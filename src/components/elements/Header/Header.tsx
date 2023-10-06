@@ -1,7 +1,7 @@
 import { AppBar, Slide, Toolbar, useScrollTrigger } from '@mui/material'
 import { useMobile } from 'hooks/useMobile'
 import { ReactElement, useCallback } from 'react'
-import { useLocation, useNavigate } from 'react-router'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { CenteredContainer } from '../Layouts/CenteredContainer'
 import { Row } from '../Layouts/Flex'
 import Sidebar from '../Navigation/Sidebar'

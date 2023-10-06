@@ -1,5 +1,4 @@
-import { Divider, Typography, styled } from '@mui/material'
-import { Box, BoxProps } from '@mui/system'
+import { Box, BoxProps, Divider, Typography, styled } from '@mui/material'
 import TextContent from 'components/elements/Texts/TextContent'
 import { Token, TokenType } from 'utils/contentParser'
 import PostImage from './PostMedia/PostImage'

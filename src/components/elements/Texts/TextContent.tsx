@@ -1,5 +1,4 @@
-import { Typography, styled } from '@mui/material'
-import { Box } from '@mui/system'
+import { Box, Typography, styled } from '@mui/material'
 import React from 'react'
 import { Token, TokenType } from 'utils/contentParser'
 import TextMention from './TextMention'
