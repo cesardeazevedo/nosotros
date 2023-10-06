@@ -121,7 +121,7 @@ describe('Test utility filter functions', () => {
       expect(result[0]).toStrictEqual({ kinds: [0, 10002], authors: ['npub1', 'npub2', 'npub3', 'npub4'] })
     })
 
-    test.only('Dont merge [0, 10002], with [1, 30023]', () => {
+    test('Dont merge [0, 10002], with [1, 30023]', () => {
       const result = Filter.merge([
         { kinds: [0, 10002], authors: ['npub1'] },
         { kinds: [1, 30023], ids: ['1'] },

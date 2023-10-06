@@ -74,7 +74,7 @@ describe('ObservableDB', () => {
     expect(stub).toHaveBeenNthCalledWith(4, { value: 4 })
   })
 
-  test.only('batcher', async () => {
+  test('batcher', async () => {
     const batcher = new DBWriterBatcher(100)
     const store = new ObservableDB('test1', { batcher })
     await store.set('1', { id: '1', value: 1 })
