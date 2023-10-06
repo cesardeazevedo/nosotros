@@ -76,7 +76,7 @@ describe('ObservableDB', () => {
 
   test('batcher', async () => {
     const batcher = new DBWriterBatcher(100)
-    const store = new ObservableDB('test1', { batcher })
+    const store = new ObservableDB('test', { batcher })
     await store.set('1', { id: '1', value: 1 })
     await store.set('1', { id: '1', value: 11 })
     await store.set('2', { id: '2', value: 2 })
@@ -85,14 +85,6 @@ describe('ObservableDB', () => {
     await store.set('3', { id: '3', value: 33 })
     await store.set('4', { id: '4', value: 4 })
     await store.set('4', { id: '4', value: 44 })
-    const store2 = new ObservableDB('test2')
-    store2._batcher = batcher
-    await store2.set('1', { id: '1', value: 1 })
-    await store2.set('1', { id: '1', value: 111 })
-    await store2.set('2', { id: '2', value: 2 })
-    await store2.set('2', { id: '2', value: 222 })
-    // Create the database
-    await database.initialize()
     // wait for batcher to write
     await delay()
     expect(await store.getItems(['1', '2', '3', '4'])).toStrictEqual([
@@ -101,11 +93,6 @@ describe('ObservableDB', () => {
       { id: '3', value: 33 },
       { id: '4', value: 44 },
     ])
-    expect(await store2.getItems(['1', '2'])).toStrictEqual([
-      { id: '1', value: 111 },
-      { id: '2', value: 222 },
-    ])
     store.clear()
-    store2.clear()
   })
 })

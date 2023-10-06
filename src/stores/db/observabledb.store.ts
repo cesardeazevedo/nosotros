@@ -167,7 +167,7 @@ export class ObservableDB<T extends Record<string, unknown>> {
     return values
   }
 
-  async set(key: string, value: T): Promise<T> {
+  set(key: string, value: T): T {
     const cached = this._data.get(key)
     if (!comparer.structural(cached?.data, value)) {
       this._set(key, value)
