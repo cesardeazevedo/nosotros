@@ -58,7 +58,6 @@ const PostContent = observer(function PostContent(props: Props) {
   const store = useStore()
   const content = store.notes.getParsedContentById(event.id)
   const canExpand = bounds.height >= MAX_HEIGHT && !expanded
-  console.log('CONTENT', content)
   return (
     <>
       <Container expanded={expanded}>

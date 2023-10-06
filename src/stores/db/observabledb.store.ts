@@ -99,12 +99,12 @@ export class ObservableDB<T extends Record<string, unknown>> {
   }
 
   async fetch(key: string): Promise<T | null | undefined> {
-    const db = await database.getDB
-    const value = await db.get(this.name, key)
     const current = this._get(key)
     if (current) {
       return current
     }
+    const db = await database.getDB
+    const value = await db.get(this.name, key)
     const { inserted_at, ...rest } = value || {}
     if (value) {
       this.set(key, rest)

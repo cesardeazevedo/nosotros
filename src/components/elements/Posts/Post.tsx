@@ -16,7 +16,6 @@ const Post = React.memo<Props>(function Post(props: Props) {
   const { post } = props
   const event = post.event
   const isMobile = useMobile()
-  console.log('event', JSON.stringify(event))
 
   return (
     <PaperContainer>

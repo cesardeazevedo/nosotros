@@ -86,7 +86,8 @@ export class UserRelayStore {
     this.relaysNIP05.set(pubkey, { pubkey, relays })
   }
 
-  addFromContacts() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  addFromContacts(_event: Event) {
     // TODO
   }
 

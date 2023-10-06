@@ -1,4 +1,5 @@
 import { RELAY_2, test } from 'utils/fixtures'
+import { delay } from 'utils/testHelpers'
 import { PostStore } from '../post.store'
 
 describe('Test PostStore', () => {
@@ -240,6 +241,7 @@ describe('Test PostStore', () => {
         content: 'nostr:note1jkmpy0llds60nthhq2avy7mw0yvwp36zkx45qcdph35dwrdctzlsdcncdp',
         tags: [['e', '10', 'wss://relay2.com']],
       })
+      await delay()
       expect(await post.relayHints()).toStrictEqual({
         authors: {},
         ids: {

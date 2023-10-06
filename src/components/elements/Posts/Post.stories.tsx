@@ -8,7 +8,8 @@ import Post from './Post'
 export type StoryProps = { data: Event }
 
 const meta = {
-  component: Post as any,
+  // @ts-ignore
+  component: Post,
   parameters: {
     layout: 'fullscreen',
   },
@@ -17,7 +18,6 @@ const meta = {
       context.parameters.store && typeof context.parameters.store === 'function'
         ? context.parameters.store(context.globals.store)
         : new PostStore(context.globals.store, args.data)
-    console.log(post)
     context.globals.store.users.add(fakeUser('1'))
     return (
       <CenteredContainer maxWidth='sm'>

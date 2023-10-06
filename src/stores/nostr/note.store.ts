@@ -15,6 +15,7 @@ type ContentSchema = {
 export class NoteStore {
   ids = new Set<string>()
 
+  // @ts-ignore
   notes = new ObservableDB<Event>('notes', { indexes: ['created_at', 'pubkey'] })
   content = new ObservableDB<ContentSchema>('notes-parsed')
 
