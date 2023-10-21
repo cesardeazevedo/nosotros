@@ -6,19 +6,23 @@ import QRCodeDialog from 'components/elements/QRCode/QRCodeDialog'
 import SignIn from 'components/elements/SignIn/SignIn'
 import { useMobile } from 'hooks/useMobile'
 import { observer } from 'mobx-react-lite'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useStore } from 'stores'
 
 const Dialogs = observer(function Dialogs() {
   const store = useStore()
+  const location = useLocation()
+  const navigate = useNavigate()
   const isMobile = useMobile()
   return (
     <>
       <Dialog
         maxWidth='xs'
-        open={store.dialogs.auth}
+        open={store.dialogs.auth || location.pathname === '/sign_in'}
         sx={{ ...(isMobile ? { backgroundImage: 'none' } : {}) }}
         onClose={() => {
           store.dialogs.closeAuth()
+          location.state?.from ? navigate(-1) : navigate('/')
         }}>
         <SignIn />
       </Dialog>

@@ -14,6 +14,10 @@ const router = createBrowserRouter([
         element: <HomeRoute />,
       },
       {
+        path: '/sign_in',
+        element: <HomeRoute />,
+      },
+      {
         path: ':npub',
         element: <ProfileRoute />,
       },

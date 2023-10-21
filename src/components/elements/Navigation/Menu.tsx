@@ -1,5 +1,7 @@
 import { Divider, List, ListItemButton, ListSubheader, Typography, TypographyProps } from '@mui/material'
 import { IconBookmark, IconLogout, IconServerBolt, IconSettings, IconUser, IconWallet } from '@tabler/icons-react'
+import { observer } from 'mobx-react-lite'
+import { Link } from 'react-router-dom'
 import { useStore } from 'stores'
 
 type Props = {
@@ -7,15 +9,16 @@ type Props = {
   onAction?: () => void
 }
 
-function Menu(props: Props) {
+const Menu = observer(function Menu(props: Props) {
   const { dense } = props
   const store = useStore()
   const iconProps = { size: dense ? 24 : 30, strokeWidth: '1.4' }
   const typographyProps: TypographyProps = { variant: dense ? 'body1' : 'h6', sx: { ml: dense ? 2 : 4 } }
+  const { currentUser } = store.auth
   return (
     <List sx={{ '>div': { my: dense ? 0.5 : 1, mx: dense ? 1 : 2, borderRadius: dense ? 1 : 2 } }}>
       {store.auth.currentUser && (
-        <ListItemButton dense={dense}>
+        <ListItemButton dense={dense} component={Link} to={`/${currentUser?.npub}`} onClick={() => props.onAction?.()}>
           <IconUser {...iconProps} />
           <Typography {...typographyProps}>Profile</Typography>
         </ListItemButton>
@@ -58,6 +61,6 @@ function Menu(props: Props) {
       )}
     </List>
   )
-}
+})
 
 export default Menu
