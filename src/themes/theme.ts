@@ -1,9 +1,10 @@
 import { Zoom, alpha, experimental_extendTheme as extendTheme } from '@mui/material'
 import { common } from '@mui/material/colors'
+import shadows, { Shadows } from '@mui/material/styles/shadows'
 import type {} from '@mui/material/themeCssVarsAugmentation'
 
 const primary = {
-  main: '#2196f3', // blue
+  main: '#0066e2', // blue
   // main: "#FA5733", // orange
   // main: 'rgb(255, 0, 127)', // pink
   // main: '#7a04eb', // purple
@@ -27,6 +28,11 @@ const theme = extendTheme({
   shape: {
     borderRadius: 8,
   },
+  shadows: [
+    'none',
+    '0px 2px 1px -1px rgba(0, 0, 0, 0.14), 0px 1px 1px 0px rgba(0, 0, 0, 0.10), 0px 1px 3px 0px rgba(0, 0, 0, 0.10)',
+    ...shadows.slice(2),
+  ] as Shadows,
   components: {
     MuiCssBaseline: {
       styleOverrides: `
@@ -48,10 +54,27 @@ const theme = extendTheme({
         },
       },
     },
-    MuiButton: {
+    MuiBottomNavigationAction: {
       styleOverrides: {
         root: {
+          '&.Mui-selected': {
+            color: 'inherit',
+          },
+        },
+      },
+    },
+    MuiButton: {
+      defaultProps: {
+        color: 'info',
+      },
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
           whiteSpace: 'nowrap',
+        },
+        outlinedInfo: {
+          border: '1px solid',
+          borderColor: 'var(--mui-palette-divider)',
         },
       },
     },
@@ -110,9 +133,11 @@ const theme = extendTheme({
           main: '#fff',
         },
         dividerSolid: '#393939',
-        background: {},
+        background: {
+          default: common.black,
+        },
         AppBar: {
-          darkBg: alpha(common.black, 0.9),
+          darkBg: common.black,
         },
       },
     },
