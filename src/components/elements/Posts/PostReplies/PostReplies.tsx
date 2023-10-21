@@ -24,10 +24,10 @@ function PostReplies(props: Props) {
               <PostRepliesTree replies={Object.values(Object.fromEntries(post.repliesTree))} level={1} />
             </Box>
             {post.repliesStatus === 'IDLE' && (
-              <Box sx={{ p: 2, py: 1 }}>
+              <Box sx={{ p: 2, py: 2 }}>
                 <Button
-                  size='small'
-                  color='inherit'
+                  color='info'
+                  // variant='outlined'
                   onClick={isMobile ? post.openRepliesDialog : post.toggleReplies}
                   sx={{ fontWeight: 600, cursor: 'pointer', color: 'text.primary' }}>
                   See more replies

@@ -21,16 +21,16 @@ const SignInIntro = observer(
         )}
         <Box>
           {auth.hasExtension && (
-            <Alert severity='success' sx={{ mt: 0 }}>
+            <Alert severity='success' sx={{ mt: 0, border: 'none' }}>
               Nostr extension detected
             </Alert>
           )}
           <Button
             size='large'
             color='primary'
-            variant='contained'
+            variant='text'
             fullWidth
-            sx={{ mt: 1, height: 50 }}
+            sx={{ mt: 1, height: 50, backgroundColor: 'action.hover' }}
             disabled={!auth.hasExtension}
             onClick={auth.loginWithNostrExtension}>
             Sign In with Nostr extension

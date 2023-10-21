@@ -38,6 +38,7 @@ export function MobileDialog(props: Props) {
   const { open, onClose, children, mobileHeight, sx, mobileSlots } = props
   return (
     <SwipeableDrawer
+      disableSwipeToOpen
       disableDiscovery={iOS}
       keepMounted={false}
       anchor='bottom'

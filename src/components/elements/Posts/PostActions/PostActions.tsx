@@ -20,7 +20,6 @@ function PostActions(props: Props) {
   const { post, renderRepost = true, renderReply = true, renderZap = true, renderRelays = true, dense = false } = props
 
   const { event: data } = post
-  // const isMobile = useMobile()
 
   return (
     <>
@@ -37,12 +36,7 @@ function PostActions(props: Props) {
             {() => (
               <>
                 {renderReply && (
-                  <PostButtonReply
-                    dense={dense}
-                    value={post.totalReplies}
-                    onClick={props.onReplyClick}
-                    // onClick={() => (isMobile ? post.openRepliesDialog() : post.toggleReplies())}
-                  />
+                  <PostButtonReply dense={dense} value={post.totalReplies} onClick={props.onReplyClick} />
                 )}
               </>
             )}

@@ -1,5 +1,5 @@
-import { Button, Paper } from '@mui/material'
-import { styled } from '@mui/material/styles'
+import { Button } from '@mui/material'
+import { Theme, styled } from '@mui/material/styles'
 // eslint-disable-next-line import/order
 import { Kind } from 'constants/kinds'
 import { observer } from 'mobx-react-lite'
@@ -8,6 +8,7 @@ import React, { useState } from 'react'
 import useMeasure from 'react-use-measure'
 import { useStore } from 'stores'
 import { TokenType } from 'utils/contentParser'
+import PaperContainer from '../Layouts/PaperContainer'
 import TextContent from '../Texts/TextContent'
 import PostLinkPreview from './PostLinks/PostLinkPreview'
 import PostMarkdown from './PostMarkdown'
@@ -31,7 +32,7 @@ const Container = styled('div', { shouldForwardProp: (prop: string) => prop !== 
   }),
 )
 
-const ExpandContainer = styled(Paper)({
+const ExpandContainer = styled(PaperContainer)({
   position: 'absolute',
   bottom: 0,
   left: 0,
@@ -39,17 +40,21 @@ const ExpandContainer = styled(Paper)({
   zIndex: 1000,
   borderRadius: 0,
   textAlign: 'center',
-  padding: 8,
+  padding: 12,
+  marginBottom: 0,
 })
 
-const ShadowIndicator = styled('div')({
+const ShadowIndicator = styled('div')(({ theme }: { theme: Theme }) => ({
   position: 'absolute',
   bottom: 0,
   zIndex: 1000,
   width: '100%',
   height: 100,
-  background: 'linear-gradient(0deg, rgba(0, 0, 0, 0.5), transparent)',
-})
+  background:
+    theme.palette.mode === 'light'
+      ? 'linear-gradient(0deg, rgba(0, 0, 0, 0.5), transparent)'
+      : 'linear-gradient(0deg, rgba(255, 255, 255, 0.2), transparent)',
+}))
 
 const PostContent = observer(function PostContent(props: Props) {
   const { event, dense = false, initialExpanded = false } = props
@@ -63,7 +68,7 @@ const PostContent = observer(function PostContent(props: Props) {
       <Container expanded={expanded}>
         <div ref={ref} className='bounds'>
           {content?.content?.map((token, index) => (
-            <React.Fragment key={token.kind + token.content.toString() + index}>
+            <React.Fragment key={token.kind + token.content?.toString() + index}>
               {token.kind === TokenType.URL && (
                 <PostLinkPreview dense={dense} href={token.href} content={token.content} />
               )}
@@ -78,7 +83,9 @@ const PostContent = observer(function PostContent(props: Props) {
         {canExpand && <ShadowIndicator />}
         {canExpand && (
           <ExpandContainer>
-            <Button onClick={() => setExpanded(true)}>View More</Button>
+            <Button variant='outlined' size='large' onClick={() => setExpanded(true)}>
+              View More
+            </Button>
           </ExpandContainer>
         )}
       </Container>

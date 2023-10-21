@@ -17,7 +17,7 @@ function PostLinkPreview(props: Props) {
   const contentUrl = href || content
   const url = useMemo(() => new URL(contentUrl), [contentUrl])
   return (
-    <Box sx={{ px: dense ? 0 : 2, mb: 1 }}>
+    <Box sx={{ px: dense ? 0 : 2, my: 1 }}>
       {(url.host.includes('youtube.com') || url.host === 'youtu.be') && <PostYoutubeEmbbed url={url} />}
       {url.host === 'twitter.com' && <PostTwitterEmbed url={url} />}
       <Link href={url.href} target='_blank' rel='noopener noreferrer' underline='none'>
