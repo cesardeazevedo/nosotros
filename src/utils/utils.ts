@@ -19,7 +19,7 @@ export const isMention = (tag: string[]) => tag[3] === 'mention'
 export type ObjectValues<T> = T[keyof T]
 
 export function dedupe<T>(...arrays: Array<T[] | undefined>) {
-  return [...new Set(arrays.map((x) => x || []).flat())]
+  return [...new Set(arrays.map((x) => x?.flat() || []).flat())].flat()
 }
 
 export function pickBy<T extends object, K extends keyof T>(obj: T, keys: K[]): Pick<T, K> {

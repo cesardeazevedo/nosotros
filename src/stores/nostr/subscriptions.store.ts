@@ -1,7 +1,7 @@
 import { Kind } from 'constants/kinds'
 import { share } from 'rxjs'
 import { Filter } from 'stores/core/filter'
-import { bufferLatestCreatedAt, bufferPosts, bufferTime, ofKind } from 'stores/core/operators'
+import { bufferLatestCreatedAt, bufferTime, ofKind } from 'stores/core/operators'
 import { Subscription, SubscriptionOptions } from 'stores/core/subscription'
 import { PostStore } from 'stores/modules/post.store'
 import type { RootStore } from 'stores/root.store'
@@ -76,12 +76,12 @@ export class SubscriptionsStore {
 
   subNotes(filter: Filter, options?: SubscriptionOptions) {
     const sub = this.subscribe(filter, options)
-    const posts$ = sub.onEvent$.pipe(bufferPosts(this.root))
     // Get users from posts
-    posts$.subscribe((posts) => {
+    sub.posts$.subscribe((posts) => {
       const authors = posts.map((x) => x.event.pubkey)
       const authorsTagged = PostStore.mergeTags(posts.map((x) => x.authorsTags))
-      this.root.subscriptions.subUsers(dedupe(authors, authorsTagged))
+      const authorsEncoded = posts.map((x) => x.noteContent?.map((x) => x.author || []) || []).flat() as string[]
+      this.root.subscriptions.subUsers(dedupe(authors, authorsTagged, authorsEncoded))
     })
     return sub
   }

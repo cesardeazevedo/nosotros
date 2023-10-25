@@ -55,27 +55,3 @@ export function fakeReaction(data?: Partial<Event>): Event {
     sig: '',
   }
 }
-
-export function fakeRelayList(data?: Partial<Event>): Event {
-  return {
-    kind: Kind.RelayList,
-    id: Math.random().toString().slice(2),
-    content: '',
-    created_at: data?.created_at || Date.now() / 1000 - 1000,
-    pubkey: data?.pubkey || '1',
-    tags: data?.tags || [[]],
-    sig: '',
-  }
-}
-
-export function fakeContacts(data?: Partial<Event>): Event {
-  return {
-    kind: Kind.Contacts,
-    id: Math.random().toString().slice(2),
-    content: data?.content || '',
-    created_at: data?.created_at || Date.now() / 1000 - 1000,
-    pubkey: data?.pubkey || '1',
-    tags: data?.tags || [[]],
-    sig: '',
-  }
-}

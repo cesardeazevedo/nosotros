@@ -1,10 +1,10 @@
-import { fakeContacts } from 'utils/faker'
+import { fakeNote } from 'utils/faker'
 import { test } from 'utils/fixtures'
 
 describe('ContactStore', () => {
   test('add()', async ({ root }) => {
     const store = root.contacts
-    const data1 = fakeContacts({
+    const data1 = fakeNote({
       pubkey: '1',
       created_at: 1,
       tags: [
@@ -20,7 +20,7 @@ describe('ContactStore', () => {
       timestamp: 1,
       tags: data1.tags,
     })
-    const data2 = fakeContacts({
+    const data2 = fakeNote({
       pubkey: '1',
       created_at: 2,
       tags: [
@@ -37,7 +37,7 @@ describe('ContactStore', () => {
       tags: data2.tags,
     })
     // Old created_at, should be ignored
-    const data3 = fakeContacts({
+    const data3 = fakeNote({
       pubkey: '1',
       created_at: 1,
       tags: [
@@ -57,7 +57,7 @@ describe('ContactStore', () => {
 
   test('getByAuthor()', async ({ root }) => {
     const store = root.contacts
-    const data = fakeContacts({
+    const data = fakeNote({
       pubkey: '1',
       created_at: 1,
       tags: [

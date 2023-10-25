@@ -1,4 +1,3 @@
-import { IDBPDatabase } from 'idb'
 import { DateTime } from 'luxon'
 import { comparer, makeAutoObservable, observable, runInAction } from 'mobx'
 import { database } from './database.store'
@@ -21,6 +20,8 @@ type CacheOptions<T> = {
   batcher: DBWriterBatcher
 }
 
+export const dbBatcher = new DBWriterBatcher()
+
 const defaultOptions: CacheOptions<unknown> = {
   keyPath: 'id',
   indexes: [],
@@ -28,7 +29,7 @@ const defaultOptions: CacheOptions<unknown> = {
   cachePruneInterval: 62000,
   expireTime: 3600000,
   expirePruneInterval: 60000,
-  batcher: new DBWriterBatcher(),
+  batcher: dbBatcher,
 }
 
 export class ObservableDB<T extends Record<string, unknown>> {
@@ -37,11 +38,7 @@ export class ObservableDB<T extends Record<string, unknown>> {
   expireTime: number
 
   _data = observable.map<string, DBAtom<T>>({})
-  _dbPromise: Promise<IDBPDatabase>
   _batcher: DBWriterBatcher
-
-  private static _db: Promise<IDBPDatabase>
-  private static _schemas = new Map<string, string[]>()
 
   constructor(key: string, options: Partial<CacheOptions<T>> = defaultOptions) {
     makeAutoObservable(this, {
@@ -52,9 +49,7 @@ export class ObservableDB<T extends Record<string, unknown>> {
     this.cacheTime = options.cacheTime ?? defaultOptions.cacheTime
     this.expireTime = options.expireTime ?? defaultOptions.expireTime
     this._batcher = options.batcher ?? defaultOptions.batcher
-    this._dbPromise = ObservableDB._db
 
-    // database.schemas.set(key, indexes as string[])
     database.schemas.set(key, {
       indexes: (options.indexes ?? []) as string[],
       keyPath: options.keyPath ?? defaultOptions.keyPath,

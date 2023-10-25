@@ -1,5 +1,5 @@
 import { openDB } from 'idb'
-import { Subject } from 'rxjs'
+import { Subject, Subscription } from 'rxjs'
 import { bufferTime } from 'stores/core/operators'
 
 type Batcher = {
@@ -8,9 +8,10 @@ type Batcher = {
 
 export class DBWriterBatcher {
   _subject = new Subject<[string, Record<string, unknown>]>()
+  subscription: Subscription
 
   constructor(bufferTimeSpan = 4000) {
-    this._subject.pipe(bufferTime(bufferTimeSpan)).subscribe((data) => {
+    this.subscription = this._subject.pipe(bufferTime(bufferTimeSpan)).subscribe((data) => {
       const batches = data.reduce<Batcher>((acc, [name, value]) => {
         acc[name] ??= []
         acc[name].push(value)

@@ -81,7 +81,10 @@ export class Filter {
     return false
   }
 
-  setInitialPaginationRange() {
+  setInitialPaginationRange(range?: number) {
+    if (range) {
+      this.options.range = range
+    }
     this.data.since = DateTime.now().minus({ minutes: this.options.range }).toUnixInteger()
     this.data.until = DateTime.now().minus({ minutes: 0 }).toUnixInteger()
   }

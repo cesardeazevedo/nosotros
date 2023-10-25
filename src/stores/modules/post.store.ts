@@ -3,11 +3,10 @@ import { action, computed, makeAutoObservable, observable, values } from 'mobx'
 import { Event } from 'nostr-tools'
 import { EMPTY, timeout } from 'rxjs'
 import { Filter } from 'stores/core/filter'
-import { bufferPosts } from 'stores/core/operators'
 import { RelayHints } from 'stores/core/subscription'
 import type { RootStore } from 'stores/root.store'
-import { TokenType } from 'utils/contentParser'
-import { ObjectValues, groupKeysToArray, isAuthorTag, isEventTag, isMention, isQuoteTag } from 'utils/utils'
+import { TokenNote, TokenType } from 'utils/contentParser'
+import { ObjectValues, dedupe, groupKeysToArray, isAuthorTag, isEventTag, isMention, isQuoteTag } from 'utils/utils'
 
 const Status = {
   IDLE: 'IDLE',
@@ -129,7 +128,7 @@ export class PostStore {
     const contentHints = this.noteContent?.reduce((acc, token) => {
       return {
         ...acc,
-        [token]: userRelays,
+        [token.content.toString()]: dedupe(userRelays, token.relays),
       }
     }, {})
 
@@ -148,7 +147,7 @@ export class PostStore {
   }
 
   get noteContent() {
-    return this.content?.content?.filter((x) => x.kind === TokenType.NOTE).map((x) => x.content) as string[]
+    return this.content?.content?.filter((x) => x.kind === TokenType.NOTE) as TokenNote[] | undefined
   }
 
   get repliesTree() {
@@ -201,9 +200,8 @@ export class PostStore {
   subscribeReplies() {
     this.setRepliesStatus(Status.LOADING)
     const sub = this.root.subscriptions.subNotes(this.filter)
-    sub.onEvent$
+    sub.posts$
       .pipe(
-        bufferPosts(this.root),
         timeout({
           first: 4000,
           with: () => {

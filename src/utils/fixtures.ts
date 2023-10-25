@@ -1,11 +1,10 @@
-/* eslint-disable no-empty-pattern */
 import { FIXED_RELAYS } from 'constants/relays'
 import { WS } from 'jest-websocket-mock'
 import { Event, Filter as NostrFilter } from 'nostr-tools'
 import { Filter, Options as FilterOptions } from 'stores/core/filter'
 import { Subscription, SubscriptionOptions } from 'stores/core/subscription'
 import { database } from 'stores/db/database.store'
-import { ObservableDB } from 'stores/db/observabledb.store'
+import { ObservableDB, dbBatcher } from 'stores/db/observabledb.store'
 import { FeedStore } from 'stores/modules/feed.store'
 import { PostStore } from 'stores/modules/post.store'
 import { RelayStore } from 'stores/nostr/userRelay.store'
@@ -42,6 +41,7 @@ export const test = base.extend<Fixtures>({
     await use(root)
     // Clean up
     relays.length = 0
+    dbBatcher.subscription.unsubscribe()
     WS.clean()
     await database.clear()
   },
@@ -75,6 +75,7 @@ export const test = base.extend<Fixtures>({
     root.userRelays.relays.clear()
   },
 
+  /* eslint-disable no-empty-pattern */
   observabledb: async ({}, use) => {
     const db = new ObservableDB<Record<string, unknown>>('test')
     await database.initialize()

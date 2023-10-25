@@ -46,7 +46,7 @@ export class NoteStore {
     if (!content && event.kind === Kind.Text) {
       const content = parseContent(event)
       const hasMedia = content.some((x) => x.kind === TokenType.IMAGE || x.kind === TokenType.VIDEO)
-      this.content.set(event.id, { id: event.id, hasMedia, content: parseContent(event) })
+      this.content.set(event.id, { id: event.id, hasMedia, content })
     } else if (event.kind === Kind.Article) {
       this.content.set(event.id, { id: event.id, content: parseMarkdown(event) })
     }

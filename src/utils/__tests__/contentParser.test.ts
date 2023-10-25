@@ -2,7 +2,7 @@ import { Kind } from 'constants/kinds'
 import { parseContent, parseMarkdown } from 'utils/contentParser'
 import { fakeNote } from 'utils/faker'
 
-const event = fakeNote({})
+const event = fakeNote()
 
 describe('Test useContentParser()', () => {
   test('Test image content', () => {
@@ -70,6 +70,7 @@ describe('Test useContentParser()', () => {
         kind: 'note',
         author: undefined,
         content: 'cc6b9fea033f59c3c39a0407c5f1bfee439b077508d918cfdc0d6fd431d39393',
+        relays: [],
       },
     ])
   })

@@ -1,4 +1,5 @@
 import { Kind } from 'constants/kinds'
+import { getPublicKey, nip19 } from 'nostr-tools'
 import { fakeNote } from 'utils/faker'
 import { RELAY_2, RELAY_3, test } from 'utils/fixtures'
 import { delay, expectMessage, getJSONFeed, sendMessages } from 'utils/testHelpers'
@@ -102,7 +103,6 @@ describe('FeedStore', () => {
       const [relay] = relays
 
       const feed = createFeed()
-      // return
       feed.subNotesByAuthors(authors)
       const reqId = await expectMessage(relay, { kinds: [Kind.Text, Kind.Article], authors })
 
@@ -132,7 +132,49 @@ describe('FeedStore', () => {
         { kinds: [Kind.Text, Kind.Article], ids: ['5'] }, // requested the parent note
       )
     })
+
+    test('Test a quote repost with a nevent + encoded relay', async ({ relays, createFeed }) => {
+      const authors = ['1']
+      const [relay, relay2] = relays
+      const feed = createFeed()
+      feed.subNotesByAuthors(authors)
+
+      const reqId = await expectMessage(relay, { kinds: [Kind.Text, Kind.Article], authors })
+
+      const id = getPublicKey('90c5c2bfb6487619a89296d192a6d9db772df435459ddf0d5764a82e37369bd5')
+      const eventAuthor = 'b59efe9478f8e17b2b4271000c6128850bcbaba1b3d8256187cf4b93cfcd1063'
+      const nevent = nip19.neventEncode({
+        id,
+        kind: Kind.Text,
+        relays: [RELAY_2],
+        author: eventAuthor,
+      })
+      const note1 = fakeNote({
+        id: '1',
+        pubkey: '1',
+        content: `Hey nostr:${nevent}`,
+        tags: [],
+      })
+      await sendMessages(relay, reqId, [note1])
+      await expectMessage(
+        relay,
+        {
+          kinds: [Kind.Metadata, Kind.RelayList],
+          authors: ['1', eventAuthor],
+        },
+        {
+          kinds: [Kind.Text, Kind.Article],
+          ids: [id],
+        },
+      )
+      // Encoded relay received the quoted post request
+      await expectMessage(relay2, {
+        kinds: [Kind.Text, Kind.Article],
+        ids: [id],
+      })
+    })
   })
+
   describe('Relay Hints', () => {
     test('Test relay hints from quoted notes (twice)', async ({ relays, createFeed }) => {
       const authors = ['1']

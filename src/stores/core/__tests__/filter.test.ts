@@ -2,6 +2,7 @@ import { DateTime } from 'luxon'
 import { fakeNote, fakeUser } from 'utils/faker'
 import { test } from 'utils/fixtures'
 import { Filter } from '../filter'
+import { RelayHints } from '../subscription'
 
 describe('Test utility filter functions', () => {
   describe('dedupeFilterKeys()', () => {
@@ -202,7 +203,7 @@ describe('Test utility filter functions', () => {
     })
   })
 
-  describe('getFilterRelays', () => {
+  describe('groupAuthorsByRelay', () => {
     test('Invalid filter', async ({ root }) => {
       const filter = { kinds: [0], '#e': ['1', '2', '3', '4', '5'] }
       expect((await Filter.groupAuthorsByRelay(filter, root)).result).toStrictEqual({})
@@ -262,7 +263,7 @@ describe('Test utility filter functions', () => {
 
     describe('Relay hints', () => {
       test('Test relay hints authors', async ({ root, createRelayList }) => {
-        const relayHints = {
+        const relayHints: RelayHints = {
           authors: {
             '1': ['wss://relay1.com', 'wss://relay2.com'],
             '2': ['wss://relay3.com', 'wss://relay4.com'],
@@ -282,7 +283,7 @@ describe('Test utility filter functions', () => {
       })
 
       test('Test relay hints authors with ids', async ({ root }) => {
-        const relayHints = {
+        const relayHints: RelayHints = {
           ids: {
             '1': ['wss://relay1.com', 'wss://relay2.com'],
             '2': ['wss://relay1.com'],

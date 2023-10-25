@@ -14,6 +14,15 @@ describe('Test utils', () => {
     test('Test with undefined', () => {
       expect(dedupe(['1', '1', '2', '2'], undefined)).toStrictEqual(['1', '2'])
     })
+
+    test('Test with nested arrays', () => {
+      expect(dedupe([], [])).toStrictEqual([])
+      expect(dedupe([], [[]])).toStrictEqual([])
+      expect(dedupe([[]], [[]])).toStrictEqual([])
+      expect(dedupe([[]], [[], []])).toStrictEqual([])
+      expect(dedupe([[]], [[[]], []])).toStrictEqual([])
+      expect(dedupe([[]], [[[]], [[]]])).toStrictEqual([])
+    })
   })
 
   describe('pickBy()', () => {

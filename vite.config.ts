@@ -18,7 +18,6 @@ export default defineConfig({
     'process.env.APP_NAME': JSON.stringify('Nosotros'),
     'process.env.BUGSNAG_API_KEY': JSON.stringify('4dc625765598a98e69c5215ce6e75062'),
   },
-  // base: '/nosotros/',
   test: {
     globals: true,
     environment: 'jsdom',

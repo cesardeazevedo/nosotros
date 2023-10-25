@@ -30,19 +30,36 @@ export enum TokenType {
 }
 
 type ArrayTokens = TokenType.TEXT | TokenType.PARAGRAPH | TokenType.LIST | TokenType.BLOCKQUOTE
-type SingleTokens = Exclude<TokenType, ArrayTokens>
 
-export type Token =
-  | { kind: SingleTokens; content: string; href?: string; author?: string }
-  | { kind: ArrayTokens; content: PartiallyParsed }
+export interface TokenArrays {
+  kind: ArrayTokens
+  content: PartiallyParsed
+}
+
+export interface TokenBase {
+  kind: Exclude<TokenType, ArrayTokens | TokenType.URL | TokenType.NOTE>
+  content: string
+}
+
+export interface TokenNote {
+  kind: TokenType.NOTE
+  content: string
+  author?: string
+  relays?: string[]
+}
+
+export interface TokenURL {
+  kind: TokenType.URL | TokenType.IMAGE
+  content: string
+  href: string
+}
+
+export type Token = TokenBase | TokenArrays | TokenNote | TokenURL
 
 type PartiallyParsed = Array<string | Token>
 export type ParsedContent = Array<Token>
 
-export function groupContent(
-  parsed: (string | Token)[],
-  textGroup = [TokenType.MENTION, TokenType.TAG],
-): ParsedContent {
+export function groupContent(parsed: (string | Token)[], textGroup = [TokenType.MENTION, TokenType.TAG]) {
   const result: ParsedContent = []
   parsed.forEach((current) => {
     const prev = result[result.length - 1]
@@ -80,7 +97,7 @@ function replaceReferences(references: References, content: string) {
         return profile
           ? ({ kind: TokenType.MENTION, content: profile.pubkey } as Token)
           : event
-          ? ({ kind: TokenType.NOTE, content: event.id, author: event.author } as Token)
+          ? ({ kind: TokenType.NOTE, content: event.id, author: event.author, relays: event.relays } as Token)
           : acc
       }) as Array<string | Token>
       return result

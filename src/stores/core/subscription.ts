@@ -5,6 +5,7 @@ import { Filter } from 'stores/core/filter'
 import { PostStore } from 'stores/modules/post.store'
 import { RootStore } from 'stores/root.store'
 import { dedupe, groupKeysToArray, toMap } from 'utils/utils'
+import { bufferPosts } from './operators'
 import { Relay } from './relay'
 
 export enum SubscriptionEvents {
@@ -45,6 +46,7 @@ export class Subscription {
 
   events = new Map<string, string[]>()
 
+  posts$: Observable<PostStore[]>
   onEvent$: Observable<Event>
   onEose$: Observable<void>
 
@@ -76,6 +78,8 @@ export class Subscription {
       map((msg) => msg[1]),
       share(),
     )
+
+    this.posts$ = this.onEvent$.pipe(bufferPosts(this.root))
   }
 
   get filtersData() {

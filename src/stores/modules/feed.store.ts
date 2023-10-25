@@ -1,7 +1,6 @@
 import { Kind } from 'constants/kinds'
 import { action, makeAutoObservable, observable } from 'mobx'
 import { Filter } from 'stores/core/filter'
-import { bufferPosts } from 'stores/core/operators'
 import { RelayHints, Subscription } from 'stores/core/subscription'
 import type { RootStore } from 'stores/root.store'
 import { dedupe } from 'utils/utils'
@@ -88,7 +87,7 @@ export class FeedStore {
   async getPostsMetadata(posts: PostStore[]) {
     const rootNotes = posts.filter((x) => !x.isRoot && !x.isReplyOfAReply).map((x) => x.rootNoteId)
     const mentionNotes = PostStore.mergeTags(posts.map((x) => x.mentionsTags))
-    const mentionNotesFromContent = posts.map((post) => post.noteContent).flat()
+    const mentionNotesFromContent = posts.map((post) => post.noteContent?.map((x) => x.content) || []).flat()
     const relayHints = PostStore.mergeRelayHints(await Promise.all(posts.map((post) => post.relayHints()).flat()))
     return { rootNotes, mentionNotes, mentionNotesFromContent, relayHints }
   }
@@ -101,7 +100,7 @@ export class FeedStore {
     const sub = this.root.subscriptions.subNotes(new Filter(this.root, { kinds: [Kind.Text, Kind.Article], ids }), {
       relayHints,
     })
-    sub.onEvent$.pipe(bufferPosts(this.root)).subscribe(async (posts) => {
+    sub.posts$.subscribe(async (posts) => {
       this.addPosts(posts)
       // related notes might also have mentions
       const metadata = await this.getPostsMetadata(posts)
@@ -118,7 +117,7 @@ export class FeedStore {
   subNotesByAuthors(authors: string[]) {
     this.filter.addAuthors(authors)
     const sub = this.root.subscriptions.subNotes(this.filter)
-    sub.onEvent$.pipe(bufferPosts(this.root)).subscribe(async (posts) => {
+    sub.posts$.subscribe(async (posts) => {
       this.addPosts(posts)
 
       const metadata = await this.getPostsMetadata(posts)
@@ -145,8 +144,7 @@ export class FeedStore {
     const authors = contactList.tags.map((tag) => tag[1])
     if (authors?.length !== 0) {
       this.authors.push(...authors)
-      this.filter.options.range = authors.length > 100 ? 10 : 60
-      this.filter.setInitialPaginationRange()
+      this.filter.setInitialPaginationRange(this.authors.length > 100 ? 10 : 60)
       this.subNotesByAuthors(this.authors)
     }
     const sub = this.root.subscriptions.subContacts(this.authors[0])
@@ -156,8 +154,7 @@ export class FeedStore {
       // New contacts found, subscribe to their notes
       if (newContacts.length !== 0) {
         this.authors.push(...newContacts)
-        this.filter.options.range = authors.length > 100 ? 10 : 60
-        this.filter.setInitialPaginationRange()
+        this.filter.setInitialPaginationRange(this.authors.length > 100 ? 10 : 60)
         this.subNotesByAuthors(newContacts)
       }
     })
