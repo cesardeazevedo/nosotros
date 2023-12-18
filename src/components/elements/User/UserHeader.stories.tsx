@@ -1,26 +1,36 @@
 import { Paper } from '@mui/material'
 import { Meta, StoryObj } from '@storybook/react'
 
-import { fakeUser } from 'utils/faker'
+import React from 'react'
+import type { RootStore } from 'stores'
+import { useStore } from 'stores'
+import { fakeNote } from 'utils/faker'
 import UserHeader from './UserHeader'
+
+type Props = Omit<React.ComponentProps<typeof UserHeader>, 'note'>
 
 const meta = {
   component: UserHeader,
-  render: (args) => (
-    <Paper sx={{ p: 2 }}>
-      <UserHeader {...args} />
-    </Paper>
-  ),
+  render: function App(args) {
+    const store = useStore()
+    const note = store.notes.getNoteById('1')
+    return <Paper sx={{ p: 2 }}>{note && <UserHeader {...args} note={note} />}</Paper>
+  },
   parameters: {
     layout: 'centered',
   },
 } satisfies Meta<typeof UserHeader>
 export default meta
 
-type Story = StoryObj<typeof meta>
+type Story = StoryObj<Props>
 
 export const Default: Story = {
   args: {
-    event: fakeUser(),
+    dense: false,
+  },
+  parameters: {
+    setup(store: RootStore) {
+      store.notes.loadNotes([fakeNote({ id: '1', content: 'Hello World' })])
+    },
   },
 }

@@ -1,38 +1,43 @@
 import { Meta, StoryObj } from '@storybook/react'
 import { Event } from 'nostr-tools'
-import { PostStore } from 'stores/modules/post.store'
+import { RootStore, useStore } from 'stores'
 import { fakeNote, fakeUser } from 'utils/faker'
 import { CenteredContainer } from '../Layouts/CenteredContainer'
 import Post from './Post'
-
-export type StoryProps = { data: Event }
+import PostLoading from './PostLoading'
 
 const meta = {
-  // @ts-ignore
   component: Post,
-  parameters: {
-    layout: 'fullscreen',
-  },
-  render: (args: StoryProps, context) => {
-    const post =
-      context.parameters.store && typeof context.parameters.store === 'function'
-        ? context.parameters.store(context.globals.store)
-        : new PostStore(context.globals.store, args.data)
-    context.globals.store.users.add(fakeUser('1'))
-    return (
+  excludeStories: /.*setup$/,
+  decorators: [
+    (Story) => (
       <CenteredContainer maxWidth='sm'>
-        <Post post={post} />
+        <Story />
       </CenteredContainer>
-    )
+    ),
+  ],
+  render: function Render() {
+    const store = useStore()
+    const note = store.notes.getNoteById('1')
+    return note ? <Post note={note} /> : <PostLoading />
   },
-} satisfies Meta<StoryProps>
+} satisfies Meta<typeof Post>
+
+export const setup = (note: Partial<Event>) => ({
+  parameters: {
+    setup(store: RootStore) {
+      store.notes.load(fakeNote({ ...note, id: '1' }))
+    },
+  },
+})
 
 export default meta
 
-export type Story = StoryObj<StoryProps>
-
 export const BaseStory = {
-  args: {
-    data: fakeNote({ pubkey: '1', content: 'Hello World' }),
+  parameters: {
+    setup(store: RootStore) {
+      store.users.add(fakeUser('1'))
+      store.notes.load(fakeNote({ id: '1', content: 'Hello World' }))
+    },
   },
-} satisfies Story
+} satisfies StoryObj

@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker'
-import { fakeNote } from 'utils/faker'
+import { StoryObj } from '@storybook/react'
 import Post from '../Post'
-import BaseMeta, { Story } from '../Post.stories'
+import BaseMeta, { setup } from '../Post.stories'
 
 const meta = {
   ...BaseMeta,
@@ -11,7 +11,5 @@ const meta = {
 export default meta
 
 export const Default = {
-  args: {
-    data: fakeNote({ content: `${faker.lorem.paragraphs(4)} https://v.nostr.build/g6BQ.mp4` }),
-  },
-} satisfies Story
+  ...setup({ content: `${faker.lorem.paragraphs(4)} https://v.nostr.build/g6BQ.mp4` }),
+} satisfies StoryObj
