@@ -9,13 +9,19 @@ import theme from 'themes/theme'
 import React from 'react'
 import App from './App'
 
-Bugsnag.start({
-  apiKey: process.env.BUGSNAG_API_KEY as string,
-  plugins: [new BugsnagPluginReact()],
-  enabledReleaseStages: ['production'],
-})
+const bugsnagApiKey = import.meta.env.VITE_BUGSNAG_API_KEY
 
-const ErrorBoundary = Bugsnag.getPlugin('react')?.createErrorBoundary(React) || React.Fragment
+if (bugsnagApiKey) {
+  Bugsnag.start({
+    apiKey: bugsnagApiKey as string,
+    plugins: [new BugsnagPluginReact()],
+    enabledReleaseStages: ['production'],
+  })
+}
+
+const ErrorBoundary = bugsnagApiKey
+  ? Bugsnag.getPlugin('react')?.createErrorBoundary(React) || React.Fragment
+  : React.Fragment
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <ErrorBoundary>
