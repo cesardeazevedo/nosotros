@@ -27,24 +27,24 @@ const PostCreateForm = React.memo(function PostCreateForm() {
             borderRadius: 1.5,
             minHeight: 60,
           }}>
-          <InputBase fullWidth multiline placeholder="What's in your mind?" sx={{}} />
+          <InputBase fullWidth placeholder="What's in your mind?" />
         </Box>
       </Row>
       <Divider />
       <Row sx={{ p: 1, pr: 3 }}>
         <Box sx={{ flex: 1, button: { mr: 1.2 } }}>
           <Tooltip arrow title='Add Picture'>
-            <IconButton size='small' color='primary'>
+            <IconButton size='small'>
               <IconPhotoPlus strokeWidth='1.4' />
             </IconButton>
           </Tooltip>
           <Tooltip arrow title='Add Emoji'>
-            <IconButton size='small' color='primary'>
+            <IconButton size='small'>
               <IconMoodSmile strokeWidth='1.4' />
             </IconButton>
           </Tooltip>
           <Tooltip arrow title='Select relays'>
-            <IconButton size='small' color='primary'>
+            <IconButton size='small'>
               <IconServerBolt strokeWidth='1.4' />
             </IconButton>
           </Tooltip>

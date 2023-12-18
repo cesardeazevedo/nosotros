@@ -21,18 +21,20 @@ const PostButtonRelays = observer(function PostRelays(props: Props & ContainerPr
   return (
     <Tooltip
       arrow
-      key={isMobile.toString()} // get rid of warnings since we are the component will be controlled/uncontrolled
+      key={isMobile.toString()}
       enterDelay={0}
       {...mobileProps}
       slotProps={{ arrow: { sx: { left: '-8px!important' } } }}
       title={<Box>Seen on {relays?.map((relay) => <Box key={relay}>{new URL(relay).hostname}</Box>)}</Box>}>
-      <div>
-        <ButtonContainer value={relays?.length || 0} dense={dense} onClick={() => isMobile && setOpen(true)}>
-          <IconButton disableRipple size='small'>
-            <IconServerBolt strokeWidth='1.5' />
-          </IconButton>
-        </ButtonContainer>
-      </div>
+      <ButtonContainer
+        value={relays?.length || 0}
+        dense={dense}
+        onClick={() => isMobile && setOpen(true)}
+        aria-label='Seen on relays'>
+        <IconButton disableRipple size='small'>
+          <IconServerBolt strokeWidth='1.5' />
+        </IconButton>
+      </ButtonContainer>
     </Tooltip>
   )
 })

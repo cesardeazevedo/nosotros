@@ -1,17 +1,17 @@
-import { Box, IconButton, SwipeableDrawer, useColorScheme } from '@mui/material'
+import { Box, IconButton, SwipeableDrawer } from '@mui/material'
 
-import { IconMenu2, IconMoon, IconQrcode, IconSun } from '@tabler/icons-react'
+import { IconMenu2, IconQrcode } from '@tabler/icons-react'
 
 import { Observer } from 'mobx-react-lite'
 import { useState } from 'react'
 import { useStore } from 'stores'
+import ThemeButton from '../Buttons/ThemeButton'
 import UserAvatar from '../User/UserAvatar'
 import UserName from '../User/UserName'
 import Menu from './Menu'
 
 function Sidebar() {
   const [open, setOpen] = useState(false)
-  const { mode, setMode } = useColorScheme()
   const store = useStore()
   return (
     <>
@@ -30,16 +30,7 @@ function Sidebar() {
           },
         }}>
         <Box sx={{ width: 300, p: 2 }}>
-          <IconButton
-            sx={{
-              position: 'absolute',
-              left: 20,
-              bottom: 20,
-              color: 'text.primary',
-            }}
-            onClick={() => setMode(mode === 'light' ? 'dark' : 'light')}>
-            {mode === 'light' ? <IconSun size={30} /> : <IconMoon />}
-          </IconButton>
+          <ThemeButton sx={{ position: 'absolute', left: 30, bottom: 30 }} />
           <Observer>
             {() => {
               const { currentUser: me } = store.auth

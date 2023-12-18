@@ -1,6 +1,6 @@
 import { Fab } from '@mui/material'
 import { useMobile } from 'hooks/useMobile'
-import LinkSignIn from '../Navigation/LinkSignIn'
+import LinkSignIn from '../Links/LinkSignIn'
 
 function SignInButtonFab() {
   const isMobile = useMobile()
