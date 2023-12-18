@@ -1,5 +1,6 @@
 import { Box, BoxProps, Divider, Typography, styled } from '@mui/material'
 import TextContent from 'components/elements/Texts/TextContent'
+import { Note } from 'stores/modules/note.store'
 import { Token, TokenType } from 'utils/contentParser'
 import PostImage from './PostMedia/PostImage'
 import PostVideo from './PostMedia/PostVideo'
@@ -7,6 +8,7 @@ import PostNote from './PostNote'
 
 type Props = {
   token: Token
+  note: Note
   dense?: boolean
 }
 
@@ -32,7 +34,7 @@ const Code = styled('pre')(({ theme }) =>
 )
 
 function Content(props: Props & { component?: BoxProps['component'] }) {
-  const { dense, component } = props
+  const { dense, component, note } = props
   const { content } = props.token
   return (
     <>
@@ -41,7 +43,7 @@ function Content(props: Props & { component?: BoxProps['component'] }) {
           if (typeof token !== 'string') {
             return (
               <Box key={token.kind + index} component={component} sx={{ my: 1 }}>
-                {token.kind === TokenType.IMAGE && <PostImage dense={dense} content={token.content} />}
+                {token.kind === TokenType.IMAGE && <PostImage dense={dense} content={token.content} note={note} />}
                 {token.kind === TokenType.VIDEO && <PostVideo dense={dense} content={token.content} />}
                 {token.kind === TokenType.NOTE && <PostNote noteId={token.content} author={token.author} />}
                 {token.kind === TokenType.TEXT && <TextContent token={token} dense={dense} />}
@@ -55,19 +57,19 @@ function Content(props: Props & { component?: BoxProps['component'] }) {
 }
 
 function PostMarkdown(props: Props) {
-  const { token, dense } = props
+  const { token, dense, note } = props
   return (
     <>
       {token.kind === TokenType.DIVIDER && <Divider sx={{ my: 4 }} />}
       {token.kind === TokenType.TITLE && (
-        <Typography variant='h5' sx={{ mt: 2, ml: 2 }}>
+        <Typography variant='h5' sx={{ mt: 2, ml: 2, fontWeight: 900 }}>
           {token.content}
         </Typography>
       )}
-      {token.kind === TokenType.PARAGRAPH && <Content token={token} dense={dense} />}
+      {token.kind === TokenType.PARAGRAPH && <Content note={note} token={token} dense={dense} />}
       {token.kind === TokenType.LIST && (
         <ul>
-          <Content token={token} dense={dense} component='li' />
+          <Content note={note} token={token} dense={dense} component='li' />
         </ul>
       )}
       {token.kind === TokenType.CODE && (
@@ -79,7 +81,7 @@ function PostMarkdown(props: Props) {
       {token.kind === TokenType.BLOCKQUOTE && (
         <BlockQuote>
           {token.content.map((pToken, index) => (
-            <PostMarkdown key={index} token={pToken as Token} dense={dense} />
+            <PostMarkdown key={index} token={pToken as Token} dense={dense} note={note} />
           ))}
         </BlockQuote>
       )}

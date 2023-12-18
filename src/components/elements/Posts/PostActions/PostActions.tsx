@@ -1,13 +1,14 @@
 import { Row } from 'components/elements/Layouts/Flex'
 import { PostButtonReply, PostButtonRepost, PostButtonZap } from 'components/elements/Posts/PostActions'
 
+import { styled } from '@mui/material'
 import { Observer } from 'mobx-react-lite'
-import { PostStore } from 'stores/modules/post.store'
-import PostReactions from './PostReactions'
+import { Note } from 'stores/modules/note.store'
+import PostButtonReact from './PostButtonReact'
 import PostButtonRelays from './PostRelays'
 
 type Props = {
-  post: PostStore
+  note: Note
   dense?: boolean
   onReplyClick?: () => void
   renderRelays?: boolean
@@ -16,36 +17,28 @@ type Props = {
   renderZap?: boolean
 }
 
-function PostActions(props: Props) {
-  const { post, renderRepost = true, renderReply = true, renderZap = true, renderRelays = true, dense = false } = props
+const shouldForwardProp = (prop: string) => prop !== 'dense'
 
-  const { event: data } = post
+const Container = styled(Row, { shouldForwardProp })<{ dense: boolean }>(({ dense }) => ({
+  padding: dense ? 0 : 16,
+  justifyContent: dense ? 'flex-start' : 'space-between',
+}))
+
+function PostActions(props: Props) {
+  const { note, renderRepost = true, renderReply = true, renderZap = true, renderRelays = true, dense = false } = props
 
   return (
-    <>
-      <Row sx={{ px: dense ? 0 : 2, py: dense ? 0.6 : 2, justifyContent: 'space-between' }}>
-        <Row
-          sx={{
-            flex: 1,
-            justifyContent: dense ? 'flex-start' : 'space-between',
-            '> *': { ml: 1, mr: dense ? 0.5 : 1 },
-          }}>
-          <PostReactions noteId={data.id} dense={dense} />
-          {renderRepost && <PostButtonRepost dense={dense} />}
-          <Observer>
-            {() => (
-              <>
-                {renderReply && (
-                  <PostButtonReply dense={dense} value={post.totalReplies} onClick={props.onReplyClick} />
-                )}
-              </>
-            )}
-          </Observer>
-          {renderZap && <PostButtonZap dense={dense} />}
-          {renderRelays && <PostButtonRelays dense={dense} eventId={data.id} />}
-        </Row>
-      </Row>
-    </>
+    <Container dense={dense}>
+      <PostButtonReact noteId={note.event.id} dense={dense} />
+      {renderRepost && <PostButtonRepost dense={dense} />}
+      <Observer>
+        {() => (
+          <>{renderReply && <PostButtonReply dense={dense} value={note.totalReplies} onClick={props.onReplyClick} />}</>
+        )}
+      </Observer>
+      {renderZap && <PostButtonZap dense={dense} />}
+      {renderRelays && <PostButtonRelays dense={dense} eventId={note.event.id} />}
+    </Container>
   )
 }
 

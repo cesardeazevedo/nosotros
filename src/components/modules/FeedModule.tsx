@@ -1,9 +1,8 @@
 import { CenteredContainer } from 'components/elements/Layouts/CenteredContainer'
 import PostCreateForm from 'components/elements/Posts/PostCreate/PostCreateForm'
-import PostList from 'components/elements/Posts/PostList'
-import { useSubscription } from 'hooks/useSubscription'
+import PostVirtua from 'components/elements/Posts/PostList'
 import { observer } from 'mobx-react-lite'
-import { useCallback } from 'react'
+import { useEffect } from 'react'
 import { FeedStore } from 'stores/modules/feed.store'
 
 type Props = {
@@ -13,16 +12,13 @@ type Props = {
 
 const FeedModule = observer(function FeedModule(props: Props) {
   const { feed, renderCreateForm = true } = props
-  useSubscription(
-    useCallback(() => {
-      feed.subscribe()
-    }, [feed]),
-  )
+  useEffect(() => {
+    feed.subscribe()
+  }, [feed])
   return (
     <CenteredContainer maxWidth='sm' sx={{ mb: 24 }}>
       {renderCreateForm && <PostCreateForm />}
-      {/* <PostListVirtual feed={feed} /> */}
-      <PostList feed={feed} />
+      <PostVirtua feed={feed} />
     </CenteredContainer>
   )
 })

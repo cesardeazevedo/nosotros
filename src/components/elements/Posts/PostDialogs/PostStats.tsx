@@ -55,13 +55,15 @@ const PostJsonEvent = observer(function PostJsonEvent(props: Props) {
 
 const PostUserJson = observer(function PostUserJson(props: Props) {
   const { data } = props
-  const user = useStore().users.getUserById(data.pubkey)
+  const store = useStore()
+  const user = store.users.getUserById(data.pubkey)
+  const { id, aboutParsed, createdAt, ...metadata } = user?.metadata || {}
   return (
     <>
       <Typography variant='h6'>User</Typography>
       <Box sx={{ borderRadius: 1, overflow: 'hidden' }}>
         <ReactJsonView
-          src={user || {}}
+          src={metadata}
           style={{ maxHeight: 250, overflow: 'auto', padding: '8px' }}
           theme='summerfruit'
           displayDataTypes={false}

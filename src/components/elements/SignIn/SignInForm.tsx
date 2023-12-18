@@ -1,11 +1,12 @@
 import { Avatar, Box, Button, IconButton, Skeleton, TextField, Typography } from '@mui/material'
 import { IconClipboardCopy, IconScan } from '@tabler/icons-react'
+import { useNavigate } from '@tanstack/react-router'
 import { useMobile } from 'hooks/useMobile'
 import { observer } from 'mobx-react-lite'
 import { useCallback, useEffect, useState } from 'react'
 import { Control, Controller, useForm, useWatch } from 'react-hook-form'
-import { useNavigate } from 'react-router-dom'
 import { useStore } from 'stores'
+import { Npub, decodeNIP19 } from 'utils/nip19'
 import UserName from '../User/UserName'
 
 type FormValues = {
@@ -23,7 +24,7 @@ const avatarStyle = {
 const UserPreview = observer(function UserPreview(props: { control: Control<FormValues> }) {
   const { users, auth } = useStore()
   const pubkey = useWatch({ name: 'pubkey', control: props.control })
-  const user = pubkey ? users.getUserById(pubkey) : undefined
+  const user = users.getUserById(pubkey)
 
   useEffect(() => {
     if (!user && pubkey) {
@@ -38,7 +39,7 @@ const UserPreview = observer(function UserPreview(props: { control: Control<Form
       ) : (
         <Avatar src={user?.picture} sx={avatarStyle} />
       )}
-      {user && <UserName user={user} variant='h6' />}
+      {user && <UserName disableLink disablePopover user={user} variant='h6' />}
     </Box>
   )
 })
@@ -53,11 +54,11 @@ const SignInForm = function SignInForm() {
     mode: 'all',
     reValidateMode: 'onChange',
     resolver: (field) => {
-      const pubkey = auth.decode(field.npub)
+      const pubkey = decodeNIP19(field.npub as Npub)
       if (!pubkey) {
         return { values: {}, errors: { npub: { type: 'value', message: 'npub invalid' } } }
       }
-      form.setValue('pubkey', pubkey)
+      form.setValue('pubkey', pubkey.data)
       return { values: { npub: field.npub, pubkey }, errors: {} }
     },
     defaultValues: {
@@ -69,7 +70,7 @@ const SignInForm = function SignInForm() {
   const onSubmit = useCallback(
     (values: FormValues) => {
       auth.addAccount(values.pubkey)
-      navigate('/')
+      navigate({ to: '/' })
     },
     [auth, navigate],
   )

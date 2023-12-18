@@ -1,10 +1,9 @@
 import { Typography } from '@mui/material'
-import { alpha, styled } from '@mui/material/styles'
+import { styled } from '@mui/material/styles'
 import { Row } from 'components/elements/Layouts/Flex'
-import { motion } from 'framer-motion'
 import React from 'react'
 
-export type ContainerProps = {
+export interface ContainerProps {
   value?: number | false | React.ReactElement
   color?: string
   active?: boolean
@@ -25,6 +24,7 @@ const Container = styled(Row, { shouldForwardProp })<ContainerProps>(
       cursor: 'pointer',
       h6: {
         ml: 1,
+        width: dense ? 'auto' : 28,
         fontWeight: 500,
         color: active ? color : theme.vars.palette.text.secondary,
       },
@@ -38,29 +38,28 @@ const Container = styled(Row, { shouldForwardProp })<ContainerProps>(
           },
         }),
       },
+      button: {
+        width: 34,
+        height: 34,
+        transition: 'scale 0.1s ease',
+        '&:active': {
+          scale: '1.1',
+        },
+      },
       '&:hover': {
-        '> *': {
-          transition: 'all 0.08s ease',
-        },
-        button: {
-          backgroundColor: alpha(color, 0.08),
-        },
         svg: {
           stroke: color,
-        },
-        h6: {
-          color: color,
         },
       },
     }),
 )
 
 function ButtonContainer(props: Props & ContainerProps) {
-  const { value, children, animate = true, ...rest } = props
+  const { value, children, ...rest } = props
   return (
     <Container {...rest}>
-      {animate ? <motion.span whileTap={{ scale: 1.2 }}>{children}</motion.span> : children}
-      {value !== 0 && <Typography variant='subtitle1'>{value}</Typography>}
+      {children}
+      <Typography variant='subtitle1'>{value || ''}</Typography>
     </Container>
   )
 }

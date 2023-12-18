@@ -5,7 +5,7 @@ import { CenteredContainer } from 'components/elements/Layouts/CenteredContainer
 import PaperContainer from 'components/elements/Layouts/PaperContainer'
 import PostFab from 'components/elements/Posts/PostFab'
 import SignInButtonFab from 'components/elements/SignIn/SignInButtonFab'
-import FeedModule from 'components/modules/feed'
+import FeedModule from 'components/modules/FeedModule'
 import { entries } from 'mobx'
 import { observer } from 'mobx-react-lite'
 import { useEffect } from 'react'

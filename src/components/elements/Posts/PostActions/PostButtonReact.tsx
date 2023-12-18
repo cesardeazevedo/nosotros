@@ -1,4 +1,4 @@
-import { IconButton, Typography } from '@mui/material'
+import { IconButton } from '@mui/material'
 import { observer } from 'mobx-react-lite'
 import { useStore } from 'stores'
 import ReactionPicker from '../../Reactions/ReactionPicker'
@@ -10,7 +10,7 @@ type Props = {
   dense?: boolean
 }
 
-const PostReactions = observer(function PostReactions(props: Props) {
+const PostButtonReact = observer(function PostReactions(props: Props) {
   const { noteId, dense } = props
   const store = useStore()
   const total = store.reactions.getTotal(noteId)
@@ -21,16 +21,12 @@ const PostReactions = observer(function PostReactions(props: Props) {
         active
         dense={dense}
         value={
-          total > 0 && (
-            <ReactionsTooltip noteId={noteId}>
-              <Typography variant='subtitle1' color='textSecondary' sx={{ ml: 0, fontWeight: 500 }}>
-                {total}
-              </Typography>
-            </ReactionsTooltip>
-          )
+          <ReactionsTooltip noteId={noteId}>
+            <span>{total || ''}</span>
+          </ReactionsTooltip>
         }>
         <ReactionPicker>
-          <IconButton size='small' sx={{ width: dense ? 30 : 34, height: dense ? 30 : 34, color: 'inherit' }}>
+          <IconButton size='small' color='inherit'>
             {defaultEmoji}
           </IconButton>
         </ReactionPicker>
@@ -39,4 +35,4 @@ const PostReactions = observer(function PostReactions(props: Props) {
   )
 })
 
-export default PostReactions
+export default PostButtonReact

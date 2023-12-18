@@ -1,5 +1,5 @@
 import UserProfileHeader from 'components/elements/User/UserProfileHeader'
-import FeedModule from 'components/modules/feed'
+import FeedModule from 'components/modules/FeedModule'
 import { observer } from 'mobx-react-lite'
 import { useEffect, useMemo } from 'react'
 import { useStore } from 'stores'

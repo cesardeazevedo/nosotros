@@ -1,8 +1,8 @@
-import { Link, Skeleton } from '@mui/material'
+import { Skeleton } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import { observer } from 'mobx-react-lite'
-import { Link as RouterLink } from 'react-router-dom'
 import { useStore } from 'stores'
+import LinkProfile from '../Links/LinkProfile'
 import UserPopover from '../User/UserPopover'
 
 type Props = {
@@ -35,9 +35,9 @@ const TextMention = observer(function TextMention(props: Props) {
       {!user && <Loader animation='wave' variant='rectangular' />}
       {user && (
         <UserPopover user={user}>
-          <Link color='primary' component={RouterLink} to={`/${user.npub}`}>
-            @{user?.displayName || user?.display_name || user?.name}
-          </Link>
+          <LinkProfile color='primary' user={user}>
+            @{user.displayName}
+          </LinkProfile>
         </UserPopover>
       )}
     </Container>
