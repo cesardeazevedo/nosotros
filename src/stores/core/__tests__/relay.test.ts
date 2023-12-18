@@ -6,7 +6,7 @@ import { RELAY_1, test } from 'utils/fixtures'
 import { expectMessage, sendMessages } from 'utils/testHelpers'
 import { vi } from 'vitest'
 
-describe('Relay tests', () => {
+describe('Relay', () => {
   test('Test simple subscription and assert events', async ({ relays, createSubscription }) => {
     const stub = vi.fn()
     const [server] = relays
@@ -22,6 +22,10 @@ describe('Relay tests', () => {
     const response = fakeUser()
     await sendMessages(server, sub.id, [response])
 
-    expect(stub).toBeCalledWith(expect.arrayContaining([SubscriptionEvents.EVENT, expect.any(String), response]))
+    const args = stub.mock.calls.flat(Infinity)
+    expect(args).toHaveLength(3)
+    expect(args[0]).toStrictEqual(SubscriptionEvents.EVENT)
+    expect(args[1]).toStrictEqual(expect.any(String))
+    expect(args[2]).toStrictEqual(response)
   })
 })
