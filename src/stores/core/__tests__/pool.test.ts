@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { FIXED_RELAYS } from 'constants/relays'
 import { Pool } from '../pool'
 
