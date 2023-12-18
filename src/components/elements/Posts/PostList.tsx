@@ -70,7 +70,8 @@ const PostList = observer(function PostWindow(props: Props) {
 
   const handleScrollForPagination = useCallback(
     (end: number) => {
-      if (props.feed.feed.size > 0 && end >= length - 5) {
+      const { size } = props.feed.feed
+      if (size > 0 && end >= size - 5) {
         props.feed.paginate$.next()
       }
     },

@@ -32,6 +32,7 @@ const PostContent = observer(function PostContent(props: Props) {
             {token.kind === TokenType.VIDEO && <PostVideo dense={dense} content={token.content} />}
             {token.kind === TokenType.NOTE && <PostNote dense={dense} noteId={token.content} author={token.author} />}
             {token.kind === TokenType.TEXT && <TextContent token={token} dense={dense} />}
+            {token.kind === TokenType.SPACE && <br />}
             {event.kind === Kind.Article && <PostMarkdown token={token} note={note} />}
           </React.Fragment>
         ))}

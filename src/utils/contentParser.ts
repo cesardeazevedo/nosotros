@@ -18,6 +18,9 @@ export enum TokenType {
   MENTION = 'mention',
   TEXT = 'text',
   NOTE = 'note',
+  BR = 'br',
+  SPACE = 'space',
+  BUBBLE = 'bubble',
   // Markdown Tokens (NIP-23)
   TITLE = 'title',
   PARAGRAPH = 'paragraph',
@@ -39,11 +42,18 @@ interface TokenBase {
     | TokenType.CODESPAN
     | TokenType.TITLE
     | TokenType.DIVIDER
+    | TokenType.BR
+    | TokenType.SPACE
   content: string
 }
 
 export interface TokenText {
   kind: TokenType.TEXT | TokenType.PARAGRAPH | TokenType.LIST | TokenType.BLOCKQUOTE
+  content: Array<string | Token>
+}
+
+export interface TokenBubble {
+  kind: TokenType.BUBBLE
   content: Array<string | Token>
 }
 
@@ -66,13 +76,14 @@ export interface TokenURL {
   href: string
 }
 
-export type Token = TokenBase | TokenText | TokenMention | TokenNote | TokenURL
+export type Token = TokenBase | TokenText | TokenMention | TokenNote | TokenURL | TokenBubble
 
 export type PartiallyParsed = Array<string | Token>
 export type ParsedContent = Array<Token>
 
 const REGEX_IMAGES = /(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|jpeg|gif|png|bmp|svg|webp)[\\?!]?(?:&?[^=&]*=[^=&]*)*$/i
 const REGEX_VIDEOS = /(http(s?):)([/|.|\w|\s|-])*\.(?:webm|mp4|ogg|mov)[\\?!]?(?:&?[^=&]*=[^=&]*)*$/i
+const REGEX_LINEBREAK = /(\r?\n){1,}/gm
 const REGEX_TAG = /(#\w+)/g
 
 const MIMETYPE_TOKEN: Record<string, TokenType.IMAGE | TokenType.VIDEO> = {
@@ -123,7 +134,7 @@ export class ContentParser {
     return REGEX_IMAGES.test(url) ? TokenType.IMAGE : REGEX_VIDEOS.test(url) ? TokenType.VIDEO : TokenType.URL
   }
 
-  private groupTextTokens(tokens: PartiallyParsed, textGroup: Array<TokenType>) {
+  groupTextTokens(tokens: PartiallyParsed, textGroup: Array<TokenType>) {
     const result: ParsedContent = []
     tokens.forEach((current) => {
       const prev = result[result.length - 1]
@@ -139,6 +150,26 @@ export class ContentParser {
         result.push(current)
       }
     })
+    return result
+  }
+
+  groupBubbles(tokens: ParsedContent, bubbleGroup: Array<TokenType> = [TokenType.TEXT, TokenType.SPACE, TokenType.BR]) {
+    const result: ParsedContent = []
+    let bubbles: ParsedContent = []
+    for (const token of tokens) {
+      if (bubbleGroup.includes(token.kind) && token.content[0] !== ' ') {
+        bubbles.push(token)
+      } else {
+        if (bubbles.length > 0) {
+          result.push({ kind: TokenType.BUBBLE, content: bubbles })
+          bubbles = []
+        }
+        result.push(token)
+      }
+    }
+    if (bubbles.length > 0) {
+      result.push({ kind: TokenType.BUBBLE, content: bubbles })
+    }
     return result
   }
 
@@ -185,6 +216,14 @@ export class ContentParser {
     return replaceToArray(this.tokens, REGEX_TAG, (content) => ({ kind: TokenType.TAG, content }) as Token)
   }
 
+  private replaceBreakLines() {
+    return replaceToArray(
+      this.tokens,
+      REGEX_LINEBREAK,
+      (what) => ({ kind: what.length >= 2 ? TokenType.SPACE : TokenType.BR, content: '' }) as Token,
+    )
+  }
+
   private parseLinks(content: string) {
     return linkify.match(content)
   }
@@ -215,10 +254,11 @@ export class ContentParser {
     this.tokens = [this.event.content]
     this.links = this.parseLinks(this.event.content)
 
+    this.tokens = this.replaceBreakLines()
     this.tokens = this.replaceReferences(this.tokens)
     this.tokens = this.replaceLinks()
     this.tokens = this.replaceTags()
-    this.parsed = this.groupTextTokens(this.tokens, [TokenType.URL, TokenType.MENTION, TokenType.TAG])
+    this.parsed = this.groupTextTokens(this.tokens, [TokenType.URL, TokenType.MENTION, TokenType.TAG, TokenType.BR])
     return this.parsed
   }
 
@@ -245,6 +285,7 @@ export class ContentParser {
       TokenType.EM,
       TokenType.STRONG,
     ]
+    const listGroup = [...textGroup, TokenType.CODE]
     // Parse marked lexer format into our own format
     const parseLexer = (lexer: marked.Token[]) => {
       const result: PartiallyParsed = []
@@ -262,7 +303,7 @@ export class ContentParser {
             if ('tokens' in token) {
               result.push(...this.groupTextTokens(parseLexer(token.tokens || []), textGroup))
             } else {
-              result.push(...this.replaceReferences([token.text]))
+              result.push(...this.replaceReferences([token.raw]))
             }
             break
           }
@@ -297,7 +338,7 @@ export class ContentParser {
             })
             break
           case 'list': {
-            result.push({ kind: TokenType.LIST, content: this.groupTextTokens(parseLexer(token.items), textGroup) })
+            result.push({ kind: TokenType.LIST, content: this.groupTextTokens(parseLexer(token.items), listGroup) })
             break
           }
           case 'list_item': {

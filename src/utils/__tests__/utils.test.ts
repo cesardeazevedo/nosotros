@@ -66,8 +66,19 @@ describe('Test utils', () => {
       ])
     })
 
+    test('Test regex on string', () => {
+      const content = `1 2 test 3 4 test 5 6`
+      expect(replaceToArray(content, /test/g, () => 'replaced')).toStrictEqual([
+        '1 2 ',
+        'replaced',
+        ' 3 4 ',
+        'replaced',
+        ' 5 6',
+      ])
+    })
+
     test('Test with multiple replacements', () => {
-      expect(replaceToArray('Hello Test Test Test !', /(Test)/, (match) => ({ content: match }))).toStrictEqual([
+      expect(replaceToArray('Hello Test Test Test !', /(Test)/g, (match) => ({ content: match }))).toStrictEqual([
         'Hello ',
         { content: 'Test' },
         ' ',

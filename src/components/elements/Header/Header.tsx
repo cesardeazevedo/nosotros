@@ -1,4 +1,4 @@
-import { AppBar, Slide, Toolbar, useScrollTrigger } from '@mui/material'
+import { AppBar, Slide, SlideProps, Toolbar, useScrollTrigger } from '@mui/material'
 import { useMatch } from '@tanstack/react-router'
 import { useMobile } from 'hooks/useMobile'
 import { useCurrentRoute } from 'hooks/useNavigations'
@@ -10,8 +10,12 @@ import HeaderActions from './HeaderActions'
 import HeaderCenter from './HeaderCenter'
 import HeaderLogo from './HeaderLogo'
 
-function HideOnScroll(props: { isMobile: boolean; children: ReactElement }) {
-  const { isMobile, children } = props
+export function HideOnScroll(props: {
+  direction?: SlideProps['direction']
+  isMobile: boolean
+  children: ReactElement
+}) {
+  const { direction = 'down', isMobile, children } = props
   const trigger = useScrollTrigger({ target: window })
 
   if (!isMobile) {
@@ -19,7 +23,7 @@ function HideOnScroll(props: { isMobile: boolean; children: ReactElement }) {
   }
 
   return (
-    <Slide appear={false} direction='down' in={!trigger}>
+    <Slide appear={false} direction={direction} in={!trigger}>
       {children}
     </Slide>
   )

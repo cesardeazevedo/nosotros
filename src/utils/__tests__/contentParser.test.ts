@@ -271,6 +271,36 @@ describe('ContentParser', () => {
     expect(note.content.mentionedNotes).toStrictEqual([event1.id])
   })
 
+  test('Should test groupBubbles', ({ createNote }) => {
+    const content = 'Bubble test https://url.com/image.jpg bubble 2 test'
+    const note = createNote({ ...event, content })
+    expect(note.content.groupBubbles(note.content.parsed)).toStrictEqual([
+      {
+        content: [
+          {
+            content: ['Bubble test '],
+            kind: 'text',
+          },
+        ],
+        kind: 'bubble',
+      },
+      {
+        content: 'https://url.com/image.jpg',
+        href: 'https://url.com/image.jpg',
+        kind: 'image',
+      },
+      {
+        content: [
+          {
+            content: [' bubble 2 test'],
+            kind: 'text',
+          },
+        ],
+        kind: 'bubble',
+      },
+    ])
+  })
+
   describe('Markdown', () => {
     test('multiple markdown syntax', ({ createNote }) => {
       const content = `
