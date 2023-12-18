@@ -1,52 +1,38 @@
-import { comparer, reaction } from 'mobx'
-import { Event, Filter as NostrFilter, matchFilters } from 'nostr-tools'
+import { Event, matchFilters, validateEvent, verifySignature } from 'nostr-tools'
 import { Observable, Subject, filter, map, share } from 'rxjs'
 import { Filter } from 'stores/core/filter'
-import { PostStore } from 'stores/modules/post.store'
-import { RootStore } from 'stores/root.store'
-import { dedupe, groupKeysToArray, toMap } from 'utils/utils'
-import { bufferPosts } from './operators'
+import type { RootStore } from 'stores/root.store'
+import { dedupe } from 'utils/utils'
+import { FilterRelayGroup } from './filterRelay'
 import { Relay } from './relay'
+import { RelayHints, RelayHintsData } from './relayHints'
 
 export enum SubscriptionEvents {
   EOSE = 'eose',
   EVENT = 'event',
-  COUNT = 'count',
 }
 
 export type SubscriptionOptions = {
   id?: string
   skipVerification?: boolean
-  relayHints?: unknown
-}
-
-export type RelayHints = {
-  authors?: Record<string, string[]>
-  ids?: Record<string, string[]>
+  relayHints?: RelayHintsData
 }
 
 export class Subscription {
   readonly id: string
 
   filters: Filter[]
-  // Pending filters waiting for author relay list
-  filtersPending: NostrFilter[]
-  // filters for specific relays
-  filtersByRelay = new Map<string, NostrFilter[]>()
+  filterRelays: FilterRelayGroup
 
   relays = new Map<string, Relay>()
 
-  relayHints: RelayHints
   /**
    * Parent subscription in case the current subscription was grouped
    */
   parent: Subscription | undefined
 
-  skipVerification: boolean
-
   events = new Map<string, string[]>()
 
-  posts$: Observable<PostStore[]>
   onEvent$: Observable<Event>
   onEose$: Observable<void>
 
@@ -61,11 +47,9 @@ export class Subscription {
     options?: SubscriptionOptions,
   ) {
     this.id = options?.id || Math.random().toString().slice(2)
-    this.skipVerification = options?.skipVerification ?? false
-    this.relayHints = options?.relayHints || {}
 
     this.filters = [filters].flat()
-    this.filtersPending = this.filtersData
+    this.filterRelays = new FilterRelayGroup(this.root, this.filtersData, options?.relayHints)
 
     this.onEose$ = this.eose$
 
@@ -76,10 +60,12 @@ export class Subscription {
         return !seenEvent
       }),
       map((msg) => msg[1]),
+      filter((event) => {
+        // Only validate signature for new events
+        return this.root.nostr.events.cachedKeys.has(event.id) || (validateEvent(event) && verifySignature(event))
+      }),
       share(),
     )
-
-    this.posts$ = this.onEvent$.pipe(bufferPosts(this.root))
   }
 
   get filtersData() {
@@ -89,7 +75,7 @@ export class Subscription {
   /**
    * Send subscription to all fixed relays from the pool
    */
-  private subscribeFromPool() {
+  private subscribeFromFixedRelays() {
     for (const relay of this.root.nostr.pool.fixedRelays) {
       this.relays.set(relay.url, relay)
       relay.subscribe(this, ...this.filtersData)
@@ -100,9 +86,11 @@ export class Subscription {
    * Send subscription to filtersByRelay's
    */
   private subscribeFromRelayFilters() {
-    for (const [url, filter] of this.filtersByRelay) {
-      if (!this.root.nostr.pool.urls.includes(url)) {
-        const relay = this.root.nostr.pool.getRelay(url)
+    const { pool } = this.root.nostr
+    for (const [url, filter] of this.filterRelays.results) {
+      // Ignore fixed relays since they are already subscribed
+      if (!pool.urls.includes(url)) {
+        const relay = pool.getRelay(url)
         if (relay) {
           this.relays.set(relay.url, relay)
           relay.subscribe(this, ...filter)
@@ -111,55 +99,20 @@ export class Subscription {
     }
   }
 
-  public async start() {
-    await this.prepareRelayFilters()
+  async start() {
+    await this.filterRelays.prepare()
 
-    this.subscribeFromPool()
+    this.subscribeFromFixedRelays()
     this.subscribeFromRelayFilters()
-    this.subscribeToPendingRelays()
+    this.filterRelays.subscribeToPendingRelayList(() => {
+      this.subscribeFromRelayFilters()
+    })
   }
 
-  public stop() {
+  stop() {
     for (const relay of this.relays.values()) {
       relay.unsubscribe(this)
     }
-  }
-
-  /**
-   * Listens for new userRelays (NIP-65)
-   */
-  private subscribeToPendingRelays() {
-    const pendingAuthors = dedupe(this.filtersPending.map((filter) => filter.authors || []).flat())
-    const disposer = reaction(
-      () =>
-        pendingAuthors.map((author) => [
-          this.root.userRelays.relays.get(author),
-          this.root.userRelays.relaysNIP05.get(author),
-        ]),
-      async () => {
-        const filtersPending = this.filtersPending.slice()
-        await this.prepareRelayFilters()
-        const newFiltersPending = this.filtersPending.slice()
-        if (!comparer.structural(filtersPending, newFiltersPending)) {
-          this.subscribeFromRelayFilters()
-        }
-      },
-      {
-        delay: 1000, // throttle
-      },
-    )
-    setTimeout(disposer, 10000)
-  }
-
-  /**
-   * Group filters by authors and their respective relays, and by relayHints
-   */
-  public async prepareRelayFilters() {
-    const filters = await Promise.all(
-      this.filtersPending.map((filter) => Filter.groupAuthorsByRelay(filter, this.root, this.relayHints)),
-    )
-    this.filtersByRelay = toMap<NostrFilter[]>(groupKeysToArray(filters.map((filter) => filter.result)))
-    this.filtersPending = filters.map((filter) => filter.pending)
   }
 }
 
@@ -167,10 +120,8 @@ export class SubscriptionGroup extends Subscription {
   subscriptions: Subscription[]
 
   constructor(root: RootStore, subscriptions: Subscription[], options?: SubscriptionOptions) {
-    const filters = Filter.merge(subscriptions.map((x) => x.filtersData).flat()).map(
-      (filter) => new Filter(root, filter),
-    )
-    const relayHints = PostStore.mergeRelayHints(subscriptions.map((x) => x.relayHints))
+    const filters = Filter.merge(subscriptions.flatMap((x) => x.filtersData)).map((filter) => new Filter(root, filter))
+    const relayHints = RelayHints.merge(subscriptions.map((x) => x.filterRelays.hints || {}))
 
     super(root, filters, { ...options, relayHints })
 
