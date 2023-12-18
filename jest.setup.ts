@@ -1,9 +1,4 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-// import '@testing-library/jest-dom/extend-expect'
 import { vi } from 'vitest'
-
-// global.TextEncoder = require('util').TextEncoder
-// global.TextDecoder = require('util').TextDecoder
 
 vi.mock('mobx-persist-store')
 
