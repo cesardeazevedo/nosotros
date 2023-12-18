@@ -1,19 +1,20 @@
 import { Event } from 'nostr-tools'
 import {
   BehaviorSubject,
+  Observable,
   OperatorFunction,
   filter,
   first,
+  from,
   map,
+  mergeAll,
   mergeMap,
   pipe,
   bufferTime as rxBufferTime,
-  share,
   tap,
 } from 'rxjs'
-import { PostStore } from 'stores/modules/post.store'
-import { RootStore } from 'stores/root.store'
-import { groupByKey } from 'utils/utils'
+
+import type { RootStore } from 'stores/root.store'
 import { Subscription, SubscriptionGroup } from './subscription'
 
 export function bufferTime<T>(bufferTimeSpan: number): OperatorFunction<T, T[]> {
@@ -83,36 +84,15 @@ export function mergeDelayedSubscriptions(
   )
 }
 
+export function mergeStream<T>(streams: (value: T) => Observable<T>): OperatorFunction<T, T> {
+  return mergeMap((x) => from([[x], streams(x)]).pipe(mergeAll()))
+}
+
 export function hasValidFilters(): OperatorFunction<Subscription, Subscription> {
   return pipe(
     tap((subscription) => {
       subscription.filters = subscription.filters.filter((filter) => filter.isValid)
     }),
     filter((subscription) => subscription.filters.length > 0),
-  )
-}
-
-export function bufferPosts(root: RootStore, bufferTimeSpan = 1000): OperatorFunction<Event, PostStore[]> {
-  return pipe(
-    map((event) => new PostStore(root, event)),
-    bufferTime(bufferTimeSpan),
-    map((posts) => posts.sort((a, b) => b.event.created_at - a.event.created_at)),
-    share(),
-  )
-}
-
-export function bufferLatestCreatedAt(bufferTimeSpan = 500): OperatorFunction<Event, Event[]> {
-  return pipe(
-    bufferTime<Event>(bufferTimeSpan),
-    map((events) => {
-      const data = groupByKey(events, 'pubkey')
-      return Object.entries(data).reduce((acc, [pubkey, events]) => {
-        return {
-          ...acc,
-          [pubkey]: events.reduce((prev, event) => (event.created_at > prev.created_at ? event : prev), events[0]),
-        }
-      }, {})
-    }),
-    map((events) => Object.values(events)),
   )
 }

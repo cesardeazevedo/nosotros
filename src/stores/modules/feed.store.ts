@@ -1,114 +1,88 @@
 import { Kind } from 'constants/kinds'
 import { action, makeAutoObservable, observable } from 'mobx'
+import { Subject, map, of, take, throttleTime, timeout } from 'rxjs'
 import { Filter } from 'stores/core/filter'
-import { RelayHints, Subscription } from 'stores/core/subscription'
+import { bufferTime } from 'stores/core/operators'
 import type { RootStore } from 'stores/root.store'
 import { dedupe } from 'utils/utils'
-import { PostStore } from './post.store'
+import { Note } from './note.store'
 
-export type PostRow = {
-  noteId: string
-  timestamp: number
-  author: string
-  replies: PostRow[]
-}
-
-type Options = {
+export type FeedOptions = {
+  name?: string
   authors: string[]
   contacts?: boolean
   pagination?: boolean
+  paginationRetryTimeout?: number
   range?: number
 }
 
 export class FeedStore {
-  sub: Subscription | undefined
   authors: string[]
   filter: Filter
-  contacts: boolean
+  paginationRetryTimeout: number
 
-  feed = observable.map<string, PostStore>()
-  tempReplies = new Map<string, PostStore[]>()
+  feed = observable.map<string, Note>()
+  options: FeedOptions
+
+  paginate$ = new Subject<number | void>()
+  reactions$ = new Subject<string[]>()
 
   constructor(
     private root: RootStore,
-    options: Options,
+    options: FeedOptions,
   ) {
     makeAutoObservable(this, {
       feed: observable,
       add: action,
+      authors: false,
       filter: false,
       subscribe: false,
-      tempReplies: false,
+      options: false,
+      paginationRetryTimeout: false,
     })
+
+    this.options = {
+      pagination: true,
+      ...options,
+    }
 
     this.filter = new Filter(
       this.root,
       {
         kinds: [Kind.Text, Kind.Article],
       },
-      { pagination: options.pagination ?? true, range: options.range },
+      { pagination: this.options.pagination, range: options.range },
     )
 
     this.authors = options.authors
-    this.contacts = options.contacts || false
+    this.paginationRetryTimeout = options.paginationRetryTimeout || 2000
+
+    this.reactions$
+      .pipe(
+        bufferTime(2000),
+        map((ids) => dedupe(ids)),
+      )
+      .subscribe((ids) => {
+        this.root.subscriptions.subReactions(ids)
+      })
+
+    this.paginate$
+      .pipe(throttleTime(2000, undefined, { leading: true, trailing: true }))
+      .subscribe(() => this.paginate())
   }
 
-  add(post: PostStore) {
-    const rootNoteId = post.rootNoteId
-    if (!post.isRoot) {
-      if (!this.feed.has(rootNoteId)) {
-        this.tempReplies.set(rootNoteId, [...(this.tempReplies.get(rootNoteId) || []), post])
-      } else {
-        this.feed.get(rootNoteId)?.addReply(post)
-      }
-    } else {
-      post.addReplies(this.tempReplies.get(post.id) || [])
-      this.feed.set(post.id, post)
+  add(note: Note) {
+    // We never put replies as root notes on feed
+    if (note.isRoot && !this.feed.has(note.id)) {
+      this.feed.set(note.id, note)
     }
   }
 
-  addPosts(posts: PostStore[]) {
-    posts.forEach((post) => {
-      if (!this.feed.has(post.id)) {
-        this.add(post)
-      }
-    })
-  }
-
   paginate(range?: number) {
-    this.filter.nextPage(range)
-    this.subNotesByAuthors(this.authors)
-  }
-
-  subscribeReactions(ids: string[]) {
-    this.root.subscriptions.subReactions(ids)
-  }
-
-  async getPostsMetadata(posts: PostStore[]) {
-    const rootNotes = posts.filter((x) => !x.isRoot && !x.isReplyOfAReply).map((x) => x.rootNoteId)
-    const mentionNotes = PostStore.mergeTags(posts.map((x) => x.mentionsTags))
-    const mentionNotesFromContent = posts.map((post) => post.noteContent?.map((x) => x.content) || []).flat()
-    const relayHints = PostStore.mergeRelayHints(await Promise.all(posts.map((post) => post.relayHints()).flat()))
-    return { rootNotes, mentionNotes, mentionNotesFromContent, relayHints }
-  }
-
-  /**
-   * Subscribe to related/parent notes, and add them to the feed
-   */
-  subRelatedNotes(ids: string[], relayHints?: RelayHints) {
-    // We might want to add pagination here too, since we don't want to load related posts that are too old
-    const sub = this.root.subscriptions.subNotes(new Filter(this.root, { kinds: [Kind.Text, Kind.Article], ids }), {
-      relayHints,
-    })
-    sub.posts$.subscribe(async (posts) => {
-      this.addPosts(posts)
-      // related notes might also have mentions
-      const metadata = await this.getPostsMetadata(posts)
-      const notes = dedupe(metadata.mentionNotes, metadata.mentionNotesFromContent)
-      this.root.subscriptions.subNotes(new Filter(this.root, { kinds: [Kind.Text, Kind.Article], ids: notes }), {
-        relayHints: metadata.relayHints,
-      })
-    })
+    if (this.options.pagination) {
+      this.filter.nextPage(range)
+      this.subNotesByAuthors(this.authors)
+    }
   }
 
   /**
@@ -116,22 +90,27 @@ export class FeedStore {
    */
   subNotesByAuthors(authors: string[]) {
     this.filter.addAuthors(authors)
-    const sub = this.root.subscriptions.subNotes(this.filter)
-    sub.posts$.subscribe(async (posts) => {
-      this.addPosts(posts)
+    const sub = this.root.notes.subscribe(this.filter)
 
-      const metadata = await this.getPostsMetadata(posts)
-
-      const relatedNotes = dedupe(metadata.rootNotes, metadata.mentionNotes, metadata.mentionNotesFromContent)
-      if (relatedNotes.length > 0) {
-        this.subRelatedNotes(relatedNotes, metadata.relayHints)
-      }
-
-      // Check if the current pagination range didn't received any `root` posts, if so, try to paginate again.
-      if (posts.filter((x) => x.isRoot).length === 0) {
-        this.paginate(this.filter.options.range * 2)
-      }
+    sub.subscribe(async (posts) => {
+      posts.forEach((note) => {
+        this.add(note)
+        // This is a hacky since if the user isn't logged, we are pushing default authors for the feed
+        if (!this.root.auth.pubkey) {
+          note.relevantAuthors.push(...this.authors)
+        }
+      })
     })
+
+    if (this.filter.options.pagination) {
+      // Check for empty responses after 5 seconds, then paginate again
+      sub.pipe(timeout({ first: this.paginationRetryTimeout, with: () => of([]) }), take(1)).subscribe((posts) => {
+        if (posts.length === 0 || posts.filter((x) => x.isRoot).length === 0) {
+          // No posts found, paginate again increasing the pagination range
+          this.paginate$.next(this.filter.options.range * 2)
+        }
+      })
+    }
 
     return sub
   }
@@ -141,10 +120,10 @@ export class FeedStore {
    */
   async subNotesByAuthorsContacts() {
     const contactList = await this.root.contacts.fetchByAuthor(this.authors[0])
-    const authors = contactList.tags.map((tag) => tag[1])
+    const authors = Object.keys(contactList?.contacts || {})
     if (authors?.length !== 0) {
       this.authors.push(...authors)
-      this.filter.setInitialPaginationRange(this.authors.length > 100 ? 10 : 60)
+      this.filter.setInitialPaginationRange(this.authors.length > 100 ? 20 : 120)
       this.subNotesByAuthors(this.authors)
     }
     const sub = this.root.subscriptions.subContacts(this.authors[0])
@@ -154,18 +133,17 @@ export class FeedStore {
       // New contacts found, subscribe to their notes
       if (newContacts.length !== 0) {
         this.authors.push(...newContacts)
-        this.filter.setInitialPaginationRange(this.authors.length > 100 ? 10 : 60)
         this.subNotesByAuthors(newContacts)
       }
     })
   }
 
   subscribe() {
-    if (this.contacts) {
+    if (this.options.contacts) {
       this.subNotesByAuthorsContacts()
     } else {
       this.subNotesByAuthors(this.authors)
     }
-    this.root.subscriptions.subUsers(this.authors)
+    this.root.users.subscribe(this.authors)
   }
 }
