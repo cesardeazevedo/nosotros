@@ -1,22 +1,25 @@
-import { Box } from '@mui/material'
+import { styled } from '@mui/material'
 import { Row } from 'components/elements/Layouts/Flex'
-import { PostStore } from 'stores/modules/post.store'
+import { Note } from 'stores/modules/note.store'
 import UserHeader from '../User/UserHeader'
 import PostOptions from './PostOptions'
 
 type Props = {
-  post: PostStore
+  note: Note
 }
 
+const Container = styled(Row)({
+  justifyContent: 'space-between',
+  padding: 16,
+})
+
 function PostHeader(props: Props) {
-  const { post } = props
+  const { note } = props
   return (
-    <Row sx={{ p: 2, justifyContent: 'space-between' }}>
-      <Box sx={{ flex: 1 }}>
-        <UserHeader event={post.event} />
-      </Box>
-      <PostOptions post={post} />
-    </Row>
+    <Container>
+      <UserHeader note={note} />
+      <PostOptions note={note} />
+    </Container>
   )
 }
 
