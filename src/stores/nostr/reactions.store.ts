@@ -3,7 +3,7 @@ import { Event } from 'nostr-tools'
 import { isEventTag } from 'utils/utils'
 import type { RootStore } from '../root.store'
 
-export type Reactions = {
+type Reactions = {
   [emoji: string]: string[]
 }
 
