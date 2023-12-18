@@ -1,8 +1,8 @@
-import { Box, styled } from '@mui/material'
+import { styled } from '@mui/material'
 
-export const Row = styled(Box)`
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  align-items: center;
-`
+export const Row = styled('div')({
+  display: 'flex',
+  flexDirection: 'row',
+  justifyContent: 'flex-start',
+  alignItems: 'center',
+})

@@ -1,7 +1,7 @@
 import { Button } from '@mui/material'
 import { observer } from 'mobx-react-lite'
 import { useStore } from 'stores'
-import LinkSignIn from '../Navigation/LinkSignIn'
+import LinkSignIn from '../Links/LinkSignIn'
 import ProfilePopover from '../Navigation/ProfilePopover'
 
 const HeaderSignIn = observer(function HeaderSignIn() {

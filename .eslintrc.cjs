@@ -42,12 +42,6 @@ module.exports = {
       },
     ],
     '@typescript-eslint/ban-ts-comment': 'warn',
-    'import/order': [
-      'error',
-      // {
-      //   groups: ['builtin', 'internal', 'index'],
-      // },
-    ],
     '@typescript-eslint/no-empty-function': 0,
     '@typescript-eslint/no-unused-vars': [
       'error',

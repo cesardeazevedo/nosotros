@@ -5,7 +5,7 @@ import { CenteredContainer } from 'components/elements/Layouts/CenteredContainer
 import PaperContainer from 'components/elements/Layouts/PaperContainer'
 import PostFab from 'components/elements/Posts/PostFab'
 import SignInButtonFab from 'components/elements/SignIn/SignInButtonFab'
-import FeedModule from 'components/modules/feed'
+import FeedModule from 'components/modules/FeedModule'
 import { entries } from 'mobx'
 import { observer } from 'mobx-react-lite'
 import { useEffect } from 'react'
@@ -17,7 +17,7 @@ const HomeRoute = observer(() => {
 
   useEffect(() => {
     if (!store.deck.mainFeed) {
-      store.initializeHome()
+      store.initializeFeed()
     }
   }, [store])
 
@@ -40,7 +40,7 @@ const HomeRoute = observer(() => {
       </CenteredContainer>
       <DeckContainer>
         {!store.deck.enabled && mainFeed && <FeedModule feed={mainFeed} renderCreateForm />}
-        {/*  Untested */}
+        {/* Untested */}
         {store.deck.enabled &&
           entries(store.deck.columns).map(([key, column], index) => (
             <FeedModule key={key} feed={column} renderCreateForm={index === 0} />

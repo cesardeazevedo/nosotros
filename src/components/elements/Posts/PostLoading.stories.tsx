@@ -1,17 +1,18 @@
-import { Paper } from '@mui/material'
 import { Meta, StoryObj } from '@storybook/react'
+import { CenteredContainer } from '../Layouts/CenteredContainer'
 import PostLoading from './PostLoading'
 
 const meta = {
   component: PostLoading,
   render() {
     return (
-      <Paper sx={{ p: 2 }}>
+      <CenteredContainer maxWidth='sm'>
         <PostLoading />
-      </Paper>
+      </CenteredContainer>
     )
   },
 } satisfies Meta<typeof PostLoading>
+
 export default meta
 
 export type Story = StoryObj<typeof meta>

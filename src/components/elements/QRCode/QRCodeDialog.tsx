@@ -1,16 +1,18 @@
 import { Box, Button, IconButton, Skeleton, Typography } from '@mui/material'
 import { IconCameraFilled, IconX } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
+import { nip19 } from 'nostr-tools'
 import { QRCodeCanvas } from 'qrcode.react'
 import { useMemo } from 'react'
 import { useStore } from 'stores'
+import { encodeSafe } from 'utils/nip19'
 import UserAvatar from '../User/UserAvatar'
 import UserName from '../User/UserName'
 
 const QRCodeDialog = observer(function QRCodeDialog() {
   const store = useStore()
   const { pubkey, currentUser: user } = store.auth
-  const npub = useMemo(() => store.auth.encode(pubkey), [pubkey, store])
+  const npub = useMemo(() => encodeSafe(() => nip19.npubEncode(pubkey || '')), [pubkey])
   return (
     <>
       <Box sx={{ position: 'absolute', left: 20, top: 20, zIndex: 10000 }}>
@@ -34,7 +36,7 @@ const QRCodeDialog = observer(function QRCodeDialog() {
           </Box>
           <UserName user={user} variant='h4' sx={{ mt: 1 }}>
             <Typography variant='subtitle1' sx={{ textAlign: 'center' }}>
-              @{user?.name}
+              @{user?.displayName}
             </Typography>
           </UserName>
         </Box>

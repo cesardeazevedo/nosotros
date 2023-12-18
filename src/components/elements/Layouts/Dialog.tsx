@@ -33,7 +33,7 @@ const Transition = React.forwardRef(function Transition(
   return <Slide direction='up' ref={ref} {...props} />
 })
 
-export function MobileDialog(props: Props) {
+function MobileDialog(props: Props) {
   const iOS = typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent)
   const { open, onClose, children, mobileHeight, sx, mobileSlots } = props
   return (

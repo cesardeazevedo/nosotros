@@ -1,10 +1,10 @@
-import { fakeContacts } from 'utils/faker'
+import { fakeNote } from 'utils/faker'
 import { test } from 'utils/fixtures'
 
 describe('ContactStore', () => {
   test('add()', async ({ root }) => {
     const store = root.contacts
-    const data1 = fakeContacts({
+    const data1 = fakeNote({
       pubkey: '1',
       created_at: 1,
       tags: [
@@ -18,57 +18,68 @@ describe('ContactStore', () => {
     expect(await store.fetchByAuthor('1')).toStrictEqual({
       id: '1',
       timestamp: 1,
-      tags: data1.tags,
+      contacts: {
+        '1': true,
+        '2': true,
+        '3': true,
+      },
     })
-    const data2 = fakeContacts({
-      pubkey: '1',
-      created_at: 2,
-      tags: [
-        ['p', '4'],
-        ['p', '5'],
-        ['p', '6'],
-      ],
-    })
-    await store.add(data2)
+    await store.add(
+      fakeNote({
+        pubkey: '1',
+        created_at: 2,
+        tags: [
+          ['p', '4'],
+          ['p', '5'],
+          ['p', '6'],
+        ],
+      }),
+    )
     expect(await store.contacts.size).toBe(1)
     expect(await store.fetchByAuthor('1')).toStrictEqual({
       id: '1',
       timestamp: 2,
-      tags: data2.tags,
+      contacts: {
+        '4': true,
+        '5': true,
+        '6': true,
+      },
     })
     // Old created_at, should be ignored
-    const data3 = fakeContacts({
-      pubkey: '1',
-      created_at: 1,
-      tags: [
-        ['p', '7'],
-        ['p', '8'],
-        ['p', '9'],
-      ],
-    })
-    await store.add(data3)
+    await store.add(
+      fakeNote({
+        pubkey: '1',
+        created_at: 1,
+        tags: [
+          ['p', '7'],
+          ['p', '8'],
+          ['p', '9'],
+        ],
+      }),
+    )
     expect(await store.contacts.size).toBe(1)
     expect(await store.fetchByAuthor('1')).toStrictEqual({
       id: '1',
       timestamp: 2,
-      tags: data2.tags,
+      contacts: {
+        '4': true,
+        '5': true,
+        '6': true,
+      },
     })
   })
 
-  test('getByAuthor()', async ({ root }) => {
+  test('Should assert isFollowing', async ({ root }) => {
+    root.auth.pubkey = '1'
     const store = root.contacts
-    const data = fakeContacts({
-      pubkey: '1',
-      created_at: 1,
-      tags: [
-        ['p', '1'],
-        ['p', '2'],
-        ['p', '3'],
-      ],
-    })
-    await store.add(data)
-    expect(await store.contacts.size).toBe(1)
-    expect(await store.fetchByAuthor('1')).toStrictEqual({ id: '1', timestamp: 1, tags: data.tags })
-    expect(await store.fetchByAuthor('2')).toStrictEqual({ timestamp: 0, tags: [] })
+    await store.add(
+      fakeNote({
+        pubkey: '1',
+        created_at: 1,
+        tags: [['p', '2']],
+      }),
+    )
+    expect(store.isFollowing('2')).toBe(true)
+    expect(store.isFollowing('3')).toBe(false)
   })
 })

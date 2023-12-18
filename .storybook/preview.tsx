@@ -2,40 +2,50 @@ import { CssBaseline, Experimental_CssVarsProvider as CssVarsProvider, useColorS
 import { addons } from '@storybook/addons'
 import type { PartialStoryFn } from '@storybook/csf'
 import type { Preview, ReactRenderer } from '@storybook/react'
-import { themes } from '@storybook/theming'
-import React, { useEffect } from 'react'
-import { RouterProvider, createBrowserRouter } from 'react-router-dom'
+import { RootRoute, Route, Router, RouterProvider } from '@tanstack/react-router'
+import React, { useEffect, useState } from 'react'
 import { RootStore, StoreProvider } from '../src/stores'
+import { dbBatcher } from '../src/stores/db/observabledb.store'
 
+import { database } from '../src/stores/db/database.store'
 import theme from '../src/themes/theme'
 
 const channel = addons.getChannel()
 
-const App = (props: { Story: PartialStoryFn<ReactRenderer, { [x: string]: any }>; store: RootStore }) => {
+const App = (props: { Story: PartialStoryFn<ReactRenderer>; store: RootStore }) => {
   const { setMode } = useColorScheme()
   const { Story, store } = props
+  const [ready, setReady] = useState(false)
 
   useEffect(() => {
     channel.on('DARK_MODE', (dark) => setMode(dark ? 'dark' : 'light'))
     return () => channel.off('DARK_MODE', () => setMode('light'))
   }, [channel, setMode])
 
-  return <Story globals={{ store }} />
-}
+  useEffect(() => {
+    dbBatcher._subject.complete()
+    database.clear().then(() => setReady(true))
+  }, [])
 
-const { dark, light } = theme.colorSchemes
+  return ready && <Story globals={{ store }} />
+}
 
 const preview: Preview = {
   decorators: [
     (Story, context) => {
       const store = new RootStore()
+      const rootRoute = new RootRoute({
+        component: () => <App Story={Story} store={store} />,
+      })
+      const index = new Route({ getParentRoute: () => rootRoute, path: '/' })
+      const routeTree = rootRoute.addChildren([index])
+      const router = new Router({ routeTree })
+      context.parameters.setup?.(store)
       return (
         <StoreProvider value={store}>
           <CssVarsProvider theme={theme}>
             <CssBaseline />
-            <RouterProvider
-              router={createBrowserRouter([{ path: '*', element: <App Story={Story} store={store} /> }])}
-            />
+            <RouterProvider router={router} />
           </CssVarsProvider>
         </StoreProvider>
       )
@@ -50,34 +60,6 @@ const preview: Preview = {
       },
     },
     layout: 'fullscreen',
-  },
-  // @ts-ignore
-  darkMode: {
-    light: {
-      ...themes.normal,
-      appBg: '#fff',
-      colorPrimary: light.palette.secondary.main,
-      colorSecondary: light.palette.primary.main,
-      base: 'light',
-      brandTitle: 'Nostr',
-      brandUrl: '',
-      brandImage: '',
-    },
-    dark: {
-      ...themes.dark,
-      appBg: dark.palette.background.default,
-      barBg: dark.palette.background.paper,
-      appContentBg: dark.palette.background.paper,
-      appBorderColor: dark.palette.divider,
-      inputBg: dark.palette.background.paper,
-      inputBorder: dark.palette.divider,
-      colorPrimary: dark.palette.primary.main,
-      colorSecondary: dark.palette.primary.main,
-      base: 'light',
-      brandTitle: 'Nostr',
-      brandUrl: '',
-      brandImage: '',
-    },
   },
 }
 

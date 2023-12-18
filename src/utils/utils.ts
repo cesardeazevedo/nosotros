@@ -1,25 +1,21 @@
-import { computed, observe } from 'mobx'
-import { Observable } from 'rxjs'
-
 /**
  * Dedupe and concat all arguments
  */
-export const QUOTE = 'q'
-export const EVENT = 'e'
-export const PUBKEY = 'p'
+const QUOTE = 'q'
+const EVENT = 'e'
+const PUBKEY = 'p'
 
 export const isEventTag = (tag: string[]) => tag[0] === EVENT
 export const isQuoteTag = (tag: string[]) => tag[0] === QUOTE
 export const isAuthorTag = (tag: string[]) => tag[0] === PUBKEY
 
-export const isRoot = (tag: string[]) => tag[3] === 'root'
-export const isReply = (tag: string[]) => tag[3] === 'reply'
 export const isMention = (tag: string[]) => tag[3] === 'mention'
 
 export type ObjectValues<T> = T[keyof T]
 
-export function dedupe<T>(...arrays: Array<T[] | undefined>) {
-  return [...new Set(arrays.map((x) => x || []).flat())]
+export function dedupe<T>(...arrays: Array<Array<T | T[] | undefined | null> | undefined | null>) {
+  const flattened = arrays.flat(Infinity).filter((item): item is T => item != null)
+  return Array.from(new Set(flattened))
 }
 
 export function pickBy<T extends object, K extends keyof T>(obj: T, keys: K[]): Pick<T, K> {
@@ -32,41 +28,31 @@ export function pickBy<T extends object, K extends keyof T>(obj: T, keys: K[]): 
   return result as Pick<T, K>
 }
 
-export function groupKeysToArray(data: Record<string, unknown>[]) {
-  return data.reduce<Record<string, unknown[]>>(
-    (acc, current) => {
-      for (const [key, value] of Object.entries(current)) {
-        acc[key] = dedupe(acc[key], [value].flat())
-      }
-      return acc
-    },
-    {} as Record<string, unknown[]>,
-  )
-}
-
-export function groupByKey<T>(data: T[], key: keyof T) {
-  return data.reduce<Record<string, T[]>>((acc, current) => {
-    acc[current[key] as string] ??= []
-    acc[current[key] as string].push(current)
+type Flat<T> = T extends Array<Array<infer U>> ? U[] : T
+/**
+ * [{ a: 1 }, { a: 2 }] => { a: [1, 2] }
+ */
+export function groupKeysToArray<T>(data: Array<Record<string, T> | undefined>) {
+  return data.reduce<Record<string, Flat<T>>>((acc, current) => {
+    for (const [key, value] of Object.entries(current || {})) {
+      acc[key] = dedupe(acc[key] as unknown[], [value]) as Flat<T>
+    }
     return acc
   }, {})
 }
 
-export function toMap<T>(data: Record<string, unknown>) {
-  return new Map<string, T>(Object.entries(data as Record<string, T>) as [string, T][])
+export function removeEmptyKeys<T extends object>(obj: T) {
+  const result: T = {} as T
+  for (const [key, value] of Object.entries(obj)) {
+    if (value && Object.keys(value).length > 0) {
+      result[key as keyof T] = value
+    }
+  }
+  return result
 }
 
-export function toStream<T>(expression: () => T, fireImmediately = false): Observable<T> {
-  const computedValue = computed(expression)
-  return new Observable<T>((subscriber) => {
-    observe<T>(
-      computedValue,
-      (props) => {
-        subscriber.next(props.newValue)
-      },
-      fireImmediately,
-    )
-  })
+export function toMap<T>(data: Record<string, unknown>) {
+  return new Map<string, T>(Object.entries(data as Record<string, T>) as [string, T][])
 }
 
 export function replaceToArray<T>(
@@ -101,5 +87,5 @@ export function replaceToArray<T>(
     }
     return input
   }
-  return [text].flat().map(replace).flat() as (string | T)[]
+  return [text].flat().flatMap(replace) as (string | T)[]
 }

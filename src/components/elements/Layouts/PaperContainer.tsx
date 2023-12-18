@@ -1,9 +1,8 @@
-import { Paper } from '@mui/material'
-import { SxProps, styled } from '@mui/material/styles'
+import { Paper, SxProps, Theme, styled } from '@mui/material'
 
-const PaperContainer = styled(Paper)(({ theme }) => {
+const PaperContainer = styled(Paper)(({ theme }: { theme: Theme }) => {
   const compactStyle: SxProps = {
-    mb: 0,
+    marginBottom: 0,
     borderRadius: 0,
     borderBottom: '1px solid',
     borderColor: theme.palette.divider,
@@ -11,12 +10,12 @@ const PaperContainer = styled(Paper)(({ theme }) => {
     backgroundImage: 'none',
     backgroundColor: theme.palette.mode === 'dark' ? theme.palette.common.black : theme.palette.common.white,
   }
-  return theme.unstable_sx({
-    mb: 2,
+  return {
+    marginBottom: 16,
     overflowX: 'hidden',
     [theme.breakpoints.down('sm')]: compactStyle,
     'html.deck &': compactStyle,
-  })
+  }
 })
 
 export default PaperContainer

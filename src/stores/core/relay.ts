@@ -1,4 +1,4 @@
-import { Event, Filter as NostrFilter, validateEvent, verifySignature } from 'nostr-tools'
+import { Event, Filter as NostrFilter } from 'nostr-tools'
 import { Observable, asyncScheduler, filter, merge, observeOn, retry, share, tap } from 'rxjs'
 import { WebSocketSubject, webSocket } from 'rxjs/webSocket'
 import { Subscription, SubscriptionEvents } from './subscription'
@@ -26,19 +26,26 @@ export class Relay {
   websocket: WebSocketSubject<MessageReceived>
 
   onEvent$: Observable<MessageReceived>
-  onCount$: Observable<MessageReceived>
   onNotice$: Observable<MessageReceived>
   onEose$: Observable<MessageReceived>
 
   subscriptions: Map<string, Subscription> = new Map()
 
+  connected = false
+
   constructor(url: string) {
     this.url = url.replace(/\/$/, '')
     this.websocket = webSocket({
       url: this.url,
+      openObserver: {
+        next: () => {
+          this.connected = true
+        },
+      },
       closeObserver: {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         next: (event) => {
+          this.connected = false
           // console.log('CLOSED', url, event)
         },
       },
@@ -61,38 +68,20 @@ export class Relay {
         const id = message[1]
         const event = message[2] as Event
         const sub = this.subscriptions.get(id)
-        if (sub && validateEvent(event) && (sub.skipVerification || verifySignature(event))) {
-          sub.event$.next([this.url, event])
-        }
+        sub?.event$?.next([this.url, event])
       }),
       share(),
     )
 
-    this.onCount$ = this.websocket.pipe(
-      ofMessage(SubscriptionEvents.COUNT),
-      tap((message) => {
-        const id = message[1]
-        const event = message[2]
-        const sub = this.subscriptions.get(id)
-        sub?.count$.next([this.url, event])
-      }),
-    )
-
     this.onNotice$ = this.websocket.pipe(ofMessage(RelayEvents.NOTICE))
 
-    merge(
-      this.onEvent$,
-      this.onCount$,
-      this.onEose$,
-      this.onNotice$,
-      //
-    )
+    merge(this.onEvent$, this.onEose$, this.onNotice$)
       // Reconnect when the websocket closes
       .pipe(retry({ count: 3, delay: 5000 }))
       .subscribe({
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         error: (error) => {
-          // console.log('ERROR', error)
+          // console.log('ERROR', this.url, error)
         },
       })
   }

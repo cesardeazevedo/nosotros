@@ -19,25 +19,21 @@ import {
 import Dialog from 'components/elements/Layouts/Dialog'
 import { observer } from 'mobx-react-lite'
 import { useState } from 'react'
-import { useStore } from 'stores'
-import { PostStore } from 'stores/modules/post.store'
-import { UserState } from 'stores/nostr/user.store'
+import { Note } from 'stores/modules/note.store'
+import { User } from 'stores/modules/user.store'
 import PostStats from './PostDialogs/PostStats'
 
 type Props = {
-  post: PostStore
+  note: Note
 }
 
 function isMobileDevice() {
   return 'ontouchstart' in window
 }
 
-function Options(props: {
-  user: Partial<UserState> | undefined
-  debugDialog: boolean
-  setDebugDialog: (value: boolean) => void
-}) {
+function Options(props: { user: User | undefined; debugDialog: boolean; setDebugDialog: (value: boolean) => void }) {
   const { user, debugDialog, setDebugDialog } = props
+  const name = user?.displayName
   return (
     <>
       <MenuList>
@@ -65,13 +61,13 @@ function Options(props: {
           <ListItemIcon sx={{ color: 'text.secondary' }}>
             <IconVolumeOff size={22} />
           </ListItemIcon>
-          <ListItemText primary={`Mute ${user?.name}`} secondary={`Mute all ${user?.name} posts`} />
+          <ListItemText primary={`Mute ${name}`} secondary={`Mute all ${name} posts`} />
         </MenuItem>
         <MenuItem disabled>
           <ListItemIcon sx={{ color: 'text.secondary' }}>
             <IconUserMinus size={22} />
           </ListItemIcon>
-          <ListItemText primary={`Unfollow ${user?.name}`} secondary={`Stop seeing ${user?.name} in your timeline`} />
+          <ListItemText primary={`Unfollow ${name}`} secondary={`Stop seeing ${name} in your timeline`} />
         </MenuItem>
       </MenuList>
     </>
@@ -79,12 +75,11 @@ function Options(props: {
 }
 
 const PostOptions = observer(function PostOptions(props: Props) {
-  const { post } = props
+  const { note } = props
   const [debugDialog, setDebugDialog] = useState(false)
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>()
   const isMobile = isMobileDevice()
-  const store = useStore()
-  const user = store.users.getUserById(post.event?.pubkey)
+  const user = note.user
   return (
     <>
       <Dialog
@@ -94,7 +89,7 @@ const PostOptions = observer(function PostOptions(props: Props) {
           setDebugDialog(false)
           setAnchorEl(null)
         }}>
-        <PostStats data={post.event} />
+        <PostStats data={note.event} />
       </Dialog>
       <IconButton size='small' sx={{ color: 'text.secondary' }} onClick={(e) => setAnchorEl(e.currentTarget)}>
         <IconDots stroke='currentColor' strokeWidth='2.0' size={20} />

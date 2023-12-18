@@ -8,7 +8,7 @@ const PostFab = React.memo(function PostFab() {
   return (
     <>
       {isMobile && (
-        <Fab color='primary' sx={{ position: 'fixed', right: 20, bottom: 90 }}>
+        <Fab color='info' sx={{ position: 'fixed', right: 20, bottom: 90 }}>
           <IconPlus size={30} strokeWidth='1.5' />
         </Fab>
       )}

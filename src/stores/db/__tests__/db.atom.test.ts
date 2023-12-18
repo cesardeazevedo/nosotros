@@ -7,8 +7,8 @@ import { DBAtom } from '../db.atom'
 
 const note = fakeNote()
 
-describe('db.atom', () => {
-  test('lastTimeObserved, lastTimeUnobserved, isBeingObserved', () => {
+describe('DBAtom', () => {
+  test('Should expect lastTimeObserved, lastTimeUnobserved, isBeingObserved properties before and after observe the atom', () => {
     const atom = new DBAtom<Event>(note)
     expect(atom.lastTimeObserved).toBe(0)
     expect(atom.lastTimeUnobserved).toBe(0)

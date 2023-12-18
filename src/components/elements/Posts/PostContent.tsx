@@ -1,15 +1,10 @@
-import { Button } from '@mui/material'
-import { Theme, styled } from '@mui/material/styles'
-// eslint-disable-next-line import/order
 import { Kind } from 'constants/kinds'
 import { observer } from 'mobx-react-lite'
-import { Event } from 'nostr-tools'
-import React, { useState } from 'react'
-import useMeasure from 'react-use-measure'
-import { useStore } from 'stores'
+import React from 'react'
+import { Note } from 'stores/modules/note.store'
 import { TokenType } from 'utils/contentParser'
-import PaperContainer from '../Layouts/PaperContainer'
 import TextContent from '../Texts/TextContent'
+import PostContentWrapper from './PostContentWrapper'
 import PostLinkPreview from './PostLinks/PostLinkPreview'
 import PostMarkdown from './PostMarkdown'
 import PostImage from './PostMedia/PostImage'
@@ -17,78 +12,30 @@ import PostVideo from './PostMedia/PostVideo'
 import PostNote from './PostNote'
 
 type Props = {
-  event: Event
+  note: Note
   dense?: boolean
   initialExpanded?: boolean
 }
 
-const MAX_HEIGHT = 700
-
-const Container = styled('div', { shouldForwardProp: (prop: string) => prop !== 'expanded' })<{ expanded: boolean }>(
-  ({ expanded }) => ({
-    position: 'relative',
-    maxHeight: expanded ? 'inherit' : MAX_HEIGHT,
-    overflow: 'hidden',
-  }),
-)
-
-const ExpandContainer = styled(PaperContainer)({
-  position: 'absolute',
-  bottom: 0,
-  left: 0,
-  right: 0,
-  zIndex: 1000,
-  borderRadius: 0,
-  textAlign: 'center',
-  padding: 12,
-  marginBottom: 0,
-})
-
-const ShadowIndicator = styled('div')(({ theme }: { theme: Theme }) => ({
-  position: 'absolute',
-  bottom: 0,
-  zIndex: 1000,
-  width: '100%',
-  height: 100,
-  background:
-    theme.palette.mode === 'light'
-      ? 'linear-gradient(0deg, rgba(0, 0, 0, 0.5), transparent)'
-      : 'linear-gradient(0deg, rgba(255, 255, 255, 0.2), transparent)',
-}))
-
 const PostContent = observer(function PostContent(props: Props) {
-  const { event, dense = false, initialExpanded = false } = props
-  const [ref, bounds] = useMeasure({ debounce: 400 })
-  const [expanded, setExpanded] = useState(initialExpanded)
-  const store = useStore()
-  const content = store.notes.getParsedContentById(event.id)
-  const canExpand = bounds.height >= MAX_HEIGHT && !expanded
+  const { note, dense = false, initialExpanded = false } = props
+  const event = note?.event
   return (
     <>
-      <Container expanded={expanded}>
-        <div ref={ref} className='bounds'>
-          {content?.content?.map((token, index) => (
-            <React.Fragment key={token.kind + token.content?.toString() + index}>
-              {token.kind === TokenType.URL && (
-                <PostLinkPreview dense={dense} href={token.href} content={token.content} />
-              )}
-              {token.kind === TokenType.IMAGE && <PostImage dense={dense} content={token.content} />}
-              {token.kind === TokenType.VIDEO && <PostVideo dense={dense} content={token.content} />}
-              {token.kind === TokenType.NOTE && <PostNote noteId={token.content} author={token.author} />}
-              {token.kind === TokenType.TEXT && <TextContent token={token} dense={dense} />}
-              {event.kind === Kind.Article && <PostMarkdown token={token} />}
-            </React.Fragment>
-          ))}
-        </div>
-        {canExpand && <ShadowIndicator />}
-        {canExpand && (
-          <ExpandContainer>
-            <Button variant='outlined' size='large' onClick={() => setExpanded(true)}>
-              View More
-            </Button>
-          </ExpandContainer>
-        )}
-      </Container>
+      <PostContentWrapper note={note} initialExpanded={initialExpanded}>
+        {note?.content.parsed.map((token, index) => (
+          <React.Fragment key={token.kind + token.content?.toString() + index}>
+            {token.kind === TokenType.URL && (
+              <PostLinkPreview dense={dense} href={token.href} content={token.content} />
+            )}
+            {token.kind === TokenType.IMAGE && <PostImage dense={dense} note={note} content={token.content} />}
+            {token.kind === TokenType.VIDEO && <PostVideo dense={dense} content={token.content} />}
+            {token.kind === TokenType.NOTE && <PostNote dense={dense} noteId={token.content} author={token.author} />}
+            {token.kind === TokenType.TEXT && <TextContent token={token} dense={dense} />}
+            {event.kind === Kind.Article && <PostMarkdown token={token} note={note} />}
+          </React.Fragment>
+        ))}
+      </PostContentWrapper>
     </>
   )
 })

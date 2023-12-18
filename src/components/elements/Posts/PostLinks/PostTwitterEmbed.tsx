@@ -10,7 +10,7 @@ function PostTwitterEmbed(props: { url: URL }) {
   }, [url])
 
   return (
-    <div className='twitter-embed'>
+    <div className='twitter-embed' style={{ minHeight: 565 }}>
       <blockquote className='twitter-tweet'>
         <a href={url.toString()}></a>
       </blockquote>

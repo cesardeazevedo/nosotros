@@ -22,8 +22,8 @@ function PostLinkPreview(props: Props) {
       {url.host === 'twitter.com' && <PostTwitterEmbed url={url} />}
       <Link href={url.href} target='_blank' rel='noopener noreferrer' underline='none'>
         {!/youtube.com|youtu.be|twitter.com/.test(url.host) && (
-          <ButtonBase sx={{ width: '100%', textAlign: 'left', borderRadius: 1 }}>
-            <Paper variant='outlined' sx={{ p: 2, width: '100%', background: 'transparent' }}>
+          <ButtonBase sx={{ width: '100%', textAlign: 'left', borderRadius: 2, overflow: 'hidden' }}>
+            <Paper variant='outlined' sx={{ p: 2, width: '100%', borderRadius: 2, background: 'transparent' }}>
               <Row sx={{ justifyContent: 'space-between' }}>
                 <Box sx={{ mr: 2, wordBreak: 'break-word' }}>
                   <Typography variant='h6'>{url.hostname.replace('www.', '')}</Typography>

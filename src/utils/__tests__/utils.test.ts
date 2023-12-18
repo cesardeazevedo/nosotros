@@ -1,5 +1,5 @@
-import { fakeNote } from 'utils/faker'
-import { dedupe, groupByKey, groupKeysToArray, pickBy, replaceToArray } from 'utils/utils'
+import { Filter as NostrFilter } from 'nostr-tools'
+import { dedupe, groupKeysToArray, pickBy, replaceToArray } from 'utils/utils'
 
 describe('Test utils', () => {
   describe('dedupe()', () => {
@@ -14,6 +14,20 @@ describe('Test utils', () => {
     test('Test with undefined', () => {
       expect(dedupe(['1', '1', '2', '2'], undefined)).toStrictEqual(['1', '2'])
     })
+
+    test('Test with nested arrays', () => {
+      expect(dedupe([], [])).toStrictEqual([])
+      expect(dedupe([], [[]])).toStrictEqual([])
+      expect(dedupe([[]], [[]])).toStrictEqual([])
+      expect(dedupe([[]], [[], []])).toStrictEqual([])
+      expect(dedupe([[]], [[[]], []])).toStrictEqual([])
+      expect(dedupe([[]], [[[]], [[]]])).toStrictEqual([])
+    })
+
+    test('test with undefined and null', () => {
+      expect(dedupe([null], [null])).toStrictEqual([])
+      expect(dedupe([undefined], [undefined])).toStrictEqual([])
+    })
   })
 
   describe('pickBy()', () => {
@@ -23,24 +37,18 @@ describe('Test utils', () => {
   })
 
   describe('groupKeysToArray()', () => {
-    test('Test', () => {
+    test('Test simple values', () => {
       expect(groupKeysToArray([{ a: 1 }, { a: 2 }])).toStrictEqual({ a: [1, 2] })
       expect(groupKeysToArray([{ a: [1] }, { a: [2] }])).toStrictEqual({ a: [1, 2] })
       expect(groupKeysToArray([{ a: [1, 2] }, { a: [1, 2] }])).toStrictEqual({ a: [1, 2] })
       expect(groupKeysToArray([{ a: 1 }, { b: 2 }])).toStrictEqual({ a: [1], b: [2] })
+      expect(groupKeysToArray([undefined, { b: 2 }])).toStrictEqual({ b: [2] })
     })
-  })
 
-  describe('groupByKey()', () => {
-    test('test', () => {
-      const note1 = fakeNote({ pubkey: '1', content: 'a' })
-      const note2 = fakeNote({ pubkey: '1', content: 'b' })
-      const note3 = fakeNote({ pubkey: '2', content: 'c' })
-      const note4 = fakeNote({ pubkey: '2', content: 'd' })
-      expect(groupByKey([note1, note2, note3, note4], 'pubkey')).toStrictEqual({
-        '1': [note1, note2],
-        '2': [note3, note4],
-      })
+    test('Test simple NostrFilter type', () => {
+      const a: NostrFilter = { kinds: [0], authors: ['1'] }
+      const b: NostrFilter = { kinds: [0], authors: ['2'] }
+      expect(groupKeysToArray([a, b])).toStrictEqual({ kinds: [0], authors: ['1', '2'] })
     })
   })
 

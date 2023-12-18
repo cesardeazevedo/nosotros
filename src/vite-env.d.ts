@@ -1,15 +1,5 @@
 /// <reference types="vite/client" />
-/// <reference types="vite-plugin-comlink/client" />
-import '@mui/material/styles'
-import { RootStore } from 'stores/root.store'
-
-// "Typescript Gymnastics"
-
-declare module '@nichoth/identicon' {
-  export class Identicon {
-    constructor(hash: string)
-  }
-}
+import '@mui/material'
 
 declare global {
   interface Window {
@@ -17,19 +7,13 @@ declare global {
   }
 }
 
-declare module '@mui/material/styles' {
+declare module '@mui/material' {
   interface Palette {
     dividerSolid: string
   }
   // allow configuration using `createTheme`
   interface PaletteOptions {
     dividerSolid: string
-  }
-}
-
-declare module 'vitest' {
-  export interface TestContext {
-    root: RootStore
   }
 }
 

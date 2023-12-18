@@ -24,7 +24,7 @@ const ProfilePopover = observer(function ProfilePopover() {
   return (
     <Box>
       <div onClick={handleOpen}>
-        <UserAvatar user={user} />
+        <UserAvatar user={user} disableLink disabledPopover />
       </div>
       <Popover
         open={Boolean(anchorEl)}
@@ -39,16 +39,16 @@ const ProfilePopover = observer(function ProfilePopover() {
         }}
         onClose={handleClose}>
         <Box sx={{ width: 260 }}>
-          <img src={user?.banner} style={{ maxHeight: 110, width: '100%', objectFit: 'cover' }} />
+          <img src={user?.metadata.banner} style={{ maxHeight: 110, width: '100%', objectFit: 'cover' }} />
           <Row sx={{ px: 2, justifyContent: 'space-between' }}>
-            <UserName variant='h6' user={user} />
+            <UserName variant='h6' user={user} disableLink disablePopover />
             <Tooltip arrow placement='bottom' title='Use the QR Code to scan your npub on your mobile device'>
               <IconButton sx={{ color: 'text.primary' }} onClick={store.dialogs.openQRCode}>
                 <IconQrcode />
               </IconButton>
             </Tooltip>
           </Row>
-          <Menu dense />
+          <Menu dense onAction={handleClose} />
         </Box>
       </Popover>
     </Box>

@@ -9,18 +9,13 @@ export type Relay = {
   write: boolean
 }
 
-export type RelayStore = {
-  timestamp: number
-  relays: Record<string, Relay>
-}
-
-type SchemaNIP65 = {
+export type SchemaNIP65 = {
   pubkey: string
   timestamp: number
   relays: Record<string, Relay>
 }
 
-type SchemaNIP05 = {
+export type SchemaNIP05 = {
   pubkey: string
   relays: string[]
 }
@@ -33,19 +28,6 @@ export class UserRelayStore {
     makeAutoObservable(this)
   }
 
-  private async getRelaysFromNIP65(author: string, write?: boolean) {
-    const data = await this.relays.fetch(author)
-    return Object.entries(data?.relays || {})
-      .filter(([, relay]) => (write !== undefined ? relay.write === write : true))
-      .map((x) => x[0])
-      .slice(0, this.root.settings.maxRelaysPerUser) as string[] // This is just a safety limit for now, we want to make this configurable
-  }
-
-  private async getRelaysFromNIP05(author: string) {
-    const data = await this.relaysNIP05.fetch(author)
-    return data?.relays || []
-  }
-
   /**
    * User relay selection goes here, we want to do something a lot more sophisticated than this.
    *
@@ -53,14 +35,33 @@ export class UserRelayStore {
    * @param write
    * @returns
    */
-  async getRelaysFromAuthor(author: string, write?: boolean) {
-    const relaysNIP65 = await this.getRelaysFromNIP65(author, write)
-    const relaysNIP05 = await this.getRelaysFromNIP05(author)
-    return dedupe(relaysNIP65, relaysNIP05)
+  async fetchRelaysFromAuthor(author: string, write?: boolean) {
+    const relaysNIP65 = await this.relays.fetch(author)
+    const relaysNIP05 = await this.relaysNIP05.fetch(author)
+    return dedupe(this.selectNIP65Relays(relaysNIP65, write), relaysNIP05?.relays)
+  }
+
+  getRelaysFromAuthor = (author: string, write?: boolean) => {
+    const relaysNIP65 = this.relays.get(author)
+    const relaysNIP05 = this.relaysNIP05.get(author)
+    return dedupe(this.selectNIP65Relays(relaysNIP65, write), relaysNIP05?.relays)
+  }
+
+  private selectNIP65Relays(relays: SchemaNIP65 | undefined, write?: boolean) {
+    return Object.entries(relays?.relays || {})
+      .filter(([, relay]) => (write !== undefined ? relay.write === write : true))
+      .map((x) => x[0])
+      .filter((x) => !this.root.nostr.pool.blacklist.has(x))
+      .slice(0, this.root.settings.maxRelaysPerUser) as string[]
+  }
+
+  private async isNewer(event: Event) {
+    const item = await this.relays.fetch(event.pubkey)
+    return event.created_at > (item?.timestamp || 0)
   }
 
   async add(event: Event) {
-    if (this.isNewer(event)) {
+    if (await this.isNewer(event)) {
       const relays = event.tags.reduce(
         (acc, tag) => {
           if (tag[0] === 'r') {
@@ -83,15 +84,13 @@ export class UserRelayStore {
   }
 
   async addFromNIP05(pubkey: string, relays: string[]) {
-    this.relaysNIP05.set(pubkey, { pubkey, relays })
+    if (pubkey && relays.length > 0) {
+      this.relaysNIP05.set(pubkey, { pubkey, relays })
+    }
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   addFromContacts(_event: Event) {
     // TODO
-  }
-
-  isNewer(event: Event) {
-    return event.created_at > (this.relays.get(event.pubkey)?.timestamp || 0)
   }
 }

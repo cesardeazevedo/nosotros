@@ -1,7 +1,8 @@
 import { Alert, Box, Button, Link, Typography } from '@mui/material'
+import { useNavigate } from '@tanstack/react-router'
 import { useMobile } from 'hooks/useMobile'
 import { observer } from 'mobx-react-lite'
-import { forwardRef } from 'react'
+import { forwardRef, useCallback } from 'react'
 import { useStore } from 'stores'
 
 type Props = {
@@ -12,6 +13,13 @@ const SignInIntro = observer(
   forwardRef(function SignInIntro(props: Props, ref) {
     const auth = useStore().auth
     const isMobile = useMobile()
+    const navigate = useNavigate()
+
+    const handleLoginWithNostrExtension = useCallback(() => {
+      auth.loginWithNostrExtension()
+      navigate({ to: '/', replace: true })
+    }, [auth, navigate])
+
     return (
       <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%' }} ref={ref}>
         {isMobile && (
@@ -32,7 +40,7 @@ const SignInIntro = observer(
             fullWidth
             sx={{ mt: 1, height: 50, backgroundColor: 'action.hover' }}
             disabled={!auth.hasExtension}
-            onClick={auth.loginWithNostrExtension}>
+            onClick={handleLoginWithNostrExtension}>
             Sign In with Nostr extension
           </Button>
           <Typography variant='body2' sx={{ textAlign: 'center', m: 'auto', mt: 1, width: '90%' }}>

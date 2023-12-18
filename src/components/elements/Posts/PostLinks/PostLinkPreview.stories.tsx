@@ -1,6 +1,6 @@
-import { fakeNote } from 'utils/faker'
+import { StoryObj } from '@storybook/react'
 import Post from '../Post'
-import BaseMeta, { Story } from '../Post.stories'
+import BaseMeta, { setup } from '../Post.stories'
 
 export default {
   ...BaseMeta,
@@ -8,37 +8,25 @@ export default {
 }
 
 export const Default = {
-  args: {
-    data: fakeNote({ content: 'Check this out! https://google.com' }),
-  },
-} satisfies Story
+  ...setup({ content: 'Check this out! https://google.com' }),
+} satisfies StoryObj
 
 export const WithParenthesis = {
-  args: {
-    data: fakeNote({ content: 'Check this out! (https://google.com)' }),
-  },
-} satisfies Story
+  ...setup({ content: 'Check this out! (https://google.com)' }),
+} satisfies StoryObj
 
 export const WithParenthesisAndSpaces = {
-  args: {
-    data: fakeNote({ content: `Check this out! ( https://google.com )\n cool right?` }),
-  },
-} satisfies Story
+  ...setup({ content: `Check this out! ( https://google.com )\n cool right?` }),
+} satisfies StoryObj
 
 export const WithParenthesisAndNormalink = {
-  args: {
-    data: fakeNote({ content: `Check this out! (https://google.com)\n https://nostr.com` }),
-  },
-} satisfies Story
+  ...setup({ content: `Check this out! (https://google.com)\n https://nostr.com` }),
+} satisfies StoryObj
 
 export const YoutubeEmbedShorted = {
-  args: {
-    data: fakeNote({ content: 'Check this out! https://youtu.be/aA-jiiepOrE' }),
-  },
-} satisfies Story
+  ...setup({ content: 'Check this out! https://youtu.be/aA-jiiepOrE' }),
+} satisfies StoryObj
 
 export const YoutubeEmbed = {
-  args: {
-    data: fakeNote({ content: 'Check this out! https://m.youtube.com/watch?v=aA-jiiepOrE' }),
-  },
-} satisfies Story
+  ...setup({ content: 'Check this out! https://m.youtube.com/watch?v=aA-jiiepOrE' }),
+} satisfies StoryObj

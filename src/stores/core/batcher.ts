@@ -1,5 +1,5 @@
 import { BehaviorSubject, Observable, Subject, share, tap } from 'rxjs'
-import { RootStore } from 'stores/root.store'
+import type { RootStore } from 'stores/root.store'
 import { hasValidFilters, mergeDelayedSubscriptions, switcher } from './operators'
 import { Subscription } from './subscription'
 

@@ -37,17 +37,14 @@ export class NostrStore {
   }
 
   getEventRelays(id: string) {
-    return (this.events.get(id) || {})?.relays?.slice().sort()
+    return (this.events.get(id) || {})?.relays
   }
 
-  async addEvent(id: string, sub: Subscription) {
+  async addEvent(id: string, relays: string[]) {
     const data = (await this.events.fetch(id))?.relays || []
-    const relays = sub.events.get(id) || []
-    if (dedupe(relays, data).sort() !== data.slice().sort()) {
-      runInAction(() => {
-        this.events.set(id, { id, relays: dedupe(relays, data || []) })
-      })
-    }
+    runInAction(() => {
+      this.events.set(id, { id, relays: dedupe(data, relays) })
+    })
   }
 
   subscribe(filter: Filter, options?: SubscriptionOptions) {
@@ -55,7 +52,7 @@ export class NostrStore {
     sub.event$.pipe(bufferTime(2000)).subscribe((events) => {
       const ids = dedupe(events.map((x) => x[1].id))
       ids.forEach((id) => {
-        this.addEvent(id, sub)
+        this.addEvent(id, sub.events.get(id) || [])
       })
     })
     this.batcher.send(sub)

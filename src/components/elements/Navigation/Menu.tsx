@@ -1,8 +1,8 @@
 import { Divider, List, ListItemButton, ListSubheader, Typography, TypographyProps } from '@mui/material'
 import { IconBookmark, IconLogout, IconServerBolt, IconSettings, IconUser, IconWallet } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
-import { Link } from 'react-router-dom'
 import { useStore } from 'stores'
+import LinkProfile from '../Links/LinkProfile'
 
 type Props = {
   dense?: boolean
@@ -18,10 +18,12 @@ const Menu = observer(function Menu(props: Props) {
   return (
     <List sx={{ '>div': { my: dense ? 0.5 : 1, mx: dense ? 1 : 2, borderRadius: dense ? 1 : 2 } }}>
       {store.auth.currentUser && (
-        <ListItemButton dense={dense} component={Link} to={`/${currentUser?.npub}`} onClick={() => props.onAction?.()}>
-          <IconUser {...iconProps} />
-          <Typography {...typographyProps}>Profile</Typography>
-        </ListItemButton>
+        <LinkProfile user={currentUser} underline='none'>
+          <ListItemButton dense={dense} onClick={() => props.onAction?.()}>
+            <IconUser {...iconProps} />
+            <Typography {...typographyProps}>Profile</Typography>
+          </ListItemButton>
+        </LinkProfile>
       )}
       {!store.auth.currentUser && (
         <ListItemButton dense={dense} onClick={store.dialogs.openAuth}>

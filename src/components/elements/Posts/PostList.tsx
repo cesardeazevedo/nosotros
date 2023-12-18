@@ -1,10 +1,8 @@
 import { values } from 'mobx'
 import { observer } from 'mobx-react-lite'
-import { useObservableCallback, useSubscription } from 'observable-hooks'
-import { useCallback, useEffect, useRef } from 'react'
-import { filter, throttleTime } from 'rxjs'
-import { bufferTime } from 'stores/core/operators'
+import { useCallback, useLayoutEffect, useMemo, useRef } from 'react'
 import { FeedStore } from 'stores/modules/feed.store'
+import { CacheSnapshot, WVList, WVListHandle } from 'virtua'
 import Post from './Post'
 import PostLoading from './PostLoading'
 
@@ -21,95 +19,83 @@ function Footer() {
   )
 }
 
-const PostList = observer(function PostList(props: Props) {
+const PostList = observer(function PostWindow(props: Props) {
   const feed = values(props.feed.feed)
-  const ref = useRef<HTMLSpanElement | null>(null)
-  const observedRefs = useRef(new Set()).current
-  const seenRefs = useRef(new Set()).current
 
-  const [onScroll, pagination$] = useObservableCallback<void>((input$) =>
-    input$.pipe(
-      filter(() => {
-        const scrollTop = window.scrollY
-        const clientHeight = window.innerHeight
-        const scrollHeight = document.documentElement.scrollHeight
-        const threshold = 470
-        // Check if we're almost at the bottom
-        return scrollTop + clientHeight + threshold >= scrollHeight
-      }),
-      throttleTime(2000, undefined, { leading: true }),
-    ),
-  )
+  const cacheKey = `window-list-cache-${props.feed.options.name}`
 
-  const [onItemVisible, itemVisible$] = useObservableCallback<number[], number>((input$) =>
-    input$.pipe(bufferTime(2000)),
-  )
+  const ref = useRef<WVListHandle>(null)
+  const seenRefs = useRef(new Set<number>()).current
 
-  useSubscription(pagination$, () => {
-    props.feed.paginate()
-  })
-
-  useSubscription(itemVisible$, (indexes: number[]) => {
-    const ids = indexes.map((index) => feed[index]?.event.id)
-    props.feed.subscribeReactions(ids)
-  })
-
-  const handleScroll = useCallback(() => {
-    onScroll()
-  }, [onScroll])
-
-  useEffect(() => {
-    window.addEventListener('scroll', handleScroll)
-    // Trigger first scroll event manually in case there's only one post and the user didn't scroll yet
-    setTimeout(() => {
-      handleScroll()
-    }, 1000)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [handleScroll])
-
-  useEffect(() => {
-    if (ref.current && feed.length > 0) {
-      const observer = new IntersectionObserver(
-        (entries) => {
-          const parent = ref.current ? Array.from(ref.current.children) : []
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              const index = parent.indexOf(entry.target)
-              if (!seenRefs.has(index)) {
-                seenRefs.add(index)
-                onItemVisible(index)
-              }
-            }
-          })
-        },
-        {
-          threshold: 0.1,
-        },
-      )
-      const timeout = setTimeout(() => {
-        if (ref.current) {
-          Array.from(ref.current.children).forEach((node) => {
-            if (!observedRefs.has(node) && !node.className.includes('loading')) {
-              observer.observe(node)
-              observedRefs.add(node)
-            }
-          })
-        }
-      })
-      return () => {
-        observer.disconnect()
-        clearTimeout(timeout)
-      }
+  const [offset, cache] = useMemo(() => {
+    const serialized = sessionStorage.getItem(cacheKey)
+    if (!serialized) return []
+    try {
+      return JSON.parse(serialized) as [number, CacheSnapshot]
+    } catch (e) {
+      return []
     }
-  }, [feed, seenRefs, observedRefs, onItemVisible])
+  }, [cacheKey])
+
+  useLayoutEffect(() => {
+    if (!ref.current) {
+      return
+    }
+    const handle = ref.current
+
+    window.scrollTo(0, offset ?? 0)
+
+    let scrollY = 0
+    const onScroll = () => {
+      scrollY = window.scrollY
+    }
+    window.addEventListener('scroll', onScroll)
+    onScroll()
+
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      sessionStorage.setItem(cacheKey, JSON.stringify([scrollY, handle.cache]))
+    }
+  }, [cacheKey, offset])
+
+  const handleScrollForReactions = useCallback(
+    (start: number, end: number) => {
+      const range = [...Array(1 + end - start).keys()].map((x) => start + x)
+      const newKeys = range.filter((index) => !seenRefs.has(index))
+      range.forEach((index) => seenRefs.add(index))
+      props.feed.reactions$.next(newKeys.map((index) => feed[index]?.event.id))
+    },
+    [seenRefs, props.feed, feed],
+  )
+
+  const handleScrollForPagination = useCallback(
+    (end: number) => {
+      if (props.feed.feed.size > 0 && end >= length - 5) {
+        props.feed.paginate$.next()
+      }
+    },
+    [props.feed],
+  )
+
+  const handleRangeChange = useCallback(
+    (start: number, end: number) => {
+      if (start >= 0 && end >= 0) {
+        handleScrollForReactions(start, end)
+        handleScrollForPagination(end)
+      }
+    },
+    [handleScrollForPagination, handleScrollForReactions],
+  )
 
   return (
-    <span ref={ref}>
-      {feed.map((post) => (
-        <Post key={post.event.id} post={post} />
-      ))}
+    <>
+      <WVList ref={ref} cache={cache} onRangeChange={handleRangeChange}>
+        {feed.map((note) => (
+          <Post key={note.id} note={note} />
+        ))}
+      </WVList>
       <Footer />
-    </span>
+    </>
   )
 })
 
