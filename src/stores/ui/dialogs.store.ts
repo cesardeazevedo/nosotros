@@ -1,7 +1,6 @@
 import { action, makeAutoObservable } from 'mobx'
-import { PostStore } from 'stores/modules/post.store'
 
-export type DialogImageProps = Array<{ content: string } | false>
+type DialogImageProps = Array<{ content: string } | false>
 
 export class DialogStore {
   auth = false
@@ -10,15 +9,19 @@ export class DialogStore {
 
   qrcode = false
 
+  updateSW = false
+
   images: DialogImageProps = [false]
 
-  replies: Array<PostStore | false> = [false]
+  replies: Array<string | false> = [false]
 
   constructor() {
     makeAutoObservable(this, {
       openAuth: action.bound,
       openCamera: action.bound,
       openQRCode: action.bound,
+      openUpdateSW: action.bound,
+      closeUpdateSW: action.bound,
       pushReply: action.bound,
       pushImage: action.bound,
       closeAuth: action.bound,
@@ -26,6 +29,7 @@ export class DialogStore {
       closeQRCode: action.bound,
       closeImage: action.bound,
       closeReply: action.bound,
+      resetReply: action.bound,
     })
   }
 
@@ -53,6 +57,14 @@ export class DialogStore {
     this.qrcode = false
   }
 
+  openUpdateSW() {
+    this.updateSW = true
+  }
+
+  closeUpdateSW() {
+    this.updateSW = false
+  }
+
   pushImage(content: string) {
     this.images[this.images.length - 1] = { content }
     this.images.push(false)
@@ -63,13 +75,19 @@ export class DialogStore {
     this.images[this.images.length - 1] = false
   }
 
-  pushReply(post: PostStore) {
-    this.replies[this.replies.length - 1] = post
+  pushReply(id: string) {
+    this.replies[this.replies.length - 1] = id
     this.replies.push(false)
   }
 
   closeReply() {
-    this.replies.pop()
-    this.replies[this.replies.length - 1] = false
+    if (this.replies.length > 1) {
+      this.replies.pop()
+      this.replies[this.replies.length - 1] = false
+    }
+  }
+
+  resetReply() {
+    this.replies = [false]
   }
 }
