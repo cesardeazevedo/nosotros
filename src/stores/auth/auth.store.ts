@@ -1,6 +1,5 @@
 import { action, makeAutoObservable, runInAction } from 'mobx'
 import { hydrateStore, isHydrated, makePersistable } from 'mobx-persist-store'
-import { nip19 } from 'nostr-tools'
 import type { RootStore } from '../root.store'
 
 type NostrExtension = {
@@ -51,32 +50,16 @@ export class AuthStore {
     await hydrateStore(this)
   }
 
-  encode(pubkey: string | undefined) {
-    try {
-      return nip19.npubEncode(pubkey || '')
-    } catch (error) {
-      return undefined
-    }
-  }
-
-  decode(npub: string | undefined) {
-    try {
-      return nip19.decode(npub || '')?.data.toString()
-    } catch (error) {
-      return undefined
-    }
-  }
-
   addAccount(pubkey: string) {
     this.pubkey = pubkey
     this.accounts.set(pubkey, {})
     this.root.deck.reset()
-    this.root.initializeHome()
+    this.root.initializeFeed()
     this.root.dialogs.closeAuth()
   }
 
   async fetchUser(pubkey: string) {
-    const sub = this.root.subscriptions.subUsers([pubkey])
+    const sub = this.root.users.subscribe([pubkey])
     sub.onEvent$.subscribe()
   }
 
@@ -92,6 +75,6 @@ export class AuthStore {
     this.accounts.delete(this.pubkey || '')
     this.pubkey = undefined
     this.root.deck.reset()
-    this.root.initializeHome()
+    this.root.initializeFeed()
   }
 }
