@@ -2,25 +2,27 @@ import UserProfileHeader from 'components/elements/User/UserProfileHeader'
 import FeedModule from 'components/modules/feed'
 import { observer } from 'mobx-react-lite'
 import { useEffect, useMemo } from 'react'
-import { useParams } from 'react-router-dom'
 import { useStore } from 'stores'
 
-const ProfileRoute = observer(function ProfileRoute() {
-  const { npub } = useParams()
+type Props = {
+  pubkey: string
+  relays?: string[]
+}
+
+const NProfileRoute = observer(function ProfileRoute(props: Props) {
+  const { pubkey, relays } = props
   const store = useStore()
 
-  const feed = useMemo(() => {
-    const pubkey = store.auth.decode(npub)
-    if (pubkey) {
-      return store.deck.columns.get(pubkey) || store.initializeProfileRoute(pubkey)
-    }
-  }, [store, npub])
+  const feed = useMemo(
+    () => store.deck.columns.get(pubkey) || store.initializeProfileRoute(pubkey, relays),
+    [store, pubkey, relays],
+  )
 
   useEffect(() => {
     store.dialogs.closeReply()
-  }, [store, npub])
+  }, [store, pubkey])
 
-  const user = store.users.getUserById(feed?.authors[0])
+  const user = store.users.getUserById(pubkey)
 
   return (
     <>
@@ -30,4 +32,4 @@ const ProfileRoute = observer(function ProfileRoute() {
   )
 })
 
-export default ProfileRoute
+export default NProfileRoute

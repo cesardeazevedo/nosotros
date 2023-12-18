@@ -17,7 +17,7 @@ const HomeRoute = observer(() => {
 
   useEffect(() => {
     if (!store.deck.mainFeed) {
-      store.initializeHome()
+      store.initializeFeed()
     }
   }, [store])
 
@@ -40,7 +40,7 @@ const HomeRoute = observer(() => {
       </CenteredContainer>
       <DeckContainer>
         {!store.deck.enabled && mainFeed && <FeedModule feed={mainFeed} renderCreateForm />}
-        {/*  Untested */}
+        {/* Untested */}
         {store.deck.enabled &&
           entries(store.deck.columns).map(([key, column], index) => (
             <FeedModule key={key} feed={column} renderCreateForm={index === 0} />

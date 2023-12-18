@@ -1,11 +1,11 @@
 import { AppBar, Slide, Toolbar, useScrollTrigger } from '@mui/material'
+import { useMatch } from '@tanstack/react-router'
 import { useMobile } from 'hooks/useMobile'
-import { ReactElement, useCallback } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useCurrentRoute } from 'hooks/useNavigations'
+import { ReactElement } from 'react'
 import { CenteredContainer } from '../Layouts/CenteredContainer'
 import { Row } from '../Layouts/Flex'
 import Sidebar from '../Navigation/Sidebar'
-import Search from '../Search/Search'
 import HeaderActions from './HeaderActions'
 import HeaderCenter from './HeaderCenter'
 import HeaderLogo from './HeaderLogo'
@@ -26,14 +26,11 @@ function HideOnScroll(props: { isMobile: boolean; children: ReactElement }) {
 }
 
 function Header() {
-  const location = useLocation()
-  const navigate = useNavigate()
-  const isHome = location.pathname === '/'
   const isMobile = useMobile()
+  const route = useCurrentRoute()
+  useMatch({ from: '__root__' })
 
-  const handleBack = useCallback(() => {
-    navigate(-1)
-  }, [navigate])
+  const isNostrRoute = route.routeId === '/$nostr'
 
   return (
     <HideOnScroll isMobile={isMobile}>
@@ -44,17 +41,16 @@ function Header() {
               sx={{
                 position: 'absolute',
                 width: isMobile ? '100%' : 'auto',
-                display: !isHome && isMobile ? 'none' : 'flex',
               }}>
-              {isMobile && <Sidebar />}
-              <HeaderLogo />
+              {!isNostrRoute && isMobile && <Sidebar />}
+              {!isNostrRoute && <HeaderLogo />}
             </Row>
             <CenteredContainer maxWidth='sm' sx={{ pt: 0, mt: 0 }}>
-              {isHome ? !isMobile && <Search /> : <HeaderCenter onBack={handleBack} />}
+              <HeaderCenter />
             </CenteredContainer>
             {!isMobile && (
               <Row sx={{ position: 'absolute', right: 20 }}>
-                <HeaderActions isHome={isHome} />
+                <HeaderActions />
               </Row>
             )}
           </Row>

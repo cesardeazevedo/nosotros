@@ -1,35 +1,44 @@
-import { IconButton, IconButtonProps, Typography } from '@mui/material'
+import { IconButton, Typography } from '@mui/material'
 import { IconChevronLeft } from '@tabler/icons-react'
-import { observer } from 'mobx-react-lite'
-import { useMemo } from 'react'
-import { Link, useLocation, useParams } from 'react-router-dom'
+import { useMobile } from 'hooks/useMobile'
+import { useCurrentRoute, useGoBack, useNostrRoute } from 'hooks/useNavigations'
+import { Observer } from 'mobx-react-lite'
 import { useStore } from 'stores'
+import { isNprofile, isNpub } from 'utils/nip19'
 import { Row } from '../Layouts/Flex'
+import Search from '../Search/Search'
 
-type Props = {
-  onBack?: () => void
-}
-
-const HeaderCenter = observer(function HeaderCenter(props: Props) {
+function HeaderCenter() {
   const store = useStore()
-  const { npub } = useParams()
-  const location = useLocation()
-  const pubkey = useMemo(() => store.auth.decode(npub), [store, npub])
-  const backProps = location.state?.from
-    ? { onClick: props.onBack }
-    : ({ LinkComponent: Link, to: '/' } as IconButtonProps)
+  const isMobile = useMobile()
+  const handleBack = useGoBack()
+  const route = useCurrentRoute()
+  const nostrRoute = useNostrRoute()
+  const context = nostrRoute?.context
+
+  const isNostrRoute = route.routeId === '/$nostr'
+
   return (
     <>
-      <Row>
-        <IconButton sx={{ color: 'inherit' }} {...backProps}>
-          <IconChevronLeft color='currentColor' />
-        </IconButton>
-        <Typography variant='h6' sx={{ ml: 2 }}>
-          {store.users.getUserById(pubkey)?.name}
-        </Typography>
-      </Row>
+      {!isNostrRoute && !isMobile && <Search />}
+      {isNostrRoute && (
+        <Row>
+          <IconButton sx={{ color: 'inherit' }} onClick={handleBack}>
+            <IconChevronLeft color='currentColor' />
+          </IconButton>
+          <Observer>
+            {() => (
+              <Typography variant='h6' sx={{ ml: 2 }}>
+                {isNpub(context?.decoded) || isNprofile(context?.decoded)
+                  ? store.users.getUserById(context.id)?.displayName
+                  : 'Post'}
+              </Typography>
+            )}
+          </Observer>
+        </Row>
+      )}
     </>
   )
-})
+}
 
 export default HeaderCenter

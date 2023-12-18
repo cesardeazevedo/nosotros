@@ -1,9 +1,12 @@
 import { Badge, BottomNavigationAction, Box, BottomNavigation as MuiBottomNavigation, styled } from '@mui/material'
 import { IconBell, IconHome, IconMessageCircle, IconServerBolt, IconUser } from '@tabler/icons-react'
+import { useMatch, useRouter } from '@tanstack/react-router'
+import { useNostrRoute } from 'hooks/useNavigations'
 import { observer } from 'mobx-react-lite'
 import { useCallback } from 'react'
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useStore } from 'stores'
+import LinkProfile from '../Links/LinkProfile'
+import LinkSignIn from '../Links/LinkSignIn'
 
 const Container = styled(Box)(({ theme }) =>
   theme.unstable_sx({
@@ -22,22 +25,23 @@ const Container = styled(Box)(({ theme }) =>
 const BottomNavigation = observer(function BottomNavigation() {
   const store = useStore()
   const { currentUser } = store.auth
-  const navigate = useNavigate()
-  const location = useLocation()
-  const params = useParams()
+  const router = useRouter()
+  useMatch({ from: '__root__' })
+  const nostrRoute = useNostrRoute()
 
   const handleHome = useCallback(() => {
-    navigate('/')
+    router.navigate({ to: '/' })
     setTimeout(() => {
       window.scrollTo({ top: 0, behavior: 'smooth' })
     })
-  }, [navigate])
-
-  const selected = location.pathname === '/' ? 'feed' : params.npub === currentUser?.npub ? 'profile' : 'feed'
+  }, [router])
 
   return (
     <Container>
-      <MuiBottomNavigation showLabels={false} value={selected} sx={{ backgroundColor: 'transparent' }}>
+      <MuiBottomNavigation
+        showLabels={false}
+        value={nostrRoute?.context?.id === store.auth.pubkey ? 'profile' : 'feed'}
+        sx={{ backgroundColor: 'transparent' }}>
         <BottomNavigationAction
           value='feed'
           onClick={handleHome}
@@ -65,12 +69,21 @@ const BottomNavigation = observer(function BottomNavigation() {
           value='notifications'
           icon={<IconBell size={28} strokeWidth='1.5' />}
         />
-        <BottomNavigationAction
-          component={Link}
-          to={`/${currentUser?.npub || 'sign_in'}`}
-          value='profile'
-          icon={<IconUser size={28} strokeWidth='1.5' />}
-        />
+        {currentUser && (
+          <BottomNavigationAction
+            component={LinkProfile}
+            user={currentUser}
+            value='profile'
+            icon={<IconUser size={28} strokeWidth='1.5' />}
+          />
+        )}
+        {!currentUser && (
+          <BottomNavigationAction
+            component={LinkSignIn}
+            value='sign_in'
+            icon={<IconUser size={28} strokeWidth='1.5' />}
+          />
+        )}
       </MuiBottomNavigation>
     </Container>
   )
