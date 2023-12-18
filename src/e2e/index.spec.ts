@@ -112,7 +112,6 @@ test('Should expect a basic note and fetch the mentioned note', async ({ page, g
 
   const reqId = await expectInitialFeed(relay1, authors)
 
-  // const privateKeyRelated = '17140cf46dc8b5e16954d25b81b74ef02e2f77ae70a1d3dec16d514783d21b2c'
   const mentioned = fakeSignature(fakeNote({ pubkey: '2', content: 'Related Note' }))
 
   const encodedNote = nip19.neventEncode({
@@ -132,6 +131,13 @@ test('Should expect a basic note and fetch the mentioned note', async ({ page, g
     },
     {
       ids: [mentioned.id],
+    },
+    // PostList will trigger a new pagination request
+    {
+      kinds: [Kind.Text, Kind.Article],
+      authors,
+      since: expect.any(Number),
+      until: expect.any(Number),
     },
   ]
   const reqId2 = await relay1.expectMessage(expectedRelatedMessage)
