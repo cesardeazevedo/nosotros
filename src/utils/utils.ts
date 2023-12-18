@@ -72,11 +72,20 @@ export function replaceToArray<T>(
     return [input]
   }
 
-  function replaceRegex(input: string, regex: RegExp) {
-    const result = input.split(regex) as (string | T)[]
-    for (let i = 1, length = result.length; i < length; i += 2) {
-      result[i] = fn(result[i] as string)
+  function replaceRegex<T>(input: string, regex: RegExp) {
+    const result: (string | T)[] = []
+    let lastIndex = 0
+    input.replace(regex, (match, ...args) => {
+      const index = args[args.length - 2]
+      result.push(input.substring(lastIndex, index))
+      result.push(fn(match) as T)
+      lastIndex = index + match.length
+      return match
+    })
+    if (lastIndex < input.length) {
+      result.push(input.substring(lastIndex))
     }
+
     return result
   }
 
