@@ -5,6 +5,7 @@ import { useNostrRoute } from 'hooks/useNavigations'
 import { observer } from 'mobx-react-lite'
 import { useCallback } from 'react'
 import { useStore } from 'stores'
+import { HideOnScroll } from '../Header/Header'
 import LinkProfile from '../Links/LinkProfile'
 import LinkSignIn from '../Links/LinkSignIn'
 
@@ -37,55 +38,57 @@ const BottomNavigation = observer(function BottomNavigation() {
   }, [router])
 
   return (
-    <Container>
-      <MuiBottomNavigation
-        showLabels={false}
-        value={nostrRoute?.context?.id === store.auth.pubkey ? 'profile' : 'feed'}
-        sx={{ backgroundColor: 'transparent' }}>
-        <BottomNavigationAction
-          value='feed'
-          onClick={handleHome}
-          icon={
-            <Badge badgeContent={0} color='primary'>
-              <IconHome size={28} strokeWidth='1.5' />
-            </Badge>
-          }
-        />
-        <BottomNavigationAction
-          disabled
-          sx={{ opacity: 0.4 }}
-          value='messages'
-          icon={<IconMessageCircle size={28} strokeWidth='1.5' />}
-        />
-        <BottomNavigationAction
-          disabled
-          sx={{ opacity: 0.5 }}
-          value='relays'
-          icon={<IconServerBolt size={28} strokeWidth='1.5' />}
-        />
-        <BottomNavigationAction
-          disabled
-          sx={{ opacity: 0.5 }}
-          value='notifications'
-          icon={<IconBell size={28} strokeWidth='1.5' />}
-        />
-        {currentUser && (
+    <HideOnScroll isMobile direction='up'>
+      <Container>
+        <MuiBottomNavigation
+          showLabels={false}
+          value={nostrRoute?.context?.id === store.auth.pubkey ? 'profile' : 'feed'}
+          sx={{ backgroundColor: 'transparent' }}>
           <BottomNavigationAction
-            component={LinkProfile}
-            user={currentUser}
-            value='profile'
-            icon={<IconUser size={28} strokeWidth='1.5' />}
+            value='feed'
+            onClick={handleHome}
+            icon={
+              <Badge badgeContent={0} color='primary'>
+                <IconHome size={28} strokeWidth='1.5' />
+              </Badge>
+            }
           />
-        )}
-        {!currentUser && (
           <BottomNavigationAction
-            component={LinkSignIn}
-            value='sign_in'
-            icon={<IconUser size={28} strokeWidth='1.5' />}
+            disabled
+            sx={{ opacity: 0.4 }}
+            value='messages'
+            icon={<IconMessageCircle size={28} strokeWidth='1.5' />}
           />
-        )}
-      </MuiBottomNavigation>
-    </Container>
+          <BottomNavigationAction
+            disabled
+            sx={{ opacity: 0.5 }}
+            value='relays'
+            icon={<IconServerBolt size={28} strokeWidth='1.5' />}
+          />
+          <BottomNavigationAction
+            disabled
+            sx={{ opacity: 0.5 }}
+            value='notifications'
+            icon={<IconBell size={28} strokeWidth='1.5' />}
+          />
+          {currentUser && (
+            <BottomNavigationAction
+              component={LinkProfile}
+              user={currentUser}
+              value='profile'
+              icon={<IconUser size={28} strokeWidth='1.5' />}
+            />
+          )}
+          {!currentUser && (
+            <BottomNavigationAction
+              component={LinkSignIn}
+              value='sign_in'
+              icon={<IconUser size={28} strokeWidth='1.5' />}
+            />
+          )}
+        </MuiBottomNavigation>
+      </Container>
+    </HideOnScroll>
   )
 })
 
