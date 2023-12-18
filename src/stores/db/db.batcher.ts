@@ -25,7 +25,7 @@ export class DBWriterBatcher {
 
   private async _put(name: string, values: Record<string, unknown>[]) {
     try {
-      const db = await openDB(process.env.APP_NAME + 'DB')
+      const db = await openDB(import.meta.env.VITE_DB_NAME)
       const tx = db.transaction(name, 'readwrite')
       const store = tx.objectStore(name)
       const inserted_at = Date.now()
@@ -34,7 +34,7 @@ export class DBWriterBatcher {
       }
       await tx.done
     } catch (error) {
-      console.log(error)
+      console.error(error)
     }
   }
 

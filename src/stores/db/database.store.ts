@@ -1,5 +1,5 @@
+import * as idb from 'idb'
 import { IDBPDatabase, IDBPObjectStore } from 'idb'
-import * as idb from 'idb/with-async-ittr'
 
 type Schema = {
   indexes: string[]
@@ -12,7 +12,7 @@ class Database {
   getDB: Promise<IDBPDatabase>
   private _resolver!: (value: IDBPDatabase) => void
 
-  version = 2
+  version = 6
   schemas = new Map<string, Schema>()
 
   constructor() {
@@ -22,8 +22,8 @@ class Database {
   }
 
   async initialize() {
-    this.db = await idb.openDB(process.env.APP_NAME + 'DB', this.version, {
-      upgrade: (db, oldVersion, newVersion, transaction) => {
+    this.db = await idb.openDB(import.meta.env.VITE_DB_NAME, this.version, {
+      upgrade: async (db, oldVersion, newVersion, transaction) => {
         this.schemas.forEach((schema, name) => {
           let store: IDBPObjectStore<unknown, string[], string, 'versionchange'>
           if (!db.objectStoreNames.contains(name)) {
@@ -45,13 +45,11 @@ class Database {
     return this.db
   }
 
+  // for tests only
   async clear() {
     const db = await this.getDB
     for (const name of db.objectStoreNames) {
-      const tx = db.transaction(name, 'readwrite')
-      const store = tx.objectStore(name)
-      await store.clear()
-      await tx.done
+      await db.clear(name)
     }
   }
 }
