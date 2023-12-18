@@ -1,37 +1,48 @@
 import { Box, Typography } from '@mui/material'
 import { IconMessageCircle2 } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
-import { PostStore } from 'stores/modules/post.store'
+import { useEffect, useMemo } from 'react'
+import { useStore } from 'stores'
 import PostRepliesLoading from './PostRepliesLoading'
 import { PostRepliesTree } from './PostReply'
 import PostReplyForm from './PostReplyForm'
 
 type Props = {
-  post: PostStore | null
+  noteId?: string
 }
 
 const PostRepliesDialog = observer(function PostRepliesDialog(props: Props) {
-  const { post } = props
-  const replies = post ? Object.values(Object.fromEntries(post.repliesTree)) : []
+  const { noteId } = props
+  const store = useStore()
+  // Avoid underfined noteId when closing the dialog, disappearing the content
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const id = useMemo(() => noteId, [])
+  const note = store.notes.getNoteById(id)
+  const replies = note?.repliesSorted || []
+
+  useEffect(() => {
+    note?.subscribeReplies()
+  }, [note])
+
   return (
     <>
       <Box sx={{ position: 'relative', pt: 2, pb: 1, flex: 1, overflowY: 'auto' }}>
         <Box
           sx={{
-            height: post?.repliesStatus === 'LOADED' && replies.length > 0 ? '100%' : 'auto',
+            height: note?.repliesStatus === 'LOADED' && replies.length > 0 ? '100%' : 'auto',
             ml: -3,
             pr: 2,
             width: '100%',
             overflowY: 'visible',
             position: 'relative',
-            '>div': {
+            '> div': {
               overflowX: 'hidden',
             },
           }}>
-          <PostRepliesTree replies={replies} level={1} />
+          <PostRepliesTree replies={replies} repliesOpen level={1} />
         </Box>
-        {post && post.repliesStatus === 'LOADING' && <PostRepliesLoading contentHeight={50} />}
-        {post?.repliesStatus === 'LOADED' && replies.length === 0 && (
+        {note && note.repliesStatus === 'LOADING' && <PostRepliesLoading contentHeight={50} />}
+        {note?.repliesStatus === 'LOADED' && replies.length === 0 && (
           <Box
             sx={{
               display: 'flex',

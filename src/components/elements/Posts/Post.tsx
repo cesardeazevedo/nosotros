@@ -1,37 +1,41 @@
+import { useRouter } from '@tanstack/react-router'
 import PaperContainer from 'components/elements/Layouts/PaperContainer'
 import { useMobile } from 'hooks/useMobile'
-import { Observer } from 'mobx-react-lite'
-import React from 'react'
-import { PostStore } from 'stores/modules/post.store'
+import { observer } from 'mobx-react-lite'
+import { useCallback } from 'react'
+import { Note } from 'stores/modules/note.store'
 import PostActions from './PostActions/PostActions'
 import PostContent from './PostContent'
 import PostHeader from './PostHeader'
 import PostReplies from './PostReplies/PostReplies'
 
 export type Props = {
-  post: PostStore
+  note: Note
 }
 
-const Post = React.memo<Props>(function Post(props: Props) {
-  const { post } = props
-  const event = post.event
+const Post = observer(function Post(props: Props) {
+  const { note } = props
   const isMobile = useMobile()
+  const router = useRouter()
+
+  const handleRepliesClick = useCallback(() => {
+    if (isMobile) {
+      router.navigate({
+        to: '/$nostr/replies',
+        params: { nostr: note.nevent },
+        state: { from: router.latestLocation.pathname },
+      })
+    } else {
+      note.toggleReplies()
+    }
+  }, [router, isMobile, note])
 
   return (
     <PaperContainer>
-      <PostHeader post={post} />
-      <PostContent event={event} />
-      <PostActions post={post} onReplyClick={isMobile ? post.openRepliesDialog : post.toggleReplies} />
-      <Observer>
-        {() => (
-          <>
-            {(post.repliesOpen === true ||
-              (post.repliesOpen === null && post.totalReplies > 0 && post.totalReplies <= 2)) && (
-              <PostReplies post={post} />
-            )}
-          </>
-        )}
-      </Observer>
+      <PostHeader note={note} />
+      <PostContent note={note} />
+      <PostActions note={note} onReplyClick={handleRepliesClick} />
+      <PostReplies note={note} onReplyClick={handleRepliesClick} />
     </PaperContainer>
   )
 })
