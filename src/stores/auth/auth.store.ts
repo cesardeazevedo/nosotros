@@ -34,7 +34,7 @@ export class AuthStore {
       })
     }, 2000)
 
-    makePersistable(this, { name: 'auth', properties: ['pubkey', 'accounts'], storage: window.localStorage }).then(
+    makePersistable(this, { name: 'auth', properties: ['pubkey', 'accounts'], storage: window.localStorage })?.then(
       () => {
         if (this.pubkey && typeof this.pubkey !== 'string') {
           this.pubkey = undefined
