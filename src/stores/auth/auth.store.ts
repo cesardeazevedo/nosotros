@@ -1,11 +1,9 @@
-import { makeAutoObservable, runInAction } from 'mobx'
-import { makePersistable } from 'mobx-persist-store'
-import { Event, UnsignedEvent } from 'nostr-tools'
+import { action, makeAutoObservable, runInAction } from 'mobx'
+import { hydrateStore, isHydrated, makePersistable } from 'mobx-persist-store'
 import type { RootStore } from '../root.store'
 
-export type NostrExtension = {
+type NostrExtension = {
   getPublicKey(): Promise<string>
-  signEvent(event: UnsignedEvent): Promise<Event>
 }
 
 // To be defined
@@ -25,7 +23,10 @@ export class AuthStore {
   hasExtension?: boolean
 
   constructor(private root: RootStore) {
-    makeAutoObservable(this, {}, { autoBind: true })
+    makeAutoObservable(this, {
+      loginWithNostrExtension: action.bound,
+      logout: action.bound,
+    })
 
     // Browser extension takes some time to load
     setTimeout(() => {
@@ -34,17 +35,19 @@ export class AuthStore {
       })
     }, 2000)
 
-    makePersistable(this, { name: 'auth', properties: ['pubkey', 'accounts'], storage: window.localStorage }).then(
-      () => {
-        if (this.pubkey && typeof this.pubkey !== 'string') {
-          this.pubkey = undefined
-        }
-      },
-    )
+    makePersistable(this, { name: 'auth', properties: ['pubkey', 'accounts'], storage: window.localStorage })
   }
 
   get currentUser() {
     return this.pubkey ? this.root.users.users.get(this.pubkey) : undefined
+  }
+
+  get isHydrated() {
+    return isHydrated(this)
+  }
+
+  async hydrateStore() {
+    await hydrateStore(this)
   }
 
   addAccount(pubkey: string) {

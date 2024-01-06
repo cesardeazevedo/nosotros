@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, Skeleton, TextField, Typography } from '@mui/material'
+import { Avatar, Box, Button, IconButton, Skeleton, TextField, Typography } from '@mui/material'
 import { IconClipboardCopy, IconScan } from '@tabler/icons-react'
 import { useNavigate } from '@tanstack/react-router'
 import { useMobile } from 'hooks/useMobile'
@@ -7,7 +7,6 @@ import { useCallback, useEffect, useState } from 'react'
 import { Control, Controller, useForm, useWatch } from 'react-hook-form'
 import { useStore } from 'stores'
 import { Npub, decodeNIP19 } from 'utils/nip19'
-import UserAvatar from '../User/UserAvatar'
 import UserName from '../User/UserName'
 
 type FormValues = {
@@ -34,9 +33,13 @@ const UserPreview = observer(function UserPreview(props: { control: Control<Form
   }, [auth, pubkey, user])
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', py: 1 }}>
-      {!user && pubkey ? <Skeleton variant='circular' sx={avatarStyle} /> : <UserAvatar user={user} size={80} />}
-      {user && <UserName disableLink disablePopover user={user} variant='h6' sx={{ py: 1 }} />}
+    <Box sx={{ my: 1, mt: 2 }}>
+      {!user && pubkey ? (
+        <Skeleton variant='circular' sx={avatarStyle} />
+      ) : (
+        <Avatar src={user?.picture} sx={avatarStyle} />
+      )}
+      {user && <UserName disableLink disablePopover user={user} variant='h6' />}
     </Box>
   )
 })
@@ -51,11 +54,11 @@ const SignInForm = function SignInForm() {
     mode: 'all',
     reValidateMode: 'onChange',
     resolver: (field) => {
-      const pubkey = decodeNIP19(field.npub as Npub)?.data
+      const pubkey = decodeNIP19(field.npub as Npub)
       if (!pubkey) {
         return { values: {}, errors: { npub: { type: 'value', message: 'npub invalid' } } }
       }
-      form.setValue('pubkey', pubkey)
+      form.setValue('pubkey', pubkey.data)
       return { values: { npub: field.npub, pubkey }, errors: {} }
     },
     defaultValues: {
