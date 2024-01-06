@@ -8,7 +8,7 @@ on:
     branches: [main, dev, production]
 
 jobs:
-  build:
+  checks:
     runs-on: ubuntu-latest
     if: ${{ !github.event.pull_request.draft }}
 
@@ -44,3 +44,33 @@ jobs:
 
       - name: Run Playwright tests
         run: pnpm run test:e2e
+
+  deploy:
+    needs: checks
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/prod' || github.ref == 'refs/heads/dev')
+    steps:
+      - name: Build
+        run: pnpm run build
+
+      - name: Deploy (development)
+        uses: JamesIves/github-pages-deploy-action@4.1.1
+        if: github.ref == 'refs/heads/dev'
+        with:
+          args: --acl public-read --follow-symlinks --delete
+        env:
+          AWS_S3_BUCKET: ${{ secrets.DEV_AWS_S3_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.DEV_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.DEV_AWS_SECRET_ACCESS_KEY }}
+          SOURCE_DIR: 'dist'
+
+      - name: Deploy (production)
+        uses: JamesIves/github-pages-deploy-action@4.1.1
+        if: github.ref == 'refs/heads/prod'
+        with:
+          args: --acl public-read --follow-symlinks --delete
+        env:
+          AWS_S3_BUCKET: ${{ secrets.PROD_AWS_S3_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
+          SOURCE_DIR: 'dist'
