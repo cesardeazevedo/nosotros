@@ -71,7 +71,7 @@ jobs:
         run: pnpm run build
 
       - name: Deploy (development)
-        uses: JamesIves/github-pages-deploy-action@4.1.1
+        uses: jakejarvis/s3-sync-action@master
         if: github.ref == 'refs/heads/dev'
         with:
           args: --acl public-read --follow-symlinks --delete
@@ -82,7 +82,7 @@ jobs:
           SOURCE_DIR: 'dist'
 
       - name: Deploy (production)
-        uses: JamesIves/github-pages-deploy-action@4.1.1
+        uses: jakejarvis/s3-sync-action@master
         if: github.ref == 'refs/heads/prod'
         with:
           args: --acl public-read --follow-symlinks --delete
