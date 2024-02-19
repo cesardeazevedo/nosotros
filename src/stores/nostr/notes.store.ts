@@ -1,29 +1,14 @@
 import { Duration } from 'luxon'
 import { makeAutoObservable } from 'mobx'
-import { Event } from 'nostr-tools'
+import type { Event } from 'nostr-tools'
 import { map, mergeMap, of, pipe, share, tap } from 'rxjs'
 import { Filter } from 'stores/core/filter'
-import { IMetaTags } from 'stores/core/imeta'
 import { bufferTime, mergeStream } from 'stores/core/operators'
-import { RelayHintsData } from 'stores/core/relayHints'
-import { SubscriptionOptions } from 'stores/core/subscription'
+import type { SubscriptionOptions } from 'stores/core/subscription'
 import { ObservableDB } from 'stores/db/observabledb.store'
-import { Note } from 'stores/modules/note.store'
-import { NostrReferences, ParsedContent } from 'utils/contentParser'
+import { Note, type EventDB } from 'stores/modules/note.store'
 import { dedupe } from 'utils/utils'
 import type { RootStore } from '../root.store'
-
-export type EventDB = {
-  id: string
-  event: Event
-  pubkey: string
-  createdAt: number
-  content: ParsedContent
-  references: NostrReferences
-  hasMedia: boolean
-  hints: RelayHintsData
-  imeta: IMetaTags
-}
 
 export type ReplyDB = {
   id: string

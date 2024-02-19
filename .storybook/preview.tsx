@@ -4,8 +4,8 @@ import type { PartialStoryFn } from '@storybook/csf'
 import type { Preview, ReactRenderer } from '@storybook/react'
 import { RootRoute, Route, Router, RouterProvider } from '@tanstack/react-router'
 import React, { useEffect, useState } from 'react'
-import { RootStore, StoreProvider } from '../src/stores'
 import { dbBatcher } from '../src/stores/db/observabledb.store'
+import { RootStore, StoreProvider } from '../src/stores/index'
 
 import { database } from '../src/stores/db/database.store'
 import theme from '../src/themes/theme'
@@ -24,6 +24,7 @@ const App = (props: { Story: PartialStoryFn<ReactRenderer>; store: RootStore }) 
 
   useEffect(() => {
     dbBatcher._subject.complete()
+    database.initialize()
     database.clear().then(() => setReady(true))
   }, [])
 

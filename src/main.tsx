@@ -1,13 +1,16 @@
 import Bugsnag from '@bugsnag/js'
 import BugsnagPluginReact from '@bugsnag/plugin-react'
 import { CssBaseline, Experimental_CssVarsProvider as CssVarsProvider } from '@mui/material'
+import GlobalStyles from 'components/elements/Layouts/GlobalStyles'
 import ReactDOM from 'react-dom/client'
-import { StoreProvider, store } from 'stores'
+import { store as Store } from 'stores'
 
 import theme from 'themes/theme'
 
+import { RouterProvider } from '@tanstack/react-router'
+import { StoreProvider } from 'hooks/useStore'
 import React from 'react'
-import App from './App'
+import { router } from './Router'
 
 const bugsnagApiKey = import.meta.env.VITE_BUGSNAG_API_KEY
 
@@ -23,12 +26,15 @@ const ErrorBoundary = bugsnagApiKey
   ? Bugsnag.getPlugin('react')?.createErrorBoundary(React) || React.Fragment
   : React.Fragment
 
+const store = Store()
+
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <ErrorBoundary>
     <StoreProvider value={store}>
       <CssVarsProvider theme={theme}>
         <CssBaseline />
-        <App />
+        <GlobalStyles />
+        <RouterProvider router={router} />
       </CssVarsProvider>
     </StoreProvider>
   </ErrorBoundary>,

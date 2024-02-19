@@ -1,7 +1,7 @@
 import { RECOMMENDED_PUBKEYS } from 'constants/recommended'
 import { DEFAULT_RELAYS } from 'constants/relays'
 import { AuthStore } from './auth/auth.store'
-import { RelayHintsData } from './core/relayHints'
+import type { RelayHintsData } from './core/relayHints'
 import { database } from './db/database.store'
 import { FeedStore } from './modules/feed.store'
 import { ContactStore } from './nostr/contacts.store'
@@ -31,13 +31,13 @@ export class RootStore {
   dialogs = new DialogStore()
   settings = new SettingStore()
 
-  constructor() {
-    database.initialize()
-  }
-
   async initialize(fixedRelays = DEFAULT_RELAYS) {
+    database.initialize()
     const relays = this.auth.pubkey ? await this.userRelays.fetchRelaysFromAuthor(this.auth.pubkey || '') : fixedRelays
     this.nostr.initialize(relays.length > 0 ? relays : fixedRelays)
+    if (this.auth.pubkey) {
+      this.users.subscribe([this.auth.pubkey])
+    }
   }
 
   initializeFeed() {
@@ -49,7 +49,7 @@ export class RootStore {
     this.initialize()
   }
 
-  initializeProfileRoute(author: string, relays?: string[]) {
+  initializeProfileRoute(author: string, relays?: Array<string>) {
     const feed = new FeedStore(this, {
       name: author,
       authors: [author],
@@ -63,7 +63,7 @@ export class RootStore {
     return feed
   }
 
-  async initializePostRoute(id: string, author?: string, relays?: string[]) {
+  async initializePostRoute(id: string, author?: string, relays?: Array<string>) {
     this.initialize()
     const note = await this.notes.notes.fetch(id)
     if (!note) {
@@ -73,3 +73,9 @@ export class RootStore {
     return note
   }
 }
+
+export function makeRootStore() {
+  return new RootStore()
+}
+
+export const store = () => makeRootStore()

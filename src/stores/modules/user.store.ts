@@ -1,9 +1,16 @@
+import { parseUserAbout } from 'components/elements/Content/parser'
+import type { StateJSONSchema } from 'components/elements/Content/types'
 import { reaction } from 'mobx'
-import { Event as NostrEvent, nip19 } from 'nostr-tools'
-import { UserDB } from 'stores/nostr/users.store'
+import { nip19, type Event as NostrEvent } from 'nostr-tools'
 import type { RootStore } from 'stores/root.store'
-import { ContentParser } from 'utils/contentParser'
 import { encodeSafe } from 'utils/nip19'
+
+export type UserDB = UserMetaData & {
+  id: string
+  npub: `npub1${string}` | undefined
+  createdAt: number
+  aboutParsed: StateJSONSchema
+}
 
 export type UserMetaData = {
   name?: string
@@ -47,13 +54,12 @@ export class User {
 
   static fromNostrEvent(root: RootStore, event: NostrEvent) {
     const metadata = JSON.parse(event.content) as UserMetaData
-    const content = new ContentParser(event)
     const data: UserDB = {
       ...metadata,
       id: event.pubkey,
       npub: encodeSafe(() => nip19.npubEncode(event.pubkey)),
+      aboutParsed: parseUserAbout(metadata.about || ''),
       createdAt: event.created_at,
-      aboutParsed: content.parse(),
     }
     return new User(root, data)
   }
