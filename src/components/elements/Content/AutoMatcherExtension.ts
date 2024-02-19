@@ -39,8 +39,8 @@ interface NodeWithPosition {
   pos: number
 }
 
-const REGEX_IMAGES = /(http(s?):)([/|.|\w|\s|-])*\.(?:jpg|jpeg|gif|png|bmp|svg|webp)[\\?!]?(?:&?[^=&]*=[^=&]*)*$/i
-const REGEX_VIDEOS = /(http(s?):)([/|.|\w|\s|-])*\.(?:webm|mp4|ogg|mov)[\\?!]?(?:&?[^=&]*=[^=&]*)*$/i
+const IMAGE_EXTENSIONS = /.(jpg|jpeg|gif|png|bmp|svg|webp)$/
+const VIDEO_EXTENSIONS = /.(webm|mp4|ogg|mov)$/
 const REGEX_TAG = /(#\w+)/g
 
 type Storage = {
@@ -255,7 +255,7 @@ class AutoMatcherPlugin {
     const links: Matches[] = []
 
     for (const { start: from, end: to, value, href } of linkifyjs.find(text) || []) {
-      const kind = this.getLinkKind(value)
+      const kind = this.getLinkKind(value, href)
 
       if (!this.isValidTLD(href) && !href.startsWith('tel:')) {
         continue
@@ -307,7 +307,7 @@ class AutoMatcherPlugin {
     return linkMarks
   }
 
-  private getLinkKind(url: string): MatchLinks['kind'] {
+  private getLinkKind(url: string, href: string): MatchLinks['kind'] {
     const mimetype = this.editor.storage.imeta?.getMimeType(url)?.split('/')[0]
     if (mimetype && ['image', 'video'].includes(mimetype)) {
       return mimetype as 'image' | 'video'
@@ -316,7 +316,8 @@ class AutoMatcherPlugin {
     } else if (/^https?:\/\/(twitter|x)\.com\/(?:#!\/)?(\w+)\/status(es)?\/(\d+)/.test(url)) {
       return 'tweet'
     } else {
-      return REGEX_IMAGES.test(url) ? 'image' : REGEX_VIDEOS.test(url) ? 'video' : 'text'
+      const { pathname } = new URL(href)
+      return IMAGE_EXTENSIONS.test(pathname) ? 'image' : VIDEO_EXTENSIONS.test(pathname) ? 'video' : 'text'
     }
   }
 

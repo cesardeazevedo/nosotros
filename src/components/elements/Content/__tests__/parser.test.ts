@@ -80,7 +80,7 @@ describe('ContentParser', () => {
     )
     const nevent = nip19.neventEncode({ id: ref.id, relays: [], author: ref.pubkey })
     const note = createNote({
-      content: `Hi! https://google.com #tag nostr:${nevent} Hi nostr:nprofile1qqsvvcpmpuwvlmrztkwq3d6nunmhf6hh688jw6fzxyjmtl2d5u5qr8spz3mhxue69uhhyetvv9ujuerpd46hxtnfdufzkeuj check this out https://v.nostr.build/g6BQ.mp4`,
+      content: `Hi! https://google.com #tag nostr:${nevent} Hi nostr:nprofile1qqsvvcpmpuwvlmrztkwq3d6nunmhf6hh688jw6fzxyjmtl2d5u5qr8spz3mhxue69uhhyetvv9ujuerpd46hxtnfdufzkeuj check this out https://nostr.com/img.jpg https://v.nostr.build/g6BQ.mp4`,
     })
     expect(parseNote(note.event)).toMatchInlineSnapshot(`
       {
@@ -152,6 +152,23 @@ describe('ContentParser', () => {
               },
               {
                 "text": " check this out ",
+                "type": "text",
+              },
+            ],
+            "type": "paragraph",
+          },
+          {
+            "attrs": {
+              "alt": null,
+              "src": "https://nostr.com/img.jpg",
+              "title": null,
+            },
+            "type": "image",
+          },
+          {
+            "content": [
+              {
+                "text": " ",
                 "type": "text",
               },
             ],
