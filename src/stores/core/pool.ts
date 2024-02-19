@@ -1,5 +1,6 @@
 import { FIXED_RELAYS } from 'constants/relays'
 import { observable, runInAction } from 'mobx'
+import type { Event } from 'nostr-tools'
 import { pickBy } from 'utils/utils'
 import { Relay } from './relay'
 
@@ -41,6 +42,13 @@ export class Pool {
         return relay
       }
       return this.relays.get(url) as Relay
+    }
+  }
+
+  publish(event: Event, relays: string[]) {
+    for (const url of relays) {
+      const relay = this.getRelay(url)
+      relay?.publish(event)
     }
   }
 }

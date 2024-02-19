@@ -1,9 +1,12 @@
 import { makeAutoObservable, runInAction } from 'mobx'
+import type { UnsignedEvent } from 'nostr-tools'
+import type { NostrExtension } from 'stores/auth/auth.store'
 import { SubscriptionBatcher } from 'stores/core/batcher'
-import { Filter } from 'stores/core/filter'
+import type { Filter } from 'stores/core/filter'
 import { bufferTime } from 'stores/core/operators'
 import { Pool } from 'stores/core/pool'
-import { Subscription, SubscriptionOptions } from 'stores/core/subscription'
+import type { SubscriptionOptions } from 'stores/core/subscription'
+import { Subscription } from 'stores/core/subscription'
 import { ObservableDB } from 'stores/db/observabledb.store'
 import type { RootStore } from 'stores/root.store'
 import { dedupe } from 'utils/utils'
@@ -45,6 +48,20 @@ export class NostrStore {
     runInAction(() => {
       this.events.set(id, { id, relays: dedupe(data, relays) })
     })
+  }
+
+  private async _sign(unsigned: UnsignedEvent) {
+    if ('nostr' in window) {
+      const nostr = window.nostr as NostrExtension
+      return await nostr.signEvent(unsigned)
+    }
+  }
+
+  async publish(unsigned: UnsignedEvent, relays: string[]) {
+    const event = await this._sign(unsigned)
+    if (event) {
+      this.pool.publish(event, relays)
+    }
   }
 
   subscribe(filter: Filter, options?: SubscriptionOptions) {

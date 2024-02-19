@@ -1,7 +1,7 @@
-import { Event, Filter as NostrFilter } from 'nostr-tools'
-import { Observable, asyncScheduler, filter, merge, observeOn, retry, share, tap } from 'rxjs'
-import { WebSocketSubject, webSocket } from 'rxjs/webSocket'
-import { Subscription, SubscriptionEvents } from './subscription'
+import type { Event, Filter as NostrFilter } from 'nostr-tools'
+import { asyncScheduler, filter, merge, observeOn, share, tap, type Observable } from 'rxjs'
+import { webSocket, type WebSocketSubject } from 'rxjs/webSocket'
+import { SubscriptionEvents, type Subscription } from './subscription'
 
 enum RelayEvents {
   CONNECT = 'connect',
@@ -77,7 +77,7 @@ export class Relay {
 
     merge(this.onEvent$, this.onEose$, this.onNotice$)
       // Reconnect when the websocket closes
-      .pipe(retry({ count: 3, delay: 5000 }))
+      // .pipe(retry({ count: 3, delay: 5000 }))
       .subscribe({
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         error: (error) => {
@@ -90,7 +90,9 @@ export class Relay {
     this.websocket.complete()
   }
 
-  publish() {}
+  publish(event: Event) {
+    this.websocket.next([MessageTypes.EVENT, event] as never)
+  }
 
   subscribe(subscription: Subscription, ...data: NostrFilter[]): Subscription {
     const msg = [MessageTypes.REQ, subscription.id, ...data]

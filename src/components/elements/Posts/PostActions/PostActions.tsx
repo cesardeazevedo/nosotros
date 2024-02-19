@@ -3,7 +3,7 @@ import { PostButtonReply, PostButtonRepost, PostButtonZap } from 'components/ele
 
 import { styled } from '@mui/material'
 import { Observer } from 'mobx-react-lite'
-import { Note } from 'stores/modules/note.store'
+import type { Note } from 'stores/modules/note.store'
 import PostButtonReact from './PostButtonReact'
 import PostButtonRelays from './PostRelays'
 
@@ -29,7 +29,7 @@ function PostActions(props: Props) {
 
   return (
     <Container dense={dense}>
-      <PostButtonReact noteId={note.event.id} dense={dense} />
+      <PostButtonReact note={note} dense={dense} />
       {renderRepost && <PostButtonRepost dense={dense} />}
       <Observer>
         {() => (

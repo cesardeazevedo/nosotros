@@ -13,7 +13,7 @@ describe('Test ReactionStore', () => {
     })
     store.add(reaction)
     store.add(reaction) // test some duplicated
-    expect(store.getReactionByNoteId('1')).toEqual({ '🤙': ['1'] })
+    expect(store.getByNoteId('1')).toEqual({ '🤙': ['1'] })
 
     reaction = fakeReaction({
       pubkey: '2',
@@ -23,7 +23,7 @@ describe('Test ReactionStore', () => {
       ],
     })
     store.add(reaction)
-    expect(store.getReactionByNoteId('1')).toEqual({ '🤙': ['1', '2'] })
+    expect(store.getByNoteId('1')).toEqual({ '🤙': ['1', '2'] })
 
     reaction = fakeReaction({
       pubkey: '2',
@@ -33,7 +33,7 @@ describe('Test ReactionStore', () => {
       ],
     })
     store.add(reaction)
-    expect(store.getReactionByNoteId('2')).toEqual({ '🤙': ['2'] })
+    expect(store.getByNoteId('2')).toEqual({ '🤙': ['2'] })
     expect(store.reactions.toJSON()).toEqual([
       ['1', { '🤙': ['1', '2'] }],
       ['2', { '🤙': ['2'] }],
@@ -48,7 +48,7 @@ describe('Test ReactionStore', () => {
       ],
     })
     store.add(reaction)
-    expect(store.getReactionByNoteId('2')).toEqual({ '🤙': ['2'], heart: ['1'] })
+    expect(store.getByNoteId('2')).toEqual({ '🤙': ['2'], heart: ['1'] })
   })
 
   test('Test getTopReaction', ({ root }) => {

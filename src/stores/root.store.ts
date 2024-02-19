@@ -44,7 +44,6 @@ export class RootStore {
     const { pubkey } = this.auth
     const pubkeys = pubkey ? [pubkey] : RECOMMENDED_PUBKEYS
     const feed = new FeedStore(this, { name: DeckStore.MAIN_FEED, authors: pubkeys, contacts: !!pubkey })
-    this.users.subscribe(pubkeys)
     this.deck.add(DeckStore.MAIN_FEED, feed)
     this.initialize()
   }
