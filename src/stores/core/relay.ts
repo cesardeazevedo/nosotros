@@ -61,7 +61,10 @@ export class Relay {
       tap((message) => {
         const id = message[1]
         const sub = this.subscriptions.get(id)
-        sub?.eose$.next()
+        if (sub) {
+          sub.eose$.next()
+          this.unsubscribe(sub)
+        }
       }),
       share(),
     )
