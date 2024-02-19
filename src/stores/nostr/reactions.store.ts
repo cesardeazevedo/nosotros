@@ -91,7 +91,7 @@ export class ReactionStore {
         ],
       }
       const myRelays = await this.root.userRelays.fetchRelaysFromAuthor(pubkey, true)
-      const authorRelays = await this.root.userRelays.fetchRelaysFromAuthor(unsigned.pubkey, true)
+      const authorRelays = await this.root.userRelays.fetchRelaysFromAuthor(note.event.pubkey, true)
       const relays = dedupe(myRelays, authorRelays)
       this.root.nostr.publish(unsigned, relays)
     }
