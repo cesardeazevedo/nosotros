@@ -6,6 +6,8 @@ enum Languages {
   PT = 'Portuguese',
 }
 
+type ImgProxyPreset = 'feed_img' | 'user_avatar'
+
 export class SettingStore {
   // UI
   lang = Languages.EN
@@ -14,7 +16,7 @@ export class SettingStore {
   hideEmojis = false
   hideVerificationLabels = false
 
-  maxRelaysPerUser = 10
+  maxRelaysPerUser = 5
 
   imgproxy = import.meta.env.VITE_IMGPROXY_URL
 
@@ -23,7 +25,7 @@ export class SettingStore {
 
     makePersistable(this, {
       name: 'settings',
-      properties: ['lang', 'defaultEmoji', 'hideEmojis', 'hideVerificationLabels', 'maxRelaysPerUser', 'imgproxy'],
+      properties: ['lang', 'defaultEmoji', 'hideEmojis', 'hideVerificationLabels', 'maxRelaysPerUser'],
       storage: window.localStorage,
     })
   }
@@ -32,7 +34,7 @@ export class SettingStore {
     this.lang = lang
   }
 
-  getImgProxyUrl(options: string, src: string) {
-    return `${this.imgproxy}/${options}/${src}`
+  getImgProxyUrl(preset: ImgProxyPreset, src: string) {
+    return `${this.imgproxy}/_/${preset}/plain/${src}`
   }
 }

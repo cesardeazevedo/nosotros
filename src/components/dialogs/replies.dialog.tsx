@@ -1,19 +1,18 @@
-import { useMatch, useRouter } from '@tanstack/react-router'
-import { replyRoute } from 'App'
+import { useMatch, useParams, useRouter } from '@tanstack/react-router'
 import Dialog from 'components/elements/Layouts/Dialog'
 import PostRepliesDialog from 'components/elements/Posts/PostReplies/PostRepliesDialog'
 import { useGoBack } from 'hooks/useNavigations'
+import { useStore } from 'hooks/useStore'
 import { observer } from 'mobx-react-lite'
 import { useEffect } from 'react'
-import { useStore } from 'stores'
-import { Nevent, decodeNIP19 } from 'utils/nip19'
+import { decodeNIP19, type Nevent } from 'utils/nip19'
 
 const RepliesDialog = observer(function RepliesDialog() {
   const store = useStore()
   const router = useRouter()
   const goBack = useGoBack()
   useMatch({ from: '__root__' })
-  const params = replyRoute.useParams()
+  const params = useParams({ from: '/$nostr/replies' })
 
   useEffect(() => {
     const id = params.nostr ? decodeNIP19(params.nostr as Nevent)?.data?.id : undefined

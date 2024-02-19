@@ -1,8 +1,5 @@
-import { Event } from 'nostr-tools'
+import type { Event } from 'nostr-tools'
 import {
-  BehaviorSubject,
-  Observable,
-  OperatorFunction,
   filter,
   first,
   from,
@@ -12,10 +9,13 @@ import {
   pipe,
   bufferTime as rxBufferTime,
   tap,
+  type BehaviorSubject,
+  type Observable,
+  type OperatorFunction,
 } from 'rxjs'
 
 import type { RootStore } from 'stores/root.store'
-import { Subscription, SubscriptionGroup } from './subscription'
+import { SubscriptionGroup, type Subscription } from './subscription'
 
 export function bufferTime<T>(bufferTimeSpan: number): OperatorFunction<T, T[]> {
   return pipe(

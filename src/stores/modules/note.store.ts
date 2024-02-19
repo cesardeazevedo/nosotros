@@ -1,14 +1,27 @@
+import { parseNote } from 'components/elements/Content/parser'
+import type { StateJSONSchema } from 'components/elements/Content/types'
 import { Kind } from 'constants/kinds'
 import { action, computed, makeAutoObservable, observable, toJS } from 'mobx'
-import { Event, nip19 } from 'nostr-tools'
+import { nip19, type Event } from 'nostr-tools'
 import { EMPTY, timeout } from 'rxjs'
 import { Filter } from 'stores/core/filter'
-import { IMeta } from 'stores/core/imeta'
-import { RelayHints } from 'stores/core/relayHints'
-import { EventDB } from 'stores/nostr/notes.store'
+import { IMeta, type IMetaTags } from 'stores/core/imeta'
+import { RelayHints, type RelayHintsData } from 'stores/core/relayHints'
 import type { RootStore } from 'stores/root.store'
-import { ContentParser } from 'utils/contentParser'
-import { ObjectValues, dedupe, isAuthorTag, isEventTag, isMention, isQuoteTag } from 'utils/utils'
+import { parseReferences, type EventReference, type NostrReference } from 'utils/references'
+import { dedupe, isAuthorTag, isEventTag, isMention, isQuoteTag, type ObjectValues } from 'utils/utils'
+
+export type EventDB = {
+  id: string
+  event: Event
+  pubkey: string
+  createdAt: number
+  content: StateJSONSchema
+  references: NostrReference[]
+  hasMedia: boolean
+  hints: RelayHintsData
+  imeta: IMetaTags
+}
 
 const Status = {
   IDLE: 'IDLE',
@@ -20,8 +33,10 @@ export class Note {
   id: string
   event: Event
   imeta: IMeta
-  content: ContentParser
   hints: RelayHints
+  contentSchema: StateJSONSchema
+  references: NostrReference[] = []
+
   // This is a list of revelant authors of the post, for means of sorting replies, any mentioned
   relevantAuthors: string[] = []
 
@@ -31,7 +46,8 @@ export class Note {
   constructor(
     private root: RootStore,
     event: Event,
-    content?: ContentParser | undefined | null,
+    contentSchema?: StateJSONSchema,
+    references?: NostrReference[],
     imeta?: IMeta | undefined | null,
   ) {
     makeAutoObservable(this, {
@@ -43,11 +59,17 @@ export class Note {
       repliesTags: computed,
       openRepliesDialog: action.bound,
       toggleReplies: action.bound,
+      contentSchema: false,
+      references: false,
     })
     this.id = event.id
     this.event = event
     this.imeta = imeta || new IMeta(event.tags)
-    this.content = content || new ContentParser(event, this.imeta)
+    if (!imeta) {
+      this.imeta.parse()
+    }
+    this.references = references || parseReferences(this.event)
+    this.contentSchema = contentSchema || parseNote(this.event, this.references, this.imeta)
     this.hints = new RelayHints(this)
   }
 
@@ -56,12 +78,8 @@ export class Note {
   }
 
   static deserialize(root: RootStore, event: EventDB) {
-    return new Note(
-      root,
-      event.event,
-      ContentParser.deserialize(event.event, event.content, event.references),
-      IMeta.deserialize(event.imeta),
-    )
+    const imeta = new IMeta(event.event.tags, event.imeta)
+    return new Note(root, event.event, event.content, event.references, imeta)
   }
 
   serialize(): EventDB {
@@ -71,10 +89,10 @@ export class Note {
       pubkey: this.event.pubkey,
       createdAt: this.event.created_at,
       hints: this.relayHints,
-      imeta: this.imeta.parse(),
-      content: this.content.parse(),
-      hasMedia: this.content.hasMedia,
-      references: this.content.references,
+      imeta: this.imeta.metadata,
+      content: this.contentSchema,
+      references: this.references,
+      hasMedia: false,
     }
   }
 
@@ -187,9 +205,10 @@ export class Note {
 
   get mentionedNotes() {
     const tags = this.event.tags.filter((tag) => (isEventTag(tag) && isMention(tag)) || isQuoteTag(tag))
+    const refs = this.references.filter((x): x is EventReference => x.prefix === 'nevent' || x.prefix === 'note')
     return dedupe(
       tags.map((x) => x[1]),
-      this.content.mentionedNotes,
+      refs.map((ref) => ref.event.id),
     )
   }
 
@@ -197,7 +216,7 @@ export class Note {
     return dedupe(
       [this.event.pubkey],
       this.authorsTags.map((x) => x[1]),
-      this.content.mentionedAuthors,
+      this.references.map((ref) => ref.author),
     )
   }
 
@@ -248,7 +267,7 @@ export class Note {
       )
       .subscribe((notes) => {
         this.setRepliesStatus(Status.LOADED)
-        this.root.subscriptions.subReactions(notes.map((e) => e.id))
+        this.root.reactions.subscribe(notes.map((e) => e.id))
       })
   }
 }

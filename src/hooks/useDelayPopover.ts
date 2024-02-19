@@ -1,4 +1,4 @@
-import { PopupState } from 'material-ui-popup-state/hooks'
+import type { PopupState } from 'material-ui-popup-state/hooks'
 import { useEffect, useState } from 'react'
 
 export function useDelayPopover(popupState: PopupState, delay = 500) {

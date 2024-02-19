@@ -1,5 +1,5 @@
+import type { IDBPDatabase, IDBPObjectStore } from 'idb'
 import * as idb from 'idb'
-import { IDBPDatabase, IDBPObjectStore } from 'idb'
 
 type Schema = {
   indexes: string[]

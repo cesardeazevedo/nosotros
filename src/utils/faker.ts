@@ -1,6 +1,6 @@
 import { Kind } from 'constants/kinds'
-import { Event, getEventHash, getPublicKey, getSignature } from 'nostr-tools'
-import { UserMetaData } from 'stores/modules/user.store'
+import { getEventHash, getPublicKey, getSignature, type Event } from 'nostr-tools'
+import type { UserMetaData } from 'stores/modules/user.store'
 
 export function fakeImageUrl(width: number, height?: number) {
   return `https://dummyimage.com/${width}x${height || width}/000/fff.jpg`

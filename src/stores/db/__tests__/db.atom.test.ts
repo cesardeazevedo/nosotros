@@ -1,5 +1,5 @@
 import { autorun } from 'mobx'
-import { Event } from 'nostr-tools'
+import type { Event } from 'nostr-tools'
 import { fakeNote } from 'utils/faker'
 import { test } from 'utils/fixtures'
 import { vi } from 'vitest'

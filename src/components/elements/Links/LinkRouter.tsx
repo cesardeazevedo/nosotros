@@ -1,8 +1,8 @@
-import { Link, LinkProps } from '@mui/material'
-import { AnyRoute, MakeLinkOptions, RegisteredRouter, Link as RouterLink } from '@tanstack/react-router'
+import { Link, type LinkProps } from '@mui/material'
+import { Link as RouterLink, type AnyRoute, type MakeLinkOptions, type RegisteredRouter } from '@tanstack/react-router'
 import { forwardRef } from 'react'
 
-export type LinkRouterProps<
+type LinkRouterProps<
   TRouteTree extends AnyRoute = RegisteredRouter['routeTree'],
   TTo extends string = '',
 > = MakeLinkOptions<TRouteTree, '/', TTo> & LinkProps

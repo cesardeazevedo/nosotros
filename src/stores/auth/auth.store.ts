@@ -1,6 +1,6 @@
 import { makeAutoObservable, runInAction } from 'mobx'
 import { makePersistable } from 'mobx-persist-store'
-import { Event, UnsignedEvent } from 'nostr-tools'
+import type { Event, UnsignedEvent } from 'nostr-tools'
 import type { RootStore } from '../root.store'
 
 export type NostrExtension = {

@@ -1,6 +1,6 @@
 import { Button } from '@mui/material'
+import { useStore } from 'hooks/useStore'
 import { observer } from 'mobx-react-lite'
-import { useStore } from 'stores'
 import LinkSignIn from '../Links/LinkSignIn'
 import ProfilePopover from '../Navigation/ProfilePopover'
 

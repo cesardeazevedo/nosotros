@@ -3,7 +3,7 @@ import PostCreateForm from 'components/elements/Posts/PostCreate/PostCreateForm'
 import PostVirtua from 'components/elements/Posts/PostList'
 import { observer } from 'mobx-react-lite'
 import { useEffect } from 'react'
-import { FeedStore } from 'stores/modules/feed.store'
+import type { FeedStore } from 'stores/modules/feed.store'
 
 type Props = {
   renderCreateForm?: boolean

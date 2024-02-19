@@ -1,7 +1,7 @@
-import { BehaviorSubject, Observable, Subject, share, tap } from 'rxjs'
+import { BehaviorSubject, Subject, share, tap, type Observable } from 'rxjs'
 import type { RootStore } from 'stores/root.store'
 import { hasValidFilters, mergeDelayedSubscriptions, switcher } from './operators'
-import { Subscription } from './subscription'
+import type { Subscription } from './subscription'
 
 export class SubscriptionBatcher {
   private _subject$: Subject<Subscription>

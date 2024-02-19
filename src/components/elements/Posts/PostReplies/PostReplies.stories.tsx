@@ -1,7 +1,8 @@
 import { faker } from '@faker-js/faker'
-import { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 import { CenteredContainer } from 'components/elements/Layouts/CenteredContainer'
-import { RootStore, useStore } from 'stores'
+import { useStore } from 'hooks/useStore'
+import type { RootStore } from 'stores'
 import { fakeImageUrl, fakeNote, fakeUser } from 'utils/faker'
 import Post from '../Post'
 import PostLoading from '../PostLoading'
@@ -71,6 +72,7 @@ export const ReplyPreview = {
 export const Reply800x800 = {
   parameters: {
     setup(store: RootStore) {
+      store.users.add(fakeUser())
       store.notes.loadNotes([
         fakeNote({ id: '1', content: `Hello World`, tags: [] }),
         fakeNote({ id: '2', content: `Hello World ${fakeImageUrl(800)}`, tags: [['e', '1']] }),
@@ -82,9 +84,10 @@ export const Reply800x800 = {
 export const Reply600x1200: Story = {
   parameters: {
     setup(store: RootStore) {
+      store.users.add(fakeUser())
       store.notes.loadNotes([
         fakeNote({ id: '1', content: `Hello World`, tags: [] }),
-        fakeNote({ id: '2', content: `Hello World ${fakeImageUrl(600, 1200)}`, tags: [['e', '1']] }),
+        fakeNote({ id: '2', content: `${fakeImageUrl(600, 1200)}`, tags: [['e', '1']] }),
       ])
     },
   },

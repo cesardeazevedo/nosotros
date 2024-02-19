@@ -1,6 +1,6 @@
 import { Box, Button, Divider } from '@mui/material'
 import { observer } from 'mobx-react-lite'
-import { Note } from 'stores/modules/note.store'
+import type { Note } from 'stores/modules/note.store'
 import PostRepliesLoading from './PostRepliesLoading'
 import { PostRepliesTree } from './PostReply'
 import PostReplyForm from './PostReplyForm'

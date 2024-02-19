@@ -1,6 +1,6 @@
 import { Avatar } from '@mui/material'
 import { useStore } from 'stores'
-import { User } from 'stores/modules/user.store'
+import type { User } from 'stores/modules/user.store'
 import LinkProfile from '../Links/LinkProfile'
 import UserPopover from './UserPopover'
 
@@ -17,7 +17,7 @@ function UserAvatar(props: Props) {
   const size = propSize || (dense ? 22 : 40)
   const store = useStore()
   const avatarProps = user?.picture
-    ? { src: store.settings.getImgProxyUrl('140x,q90', user.picture) }
+    ? { src: store.settings.getImgProxyUrl('user_avatar', user.picture) }
     : { src: '/placeholder.jpg' }
   return (
     <UserPopover user={user} disabled={disabledPopover}>

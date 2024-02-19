@@ -5,7 +5,7 @@ import { fakeNote } from 'utils/faker'
 import { RELAY_1, RELAY_2, RELAY_3, test } from 'utils/fixtures'
 import { delay, expectMessage, sendMessages } from 'utils/testHelpers'
 import { vi } from 'vitest'
-import { RelayHintsData } from '../relayHints'
+import type { RelayHintsData } from '../relayHints'
 
 describe('Subscription', () => {
   test('Should expect subscription event, eose and next event being called', async ({ relays, createSubscription }) => {

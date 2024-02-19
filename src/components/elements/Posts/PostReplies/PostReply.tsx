@@ -1,17 +1,17 @@
 import { Box, styled } from '@mui/material'
 import { IconArrowsDiagonal } from '@tabler/icons-react'
 import { useRouter } from '@tanstack/react-router'
+import { BubbleContainer } from 'components/elements/Content/Bubble'
 import { Row } from 'components/elements/Layouts/Flex'
 import UserAvatar from 'components/elements/User/UserAvatar'
 import UserName from 'components/elements/User/UserName'
 import { useMobile } from 'hooks/useMobile'
+import { useStore } from 'hooks/useStore'
 import { observer } from 'mobx-react-lite'
 import { useCallback, useState } from 'react'
-import { useStore } from 'stores'
-import { Note } from 'stores/modules/note.store'
+import type { Note } from 'stores/modules/note.store'
 import PostActions from '../PostActions/PostActions'
 import PostOptions from '../PostOptions'
-import Bubble from './PostReplyBubble'
 import PostReplyContent from './PostReplyContent'
 
 type Props = {
@@ -114,10 +114,10 @@ const PostReply = observer(function PostReply(props: Props) {
         {!open && (
           <Row sx={{ mb: 2 }} onClick={level < collapsedLevel ? handleOpen : handleOpenNestedDialog}>
             <UserAvatar user={user} disableLink />
-            <Bubble component={Row} sx={{ ml: 1 }}>
+            <BubbleContainer component={Row} sx={{ ml: 1 }}>
               <UserName user={user} disableLink />
               <IconArrowsDiagonal strokeWidth='2.0' size={18} style={{ marginLeft: 8 }} />
-            </Bubble>
+            </BubbleContainer>
           </Row>
         )}
         {open && (

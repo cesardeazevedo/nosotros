@@ -1,7 +1,7 @@
 import { Typography } from '@mui/material'
+import { useStore } from 'hooks/useStore'
 import { Observer } from 'mobx-react-lite'
 import React from 'react'
-import { useStore } from 'stores'
 import { Row } from '../Layouts/Flex'
 import Tooltip from '../Layouts/Tooltip'
 

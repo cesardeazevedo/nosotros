@@ -1,6 +1,6 @@
 import { Kind } from 'constants/kinds'
 import { DateTime } from 'luxon'
-import { Filter as NostrFilter } from 'nostr-tools'
+import type { Filter as NostrFilter } from 'nostr-tools'
 import type { RootStore } from 'stores/root.store'
 import { dedupe, pickBy } from 'utils/utils'
 

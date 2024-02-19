@@ -6,10 +6,10 @@ import PaperContainer from 'components/elements/Layouts/PaperContainer'
 import PostFab from 'components/elements/Posts/PostFab'
 import SignInButtonFab from 'components/elements/SignIn/SignInButtonFab'
 import FeedModule from 'components/modules/FeedModule'
+import { useStore } from 'hooks/useStore'
 import { entries } from 'mobx'
 import { observer } from 'mobx-react-lite'
 import { useEffect } from 'react'
-import { useStore } from 'stores'
 import { DeckStore } from 'stores/ui/deck.store'
 
 const HomeRoute = observer(() => {

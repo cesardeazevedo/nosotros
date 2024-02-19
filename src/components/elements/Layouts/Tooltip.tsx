@@ -1,4 +1,4 @@
-import { Box, Tooltip as MuiTooltip, TooltipProps, Typography } from '@mui/material'
+import { Box, Tooltip as MuiTooltip, Typography, type TooltipProps } from '@mui/material'
 import React from 'react'
 
 type Props = {

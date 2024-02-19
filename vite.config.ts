@@ -12,7 +12,6 @@ export default defineConfig(({ mode }) => {
   return {
     server: {
       host: true,
-      https: !isTesting,
       port: 8000,
     },
     test: {
@@ -23,6 +22,11 @@ export default defineConfig(({ mode }) => {
         name: 'chrome',
       },
       setupFiles: ['fake-indexeddb/auto', path.join(__dirname, `/jest.setup.ts`)],
+      server: {
+        deps: {
+          inline: ['react-tweet'],
+        },
+      },
     },
     plugins: [
       VitePWA({

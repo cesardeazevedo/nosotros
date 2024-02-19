@@ -1,4 +1,4 @@
-import { Note } from 'stores/modules/note.store'
+import type { Note } from 'stores/modules/note.store'
 import { dedupe, groupKeysToArray, isAuthorTag, isEventTag, isQuoteTag, removeEmptyKeys } from 'utils/utils'
 
 type Records = Record<string, string[]>
@@ -48,7 +48,7 @@ export class RelayHints {
   }
 
   private setRelaysFromTags() {
-    for (const tag of this.note.content?.event?.tags || []) {
+    for (const tag of this.note.event?.tags || []) {
       if (tag[2]) {
         const [, id, relay] = tag
         if (isAuthorTag(tag)) {
@@ -61,15 +61,24 @@ export class RelayHints {
   }
 
   private setRelayFromContentParsed() {
-    for (const { profile, event } of this.note.content.references) {
-      if (profile) {
-        this.set('authors', profile.pubkey, profile.relays || [])
-      } else if (event) {
-        if (event.relays?.length !== 0) {
-          this.set('ids', event.id, event.relays || [])
-        } else {
-          // In case there's no relays hints for a nevent, we fallback to the event author and others mentioned authors
-          this.set('fallback', event.id, dedupe(this.note.mentionedAuthors, [event.author]))
+    for (const ref of this.note.references) {
+      switch (ref.prefix) {
+        case 'npub':
+        case 'nprofile': {
+          const { profile } = ref
+          this.set('authors', profile.pubkey, profile.relays || [])
+          break
+        }
+        case 'note':
+        case 'nevent': {
+          const { event } = ref
+          if (event.relays?.length !== 0) {
+            this.set('ids', event.id, event.relays || [])
+          } else {
+            // In case there's no relays hints for a nevent, we fallback to the event author and others mentioned authors
+            this.set('fallback', event.id, dedupe(this.note.mentionedAuthors, [event.author]))
+          }
+          break
         }
       }
     }

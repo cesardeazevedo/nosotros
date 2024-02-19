@@ -1,6 +1,6 @@
 import { styled } from '@mui/material'
 import { Row } from 'components/elements/Layouts/Flex'
-import { Note } from 'stores/modules/note.store'
+import type { Note } from 'stores/modules/note.store'
 import UserHeader from '../User/UserHeader'
 import PostOptions from './PostOptions'
 

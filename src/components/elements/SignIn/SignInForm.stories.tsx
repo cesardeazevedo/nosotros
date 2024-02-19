@@ -1,5 +1,5 @@
 import { Paper } from '@mui/material'
-import { Meta } from '@storybook/react'
+import type { Meta } from '@storybook/react'
 import SignInForm from './SignIn'
 
 const meta = {

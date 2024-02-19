@@ -1,4 +1,4 @@
-import { LinkProps } from '@mui/material'
+import type { LinkProps } from '@mui/material'
 import React, { forwardRef } from 'react'
 import LinkRouter from './LinkRouter'
 

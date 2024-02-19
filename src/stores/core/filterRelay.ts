@@ -1,8 +1,8 @@
 import { comparer, reaction } from 'mobx'
-import { Filter as NostrFilter } from 'nostr-tools'
+import type { Filter as NostrFilter } from 'nostr-tools'
 import type { RootStore } from 'stores/root.store'
 import { dedupe, groupKeysToArray, toMap } from 'utils/utils'
-import { RelayHintsData } from './relayHints'
+import type { RelayHintsData } from './relayHints'
 
 export class FilterRelay {
   filter: NostrFilter

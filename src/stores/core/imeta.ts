@@ -1,4 +1,4 @@
-import { Event } from 'nostr-tools'
+import type { Event } from 'nostr-tools'
 import { dedupe } from 'utils/utils'
 
 export type IMetaFileds = {
@@ -29,15 +29,9 @@ export class IMeta {
   tags: Event['tags']
   metadata: IMetaTags
 
-  constructor(tags: Event['tags']) {
+  constructor(tags: Event['tags'], metadata?: IMetaTags) {
     this.tags = tags
-    this.metadata = {}
-  }
-
-  static deserialize(metadata: IMetaTags) {
-    const imeta = new IMeta([])
-    imeta.metadata = metadata
-    return imeta
+    this.metadata = metadata || {}
   }
 
   getMimeType(url: string) {

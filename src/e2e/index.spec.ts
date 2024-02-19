@@ -45,8 +45,6 @@ const test = base.extend<Fixtures>({
   expectInitialFeed: async ({}, use) => {
     await use(async (relay: WebSocketServerCustom, authors: string[]) => {
       const reqId = await relay.expectMessage([
-        // feed users
-        { kinds: [0, 10002], authors },
         // feed notes
         {
           kinds: [1, 30023],
@@ -54,6 +52,8 @@ const test = base.extend<Fixtures>({
           until: expect.any(Number),
           authors,
         },
+        // feed users
+        { kinds: [0, 10002], authors },
       ])
       return reqId
     })

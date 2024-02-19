@@ -1,18 +1,21 @@
-import { Event, Filter as NostrFilter } from 'nostr-tools'
-import { Observable, asyncScheduler, filter, merge, observeOn, retry, share, tap } from 'rxjs'
-import { WebSocketSubject, webSocket } from 'rxjs/webSocket'
-import { Subscription, SubscriptionEvents } from './subscription'
+import type { Event, Filter as NostrFilter } from 'nostr-tools'
+import { asyncScheduler, filter, merge, observeOn, share, tap, type Observable } from 'rxjs'
+import { webSocket, type WebSocketSubject } from 'rxjs/webSocket'
+import { toast } from 'sonner'
+import { SubscriptionEvents, type Subscription } from './subscription'
 
 enum RelayEvents {
-  CONNECT = 'connect',
-  DISCONNECT = 'disconnect',
+  OK = 'ok',
+  AUTH = 'auth',
+  EVENT = 'event',
   ERROR = 'error',
   NOTICE = 'notice',
+  CLOSED = 'closed',
 }
 
 export enum MessageTypes {
-  EVENT = 'EVENT',
   REQ = 'REQ',
+  EVENT = 'EVENT',
   CLOSE = 'CLOSE',
 }
 
@@ -28,8 +31,10 @@ export class Relay {
   onEvent$: Observable<MessageReceived>
   onNotice$: Observable<MessageReceived>
   onEose$: Observable<MessageReceived>
+  onOk$: Observable<MessageReceived>
 
   subscriptions: Map<string, Subscription> = new Map()
+  publishEvents: Map<string, () => void> = new Map()
 
   connected = false
 
@@ -56,7 +61,10 @@ export class Relay {
       tap((message) => {
         const id = message[1]
         const sub = this.subscriptions.get(id)
-        sub?.eose$.next()
+        if (sub) {
+          sub.eose$.next()
+          this.unsubscribe(sub)
+        }
       }),
       share(),
     )
@@ -75,9 +83,18 @@ export class Relay {
 
     this.onNotice$ = this.websocket.pipe(ofMessage(RelayEvents.NOTICE))
 
-    merge(this.onEvent$, this.onEose$, this.onNotice$)
+    this.onOk$ = this.websocket.pipe(
+      ofMessage(RelayEvents.OK),
+      tap((message) => {
+        const resolver = this.publishEvents.get(message[1])
+        resolver?.()
+      }),
+      share(),
+    )
+
+    merge(this.onEvent$, this.onEose$, this.onNotice$, this.onOk$)
       // Reconnect when the websocket closes
-      .pipe(retry({ count: 3, delay: 5000 }))
+      // .pipe(retry({ count: 3, delay: 5000 }))
       .subscribe({
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         error: (error) => {
@@ -90,7 +107,21 @@ export class Relay {
     this.websocket.complete()
   }
 
-  publish() {}
+  publish(event: Event) {
+    const promise = new Promise<void>((resolve, reject) => {
+      this.publishEvents.set(event.id, resolve)
+      setTimeout(() => reject(event), 6000)
+    })
+    const url = this.url.replace('wss://', '')
+    toast.promise(promise, {
+      loading: `Publishing event to ${url}...`,
+      success: `Event published to ${url}`,
+      error(event: Event) {
+        return `Failed to publish event to ${url} - ID:${event.id.slice(0, 6)}...`
+      },
+    })
+    this.websocket.next([MessageTypes.EVENT, event] as never)
+  }
 
   subscribe(subscription: Subscription, ...data: NostrFilter[]): Subscription {
     const msg = [MessageTypes.REQ, subscription.id, ...data]

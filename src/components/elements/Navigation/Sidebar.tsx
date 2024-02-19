@@ -2,9 +2,9 @@ import { Box, IconButton, SwipeableDrawer } from '@mui/material'
 
 import { IconMenu2, IconQrcode } from '@tabler/icons-react'
 
+import { useStore } from 'hooks/useStore'
 import { Observer } from 'mobx-react-lite'
 import { useState } from 'react'
-import { useStore } from 'stores'
 import ThemeButton from '../Buttons/ThemeButton'
 import UserAvatar from '../User/UserAvatar'
 import UserName from '../User/UserName'

@@ -1,10 +1,24 @@
+import type { StateJSONSchema } from 'components/elements/Content/types'
 import { fakeUserData } from 'utils/faker'
 import { test } from 'utils/fixtures'
 
 describe('UserStore', () => {
   test('add()', async ({ root }) => {
     const id = 'c6603b0f1ccfec625d9c08b753e4f774eaf7d1cf2769223125b5fd4da728019e'
-    const aboutParsed = [{ content: ['user description'], kind: 'text' }]
+    const aboutParsed: StateJSONSchema = {
+      content: [
+        {
+          content: [
+            {
+              text: 'user description',
+              type: 'text',
+            },
+          ],
+          type: 'paragraph',
+        },
+      ],
+      type: 'doc',
+    }
     const user = fakeUserData({ name: 'name1' })
     const store = root.users
     const event1 = {

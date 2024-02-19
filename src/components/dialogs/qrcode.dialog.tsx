@@ -1,6 +1,6 @@
 import Dialog from 'components/elements/Layouts/Dialog'
+import { useStore } from 'hooks/useStore'
 import { observer } from 'mobx-react-lite'
-import { useStore } from 'stores'
 
 const QRCodeDialog = observer(function QRCodeDialog() {
   const store = useStore()

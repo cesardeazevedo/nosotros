@@ -19,8 +19,8 @@ import {
 import Dialog from 'components/elements/Layouts/Dialog'
 import { observer } from 'mobx-react-lite'
 import { useState } from 'react'
-import { Note } from 'stores/modules/note.store'
-import { User } from 'stores/modules/user.store'
+import type { Note } from 'stores/modules/note.store'
+import type { User } from 'stores/modules/user.store'
 import PostStats from './PostDialogs/PostStats'
 
 type Props = {

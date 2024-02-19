@@ -1,5 +1,5 @@
 import { makeAutoObservable } from 'mobx'
-import { Event } from 'nostr-tools'
+import type { Event } from 'nostr-tools'
 import { ObservableDB } from 'stores/db/observabledb.store'
 import type { RootStore } from '../root.store'
 

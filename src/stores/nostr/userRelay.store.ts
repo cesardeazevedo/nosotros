@@ -1,5 +1,6 @@
+import { Duration } from 'luxon'
 import { makeAutoObservable } from 'mobx'
-import { Event } from 'nostr-tools'
+import type { Event } from 'nostr-tools'
 import { ObservableDB } from 'stores/db/observabledb.store'
 import { dedupe } from 'utils/utils'
 import type { RootStore } from '../root.store'
@@ -21,8 +22,14 @@ export type SchemaNIP05 = {
 }
 
 export class UserRelayStore {
-  relays = new ObservableDB<SchemaNIP65>('user-relays', { keyPath: 'pubkey' })
-  relaysNIP05 = new ObservableDB<SchemaNIP05>('user-relays-nip05', { keyPath: 'pubkey' })
+  relays = new ObservableDB<SchemaNIP65>('user-relays', {
+    keyPath: 'pubkey',
+    expireTime: Duration.fromObject({ days: 1 }).toMillis(),
+  })
+  relaysNIP05 = new ObservableDB<SchemaNIP05>('user-relays-nip05', {
+    keyPath: 'pubkey',
+    expireTime: Duration.fromObject({ days: 1 }).toMillis(),
+  })
 
   constructor(private root: RootStore) {
     makeAutoObservable(this)

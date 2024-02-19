@@ -1,4 +1,4 @@
-import { Avatar, Box, Button, Theme } from '@mui/material'
+import { Avatar, Box, Button, type Theme } from '@mui/material'
 import { Row } from 'components/elements/Layouts/Flex'
 import { bindHover, bindPopover } from 'material-ui-popup-state'
 import { usePopupState } from 'material-ui-popup-state/hooks'
@@ -9,8 +9,8 @@ import { useMobile } from 'hooks/useMobile'
 import HoverPopover from 'material-ui-popup-state/HoverPopover'
 import { Observer } from 'mobx-react-lite'
 import { useStore } from 'stores'
-import { User } from 'stores/modules/user.store'
-import TextContent from '../Texts/TextContent'
+import type { User } from 'stores/modules/user.store'
+import UserContentAbout from './UserContentAbout'
 import UserName from './UserName'
 
 type Props = {
@@ -70,9 +70,7 @@ function UserPopover(props: Props) {
               </Row>
               <UserName disablePopover user={user} />
               <Box sx={{ mt: 1 }}>
-                {user?.metadata?.aboutParsed?.map((token, index) => (
-                  <TextContent dense key={token.kind + index} token={token} />
-                ))}
+                <UserContentAbout user={user} />
               </Box>
             </Box>
           )}

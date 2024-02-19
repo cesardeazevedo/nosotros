@@ -1,8 +1,7 @@
 import { Kind } from 'constants/kinds'
 import { share } from 'rxjs'
 import { Filter } from 'stores/core/filter'
-import { bufferTime } from 'stores/core/operators'
-import { Subscription, SubscriptionOptions } from 'stores/core/subscription'
+import type { Subscription, SubscriptionOptions } from 'stores/core/subscription'
 import type { RootStore } from 'stores/root.store'
 
 export class SubscriptionsStore {
@@ -28,20 +27,5 @@ export class SubscriptionsStore {
       }
     })
     return contacts$
-  }
-
-  subReactions(noteIds: string[]) {
-    const sub = this.subscribe(
-      new Filter(this.root, {
-        kinds: [Kind.Reaction],
-        '#e': noteIds,
-      }),
-    )
-    sub.onEvent$.pipe(bufferTime(2000)).subscribe((events) => {
-      events.forEach((event) => {
-        this.root.reactions.add(event)
-      })
-    })
-    return sub
   }
 }

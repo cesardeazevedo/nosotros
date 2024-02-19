@@ -1,14 +1,18 @@
+import { ObservableDB, dbBatcher } from 'stores/db/observabledb.store'
 import { FIXED_RELAYS } from 'constants/relays'
 import { WS } from 'jest-websocket-mock'
-import { Event, Filter as NostrFilter } from 'nostr-tools'
-import { Filter, Options as FilterOptions } from 'stores/core/filter'
-import { Subscription, SubscriptionOptions } from 'stores/core/subscription'
+import type { Event, Filter as NostrFilter } from 'nostr-tools'
+import { makeRootStore } from 'stores'
+import type { Options as FilterOptions } from 'stores/core/filter'
+import { Filter } from 'stores/core/filter'
+import type { SubscriptionOptions } from 'stores/core/subscription'
+import { Subscription } from 'stores/core/subscription'
 import { database } from 'stores/db/database.store'
-import { ObservableDB, dbBatcher } from 'stores/db/observabledb.store'
-import { FeedOptions, FeedStore } from 'stores/modules/feed.store'
+import type { FeedOptions } from 'stores/modules/feed.store'
+import { FeedStore } from 'stores/modules/feed.store'
 import { Note } from 'stores/modules/note.store'
-import { SchemaNIP65 } from 'stores/nostr/userRelay.store'
-import { RootStore } from 'stores/root.store'
+import type { SchemaNIP65 } from 'stores/nostr/userRelay.store'
+import type { RootStore } from 'stores/root.store'
 import { fakeNote } from 'utils/faker'
 import { test as base } from 'vitest'
 
@@ -36,7 +40,7 @@ export const test = base.extend<Fixtures>({
     defaultRelays.forEach((url) => relays.push(new WS(url, { jsonProtocol: true })))
     // We are only setting the first relay as the fixed relay
     FIXED_RELAYS.pop()
-    const root = new RootStore()
+    const root = makeRootStore()
     await root.initialize([defaultRelays[0]])
     await use(root)
     // Clean up
@@ -51,12 +55,7 @@ export const test = base.extend<Fixtures>({
   },
 
   createNote: async ({ root }, use) => {
-    await use((event: Partial<Event>) => {
-      const note = new Note(root, fakeNote(event))
-      note.imeta.parse()
-      note.content.parse()
-      return note
-    })
+    await use((event: Partial<Event>) => new Note(root, fakeNote(event)))
   },
 
   createFilter: async ({ root }, use) => {

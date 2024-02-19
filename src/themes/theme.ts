@@ -1,6 +1,6 @@
 import { Zoom, alpha, experimental_extendTheme as extendTheme } from '@mui/material'
 import { common } from '@mui/material/colors'
-import shadows, { Shadows } from '@mui/material/styles/shadows'
+import shadows, { type Shadows } from '@mui/material/styles/shadows'
 import type {} from '@mui/material/themeCssVarsAugmentation'
 
 const primary = {
@@ -50,7 +50,7 @@ const theme = extendTheme({
           borderTop: 0,
           borderLeft: 0,
           borderRight: 0,
-          backdropFilter: 'blur(4px)',
+          backdropFilter: 'blur(6px)',
         },
       },
     },
@@ -73,7 +73,7 @@ const theme = extendTheme({
           whiteSpace: 'nowrap',
         },
         outlinedInfo: {
-          border: '1px solid',
+          bordwer: '1px solid',
           borderColor: 'var(--mui-palette-divider)',
         },
       },
@@ -100,10 +100,23 @@ const theme = extendTheme({
     },
     MuiAlert: {
       styleOverrides: {
-        standardSuccess: {
-          border: '1px solid',
-          borderColor: 'var(--mui-palette-success-light)',
+        root: {
+          border: 'none',
         },
+        standardSuccess: {},
+      },
+    },
+    MuiPaper: {
+      defaultProps: {
+        variant: 'elevation',
+      },
+      styleOverrides: {
+        root: ({ theme }) => ({
+          backgroundImage: 'none',
+          ...(theme.palette.mode === 'dark' && {
+            border: '1px solid var(--mui-palette-divider)',
+          }),
+        }),
       },
     },
   },
@@ -135,6 +148,7 @@ const theme = extendTheme({
         dividerSolid: '#393939',
         background: {
           default: common.black,
+          paper: common.black,
         },
         AppBar: {
           darkBg: common.black,

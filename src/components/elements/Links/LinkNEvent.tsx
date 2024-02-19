@@ -1,8 +1,8 @@
-import { Link, LinkProps } from '@mui/material'
+import { Link, type LinkProps } from '@mui/material'
 import { useRouter } from '@tanstack/react-router'
 import { observer } from 'mobx-react-lite'
 import React, { useCallback } from 'react'
-import { Note } from 'stores/modules/note.store'
+import type { Note } from 'stores/modules/note.store'
 
 interface Props extends Omit<LinkProps, 'color'> {
   note: Note
