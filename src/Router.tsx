@@ -1,4 +1,5 @@
 import { RootRoute, Route, Router, redirect } from '@tanstack/react-router'
+import ErrorBoundary from 'ErrorBoundary'
 import RootLayout from 'components/elements/Layouts/RootLayout'
 import HomeRoute from 'components/routes/home.route'
 import NEventRoute from 'components/routes/nevent.route'
@@ -7,12 +8,14 @@ import { decodeNIP19, isNevent, isNote, isNprofile, isNpub, type Prefixes } from
 
 const rootRoute = new RootRoute({
   component: RootLayout,
+  errorComponent: ErrorBoundary,
 })
 
 const indexRoute = new Route({
   getParentRoute: () => rootRoute,
   path: '/',
   component: HomeRoute,
+  errorComponent: ErrorBoundary,
 })
 
 const signinRoute = new Route({
@@ -61,6 +64,7 @@ export const nostrRoute = new Route({
     }
     redirect({ to: '/' })
   },
+  errorComponent: ErrorBoundary,
 })
 
 const routeTree = rootRoute.addChildren([indexRoute, nostrRoute, signinRoute, replyRoute])
