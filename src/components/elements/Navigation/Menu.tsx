@@ -1,7 +1,7 @@
-import { Divider, List, ListItemButton, ListSubheader, Typography, TypographyProps } from '@mui/material'
+import { Divider, List, ListItemButton, ListSubheader, Typography, type TypographyProps } from '@mui/material'
 import { IconBookmark, IconLogout, IconServerBolt, IconSettings, IconUser, IconWallet } from '@tabler/icons-react'
+import { useStore } from 'hooks/useStore'
 import { observer } from 'mobx-react-lite'
-import { useStore } from 'stores'
 import LinkProfile from '../Links/LinkProfile'
 
 type Props = {

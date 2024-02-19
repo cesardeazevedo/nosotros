@@ -1,8 +1,8 @@
 import UserProfileHeader from 'components/elements/User/UserProfileHeader'
 import FeedModule from 'components/modules/FeedModule'
+import { useStore } from 'hooks/useStore'
 import { observer } from 'mobx-react-lite'
 import { useEffect, useMemo } from 'react'
-import { useStore } from 'stores'
 
 type Props = {
   pubkey: string

@@ -6,7 +6,7 @@ import { observer } from 'mobx-react-lite'
 import Tooltip from 'components/elements/Layouts/Tooltip'
 
 import { useMemo } from 'react'
-import { Note } from 'stores/modules/note.store'
+import type { Note } from 'stores/modules/note.store'
 import LinkNEvent from '../Links/LinkNEvent'
 import UserAvatar from './UserAvatar'
 import UserName from './UserName'

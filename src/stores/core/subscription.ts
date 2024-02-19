@@ -1,11 +1,11 @@
-import { Event, matchFilters, validateEvent, verifySignature } from 'nostr-tools'
-import { Observable, Subject, filter, map, share } from 'rxjs'
+import { matchFilters, validateEvent, verifySignature, type Event } from 'nostr-tools'
+import { Subject, filter, map, share, type Observable } from 'rxjs'
 import { Filter } from 'stores/core/filter'
 import type { RootStore } from 'stores/root.store'
 import { dedupe } from 'utils/utils'
 import { FilterRelayGroup } from './filterRelay'
-import { Relay } from './relay'
-import { RelayHints, RelayHintsData } from './relayHints'
+import type { Relay } from './relay'
+import { RelayHints, type RelayHintsData } from './relayHints'
 
 export enum SubscriptionEvents {
   EOSE = 'eose',

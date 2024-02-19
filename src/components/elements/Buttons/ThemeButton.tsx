@@ -1,4 +1,4 @@
-import { IconButton, IconButtonProps, Zoom, useColorScheme } from '@mui/material'
+import { IconButton, Zoom, useColorScheme, type IconButtonProps } from '@mui/material'
 import { IconMoon, IconSun } from '@tabler/icons-react'
 import { useCallback } from 'react'
 import Tooltip from '../Layouts/Tooltip'

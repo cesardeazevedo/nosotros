@@ -5,7 +5,7 @@ import { Filter } from 'stores/core/filter'
 import { bufferTime } from 'stores/core/operators'
 import type { RootStore } from 'stores/root.store'
 import { dedupe } from 'utils/utils'
-import { Note } from './note.store'
+import type { Note } from './note.store'
 
 export type FeedOptions = {
   name?: string
@@ -63,7 +63,7 @@ export class FeedStore {
         map((ids) => dedupe(ids)),
       )
       .subscribe((ids) => {
-        this.root.subscriptions.subReactions(ids)
+        this.root.reactions.subscribe(ids)
       })
 
     this.paginate$

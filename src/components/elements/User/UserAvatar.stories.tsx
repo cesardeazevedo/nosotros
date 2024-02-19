@@ -1,7 +1,7 @@
 import { Paper } from '@mui/material'
-import { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
+import { useStore } from 'hooks/useStore'
 import type { RootStore } from 'stores'
-import { useStore } from 'stores'
 import { fakeImageUrl, fakeUser } from 'utils/faker'
 import UserAvatar from './UserAvatar'
 

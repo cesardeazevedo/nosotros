@@ -2,7 +2,7 @@ import { RELAY_2, RELAY_3, test } from 'utils/fixtures'
 import { delay } from 'utils/testHelpers'
 import { vi } from 'vitest'
 import { FilterRelay, FilterRelayGroup } from '../filterRelay'
-import { RelayHintsData } from '../relayHints'
+import type { RelayHintsData } from '../relayHints'
 
 describe('FilterRelays', () => {
   test('Shoudl expect filter split based on relayList', async ({ root, createFilter, createRelayList }) => {

@@ -1,8 +1,8 @@
 import { Box, Paper, Typography } from '@mui/material'
+import { useStore } from 'hooks/useStore'
 import { observer } from 'mobx-react-lite'
-import { Event } from 'nostr-tools'
+import type { Event } from 'nostr-tools'
 import ReactJsonView from 'react-json-view'
-import { useStore } from 'stores'
 import RelayChip from '../../Relays/RelayChip'
 
 type Props = {

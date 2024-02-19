@@ -2,10 +2,10 @@ import { Box, IconButton } from '@mui/material'
 import { IconServerBolt } from '@tabler/icons-react'
 import Tooltip from 'components/elements/Layouts/Tooltip'
 import { useMobile } from 'hooks/useMobile'
+import { useStore } from 'hooks/useStore'
 import { observer } from 'mobx-react-lite'
 import { useState } from 'react'
-import { useStore } from 'stores'
-import ButtonContainer, { ContainerProps } from './PostButtonContainer'
+import ButtonContainer, { type ContainerProps } from './PostButtonContainer'
 
 type Props = {
   eventId: string

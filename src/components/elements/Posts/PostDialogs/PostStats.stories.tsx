@@ -1,5 +1,5 @@
 import { Paper } from '@mui/material'
-import { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 import { fakeNote } from 'utils/faker'
 import PostStats from './PostStats'
 

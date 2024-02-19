@@ -1,16 +1,16 @@
 import {
   Box,
-  DialogProps,
   DialogTitle,
   Dialog as MuiDialog,
   Slide,
   SwipeableDrawer,
-  SwipeableDrawerProps,
+  type DialogProps,
+  type SwipeableDrawerProps,
 } from '@mui/material'
 
-import { TransitionProps } from '@mui/material/transitions'
+import type { TransitionProps } from '@mui/material/transitions'
 import { useMobile } from 'hooks/useMobile'
-import React, { JSXElementConstructor, ReactNode } from 'react'
+import React, { type JSXElementConstructor, type ReactNode } from 'react'
 
 type Props = {
   open: boolean

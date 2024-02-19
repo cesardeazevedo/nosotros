@@ -1,7 +1,7 @@
-import { IconButton, IconButtonProps } from '@mui/material'
+import { IconButton, type IconButtonProps } from '@mui/material'
 import { IconMessageCircle } from '@tabler/icons-react'
 import Tooltip from 'components/elements/Layouts/Tooltip'
-import ButtonContainer, { ContainerProps } from './PostButtonContainer'
+import ButtonContainer, { type ContainerProps } from './PostButtonContainer'
 
 type Props = {
   size?: IconButtonProps['size']
@@ -11,7 +11,7 @@ type Props = {
 function ButtonReply(props: Props & ContainerProps) {
   const { size = 'small', onClick, ...rest } = props
   return (
-    <ButtonContainer {...rest} color='#1E90FF'>
+    <ButtonContainer {...rest}>
       <Tooltip arrow title='Comment'>
         <IconButton size={size} onClick={onClick}>
           <IconMessageCircle strokeWidth='1.5' />

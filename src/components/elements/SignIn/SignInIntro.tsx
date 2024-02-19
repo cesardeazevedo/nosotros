@@ -1,9 +1,9 @@
 import { Alert, Box, Button, Link, Typography } from '@mui/material'
 import { useNavigate } from '@tanstack/react-router'
 import { useMobile } from 'hooks/useMobile'
+import { useStore } from 'hooks/useStore'
 import { observer } from 'mobx-react-lite'
 import { forwardRef, useCallback } from 'react'
-import { useStore } from 'stores'
 
 type Props = {
   onClickManual: () => void

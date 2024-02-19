@@ -1,7 +1,7 @@
-import { LinkOwnProps, LinkProps } from '@mui/material'
+import type { LinkOwnProps, LinkProps } from '@mui/material'
 import { Observer } from 'mobx-react-lite'
 import React from 'react'
-import { User } from 'stores/modules/user.store'
+import type { User } from 'stores/modules/user.store'
 import LinkRouter from './LinkRouter'
 
 interface Props extends Omit<LinkProps, 'color'> {

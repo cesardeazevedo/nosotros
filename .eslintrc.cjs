@@ -28,6 +28,7 @@ module.exports = {
   ],
   rules: {
     'react/react-in-jsx-scope': 0,
+    '@typescript-eslint/consistent-type-imports': 'error',
     semi: [2, 'never'],
     'prettier/prettier': [
       'error',

@@ -1,9 +1,9 @@
 import { Paper } from '@mui/material'
-import { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/react'
 
+import { useStore } from 'hooks/useStore'
 import React from 'react'
 import type { RootStore } from 'stores'
-import { useStore } from 'stores'
 import { fakeNote } from 'utils/faker'
 import UserHeader from './UserHeader'
 

@@ -5,9 +5,9 @@ import { Row } from 'components/elements/Layouts/Flex'
 import PaperContainer from 'components/elements/Layouts/PaperContainer'
 import Tooltip from 'components/elements/Layouts/Tooltip'
 import UserAvatar from 'components/elements/User/UserAvatar'
+import { useStore } from 'hooks/useStore'
 import { Observer } from 'mobx-react-lite'
 import React from 'react'
-import { useStore } from 'stores'
 
 const PostCreateForm = React.memo(function PostCreateForm() {
   const store = useStore()

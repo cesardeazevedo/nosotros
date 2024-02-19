@@ -1,5 +1,5 @@
 import { openDB } from 'idb'
-import { Subject, Subscription } from 'rxjs'
+import { Subject, type Subscription } from 'rxjs'
 import { bufferTime } from 'stores/core/operators'
 
 type Batcher = {

@@ -1,5 +1,5 @@
 import { makeAutoObservable, observable } from 'mobx'
-import { FeedStore } from 'stores/modules/feed.store'
+import type { FeedStore } from 'stores/modules/feed.store'
 
 export class DeckStore {
   static MAIN_FEED = 'main_feed'

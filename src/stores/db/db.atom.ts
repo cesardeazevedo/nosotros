@@ -1,4 +1,4 @@
-import { IAtom, createAtom } from 'mobx'
+import { createAtom, type IAtom } from 'mobx'
 
 export class DBAtom<T> {
   private _data: T | undefined

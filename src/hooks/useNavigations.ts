@@ -1,5 +1,5 @@
-import { RouteMatch, useRouter } from '@tanstack/react-router'
-import { nostrRoute } from 'App'
+import { useRouter, type RouteMatch } from '@tanstack/react-router'
+import type { nostrRoute } from 'Router'
 import { useCallback } from 'react'
 
 export function useGoBack() {

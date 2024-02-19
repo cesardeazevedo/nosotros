@@ -1,5 +1,5 @@
-import WS from 'jest-websocket-mock'
-import { MessageReceived, MessageTypes } from 'stores/core/relay'
+import type WS from 'jest-websocket-mock'
+import { MessageTypes, type MessageReceived } from 'stores/core/relay'
 import { SubscriptionEvents } from 'stores/core/subscription'
 
 export const delay = (timeout = 500) => new Promise((r) => setTimeout(r, timeout))

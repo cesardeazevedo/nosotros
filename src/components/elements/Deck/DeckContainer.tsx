@@ -1,7 +1,7 @@
 import { styled } from '@mui/material'
+import { useStore } from 'hooks/useStore'
 import { observer } from 'mobx-react-lite'
 import React from 'react'
-import { useStore } from 'stores'
 
 type Props = {
   children: React.ReactNode | React.ReactNode[]

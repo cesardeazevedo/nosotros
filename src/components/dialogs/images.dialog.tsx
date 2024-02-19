@@ -1,7 +1,7 @@
 import Dialog from 'components/elements/Layouts/Dialog'
-import PostImageDialog from 'components/elements/Posts/PostMedia/PostImageDialog'
+import PostImageDialog from 'components/elements/Posts/PostDialogs/PostImageDialog'
+import { useStore } from 'hooks/useStore'
 import { observer } from 'mobx-react-lite'
-import { useStore } from 'stores'
 
 const ImagesDialog = observer(function ImagesDialog() {
   const store = useStore()

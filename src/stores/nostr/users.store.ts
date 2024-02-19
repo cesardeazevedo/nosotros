@@ -1,26 +1,18 @@
 import { Kind } from 'constants/kinds'
 import { Duration } from 'luxon'
 import { makeAutoObservable, observable } from 'mobx'
-import { Event } from 'nostr-tools'
+import type { Event } from 'nostr-tools'
 import { Subject, concatMap } from 'rxjs'
 import { Filter } from 'stores/core/filter'
 import { ofKind } from 'stores/core/operators'
-import { SubscriptionOptions } from 'stores/core/subscription'
+import type { SubscriptionOptions } from 'stores/core/subscription'
 import { ObservableDB } from 'stores/db/observabledb.store'
-import { User, UserMetaData } from 'stores/modules/user.store'
-import { ParsedContent } from 'utils/contentParser'
+import { User, type UserDB, type UserMetaData } from 'stores/modules/user.store'
 import type { RootStore } from '../root.store'
 
 type NIP05Response = {
   names?: Record<string, string>
   relays?: Record<string, string[]>
-}
-
-export type UserDB = UserMetaData & {
-  id: string
-  npub: `npub1${string}` | undefined
-  createdAt: number
-  aboutParsed: ParsedContent
 }
 
 export class UsersStore {

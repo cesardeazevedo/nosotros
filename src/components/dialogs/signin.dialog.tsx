@@ -3,9 +3,9 @@ import Dialog from 'components/elements/Layouts/Dialog'
 import SignIn from 'components/elements/SignIn/SignIn'
 import { useMobile } from 'hooks/useMobile'
 import { useGoBack } from 'hooks/useNavigations'
+import { useStore } from 'hooks/useStore'
 import { observer } from 'mobx-react-lite'
 import { useCallback } from 'react'
-import { useStore } from 'stores'
 
 const SignInDialog = observer(function SignInDialog() {
   useMatch({ from: '__root__' })

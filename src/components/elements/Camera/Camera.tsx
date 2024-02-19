@@ -1,8 +1,8 @@
 import { Box, IconButton, Typography } from '@mui/material'
 import { IconBolt, IconBoltOff, IconX } from '@tabler/icons-react'
+import { useStore } from 'hooks/useStore'
 import { observer } from 'mobx-react-lite'
 import { useState } from 'react'
-import { useStore } from 'stores'
 import { Row } from '../Layouts/Flex'
 
 const iconProps = {

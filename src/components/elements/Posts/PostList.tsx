@@ -1,8 +1,8 @@
 import { values } from 'mobx'
 import { observer } from 'mobx-react-lite'
 import { useCallback, useLayoutEffect, useMemo, useRef } from 'react'
-import { FeedStore } from 'stores/modules/feed.store'
-import { CacheSnapshot, WVList, WVListHandle } from 'virtua'
+import type { FeedStore } from 'stores/modules/feed.store'
+import { WVList, type CacheSnapshot, type WVListHandle } from 'virtua'
 import Post from './Post'
 import PostLoading from './PostLoading'
 

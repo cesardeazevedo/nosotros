@@ -1,7 +1,7 @@
-import { IconButton, IconButtonProps } from '@mui/material'
+import { IconButton, type IconButtonProps } from '@mui/material'
 import { IconBolt } from '@tabler/icons-react'
 import Tooltip from 'components/elements/Layouts/Tooltip'
-import ButtonContainer, { ContainerProps } from './PostButtonContainer'
+import ButtonContainer, { type ContainerProps } from './PostButtonContainer'
 
 type Props = {
   size?: IconButtonProps['size']

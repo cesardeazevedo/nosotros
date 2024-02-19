@@ -1,4 +1,4 @@
-import { Paper, SxProps, Theme, styled } from '@mui/material'
+import { Paper, styled, type SxProps, type Theme } from '@mui/material'
 
 const PaperContainer = styled(Paper)(({ theme }: { theme: Theme }) => {
   const compactStyle: SxProps = {

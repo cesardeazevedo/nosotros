@@ -3,8 +3,8 @@ import { IconMoodSmile } from '@tabler/icons-react'
 import ComingSoon from 'components/elements/Layouts/ComingSoon'
 import { Row } from 'components/elements/Layouts/Flex'
 import UserAvatar from 'components/elements/User/UserAvatar'
+import { useStore } from 'hooks/useStore'
 import { Observer } from 'mobx-react-lite'
-import { useStore } from 'stores'
 
 function PostReplyForm() {
   const store = useStore()
