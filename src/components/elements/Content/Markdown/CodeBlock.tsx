@@ -2,12 +2,18 @@ import { Box, IconButton, type BoxProps } from '@mui/material'
 import { IconCheck, IconCopy } from '@tabler/icons-react'
 import { Row } from 'components/elements/Layouts/Flex'
 import Tooltip from 'components/elements/Layouts/Tooltip'
+import { AnimatePresence, MotionConfig, motion } from 'framer-motion'
 import React, { useCallback, useRef, useState } from 'react'
 import type { CodeBlockNode } from '../types'
 
 type Props = {
   sx?: BoxProps['sx']
   node: CodeBlockNode
+}
+
+const variants = {
+  visible: { opacity: 1, scale: 1 },
+  hidden: { opacity: 0, scale: 0.5 },
 }
 
 function CodeBlock(props: Props) {
@@ -46,16 +52,28 @@ function CodeBlock(props: Props) {
           placement='left'
           enterDelay={0}
           title={
-            !copied ? (
-              'Copy code'
-            ) : (
+            copied ? (
               <Row sx={{ color: 'success.main' }}>
                 Copied <IconCheck size={18} />
               </Row>
+            ) : (
+              'Copy code'
             )
           }>
           <IconButton sx={{ padding: '4px' }} onClick={handleCopy}>
-            <IconCopy size={20} strokeWidth='1.5' />
+            <MotionConfig transition={{ duration: 0.2 }}>
+              <AnimatePresence initial={false} mode='wait'>
+                {copied ? (
+                  <motion.div animate='visible' exit='hidden' initial='hidden' key='check' variants={variants}>
+                    <IconCheck size={20} strokeWidth='1.5' />
+                  </motion.div>
+                ) : (
+                  <motion.div animate='visible' exit='hidden' initial='hidden' key='copy' variants={variants}>
+                    <IconCopy size={20} strokeWidth='1.5' />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </MotionConfig>
           </IconButton>
         </Tooltip>
       </Box>
