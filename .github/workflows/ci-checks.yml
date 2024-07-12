@@ -47,7 +47,6 @@ jobs:
   deploy:
     needs: checks
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/prod' || github.ref == 'refs/heads/dev'
 
     strategy:
       matrix:
