@@ -2,7 +2,7 @@ export enum Kind {
   Metadata = 0,
   Text = 1,
   RecommendRelay = 2,
-  Contacts = 3,
+  Follows = 3,
   EncryptedDirectMessage = 4,
   EventDeletion = 5,
   Repost = 6,
