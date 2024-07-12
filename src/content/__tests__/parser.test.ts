@@ -129,8 +129,8 @@ describe('ContentParser', () => {
           },
           {
             "attrs": {
-              "author": "e384fed7cd372bfa9422ad5d0714580fbfbe524a32db4836452857aa1322f88b",
-              "id": "8a8bb0ba3edbb76e74b7e09c48ac3c853d4fa113fb69b10e6c22039321fdb9fd",
+              "author": "${ref.pubkey}",
+              "id": "${ref.id}",
               "relays": [],
             },
             "type": "note",

@@ -1,16 +1,16 @@
 import { nip19 } from 'nostr-tools'
-import type { AddressPointer, EventPointer, ProfilePointer } from 'nostr-tools/lib/nip19'
+import type { AddressPointer, EventPointer, ProfilePointer, DecodeResult } from 'nostr-tools/lib/types/nip19'
 
 // nostr-tools doesn't export this
 export type Prefixes = {
-  nprofile: ProfilePointer
-  nrelay: string
-  nevent: EventPointer
-  naddr: AddressPointer
-  nsec: string
-  npub: string
-  note: string
-}
+  nprofile: ProfilePointer;
+  nrelay: string;
+  nevent: EventPointer;
+  naddr: AddressPointer;
+  nsec: Uint8Array;
+  npub: string;
+  note: string;
+};
 type DecodeValue<Prefix extends keyof Prefixes> = {
   type: Prefix
   data: Prefixes[Prefix]

@@ -9,8 +9,7 @@ vi.mock('nostr-tools', async () => {
   const originalModule = await vi.importActual<Record<string, unknown>>('nostr-tools')
   return {
     ...originalModule,
-    validateEvent: vi.fn(() => true),
-    verifySignature: vi.fn(() => true),
+    verifyEvent: vi.fn(() => true),
   }
 })
 
