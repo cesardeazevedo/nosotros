@@ -1,8 +1,8 @@
 import { Box } from '@mui/material'
+import type { BulletListNode, OrderedListNode } from 'content/types'
 import React from 'react'
-import type { Note } from 'stores/modules/note.store'
-import { Paragraph } from '../Paragraph'
-import type { BulletListNode, OrderedListNode } from '../types'
+import type Note from 'stores/models/note'
+import Paragraph from '../Layout/Paragraph'
 import CodeBlock from './CodeBlock'
 
 type Props = {

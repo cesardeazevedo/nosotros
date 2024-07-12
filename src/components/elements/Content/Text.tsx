@@ -3,7 +3,7 @@ import Link from './Link/Link'
 import { CodeSpan } from './Markdown/CodeSpan'
 import { Mention } from './Mention/Mention'
 import Tag from './Tag/Tag'
-import type { BlockQuoteNode, HeadingNode, Mark, ParagraphNode, TextNode } from './types'
+import type { BlockQuoteNode, HeadingNode, Mark, ParagraphNode, TextNode } from '../../../content/types'
 
 type Props = {
   node: TextNode

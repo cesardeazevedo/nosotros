@@ -11,6 +11,7 @@ export default function Video(props: Props) {
   return (
     <video
       controls
+      preload='none'
       style={{
         width: '100%',
         maxHeight: 600,
@@ -19,7 +20,7 @@ export default function Video(props: Props) {
         backgroundColor: '#000',
         borderRadius: props.dense ? 4 : 0,
       }}>
-      <source src={src} type={`video/${extension === 'mov' ? 'quicktime' : extension}`} />
+      <source src={src} type={`video/${extension === 'mov' ? 'mp4' : extension}`} />
     </video>
   )
 }

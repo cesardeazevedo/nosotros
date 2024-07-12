@@ -1,9 +1,9 @@
 import { Skeleton } from '@mui/material'
 import { styled } from '@mui/material/styles'
-import { useStore } from 'stores/index'
 import LinkProfile from 'components/elements/Links/LinkProfile'
 import UserPopover from 'components/elements/User/UserPopover'
 import { observer } from 'mobx-react-lite'
+import { userStore } from 'stores/nostr/users.store'
 
 export type Props = {
   pubkey: string
@@ -28,8 +28,11 @@ const Loader = styled(Skeleton)({
 })
 
 export const Mention = observer(function TextMention(props: Props) {
-  const store = useStore()
-  const user = store.users.getUserById(props.pubkey)
+  const user = userStore.get(props.pubkey)
+  // console.log(props.pubkey)
+  // if (props.pubkey === '69a0a0910b49a1dbfbc4e4f10df22b5806af5403a228267638f2e908c968228d') {
+  //   console.log(user)
+  // }
   return (
     <Container>
       {!user && <Loader animation='wave' variant='rectangular' />}

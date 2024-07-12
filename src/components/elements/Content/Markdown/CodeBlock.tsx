@@ -2,9 +2,9 @@ import { Box, IconButton, type BoxProps } from '@mui/material'
 import { IconCheck, IconCopy } from '@tabler/icons-react'
 import { Row } from 'components/elements/Layouts/Flex'
 import Tooltip from 'components/elements/Layouts/Tooltip'
+import type { CodeBlockNode } from 'content/types'
 import { AnimatePresence, MotionConfig, motion } from 'framer-motion'
 import React, { useCallback, useRef, useState } from 'react'
-import type { CodeBlockNode } from '../types'
 
 type Props = {
   sx?: BoxProps['sx']
