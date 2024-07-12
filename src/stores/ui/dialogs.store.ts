@@ -91,3 +91,5 @@ export class DialogStore {
     this.replies = [false]
   }
 }
+
+export const dialogStore = new DialogStore()
