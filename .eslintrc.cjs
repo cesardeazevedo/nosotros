@@ -1,3 +1,5 @@
+const { join } = require('path')
+
 module.exports = {
   env: {
     browser: true,
@@ -11,12 +13,19 @@ module.exports = {
     'plugin:prettier/recommended',
     'plugin:storybook/recommended',
   ],
+  settings: {
+    react: {
+      version: 'detect',
+    },
+  },
   parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaVersion: 'latest',
+    project: join(__dirname, './tsconfig.json'),
     sourceType: 'module',
   },
   plugins: [
+    'rxjs',
     'react',
     'react-refresh',
     'jest',
@@ -27,14 +36,35 @@ module.exports = {
     'no-only-tests',
   ],
   rules: {
+    'rxjs/finnish': 0,
+    'rxjs/ban-operators': 'error',
+    'rxjs/no-create': 'error',
+    'rxjs/no-async-subscribe': 'error',
+    'rxjs/no-ignored-notifier': 'error',
+    //"rxjs/no-ignored-replay-buffer": "error",
+    'rxjs/no-ignored-takewhile-value': 'error',
+    'rxjs/no-ignored-subscription': 0,
+    'rxjs/no-implicit-any-catch': 'error',
+    'rxjs/no-index': 'error',
+    'rxjs/no-internal': 'error',
+    'rxjs/no-nested-subscribe': 'error',
+    'rxjs/no-redundant-notify': 'error',
+    // "rxjs/no-sharereplay": ["error", { allowConfig: true }],
+    'rxjs/no-subject-unsubscribe': 'error',
+    'rxjs/no-unbound-methods': 'error',
+    //"rxjs/no-unsafe-subject-next": "error",
+    // "rxjs/no-unsafe-takeuntil": "error",
+    // "rxjs/throw-error": "error",
     'react/react-in-jsx-scope': 0,
     '@typescript-eslint/consistent-type-imports': 'error',
+    'arrow-parens': 'error',
     semi: [2, 'never'],
     'prettier/prettier': [
-      'error',
+      'off',
       {
         printWidth: 120,
         semi: false,
+        endOfLine: 'auto',
         trailingComma: 'all',
         singleQuote: true,
         jsxSingleQuote: true,
@@ -44,11 +74,6 @@ module.exports = {
     ],
     '@typescript-eslint/ban-ts-comment': 'warn',
     '@typescript-eslint/no-empty-function': 0,
-    '@typescript-eslint/no-unused-vars': [
-      'error',
-      {
-        ignoreRestSiblings: true,
-      },
-    ],
+    '@typescript-eslint/no-unused-vars': 'warn',
   },
 }
