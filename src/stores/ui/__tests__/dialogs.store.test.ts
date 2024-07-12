@@ -1,8 +1,9 @@
 import { test } from 'utils/fixtures'
+import { DialogStore } from '../dialogs.store'
 
 describe('DialogsStore', () => {
-  test('Should assert multiple replies stack', ({ root }) => {
-    const store = root.dialogs
+  test('Should assert multiple replies stack', () => {
+    const store = new DialogStore()
     expect(store.replies).toStrictEqual([false])
     store.pushReply('1')
     expect(store.replies).toStrictEqual(['1', false])
