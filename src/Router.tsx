@@ -1,54 +1,95 @@
-import { RootRoute, Route, Router, redirect } from '@tanstack/react-router'
+import { createRootRouteWithContext, createRoute, createRouter, redirect, useRouteContext } from '@tanstack/react-router'
 import ErrorBoundary from 'ErrorBoundary'
 import RootLayout from 'components/elements/Layouts/RootLayout'
-import HomeRoute from 'components/routes/home.route'
-import NEventRoute from 'components/routes/nevent.route'
-import NProfileRoute from 'components/routes/nprofile.route'
+import DeckRoute from 'components/routes/deck.route'
+import HomeRoute, { loadHome } from 'components/routes/home.route'
+import NEventRoute, { loadNote } from 'components/routes/nevent.route'
+import NProfileRoute, { loadProfile } from 'components/routes/nprofile.route'
 import { decodeNIP19, isNevent, isNote, isNprofile, isNpub, type Prefixes } from 'utils/nip19'
 
-const rootRoute = new RootRoute({
+interface RouterContext { }
+
+const rootRoute = createRootRouteWithContext<RouterContext>()({
   component: RootLayout,
   errorComponent: ErrorBoundary,
 })
 
-const indexRoute = new Route({
+export const homeRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
-  component: HomeRoute,
-  errorComponent: ErrorBoundary,
+  loader: () => loadHome(),
+  component: () => (
+    <HomeRoute />
+  ),
 })
 
-const signinRoute = new Route({
-  getParentRoute: () => indexRoute,
+
+export const deckRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/deck',
+  component: () => <DeckRoute />
+})
+
+const signinRoute = createRoute({
+  getParentRoute: () => homeRoute,
   path: '/sign_in',
 })
 
-export const replyRoute = new Route({
-  getParentRoute: () => indexRoute,
+export const replyRoute = createRoute({
+  getParentRoute: () => homeRoute,
   path: '/$nostr/replies',
 })
 
-export const nostrRoute = new Route({
+export const nostrRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '$nostr',
   parseParams: (params) => ({ nostr: params.nostr as `${keyof Prefixes}1${string}` }),
-  beforeLoad: (context) => {
-    const decoded = decodeNIP19(context.params.nostr)
+  beforeLoad: (options) => {
+    const decoded = decodeNIP19(options.params.nostr)
     // Normalized all decoded that so we can easily access the id in the components
     switch (true) {
-      case isNpub(decoded):
-      case isNote(decoded):
+      case isNpub(decoded): {
         return { decoded, id: decoded.data }
-      case isNprofile(decoded):
-        return { decoded, id: decoded.data.pubkey, pubkey: decoded.data.pubkey, relays: decoded.data.relays }
-      case isNevent(decoded):
-        return { decoded, id: decoded.data.id, pubkey: decoded.data.author, relays: decoded.data.relays }
+      }
+      case isNprofile(decoded): {
+        const pubkey = decoded.data.pubkey
+        const relays = decoded.data.relays
+        return { decoded, id: decoded.data.pubkey, pubkey, relays }
+      }
+      case isNote(decoded): {
+        return { decoded, id: decoded.data }
+      }
+      case isNevent(decoded): {
+        const id = decoded.data.id
+        const pubkey = decoded.data.author
+        const relays = decoded.data.relays
+        return { decoded, id, pubkey, relays }
+      }
       default:
         return {}
     }
   },
-  component: function NostrRoute(props) {
-    const context = props.useRouteContext()
+  loader: (options) => {
+    const { decoded } = options.context
+    switch (true) {
+      case isNpub(decoded): {
+        return loadProfile({ pubkey: decoded.data })
+      }
+      case isNprofile(decoded): {
+        return loadProfile(decoded.data)
+      }
+      case isNote(decoded): {
+        return loadNote({ id: decoded.data })
+      }
+      case isNevent(decoded): {
+        return loadNote(decoded.data)
+      }
+      default:
+        return {}
+    }
+  },
+  component: function NostrRoute() {
+    const context = useRouteContext({ from: '/$nostr' })
     const { decoded, id, relays } = context
     if (decoded) {
       switch (true) {
@@ -57,7 +98,7 @@ export const nostrRoute = new Route({
           return <NProfileRoute pubkey={id} relays={relays} />
         case isNote(decoded):
         case isNevent(decoded):
-          return <NEventRoute id={id} relays={relays} />
+          return <NEventRoute />
         default:
           redirect({ to: '/' })
       }
@@ -67,12 +108,19 @@ export const nostrRoute = new Route({
   errorComponent: ErrorBoundary,
 })
 
-const routeTree = rootRoute.addChildren([indexRoute, nostrRoute, signinRoute, replyRoute])
+export const routeTree = rootRoute.addChildren([homeRoute, deckRoute, nostrRoute, signinRoute, replyRoute])
 
-export const router = new Router({ routeTree })
+
+export const router = createRouter({
+  routeTree,
+  defaultPreload: false,
+  defaultPendingMinMs: 300,
+})
 
 declare module '@tanstack/react-router' {
   interface Register {
     router: typeof router
   }
 }
+
+export type RouterTypeof = typeof router

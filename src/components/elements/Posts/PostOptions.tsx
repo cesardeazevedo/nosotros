@@ -8,20 +8,27 @@ import {
   MenuList,
   Popover,
 } from '@mui/material'
+
 import {
   IconBookmark,
+  IconColumnInsertRight,
   IconDots,
   IconEyeOff,
   IconInfoSquareRounded,
   IconUserMinus,
   IconVolumeOff,
 } from '@tabler/icons-react'
+
+import { useMatch } from '@tanstack/react-router'
 import Dialog from 'components/elements/Layouts/Dialog'
 import { observer } from 'mobx-react-lite'
-import { useState } from 'react'
-import type { Note } from 'stores/modules/note.store'
-import type { User } from 'stores/modules/user.store'
+import { useCallback, useState } from 'react'
+import type Note from 'stores/models/note'
+import type User from 'stores/models/user'
+import { Row } from '../Layouts/Flex'
+import Tooltip from '../Layouts/Tooltip'
 import PostStats from './PostDialogs/PostStats'
+import { deckStore } from 'stores/ui/deck.store'
 
 type Props = {
   note: Note
@@ -79,7 +86,12 @@ const PostOptions = observer(function PostOptions(props: Props) {
   const [debugDialog, setDebugDialog] = useState(false)
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>()
   const isMobile = isMobileDevice()
-  const user = note.user
+  const isDeck = useMatch({ strict: false }).routeId === '/deck'
+
+  const handleNoteDeck = useCallback(() => {
+    deckStore.addNoteColumn({ id: note.id })
+  }, [note])
+
   return (
     <>
       <Dialog
@@ -89,11 +101,20 @@ const PostOptions = observer(function PostOptions(props: Props) {
           setDebugDialog(false)
           setAnchorEl(null)
         }}>
-        <PostStats data={note.event} />
+        <PostStats note={note} />
       </Dialog>
-      <IconButton size='small' sx={{ color: 'text.secondary' }} onClick={(e) => setAnchorEl(e.currentTarget)}>
-        <IconDots stroke='currentColor' strokeWidth='2.0' size={20} />
-      </IconButton>
+      <Row>
+        {isDeck && (
+          <Tooltip arrow title='Add post on deck'>
+            <IconButton size='small' sx={{ color: 'text.secondary', mr: 1 }} onClick={handleNoteDeck}>
+              <IconColumnInsertRight stroke='currentColor' strokeWidth='1.4' />
+            </IconButton>
+          </Tooltip>
+        )}
+        <IconButton size='small' sx={{ color: 'text.secondary' }} onClick={(e) => setAnchorEl(e.currentTarget)}>
+          <IconDots stroke='currentColor' strokeWidth='2.0' size={20} />
+        </IconButton>
+      </Row>
       {!isMobile && (
         <Popover
           open={Boolean(anchorEl)}
@@ -103,13 +124,13 @@ const PostOptions = observer(function PostOptions(props: Props) {
           sx={{ zIndex: 1000 }}
           transformOrigin={{ horizontal: 'right', vertical: 'top' }}
           anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}>
-          <Options user={user} debugDialog={debugDialog} setDebugDialog={setDebugDialog} />
+          <Options user={note.user} debugDialog={debugDialog} setDebugDialog={setDebugDialog} />
         </Popover>
       )}
       {isMobile && (
         <Dialog open={!!anchorEl} onClose={() => setAnchorEl(null)} mobileHeight={390}>
           <Options
-            user={user}
+            user={note.user}
             debugDialog={debugDialog}
             setDebugDialog={(value) => {
               setAnchorEl(null)
