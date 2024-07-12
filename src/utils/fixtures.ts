@@ -1,82 +1,51 @@
-import { ObservableDB, dbBatcher } from 'stores/db/observabledb.store'
-import { FIXED_RELAYS } from 'constants/relays'
-import { WS } from 'jest-websocket-mock'
-import type { Event, Filter as NostrFilter } from 'nostr-tools'
-import { makeRootStore } from 'stores'
-import type { Options as FilterOptions } from 'stores/core/filter'
-import { Filter } from 'stores/core/filter'
-import type { SubscriptionOptions } from 'stores/core/subscription'
-import { Subscription } from 'stores/core/subscription'
-import { database } from 'stores/db/database.store'
-import type { FeedOptions } from 'stores/modules/feed.store'
-import { FeedStore } from 'stores/modules/feed.store'
-import { Note } from 'stores/modules/note.store'
-import type { SchemaNIP65 } from 'stores/nostr/userRelay.store'
-import type { RootStore } from 'stores/root.store'
-import { fakeNote } from 'utils/faker'
+/* eslint-disable no-empty-pattern */
 import { test as base } from 'vitest'
+import WS from 'vitest-websocket-mock'
+
+const defaultRelays = [
+  'wss://relay1.com',
+  'wss://relay2.com',
+  'wss://relay3.com',
+  'wss://relay4.com',
+  'wss://relay5.com',
+]
 
 interface Fixtures {
-  relays: WS[]
-  root: RootStore
-  createFeed: (options?: FeedOptions) => FeedStore
-  createNote: (note: Partial<Event>) => Note
-  createFilter: (filter: NostrFilter, options?: FilterOptions) => Filter
-  createSubscription: (filters: NostrFilter, options?: SubscriptionOptions | undefined) => Subscription
-  createRelayList: (note: Partial<Event>) => Promise<SchemaNIP65 | undefined>
-  observabledb: ObservableDB<Record<string, unknown>>
+  relay: WS
+  relay2: WS
+  relay3: WS
+  relay4: WS
+  relay5: WS
 }
-
-const defaultRelays = ['wss://relay1.com', 'wss://relay2.com', 'wss://relay3.com']
 
 export const RELAY_1 = defaultRelays[0]
 export const RELAY_2 = defaultRelays[1]
 export const RELAY_3 = defaultRelays[2]
+export const RELAY_4 = defaultRelays[3]
+export const RELAY_5 = defaultRelays[4]
+
+const relay3 = new WS(RELAY_3, { jsonProtocol: true })
+const relay4 = new WS(RELAY_4, { jsonProtocol: true })
+const relay5 = new WS(RELAY_5, { jsonProtocol: true })
 
 export const test = base.extend<Fixtures>({
-  relays: [],
-
-  root: async ({ relays }, use) => {
-    defaultRelays.forEach((url) => relays.push(new WS(url, { jsonProtocol: true })))
-    // We are only setting the first relay as the fixed relay
-    FIXED_RELAYS.pop()
-    const root = makeRootStore()
-    await root.initialize([defaultRelays[0]])
-    await use(root)
-    // Clean up
-    relays.length = 0
-    dbBatcher.subscription.unsubscribe()
-    WS.clean()
-    await database.clear()
+  relay: async ({ }, use) => {
+    const relay = new WS(RELAY_1, { jsonProtocol: true })
+    await use(relay)
+    relay.close()
   },
-
-  createFeed: async ({ root }, use) => {
-    await use((options?: FeedOptions) => new FeedStore(root, { authors: ['1'], pagination: false, ...options }))
+  relay2: async ({ }, use) => {
+    const relay = new WS(RELAY_2, { jsonProtocol: true })
+    await use(relay)
+    relay.close()
   },
-
-  createNote: async ({ root }, use) => {
-    await use((event: Partial<Event>) => new Note(root, fakeNote(event)))
+  relay3: async ({ }, use) => {
+    await use(relay3)
   },
-
-  createFilter: async ({ root }, use) => {
-    await use((filter: NostrFilter, options?: FilterOptions) => new Filter(root, filter, options))
+  relay4: async ({ }, use) => {
+    await use(relay4)
   },
-
-  createSubscription: async ({ root }, use) => {
-    await use((filters, options) => new Subscription(root, new Filter(root, filters), options))
-  },
-
-  createRelayList: async ({ root }, use) => {
-    await use(async (note) => await root.userRelays.add(fakeNote(note)))
-    root.userRelays.relays.clear()
-  },
-
-  /* eslint-disable no-empty-pattern */
-  observabledb: async ({}, use) => {
-    const db = new ObservableDB<Record<string, unknown>>('test')
-    await database.initialize()
-    await use(db)
-    db._data.clear()
-    await database.clear()
+  relay5: async ({ }, use) => {
+    await use(relay5)
   },
 })

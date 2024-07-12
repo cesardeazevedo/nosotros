@@ -1,7 +1,7 @@
-import { Typography } from '@mui/material'
+import { Link, Typography } from '@mui/material'
+import { Link as LinkRouter } from '@tanstack/react-router'
 import { useMobile } from 'hooks/useMobile'
 import { useCallback } from 'react'
-import LinkRouter from '../Links/LinkRouter'
 
 function HeaderLogo() {
   const isMobile = useMobile()
@@ -11,7 +11,7 @@ function HeaderLogo() {
   }, [])
 
   return (
-    <LinkRouter to='/' onClick={handleClick} sx={{ margin: 'auto', textDecoration: 'none!important' }}>
+    <Link component={LinkRouter} to='/' onClick={handleClick} sx={{ margin: 'auto', textDecoration: 'none!important' }} >
       <Typography
         variant='h5'
         fontWeight={900}
@@ -24,7 +24,7 @@ function HeaderLogo() {
         ]}>
         nosotros
       </Typography>
-    </LinkRouter>
+    </Link>
   )
 }
 

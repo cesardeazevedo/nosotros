@@ -2,8 +2,8 @@ import { Fab, styled, type Theme } from '@mui/material'
 import { Kind } from 'constants/kinds'
 import React, { useState } from 'react'
 import useMeasure from 'react-use-measure'
-import type { Note } from 'stores/modules/note.store'
-import { BubbleContainer } from '../Content/Bubble'
+import type Note from 'stores/models/note'
+import { BubbleContainer } from '../Content/Layout/Bubble'
 import PostError from './PostError'
 
 type Props = {

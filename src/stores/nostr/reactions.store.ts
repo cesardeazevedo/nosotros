@@ -1,13 +1,9 @@
-import { Kind } from 'constants/kinds'
-import { makeAutoObservable, observable } from 'mobx'
-import type { Event } from 'nostr-tools'
-import { Filter } from 'stores/core/filter'
-import { bufferTime } from 'stores/core/operators'
-import type { Note } from 'stores/modules/note.store'
-import { dedupe, isEventTag } from 'utils/utils'
-import type { RootStore } from '../root.store'
+import type { NostrEvent } from "core/types"
+import { makeAutoObservable, observable } from "mobx"
+import { isEventTag } from "nostr/nips/nip01/metadata/parseTags"
+import { authStore } from "stores/ui/auth.store"
 
-type Reactions = {
+export type Reactions = {
   [emoji: string]: string[]
 }
 
@@ -23,10 +19,10 @@ export function fallbackEmoji(emoji: string) {
 }
 
 export class ReactionStore {
-  reactions = observable.map<string, Reactions>()
-  myReactions = observable.map<string, string[]>()
+  reactions = observable.map<string, Reactions>({}, { deep: true })
+  myReactions = observable.map<string, string[]>({}, { deep: true })
 
-  constructor(private root: RootStore) {
+  constructor() {
     makeAutoObservable(this)
   }
 
@@ -42,11 +38,11 @@ export class ReactionStore {
       .filter((x) => x[0].length !== 0) // ignore empty emojis
   }
 
-  getTotal(noteId: string | undefined) {
-    return noteId ? Object.values(this.getByNoteId(noteId) || {}).flat().length : 0
+  getTotal(noteId: string) {
+    return Object.values(this.getByNoteId(noteId) || {}).flat().length || 0
   }
 
-  add(event: Event) {
+  add(event: NostrEvent) {
     const emoji = fallbackEmoji(event.content)
 
     event.tags.forEach((tag) => {
@@ -61,7 +57,7 @@ export class ReactionStore {
         }
 
         reactionsForNote[emoji] = reactionsForEmoji
-        if (event.pubkey === this.root.auth.pubkey) {
+        if (event.pubkey === authStore.pubkey) {
           const myReactionsForNote = this.myReactions.get(noteId) || []
           this.myReactions.set(noteId, [...myReactionsForNote, event.content])
         }
@@ -70,45 +66,6 @@ export class ReactionStore {
       }
     })
   }
-
-  async react(note: Note, emoji: string) {
-    let pubkey = this.root.auth.pubkey
-    if (!pubkey) {
-      await this.root.auth.loginWithNostrExtension()
-      if (this.root.auth.pubkey) {
-        pubkey = this.root.auth.pubkey
-      }
-    }
-    if (pubkey) {
-      const unsigned = {
-        kind: Kind.Reaction,
-        pubkey,
-        created_at: parseInt((Date.now() / 1000).toString()),
-        content: emoji,
-        tags: [
-          ['e', note.id],
-          ['p', note.event.pubkey],
-        ],
-      }
-      const myRelays = await this.root.userRelays.fetchRelaysFromAuthor(pubkey, true)
-      const authorRelays = await this.root.userRelays.fetchRelaysFromAuthor(note.event.pubkey, true)
-      const relays = dedupe(myRelays, authorRelays)
-      this.root.nostr.publish(unsigned, relays)
-    }
-  }
-
-  subscribe(noteIds: string[]) {
-    const sub = this.root.nostr.subscribe(
-      new Filter(this.root, {
-        kinds: [Kind.Reaction],
-        '#e': noteIds,
-      }),
-    )
-    sub.onEvent$.pipe(bufferTime(2000)).subscribe((events) => {
-      events.forEach((event) => {
-        this.root.reactions.add(event)
-      })
-    })
-    return sub
-  }
 }
+
+export const reactionStore = new ReactionStore()

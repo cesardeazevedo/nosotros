@@ -1,8 +1,9 @@
 import { IconButton } from '@mui/material'
-import { useStore } from 'hooks/useStore'
+import { IconHeart } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
-import type { Note } from 'stores/modules/note.store'
-import { fallbackEmoji } from 'stores/nostr/reactions.store'
+import type Note from 'stores/models/note'
+import { fallbackEmoji, reactionStore } from 'stores/nostr/reactions.store'
+import { settingsStore } from 'stores/ui/settings.store'
 import ReactionPicker from '../../Reactions/ReactionPicker'
 import ReactionsTooltip from '../../Reactions/ReactionsTooltip'
 import ButtonContainer from './PostButtonContainer'
@@ -14,31 +15,22 @@ type Props = {
 
 const PostButtonReact = observer(function PostReactions(props: Props) {
   const { note, dense } = props
-  const noteId = note.id
-  const store = useStore()
-  const total = store.reactions.getTotal(noteId)
-  const myReactions = store.reactions.myReactions.get(noteId)?.at(0)
-  const { defaultEmoji } = store.settings
+  const total = reactionStore.getTotal(note.id)
+  const myReactions = reactionStore.myReactions.get(note.id)?.[0][0]
+  const { defaultEmoji } = settingsStore
   return (
     <>
       <ButtonContainer
         active
         dense={dense}
         value={
-          <ReactionsTooltip noteId={noteId}>
+          <ReactionsTooltip noteId={note.id}>
             <span>{total || ''}</span>
           </ReactionsTooltip>
         }>
-        <ReactionPicker
-          onClick={(emoji) => {
-            store.reactions.react(note, emoji)
-          }}>
-          <IconButton
-            size='small'
-            color='info'
-            sx={{ backgroundColor: myReactions ? 'divider' : 'none' }}
-            onClick={() => store.reactions.react(note, defaultEmoji)}>
-            {myReactions ? fallbackEmoji(myReactions) : defaultEmoji}
+        <ReactionPicker onClick={() => { }}>
+          <IconButton size='small' color='info' sx={{ backgroundColor: myReactions ? 'divider' : 'none' }}>
+            {myReactions ? fallbackEmoji(myReactions) : <>{defaultEmoji || <IconHeart strokeWidth='1.5' />}</>}
           </IconButton>
         </ReactionPicker>
       </ButtonContainer>

@@ -23,7 +23,7 @@ const Container = styled(Row, { shouldForwardProp })<ContainerProps>(
     theme.unstable_sx({
       cursor: 'pointer',
       h6: {
-        ml: 1,
+        mr: 1,
         width: dense ? 'auto' : 28,
         fontWeight: 500,
         color: active ? color : theme.vars.palette.text.secondary,
@@ -39,8 +39,8 @@ const Container = styled(Row, { shouldForwardProp })<ContainerProps>(
         }),
       },
       button: {
-        width: 34,
-        height: 34,
+        width: dense ? 30 : 34,
+        height: dense ? 30 : 34,
         transition: 'scale 0.1s ease',
         '&:active': {
           scale: '1.1',

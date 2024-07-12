@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test'
-import type { MessageReceived } from 'stores/core/relay'
+import type { MessageReceived } from 'core/types'
 import { WebSocketServer, type WebSocket } from 'ws'
 
 type ExpectedMessage = {

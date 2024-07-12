@@ -1,15 +1,30 @@
 import ImageExtension from '@tiptap/extension-image'
 import YoutubeExtension from '@tiptap/extension-youtube'
-import { EditorContent, useEditor } from '@tiptap/react'
+import { EditorContent, ReactNodeViewRenderer, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
-import { AutoMatcherExtension } from './AutoMatcherExtension'
-import { addImageNodeView } from './Image/ImageEditor'
-import { LinkExtension } from './Link/LinkExtension'
-import { MentionExtension } from './Mention/MentionExtension'
-import { NoteExtension } from './Note/NoteExtension'
-import { TagExtension } from './Tag/TagExtension'
-import { TweetExtension } from './Tweet/TweetExtension'
-import { VideoExtension } from './Video/VideoExtension'
+import {
+  AutoMatcherExtension,
+  LinkExtension,
+  MentionExtension,
+  NoteExtension,
+  TagExtension,
+  TweetExtension,
+  VideoExtension,
+} from 'content'
+
+import ImageEditor from './Image/ImageEditor'
+import MentionEditor from './Mention/MentionEditor'
+import NoteEditor from './Note/NoteEditor'
+import TweetEditor from './Tweet/TweetEditor'
+import VideoEditor from './Video/VideoEditor'
+
+export function addNodeView(Component: unknown) {
+  return {
+    addNodeView() {
+      return ReactNodeViewRenderer(Component)
+    },
+  }
+}
 
 function Editor() {
   const editor = useEditor({
@@ -17,11 +32,11 @@ function Editor() {
       StarterKit,
       TagExtension,
       LinkExtension,
-      ImageExtension.extend(addImageNodeView()),
-      NoteExtension,
-      MentionExtension,
-      VideoExtension,
-      TweetExtension,
+      ImageExtension.extend(addNodeView(ImageEditor)),
+      NoteExtension.extend(addNodeView(NoteEditor)),
+      MentionExtension.extend(addNodeView(MentionEditor)),
+      VideoExtension.extend(addNodeView(VideoEditor)),
+      TweetExtension.extend(addNodeView(TweetEditor)),
       YoutubeExtension,
       AutoMatcherExtension,
     ],

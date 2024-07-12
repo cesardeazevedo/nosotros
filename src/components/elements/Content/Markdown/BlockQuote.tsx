@@ -1,7 +1,7 @@
 import { styled } from '@mui/material'
+import type { BlockQuoteNode } from 'content/types'
 import React from 'react'
-import { Paragraph } from '../Paragraph'
-import type { BlockQuoteNode } from '../types'
+import Paragraph from '../Layout/Paragraph'
 
 type Props = {
   node: BlockQuoteNode
@@ -20,7 +20,7 @@ const Container = styled('div')(({ theme }) =>
   }),
 )
 
-export function BlockQuote(props: Props) {
+export default function BlockQuote(props: Props) {
   return (
     <Container>
       {props.node.content?.map((node, index) => (

@@ -1,7 +1,9 @@
 /// <reference types="vitest" />
 import react from '@vitejs/plugin-react'
 import path from 'path'
+import Info from 'unplugin-info/vite'
 import { defineConfig } from 'vite'
+// import circleDependency from 'vite-plugin-circular-dependency'
 import mkcert from 'vite-plugin-mkcert'
 import { VitePWA } from 'vite-plugin-pwa'
 import tsconfigPaths from 'vite-tsconfig-paths'
@@ -14,8 +16,12 @@ export default defineConfig(({ mode }) => {
       host: true,
       port: 8000,
     },
+    build: {
+      sourcemap: true,
+    },
     test: {
       globals: true,
+      reporters: ['verbose'],
       environment: 'happy-dom',
       exclude: ['**/node_modules/**', '**/e2e/**'],
       browser: {
@@ -29,6 +35,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     plugins: [
+      // circleDependency({ outputFilePath: './circleDep' }),
       VitePWA({
         srcDir: 'src',
         devOptions: {
@@ -96,6 +103,7 @@ export default defineConfig(({ mode }) => {
       !isTesting ? mkcert({}) : null,
       tsconfigPaths(),
       react(),
+      Info(),
     ],
   }
 })

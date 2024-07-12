@@ -73,7 +73,7 @@ const theme = extendTheme({
           whiteSpace: 'nowrap',
         },
         outlinedInfo: {
-          bordwer: '1px solid',
+          border: '1px solid',
           borderColor: 'var(--mui-palette-divider)',
         },
       },

@@ -1,7 +1,7 @@
 import type { ImageOptions } from '@tiptap/extension-image'
 import { NodeViewWrapper, ReactNodeViewRenderer, type NodeConfig, type NodeViewRendererProps } from '@tiptap/react'
 
-function ImageEditor(props: NodeViewRendererProps) {
+export default function ImageEditor(props: NodeViewRendererProps) {
   const { src, alt } = props.node.attrs
   return (
     <NodeViewWrapper as='img' src={src} alt={alt}>

@@ -1,33 +1,37 @@
+import { useLoaderData } from '@tanstack/react-router'
 import UserProfileHeader from 'components/elements/User/UserProfileHeader'
-import FeedModule from 'components/modules/FeedModule'
-import { useStore } from 'hooks/useStore'
+import FeedMain from 'components/modules/Feed/FeedMain'
 import { observer } from 'mobx-react-lite'
-import { useEffect, useMemo } from 'react'
+import { useEffect } from 'react'
+import { ProfileModule } from 'stores/modules/profile.module'
+import { userStore } from 'stores/nostr/users.store'
+import { deckStore } from 'stores/ui/deck.store'
+import { dialogStore } from 'stores/ui/dialogs.store'
 
 type Props = {
   pubkey: string
   relays?: string[]
 }
 
-const NProfileRoute = observer(function ProfileRoute(props: Props) {
+export function loadProfile(props: Props) {
   const { pubkey, relays } = props
-  const store = useStore()
+  return deckStore.add(new ProfileModule({ pubkey, relays }))
+}
 
-  const feed = useMemo(
-    () => store.deck.columns.get(pubkey) || store.initializeProfileRoute(pubkey, relays),
-    [store, pubkey, relays],
-  )
+const NProfileRoute = observer(function ProfileRoute(props: Props) {
+  const { pubkey } = props
+  const feed = useLoaderData({ from: '/$nostr' }) as ProfileModule
 
   useEffect(() => {
-    store.dialogs.closeReply()
-  }, [store, pubkey])
+    dialogStore.closeReply()
+  }, [pubkey])
 
-  const user = store.users.getUserById(pubkey)
+  const user = userStore.get(pubkey)
 
   return (
     <>
       <UserProfileHeader user={user} />
-      {feed && <FeedModule feed={feed} renderCreateForm={false} />}
+      {feed && <FeedMain feed={feed.feed} />}
     </>
   )
 })

@@ -1,18 +1,16 @@
 import { Box, IconButton, SwipeableDrawer } from '@mui/material'
-
 import { IconMenu2, IconQrcode } from '@tabler/icons-react'
-
-import { useStore } from 'hooks/useStore'
 import { Observer } from 'mobx-react-lite'
 import { useState } from 'react'
+import { authStore } from 'stores/ui/auth.store'
 import ThemeButton from '../Buttons/ThemeButton'
 import UserAvatar from '../User/UserAvatar'
 import UserName from '../User/UserName'
 import Menu from './Menu'
+import { dialogStore } from 'stores/ui/dialogs.store'
 
 function Sidebar() {
   const [open, setOpen] = useState(false)
-  const store = useStore()
   return (
     <>
       <IconButton onClick={() => setOpen(true)}>
@@ -33,7 +31,7 @@ function Sidebar() {
           <ThemeButton sx={{ position: 'absolute', left: 30, bottom: 30 }} />
           <Observer>
             {() => {
-              const { currentUser: me } = store.auth
+              const { currentUser: me } = authStore
               return (
                 <>
                   <UserAvatar user={me} />
@@ -42,7 +40,7 @@ function Sidebar() {
                     size='large'
                     sx={{ position: 'absolute', right: 20, top: 20, color: 'text.primary' }}
                     disabled={!me}
-                    onClick={store.dialogs.openQRCode}>
+                    onClick={dialogStore.openQRCode}>
                     <IconQrcode size={30} strokeWidth='2' />
                   </IconButton>
                 </>
