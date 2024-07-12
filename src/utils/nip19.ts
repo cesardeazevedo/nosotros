@@ -1,5 +1,5 @@
 import { nip19 } from 'nostr-tools'
-import type { AddressPointer, EventPointer, ProfilePointer, DecodeResult } from 'nostr-tools/lib/types/nip19'
+import type { AddressPointer, EventPointer, ProfilePointer } from 'nostr-tools/lib/types/nip19'
 
 // nostr-tools doesn't export this
 export type Prefixes = {

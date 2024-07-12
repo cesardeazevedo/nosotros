@@ -137,7 +137,7 @@ export class DeckStore {
     this.columns.splice(this.columns.indexOf(id), 1)
   }
 
-  update(module: ModuleOptions) {}
+  update() { }
 
   reset() {
     this.columns.clear()

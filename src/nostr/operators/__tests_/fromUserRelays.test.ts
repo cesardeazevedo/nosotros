@@ -2,7 +2,7 @@ import { subscribeSpyTo } from "@hirez_io/observer-spy"
 import { RELAY_1, RELAY_2, RELAY_3 } from "utils/fixtures"
 import { fromUserRelay } from "../fromUserRelays"
 import { insertUserRelay } from "../insertUserRelay"
-import { map, mergeMap } from "rxjs"
+import { map } from "rxjs"
 
 test('fromRelayAuthors', async () => {
   await insertUserRelay('1', [

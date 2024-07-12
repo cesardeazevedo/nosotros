@@ -28,7 +28,7 @@ const PostButtonReact = observer(function PostReactions(props: Props) {
             <span>{total || ''}</span>
           </ReactionsTooltip>
         }>
-        <ReactionPicker onClick={(emoji) => {}}>
+        <ReactionPicker onClick={() => { }}>
           <IconButton size='small' color='info' sx={{ backgroundColor: myReactions ? 'divider' : 'none' }}>
             {myReactions ? fallbackEmoji(myReactions) : <>{defaultEmoji || <IconHeart strokeWidth='1.5' />}</>}
           </IconButton>

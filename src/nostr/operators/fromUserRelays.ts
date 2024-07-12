@@ -18,6 +18,6 @@ export function selectRelays(userRelays: UserRelayDB[], config?: RelaySelectionC
     .flatMap((x) => x.relay)
 }
 
-export function fromUserRelay(author: string, config?: RelaySelectionConfig) {
+export function fromUserRelay(author: string) {
   return from(storage.queryUserRelay(author)).pipe(filter((res) => res.length > 0))
 }
