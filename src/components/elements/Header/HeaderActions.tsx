@@ -5,7 +5,6 @@ import { authStore } from 'stores/ui/auth.store'
 import ThemeButton from '../Buttons/ThemeButton'
 import Tooltip from '../Layouts/Tooltip'
 import LinkRouter from '../Links/LinkRouter'
-import NotificationPopover from '../Notification/NotificationPopover'
 import RelaysPopover from '../Relays/RelayPopover'
 import HeaderSignIn from './HeaderSignIn'
 
@@ -35,7 +34,7 @@ function HeaderActions() {
       <ThemeButton />
       {authStore.pubkey && (
         <Box sx={[{ mx: 1, ['@media (max-width: 1040px)']: { display: 'none' } }]}>
-          <NotificationPopover />
+          {/* <NotificationPopover /> */}
         </Box>
       )}
       <Box sx={{ mx: 1 }} />
