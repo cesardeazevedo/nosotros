@@ -1,5 +1,8 @@
 import { Paper } from '@mui/material'
 import type { Meta, StoryObj } from '@storybook/react'
+import { parseNote } from 'nostr/nips/nip01/metadata/parseNote'
+import { NostrClient } from 'nostr/nostr'
+import Note from 'stores/models/note'
 import { fakeNote } from 'utils/faker'
 import PostStats from './PostStats'
 
@@ -23,6 +26,6 @@ export type Story = StoryObj<typeof meta>
 
 export const Default = {
   args: {
-    data: fakeNote(),
+    note: new Note(parseNote(fakeNote()), new NostrClient()),
   },
 } satisfies Story

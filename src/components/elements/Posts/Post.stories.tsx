@@ -1,9 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { Kind } from 'constants/kinds'
-import { useStore } from 'hooks/useStore'
-import { nip19, type Event } from 'nostr-tools'
-import type { RootStore } from 'stores'
-import { fakeImageUrl, fakeNote, fakeSignature, fakeUser } from 'utils/faker'
+import type { NostrEvent } from 'core/types'
+import { noteStore } from 'stores/nostr/notes.store'
+import { fakeImageUrl } from 'utils/faker'
 import { CenteredContainer } from '../Layouts/CenteredContainer'
 import Post from './Post'
 import PostLoading from './PostLoading'
@@ -19,17 +18,17 @@ const meta = {
     ),
   ],
   render: function Render() {
-    const store = useStore()
-    const note = store.notes.getNoteById('1')
-    return note ? <Post note={note} /> : <PostLoading />
+    const note = noteStore.get('1')
+    return note ? <Post id={note.id} /> : <PostLoading />
   },
 } satisfies Meta<typeof Post>
 
-export const setup = (note: Partial<Event>) => ({
+export const setup = (note: Partial<NostrEvent>) => ({
   parameters: {
-    setup(store: RootStore) {
-      store.users.add(fakeUser('1', { name: 'test' }))
-      store.notes.load(fakeNote({ ...note, id: '1' }))
+    setup() {
+      console.log(note)
+      // store.users.add(fakeUser('1', { name: 'test' }))
+      // store.notes.load(fakeNote({ ...note, id: '1' }))
     },
   },
 })
@@ -161,12 +160,10 @@ console.log("Hello World")
 
 export const Note = {
   parameters: {
-    setup(store: RootStore) {
-      const mentioned = fakeSignature(fakeNote({ id: '2', content: 'Related note https://google.com' }))
-      const encoded = nip19.neventEncode({ id: mentioned.id })
-      store.users.add(fakeUser('1'))
-      store.users.add(fakeUser(mentioned.pubkey, { name: 'mentioned user' }))
-      store.notes.loadNotes([fakeNote({ id: '1', content: `Hello World nostr:${encoded}` }), mentioned])
+    setup() {
+      // store.users.add(fakeUser('1'))
+      // store.users.add(fakeUser(mentioned.pubkey, { name: 'mentioned user' }))
+      // store.notes.loadNotes([fakeNote({ id: '1', content: `Hello World nostr:${encoded}` }), mentioned])
     },
   },
 } satisfies StoryObj
