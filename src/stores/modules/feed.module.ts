@@ -107,8 +107,8 @@ export class FeedModule implements ModuleInterface {
   }
 
   stop() {
-    this.pagination$.complete()
     this._subscription?.unsubscribe()
+    this._subscription = undefined
   }
 
   private subFeed() {
