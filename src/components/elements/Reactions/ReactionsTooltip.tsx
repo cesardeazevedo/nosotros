@@ -1,7 +1,7 @@
 import { Typography } from '@mui/material'
-import { useStore } from 'hooks/useStore'
 import { Observer } from 'mobx-react-lite'
 import React from 'react'
+import { reactionStore } from 'stores/nostr/reactions.store'
 import { Row } from '../Layouts/Flex'
 import Tooltip from '../Layouts/Tooltip'
 
@@ -11,9 +11,8 @@ type Props = {
 }
 
 function ReactionsTooltip(props: Props) {
-  const { noteId, children } = props
-  const store = useStore()
-  const list = store.reactions.getTopReactions(noteId)
+  const { children } = props
+  const list = reactionStore.getTopReactions(props.noteId)
   return (
     <Tooltip
       arrow

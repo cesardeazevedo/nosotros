@@ -1,12 +1,11 @@
 import { Box, Typography } from '@mui/material'
 import { Row } from 'components/elements/Layouts/Flex'
+import Tooltip from 'components/elements/Layouts/Tooltip'
 import { DateTime } from 'luxon'
 import { observer } from 'mobx-react-lite'
-
-import Tooltip from 'components/elements/Layouts/Tooltip'
-
 import { useMemo } from 'react'
-import type { Note } from 'stores/modules/note.store'
+import type Note from 'stores/models/note'
+import { userStore } from 'stores/nostr/users.store'
 import LinkNEvent from '../Links/LinkNEvent'
 import UserAvatar from './UserAvatar'
 import UserName from './UserName'
@@ -19,12 +18,12 @@ type Props = {
 
 export const UserHeaderDate = function UserHeaderDate(props: { note: Note }) {
   const { note } = props
-  const { event } = note
+  const createdAt = note.event.created_at
   const shortDate = useMemo(
-    () => DateTime.fromSeconds(event.created_at).toRelative({ style: 'narrow' })?.replace('ago', ''),
-    [event],
+    () => DateTime.fromSeconds(createdAt).toRelative({ style: 'narrow' })?.replace('ago', ''),
+    [createdAt],
   )
-  const fullDate = useMemo(() => DateTime.fromSeconds(event.created_at).toLocaleString(DateTime.DATETIME_FULL), [event])
+  const fullDate = useMemo(() => DateTime.fromSeconds(createdAt).toLocaleString(DateTime.DATETIME_FULL), [createdAt])
   return (
     <>
       <Box sx={{ mx: 1, fontWeight: 600, color: 'text.secondary' }}>·</Box>
@@ -41,8 +40,7 @@ export const UserHeaderDate = function UserHeaderDate(props: { note: Note }) {
 
 const UserHeader = observer(function UserHeader(props: Props) {
   const { note, dense, alignCenter = true } = props
-  const { user } = note
-
+  const user = userStore.get(note.event.pubkey)
   return (
     <Row sx={{ alignItems: alignCenter ? 'center' : 'flex-start', height: !alignCenter ? 42 : 46 }}>
       <UserAvatar user={user} dense={dense} />

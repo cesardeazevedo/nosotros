@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react-lite'
-import type { Note } from 'stores/modules/note.store'
+import type Note from 'stores/models/note'
 import { Content } from '../Content/Content'
 import PostContentWrapper from './PostContentWrapper'
 

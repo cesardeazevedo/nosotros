@@ -1,9 +1,8 @@
+import { styled } from '@mui/material'
 import { Row } from 'components/elements/Layouts/Flex'
 import { PostButtonReply, PostButtonRepost, PostButtonZap } from 'components/elements/Posts/PostActions'
-
-import { styled } from '@mui/material'
 import { Observer } from 'mobx-react-lite'
-import type { Note } from 'stores/modules/note.store'
+import type Note from 'stores/models/note'
 import PostButtonReact from './PostButtonReact'
 import PostButtonRelays from './PostRelays'
 
@@ -37,7 +36,7 @@ function PostActions(props: Props) {
         )}
       </Observer>
       {renderZap && <PostButtonZap dense={dense} />}
-      {renderRelays && <PostButtonRelays dense={dense} eventId={note.event.id} />}
+      {renderRelays && <PostButtonRelays dense={dense} note={note} />}
     </Container>
   )
 }

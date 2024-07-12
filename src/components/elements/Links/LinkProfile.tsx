@@ -1,40 +1,38 @@
-import type { LinkOwnProps, LinkProps } from '@mui/material'
-import { Observer } from 'mobx-react-lite'
-import React from 'react'
-import type { User } from 'stores/modules/user.store'
+import type { LinkProps } from '@mui/material'
+import { type LinkOwnProps } from '@mui/material'
+import { observer } from 'mobx-react-lite'
+import type User from 'stores/models/user'
 import LinkRouter from './LinkRouter'
+import { forwardRef } from 'react'
 
-interface Props extends Omit<LinkProps, 'color'> {
+interface Props {
   user?: User
   color?: LinkOwnProps['color']
+  underline?: LinkProps['underline']
   disabled?: boolean
   children: React.ReactNode
 }
 
-const LinkProfile = function LinkProfile(props: Props, ref: React.Ref<LinkProps['ref']>) {
-  const { user, color = 'inherit', disabled = false, children, ...rest } = props
+const LinkProfile = observer(forwardRef<never, Props>(function LinkProfile(props, ref) {
+  const { user, color = 'inherit', disabled = false, underline, children, ...rest } = props
 
   if (disabled || !user?.nprofile) {
     return children
   }
 
   return (
-    <Observer>
-      {() => (
-        <LinkRouter
-          to='/$nostr'
-          color={color as string}
-          params={{ nostr: user?.nprofile }}
-          state={{ from: location.pathname }}
-          disabled={disabled}
-          underline={disabled ? 'none' : 'hover'}
-          {...rest}
-          ref={ref}>
-          {children}
-        </LinkRouter>
-      )}
-    </Observer>
+    <LinkRouter
+      to='/$nostr'
+      color={color as string}
+      params={{ nostr: user?.nprofile }}
+      disabled={disabled}
+      underline={underline || (disabled ? 'none' : 'hover')}
+      {...rest}
+      ref={ref}
+    >
+      {children}
+    </LinkRouter >
   )
-}
+}))
 
-export default React.forwardRef(LinkProfile)
+export default LinkProfile

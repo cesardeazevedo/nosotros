@@ -3,21 +3,21 @@ import { IconTrashXFilled } from '@tabler/icons-react'
 import { CenteredContainer } from 'components/elements/Layouts/CenteredContainer'
 import { Row } from 'components/elements/Layouts/Flex'
 import PaperContainer from 'components/elements/Layouts/PaperContainer'
+import { storage } from 'nostr/storage'
 import { useCallback, useState } from 'react'
-import { database } from 'stores/db/database.store'
 
 function ErrorBoundary() {
   const [cleaning, setCleaning] = useState(false)
 
   const handleClick = useCallback(async () => {
     setCleaning(true)
-    await database.clear()
+    await storage.clearDB()
     setCleaning(false)
   }, [])
 
   return (
     <CenteredContainer maxWidth='sm'>
-      <PaperContainer sx={{ border: '1px solid', borderColor: 'error.main' }}>
+      <PaperContainer sx={{ mt: 10 }}>
         {cleaning && <LinearProgress variant='indeterminate' color='error' />}
         <Row sx={{ p: 4, justifyContent: 'center', color: 'error.main' }}>
           <Typography variant='h5' align='center' sx={{ ml: 2 }}>

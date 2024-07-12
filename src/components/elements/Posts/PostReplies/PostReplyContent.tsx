@@ -1,6 +1,6 @@
 import { Content } from 'components/elements/Content/Content'
 import { observer } from 'mobx-react-lite'
-import type { Note } from 'stores/modules/note.store'
+import type Note from 'stores/models/note'
 import PostContentWrapper from '../PostContentWrapper'
 
 type Props = {

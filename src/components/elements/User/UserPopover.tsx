@@ -1,15 +1,15 @@
-import { Avatar, Box, Button, type Theme } from '@mui/material'
+import { Box, Button, type Theme } from '@mui/material'
 import { Row } from 'components/elements/Layouts/Flex'
-import { bindHover, bindPopover } from 'material-ui-popup-state'
-import { usePopupState } from 'material-ui-popup-state/hooks'
-import React from 'react'
-
 import { useDelayPopover } from 'hooks/useDelayPopover'
 import { useMobile } from 'hooks/useMobile'
+import { bindHover, bindPopover } from 'material-ui-popup-state'
 import HoverPopover from 'material-ui-popup-state/HoverPopover'
+import { usePopupState } from 'material-ui-popup-state/hooks'
 import { Observer } from 'mobx-react-lite'
-import { useStore } from 'stores'
-import type { User } from 'stores/modules/user.store'
+import React from 'react'
+import type User from 'stores/models/user'
+import { authStore } from 'stores/ui/auth.store'
+import UserAvatar from './UserAvatar'
 import UserContentAbout from './UserContentAbout'
 import UserName from './UserName'
 
@@ -22,7 +22,8 @@ type Props = {
 function UserPopover(props: Props) {
   const popupState = usePopupState({ variant: 'popover', popupId: 'user-popup' })
   const open = useDelayPopover(popupState)
-  const store = useStore()
+
+  const me = authStore.currentUser
 
   const isMobile = useMobile()
   const { user, disabled = false } = props
@@ -53,12 +54,10 @@ function UserPopover(props: Props) {
         anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}>
         <Observer>
           {() => (
-            <Box sx={{ width: 300, maxHeight: 270, p: 2 }}>
+            <Box sx={{ width: 340, maxHeight: 270, p: 2 }}>
               <Row sx={{ justifyContent: 'space-between' }}>
-                <Avatar src={user?.metadata.picture} sx={{ width: 60, height: 60 }}>
-                  {user?.initial}
-                </Avatar>
-                {store.contacts.isFollowing(user?.id) ? (
+                <UserAvatar disabledPopover size={60} user={user} />
+                {me?.following?.followsPubkey(user?.data.pubkey) ? (
                   <Button sx={{ minWidth: 95 }} variant='text' color='inherit'>
                     Following
                   </Button>
@@ -68,8 +67,8 @@ function UserPopover(props: Props) {
                   </Button>
                 )}
               </Row>
-              <UserName disablePopover user={user} />
-              <Box sx={{ mt: 1 }}>
+              <UserName disablePopover user={user} sx={{ mt: 1 }} />
+              <Box sx={{ lineHeight: '1.2' }}>
                 <UserContentAbout user={user} />
               </Box>
             </Box>

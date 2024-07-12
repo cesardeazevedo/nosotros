@@ -1,17 +1,13 @@
-import { Box, Paper, Typography } from '@mui/material'
-import { useStore } from 'hooks/useStore'
+import { Box, Chip, Paper, Typography } from '@mui/material'
 import { observer } from 'mobx-react-lite'
-import type { Event } from 'nostr-tools'
 import ReactJsonView from 'react-json-view'
-import RelayChip from '../../Relays/RelayChip'
+import type Note from 'stores/models/note'
 
 type Props = {
-  data: Event
+  note: Note
 }
 
 const PostStatsRelays = observer(function PostStatsRelays(props: Props) {
-  const store = useStore()
-  const relays = store.nostr.events.get(props.data.id)?.relays || []
   return (
     <>
       <Typography variant='h6'>Relays:</Typography>
@@ -27,8 +23,8 @@ const PostStatsRelays = observer(function PostStatsRelays(props: Props) {
           flexWrap: 'wrap',
           maxHeight: 350,
         }}>
-        {relays.map((url) => (
-          <RelayChip key={url} url={url} />
+        {props.note.seenOn.map((url) => (
+          <Chip key={url} label={url} sx={{ mb: 1 }} />
         ))}
       </Paper>
     </>
@@ -36,13 +32,13 @@ const PostStatsRelays = observer(function PostStatsRelays(props: Props) {
 })
 
 const PostJsonEvent = observer(function PostJsonEvent(props: Props) {
-  const { data } = props
+  const { note } = props
   return (
     <>
       <Typography variant='h6'>JSON Event</Typography>
       <Box sx={{ borderRadius: 1, overflow: 'hidden' }}>
         <ReactJsonView
-          src={data}
+          src={JSON.parse(JSON.stringify(note.event))}
           style={{ maxHeight: 400, overflow: 'auto', padding: '8px' }}
           theme='summerfruit'
           displayDataTypes={false}
@@ -54,28 +50,28 @@ const PostJsonEvent = observer(function PostJsonEvent(props: Props) {
 })
 
 const PostUserJson = observer(function PostUserJson(props: Props) {
-  const { data } = props
-  const store = useStore()
-  const user = store.users.getUserById(data.pubkey)
-  const { id, aboutParsed, createdAt, ...metadata } = user?.metadata || {}
+  const { note } = props
   return (
     <>
       <Typography variant='h6'>User</Typography>
       <Box sx={{ borderRadius: 1, overflow: 'hidden' }}>
-        <ReactJsonView
-          src={metadata}
-          style={{ maxHeight: 250, overflow: 'auto', padding: '8px' }}
-          theme='summerfruit'
-          displayDataTypes={false}
-          enableClipboard={(data) => navigator.clipboard.writeText(JSON.stringify(data.src))}
-        />
+        {note.user && (
+          <ReactJsonView
+            src={JSON.parse(JSON.stringify(note.user.meta))}
+            collapsed={false}
+            style={{ maxHeight: 250, overflow: 'auto', padding: '8px' }}
+            theme='summerfruit'
+            displayDataTypes={false}
+            enableClipboard={(data) => navigator.clipboard.writeText(JSON.stringify(data.src))}
+          />
+        )}
       </Box>
     </>
   )
 })
 
 function PostStats(props: Props) {
-  const { data } = props
+  const { note } = props
   return (
     <Box sx={{ p: 2, width: '100%', height: '100%' }}>
       <style>
@@ -85,9 +81,9 @@ function PostStats(props: Props) {
             }
           `}
       </style>
-      <PostStatsRelays data={data} />
-      <PostJsonEvent data={data} />
-      <PostUserJson data={data} />
+      <PostStatsRelays note={note} />
+      <PostJsonEvent note={note} />
+      <PostUserJson note={note} />
     </Box>
   )
 }

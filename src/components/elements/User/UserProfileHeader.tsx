@@ -1,13 +1,13 @@
 import { Box, Button, Typography } from '@mui/material'
 import { IconDiscountCheckFilled } from '@tabler/icons-react'
-import { useStore } from 'hooks/useStore'
 import { observer } from 'mobx-react-lite'
-import type { User } from 'stores/modules/user.store'
+import type User from 'stores/models/user'
 import { CenteredContainer } from '../Layouts/CenteredContainer'
 import { Row } from '../Layouts/Flex'
 import PaperContainer from '../Layouts/PaperContainer'
 import UserAvatar from './UserAvatar'
 import UserContentAbout from './UserContentAbout'
+import { settingsStore } from 'stores/ui/settings.store'
 
 type Props = {
   user?: User
@@ -15,15 +15,14 @@ type Props = {
 
 const UserProfileHeader = observer(function UserProfileHeader(props: Props) {
   const { user } = props
-  const store = useStore()
-  const { banner, nip05 } = user?.metadata || {}
+  const { banner, nip05 } = user?.meta || {}
   return (
     <CenteredContainer maxWidth='sm' sx={{ mt: 0, mb: 0, pt: 0, pb: 0 }}>
       <PaperContainer sx={{ mb: 0, borderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
         <Box sx={{ overflow: 'hidden', height: 220, m: '0 auto', p: 0 }}>
           {banner && (
             <img
-              key={store.settings.getImgProxyUrl('user_avatar', banner)}
+              key={settingsStore.getImgProxyUrl('user_avatar', banner)}
               style={{ objectFit: 'cover', width: '100%', height: '100%' }}
               src={banner}
             />

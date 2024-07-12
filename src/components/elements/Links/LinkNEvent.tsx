@@ -2,7 +2,7 @@ import { Link, type LinkProps } from '@mui/material'
 import { useRouter } from '@tanstack/react-router'
 import { observer } from 'mobx-react-lite'
 import React, { useCallback } from 'react'
-import type { Note } from 'stores/modules/note.store'
+import type Note from 'stores/models/note'
 
 interface Props extends Omit<LinkProps, 'color'> {
   note: Note
@@ -22,7 +22,8 @@ const LinkNEvent = observer(function LinkNEvent(props: Props) {
         router.navigate({
           to: `/$nostr`,
           params: { nostr: note.nevent },
-          state: { from: router.latestLocation.pathname },
+          // TODO: check this later
+          // state: { from: router.latestLocation.pathname },
         })
       }
       return true

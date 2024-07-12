@@ -1,5 +1,6 @@
+import type { ContentSchema } from 'content/types'
 import React from 'react'
-import type { User } from 'stores/modules/user.store'
+import type User from 'stores/models/user'
 import { TextContent } from '../Content/Text'
 
 type Props = {
@@ -8,9 +9,10 @@ type Props = {
 
 function UserContentAbout(props: Props) {
   const { user } = props
+  const schema = user?.meta?.aboutParsed as ContentSchema
   return (
     <>
-      {user?.metadata?.aboutParsed?.content?.map((node, index) => (
+      {schema?.content?.map((node, index) => (
         <React.Fragment key={node.type + index}>
           {node.type === 'paragraph' && <TextContent node={node} />}
         </React.Fragment>
