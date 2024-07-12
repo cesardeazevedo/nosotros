@@ -1,12 +1,13 @@
 import { Kind } from 'constants/kinds'
+import type { UserDB } from 'nostr/types'
 import { getEventHash, getPublicKey, getSignature, type Event } from 'nostr-tools'
-import type { UserMetaData } from 'stores/modules/user.store'
+import type { UserMetaData } from 'nostr/nips/nip01/metadata/parseUser'
 
 export function fakeImageUrl(width: number, height?: number) {
   return `https://dummyimage.com/${width}x${height || width}/000/fff.jpg`
 }
 
-export function fakeUserData(data?: Partial<UserMetaData>): UserMetaData {
+export function fakeUserData(data?: Partial<UserDB['metadata']>): Partial<UserMetaData> {
   return {
     ...data,
     name: data?.name || 'name',
@@ -33,12 +34,12 @@ export function fakeUser(pubkey?: string, data?: Partial<UserMetaData>): Event {
 
 export function fakeNote(data?: Partial<Event>): Event {
   return {
-    kind: data?.kind || Kind.Text,
+    kind: data?.kind ?? Kind.Text,
     id: data?.id || Math.random().toString().slice(2),
     content: data?.content || 'Hello World',
     created_at: data?.created_at || Date.now() / 1000 - 1000,
     pubkey: data?.pubkey || '1',
-    tags: data?.tags || [[]],
+    tags: data?.tags || [],
     sig: '',
   }
 }
@@ -53,6 +54,7 @@ const privateKeys = {
 } as Record<string, string>
 
 export function fakeSignature(wrappedEvent: Event) {
+  // eslint-disable-next-line
   const { id, sig, ...rest } = wrappedEvent
   const privateKey = privateKeys[rest.pubkey || '1'] || privateKeys['1']
   const event = {

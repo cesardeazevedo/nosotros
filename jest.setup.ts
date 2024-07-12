@@ -1,5 +1,8 @@
+import { storage } from 'nostr/storage'
 import { vi } from 'vitest'
 
+vi.mock('core/Relay')
+vi.mock('constants/relays')
 vi.mock('mobx-persist-store')
 
 vi.mock('nostr-tools', async () => {
@@ -10,3 +13,6 @@ vi.mock('nostr-tools', async () => {
     verifySignature: vi.fn(() => true),
   }
 })
+
+// Reset Indexeddb
+beforeEach(() => storage.clearDB())

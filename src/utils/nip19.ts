@@ -22,7 +22,7 @@ export type Nnote = `note1${string}`
 export type Npub = `npub1${string}`
 
 // Type guards
-type Decoded = DecodeValue<keyof Prefixes>
+export type Decoded = DecodeValue<keyof Prefixes>
 export const isNpub = (decoded?: Decoded): decoded is DecodeValue<'npub'> => decoded?.type === 'npub'
 export const isNevent = (decoded?: Decoded): decoded is DecodeValue<'nevent'> => decoded?.type === 'nevent'
 export const isNprofile = (decoded?: Decoded): decoded is DecodeValue<'nprofile'> => decoded?.type === 'nprofile'
@@ -43,6 +43,6 @@ export function encodeSafe<T>(callback: () => T) {
   try {
     return callback()
   } catch {
-    return undefined
+    return null
   }
 }
