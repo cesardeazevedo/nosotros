@@ -12,7 +12,7 @@ export default function Video(props: Props) {
   return (
     <video
       controls
-      preload='none'
+      preload='metadata'
       style={{
         width: '100%',
         maxHeight: 600,

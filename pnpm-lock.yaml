@@ -119,6 +119,9 @@ importers:
       react-json-view:
         specifier: ^1.21.3
         version: 1.21.3(@types/react@18.3.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      react-lite-youtube-embed:
+        specifier: ^2.4.0
+        version: 2.4.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-tweet:
         specifier: ^3.2.0
         version: 3.2.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -7354,6 +7357,12 @@ packages:
 
   react-lifecycles-compat@3.0.4:
     resolution: {integrity: sha512-fBASbA6LnOU9dOU2eW7aQ8xmYBSXUIWr+UmF9b1efZBazGNO+rcXT/icdKnYm2pTwcRylVUYwW7H1PHfLekVzA==}
+
+  react-lite-youtube-embed@2.4.0:
+    resolution: {integrity: sha512-Xo6cM1zPlROvvM97JkqQIoXstlQDaC4+DawmM7BB7Hh1cXrkBHEGq1iJlQxBTUWAUklmpcC7ph7qg7CztXtABQ==}
+    peerDependencies:
+      react: '>=18.2.0'
+      react-dom: '>=18.2.0'
 
   react-refresh@0.14.0:
     resolution: {integrity: sha512-wViHqhAd8OHeLS/IRMJjTSDHF3U9eWi62F/MledQGPdJGDhodXJ9PBLNGr6WWL7qlH12Mt3TyTpbS+hGXMjCzQ==}
@@ -18354,6 +18363,11 @@ snapshots:
       - encoding
 
   react-lifecycles-compat@3.0.4: {}
+
+  react-lite-youtube-embed@2.4.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+    dependencies:
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
 
   react-refresh@0.14.0: {}
 
