@@ -108,7 +108,6 @@ export class DeckStore {
   addColumn(module: Modules, index = this.columns.length) {
     this.add(module)
     if (module) {
-      console.log('ADDD???', module)
       this.options.set(module.id, module.options)
       this.columns.splice(index, 0, module.id)
       return module

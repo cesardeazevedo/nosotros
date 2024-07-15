@@ -3,7 +3,9 @@ import { styled } from '@mui/material/styles'
 import LinkProfile from 'components/elements/Links/LinkProfile'
 import UserPopover from 'components/elements/User/UserPopover'
 import { observer } from 'mobx-react-lite'
+import { useContext } from 'react'
 import { userStore } from 'stores/nostr/users.store'
+import { ContentContext } from '../Content'
 
 export type Props = {
   pubkey: string
@@ -29,16 +31,13 @@ const Loader = styled(Skeleton)({
 
 export const Mention = observer(function TextMention(props: Props) {
   const user = userStore.get(props.pubkey)
-  // console.log(props.pubkey)
-  // if (props.pubkey === '69a0a0910b49a1dbfbc4e4f10df22b5806af5403a228267638f2e908c968228d') {
-  //   console.log(user)
-  // }
+  const { disableLink } = useContext(ContentContext)
   return (
     <Container>
       {!user && <Loader animation='wave' variant='rectangular' />}
       {user && (
         <UserPopover user={user}>
-          <LinkProfile color='primary' user={user}>
+          <LinkProfile color='primary' user={user} disabled={disableLink}>
             @{user.displayName}
           </LinkProfile>
         </UserPopover>

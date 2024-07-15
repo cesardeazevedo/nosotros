@@ -51,7 +51,6 @@ export class FeedModule implements ModuleInterface {
     this.id = options.id
     this.options = options
 
-    console.log('client ref')
     this.client = appState.client
     this.pagination$ = new PaginationSubject(options.filter, { range: this.options.range })
   }

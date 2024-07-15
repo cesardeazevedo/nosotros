@@ -5,15 +5,13 @@ import PostContentWrapper from '../PostContentWrapper'
 
 type Props = {
   note: Note
-  dense?: boolean
-  initialExpanded?: boolean
 }
 
 const PostReplyContent = observer(function PostReplyContent(props: Props) {
-  const { note, dense = true } = props
+  const { note } = props
   return (
     <PostContentWrapper bubble note={note}>
-      <Content bubble note={note} dense={dense} />
+      <Content dense bubble note={note} />
     </PostContentWrapper>
   )
 })
