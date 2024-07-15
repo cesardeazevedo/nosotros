@@ -1,9 +1,11 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import Link from './Link/Link'
 import { CodeSpan } from './Markdown/CodeSpan'
 import { Mention } from './Mention/Mention'
 import Tag from './Tag/Tag'
 import type { BlockQuoteNode, HeadingNode, Mark, ParagraphNode, TextNode } from '../../../content/types'
+import { ContentContext } from './Content'
+import { Typography } from '@mui/material'
 
 type Props = {
   node: TextNode
@@ -11,6 +13,7 @@ type Props = {
 
 function Text(props: Props) {
   const { text, marks = [] } = props.node
+  const { disableLink } = useContext(ContentContext)
   return (
     <>
       {marks.reduce(
@@ -27,7 +30,9 @@ function Text(props: Props) {
             case 'tag':
               return <Tag>{content}</Tag>
             case 'link':
-              return <Link href={mark.attrs.href}>{content}</Link>
+              return disableLink
+                ? <Typography>{content}</Typography>
+                : <Link href={mark.attrs.href}>{content}</Link>
             default:
               return content
           }

@@ -127,7 +127,7 @@ const PostReply = observer(function PostReply(props: Props) {
                 <Row sx={{ alignItems: 'flex-start' }}>
                   <UserAvatar user={user} />
                   <Box sx={{ ml: 1 }}>
-                    <PostReplyContent dense note={note} />
+                    <PostReplyContent note={note} />
                   </Box>
                 </Row>
               </Box>

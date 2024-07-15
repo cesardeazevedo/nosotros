@@ -1,11 +1,12 @@
 import { styled } from '@mui/material'
-import { useRef } from 'react'
+import type { SyntheticEvent } from 'react'
+import { useCallback, useContext, useRef } from 'react'
 import type Note from 'stores/models/note'
 import { dialogStore } from 'stores/ui/dialogs.store'
 import { settingsStore } from 'stores/ui/settings.store'
+import { ContentContext } from '../Content'
 
 type Props = {
-  dense?: boolean
   src: string
   note: Note
 }
@@ -23,12 +24,19 @@ const Img = styled('img', { shouldForwardProp })<{ dense?: boolean }>(({ dense }
 }))
 
 function Image(props: Props) {
-  const { note, dense, src } = props
+  const { note, src } = props
+  const { dense } = useContext(ContentContext)
   const ref = useRef<HTMLImageElement>(null)
 
   const width = note.meta.imeta?.[src]?.dim?.width
   const height = note.meta.imeta?.[src]?.dim?.height
   // const blurhash = note.imeta?.metadata?.[url]?.blurhash
+
+  const handleClick = useCallback((e: SyntheticEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    dialogStore.pushImage(src)
+  }, [src])
 
   return (
     <div
@@ -40,7 +48,7 @@ function Image(props: Props) {
         maxHeight: 800,
         maxWidth: 600,
       }}
-      onClick={() => dialogStore.pushImage(src)}>
+      onClick={handleClick}>
       {/* Too slow, not worth it */}
       {/* <ImageBlur width={width} height={height} blurhash={blurhash} render={!loaded} /> */}
       <Img

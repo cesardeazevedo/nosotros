@@ -6,14 +6,16 @@ import PostContentWrapper from './PostContentWrapper'
 type Props = {
   note: Note
   dense?: boolean
+  disableLink?: boolean
   initialExpanded?: boolean
 }
 
+
 const PostContent = observer(function PostContent(props: Props) {
-  const { note, dense = false, initialExpanded = false } = props
+  const { note, dense = false, disableLink = false, initialExpanded = false } = props
   return (
     <PostContentWrapper note={note} initialExpanded={initialExpanded}>
-      <Content note={note} dense={dense} />
+      <Content note={note} dense={dense} disableLink={disableLink} />
     </PostContentWrapper>
   )
 })

@@ -1,5 +1,7 @@
 import { styled } from '@mui/material'
 import type { ParagraphNode } from 'content/types'
+import { useContext } from 'react'
+import { ContentContext } from '../Content'
 import { TextContent } from '../Text'
 
 const shouldForwardProp = (prop: string) => prop !== 'dense'
@@ -16,14 +18,14 @@ export const Container = styled('div', { shouldForwardProp })<{ dense: boolean }
 
 type Props = {
   node: ParagraphNode
-  dense?: boolean
 }
 
 export default function Paragraph(props: Props) {
-  const { dense = false } = props
+  const { node } = props
+  const { dense } = useContext(ContentContext)
   return (
     <Container dense={dense}>
-      <TextContent node={props.node} />
+      <TextContent node={node} />
     </Container>
   )
 }
