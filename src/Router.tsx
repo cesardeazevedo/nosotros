@@ -70,6 +70,7 @@ export const nostrRoute = createRoute({
     }
   },
   loader: (options) => {
+    console.log(options)
     const { decoded } = options.context
     switch (true) {
       case isNpub(decoded): {
