@@ -9,14 +9,14 @@ interface Props {
   user?: User
   color?: LinkOwnProps['color']
   underline?: LinkProps['underline']
-  disabled?: boolean
+  disableLink?: boolean
   children: React.ReactNode
 }
 
 const LinkProfile = observer(forwardRef<never, Props>(function LinkProfile(props, ref) {
-  const { user, color = 'inherit', disabled = false, underline, children, ...rest } = props
+  const { user, color = 'inherit', disableLink = false, underline, children, ...rest } = props
 
-  if (disabled || !user?.nprofile) {
+  if (disableLink || !user?.nprofile) {
     return children
   }
 
@@ -25,8 +25,7 @@ const LinkProfile = observer(forwardRef<never, Props>(function LinkProfile(props
       to='/$nostr'
       color={color as string}
       params={{ nostr: user?.nprofile }}
-      disabled={disabled}
-      underline={underline || (disabled ? 'none' : 'hover')}
+      underline={underline}
       {...rest}
       ref={ref}
     >

@@ -15,7 +15,7 @@ type Props = {
 }
 
 const Note = observer(function PostNote(props: Props) {
-  const { dense } = useContext(ContentContext)
+  const { dense, disableLink } = useContext(ContentContext)
   const note = noteStore.get(props.noteId)
   return (
     <>
@@ -27,11 +27,16 @@ const Note = observer(function PostNote(props: Props) {
       {note && (
         <Paper variant='outlined' sx={{ borderRadius: 2, mt: 1, mx: dense ? 0 : 2, pb: 2, background: 'transparent' }}>
           <Row sx={{ px: 2, pt: 1 }}>
-            <UserHeader dense note={note} />
+            <UserHeader dense note={note} disableLink={disableLink} />
           </Row>
-          <LinkNEvent note={note} underline='none' sx={{ cursor: 'pointer', fontWeight: 'normal' }}>
+          {disableLink && (
             <PostContent initialExpanded note={note} disableLink />
-          </LinkNEvent>
+          )}
+          {!disableLink && (
+            <LinkNEvent note={note} underline='none' sx={{ cursor: 'pointer', fontWeight: 'normal' }}>
+              <PostContent initialExpanded note={note} disableLink />
+            </LinkNEvent>
+          )}
           <Box sx={{ mt: 1, ml: 2 }}>
             <PostActions dense note={note} />
           </Box>

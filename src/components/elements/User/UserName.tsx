@@ -39,7 +39,7 @@ const UserName = observer(function UserName(props: Props) {
         <Skeleton variant='rectangular' style={{ alignSelf: 'center', width: 100, height: 14, borderRadius: 6 }} />
       )}
       <UserPopover user={user} disabled={disablePopover}>
-        <LinkProfile user={user} disabled={disableLink}>
+        <LinkProfile user={user} disableLink={disableLink}>
           <Container variant='subtitle1' {...rest}>
             {user?.displayName}
             {children}

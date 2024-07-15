@@ -8,10 +8,15 @@ interface Props extends Omit<LinkProps, 'ref'> {
   note: Note
   component?: LinkProps['component']
   children: React.ReactNode
+  disableLink?: boolean
 }
 
 const LinkNEvent = observer(function LinkNEvent(props: Props) {
-  const { note, ...rest } = props
+  const { note, disableLink, ...rest } = props
+
+  if (disableLink) {
+    return props.children
+  }
 
   return (
     <LinkRouter to='/$nostr' params={{ nostr: note.nevent }} sx={{ cursor: 'pointer' }} {...rest}>
