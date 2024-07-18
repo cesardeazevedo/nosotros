@@ -1,4 +1,4 @@
-import { mergeFilters } from "../mergeFilters"
+import { mergeFilters } from '../mergeFilters'
 
 describe('mergeFilters', () => {
   test('Should expect authors of kind [0] being merged', () => {
@@ -57,7 +57,6 @@ describe('mergeFilters', () => {
       { kinds: [0], authors: ['npub4'], until: 10 },
     ])
     expect(result).toHaveLength(3)
-    return
     expect(result[0]).toStrictEqual({ kinds: [0, 1, 6], authors: ['npub1', 'npub2'] })
     expect(result[1]).toStrictEqual({ kinds: [0], authors: ['npub3'] })
     expect(result[2]).toStrictEqual({ kinds: [0], authors: ['npub4'], until: 10 })
@@ -75,17 +74,20 @@ describe('mergeFilters', () => {
     expect(result[1]).toStrictEqual({ kinds: [0], authors: ['npub3', 'npub4'], until: 15 })
   })
 
-  test('Should expect merge authors of different kinds', () => {
+  test('Should merge replaceable kinds and not other kinds', () => {
     const result = mergeFilters([
       { kinds: [0], authors: ['npub1'] },
       { kinds: [0], authors: ['npub2'] },
       { kinds: [10002], authors: ['npub3'] },
       { kinds: [10002], authors: ['npub4'] },
+      { kinds: [1], authors: ['npub1'] },
+      { kinds: [6], authors: ['npub2'] },
     ])
-    expect(result).toHaveLength(2)
+    expect(result).toHaveLength(3)
     expect(result).toStrictEqual([
-      { kinds: [0], authors: ['npub1', 'npub2'] },
-      { kinds: [10002], authors: ['npub3', 'npub4'] },
+      { kinds: [0, 10002], authors: ['npub1', 'npub2', 'npub3', 'npub4'] },
+      { kinds: [1], authors: ['npub1'] },
+      { kinds: [6], authors: ['npub2'] },
     ])
   })
 
