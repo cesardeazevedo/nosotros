@@ -1,17 +1,17 @@
-import { NostrClient } from "nostr/nostr"
-import { authStore } from "./ui/auth.store"
-import { DEFAULT_RELAYS } from "constants/relays"
-import { router } from "Router"
+import { DEFAULT_RELAYS } from 'constants/relays'
+import { NostrClient } from 'nostr/nostr'
+import { pool } from 'nostr/pool'
+import { router } from 'Router'
+import { authStore } from './ui/auth.store'
 
 class AppState {
   client: NostrClient
 
   constructor() {
-
     if (authStore.pubkey) {
-      this.client = new NostrClient({ pubkey: authStore.pubkey })
+      this.client = new NostrClient(pool, { pubkey: authStore.pubkey })
     } else {
-      this.client = new NostrClient({ relays: DEFAULT_RELAYS })
+      this.client = new NostrClient(pool, { relays: DEFAULT_RELAYS })
     }
 
     if (authStore.pubkey) {
@@ -25,12 +25,12 @@ class AppState {
   }
 
   onLogin(pubkey: string) {
-    this.client = new NostrClient({ pubkey })
+    this.client = new NostrClient(pool, { pubkey })
     this.subscribeUser(pubkey)
     router.history.back()
   }
 
-  onLogout() { }
+  onLogout() {}
 
   subscribeUser(pubkey: string) {
     this.client.users.subscribe([pubkey]).subscribe()

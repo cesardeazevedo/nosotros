@@ -5,7 +5,6 @@ import type { UserMetaData } from 'nostr/nips/nip01/metadata/parseUser'
 import type { NostrReference } from 'nostr/nips/nip27.references'
 import type { IMetaTags } from './nips/nip92.imeta'
 
-
 export interface NoteDB extends EventDB {
   metadata: {
     imeta: IMetaTags

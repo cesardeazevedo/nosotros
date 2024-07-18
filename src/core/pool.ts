@@ -4,6 +4,7 @@ import type { NostrSubscription } from './NostrSubscription'
 import { onAuth } from './operators/onAuth'
 import { start } from './operators/start'
 import { Relay } from './Relay'
+import type { NostrFilter } from './types'
 
 type Options = {
   blacklist?: Array<{ pattern: RegExp }>
@@ -22,9 +23,7 @@ export class Pool {
     this.relays.set(url, relay)
 
     // Stablish WebSocket connection
-    relay.websocket$.pipe(
-      onAuth((challenge) => this.options?.auth?.(relay, challenge)),
-    ).subscribe({
+    relay.websocket$.pipe(onAuth((challenge) => this.options?.auth?.(relay, challenge))).subscribe({
       error: () => {
         this.relays.delete(url)
         this.blacklisted.add(url)
@@ -51,7 +50,7 @@ export class Pool {
     return this.newRelay(url)
   }
 
-  subscribe(sub: NostrSubscription) {
-    return of(sub).pipe(start(this))
+  subscribe(sub: NostrSubscription, refine?: (filters: NostrFilter[]) => NostrFilter[]) {
+    return of(sub).pipe(start(this, refine))
   }
 }

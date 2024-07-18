@@ -3,7 +3,6 @@ import { IconHeart } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
 import type Note from 'stores/models/note'
 import { fallbackEmoji, reactionStore } from 'stores/nostr/reactions.store'
-import { settingsStore } from 'stores/ui/settings.store'
 import ReactionPicker from '../../Reactions/ReactionPicker'
 import ReactionsTooltip from '../../Reactions/ReactionsTooltip'
 import ButtonContainer from './PostButtonContainer'
@@ -17,7 +16,6 @@ const PostButtonReact = observer(function PostReactions(props: Props) {
   const { note, dense } = props
   const total = reactionStore.getTotal(note.id)
   const myReactions = reactionStore.myReactions.get(note.id)?.[0][0]
-  const { defaultEmoji } = settingsStore
   return (
     <>
       <ButtonContainer
@@ -30,7 +28,7 @@ const PostButtonReact = observer(function PostReactions(props: Props) {
         }>
         <ReactionPicker onClick={() => { }}>
           <IconButton size='small' color='info' sx={{ backgroundColor: myReactions ? 'divider' : 'none' }}>
-            {myReactions ? fallbackEmoji(myReactions) : <>{defaultEmoji || <IconHeart strokeWidth='1.5' />}</>}
+            {myReactions ? fallbackEmoji(myReactions) : <><IconHeart strokeWidth='1.5' /></>}
           </IconButton>
         </ReactionPicker>
       </ButtonContainer>

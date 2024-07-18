@@ -31,12 +31,11 @@ export class PaginationSubject extends BehaviorSubject<NostrFilter> {
     this.skipUntil = options?.skipUntil || 1000
     this.initialValue = initialValue
 
-    this.subject$.pipe(
-      skipUntil(timer(this.skipUntil)),
-      throttleTime(this.debounceTime, undefined, throttleConfig),
-    ).subscribe(() => {
-      super.next(paginateFilter(this.value, this.range))
-    })
+    this.subject$
+      .pipe(skipUntil(timer(this.skipUntil)), throttleTime(this.debounceTime, undefined, throttleConfig))
+      .subscribe(() => {
+        super.next(paginateFilter(this.value, this.range))
+      })
   }
 
   get value() {
