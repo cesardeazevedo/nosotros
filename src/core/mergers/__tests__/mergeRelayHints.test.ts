@@ -1,4 +1,4 @@
-import { mergeRelayHints } from "../mergeRelayHints"
+import { mergeRelayHints } from '../mergeRelayHints'
 
 test('mergeRelayHints', () => {
   const res = mergeRelayHints([
