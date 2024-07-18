@@ -10,7 +10,6 @@ type Props = {
   initialExpanded?: boolean
 }
 
-
 const PostContent = observer(function PostContent(props: Props) {
   const { note, dense = false, disableLink = false, initialExpanded = false } = props
   return (

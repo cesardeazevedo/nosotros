@@ -7,7 +7,7 @@ import type { IndexedDBSchema } from '../idb.schemas'
 import IDBEventQuery from './idb.events.query'
 
 export class IDBEventStore {
-  constructor(private db: Promise<idb.IDBPDatabase<IndexedDBSchema>>) { }
+  constructor(private db: Promise<idb.IDBPDatabase<IndexedDBSchema>>) {}
 
   async *query(filters: NostrFilter | NostrFilter[]) {
     const db = await this.db

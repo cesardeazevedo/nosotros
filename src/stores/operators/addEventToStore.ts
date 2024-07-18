@@ -1,9 +1,9 @@
-import { Kind } from "constants/kinds"
-import type { NostrEvent } from "core/types"
-import { cache, cacheRelayList } from "nostr/cache"
-import type { UserDB } from "nostr/types"
-import { reactionStore } from "stores/nostr/reactions.store"
-import { userStore } from "stores/nostr/users.store"
+import { Kind } from 'constants/kinds'
+import type { NostrEvent } from 'core/types'
+import { cache, cacheRelayList } from 'nostr/cache'
+import type { UserDB } from 'nostr/types'
+import { reactionStore } from 'stores/nostr/reactions.store'
+import { userStore } from 'stores/nostr/users.store'
 
 export function addEventToStore(event: NostrEvent) {
   switch (event.kind) {
@@ -36,4 +36,3 @@ export function addEventToStore(event: NostrEvent) {
     }
   }
 }
-

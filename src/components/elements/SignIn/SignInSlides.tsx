@@ -1,9 +1,9 @@
-import { Box, Slide, styled } from "@mui/material"
-import { useMobile } from "hooks/useMobile"
-import { useCallback, useEffect, useRef } from "react"
-import { OnboardMachineContext } from "./SignInContext"
-import SignInForm from "./SignInForm"
-import SignInIntro from "./SignInIntro"
+import { Box, Slide, styled } from '@mui/material'
+import { useMobile } from 'hooks/useMobile'
+import { useCallback, useEffect, useRef } from 'react'
+import { OnboardMachineContext } from './SignInContext'
+import SignInForm from './SignInForm'
+import SignInIntro from './SignInIntro'
 
 const easings = {
   enter: 'cubic-bezier(0.33, 1, 0.68, 1)',
@@ -41,30 +41,27 @@ function SignInSlides() {
     return subscription.unsubscribe
   }, [machine])
 
-  const handleDirection = useCallback(
-    (nextStep: number) => {
-      const step = stepRef.current
-      const prev = prevStepRef.current
+  const handleDirection = useCallback((nextStep: number) => {
+    const step = stepRef.current
+    const prev = prevStepRef.current
 
-      if (nextStep > step) {
-        // If the next step is greater than the current step, move from right to left.
+    if (nextStep > step) {
+      // If the next step is greater than the current step, move from right to left.
+      return 'left'
+    } else if (nextStep < step) {
+      // If the next step is less than the current step, move from left to right.
+      return 'right'
+    } else if (nextStep === step) {
+      // If the next step is the same as the current step, consider the previous step.
+      if (prev < nextStep) {
         return 'left'
-      } else if (nextStep < step) {
-        // If the next step is less than the current step, move from left to right.
+      } else if (prev > nextStep) {
         return 'right'
-      } else if (nextStep === step) {
-        // If the next step is the same as the current step, consider the previous step.
-        if (prev < nextStep) {
-          return 'left'
-        } else if (prev > nextStep) {
-          return 'right'
-        }
-        return 'left'
       }
       return 'left'
-    },
-    [],
-  )
+    }
+    return 'left'
+  }, [])
 
   const handleNext = useCallback(() => {
     machine.send({ type: 'next' })
@@ -89,7 +86,7 @@ function SignInSlides() {
           <SignInForm />
         </AbsoluteContainer>
       </Slide>
-    </Box >
+    </Box>
   )
 }
 

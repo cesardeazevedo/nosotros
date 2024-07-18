@@ -1,7 +1,7 @@
-import { AccordionDetails, AccordionSummary, Divider, Typography } from "@mui/material"
-import Accordion from "components/elements/Layouts/Accordion"
-import SettingsAuthors from "./SettingsAuthors"
-import SettingsKinds from "./SettingsKinds"
+import { AccordionDetails, AccordionSummary, Divider, Typography } from '@mui/material'
+import Accordion from 'components/elements/Layouts/Accordion'
+import SettingsAuthors from './SettingsAuthors'
+import SettingsKinds from './SettingsKinds'
 
 function SettingsFilters() {
   return (

@@ -1,7 +1,7 @@
-import { subscribeSpyTo } from "@hirez_io/observer-spy"
-import { of } from "rxjs"
-import { fakeNote } from "utils/faker"
-import { ofKind } from "../ofKind"
+import { subscribeSpyTo } from '@hirez_io/observer-spy'
+import { of } from 'rxjs'
+import { fakeNote } from 'utils/faker'
+import { ofKind } from '../ofKind'
 
 test('ofKind', () => {
   const kind0 = fakeNote({ kind: 0 })

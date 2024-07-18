@@ -25,7 +25,7 @@ const PostCreateForm = function PostCreateForm() {
             fullWidth
             rows={2}
             placeholder="What's in your mind?"
-            sx={{ fontSize: '115%', fontWeight: 500, }}
+            sx={{ fontSize: '115%', fontWeight: 500 }}
             startAdornment={
               <Box sx={{ mr: 2, alignSelf: 'flex-start' }}>
                 <Observer>{() => <UserAvatar user={authStore.currentUser} size={34} />}</Observer>
@@ -55,8 +55,8 @@ const PostCreateForm = function PostCreateForm() {
             </Button>
           </Row>
         </Box>
-      </Row >
-    </PaperContainer >
+      </Row>
+    </PaperContainer>
   )
 }
 

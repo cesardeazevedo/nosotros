@@ -1,9 +1,9 @@
-import { subscribeSpyTo } from "@hirez_io/observer-spy"
-import { Kind } from "constants/kinds"
-import { parseNote } from "nostr/nips/nip01/metadata/parseNote"
-import { storage } from "nostr/storage"
-import { fakeNote } from "utils/faker"
-import { queryCache } from "../queryCache"
+import { subscribeSpyTo } from '@hirez_io/observer-spy'
+import { Kind } from 'constants/kinds'
+import { parseNote } from 'nostr/nips/nip01/metadata/parseNote'
+import { storage } from 'nostr/storage'
+import { fakeNote } from 'utils/faker'
+import { queryCache } from '../queryCache'
 
 test('queryCache()', async () => {
   const note1 = parseNote(fakeNote({ id: '1', kind: Kind.Text, pubkey: '1' }))

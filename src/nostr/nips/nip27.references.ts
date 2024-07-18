@@ -133,4 +133,3 @@ export function parseReferences(evt: Partial<NostrEvent>): NostrReference[] {
 
   return references
 }
-

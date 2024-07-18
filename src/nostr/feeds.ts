@@ -5,13 +5,13 @@ import { from, mergeMap } from 'rxjs'
 import type { NostrClient } from './nostr'
 
 export class NostrFeeds {
-  constructor(private client: NostrClient) { }
+  constructor(private client: NostrClient) {}
 
   subscribe(filter$: PaginationSubject, options?: SubscriptionOptions) {
     return from(filter$).pipe(
       mergeMap((filter) => {
         return this.client.notes.subWithRelated(filter, options)
-      })
+      }),
     )
   }
 

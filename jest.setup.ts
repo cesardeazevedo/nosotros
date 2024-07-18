@@ -1,7 +1,6 @@
 import { storage } from 'nostr/storage'
 import { vi } from 'vitest'
 
-vi.mock('core/Relay')
 vi.mock('constants/relays')
 vi.mock('mobx-persist-store')
 

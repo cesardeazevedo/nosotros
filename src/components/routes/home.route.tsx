@@ -14,9 +14,7 @@ const HomeRoute = observer(function HomeRoute() {
   return (
     <>
       {!authStore.currentUser ? <SignInButtonFab /> : <PostFab />}
-      {feed && (
-        <FeedMain feed={feed.feed} renderCreatePost />
-      )}
+      {feed && <FeedMain feed={feed.feed} renderCreatePost />}
     </>
   )
 })

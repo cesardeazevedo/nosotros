@@ -20,11 +20,7 @@ export const onboardMachine = setup({
   types: {
     context: {} as Context,
     meta: {} as { index: number },
-    events: {} as
-      | { type: 'back' }
-      | { type: 'next' }
-      | { type: 'next.pubkey' }
-      | { type: 'paste' }
+    events: {} as { type: 'back' } | { type: 'next' } | { type: 'next.pubkey' } | { type: 'paste' },
   },
   actors: {
     clipboard,
@@ -35,8 +31,8 @@ export const onboardMachine = setup({
       if (pubkey) {
         appState.client.users.subscribe([pubkey]).subscribe()
       }
-    }
-  }
+    },
+  },
 }).createMachine({
   initial: 'intro',
   context: {
@@ -50,12 +46,11 @@ export const onboardMachine = setup({
         index: 0,
       },
       on: {
-        'next': {
+        next: {
           target: 'withPubkey',
         },
-        'back': {
-        },
-      }
+        back: {},
+      },
     },
     withPubkey: {
       meta: {
@@ -66,37 +61,35 @@ export const onboardMachine = setup({
         idle: {
           on: {
             paste: {
-              target: 'clipboard'
-            }
-          }
+              target: 'clipboard',
+            },
+          },
         },
         clipboard: {
           invoke: {
             src: 'clipboard',
             onError: {
-              target: 'clipboardRejected'
+              target: 'clipboardRejected',
             },
             onDone: {
               actions: assign((args) => ({ pubkey: args.event.output?.text })),
-              target: 'clipboardAccepted'
-            }
-          }
+              target: 'clipboardAccepted',
+            },
+          },
         },
         clipboardAccepted: {},
         clipboardRejected: {
-          entry: [
-            assign(() => ({ clipboardError: 'Clipboard permission not granted' })),
-          ]
-        }
+          entry: [assign(() => ({ clipboardError: 'Clipboard permission not granted' }))],
+        },
       },
       on: {
-        'next': {
+        next: {
           target: 'confirm',
         },
-        'back': {
+        back: {
           target: 'intro',
-        }
-      }
+        },
+      },
     },
     withRemoteSigner: {
       meta: {
@@ -108,5 +101,5 @@ export const onboardMachine = setup({
         index: 2,
       },
     },
-  }
+  },
 })

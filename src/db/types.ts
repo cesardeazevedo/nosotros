@@ -1,8 +1,10 @@
-import type { Kind } from "constants/kinds"
-import type { NostrEvent, NostrFilter } from "core/types"
+import type { Kind } from 'constants/kinds'
+import type { NostrEvent, NostrFilter } from 'core/types'
 
 export interface Storage {
-  query(filters: NostrFilter | NostrFilter[]): AsyncGenerator<Generator<AsyncGenerator<NostrEvent, void, unknown>, void, unknown>, void, undefined>;
+  query(
+    filters: NostrFilter | NostrFilter[],
+  ): AsyncGenerator<Generator<AsyncGenerator<NostrEvent, void, unknown>, void, unknown>, void, undefined>
   queryEventByPubkey(kind: number, pubkey: string): Promise<NostrEvent | undefined>
   insert(event: NostrEvent): Promise<NostrEvent | false>
   querySeen(eventId: string): Promise<SeenDB[]>

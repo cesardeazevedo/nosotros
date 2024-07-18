@@ -1,7 +1,7 @@
-import type { NostrEvent } from "core/types"
-import { makeAutoObservable, observable } from "mobx"
-import { isEventTag } from "nostr/nips/nip01/metadata/parseTags"
-import { authStore } from "stores/ui/auth.store"
+import type { NostrEvent } from 'core/types'
+import { makeAutoObservable, observable } from 'mobx'
+import { isEventTag } from 'nostr/nips/nip01/metadata/parseTags'
+import { authStore } from 'stores/ui/auth.store'
 
 export type Reactions = {
   [emoji: string]: string[]

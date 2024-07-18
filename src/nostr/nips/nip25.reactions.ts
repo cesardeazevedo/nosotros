@@ -12,7 +12,7 @@ import { addEventToStore } from 'stores/operators/addEventToStore'
 const kinds = [Kind.Reaction]
 
 export class NIP25Reactions {
-  constructor(private client: NostrClient) { }
+  constructor(private client: NostrClient) {}
 
   subFromNote(note: NoteDB, options?: SubscriptionOptions) {
     return this.subscribe([note.id, ...note.metadata.mentionedNotes], options)

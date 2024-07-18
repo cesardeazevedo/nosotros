@@ -1,14 +1,11 @@
-import { AccordionDetails, AccordionSummary } from "@mui/material"
-import Accordion from "components/elements/Layouts/Accordion"
+import { AccordionDetails, AccordionSummary } from '@mui/material'
+import Accordion from 'components/elements/Layouts/Accordion'
 
 function SettingsAuthors() {
   return (
     <Accordion>
-      <AccordionSummary sx={{ ml: 2 }}>
-        Authors
-      </AccordionSummary>
-      <AccordionDetails>
-      </AccordionDetails>
+      <AccordionSummary sx={{ ml: 2 }}>Authors</AccordionSummary>
+      <AccordionDetails></AccordionDetails>
     </Accordion>
   )
 }

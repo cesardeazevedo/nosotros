@@ -1,12 +1,13 @@
 import type { NostrEvent } from 'core/types'
 import { parseNote } from 'nostr/nips/nip01/metadata/parseNote'
+import { NostrClient } from 'nostr/nostr'
+import { pool } from 'nostr/pool'
 import Note from 'stores/models/note'
 import { fakeNote } from 'utils/faker'
 import { test } from 'utils/fixtures'
 import { NoteStore } from '../notes.store'
-import { NostrClient } from 'nostr/nostr'
 
-const getNote = (event: Partial<NostrEvent>) => new Note(parseNote(fakeNote(event)), new NostrClient())
+const getNote = (event: Partial<NostrEvent>) => new Note(parseNote(fakeNote(event)), new NostrClient(pool))
 
 describe('NoteStore', () => {
   test('Should add a note and expect on the notes store', () => {

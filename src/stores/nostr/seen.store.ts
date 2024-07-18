@@ -1,6 +1,6 @@
-import { dedupe } from "core/helpers"
-import type { SeenDB } from "db/types"
-import { makeAutoObservable, observable } from "mobx"
+import { dedupe } from 'core/helpers'
+import type { SeenDB } from 'db/types'
+import { makeAutoObservable, observable } from 'mobx'
 
 class SeenStore {
   seen = observable.map<string, string[]>()

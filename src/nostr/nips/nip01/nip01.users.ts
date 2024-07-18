@@ -40,9 +40,6 @@ export class NIP01Users {
       tap((user) => enqueueNIP05(user)),
       tap((user) => addEventToStore(user)),
     )
-    return merge(
-      stream$,
-      relayLists$.pipe(ignoreElements()),
-    )
+    return merge(stream$, relayLists$.pipe(ignoreElements()))
   }
 }

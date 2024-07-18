@@ -32,11 +32,14 @@ function Image(props: Props) {
   const height = note.meta.imeta?.[src]?.dim?.height
   // const blurhash = note.imeta?.metadata?.[url]?.blurhash
 
-  const handleClick = useCallback((e: SyntheticEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    dialogStore.pushImage(src)
-  }, [src])
+  const handleClick = useCallback(
+    (e: SyntheticEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      dialogStore.pushImage(src)
+    },
+    [src],
+  )
 
   return (
     <div

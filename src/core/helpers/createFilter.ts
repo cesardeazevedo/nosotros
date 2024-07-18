@@ -1,6 +1,6 @@
-import { FILTER_ARRAY_FIELDS } from "core/mergers/mergeFilters"
-import type { NostrFilter } from "core/types"
-import { dedupe } from "./dedupe"
+import { FILTER_ARRAY_FIELDS } from 'core/mergers/mergeFilters'
+import type { NostrFilter } from 'core/types'
+import { dedupe } from './dedupe'
 
 /**
  * Helper to creates a nostr filter object removing duplicates and null/undefined from array fields such as authors and ids

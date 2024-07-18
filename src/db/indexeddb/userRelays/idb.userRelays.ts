@@ -3,7 +3,7 @@ import type * as idb from 'idb'
 import type { IndexedDBSchema } from '../idb.schemas'
 
 export class IDBUserRelayStore {
-  constructor(private db: Promise<idb.IDBPDatabase<IndexedDBSchema>>) { }
+  constructor(private db: Promise<idb.IDBPDatabase<IndexedDBSchema>>) {}
 
   async query(pubkey: string) {
     const db = await this.db

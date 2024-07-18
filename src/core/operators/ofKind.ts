@@ -1,7 +1,7 @@
-import type { Kind } from "constants/kinds"
-import type { NostrEvent } from "core/types"
-import type { OperatorFunction } from "rxjs"
-import { filter } from "rxjs"
+import type { Kind } from 'constants/kinds'
+import type { NostrEvent } from 'core/types'
+import type { OperatorFunction } from 'rxjs'
+import { filter } from 'rxjs'
 
 /**
  * filter by kind

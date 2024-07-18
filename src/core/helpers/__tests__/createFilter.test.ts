@@ -1,4 +1,4 @@
-import { createFilter } from "../createFilter"
+import { createFilter } from '../createFilter'
 
 describe('createFilter()', () => {
   test('Should expect not duplicates on `authors`, `ids`, `#e` and `kinds`', () => {

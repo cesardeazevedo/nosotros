@@ -20,7 +20,7 @@ export interface IndexedDBSchema extends DBSchema {
     indexes: {
       kind_tag_value: [kind: Kind, tag: string, value: string]
     }
-  },
+  }
   seen: {
     key: [eventId: string, relay: string]
     value: SeenDB
@@ -28,7 +28,7 @@ export interface IndexedDBSchema extends DBSchema {
       eventId: string
       relay: string
     }
-  },
+  }
   userRelays: {
     key: [pubkey: string, relay: string]
     value: UserRelayDB
@@ -67,18 +67,13 @@ const events = {
 const tags = {
   name: 'tags' as const,
   keyPath: ['eventId', 'tag', 'value'],
-  indexes: [
-    { keyPath: ['kind', 'tag', 'value'], name: 'kind_tag_value' },
-  ],
+  indexes: [{ keyPath: ['kind', 'tag', 'value'], name: 'kind_tag_value' }],
 } satisfies Schema<TagDB>
 
 const seen = {
   name: 'seen' as const,
   keyPath: ['eventId', 'relay'],
-  indexes: [
-    { keyPath: 'eventId' },
-    { keyPath: 'relay' }
-  ]
+  indexes: [{ keyPath: 'eventId' }, { keyPath: 'relay' }],
 }
 
 const userRelays = {

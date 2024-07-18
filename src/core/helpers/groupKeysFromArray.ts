@@ -1,4 +1,4 @@
-import { dedupe } from "./dedupe"
+import { dedupe } from './dedupe'
 
 /**
  * [{ a: 1 }, { a: 2 }] => { a: [1, 2] }

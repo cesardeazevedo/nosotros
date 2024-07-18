@@ -2,8 +2,8 @@ import type { NostrEvent, NostrFilter } from 'core/types'
 import type { SeenDB, Storage, UserRelayDB } from 'db/types'
 import type * as idb from 'idb'
 import { IDBEventStore } from './events/idb.events'
-import { buildDB } from "./idb.builder"
-import { schemas, type IndexedDBSchema } from "./idb.schemas"
+import { buildDB } from './idb.builder'
+import { schemas, type IndexedDBSchema } from './idb.schemas'
 import { IDBSeenStore } from './seen/idb.seen'
 import { IDBUserRelayStore } from './userRelays/idb.userRelays'
 

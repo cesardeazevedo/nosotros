@@ -29,9 +29,7 @@ const Note = observer(function PostNote(props: Props) {
           <Row sx={{ px: 2, pt: 1 }}>
             <UserHeader dense note={note} disableLink={disableLink} />
           </Row>
-          {disableLink && (
-            <PostContent initialExpanded note={note} disableLink />
-          )}
+          {disableLink && <PostContent initialExpanded note={note} disableLink />}
           {!disableLink && (
             <LinkNEvent note={note} underline='none' sx={{ cursor: 'pointer', fontWeight: 'normal' }}>
               <PostContent initialExpanded note={note} disableLink />
@@ -40,7 +38,7 @@ const Note = observer(function PostNote(props: Props) {
           <Box sx={{ mt: 1, ml: 2 }}>
             <PostActions dense note={note} />
           </Box>
-        </Paper >
+        </Paper>
       )}
     </>
   )

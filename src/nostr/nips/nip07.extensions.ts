@@ -1,4 +1,4 @@
-import type { UnsignedEvent } from "nostr-tools"
+import type { UnsignedEvent } from 'nostr-tools'
 
 export type NostrExtension = {
   getPublicKey(): Promise<string>

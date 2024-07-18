@@ -13,25 +13,26 @@ interface Props {
   children: React.ReactNode
 }
 
-const LinkProfile = observer(forwardRef<never, Props>(function LinkProfile(props, ref) {
-  const { user, color = 'inherit', disableLink = false, underline, children, ...rest } = props
+const LinkProfile = observer(
+  forwardRef<never, Props>(function LinkProfile(props, ref) {
+    const { user, color = 'inherit', disableLink = false, underline, children, ...rest } = props
 
-  if (disableLink || !user?.nprofile) {
-    return children
-  }
+    if (disableLink || !user?.nprofile) {
+      return children
+    }
 
-  return (
-    <LinkRouter
-      to='/$nostr'
-      color={color as string}
-      params={{ nostr: user?.nprofile }}
-      underline={underline}
-      {...rest}
-      ref={ref}
-    >
-      {children}
-    </LinkRouter >
-  )
-}))
+    return (
+      <LinkRouter
+        to='/$nostr'
+        color={color as string}
+        params={{ nostr: user?.nprofile }}
+        underline={underline}
+        {...rest}
+        ref={ref}>
+        {children}
+      </LinkRouter>
+    )
+  }),
+)
 
 export default LinkProfile

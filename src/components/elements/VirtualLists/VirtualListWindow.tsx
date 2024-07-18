@@ -61,10 +61,7 @@ const VirtualListWindow = observer(function VirtualListWindow(props: Props) {
 
   return (
     <>
-      <WindowVirtualizer
-        ref={ref}
-        cache={cache}
-        onRangeChange={(start, end) => onRangeChange([start, end])}>
+      <WindowVirtualizer ref={ref} cache={cache} onRangeChange={(start, end) => onRangeChange([start, end])}>
         {data.map((id) => render(id))}
       </WindowVirtualizer>
     </>

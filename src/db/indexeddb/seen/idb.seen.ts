@@ -2,9 +2,8 @@ import type { SeenDB } from 'db/types'
 import type * as idb from 'idb'
 import type { IndexedDBSchema } from '../idb.schemas'
 
-
 export class IDBSeenStore {
-  constructor(private db: Promise<idb.IDBPDatabase<IndexedDBSchema>>) { }
+  constructor(private db: Promise<idb.IDBPDatabase<IndexedDBSchema>>) {}
 
   async query(eventId: string) {
     return (await this.db).getAllFromIndex('seen', 'eventId', eventId)

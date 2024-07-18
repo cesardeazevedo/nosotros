@@ -1,10 +1,10 @@
-import { Box, Divider, IconButton, Popover, Tooltip, Typography } from "@mui/material"
-import { IconServerBolt } from "@tabler/icons-react"
-import { Observer } from "mobx-react-lite"
-import { useState } from "react"
-import { relayStore } from "stores/nostr/relays.store"
-import { Row } from "../Layouts/Flex"
-import RelayList from "./RelayList"
+import { Box, Divider, IconButton, Popover, Tooltip, Typography } from '@mui/material'
+import { IconServerBolt } from '@tabler/icons-react'
+import { Observer } from 'mobx-react-lite'
+import { useState } from 'react'
+import { relayStore } from 'stores/nostr/relays.store'
+import { Row } from '../Layouts/Flex'
+import RelayList from './RelayList'
 
 function RelaysPopover() {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
@@ -19,7 +19,6 @@ function RelaysPopover() {
 
   const open = Boolean(anchorEl)
 
-
   return (
     <>
       <Tooltip arrow title='Configure Relays' enterDelay={0}>
@@ -31,8 +30,7 @@ function RelaysPopover() {
             <Observer>
               {() => (
                 <>
-                  {relayStore.myConnectedRelays.length || 0}/
-                  {relayStore.myRelays.length}
+                  {relayStore.myConnectedRelays.length || 0}/{relayStore.myRelays.length}
                 </>
               )}
             </Observer>

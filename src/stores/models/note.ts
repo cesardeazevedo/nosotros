@@ -18,7 +18,10 @@ class Note {
   private sub?: Subscription
   private subReactions?: Subscription
 
-  constructor(public data: NoteDB, client: NostrClient) {
+  constructor(
+    public data: NoteDB,
+    client: NostrClient,
+  ) {
     makeAutoObservable(this, { data: false })
 
     this.client = client
@@ -89,6 +92,7 @@ class Note {
     this.repliesOpen = open ?? !this.repliesOpen
     if (this.repliesOpen) {
       this.subscribeReplies()
+      this.subscribeReactions()
     } else {
       this.sub?.unsubscribe()
       this.subReactions?.unsubscribe()

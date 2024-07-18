@@ -3,7 +3,7 @@ import { Row } from 'components/elements/Layouts/Flex'
 import Tooltip from 'components/elements/Layouts/Tooltip'
 import { DateTime } from 'luxon'
 import { observer } from 'mobx-react-lite'
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 import type Note from 'stores/models/note'
 import { userStore } from 'stores/nostr/users.store'
 import LinkNEvent from '../Links/LinkNEvent'
@@ -17,7 +17,7 @@ type Props = {
   disableLink?: boolean
 }
 
-export const UserHeaderDate = function UserHeaderDate(props: { note: Note, disableLink?: boolean }) {
+export const UserHeaderDate = function UserHeaderDate(props: { note: Note; disableLink?: boolean }) {
   const { note, disableLink } = props
 
   const createdAt = note.event.created_at

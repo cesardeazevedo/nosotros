@@ -30,9 +30,7 @@ function Text(props: Props) {
             case 'tag':
               return <Tag>{content}</Tag>
             case 'link':
-              return disableLink
-                ? <Typography>{content}</Typography>
-                : <Link href={mark.attrs.href}>{content}</Link>
+              return disableLink ? <Typography>{content}</Typography> : <Link href={mark.attrs.href}>{content}</Link>
             default:
               return content
           }

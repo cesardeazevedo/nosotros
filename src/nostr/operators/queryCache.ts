@@ -1,7 +1,7 @@
-import type { NostrFilter } from "core/types"
-import { storage } from "nostr/storage"
-import type { Observable, OperatorFunction } from "rxjs"
-import { delay, from, mergeAll, mergeWith, NEVER } from "rxjs"
+import type { NostrFilter } from 'core/types'
+import { storage } from 'nostr/storage'
+import type { Observable, OperatorFunction } from 'rxjs'
+import { delay, from, mergeAll, mergeWith, NEVER } from 'rxjs'
 
 export function queryCache(filters: NostrFilter[]) {
   if (filters.length > 0) {

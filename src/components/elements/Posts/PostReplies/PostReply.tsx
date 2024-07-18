@@ -134,11 +134,13 @@ const PostReply = observer(function PostReply(props: Props) {
               <PostOptions note={note} />
             </Row>
             <Box sx={{ ml: 6, pt: 0.4, pb: 0.8 }}>
-              <PostActions dense note={note} onReplyClick={() => { }} />
+              <PostActions dense note={note} onReplyClick={() => {}} />
             </Box>
             {note.hasReplies && (
               <PostRepliesTree
-                replies={repliesOpen === null ? note.replies.slice(0, 1).filter((x) => x.isCurrentUserFollowing) : note.replies}
+                replies={
+                  repliesOpen === null ? note.replies.slice(0, 1).filter((x) => x.isCurrentUserFollowing) : note.replies
+                }
                 repliesOpen={repliesOpen}
                 level={level + 1}
               />

@@ -1,5 +1,5 @@
-import { useEffect } from "react"
-import type { ModuleInterface } from "stores/modules/interface"
+import { useEffect } from 'react'
+import type { ModuleInterface } from 'stores/modules/interface'
 
 export function useModuleSubscription(feed?: ModuleInterface) {
   useEffect(() => {

@@ -175,23 +175,25 @@ describe('Test noteStore', () => {
     const nevent2 = nip19.neventEncode({ id: event2.id, relays: [] })
     const profile1 = nip19.nprofileEncode({ pubkey: event1.pubkey, relays: [RELAY_2] })
     const profile2 = nip19.nprofileEncode({ pubkey: event2.pubkey, relays: [] })
-    const note = parseNote(fakeNote({
-      id: '1',
-      content: `hello nostr:${nevent1} nostr:${nevent2} nostr:${profile1} nostr:${profile2}`,
-      tags: [
-        ['p', '1', RELAY_2],
-        ['p', '2'],
-        ['e', '1', RELAY_2],
-        ['e', '1', RELAY_2],
-        ['e', '2'],
-      ],
-    }))
+    const note = parseNote(
+      fakeNote({
+        id: '1',
+        content: `hello nostr:${nevent1} nostr:${nevent2} nostr:${profile1} nostr:${profile2}`,
+        tags: [
+          ['p', '1', RELAY_2],
+          ['p', '2'],
+          ['e', '1', RELAY_2],
+          ['e', '1', RELAY_2],
+          ['e', '2'],
+        ],
+      }),
+    )
     expect(note.metadata.relayHints).toStrictEqual({
       authors: { '1': [RELAY_2], [event1.pubkey]: [RELAY_2] },
       ids: { '1': [RELAY_2], [event1.id]: [RELAY_2, RELAY_3] },
       fallback: {
-        [event2.id]: note.metadata.mentionedAuthors
-      }
+        [event2.id]: note.metadata.mentionedAuthors,
+      },
     } as RelayHints)
   })
 })

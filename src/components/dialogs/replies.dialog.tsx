@@ -29,9 +29,7 @@ const RepliesDialog = observer(function RepliesDialog() {
   return (
     <>
       {dialogStore.replies.map((id, index) => (
-        <Dialog key={index} maxWidth='sm' mobileHeight='90%' open={Boolean(id)}
-          onClose={goBack}
-        >
+        <Dialog key={index} maxWidth='sm' mobileHeight='90%' open={Boolean(id)} onClose={goBack}>
           <PostRepliesDialog noteId={typeof id !== 'boolean' ? id : undefined} />
         </Dialog>
       ))}

@@ -1,8 +1,8 @@
-import type { NostrEvent } from "core/types"
-import type { SeenDB } from "db/types"
-import { filter, map, pipe } from "rxjs"
-import { seenStore } from "stores/nostr/seen.store"
-import { insertSeen } from "./insertSeen"
+import type { NostrEvent } from 'core/types'
+import type { SeenDB } from 'db/types'
+import { filter, map, pipe } from 'rxjs'
+import { seenStore } from 'stores/nostr/seen.store'
+import { insertSeen } from './insertSeen'
 
 export function distinctEvent() {
   return pipe(

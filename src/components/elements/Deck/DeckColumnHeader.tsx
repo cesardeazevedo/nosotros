@@ -1,10 +1,10 @@
-import { AccordionDetails, Box, Divider, IconButton, Typography, } from "@mui/material"
-import { IconGripVertical, IconSettings, IconTrashX } from "@tabler/icons-react"
-import React, { useCallback, useState } from "react"
-import Accordion from "../Layouts/Accordion"
-import { Row } from "../Layouts/Flex"
-import Tooltip from "../Layouts/Tooltip"
-import { deckStore } from "stores/ui/deck.store"
+import { AccordionDetails, Box, Divider, IconButton, Typography } from '@mui/material'
+import { IconGripVertical, IconSettings, IconTrashX } from '@tabler/icons-react'
+import React, { useCallback, useState } from 'react'
+import Accordion from '../Layouts/Accordion'
+import { Row } from '../Layouts/Flex'
+import Tooltip from '../Layouts/Tooltip'
+import { deckStore } from 'stores/ui/deck.store'
 
 type Props = {
   id: string
@@ -43,7 +43,9 @@ function DeckColumnHeader(props: Props) {
         <Row sx={{ px: 2, py: 1, justifyContent: 'space-between' }}>
           <Typography variant='h6'>Home Settings</Typography>
           <Tooltip arrow title='Delete column'>
-            <IconButton color='error' onClick={handleDelete}><IconTrashX strokeWidth='1.4' size={20} /></IconButton>
+            <IconButton color='error' onClick={handleDelete}>
+              <IconTrashX strokeWidth='1.4' size={20} />
+            </IconButton>
           </Tooltip>
         </Row>
         {props.settings}

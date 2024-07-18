@@ -1,4 +1,4 @@
-import { dedupe } from "../dedupe"
+import { dedupe } from '../dedupe'
 
 describe('dedupe()', () => {
   test('Test dedupe [1, 2]', () => {

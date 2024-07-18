@@ -15,7 +15,6 @@ import {
 } from './parseTags'
 
 export function parseNote(event: NostrEvent): NoteDB {
-
   const imeta = parseImeta(event.tags)
   const references = parseReferences(event)
   const contentSchema = parseNoteContent(event, references, imeta)

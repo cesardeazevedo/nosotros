@@ -1,10 +1,10 @@
-import { Kind } from "constants/kinds"
-import { createFilter, isFilterValid } from "core/helpers"
-import type { NostrFilter } from "core/types"
-import { cacheRelayList } from "nostr/cache"
-import { followsStore } from "stores/nostr/follows.store"
-import { noteStore } from "stores/nostr/notes.store"
-import { userStore } from "stores/nostr/users.store"
+import { Kind } from 'constants/kinds'
+import { createFilter, isFilterValid } from 'core/helpers'
+import type { NostrFilter } from 'core/types'
+import { cacheRelayList } from 'nostr/cache'
+import { followsStore } from 'stores/nostr/follows.store'
+import { noteStore } from 'stores/nostr/notes.store'
+import { userStore } from 'stores/nostr/users.store'
 
 export function getOptimizedFilters(filters: NostrFilter | NostrFilter[]) {
   const newFilters: NostrFilter[] = []

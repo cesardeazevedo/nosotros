@@ -27,7 +27,6 @@ export type RelayHints = {
   fallback?: Record<string, string[]>
 }
 
-
 export interface IRelay {
   url: string
   websocket$: WebSocketSubject<MessageReceived>

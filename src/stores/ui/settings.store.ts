@@ -21,10 +21,7 @@ export class SettingsStore {
 
     makePersistable(this, {
       name: 'settings',
-      properties: [
-        'lang',
-        'defaultEmoji',
-      ],
+      properties: ['lang', 'defaultEmoji'],
       storage: window.localStorage,
     })
   }
@@ -39,4 +36,3 @@ export class SettingsStore {
 }
 
 export const settingsStore = new SettingsStore()
-

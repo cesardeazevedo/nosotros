@@ -1,4 +1,4 @@
-import { groupKeysFromArray } from "../groupKeysFromArray"
+import { groupKeysFromArray } from '../groupKeysFromArray'
 
 describe('groupKeysFromArray()', () => {
   test('Test simple values', () => {

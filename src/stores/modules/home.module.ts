@@ -1,4 +1,4 @@
-import { FeedModule } from "./feed.module"
+import { FeedModule } from './feed.module'
 
 export type HomeOptions = {
   id: string
@@ -10,7 +10,7 @@ export class HomeModule {
   feed: FeedModule
   options: HomeOptions
 
-  constructor(options: { pubkey: string, id?: string }) {
+  constructor(options: { pubkey: string; id?: string }) {
     this.feed = new FeedModule({
       id: options.id || 'home',
       pipeline: 'subFeedFromFollows',

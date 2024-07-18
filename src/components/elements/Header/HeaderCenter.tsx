@@ -32,7 +32,9 @@ function HeaderCenter() {
           <Observer>
             {() => (
               <Typography variant='h6' sx={{ ml: 2 }}>
-                {isNpub(context?.decoded) || isNprofile(context?.decoded) ? userStore.get(context.id)?.displayName : 'Post'}
+                {isNpub(context?.decoded) || isNprofile(context?.decoded)
+                  ? userStore.get(context.id)?.displayName
+                  : 'Post'}
               </Typography>
             )}
           </Observer>
