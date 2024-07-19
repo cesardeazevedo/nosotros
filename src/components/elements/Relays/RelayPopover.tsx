@@ -22,7 +22,7 @@ function RelaysPopover() {
   return (
     <>
       <Tooltip arrow title='Configure Relays' enterDelay={0}>
-        <Row sx={{ mr: 1, ['@media (max-width: 1140px)']: { display: 'none' } }}>
+        <Row sx={{ mx: 0.5, ['@media (max-width: 1140px)']: { display: 'none' } }}>
           <IconButton onClick={handleClick} color='inherit'>
             <IconServerBolt strokeWidth='1.5' />
           </IconButton>

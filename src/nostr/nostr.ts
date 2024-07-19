@@ -2,6 +2,7 @@ import { NostrSubscription, type SubscriptionOptions } from 'core/NostrSubscript
 import type { Pool } from 'core/pool'
 import type { NostrFilter } from 'core/types'
 import { EMPTY, merge, of, type Observable } from 'rxjs'
+import { settingsStore } from 'stores/ui/settings.store'
 import { NostrFeeds } from './feeds'
 import { NIP01Notes } from './nips/nip01/nip01.notes'
 import { NIP01Users } from './nips/nip01/nip01.users'
@@ -9,7 +10,7 @@ import { NIP02Follows } from './nips/nip02.follows'
 import { NIP25Reactions } from './nips/nip25.reactions'
 import { NIP65RelayList } from './nips/nip65.relaylist'
 import { outbox } from './outbox'
-import { defaultNostrSettings, type NostrSettings } from './settings'
+import { type NostrSettings } from './settings'
 import { myRelays } from './trackers'
 
 type NostrOptions = {
@@ -38,7 +39,7 @@ export class NostrClient {
     this.pubkey = options?.pubkey
     this.relays = options?.relays || []
     this.relays$ = options?.pubkey ? myRelays(options.pubkey) : of(this.relays)
-    this.settings = Object.assign({}, defaultNostrSettings, options?.settings)
+    this.settings = Object.assign({}, settingsStore.nostrSettings, options?.settings)
 
     // Initiate relay connection asap.
     this.relays$.subscribe((relays) => {
@@ -51,11 +52,15 @@ export class NostrClient {
   subscribe(filters: NostrFilter | NostrFilter[], options?: SubscriptionOptions) {
     return new NostrSubscription(filters, {
       ...options,
+      relays: merge(this.relays$, options?.relays || EMPTY),
+
+      relayHints: this.settings.hintsEnabled ? options?.relayHints : {},
+
       outbox: outbox({
+        enabled: this.settings.outboxEnabled,
         ignoreRelays: this.relays$,
         maxRelaysPerUser: this.settings.maxRelaysPerUser,
       }),
-      relays: merge(this.relays$, options?.relays || EMPTY),
     })
   }
 }

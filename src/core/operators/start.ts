@@ -3,17 +3,7 @@ import type { NostrSubscription } from 'core/NostrSubscription'
 import type { Pool } from 'core/pool'
 import type { NostrEvent, NostrFilter } from 'core/types'
 import type { OperatorFunction } from 'rxjs'
-import {
-  EMPTY,
-  filter,
-  from,
-  identity,
-  map,
-  mergeMap,
-  of,
-  takeUntil,
-  timer,
-} from 'rxjs'
+import { EMPTY, filter, from, identity, map, mergeMap, of, takeUntil, timer } from 'rxjs'
 import { bufferTime } from './bufferTime'
 import { subscribe } from './subscribe'
 
@@ -34,7 +24,6 @@ export function start(
 
       mergeMap(([url, filters]) => {
         const relay = pool.getOrAddRelay(url)
-        console.log('sending', url, filters)
 
         if (relay) {
           return of(sub).pipe(subscribe(relay, filters))

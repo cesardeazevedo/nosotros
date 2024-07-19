@@ -7,6 +7,7 @@ import Tooltip from '../Layouts/Tooltip'
 import LinkRouter from '../Links/LinkRouter'
 import RelaysPopover from '../Relays/RelayPopover'
 import HeaderSignIn from './HeaderSignIn'
+import SettingsPopover from '../Settings/SettingsPopover'
 
 function HeaderActions() {
   const router = useCurrentRoute()
@@ -16,25 +17,26 @@ function HeaderActions() {
         <>
           {router.routeId !== '/deck' && (
             <LinkRouter to='/deck'>
-              <IconButton color='inherit' sx={{ mr: 1 }}>
+              <IconButton color='inherit' sx={{ m: 0.5 }}>
                 <IconLayoutSidebarLeftExpand strokeWidth='1.5' />
               </IconButton>
             </LinkRouter>
           )}
           {router.routeId === '/deck' && (
             <LinkRouter to='/'>
-              <IconButton color='inherit' sx={{ mr: 1 }}>
+              <IconButton color='inherit' sx={{ m: 0.5 }}>
                 <IconLayoutSidebarRightExpand strokeWidth='1.5' />
               </IconButton>
             </LinkRouter>
           )}
         </>
       </Tooltip>
-      <RelaysPopover />
       <ThemeButton />
-      {authStore.pubkey && (
-        <Box sx={[{ mx: 1, ['@media (max-width: 1040px)']: { display: 'none' } }]}>{/* <NotificationPopover /> */}</Box>
-      )}
+      <RelaysPopover />
+      <SettingsPopover />
+      {/* {authStore.pubkey && ( */}
+      {/*   <Box sx={[{ mx: 0, ['@media (max-width: 1040px)']: { display: 'none' } }]}></Box> */}
+      {/* )} */}
       <Box sx={{ mx: 1 }} />
       <HeaderSignIn />
     </>

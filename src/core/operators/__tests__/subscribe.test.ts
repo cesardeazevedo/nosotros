@@ -7,7 +7,6 @@ import { RELAY_1, test } from 'utils/fixtures'
 import { expectRelayReceived, relaySendClose, relaySendEose, relaySendEvents } from 'utils/testHelpers'
 import { subscribe } from '../subscribe'
 
-
 describe('onEvent()', () => {
   test('Assert events received and stream completed after eose', async ({ relay }) => {
     const relay1 = new Relay(RELAY_1)
