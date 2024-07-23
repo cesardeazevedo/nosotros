@@ -16,37 +16,39 @@ type Props = {
   onClick?: (e?: unknown) => void
 }
 
-const shouldForwardProp = (prop: string) => prop !== 'active' && prop !== 'dense'
+const shouldForwardProp = (prop: string) => prop !== 'active' && prop !== 'dense' && prop !== 'animate'
 
 const Container = styled(Row, { shouldForwardProp })<ContainerProps>(
-  ({ dense = false, active = false, theme, color = theme.palette.text.secondary }) =>
+  ({ animate = true, dense = false, active = false, theme, color = theme.palette.text.secondary }) =>
     theme.unstable_sx({
       cursor: 'pointer',
       h6: {
         mr: 1,
         width: dense ? 'auto' : 28,
-        fontWeight: 500,
-        color: active ? color : theme.vars.palette.text.secondary,
+        fontWeight: active ? 600 : 500,
+        color: color || theme.vars.palette.text.secondary,
       },
       svg: {
         width: dense ? 20 : 24,
         height: dense ? 20 : 24,
         ...(active && {
           svg: {
+            color: '#000',
             fill: color,
             stroke: color,
           },
         }),
       },
       button: {
-        width: dense ? 30 : 34,
-        height: dense ? 30 : 34,
+        width: dense ? 28 : 34,
+        height: dense ? 28 : 34,
         transition: 'scale 0.1s ease',
-        '&:active': {
-          scale: '1.1',
-        },
+        '&:active': animate ? { scale: '1.2' } : {},
       },
       '&:hover': {
+        h6: {
+          color: color,
+        },
         svg: {
           stroke: color,
         },
