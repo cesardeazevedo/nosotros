@@ -1,8 +1,8 @@
-import { isReplaceable } from "core/helpers"
-import type { NostrEvent } from "core/types"
-import { storage } from "nostr/storage"
-import type { OperatorFunction } from "rxjs"
-import { concatMap, filter, iif, of, pipe, tap } from "rxjs"
+import { isReplaceable } from 'core/helpers'
+import type { NostrEvent } from 'core/types'
+import { storage } from 'nostr/storage'
+import type { OperatorFunction } from 'rxjs'
+import { concatMap, filter, iif, of, pipe, tap } from 'rxjs'
 
 function insertReplaceableEvent<T extends NostrEvent>(): OperatorFunction<T, T> {
   return pipe(

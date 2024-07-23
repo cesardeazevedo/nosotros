@@ -15,7 +15,9 @@ const FeedColumn = observer(function FeedModule(props: Props) {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', position: 'relative', p: 0 }}>
       <DeckColumnHeader id={feed.id}>
-        <Typography variant='h6' fontWeight='bold'>Feed</Typography>
+        <Typography variant='h6' fontWeight='bold'>
+          Feed
+        </Typography>
       </DeckColumnHeader>
       <VirtualList
         feed={feed}

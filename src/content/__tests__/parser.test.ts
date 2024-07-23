@@ -7,13 +7,15 @@ import { parseNoteContent } from '../parser'
 
 describe('ContentParser', () => {
   test('Should assert content with a image url with imeta', () => {
-    const note = parseNote(fakeNote({
-      content: 'http://host.com/image http://host.com/video https://simplelink.com',
-      tags: [
-        ['imeta', 'url http://host.com/image', 'm image/jpg'],
-        ['imeta', 'url http://host.com/video', 'm video/mp4'],
-      ],
-    }))
+    const note = parseNote(
+      fakeNote({
+        content: 'http://host.com/image http://host.com/video https://simplelink.com',
+        tags: [
+          ['imeta', 'url http://host.com/image', 'm image/jpg'],
+          ['imeta', 'url http://host.com/video', 'm video/mp4'],
+        ],
+      }),
+    )
     expect(parseNoteContent(note, note.metadata.references, note.metadata.imeta)).toMatchInlineSnapshot(`
       {
         "content": [
@@ -80,9 +82,11 @@ describe('ContentParser', () => {
       }),
     )
     const nevent = nip19.neventEncode({ id: ref.id, relays: [], author: ref.pubkey })
-    const note = parseNote(fakeNote({
-      content: `Hi! https://google.com #tag nostr:${nevent} Hi nostr:nprofile1qqsvvcpmpuwvlmrztkwq3d6nunmhf6hh688jw6fzxyjmtl2d5u5qr8spz3mhxue69uhhyetvv9ujuerpd46hxtnfdufzkeuj check this out https://nostr.com/img.jpg https://v.nostr.build/g6BQ.mp4`,
-    }))
+    const note = parseNote(
+      fakeNote({
+        content: `Hi! https://google.com #tag nostr:${nevent} Hi nostr:nprofile1qqsvvcpmpuwvlmrztkwq3d6nunmhf6hh688jw6fzxyjmtl2d5u5qr8spz3mhxue69uhhyetvv9ujuerpd46hxtnfdufzkeuj check this out https://nostr.com/img.jpg https://v.nostr.build/g6BQ.mp4`,
+      }),
+    )
     expect(parseNoteContent(note)).toMatchInlineSnapshot(`
       {
         "content": [
@@ -188,9 +192,10 @@ describe('ContentParser', () => {
   })
 
   test('Should assert markdown content', () => {
-    const note = parseNote(fakeNote({
-      kind: Kind.Article,
-      content: `
+    const note = parseNote(
+      fakeNote({
+        kind: Kind.Article,
+        content: `
 # Title
 
 * list 1
@@ -199,7 +204,8 @@ describe('ContentParser', () => {
 
 text **bold** *italic* [link](https://google.com)
 `,
-    }))
+      }),
+    )
     expect(parseNoteContent(note)).toMatchInlineSnapshot(`
       {
         "content": [
@@ -307,14 +313,16 @@ text **bold** *italic* [link](https://google.com)
   })
 
   test('Should assert image links with line breaks', () => {
-    const note = parseNote(fakeNote({
-      kind: Kind.Article,
-      content: `
+    const note = parseNote(
+      fakeNote({
+        kind: Kind.Article,
+        content: `
 https://host.com/1.jpeg
 
 https://host.com/2.jpeg
-`
-    }))
+`,
+      }),
+    )
     expect(note.metadata.contentSchema).toMatchInlineSnapshot(`
       {
         "content": [
@@ -347,10 +355,13 @@ https://host.com/2.jpeg
   })
 
   test('Should assert an intersecting node', () => {
-    const note = parseNote(fakeNote({
-      kind: Kind.Text,
-      content: "Test: https://github.com/nostr:npub1cesrkrcuelkxyhvupzm48e8hwn4005w0ya5jyvf9kh75mfegqx0q4kt37c/wrong/link/ text",
-    }))
+    const note = parseNote(
+      fakeNote({
+        kind: Kind.Text,
+        content:
+          'Test: https://github.com/nostr:npub1cesrkrcuelkxyhvupzm48e8hwn4005w0ya5jyvf9kh75mfegqx0q4kt37c/wrong/link/ text',
+      }),
+    )
     expect(note.metadata.contentSchema).toMatchInlineSnapshot(`
       {
         "content": [

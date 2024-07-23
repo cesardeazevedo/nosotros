@@ -1,4 +1,10 @@
-import { createRootRouteWithContext, createRoute, createRouter, redirect, useRouteContext } from '@tanstack/react-router'
+import {
+  createRootRouteWithContext,
+  createRoute,
+  createRouter,
+  redirect,
+  useRouteContext,
+} from '@tanstack/react-router'
 import ErrorBoundary from 'ErrorBoundary'
 import RootLayout from 'components/elements/Layouts/RootLayout'
 import DeckRoute from 'components/routes/deck.route'
@@ -7,7 +13,7 @@ import NEventRoute, { loadNote } from 'components/routes/nevent.route'
 import NProfileRoute, { loadProfile } from 'components/routes/nprofile.route'
 import { decodeNIP19, isNevent, isNote, isNprofile, isNpub, type Prefixes } from 'utils/nip19'
 
-interface RouterContext { }
+interface RouterContext {}
 
 const rootRoute = createRootRouteWithContext<RouterContext>()({
   component: RootLayout,
@@ -18,16 +24,13 @@ export const homeRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
   loader: () => loadHome(),
-  component: () => (
-    <HomeRoute />
-  ),
+  component: () => <HomeRoute />,
 })
-
 
 export const deckRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/deck',
-  component: () => <DeckRoute />
+  component: () => <DeckRoute />,
 })
 
 const signinRoute = createRoute({
@@ -109,7 +112,6 @@ export const nostrRoute = createRoute({
 })
 
 export const routeTree = rootRoute.addChildren([homeRoute, deckRoute, nostrRoute, signinRoute, replyRoute])
-
 
 export const router = createRouter({
   routeTree,

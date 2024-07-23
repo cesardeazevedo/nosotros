@@ -16,9 +16,9 @@ type Props = {
 
 export const BubbleContainer = styled(Box)(({ theme }) =>
   theme.unstable_sx({
-    px: 1.5,
+    px: 1.4,
     pt: 0.2,
-    pb: 0.6,
+    pb: 0.8,
     borderRadius: 1.5,
     backgroundColor: 'var(--mui-palette-FilledInput-bg)',
     display: 'inline-block',

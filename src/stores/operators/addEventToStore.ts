@@ -1,9 +1,10 @@
-import { Kind } from "constants/kinds"
-import type { NostrEvent } from "core/types"
-import { cache, cacheRelayList } from "nostr/cache"
-import type { UserDB } from "nostr/types"
-import { reactionStore } from "stores/nostr/reactions.store"
-import { userStore } from "stores/nostr/users.store"
+import { Kind } from 'constants/kinds'
+import type { NostrEvent } from 'core/types'
+import { cache, cacheRelayList } from 'nostr/cache'
+import type { UserDB, ZapDB } from 'nostr/types'
+import { reactionStore } from 'stores/nostr/reactions.store'
+import { userStore } from 'stores/nostr/users.store'
+import { zapStore } from 'stores/nostr/zaps.store'
 
 export function addEventToStore(event: NostrEvent) {
   switch (event.kind) {
@@ -25,6 +26,11 @@ export function addEventToStore(event: NostrEvent) {
       reactionStore.add(event)
       break
     }
+    case Kind.Zap: {
+      cache.set(event.id, true)
+      zapStore.add(event as ZapDB)
+      break
+    }
     case Kind.RelayList: {
       cacheRelayList.set(event.pubkey, true)
       break
@@ -36,4 +42,3 @@ export function addEventToStore(event: NostrEvent) {
     }
   }
 }
-

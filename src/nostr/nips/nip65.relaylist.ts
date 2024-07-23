@@ -1,5 +1,6 @@
 import { Kind } from 'constants/kinds'
 import { OUTBOX_RELAYS } from 'constants/relays'
+import { formatRelayUrl } from 'core/helpers/formatRelayUrl'
 import type { NostrEvent } from 'core/types'
 import type { UserRelayDB } from 'db/types'
 import { batcher } from 'nostr/batcher'
@@ -12,21 +13,26 @@ import { of, tap } from 'rxjs'
 import { addEventToStore } from 'stores/operators/addEventToStore'
 
 export class NIP65RelayList {
-  constructor(private client: NostrClient) { }
+  constructor(private client: NostrClient) {}
 
   parseUserRelay(event: NostrEvent) {
-    return event.tags.filter((tag) => tag[0] === 'r').map((tag) => ({
-      type: 'nip65',
-      pubkey: event.pubkey,
-      relay: tag[1],
-      permission: tag[2] as UserRelayDB['permission'],
-    } as UserRelayDB))
+    return event.tags
+      .filter((tag) => tag[0] === 'r')
+      .map(
+        (tag) =>
+          ({
+            type: 'nip65',
+            pubkey: event.pubkey,
+            relay: formatRelayUrl(tag[1]),
+            permission: tag[2] as UserRelayDB['permission'],
+          }) as UserRelayDB,
+      )
   }
 
   subscribe(authors: string[]) {
     const filter = { kinds: [Kind.RelayList], authors }
     const sub = this.client.subscribe(filter, {
-      relays: of(OUTBOX_RELAYS)
+      relays: of(OUTBOX_RELAYS),
     })
 
     return of(sub).pipe(

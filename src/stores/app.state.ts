@@ -1,22 +1,16 @@
-import { NostrClient } from "nostr/nostr"
-import { authStore } from "./ui/auth.store"
-import { DEFAULT_RELAYS } from "constants/relays"
-import { router } from "Router"
+import { DEFAULT_RELAYS } from 'constants/relays'
+import { NIP07Signer } from 'core/signers/nip07.signer'
+import { NostrClient } from 'nostr/nostr'
+import { pool } from 'nostr/pool'
+import { router } from 'Router'
+import type { Account } from './ui/auth.store'
+import { authStore } from './ui/auth.store'
 
 class AppState {
-  client: NostrClient
+  client!: NostrClient
 
   constructor() {
-
-    if (authStore.pubkey) {
-      this.client = new NostrClient({ pubkey: authStore.pubkey })
-    } else {
-      this.client = new NostrClient({ relays: DEFAULT_RELAYS })
-    }
-
-    if (authStore.pubkey) {
-      this.subscribeUser(authStore.pubkey)
-    }
+    this.setClient(authStore.currentAccount)
 
     authStore.on({
       onLogin: this.onLogin.bind(this),
@@ -24,13 +18,25 @@ class AppState {
     })
   }
 
-  onLogin(pubkey: string) {
-    this.client = new NostrClient({ pubkey })
-    this.subscribeUser(pubkey)
+  setClient(account?: Account) {
+    if (account) {
+      const pubkey = account.pubkey
+      const signer = account.signer === 'nip07' ? new NIP07Signer() : undefined
+      this.client = new NostrClient(pool, { pubkey, signer })
+      this.subscribeUser(pubkey)
+    } else {
+      this.client = new NostrClient(pool, { relays: DEFAULT_RELAYS })
+    }
+  }
+
+  onLogin(account: Account) {
+    this.setClient(account)
     router.history.back()
   }
 
-  onLogout() { }
+  onLogout() {
+    this.setClient()
+  }
 
   subscribeUser(pubkey: string) {
     this.client.users.subscribe([pubkey]).subscribe()

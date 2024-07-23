@@ -9,7 +9,11 @@ type Props = {
 function Tag(props: Props) {
   const { disableLink } = useContext(ContentContext)
   if (disableLink) {
-    return <Typography variant='body1' fontWeight={600} display='inline'>{props.children}</Typography>
+    return (
+      <Typography variant='body1' fontWeight={600} display='inline'>
+        {props.children}
+      </Typography>
+    )
   }
   return (
     <Link href='#' color='primary'>

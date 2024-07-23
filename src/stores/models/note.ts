@@ -2,7 +2,7 @@ import { makeAutoObservable } from 'mobx'
 import { nip19 } from 'nostr-tools'
 import type { NostrClient } from 'nostr/nostr'
 import type { NoteDB } from 'nostr/types'
-import { type Subscription } from 'rxjs'
+import { filter, take, type Subscription } from 'rxjs'
 import { noteStore } from 'stores/nostr/notes.store'
 import { seenStore } from 'stores/nostr/seen.store'
 import { userStore } from 'stores/nostr/users.store'
@@ -17,8 +17,12 @@ class Note {
   private client: NostrClient
   private sub?: Subscription
   private subReactions?: Subscription
+  private subZaps?: Subscription
 
-  constructor(public data: NoteDB, client: NostrClient) {
+  constructor(
+    public data: NoteDB,
+    client: NostrClient,
+  ) {
     makeAutoObservable(this, { data: false })
 
     this.client = client
@@ -88,11 +92,35 @@ class Note {
   toggleReplies(open?: boolean) {
     this.repliesOpen = open ?? !this.repliesOpen
     if (this.repliesOpen) {
+      this.subscribeZaps()
       this.subscribeReplies()
+      this.subscribeReactions()
     } else {
       this.sub?.unsubscribe()
       this.subReactions?.unsubscribe()
     }
+  }
+
+  react(reaction: string) {
+    this.client.reactions
+      .publish(this.event, reaction)
+      .pipe(
+        filter((event) => event[2] === true),
+        take(1),
+      )
+      .subscribe(() => {
+        //notifications
+      })
+  }
+
+  subscribeOnScroll() {
+    this.subscribeZaps()
+    this.subscribeReactions()
+  }
+
+  subscribeZaps() {
+    this.subZaps = this.client.zaps.subFromNote(this.data).subscribe()
+    return this.subZaps
   }
 
   subscribeReactions() {

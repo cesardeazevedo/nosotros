@@ -12,7 +12,7 @@ function RootLayout() {
     <>
       <Dialogs />
       <Header />
-      <Toaster theme={theme.palette.mode} visibleToasts={10} closeButton />
+      <Toaster theme={theme.palette.mode === 'dark' ? 'light' : 'dark'} visibleToasts={10} closeButton />
       <Box sx={(theme) => ({ position: 'relative', height: '100%', mt: 8, [theme.breakpoints.down('sm')]: { mt: 7 } })}>
         <Outlet />
         <BottomNavigation />

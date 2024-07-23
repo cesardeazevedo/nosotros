@@ -7,7 +7,7 @@ import type { IndexedDBSchema } from '../idb.schemas'
 import IDBEventQuery from './idb.events.query'
 
 export class IDBEventStore {
-  constructor(private db: Promise<idb.IDBPDatabase<IndexedDBSchema>>) { }
+  constructor(private db: Promise<idb.IDBPDatabase<IndexedDBSchema>>) {}
 
   async *query(filters: NostrFilter | NostrFilter[]) {
     const db = await this.db
@@ -44,17 +44,20 @@ export class IDBEventStore {
     await events.put(data as EventDB)
 
     await Promise.all(
-      data.tags.map((tag, index) => {
-        return tags.put({
-          index,
-          kind: data.kind,
-          eventId: data.id,
-          pubkey: data.pubkey,
-          tag: tag[0],
-          value: tag[1],
-          extras: tag.slice(2),
-        })
-      }),
+      data.tags
+        // some relays sending bad data
+        .filter((tags) => tags.length > 1)
+        .map((tag, index) => {
+          return tags.put({
+            index,
+            kind: data.kind,
+            eventId: data.id,
+            pubkey: data.pubkey,
+            tag: tag[0],
+            value: tag[1],
+            extras: tag.slice(2),
+          })
+        }),
     )
     await tx.done
     return data

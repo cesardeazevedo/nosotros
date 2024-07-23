@@ -1,21 +1,25 @@
-import { EMPTY, filter, mergeWith, of, type Observable } from 'rxjs'
+import { EMPTY, from, mergeWith, of, type Observable } from 'rxjs'
 import { createFilter, isFilterValid } from './helpers'
 import { hintsToRelayFilters } from './helpers/hintsToRelayFilters'
 import { relaysToRelayFilters } from './helpers/relaysToRelayFilters'
 import type { NostrFilter, RelayHints } from './types'
 
+export type RelayFilters = [string, NostrFilter[]]
+
 export type SubscriptionOptions = {
   relays?: Observable<string[]>
-  relayFilters?: Observable<Record<string, NostrFilter[]>[]>
+  relayFilters?: Observable<RelayFilters>
   relayHints?: RelayHints
+  outbox?: (filters: NostrFilter[]) => Observable<RelayFilters>
 }
 
 export class NostrSubscription {
   readonly id: string
   readonly filters: NostrFilter[]
-  readonly relays: Observable<string[]>
-  readonly relayFilters: Observable<Record<string, NostrFilter[]>[]>
-  readonly relayHints?: RelayHints
+  readonly relays: SubscriptionOptions['relays']
+  readonly relayFilters: Observable<RelayFilters>
+  readonly relayHints?: SubscriptionOptions['relayHints']
+  readonly outbox: (filters: NostrFilter[]) => Observable<RelayFilters>
 
   constructor(filters: NostrFilter | NostrFilter[], options?: SubscriptionOptions) {
     this.id = Math.random().toString().slice(2, 10)
@@ -26,15 +30,19 @@ export class NostrSubscription {
 
     this.relays = options?.relays || of([])
 
+    this.outbox = options?.outbox || (() => EMPTY)
+
     const relayFilters = options?.relayFilters || EMPTY
 
     this.relayFilters = relayFilters.pipe(
-      // Apply relay hints to relayFilters
-      mergeWith(of([hintsToRelayFilters(this.filters, this.relayHints)])),
-      // Apply fixed relays to relayFilters
+      // Apply fixed relays
       mergeWith(relaysToRelayFilters(this.relays, this.filters)),
 
-      filter((x) => x && x.length > 0 && Object.keys(x[0]).length > 0),
+      // Apply relay hints
+      mergeWith(from(hintsToRelayFilters(this.filters, this.relayHints))),
+
+      // Apply outbox
+      mergeWith(this.outbox(this.filters)),
     )
   }
 }

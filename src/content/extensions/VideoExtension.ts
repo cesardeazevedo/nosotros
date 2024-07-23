@@ -21,10 +21,6 @@ export const VideoExtension = Node.create({
     }
   },
 
-  // addNodeView() {
-  //   return ReactNodeViewRenderer(VideoEditor)
-  // },
-
   renderHTML() {
     return ['a', {}, 0]
   },

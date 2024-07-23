@@ -78,6 +78,31 @@ const theme = extendTheme({
         },
       },
     },
+    MuiList: {
+      styleOverrides: {
+        root: {
+          paddingTop: 0,
+          paddingBottom: 0,
+        },
+      },
+    },
+    MuiListItemButton: {
+      styleOverrides: {
+        root: {
+          padding: '2px 16px',
+          minHeight: 36,
+          margin: 8,
+          borderRadius: 10,
+        },
+      },
+    },
+    MuiListItemIcon: {
+      styleOverrides: {
+        root: {
+          minWidth: 36,
+        },
+      },
+    },
     MuiLink: {
       defaultProps: {
         color: 'inherit',

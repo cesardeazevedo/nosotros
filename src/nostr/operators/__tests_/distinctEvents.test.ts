@@ -1,8 +1,8 @@
-import { subscribeSpyTo } from "@hirez_io/observer-spy"
-import type { NostrEvent } from "core/types"
-import { of } from "rxjs"
-import { fakeNote } from "utils/faker"
-import { distinctEvent } from "../distinctEvents"
+import { subscribeSpyTo } from '@hirez_io/observer-spy'
+import type { NostrEvent } from 'core/types'
+import { of } from 'rxjs'
+import { fakeNote } from 'utils/faker'
+import { distinctEvent } from '../distinctEvents'
 
 describe('Seen', () => {
   test('assert distinctEvents', async () => {

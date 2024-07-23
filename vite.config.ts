@@ -38,8 +38,9 @@ export default defineConfig(({ mode }) => {
       // circleDependency({ outputFilePath: './circleDep' }),
       VitePWA({
         srcDir: 'src',
+        registerType: 'autoUpdate',
         devOptions: {
-          enabled: false,
+          enabled: true,
         },
         filename: 'serviceWorker.ts',
         strategies: 'injectManifest',

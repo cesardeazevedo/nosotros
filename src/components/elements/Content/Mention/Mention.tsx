@@ -37,7 +37,7 @@ export const Mention = observer(function TextMention(props: Props) {
       {!user && <Loader animation='wave' variant='rectangular' />}
       {user && (
         <UserPopover user={user}>
-          <LinkProfile color='primary' user={user} disabled={disableLink}>
+          <LinkProfile color='primary' user={user} disableLink={disableLink}>
             @{user.displayName}
           </LinkProfile>
         </UserPopover>

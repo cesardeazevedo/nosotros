@@ -3,14 +3,14 @@ import type { AddressPointer, EventPointer, ProfilePointer } from 'nostr-tools/l
 
 // nostr-tools doesn't export this
 export type Prefixes = {
-  nprofile: ProfilePointer;
-  nrelay: string;
-  nevent: EventPointer;
-  naddr: AddressPointer;
-  nsec: Uint8Array;
-  npub: string;
-  note: string;
-};
+  nprofile: ProfilePointer
+  nrelay: string
+  nevent: EventPointer
+  naddr: AddressPointer
+  nsec: Uint8Array
+  npub: string
+  note: string
+}
 type DecodeValue<Prefix extends keyof Prefixes> = {
   type: Prefix
   data: Prefixes[Prefix]

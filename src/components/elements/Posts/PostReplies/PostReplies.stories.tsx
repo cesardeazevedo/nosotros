@@ -19,8 +19,7 @@ export type Story = StoryObj
 
 export const Tree = {
   parameters: {
-    setup() {
-    },
+    setup() {},
   },
 } satisfies Story
 

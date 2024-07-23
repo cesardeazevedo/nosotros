@@ -1,7 +1,7 @@
-import type { NostrFilter } from "core/types"
-import { storage } from "nostr/storage"
-import type { Observable, OperatorFunction } from "rxjs"
-import { delay, from, mergeAll, mergeWith, NEVER } from "rxjs"
+import type { NostrFilter } from 'core/types'
+import { storage } from 'nostr/storage'
+import type { Observable, OperatorFunction } from 'rxjs'
+import { delay, EMPTY, from, mergeAll, mergeWith } from 'rxjs'
 
 export function queryCache(filters: NostrFilter[]) {
   if (filters.length > 0) {
@@ -10,7 +10,7 @@ export function queryCache(filters: NostrFilter[]) {
       mergeAll(), // async generators
     )
   }
-  return NEVER
+  return EMPTY
 }
 
 export function withCache<T>(filters: NostrFilter[], delayTime?: number): OperatorFunction<T, T> {

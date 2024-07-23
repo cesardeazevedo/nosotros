@@ -1,11 +1,11 @@
-import { Box, IconButton, } from '@mui/material'
+import { Box, IconButton } from '@mui/material'
 import { IconLayoutSidebarLeftExpand, IconLayoutSidebarRightExpand } from '@tabler/icons-react'
 import { useCurrentRoute } from 'hooks/useNavigations'
-import { authStore } from 'stores/ui/auth.store'
 import ThemeButton from '../Buttons/ThemeButton'
 import Tooltip from '../Layouts/Tooltip'
 import LinkRouter from '../Links/LinkRouter'
 import RelaysPopover from '../Relays/RelayPopover'
+import SettingsPopover from '../Settings/SettingsPopover'
 import HeaderSignIn from './HeaderSignIn'
 
 function HeaderActions() {
@@ -16,27 +16,23 @@ function HeaderActions() {
         <>
           {router.routeId !== '/deck' && (
             <LinkRouter to='/deck'>
-              <IconButton color='inherit' sx={{ mr: 1 }} >
+              <IconButton color='inherit' sx={{ m: 0.5 }}>
                 <IconLayoutSidebarLeftExpand strokeWidth='1.5' />
               </IconButton>
             </LinkRouter>
           )}
           {router.routeId === '/deck' && (
             <LinkRouter to='/'>
-              <IconButton color='inherit' sx={{ mr: 1 }} >
+              <IconButton color='inherit' sx={{ m: 0.5 }}>
                 <IconLayoutSidebarRightExpand strokeWidth='1.5' />
               </IconButton>
             </LinkRouter>
           )}
         </>
       </Tooltip>
-      <RelaysPopover />
       <ThemeButton />
-      {authStore.pubkey && (
-        <Box sx={[{ mx: 1, ['@media (max-width: 1040px)']: { display: 'none' } }]}>
-          {/* <NotificationPopover /> */}
-        </Box>
-      )}
+      <RelaysPopover />
+      <SettingsPopover />
       <Box sx={{ mx: 1 }} />
       <HeaderSignIn />
     </>

@@ -1,9 +1,9 @@
-import { Box, Grow, IconButton, Typography } from "@mui/material"
-import { IconChevronLeft, IconX } from "@tabler/icons-react"
-import { useMobile } from "hooks/useMobile"
-import { useCallback } from "react"
-import { Row } from "../Layouts/Flex"
-import { OnboardMachineContext } from "./SignInContext"
+import { Box, Grow, IconButton, Typography } from '@mui/material'
+import { IconChevronLeft, IconX } from '@tabler/icons-react'
+import { useMobile } from 'hooks/useMobile'
+import { useCallback } from 'react'
+import { Row } from '../Layouts/Flex'
+import { OnboardMachineContext } from './SignInContext'
 
 const easings = {
   enter: 'cubic-bezier(0.33, 1, 0.68, 1)',
@@ -48,7 +48,7 @@ function SignInHeader() {
       <Typography variant='h6' sx={{ flex: 1, textAlign: 'center', mr: 6 }}>
         {!isMobile ? 'Sign In' : camera ? 'Camera' : ''}
       </Typography>
-    </Row >
+    </Row>
   )
 }
 

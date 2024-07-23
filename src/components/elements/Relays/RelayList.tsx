@@ -1,6 +1,6 @@
-import type { UserRelayDB } from "db/types"
-import { observer } from "mobx-react-lite"
-import RelayUserChip from "./RelayUserChip"
+import type { UserRelayDB } from 'db/types'
+import { observer } from 'mobx-react-lite'
+import RelayUserChip from './RelayUserChip'
 
 type Props = {
   relays: UserRelayDB[]

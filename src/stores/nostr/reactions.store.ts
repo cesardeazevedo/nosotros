@@ -1,13 +1,13 @@
-import type { NostrEvent } from "core/types"
-import { makeAutoObservable, observable } from "mobx"
-import { isEventTag } from "nostr/nips/nip01/metadata/parseTags"
-import { authStore } from "stores/ui/auth.store"
+import type { NostrEvent } from 'core/types'
+import { makeAutoObservable, observable } from 'mobx'
+import { isEventTag } from 'nostr/helpers/tags'
+import { authStore } from 'stores/ui/auth.store'
 
 export type Reactions = {
   [emoji: string]: string[]
 }
 
-export function fallbackEmoji(emoji: string) {
+export function fallbackEmoji(emoji?: string) {
   switch (emoji) {
     case '+':
       return '🤙'
@@ -43,7 +43,7 @@ export class ReactionStore {
   }
 
   add(event: NostrEvent) {
-    const emoji = fallbackEmoji(event.content)
+    const emoji = fallbackEmoji(event.content) as string
 
     event.tags.forEach((tag) => {
       if (isEventTag(tag)) {

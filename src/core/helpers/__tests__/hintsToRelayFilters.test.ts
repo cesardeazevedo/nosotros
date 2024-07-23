@@ -1,6 +1,6 @@
-import type { RelayHints } from "core/types"
-import { hintsToRelayFilters } from "../hintsToRelayFilters"
-import { RELAY_1, RELAY_2, RELAY_3, RELAY_4 } from "utils/fixtures"
+import type { RelayHints } from 'core/types'
+import { RELAY_1, RELAY_2, RELAY_3, RELAY_4 } from 'utils/fixtures'
+import { hintsToRelayFilters } from '../hintsToRelayFilters'
 
 test('Assert hintsToRelayFilters', () => {
   const filters = [
@@ -17,24 +17,23 @@ test('Assert hintsToRelayFilters', () => {
   } as RelayHints
 
   const res = hintsToRelayFilters(filters, hints)
-  expect(res).toStrictEqual(
-    {
-      'wss://relay1.com': [
-        { authors: ['1', '4'], kinds: [0] },
-        { authors: ['1', '4'], kinds: [1] },
-      ],
-      'wss://relay2.com': [
-        { authors: ['1', '3'], kinds: [0] },
-        { authors: ['1', '3'], kinds: [1] },
-      ],
-      'wss://relay3.com': [
-        { authors: ['2', '3'], kinds: [0] },
-        { authors: ['2', '3'], kinds: [1] },
-      ],
-      'wss://relay4.com': [
-        { authors: ['2', '4'], kinds: [0] },
-        { authors: ['2', '4'], kinds: [1] },
-      ],
-    }
-  )
+
+  expect(res).toStrictEqual([
+    ['wss://relay1.com', [{ kinds: [0], authors: ['1'] }]],
+    ['wss://relay2.com', [{ kinds: [0], authors: ['1'] }]],
+    ['wss://relay3.com', [{ kinds: [0], authors: ['2'] }]],
+    ['wss://relay4.com', [{ kinds: [0], authors: ['2'] }]],
+    ['wss://relay2.com', [{ kinds: [0], authors: ['3'] }]],
+    ['wss://relay3.com', [{ kinds: [0], authors: ['3'] }]],
+    ['wss://relay1.com', [{ kinds: [0], authors: ['4'] }]],
+    ['wss://relay4.com', [{ kinds: [0], authors: ['4'] }]],
+    ['wss://relay1.com', [{ kinds: [1], authors: ['1'] }]],
+    ['wss://relay2.com', [{ kinds: [1], authors: ['1'] }]],
+    ['wss://relay3.com', [{ kinds: [1], authors: ['2'] }]],
+    ['wss://relay4.com', [{ kinds: [1], authors: ['2'] }]],
+    ['wss://relay2.com', [{ kinds: [1], authors: ['3'] }]],
+    ['wss://relay3.com', [{ kinds: [1], authors: ['3'] }]],
+    ['wss://relay1.com', [{ kinds: [1], authors: ['4'] }]],
+    ['wss://relay4.com', [{ kinds: [1], authors: ['4'] }]],
+  ])
 })

@@ -1,7 +1,7 @@
-import { subscribeSpyTo } from "@hirez_io/observer-spy"
-import { from } from "rxjs"
-import { fakeNote } from "utils/faker"
-import { insertEvent } from "../insertEvent"
+import { subscribeSpyTo } from '@hirez_io/observer-spy'
+import { from } from 'rxjs'
+import { fakeNote } from 'utils/faker'
+import { insertEvent } from '../insertEvent'
 
 test('insertEvent()', async () => {
   const note1 = fakeNote({ kind: 0, id: '1', pubkey: '1', created_at: 5 })

@@ -8,13 +8,12 @@ import { withCache } from 'nostr/operators/queryCache'
 import type { NoteDB } from 'nostr/types'
 import { ignoreElements, map, merge, of, tap } from 'rxjs'
 import { addEventToStore } from 'stores/operators/addEventToStore'
-import { enqueueNIP05 } from '../nip05.dns'
 import { parseUser } from './metadata/parseUser'
 
 const kinds = [Kind.Metadata]
 
 export class NIP01Users {
-  constructor(private client: NostrClient) { }
+  constructor(private client: NostrClient) {}
 
   subFromNote(note: NoteDB) {
     const authors = note.metadata.mentionedAuthors
@@ -37,12 +36,9 @@ export class NIP01Users {
 
       withCache(sub.filters),
 
-      tap((user) => enqueueNIP05(user)),
+      tap((user) => this.client.dns.enqueue(user)),
       tap((user) => addEventToStore(user)),
     )
-    return merge(
-      stream$,
-      relayLists$.pipe(ignoreElements()),
-    )
+    return merge(stream$, relayLists$.pipe(ignoreElements()))
   }
 }

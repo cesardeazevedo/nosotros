@@ -1,4 +1,4 @@
-import type { NostrFilter } from "core/types"
+import type { NostrFilter } from 'core/types'
 
 export function isFilterValid(filter: NostrFilter): boolean {
   const ids = filter.ids?.length || 0

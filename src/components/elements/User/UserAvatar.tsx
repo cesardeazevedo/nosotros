@@ -20,7 +20,7 @@ function UserAvatar(props: Props) {
     : { src: '/placeholder.jpg' }
   return (
     <UserPopover user={user} disabled={disabledPopover}>
-      <LinkProfile user={user} disabled={disableLink}>
+      <LinkProfile user={user} disableLink={disableLink}>
         <Avatar {...avatarProps} sx={{ cursor: 'pointer', width: size, height: size }}>
           {user?.initials}
         </Avatar>

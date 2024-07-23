@@ -1,5 +1,5 @@
-import { dedupe, pickBy } from "core/helpers"
-import type { NostrFilter } from "core/types"
+import { dedupe, isReplaceable, pickBy } from 'core/helpers'
+import type { NostrFilter } from 'core/types'
 
 export const FILTER_ARRAY_FIELDS = ['kinds', 'authors', 'ids', '#e', '#p'] as (keyof NostrFilter)[]
 
@@ -8,7 +8,13 @@ export function mergeFilters(filters: NostrFilter[]): NostrFilter[] {
   for (const filter of filters) {
     const mainKey = Object.keys(pickBy(filter, FILTER_ARRAY_FIELDS))
     const paginationKeys = JSON.stringify(pickBy(filter, ['until', 'limit', 'since', 'search']))
-    const key = mainKey.toString() + paginationKeys + [...(filter.kinds || [])].sort().toString()
+    const key =
+      mainKey.toString() +
+      paginationKeys +
+      [...(filter.kinds || [])]
+        .sort()
+        .map((kind) => (isReplaceable(kind) ? 'replaceable' : kind))
+        .toString()
 
     if (!groups[key]) {
       groups[key] = { ...filter }
@@ -16,7 +22,7 @@ export function mergeFilters(filters: NostrFilter[]): NostrFilter[] {
     for (const filterKey of FILTER_ARRAY_FIELDS) {
       const value = filter[filterKey] as string[]
       if (value) {
-        ; (groups[key][filterKey] as string[]) = dedupe(groups[key][filterKey] as string[], value)
+        ;(groups[key][filterKey] as string[]) = dedupe(groups[key][filterKey] as string[], value)
       }
     }
   }

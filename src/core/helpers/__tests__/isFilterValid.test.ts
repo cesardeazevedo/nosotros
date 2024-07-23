@@ -1,5 +1,5 @@
-import { createFilter } from "../createFilter"
-import { isFilterValid } from "../isFilterValid"
+import { createFilter } from '../createFilter'
+import { isFilterValid } from '../isFilterValid'
 
 test('isValid()', () => {
   expect(isFilterValid(createFilter({ ids: ['1'] }))).toBe(true)

@@ -1,5 +1,4 @@
-import { makeAutoObservable } from 'mobx'
-import { makePersistable } from 'mobx-persist-store'
+import { autorun, makeAutoObservable } from 'mobx'
 import { defaultNostrSettings, type NostrSettings } from 'nostr/settings'
 
 enum Languages {
@@ -9,23 +8,41 @@ enum Languages {
 
 type ImgProxyPreset = 'feed_img' | 'user_avatar'
 
-export class SettingsStore {
-  lang = Languages.EN
-  defaultEmoji = ''
-  imgproxy = import.meta.env.VITE_IMGPROXY_URL
+type Settings = {
+  lang: string
+  defaultEmoji: string
+  imgproxy: string
+  nostrSettings: NostrSettings
+}
 
-  nostrSettings: NostrSettings = { ...defaultNostrSettings }
+const defaultSettings: Settings = {
+  lang: Languages.EN,
+  defaultEmoji: '',
+  imgproxy: import.meta.env.VITE_IMGPROXY_URL,
+  nostrSettings: defaultNostrSettings,
+}
+
+const item = localStorage.getItem('nostrSettings')
+const data = Object.assign({}, defaultSettings, item ? (JSON.parse(item || '{}') as Settings) : defaultSettings)
+
+export class SettingsStore {
+  lang = data.lang
+  defaultEmoji = data.defaultEmoji
+  imgproxy = data.imgproxy
+  nostrSettings = data.nostrSettings
 
   constructor() {
     makeAutoObservable(this)
 
-    makePersistable(this, {
-      name: 'settings',
-      properties: [
-        'lang',
-        'defaultEmoji',
-      ],
-      storage: window.localStorage,
+    autorun(() => {
+      localStorage.setItem(
+        'nostrSettings',
+        JSON.stringify({
+          lang: this.lang,
+          defaultEmoji: this.defaultEmoji,
+          nostrSettings: this.nostrSettings,
+        }),
+      )
     })
   }
 
@@ -36,7 +53,15 @@ export class SettingsStore {
   getImgProxyUrl(preset: ImgProxyPreset, src: string) {
     return `${this.imgproxy}/_/${preset}/plain/${src}`
   }
+
+  toggleSettings(
+    field: keyof Pick<
+      NostrSettings,
+      'outboxEnabled' | 'hintsEnabled' | 'nip05enabled' | 'nip25enabled' | 'nip57enabled'
+    >,
+  ) {
+    this.nostrSettings[field] = !this.nostrSettings[field]
+  }
 }
 
 export const settingsStore = new SettingsStore()
-

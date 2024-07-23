@@ -1,5 +1,5 @@
-import type { NostrFilter } from "core/types"
-import { DateTime } from "luxon"
+import type { NostrFilter } from 'core/types'
+import { DateTime } from 'luxon'
 
 export function paginateFilter(filter: NostrFilter, range = 60): NostrFilter {
   if (filter.since && filter.until) {

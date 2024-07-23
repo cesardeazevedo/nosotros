@@ -1,10 +1,13 @@
-import type { NostrFilter } from "core/types"
-import type { Observable } from "rxjs"
-import { map } from "rxjs"
-import { formatRelayUrl } from "./formatRelayUrl"
+import type { RelayFilters } from 'core/NostrSubscription'
+import type { NostrFilter } from 'core/types'
+import type { Observable } from 'rxjs'
+import { identity, map, mergeMap } from 'rxjs'
+import { formatRelayUrl } from './formatRelayUrl'
 
-export function relaysToRelayFilters(relays: Observable<string[]>, filters: NostrFilter[]) {
+export function relaysToRelayFilters(relays: Observable<string[]>, filters: NostrFilter[]): Observable<RelayFilters> {
   return relays.pipe(
-    map((relay) => relay.map((url) => ({ [formatRelayUrl(url)]: filters }))),
+    mergeMap(identity),
+    map((relay) => formatRelayUrl(relay)),
+    map((relay) => [relay, filters]),
   )
 }

@@ -36,11 +36,7 @@ const extensions: Extensions = [
 const editor = new Editor({ extensions })
 const editorMarkdown = new Editor({ extensions: [...extensions, MarkdownExtension] })
 
-export function parseNoteContent(
-  event: NostrEvent,
-  references?: NostrReference[],
-  imeta?: IMetaFields,
-): ContentSchema {
+export function parseNoteContent(event: NostrEvent, references?: NostrReference[], imeta?: IMetaFields): ContentSchema {
   const _editor = event.kind === Kind.Article ? editorMarkdown : editor
   _editor.storage.event = event
   _editor.storage.imeta = imeta

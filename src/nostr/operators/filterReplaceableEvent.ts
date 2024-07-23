@@ -1,8 +1,8 @@
-import { isReplaceable } from "core/helpers"
-import type { NostrEvent } from "core/types"
-import { storage } from "nostr/storage"
-import type { OperatorFunction } from "rxjs"
-import { filter, mergeMap, pipe } from "rxjs"
+import { isReplaceable } from 'core/helpers'
+import type { NostrEvent } from 'core/types'
+import { storage } from 'nostr/storage'
+import type { OperatorFunction } from 'rxjs'
+import { filter, mergeMap, pipe } from 'rxjs'
 
 /**
  * Filter out older replaceable events

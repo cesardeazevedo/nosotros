@@ -1,4 +1,4 @@
-import type { NostrEvent } from "core/types"
+import type { NostrEvent } from 'core/types'
 
 class Follows {
   id: string

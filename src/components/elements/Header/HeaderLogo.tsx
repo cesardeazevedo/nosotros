@@ -11,7 +11,7 @@ function HeaderLogo() {
   }, [])
 
   return (
-    <Link component={LinkRouter} to='/' onClick={handleClick} sx={{ margin: 'auto', textDecoration: 'none!important' }} >
+    <Link component={LinkRouter} to='/' onClick={handleClick} sx={{ margin: 'auto', textDecoration: 'none!important' }}>
       <Typography
         variant='h5'
         fontWeight={900}

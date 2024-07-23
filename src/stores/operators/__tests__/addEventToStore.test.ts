@@ -1,6 +1,6 @@
-import { fakeNote } from "utils/faker"
-import { addEventToStore } from "../addEventToStore"
-import { hasEventInStore } from "../hasEventInStore"
+import { fakeNote } from 'utils/faker'
+import { addEventToStore } from '../addEventToStore'
+import { hasEventInStore } from '../hasEventInStore'
 
 test('addEventToStore()', () => {
   const event = fakeNote({ id: '1', kind: 0 })

@@ -8,8 +8,8 @@ import { VList } from 'virtua'
 type Props = {
   feed: FeedModule
   render: (id: string) => React.ReactNode
-  header?: React.ReactNode,
-  footer?: React.ReactNode,
+  header?: React.ReactNode
+  footer?: React.ReactNode
 }
 
 const VirtualList = observer(function VirtualList(props: Props) {
@@ -19,11 +19,14 @@ const VirtualList = observer(function VirtualList(props: Props) {
 
   const ref = useRef<VListHandle>(null)
 
-  const handleScroll = useCallback((offset: number) => {
-    if (offset >= (ref.current?.scrollSize || Infinity) - 1000 - 200) {
-      feed.paginate()
-    }
-  }, [feed])
+  const handleScroll = useCallback(
+    (offset: number) => {
+      if (offset >= (ref.current?.scrollSize || Infinity) - 1000 - 200) {
+        feed.paginate()
+      }
+    },
+    [feed],
+  )
 
   const onRangeChange = useRangeChange(feed)
 

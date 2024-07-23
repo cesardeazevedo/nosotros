@@ -2,7 +2,6 @@ import { matchFilters } from 'nostr-tools'
 import type { Observable } from 'rxjs'
 import {
   EMPTY,
-  NEVER,
   Subject,
   catchError,
   combineLatestWith,
@@ -15,13 +14,14 @@ import {
   share,
   tap,
 } from 'rxjs'
-import type { NostrSubscription } from './NostrSubscription'
+import type { NostrSubscription, SubscriptionOptions } from './NostrSubscription'
 import { mergeSubscriptions } from './mergers/mergeSubscription'
 import { bufferTime } from './operators/bufferTime'
 import type { NostrEvent } from './types'
 
 type Options = {
   bufferTimeSpan?: number
+  outbox?: SubscriptionOptions['outbox']
   subscribe: (sub: NostrSubscription) => Observable<[string, NostrEvent]>
 }
 
@@ -34,7 +34,7 @@ export class NostrSubscriptionBatcher {
   constructor(options: Options) {
     this.buffer$ = this.subject.pipe(
       bufferTime(options.bufferTimeSpan || 1200),
-      map((subs) => (subs.length === 1 ? subs[0] : mergeSubscriptions(subs))),
+      map((subs) => (subs.length === 1 ? subs[0] : mergeSubscriptions(subs, options))),
       share(),
     )
 
@@ -64,7 +64,7 @@ export class NostrSubscriptionBatcher {
           return events$.pipe(filter(([, event]) => matchFilters(child.filters, event)))
         }
         console.log('Couldnt find parent event stream', parent.id)
-        return NEVER
+        return EMPTY
       }),
 
       catchError(() => EMPTY),

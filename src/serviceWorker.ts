@@ -14,7 +14,7 @@ registerRoute(
     cacheName: 'images',
     plugins: [
       new ExpirationPlugin({
-        maxEntries: 500,
+        maxEntries: 1000,
         // Cache for a maximum of a week.
         maxAgeSeconds: 7 * 24 * 60 * 60,
       }),

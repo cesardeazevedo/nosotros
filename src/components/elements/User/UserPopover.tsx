@@ -29,8 +29,6 @@ function UserPopover(props: Props) {
   const { user, disabled = false } = props
 
   if (isMobile || disabled) {
-    // We are disabling this component on mobile, in the future we want to do a lot more sophisticated,
-    // but for now, it will just cause annoying problems.
     return props.children
   }
 
@@ -49,7 +47,7 @@ function UserPopover(props: Props) {
           },
         }}
         TransitionProps={{ in: open }}
-        transitionDuration={{ enter: 200, exit: 200 }}
+        transitionDuration={{ enter: 150, exit: 100 }}
         transformOrigin={{ horizontal: 'left', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}>
         <Observer>

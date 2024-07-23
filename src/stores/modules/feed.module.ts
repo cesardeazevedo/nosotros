@@ -84,7 +84,7 @@ export class FeedModule implements ModuleInterface {
     const id = values(this.data)[index]
     const note = noteStore.get(id)
     if (note) {
-      note.subscribeReactions()
+      note.subscribeOnScroll()
     }
   }
 

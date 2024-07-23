@@ -1,10 +1,11 @@
-import { Box, Divider, IconButton, Popover, Tooltip, Typography } from "@mui/material"
-import { IconServerBolt } from "@tabler/icons-react"
-import { Observer } from "mobx-react-lite"
-import { useState } from "react"
-import { relayStore } from "stores/nostr/relays.store"
-import { Row } from "../Layouts/Flex"
-import RelayList from "./RelayList"
+import { Box, Divider, IconButton, Popover, Typography } from '@mui/material'
+import { IconServerBolt } from '@tabler/icons-react'
+import { Observer } from 'mobx-react-lite'
+import { useState } from 'react'
+import { relayStore } from 'stores/nostr/relays.store'
+import { Row } from '../Layouts/Flex'
+import Tooltip from '../Layouts/Tooltip'
+import RelayList from './RelayList'
 
 function RelaysPopover() {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
@@ -19,11 +20,10 @@ function RelaysPopover() {
 
   const open = Boolean(anchorEl)
 
-
   return (
     <>
-      <Tooltip arrow title='Configure Relays' enterDelay={0}>
-        <Row sx={{ mr: 1, ['@media (max-width: 1140px)']: { display: 'none' } }}>
+      <Tooltip arrow title='Configure Relays'>
+        <Row sx={{ mx: 0.5, ['@media (max-width: 1140px)']: { display: 'none' } }}>
           <IconButton onClick={handleClick} color='inherit'>
             <IconServerBolt strokeWidth='1.5' />
           </IconButton>
@@ -31,8 +31,7 @@ function RelaysPopover() {
             <Observer>
               {() => (
                 <>
-                  {relayStore.myConnectedRelays.length || 0}/
-                  {relayStore.myRelays.length}
+                  {relayStore.myConnectedRelays.length || 0}/{relayStore.myRelays.length}
                 </>
               )}
             </Observer>
@@ -44,6 +43,7 @@ function RelaysPopover() {
         anchorEl={anchorEl}
         onClose={handleClose}
         slotProps={{ paper: { sx: { ml: 8 } } }}
+        transitionDuration={100}
         anchorOrigin={{
           vertical: 'bottom',
           horizontal: 'right',

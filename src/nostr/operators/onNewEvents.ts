@@ -1,5 +1,5 @@
 import type { NostrSubscription } from 'core/NostrSubscription'
-import { validateNostrEvent } from 'core/operators/validateNostrEvent'
+import { verify } from 'core/operators/verify'
 import type { NostrEvent } from 'core/types'
 import { matchFilters } from 'nostr-tools'
 import { filterReplaceableEvent } from 'nostr/operators/filterReplaceableEvent'
@@ -17,6 +17,6 @@ export function onNewEvents(sub: NostrSubscription): OperatorFunction<[string, N
 
     filter((event) => !hasEventInStore(event)),
 
-    validateNostrEvent(),
+    verify(),
   )
 }

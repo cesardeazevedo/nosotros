@@ -7,17 +7,17 @@ import { bindHover, bindPopover, usePopupState } from 'material-ui-popup-state/h
 import React, { useCallback, useRef } from 'react'
 
 type Props = {
-  onClick: (emoji: string) => void
+  onClick: (reaction: string) => void
   children: React.ReactNode
 }
 
 function ReactionIcon(props: {
-  title: string
-  emoji: string
+  title?: string
+  reaction: string
   mouseX: MotionValue<number>
   onClick?: (emoji: string) => void
 }) {
-  const { emoji, title, mouseX, onClick } = props
+  const { reaction, title, mouseX, onClick } = props
   const ref = useRef<HTMLDivElement | null>(null)
   const distance = useTransform(mouseX, (value: number) => {
     const bounds = ref.current?.getBoundingClientRect() ?? { x: 0, width: 0 }
@@ -32,26 +32,29 @@ function ReactionIcon(props: {
   return (
     <motion.div
       ref={ref}
-      onClick={() => onClick?.(emoji)}
+      onClick={() => onClick?.(reaction)}
       style={{ position: 'relative', scale, marginRight, rotateZ, userSelect: 'none', cursor: 'pointer' }}>
-      <motion.div
-        style={{
-          position: 'absolute',
-          backgroundColor: '#000',
-          color: '#fff',
-          paddingLeft: 12,
-          paddingRight: 12,
-          borderRadius: 24,
-          rotateZ: rotateZText,
-          top: -30,
-          left: -25,
-          scale: 0.28,
-          fontWeight: 600,
-          opacity,
-        }}>
-        {title}
-      </motion.div>
-      <Box component='span'>{emoji}</Box>
+      {title && (
+        <motion.div
+          style={{
+            position: 'absolute',
+            backgroundColor: '#000',
+            color: '#fff',
+            paddingLeft: 12,
+            paddingRight: 12,
+            borderRadius: 24,
+            rotateZ: rotateZText,
+            top: -30,
+            left: -25,
+            scale: 0.28,
+            fontWeight: 600,
+            whiteSpace: 'nowrap',
+            opacity,
+          }}>
+          {title}
+        </motion.div>
+      )}
+      <Box component='span'>{reaction}</Box>
     </motion.div>
   )
 }
@@ -63,13 +66,16 @@ function ReactionDock({ onClick }: { onClick: Props['onClick'] }) {
     <Row
       sx={{ width: 340, height: 50, fontSize: 28, justifyContent: 'center', div: { mr: 2 } }}
       onMouseMove={(e) => mouseX.set(e.pageX)}>
-      <ReactionIcon title='Like' emoji='🤙' {...props} />
-      <ReactionIcon title='Love' emoji='❤️' {...props} />
-      <ReactionIcon title='Haha' emoji='😂' {...props} />
-      <ReactionIcon title='Salute' emoji='🫡' {...props} />
-      <ReactionIcon title='Wow' emoji='😮' {...props} />
-      <ReactionIcon title='Sad' emoji='😭' {...props} />
-      <ReactionIcon title='Angry' emoji='😡' {...props} />
+      <ReactionIcon title='Like' reaction='🤙' {...props} />
+      <ReactionIcon title={`Let's go`} reaction='🚀' {...props} />
+      <ReactionIcon title='Fire' reaction='🔥' {...props} />
+      <ReactionIcon title='Watching' reaction='👀' {...props} />
+      <ReactionIcon title='Haha' reaction='😂' {...props} />
+      <ReactionIcon title='Salute' reaction='🫡' {...props} />
+      {/* <ReactionIcon title='Hugs' reaction='🫂' {...props} /> */}
+      {/* <ReactionIcon title='Wow' reaction='😮' {...props} /> */}
+      {/* <ReactionIcon title='Sad' reaction='😭' {...props} /> */}
+      <ReactionIcon title='Angry' reaction='😡' {...props} />
     </Row>
   )
 }
