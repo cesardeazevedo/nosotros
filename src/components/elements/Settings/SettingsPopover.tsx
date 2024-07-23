@@ -1,19 +1,7 @@
-import {
-  Box,
-  Button,
-  Divider,
-  FormControl,
-  FormControlLabel,
-  IconButton,
-  Popover,
-  Switch,
-  Typography,
-} from '@mui/material'
-import { IconBell, IconSettings } from '@tabler/icons-react'
+import { Box, Button, Divider, IconButton, Popover, Typography } from '@mui/material'
+import { IconSettings } from '@tabler/icons-react'
 import { useState } from 'react'
 import Tooltip from '../Layouts/Tooltip'
-import { settingsStore } from 'stores/ui/settings.store'
-import { Row } from '../Layouts/Flex'
 import SettingsNostr from './SettingsNostr'
 
 function SettingsPopover() {
@@ -31,7 +19,7 @@ function SettingsPopover() {
 
   return (
     <>
-      <Tooltip arrow title='Settings' enterDelay={0}>
+      <Tooltip arrow title='Settings'>
         <IconButton color='inherit' onClick={handleClick} sx={{ mx: 0.5 }}>
           <IconSettings strokeWidth='1.4' />
         </IconButton>
@@ -40,6 +28,7 @@ function SettingsPopover() {
         open={open}
         anchorEl={anchorEl}
         onClose={handleClose}
+        transitionDuration={100}
         slotProps={{ paper: { sx: { ml: 1 } } }}
         anchorOrigin={{
           vertical: 'bottom',
@@ -49,7 +38,7 @@ function SettingsPopover() {
           vertical: 'top',
           horizontal: 'right',
         }}>
-        <Box sx={{ width: 300 }}>
+        <Box sx={{ width: 310 }}>
           <Typography variant='h6' sx={{ px: 2, py: 1 }}>
             Settings
           </Typography>

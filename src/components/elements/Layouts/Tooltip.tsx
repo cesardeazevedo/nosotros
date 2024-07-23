@@ -11,7 +11,8 @@ function Tooltip(props: Props & TooltipProps) {
   const { title, comingSoon = false, ...rest } = props
   return (
     <MuiTooltip
-      enterDelay={comingSoon ? 0 : 600}
+      enterDelay={comingSoon ? 0 : 500}
+      TransitionProps={{ timeout: 100 }}
       title={
         <Typography variant='caption' fontWeight={600}>
           {title} {comingSoon && '(Coming Soon)'}

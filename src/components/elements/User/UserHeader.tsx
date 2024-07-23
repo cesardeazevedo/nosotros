@@ -1,4 +1,4 @@
-import { Box, Typography } from '@mui/material'
+import { Typography } from '@mui/material'
 import { Row } from 'components/elements/Layouts/Flex'
 import Tooltip from 'components/elements/Layouts/Tooltip'
 import { DateTime } from 'luxon'
@@ -27,16 +27,13 @@ export const UserHeaderDate = function UserHeaderDate(props: { note: Note; disab
   )
   const fullDate = useMemo(() => DateTime.fromSeconds(createdAt).toLocaleString(DateTime.DATETIME_FULL), [createdAt])
   return (
-    <>
-      <Box sx={{ mx: 1, fontWeight: 600, color: 'text.secondary' }}>·</Box>
-      <LinkNEvent note={note} disableLink={disableLink}>
-        <Tooltip arrow title={fullDate}>
-          <Typography variant='caption' color='textSecondary' sx={{ whiteSpace: 'nowrap' }}>
-            {shortDate}
-          </Typography>
-        </Tooltip>
-      </LinkNEvent>
-    </>
+    <LinkNEvent note={note} disableLink={disableLink}>
+      <Tooltip arrow title={fullDate}>
+        <Typography variant='caption' color='textSecondary' sx={{ ml: 1, whiteSpace: 'nowrap' }}>
+          {shortDate}
+        </Typography>
+      </Tooltip>
+    </LinkNEvent>
   )
 }
 

@@ -47,7 +47,7 @@ function UserPopover(props: Props) {
           },
         }}
         TransitionProps={{ in: open }}
-        transitionDuration={{ enter: 200, exit: 200 }}
+        transitionDuration={{ enter: 150, exit: 100 }}
         transformOrigin={{ horizontal: 'left', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}>
         <Observer>

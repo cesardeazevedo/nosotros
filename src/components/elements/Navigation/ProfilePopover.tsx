@@ -44,7 +44,7 @@ const ProfilePopover = observer(function ProfilePopover() {
             <UserName variant='h6' user={user} disableLink disablePopover />
             <Tooltip arrow placement='bottom' title='Use the QR Code to scan your npub on your mobile device'>
               <IconButton sx={{ color: 'text.primary' }} onClick={dialogStore.openQRCode}>
-                <IconQrcode />
+                <IconQrcode strokeWidth='1.5' />
               </IconButton>
             </Tooltip>
           </Row>
