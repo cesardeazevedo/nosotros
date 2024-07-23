@@ -1,12 +1,12 @@
 import { subscribeSpyTo } from '@hirez_io/observer-spy'
 import { Kind } from 'constants/kinds'
+import { Pool } from 'core/pool'
 import { NostrClient } from 'nostr/nostr'
 import { fakeNote } from 'utils/faker'
 import { RELAY_1, test } from 'utils/fixtures'
 import { expectRelayReceived, relaySendEose, relaySendEvents } from 'utils/testHelpers'
 import { parseNote } from '../metadata/parseNote'
 import { NIP01Notes } from '../nip01.notes'
-import { Pool } from 'core/pool'
 
 describe('NIP01Notes', () => {
   test('Assert subWithRelated notes', async ({ relay }) => {
@@ -28,10 +28,7 @@ describe('NIP01Notes', () => {
     relaySendEvents(relay, reqId, [event1])
 
     // Assert user requests
-    const reqId2 = await expectRelayReceived(
-      relay,
-      { kinds: [Kind.Metadata, Kind.RelayList], ...filter },
-    )
+    const reqId2 = await expectRelayReceived(relay, { kinds: [Kind.Metadata, Kind.RelayList], ...filter })
 
     relaySendEose(relay, reqId)
     relaySendEose(relay, reqId2)

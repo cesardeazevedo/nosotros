@@ -2,7 +2,6 @@ import { matchFilters } from 'nostr-tools'
 import type { Observable } from 'rxjs'
 import {
   EMPTY,
-  NEVER,
   Subject,
   catchError,
   combineLatestWith,
@@ -65,7 +64,7 @@ export class NostrSubscriptionBatcher {
           return events$.pipe(filter(([, event]) => matchFilters(child.filters, event)))
         }
         console.log('Couldnt find parent event stream', parent.id)
-        return NEVER
+        return EMPTY
       }),
 
       catchError(() => EMPTY),

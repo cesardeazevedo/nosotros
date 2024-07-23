@@ -16,7 +16,7 @@ export class Pool {
   relays = new Map<string, Relay>()
   blacklisted = new Set<string>()
 
-  constructor(private options?: Options) { }
+  constructor(private options?: Options) {}
 
   private newRelay(url: string) {
     const relay = this.options?.open?.(url) || new Relay(url)

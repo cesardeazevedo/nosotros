@@ -16,7 +16,7 @@ import { parseNote } from './metadata/parseNote'
 const kinds = [Kind.Text, Kind.Article]
 
 export class NIP01Notes {
-  constructor(private client: NostrClient) { }
+  constructor(private client: NostrClient) {}
 
   subscribe(filters: NostrFilter, options?: SubscriptionOptions) {
     const sub = this.client.subscribe(filters, options)
