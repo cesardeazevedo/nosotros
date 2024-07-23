@@ -97,9 +97,7 @@ describe('Track user relays', () => {
 
     await spy.onComplete()
 
-    expect(spy.getValues()).toStrictEqual([
-      [pubkey, ['relay1', 'relay2', 'relay3']],
-    ])
+    expect(spy.getValues()).toStrictEqual([[pubkey, ['relay1', 'relay2', 'relay3']]])
   })
 
   test('Assert tracking relays from multiple users', async () => {
@@ -108,12 +106,8 @@ describe('Track user relays', () => {
     const spy3 = subscribeSpyTo(trackUserRelays('3'))
 
     // Insert the relays after the tracking
-    await insertUserRelay('3', [
-      { pubkey: '3', relay: 'relay3', type: 'nip65', permission: undefined },
-    ])
-    await insertUserRelay('2', [
-      { pubkey: '2', relay: 'relay2', type: 'nip65', permission: undefined },
-    ])
+    await insertUserRelay('3', [{ pubkey: '3', relay: 'relay3', type: 'nip65', permission: undefined }])
+    await insertUserRelay('2', [{ pubkey: '2', relay: 'relay2', type: 'nip65', permission: undefined }])
     await insertUserRelay('1', [
       { pubkey: '1', relay: 'relay1', type: 'nip65', permission: undefined },
       { pubkey: '1', relay: 'relay2', type: 'nip65', permission: undefined },

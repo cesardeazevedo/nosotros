@@ -15,7 +15,9 @@ export function selectRelays(userRelays: UserRelayDB[], config?: RelaySelectionC
   return userRelays
     .filter((data) => !config?.blacklist?.has(formatRelayUrl(data.relay)))
     .filter((data) => !config?.ignore?.has(formatRelayUrl(data.relay)))
-    .filter((data) => data.permission === config?.permission)
+    .filter((data) => {
+      return config?.permission !== undefined ? data.permission === config.permission || !data.permission : true
+    })
     .slice(0, config?.maxRelaysPerUser || 6)
     .flatMap((x) => x.relay)
 }
