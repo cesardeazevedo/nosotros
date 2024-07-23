@@ -1,16 +1,9 @@
 import { dedupe } from 'core/helpers'
-import type { NostrEvent, RelayHints } from 'core/types'
-import type { EventReference, NostrReference } from 'nostr/nips/nip27.references'
-
-const QUOTE = 'q'
-const EVENT = 'e'
-const PUBKEY = 'p'
-
-export const isEventTag = (tag: string[]) => tag[0] === EVENT
-export const isQuoteTag = (tag: string[]) => tag[0] === QUOTE
-export const isAuthorTag = (tag: string[]) => tag[0] === PUBKEY
-
-export const isMention = (tag: string[]) => tag[3] === 'mention'
+import { mergeRelayHints } from 'core/mergers/mergeRelayHints'
+import type { RelayHints } from 'core/types'
+import type { NostrEvent } from 'nostr-tools'
+import { isAuthorTag, isEventTag, isQuoteTag } from 'nostr/helpers/tags'
+import type { NostrReference } from 'nostr/nips/nip27.references'
 
 export function getRelayHintsFromTags(event: NostrEvent) {
   const hints: Required<RelayHints> = { authors: {}, fallback: {}, ids: {} }
@@ -57,19 +50,8 @@ export function getRelayHintsFromReferences(references: NostrReference[], mentio
   return hints
 }
 
-export function getMentionedNotes(event: NostrEvent, references: NostrReference[]) {
-  const tags = event.tags.filter((tag) => (isEventTag(tag) && isMention(tag)) || isQuoteTag(tag))
-  const refs = references.filter((x): x is EventReference => x.prefix === 'nevent' || x.prefix === 'note')
-  return dedupe(
-    tags.map((x) => x[1]),
-    refs.map((ref) => ref.event.id),
-  )
-}
-
-export function getMentionedAuthors(event: NostrEvent, references: NostrReference[], authorsTags: string[][]) {
-  return dedupe(
-    [event.pubkey],
-    authorsTags.map((x) => x[1]),
-    references.map((ref) => ref.author),
-  )
+export function getRelayHints(event: NostrEvent, references: NostrReference[], mentionedAuthors: string[]) {
+  const hintTags = getRelayHintsFromTags(event)
+  const hintRefs = getRelayHintsFromReferences(references, mentionedAuthors)
+  return mergeRelayHints([hintTags, hintRefs])
 }
