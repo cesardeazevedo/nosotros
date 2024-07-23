@@ -44,27 +44,26 @@ export class ReactionStore {
 
   add(event: NostrEvent) {
     const emoji = fallbackEmoji(event.content) as string
+    const tag = event.tags.findLast(isEventTag)
 
-    event.tags.forEach((tag) => {
-      if (isEventTag(tag)) {
-        const noteId = tag[1]
+    if (tag) {
+      const noteId = tag[1]
 
-        const reactionsForNote = this.reactions.get(noteId) || {}
-        const reactionsForEmoji = reactionsForNote[emoji] || []
+      const reactionsForNote = this.reactions.get(noteId) || {}
+      const reactionsForEmoji = reactionsForNote[emoji] || []
 
-        if (reactionsForEmoji.indexOf(event.pubkey) === -1) {
-          reactionsForEmoji.push(event.pubkey)
-        }
-
-        reactionsForNote[emoji] = reactionsForEmoji
-        if (event.pubkey === authStore.pubkey) {
-          const myReactionsForNote = this.myReactions.get(noteId) || []
-          this.myReactions.set(noteId, [...myReactionsForNote, event.content])
-        }
-
-        this.reactions.set(noteId, reactionsForNote)
+      if (reactionsForEmoji.indexOf(event.pubkey) === -1) {
+        reactionsForEmoji.push(event.pubkey)
       }
-    })
+
+      reactionsForNote[emoji] = reactionsForEmoji
+      if (event.pubkey === authStore.pubkey) {
+        const myReactionsForNote = this.myReactions.get(noteId) || []
+        this.myReactions.set(noteId, [...myReactionsForNote, event.content])
+      }
+
+      this.reactions.set(noteId, reactionsForNote)
+    }
   }
 }
 
