@@ -56,11 +56,14 @@ importers:
         specifier: ^4.1.5
         version: 4.1.5(psl@1.9.0)
       framer-motion:
-        specifier: ^10.12.17
-        version: 10.16.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^11.3.8
+        version: 11.3.8(@emotion/is-prop-valid@1.2.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       idb:
         specifier: ^8.0.0
         version: 8.0.0
+      light-bolt11-decoder:
+        specifier: ^3.1.1
+        version: 3.1.1
       linkifyjs:
         specifier: ^4.1.3
         version: 4.1.3
@@ -131,8 +134,8 @@ importers:
         specifier: ^7.8.1
         version: 7.8.1
       sonner:
-        specifier: ^1.4.0
-        version: 1.4.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^1.5.0
+        version: 1.5.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       tiptap-markdown:
         specifier: ^0.8.9
         version: 0.8.9(@tiptap/core@2.2.2(@tiptap/pm@2.2.2))
@@ -1751,17 +1754,9 @@ packages:
     resolution:
       { integrity: sha512-gJB6HLm5rYwSLI6PQa+X1t5CFGrv1J1TWG+sOyMCeKz2ojaj6Fnl/rZEspogG+cvqbt4AE/2eIyD2QfLKTBNlQ== }
 
-  '@emotion/is-prop-valid@0.8.8':
-    resolution:
-      { integrity: sha512-u5WtneEAr5IDG2Wv65yhunPSMLIpuKsbuOktRojfrEiEvRyC85LgPMZI63cr7NUqT8ZIGdSVg8ZKGxIug4lXcA== }
-
   '@emotion/is-prop-valid@1.2.1':
     resolution:
       { integrity: sha512-61Mf7Ufx4aDxx1xlDeOm8aFFigGHE4z+0sKCa+IHCeZKiyP9RLD0Mmx7m8b9/Cf37f7NAvQOOJAbQQGVr5uERw== }
-
-  '@emotion/memoize@0.7.4':
-    resolution:
-      { integrity: sha512-Ja/Vfqe3HpuzRsG1oBtWTHk2PGZ7GR+2Vz5iYGelAw8dx32K0y7PjVuxK6z1nMpZOqAFsRUPCkK1YjJ56qJlgw== }
 
   '@emotion/memoize@0.8.1':
     resolution:
@@ -6408,13 +6403,16 @@ packages:
       { integrity: sha512-buRG0fpBtRHSTCOASe6hD258tEubFoRLb4ZNA6NxMVHNw2gOcwHo9wyablzMzOA5z9xA9L1KNjk/Nt6MT9aYow== }
     engines: { node: '>= 0.6' }
 
-  framer-motion@10.16.4:
+  framer-motion@11.3.8:
     resolution:
-      { integrity: sha512-p9V9nGomS3m6/CALXqv6nFGMuFOxbWsmaOrdmhyQimMIlLl3LC7h7l86wge/Js/8cRu5ktutS/zlzgR7eBOtFA== }
+      { integrity: sha512-1D+RDTsIp4Rz2dq/oToqSEc9idEQwgBRQyBq4rGpFba+0Z+GCbj9z1s0+ikFbanWe3YJ0SqkNlDe08GcpFGj5A== }
     peerDependencies:
+      '@emotion/is-prop-valid': '*'
       react: ^18.0.0
       react-dom: ^18.0.0
     peerDependenciesMeta:
+      '@emotion/is-prop-valid':
+        optional: true
       react:
         optional: true
       react-dom:
@@ -7691,6 +7689,10 @@ packages:
     resolution:
       { integrity: sha512-+bT2uH4E5LGE7h/n3evcS/sQlJXCpIp6ym8OWJ5eV6+67Dsql/LaaT7qJBAt2rzfoa/5QBGBhxDix1dMt2kQKQ== }
     engines: { node: '>= 0.8.0' }
+
+  light-bolt11-decoder@3.1.1:
+    resolution:
+      { integrity: sha512-sLg/KCwYkgsHWkefWd6KqpCHrLFWWaXTOX3cf6yD2hAzL0SLpX+lFcaFK2spkjbgzG6hhijKfORDc9WoUHwX0A== }
 
   lines-and-columns@1.2.4:
     resolution:
@@ -9446,9 +9448,9 @@ packages:
       { integrity: sha512-7maUZy1N7uo6+WVEX6psASxtNlKaNVMlGQKkG/63nEDdLOWNbiUMoLK7X4uYoLhQstau72mLgfEWcXcwsaHbYQ== }
     engines: { node: '>= 10.13.0', npm: '>= 3.0.0' }
 
-  sonner@1.4.0:
+  sonner@1.5.0:
     resolution:
-      { integrity: sha512-nvkTsIuOmi9e5Wz5If8ldasJjZNVfwiXYijBi2dbijvTQnQppvMcXTFNxL/NUFWlI2yJ1JX7TREDsg+gYm9WyA== }
+      { integrity: sha512-FBjhG/gnnbN6FY0jaNnqZOMmB73R+5IiyYAw8yBj7L54ER7HB3fOSE5OFiQiE2iXWxeXKvg6fIP4LtVppHEdJA== }
     peerDependencies:
       react: ^18.0.0
       react-dom: ^18.0.0
@@ -13103,17 +13105,9 @@ snapshots:
 
   '@emotion/hash@0.9.1': {}
 
-  '@emotion/is-prop-valid@0.8.8':
-    dependencies:
-      '@emotion/memoize': 0.7.4
-    optional: true
-
   '@emotion/is-prop-valid@1.2.1':
     dependencies:
       '@emotion/memoize': 0.8.1
-
-  '@emotion/memoize@0.7.4':
-    optional: true
 
   '@emotion/memoize@0.8.1': {}
 
@@ -17958,11 +17952,11 @@ snapshots:
 
   forwarded@0.2.0: {}
 
-  framer-motion@10.16.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  framer-motion@11.3.8(@emotion/is-prop-valid@1.2.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       tslib: 2.6.2
     optionalDependencies:
-      '@emotion/is-prop-valid': 0.8.8
+      '@emotion/is-prop-valid': 1.2.1
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
@@ -19270,6 +19264,10 @@ snapshots:
     dependencies:
       prelude-ls: 1.2.1
       type-check: 0.4.0
+
+  light-bolt11-decoder@3.1.1:
+    dependencies:
+      '@scure/base': 1.1.1
 
   lines-and-columns@1.2.4: {}
 
@@ -20807,7 +20805,7 @@ snapshots:
       ip: 2.0.0
       smart-buffer: 4.2.0
 
-  sonner@1.4.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  sonner@1.5.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
