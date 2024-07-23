@@ -24,3 +24,26 @@ export interface NoteDB extends EventDB {
 export interface UserDB extends EventDB {
   metadata: UserMetaData
 }
+
+export interface ZapDB extends EventDB {
+  metadata: {
+    bolt11: {
+      amount: {
+        value: string
+        letters: string
+      }
+      separator: {
+        letters: string
+        value: string
+      }
+      timestamp: {
+        letters: string
+        value: number
+      }
+      payment_hash: {
+        letters: string
+        value: string
+      }
+    }
+  }
+}

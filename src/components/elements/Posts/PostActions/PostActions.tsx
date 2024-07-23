@@ -3,7 +3,7 @@ import { Row } from 'components/elements/Layouts/Flex'
 import { PostButtonReply, PostButtonRepost, PostButtonZap } from 'components/elements/Posts/PostActions'
 import { Observer } from 'mobx-react-lite'
 import type Note from 'stores/models/note'
-import PostButtonReact from './PostButtonReact'
+import PostButtonReaction from './PostButtonReaction'
 import PostButtonRelays from './PostRelays'
 
 type Props = {
@@ -28,14 +28,14 @@ function PostActions(props: Props) {
 
   return (
     <Container dense={dense}>
-      <PostButtonReact note={note} dense={dense} />
+      <PostButtonReaction note={note} dense={dense} />
       {renderRepost && <PostButtonRepost dense={dense} />}
       <Observer>
         {() => (
           <>{renderReply && <PostButtonReply dense={dense} value={note.totalReplies} onClick={props.onReplyClick} />}</>
         )}
       </Observer>
-      {renderZap && <PostButtonZap dense={dense} />}
+      {renderZap && <PostButtonZap dense={dense} note={note} />}
       {renderRelays && <PostButtonRelays dense={dense} note={note} />}
     </Container>
   )
