@@ -64,7 +64,7 @@ function PostContentWrapper(props: Props) {
 
   return (
     <Container expanded={expanded}>
-      <div ref={ref} className='bounds'>
+      <div ref={ref} className='bounds' style={{ display: 'flex', flexDirection: 'column' }}>
         {props.children}
       </div>
       {canExpand && (

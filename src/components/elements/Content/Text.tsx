@@ -5,7 +5,6 @@ import { Mention } from './Mention/Mention'
 import Tag from './Tag/Tag'
 import type { BlockQuoteNode, HeadingNode, Mark, ParagraphNode, TextNode } from '../../../content/types'
 import { ContentContext } from './Content'
-import { Typography } from '@mui/material'
 
 type Props = {
   node: TextNode
@@ -30,7 +29,7 @@ function Text(props: Props) {
             case 'tag':
               return <Tag>{content}</Tag>
             case 'link':
-              return disableLink ? <Typography>{content}</Typography> : <Link href={mark.attrs.href}>{content}</Link>
+              return disableLink ? content : <Link href={mark.attrs.href}>{content}</Link>
             default:
               return content
           }

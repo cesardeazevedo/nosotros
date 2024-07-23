@@ -9,7 +9,7 @@ type Props = {
 }
 
 function YoutubeEmbed(props: Props) {
-  const { src, dense = false } = props
+  const { src } = props
 
   const embedId = useMemo(() => {
     const url = new URL(src)
@@ -18,7 +18,7 @@ function YoutubeEmbed(props: Props) {
   }, [src])
 
   return (
-    <Box sx={{ mt: 1, borderRadius: dense ? 1 : 0, overflow: 'hidden' }}>
+    <Box sx={{ mt: 1, px: 2 }}>
       <style>
         {`
         .lty-playbtn {
@@ -27,7 +27,11 @@ function YoutubeEmbed(props: Props) {
         }
       `}
       </style>
-      {embedId && <LiteYouTubeEmbed id={embedId} title='' />}
+      {embedId && (
+        <Box sx={{ borderRadius: 1, overflow: 'hidden' }}>
+          <LiteYouTubeEmbed id={embedId} title='' />
+        </Box>
+      )}
     </Box>
   )
 }

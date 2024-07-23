@@ -1,4 +1,4 @@
-import { styled } from '@mui/material'
+import { Box, styled } from '@mui/material'
 import type { SyntheticEvent } from 'react'
 import { useCallback, useContext, useRef } from 'react'
 import type Note from 'stores/models/note'
@@ -15,12 +15,12 @@ const shouldForwardProp = (prop: string) => prop !== 'dense'
 
 const Img = styled('img', { shouldForwardProp })<{ dense?: boolean }>(({ dense }) => ({
   objectFit: 'cover',
-  width: '100%',
-  maxWidth: 600,
-  maxHeight: 600,
+  width: 'fit-content',
+  maxWidth: dense ? 360 : 400,
+  maxHeight: dense ? 400 : 440,
   marginTop: dense ? 6 : 10,
   marginBottom: 10,
-  borderRadius: dense ? 16 : 0,
+  borderRadius: 8,
 }))
 
 function Image(props: Props) {
@@ -42,14 +42,13 @@ function Image(props: Props) {
   )
 
   return (
-    <div
-      style={{
+    <Box
+      sx={{
         display: 'flex',
-        justifyContent: 'center',
+        justifyContent: 'flex-start',
         alignItems: 'center',
         position: 'relative',
-        maxHeight: 800,
-        maxWidth: 600,
+        px: dense ? 0 : 2,
       }}
       onClick={handleClick}>
       {/* Too slow, not worth it */}
@@ -62,7 +61,7 @@ function Image(props: Props) {
         width={width || '100%'}
         height={height || '100%'}
       />
-    </div>
+    </Box>
   )
 }
 

@@ -133,7 +133,7 @@ const PostReply = observer(function PostReply(props: Props) {
               </Box>
               <PostOptions note={note} />
             </Row>
-            <Box sx={{ ml: 6, pt: 0.4, pb: 0.8 }}>
+            <Box sx={{ ml: 6, pt: 0.2, pb: 0.8 }}>
               <PostActions dense note={note} onReplyClick={() => {}} />
             </Box>
             {note.hasReplies && (
