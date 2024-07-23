@@ -4,13 +4,13 @@ import type { WebSocketSubject } from 'rxjs/webSocket'
 export type NostrEvent = Event
 export type NostrFilter = Filter
 
-export enum MessageSentTypes {
+export enum ClientToRelay {
   REQ = 'REQ',
   EVENT = 'EVENT',
   CLOSE = 'CLOSE',
 }
 
-export enum MessageReceivedTypes {
+export enum RelayToClient {
   OK = 'ok',
   AUTH = 'auth',
   EOSE = 'eose',
@@ -19,7 +19,11 @@ export enum MessageReceivedTypes {
   CLOSED = 'closed',
 }
 
-export type MessageReceived = [MessageReceivedTypes, string, NostrEvent]
+export type MessageReceivedEvent = [RelayToClient.EVENT, string, NostrEvent]
+export type MessageReceivedEose = [RelayToClient.EOSE, string]
+export type MessageReceivedOK = [RelayToClient.OK, string, boolean, string]
+
+export type MessageReceived = MessageReceivedEvent | MessageReceivedEose | MessageReceivedOK
 
 export type RelayHints = {
   authors?: Record<string, string[]>

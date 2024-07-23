@@ -1,20 +1,36 @@
-import type { ObservableSet } from 'mobx'
+import type { Signer } from 'core/signers/signer'
+import type { ObservableMap } from 'mobx'
 import { autorun, makeAutoObservable, observable, reaction, runInAction } from 'mobx'
 import { getNostrExtension, getNostrExtensionPublicKey } from 'nostr/nips/nip07.extensions'
 import { userStore } from 'stores/nostr/users.store'
+import { z } from 'zod'
+
+const accountSchema = z.object({
+  pubkey: z.string(),
+  signer: z.enum(['nip07', 'nip46', 'readonly']),
+})
+
+const schema = z.object({
+  accounts: z.array(z.tuple([z.string(), accountSchema])),
+  pubkey: z.string(),
+})
 
 const item = localStorage.getItem('auth')
-const data = item ? (JSON.parse(item || '{}') as { accounts: string[]; pubkey: string }) : undefined
+const parsed = schema.safeParse(JSON.parse(item || '{}'))
+const data = parsed.success ? parsed.data : undefined
+
+export type Account = z.infer<typeof accountSchema>
 
 export class AuthStore {
-  accounts: ObservableSet<string>
+  accounts: ObservableMap<string, Account>
+  signer: Signer | undefined
   pubkey: string | undefined
   hasExtension?: boolean
 
   constructor() {
     makeAutoObservable(this, { accounts: false })
 
-    this.accounts = observable.set(data?.accounts)
+    this.accounts = observable.map(data?.accounts)
     this.pubkey = data?.pubkey
 
     autorun(() => {
@@ -33,6 +49,12 @@ export class AuthStore {
     }, 2000)
   }
 
+  get currentAccount() {
+    if (this.pubkey) {
+      return this.accounts.get(this.pubkey)
+    }
+  }
+
   get currentUser() {
     return userStore.get(this.pubkey)
   }
@@ -41,11 +63,11 @@ export class AuthStore {
     return !!this.pubkey
   }
 
-  on(args: { onLogin?: (pubkey: string) => void; onLogout?: () => void }) {
+  on(args: { onLogin?: (account: Account) => void; onLogout?: () => void }) {
     return reaction(
-      () => this.pubkey,
-      (pubkey) => {
-        return pubkey ? args.onLogin?.(pubkey) : args.onLogout?.()
+      () => this.currentAccount,
+      (account) => {
+        return account ? args.onLogin?.(account) : args.onLogout?.()
       },
     )
   }
@@ -57,14 +79,14 @@ export class AuthStore {
   async loginWithNostrExtension() {
     const pubkey = await getNostrExtensionPublicKey()
     if (pubkey) {
-      this.addAccount(pubkey)
+      this.addAccount({ pubkey, signer: 'nip07' })
       this.selectAccount(pubkey)
     }
   }
 
   loginWithPubkey(pubkey: string) {
     if (this.isPubkeyValid(pubkey)) {
-      this.addAccount(pubkey)
+      this.addAccount({ pubkey, signer: 'readonly' })
       this.selectAccount(pubkey)
     }
   }
@@ -83,8 +105,9 @@ export class AuthStore {
     }
   }
 
-  addAccount(pubkey: string) {
-    this.accounts.add(pubkey)
+  addAccount(account: Account) {
+    const { pubkey, signer } = account
+    this.accounts.set(pubkey, { pubkey, signer })
   }
 
   removeAccount(pubkey: string) {

@@ -19,7 +19,7 @@ const defaultSettings: Settings = {
   lang: Languages.EN,
   defaultEmoji: '',
   imgproxy: import.meta.env.VITE_IMGPROXY_URL,
-  nostrSettings: defaultNostrSettings
+  nostrSettings: defaultNostrSettings,
 }
 
 const item = localStorage.getItem('nostrSettings')
@@ -35,11 +35,14 @@ export class SettingsStore {
     makeAutoObservable(this)
 
     autorun(() => {
-      localStorage.setItem('nostrSettings', JSON.stringify({
-        lang: this.lang,
-        defaultEmoji: this.defaultEmoji,
-        nostrSettings: this.nostrSettings,
-      }))
+      localStorage.setItem(
+        'nostrSettings',
+        JSON.stringify({
+          lang: this.lang,
+          defaultEmoji: this.defaultEmoji,
+          nostrSettings: this.nostrSettings,
+        }),
+      )
     })
   }
 
@@ -51,7 +54,12 @@ export class SettingsStore {
     return `${this.imgproxy}/_/${preset}/plain/${src}`
   }
 
-  toggleSettings(field: keyof Pick<NostrSettings, 'outboxEnabled' | 'hintsEnabled' | 'nip25enabled'>) {
+  toggleSettings(
+    field: keyof Pick<
+      NostrSettings,
+      'outboxEnabled' | 'hintsEnabled' | 'nip05enabled' | 'nip25enabled' | 'nip57enabled'
+    >,
+  ) {
     this.nostrSettings[field] = !this.nostrSettings[field]
   }
 }

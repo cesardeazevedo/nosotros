@@ -6,6 +6,7 @@ import { GuestModule, type GuestOptions } from 'stores/modules/guest.module'
 import { HomeModule, type HomeOptions } from 'stores/modules/home.module'
 import { NoteModule, type NoteOptions } from 'stores/modules/note.module'
 import { ProfileModule, type ProfileOptions } from 'stores/modules/profile.module'
+import type { Account} from './auth.store'
 import { authStore } from './auth.store'
 
 type ModuleOptions = HomeOptions | GuestOptions | ProfileOptions | NoteOptions | FeedOptions
@@ -51,7 +52,8 @@ export class DeckStore {
       .filter((options) => options !== undefined)
   }
 
-  onLogin(pubkey: string) {
+  onLogin(account: Account) {
+    const { pubkey } = account
     this.home = new HomeModule({ pubkey })
     this.removeColumn('guest')
     this.addColumn(this.home, 0)
@@ -136,7 +138,7 @@ export class DeckStore {
     this.columns.splice(this.columns.indexOf(id), 1)
   }
 
-  update() {}
+  update() { }
 
   reset() {
     this.columns.clear()
