@@ -14,7 +14,7 @@ const FeedColumn = observer(function FeedModule(props: Props) {
   const { feed } = props
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', position: 'relative', p: 0 }}>
-      <DeckColumnHeader id={feed.id}>
+      <DeckColumnHeader id={feed.id} name='Feed'>
         <Typography variant='h6' fontWeight='bold'>
           Feed
         </Typography>

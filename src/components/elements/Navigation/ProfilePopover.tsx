@@ -29,6 +29,7 @@ const ProfilePopover = observer(function ProfilePopover() {
       <Popover
         open={Boolean(anchorEl)}
         anchorEl={anchorEl}
+        transitionDuration={150}
         anchorOrigin={{
           vertical: 'bottom',
           horizontal: 'right',

@@ -36,7 +36,10 @@ const UserName = observer(function UserName(props: Props) {
   return (
     <Row>
       {!user && (
-        <Skeleton variant='rectangular' style={{ alignSelf: 'center', width: 100, height: 14, borderRadius: 6 }} />
+        <Skeleton
+          variant='rectangular'
+          style={{ marginLeft: 14, alignSelf: 'center', width: 100, height: 14, borderRadius: 6 }}
+        />
       )}
       <UserPopover user={user} disabled={disablePopover}>
         <LinkProfile user={user} disableLink={disableLink}>

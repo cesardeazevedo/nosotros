@@ -10,6 +10,7 @@ import type { ModuleInterface } from './interface'
 
 export type NoteOptions = {
   id: string
+  noteId: string
   type: 'note'
   subscription: SubscriptionOptions
 }
@@ -25,13 +26,14 @@ export class NoteModule implements ModuleInterface {
 
   filter: NostrFilter
 
-  constructor(options: { id: string; kind?: Kind; relays?: string[] }) {
+  constructor(options: { id?: string; noteId: string; kind?: Kind; relays?: string[] }) {
     makeAutoObservable(this)
 
     this.id = options.id || Math.random().toString().slice(2, 10)
 
     this.options = {
       id: this.id,
+      noteId: options.noteId,
       type: 'note',
       subscription: {
         relayHints: {
@@ -44,7 +46,7 @@ export class NoteModule implements ModuleInterface {
 
     this.client = appState.client
 
-    this.filter = { ids: [this.options.id] }
+    this.filter = { ids: [this.options.noteId] }
   }
 
   get note() {
@@ -64,7 +66,7 @@ export class NoteModule implements ModuleInterface {
   }
 
   handleNote() {
-    const event = noteStore.get(this.id)?.data
+    const event = noteStore.get(this.options.noteId)?.data
     if (event) {
       // Create a new note model for each note module
       const note = new Note(event, this.client)

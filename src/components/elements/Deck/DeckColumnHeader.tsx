@@ -1,4 +1,4 @@
-import { AccordionDetails, Box, Divider, IconButton, Typography } from '@mui/material'
+import { AccordionDetails, Box, Button, Divider, IconButton, Typography } from '@mui/material'
 import { IconGripVertical, IconSettings, IconTrashX } from '@tabler/icons-react'
 import React, { useCallback, useState } from 'react'
 import Accordion from '../Layouts/Accordion'
@@ -8,6 +8,7 @@ import { deckStore } from 'stores/ui/deck.store'
 
 type Props = {
   id: string
+  name: string
   settings?: React.ReactElement
   children: React.ReactElement | React.ReactElement[]
 }
@@ -33,7 +34,7 @@ function DeckColumnHeader(props: Props) {
           </Row>
           <Tooltip arrow title='Feed Settings'>
             <IconButton size='small' onClick={() => setSettings(!settings)}>
-              <IconSettings size={22} strokeWidth='2.0' />
+              <IconSettings size={22} strokeWidth='1.5' />
             </IconButton>
           </Tooltip>
         </Row>
@@ -41,7 +42,7 @@ function DeckColumnHeader(props: Props) {
       </Box>
       <AccordionDetails sx={{ p: 0 }}>
         <Row sx={{ px: 2, py: 1, justifyContent: 'space-between' }}>
-          <Typography variant='h6'>Home Settings</Typography>
+          <Typography variant='h6'>{props.name}</Typography>
           <Tooltip arrow title='Delete column'>
             <IconButton color='error' onClick={handleDelete}>
               <IconTrashX strokeWidth='1.4' size={20} />
@@ -49,6 +50,17 @@ function DeckColumnHeader(props: Props) {
           </Tooltip>
         </Row>
         {props.settings}
+        {props.settings && (
+          <>
+            <Row sx={{ p: 1, justifyContent: 'space-between' }}>
+              <Button>Reset</Button>
+              <Button variant='contained' size='small'>
+                Apply Filters
+              </Button>
+            </Row>
+            <Divider />
+          </>
+        )}
       </AccordionDetails>
     </Accordion>
   )

@@ -17,7 +17,7 @@ export class ProfileModule {
     this.feed = new FeedModule({
       id: id || pubkey,
       pipeline: 'subFeed',
-      range: Duration.fromObject({ days: 4 }).as('minutes'),
+      range: Duration.fromObject({ days: 1 }).as('minutes'),
       subscription: {
         relayHints: {
           authors: {

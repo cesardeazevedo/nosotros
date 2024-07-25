@@ -28,19 +28,19 @@ export interface UserDB extends EventDB {
 export interface ZapDB extends EventDB {
   metadata: {
     bolt11: {
-      amount: {
+      amount?: {
         value: string
         letters: string
       }
-      separator: {
+      separator?: {
         letters: string
         value: string
       }
-      timestamp: {
+      timestamp?: {
         letters: string
         value: number
       }
-      payment_hash: {
+      payment_hash?: {
         letters: string
         value: string
       }

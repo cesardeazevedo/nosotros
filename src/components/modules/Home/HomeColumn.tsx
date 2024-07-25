@@ -23,7 +23,7 @@ const HomeColumn = observer(function HomeColumn(props: Props) {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', position: 'relative', p: 0 }}>
-      <DeckColumnHeader id={feed.id} settings={<HomeSettings />}>
+      <DeckColumnHeader id={feed.id} name='Home Settings' settings={<HomeSettings />}>
         <IconHome strokeWidth='2' size={24} />
         <Typography variant='h6' fontWeight='bold' sx={{ ml: 1 }}>
           Home

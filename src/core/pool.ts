@@ -1,3 +1,4 @@
+import { LRUCache } from 'lru-cache'
 import { of } from 'rxjs'
 import { formatRelayUrl } from './helpers/formatRelayUrl'
 import type { NostrSubscription } from './NostrSubscription'
@@ -14,9 +15,12 @@ type Options = {
 
 export class Pool {
   relays = new Map<string, Relay>()
-  blacklisted = new Set<string>()
+  blacklisted = new LRUCache({
+    ttl: 30000,
+    ttlAutopurge: true,
+  })
 
-  constructor(private options?: Options) {}
+  constructor(private options?: Options) { }
 
   private newRelay(url: string) {
     const relay = this.options?.open?.(url) || new Relay(url)
@@ -25,12 +29,23 @@ export class Pool {
     // Stablish WebSocket connection
     relay.websocket$.pipe(onAuth((challenge) => this.options?.auth?.(relay, challenge))).subscribe({
       error: () => {
-        this.relays.delete(url)
-        this.blacklisted.add(url)
+        this.delete(url)
+        this.blacklist(url)
+      },
+      complete: () => {
+        this.delete(url)
       },
     })
 
     return relay
+  }
+
+  delete(url: string) {
+    this.relays.delete(url)
+  }
+
+  blacklist(url: string) {
+    this.blacklisted.set(url, true)
   }
 
   getOrAddRelay(url: string): Relay | undefined {
@@ -41,7 +56,7 @@ export class Pool {
     if (this.blacklisted.has(url)) {
       return
     }
-    if (this.options?.blacklist?.length && this.options?.blacklist.some((x) => x.pattern.exec(url))) {
+    if (this.options?.blacklist?.some((x) => x.pattern.exec(url))) {
       return
     }
     if (this.relays.has(url)) {

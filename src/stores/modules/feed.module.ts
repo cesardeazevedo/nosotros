@@ -6,7 +6,7 @@ import type { NostrClient } from 'nostr/nostr'
 import type { NostrSettings } from 'nostr/settings'
 import type { NoteDB } from 'nostr/types'
 import type { Subscription } from 'rxjs'
-import { type Observable } from 'rxjs'
+import { ignoreElements, interval, map, merge, takeWhile, tap, type Observable } from 'rxjs'
 import { appState } from 'stores/app.state'
 import Note from 'stores/models/note'
 import { noteStore } from 'stores/nostr/notes.store'
@@ -110,6 +110,19 @@ export class FeedModule implements ModuleInterface {
     this._subscription = undefined
   }
 
+  // Paginate again increasing the pagination range if the feed still less than 5 posts.
+  private paginateOnEmpty() {
+    return interval(1500).pipe(
+      map(() => this.data),
+      takeWhile((data) => data.size < 5),
+      tap(() => {
+        this.pagination$.increaseRange()
+        this.paginate()
+      }),
+      ignoreElements(),
+    )
+  }
+
   private subFeed() {
     return this.subscribe(this.client.feeds.subscribe(this.pagination$))
   }
@@ -119,7 +132,7 @@ export class FeedModule implements ModuleInterface {
   }
 
   private subscribe(notes$: Observable<NoteDB>) {
-    this._subscription = notes$.subscribe({
+    this._subscription = merge(notes$, this.paginateOnEmpty()).subscribe({
       next: (event) => {
         noteStore.add(new Note(event, this.client))
         // We never put replies as root notes on the feed

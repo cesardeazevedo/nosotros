@@ -1,7 +1,7 @@
 import type { NostrFilter } from 'core/types'
 import type { Observable } from 'rxjs'
 import { combineLatestWith, EMPTY, filter, from, map, merge, mergeMap, takeUntil, timer } from 'rxjs'
-import type { RelaySelectionConfig } from './operators/fromUserRelays'
+import { type RelaySelectionConfig } from './operators/fromUserRelays'
 import { toRelayFilters, trackUsersRelays } from './operators/trackUserRelays'
 
 interface OutboxConfig extends RelaySelectionConfig {
@@ -30,7 +30,7 @@ export function outbox(config: OutboxConfig = defaultConfig) {
           maxRelaysPerUser: options.maxRelaysPerUser,
         }
         // Track pubkeys from authors property
-        const authors$ = trackUsersRelays(filter.authors, relaySelection).pipe(toRelayFilters(filter, 'authors'))
+        const authors$ = trackUsersRelays(filter.authors, config).pipe(toRelayFilters(filter, 'authors'))
 
         // Track pubkeys from #p property
         const p$ = trackUsersRelays(filter['#p'], relaySelection).pipe(toRelayFilters(filter, '#p'))

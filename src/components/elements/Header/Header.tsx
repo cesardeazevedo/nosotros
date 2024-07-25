@@ -47,7 +47,7 @@ function Header() {
                 width: isMobile ? '100%' : 'auto',
               }}>
               {!isNostrRoute && isMobile && <Sidebar />}
-              {!isNostrRoute && <HeaderLogo />}
+              {isNostrRoute && isMobile ? null : <HeaderLogo />}
             </Row>
             <CenteredContainer maxWidth='sm' sx={{ pt: 0, mt: 0 }}>
               <HeaderCenter />

@@ -8,7 +8,10 @@ describe('Test ReactionStore', () => {
     let reaction = fakeReaction({
       pubkey: '1',
       tags: [
-        ['e', '1'],
+        ['e', '10'],
+        ['e', '11'],
+        ['e', '12'],
+        ['e', '1'], // the last is the actual event being reacted to
         ['p', '10'],
       ],
     })

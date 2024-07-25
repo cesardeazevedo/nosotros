@@ -33,7 +33,7 @@ export class NostrSubscriptionBatcher {
 
   constructor(options: Options) {
     this.buffer$ = this.subject.pipe(
-      bufferTime(options.bufferTimeSpan || 1200),
+      bufferTime(options.bufferTimeSpan || 1500),
       map((subs) => (subs.length === 1 ? subs[0] : mergeSubscriptions(subs, options))),
       share(),
     )

@@ -44,7 +44,7 @@ const UserHeader = observer(function UserHeader(props: Props) {
     <Row sx={{ alignItems: alignCenter ? 'center' : 'flex-start', height: !alignCenter ? 42 : 46 }}>
       <UserAvatar user={user} dense={dense} disableLink={disableLink} />
       <Row>
-        {user && <UserName user={user} sx={{ maxWidth: 260, ml: 2 }} disableLink={disableLink} />}
+        <UserName user={user} sx={{ maxWidth: 260, ml: 2 }} disableLink={disableLink} />
         <UserHeaderDate note={note} disableLink={disableLink} />
       </Row>
     </Row>

@@ -2,6 +2,7 @@ import { subscribeSpyTo } from '@hirez_io/observer-spy'
 import { RELAY_1, RELAY_2, RELAY_3, RELAY_4 } from 'utils/fixtures'
 import { fromUserRelay } from '../fromUserRelays'
 import { insertUserRelay } from '../insertUserRelay'
+import { identity, map, mergeMap } from 'rxjs'
 
 describe('fromUserRelay', () => {
   test('assert user relays', async () => {
@@ -15,8 +16,8 @@ describe('fromUserRelay', () => {
       { type: 'nip65', pubkey: '2', permission: undefined, relay: RELAY_2 },
     ])
 
-    const user1$ = fromUserRelay('1')
-    const user2$ = fromUserRelay('2')
+    const user1$ = fromUserRelay('1').pipe(map((x) => x.map((x) => x.relay)))
+    const user2$ = fromUserRelay('2').pipe(map((x) => x.map((x) => x.relay)))
 
     const spy1 = subscribeSpyTo(user1$)
     const spy2 = subscribeSpyTo(user2$)
@@ -37,13 +38,16 @@ describe('fromUserRelay', () => {
 
     const $ = fromUserRelay('1', {
       permission: 'read',
-    })
+    }).pipe(
+      mergeMap(identity),
+      map((x) => x.relay)
+    )
 
     const spy = subscribeSpyTo($)
 
     await spy.onComplete()
 
-    expect(spy.getValues()).toStrictEqual([[RELAY_1, RELAY_2, RELAY_4]])
+    expect(spy.getValues()).toStrictEqual([RELAY_1, RELAY_2, RELAY_4])
   })
 
   test('assert user write relays', async () => {
@@ -54,14 +58,15 @@ describe('fromUserRelay', () => {
       { type: 'nip65', pubkey: '1', permission: undefined, relay: RELAY_4 },
     ])
 
-    const $ = fromUserRelay('1', {
-      permission: 'write',
-    })
+    const $ = fromUserRelay('1', { permission: 'write' }).pipe(
+      mergeMap(identity),
+      map((x) => x.relay)
+    )
 
     const spy = subscribeSpyTo($)
 
     await spy.onComplete()
 
-    expect(spy.getValues()).toStrictEqual([[RELAY_2, RELAY_3, RELAY_4]])
+    expect(spy.getValues()).toStrictEqual([RELAY_2, RELAY_3, RELAY_4])
   })
 })

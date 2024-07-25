@@ -78,8 +78,7 @@ export class NostrClient {
           ignoreRelays: this.relays$,
           maxRelaysPerUser: this.settings.maxRelaysPerUser,
         }),
-      },
-      )
+      })
       return of(pub)
     }
     return throwError(() => new Error('Not authenticated'))

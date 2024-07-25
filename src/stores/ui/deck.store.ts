@@ -1,3 +1,4 @@
+import type { IObservableArray } from 'mobx'
 import { makeAutoObservable, observable } from 'mobx'
 import { makePersistable } from 'mobx-persist-store'
 import type { FeedOptions } from 'stores/modules/feed.module'
@@ -6,7 +7,7 @@ import { GuestModule, type GuestOptions } from 'stores/modules/guest.module'
 import { HomeModule, type HomeOptions } from 'stores/modules/home.module'
 import { NoteModule, type NoteOptions } from 'stores/modules/note.module'
 import { ProfileModule, type ProfileOptions } from 'stores/modules/profile.module'
-import type { Account} from './auth.store'
+import type { Account } from './auth.store'
 import { authStore } from './auth.store'
 
 type ModuleOptions = HomeOptions | GuestOptions | ProfileOptions | NoteOptions | FeedOptions
@@ -116,26 +117,26 @@ export class DeckStore {
     }
   }
 
-  addHomeColumn() {
+  addHomeColumn(index?: number) {
     if (authStore.pubkey) {
-      this.addColumn(new HomeModule({ id: this.newId(), pubkey: authStore.pubkey }))
+      this.addColumn(new HomeModule({ id: this.newId(), pubkey: authStore.pubkey }), index)
     }
   }
 
-  addProfileColumn(...options: ConstructorParameters<typeof ProfileModule>) {
-    const module = new ProfileModule(...options)
-    return this.addColumn(module) as ProfileModule
+  addProfileColumn(options: ConstructorParameters<typeof ProfileModule>[0], index?: number) {
+    const module = new ProfileModule({ id: this.newId(), ...options })
+    return this.addColumn(module, index) as ProfileModule
   }
 
-  addNoteColumn(...options: ConstructorParameters<typeof NoteModule>) {
-    const module = new NoteModule(...options)
-    return this.addColumn(module) as NoteModule
+  addNoteColumn(options: ConstructorParameters<typeof NoteModule>[0], index?: number) {
+    const module = new NoteModule({ id: this.newId(), ...options })
+    return this.addColumn(module, index) as NoteModule
   }
 
   removeColumn(id: string) {
     this.modules.delete(id)
     this.options.delete(id)
-    this.columns.splice(this.columns.indexOf(id), 1)
+    this.columns = this.columns.filter((column) => column !== id) as IObservableArray<string>
   }
 
   update() { }

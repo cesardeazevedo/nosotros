@@ -1,45 +1,10 @@
 import { subscribeSpyTo } from '@hirez_io/observer-spy'
-import { from } from 'rxjs'
+import type { UserRelayDB } from 'db/types'
+import { of } from 'rxjs'
 import { insertUserRelay } from '../insertUserRelay'
 import { toRelayFilters, trackUserRelays, trackUsersRelays } from '../trackUserRelays'
 
 describe('Track user relays', () => {
-  test('Assert user relays in the database', async () => {
-    const pubkey = '1'
-
-    await insertUserRelay(pubkey, [
-      { pubkey, relay: 'relay1', type: 'nip65', permission: undefined },
-      { pubkey, relay: 'relay2', type: 'nip65', permission: undefined },
-      { pubkey, relay: 'relay3', type: 'nip05', permission: undefined },
-    ])
-
-    const spy = subscribeSpyTo(trackUserRelays(pubkey))
-
-    await spy.onComplete()
-
-    expect(spy.getValues()).toStrictEqual([[pubkey, ['relay1', 'relay2', 'relay3']]])
-  })
-
-  test('Assert multiple users relays in the database', async () => {
-    await insertUserRelay('1', [{ pubkey: '1', relay: 'relay1', type: 'nip65', permission: undefined }])
-    await insertUserRelay('2', [{ pubkey: '2', relay: 'relay2', type: 'nip65', permission: undefined }])
-    await insertUserRelay('3', [{ pubkey: '3', relay: 'relay3', type: 'nip65', permission: undefined }])
-    await insertUserRelay('4', [{ pubkey: '4', relay: 'relay4', type: 'nip65', permission: undefined }])
-    await insertUserRelay('5', [{ pubkey: '5', relay: 'relay5', type: 'nip65', permission: undefined }])
-
-    const spy = subscribeSpyTo(trackUsersRelays(['1', '2', '3', '4', '5']))
-
-    await spy.onComplete()
-
-    expect(spy.getValues()).toStrictEqual([
-      ['1', ['relay1']],
-      ['2', ['relay2']],
-      ['3', ['relay3']],
-      ['4', ['relay4']],
-      ['5', ['relay5']],
-    ])
-  })
-
   test('Assert multiple users relays on the fly', async () => {
     const spy = subscribeSpyTo(trackUsersRelays(['1', '2', '3', '4', '5'], { timeout: 1000 }))
 
@@ -53,21 +18,22 @@ describe('Track user relays', () => {
     await spy.onComplete()
 
     expect(spy.getValues()).toStrictEqual([
-      ['1', ['relay1']],
-      ['2', ['relay2']],
-      ['3', ['relay3']],
-      ['4', ['relay4']],
+      [{ pubkey: '1', relay: 'relay1', type: 'nip65', permission: undefined }],
+      [{ pubkey: '2', relay: 'relay2', type: 'nip65', permission: undefined }],
+      [{ pubkey: '3', relay: 'relay3', type: 'nip65', permission: undefined }],
+      [{ pubkey: '4', relay: 'relay4', type: 'nip65', permission: undefined }],
     ])
   })
 
   test('Assert toRelayFilters', async () => {
-    const stream = from([
-      ['1', ['relay1', 'relay2']],
-      ['2', ['relay2']],
-      ['3', ['relay3']],
-      ['4', ['relay4']],
-      ['5', ['relay5']],
-    ] as [string, string[]][]).pipe(toRelayFilters({ kinds: [0], authors: [], limit: 1 }, 'authors'))
+    const stream = of([
+      { pubkey: '1', relay: 'relay1', type: 'nip65', permission: undefined },
+      { pubkey: '1', relay: 'relay2', type: 'nip65', permission: undefined },
+      { pubkey: '2', relay: 'relay2', type: 'nip65', permission: undefined },
+      { pubkey: '3', relay: 'relay3', type: 'nip65', permission: undefined },
+      { pubkey: '4', relay: 'relay4', type: 'nip65', permission: undefined },
+      { pubkey: '5', relay: 'relay5', type: 'nip65', permission: undefined },
+    ] as UserRelayDB[]).pipe(toRelayFilters({ kinds: [0], authors: [], limit: 1 }, 'authors'))
 
     const spy = subscribeSpyTo(stream)
     await spy.onComplete()
@@ -97,28 +63,12 @@ describe('Track user relays', () => {
 
     await spy.onComplete()
 
-    expect(spy.getValues()).toStrictEqual([[pubkey, ['relay1', 'relay2', 'relay3']]])
-  })
-
-  test('Assert tracking relays from multiple users', async () => {
-    const spy1 = subscribeSpyTo(trackUserRelays('1'))
-    const spy2 = subscribeSpyTo(trackUserRelays('2'))
-    const spy3 = subscribeSpyTo(trackUserRelays('3'))
-
-    // Insert the relays after the tracking
-    await insertUserRelay('3', [{ pubkey: '3', relay: 'relay3', type: 'nip65', permission: undefined }])
-    await insertUserRelay('2', [{ pubkey: '2', relay: 'relay2', type: 'nip65', permission: undefined }])
-    await insertUserRelay('1', [
-      { pubkey: '1', relay: 'relay1', type: 'nip65', permission: undefined },
-      { pubkey: '1', relay: 'relay2', type: 'nip65', permission: undefined },
-      { pubkey: '1', relay: 'relay3', type: 'nip05', permission: undefined },
+    expect(spy.getValues()).toStrictEqual([
+      [
+        { pubkey: '1', relay: 'relay1', type: 'nip65', permission: undefined },
+        { pubkey: '1', relay: 'relay2', type: 'nip65', permission: undefined },
+        { pubkey: '1', relay: 'relay3', type: 'nip05', permission: undefined },
+      ],
     ])
-
-    await spy1.onComplete()
-    await spy2.onComplete()
-    await spy3.onComplete()
-    expect(spy1.getValues()).toStrictEqual([['1', ['relay1', 'relay2', 'relay3']]])
-    expect(spy2.getValues()).toStrictEqual([['2', ['relay2']]])
-    expect(spy3.getValues()).toStrictEqual([['3', ['relay3']]])
   })
 })

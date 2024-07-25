@@ -17,8 +17,11 @@ const Menu = observer(function Menu(props: Props) {
     strokeWidth: '1.4',
   }
   const typographyProps: TypographyProps = {
-    variant: dense ? 'body1' : 'h6',
-    sx: { ml: dense ? 2 : 4 },
+    variant: dense ? 'body1' : 'subtitle1',
+    sx: {
+      ml: dense ? 2 : 4,
+      fontSize: dense ? '100%' : '120%',
+    },
   }
   return (
     <List>

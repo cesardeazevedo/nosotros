@@ -7,5 +7,7 @@ import { filter } from 'rxjs'
  * Filter out invalid events and invalid signatures
  */
 export function verify() {
-  return filter((event: NostrEvent | UnsignedEvent): event is VerifiedEvent => verifyEvent(event as NostrEvent))
+  return filter((event: NostrEvent | UnsignedEvent): event is VerifiedEvent => {
+    return verifyEvent(event as NostrEvent)
+  })
 }
