@@ -32,7 +32,9 @@ export function inbox(config: InboxConfig = defaultConfig) {
 
         const authors = [author, ...related]
 
-        return trackUsersRelays(authors, relaySelection).pipe(map((x) => x[1]))
+        return trackUsersRelays(authors, relaySelection).pipe(
+          map((userRelay) => userRelay.map((item) => item.relay))
+        )
       }),
     )
   }

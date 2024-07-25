@@ -7,7 +7,7 @@ export type NostrExtension = {
 }
 
 export class NIP07Signer implements Signer {
-  constructor() { }
+  constructor() {}
 
   async sign(event: UnsignedEvent): Promise<NostrEvent | UnsignedEvent> {
     if ('nostr' in window) {

@@ -5,6 +5,6 @@ export const pool = new Pool({
   blacklist: [],
 
   auth(relay: Relay, challenge: string) {
-    console.log('AUTH', relay, challenge)
+    console.log('AUTH', relay.url, challenge)
   },
 })
