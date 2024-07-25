@@ -50,8 +50,8 @@ export class PaginationSubject extends BehaviorSubject<NostrFilter> {
     this.subject$.next()
   }
 
-  setRange(range: number) {
-    this.range = range
+  increaseRange(range?: number) {
+    this.range = range || this.range * 2
   }
 
   setFilter(filter: NostrFilter) {
