@@ -119,7 +119,7 @@ export class FeedModule implements ModuleInterface {
         this.pagination$.increaseRange()
         this.paginate()
       }),
-      ignoreElements()
+      ignoreElements(),
     )
   }
 

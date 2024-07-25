@@ -1,7 +1,7 @@
 import { Box, IconButton, TextField, Typography } from '@mui/material'
 import type { TablerIconsProps } from '@tabler/icons-react'
 import { IconBell, IconHome, IconSearch, IconUser } from '@tabler/icons-react'
-import React, { useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { authStore } from 'stores/ui/auth.store'
 import { deckStore } from 'stores/ui/deck.store'
 import { Row } from '../Layouts/Flex'
@@ -30,6 +30,12 @@ function Item(props: Props) {
 function DeckNew() {
   const [author, setAuthor] = useState('')
 
+  const handleAddProfile = useCallback(() => {
+    if (author) {
+      deckStore.addProfileColumn({ pubkey: author })
+    }
+  }, [author])
+
   return (
     <>
       <Box sx={{ py: 4, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
@@ -44,7 +50,7 @@ function DeckNew() {
               onClick={() => deckStore.addHomeColumn()}
               disabled={!authStore.isLogged}
             />
-            <Item title='User' icon={IconUser} onClick={() => deckStore.addProfileColumn({ pubkey: author })} />
+            <Item title='User' icon={IconUser} onClick={handleAddProfile} />
             <Item title='Notifications' icon={IconBell} />
             <Item title='Search' icon={IconSearch} />
           </Row>
