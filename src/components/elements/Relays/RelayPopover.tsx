@@ -1,16 +1,19 @@
-import { Box, Divider, IconButton, Popover, Typography } from '@mui/material'
-import { IconServerBolt } from '@tabler/icons-react'
-import { Observer } from 'mobx-react-lite'
+import { AccordionDetails, AccordionSummary, Box, Divider, Popover, Typography } from '@mui/material'
+import { IconChevronDown } from '@tabler/icons-react'
+import { observer } from 'mobx-react-lite'
 import { useState } from 'react'
 import { relayStore } from 'stores/nostr/relays.store'
+import { authStore } from 'stores/ui/auth.store'
+import Accordion from '../Layouts/Accordion'
 import { Row } from '../Layouts/Flex'
-import Tooltip from '../Layouts/Tooltip'
+import { RelayIconButton } from './RelayIconButton'
 import RelayList from './RelayList'
+import RelayListOthers from './RelayListOthers'
 
-function RelaysPopover() {
-  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
+const RelaysPopover = observer(function RelaysPopover() {
+  const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null)
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
     setAnchorEl(event.currentTarget)
   }
 
@@ -22,22 +25,7 @@ function RelaysPopover() {
 
   return (
     <>
-      <Tooltip arrow title='Configure Relays'>
-        <Row sx={{ mx: 0.5, ['@media (max-width: 1140px)']: { display: 'none' } }}>
-          <IconButton onClick={handleClick} color='inherit'>
-            <IconServerBolt strokeWidth='1.5' />
-          </IconButton>
-          <Typography variant='body2'>
-            <Observer>
-              {() => (
-                <>
-                  {relayStore.myConnectedRelays.length || 0}/{relayStore.myRelays.length}
-                </>
-              )}
-            </Observer>
-          </Typography>
-        </Row>
-      </Tooltip>
+      <RelayIconButton onClick={handleClick} />
       <Popover
         open={open}
         anchorEl={anchorEl}
@@ -54,16 +42,31 @@ function RelaysPopover() {
         }}>
         <Box sx={{ minWidth: 250, maxWidth: 300 }}>
           <Typography variant='subtitle1' sx={{ px: 2, py: 1 }}>
-            My Relays
+            {authStore.pubkey ? 'My Relays' : 'Default Relays'}
           </Typography>
           <Divider />
-          <Box sx={{ p: 2 }}>
-            <RelayList relays={relayStore.myRelays} />
+          <Box sx={{ px: 2, py: 1 }}>
+            {authStore.pubkey ? <RelayList relays={relayStore.myRelays} /> : <RelayListOthers relays={relayStore.others} />}
           </Box>
+          <Divider />
+          {authStore.pubkey && (
+            <Row sx={{ px: 0 }}>
+              <Accordion sx={{ width: '100%' }}>
+                <AccordionSummary sx={{ height: 30 }} expandIcon={<IconChevronDown strokeWidth='1.5' />}>
+                  <Typography variant='subtitle1' sx={{ px: 2, py: 1 }}>
+                    Other Relays ({relayStore.others.length})
+                  </Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <RelayListOthers relays={relayStore.others} />
+                </AccordionDetails>
+              </Accordion>
+            </Row>
+          )}
         </Box>
       </Popover>
     </>
   )
-}
+})
 
 export default RelaysPopover

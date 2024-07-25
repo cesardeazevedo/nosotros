@@ -18,15 +18,24 @@ export class Relay {
       url: this.url,
       openObserver: {
         next: () => {
-          this.connected = true
+          this.setConnected(true)
+        },
+      },
+      closeObserver: {
+        next: () => {
+          this.setConnected(false)
         },
       },
       closingObserver: {
         next: () => {
-          this.connected = false
+          this.setConnected(false)
         },
       },
     })
+  }
+
+  setConnected(value: boolean) {
+    this.connected = value
   }
 
   subscribe(sub: NostrSubscription) {
