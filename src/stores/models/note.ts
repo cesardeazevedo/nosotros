@@ -3,6 +3,7 @@ import { nip19 } from 'nostr-tools'
 import type { NostrClient } from 'nostr/nostr'
 import type { NoteDB } from 'nostr/types'
 import { filter, take, type Subscription } from 'rxjs'
+import { toast } from 'sonner'
 import { noteStore } from 'stores/nostr/notes.store'
 import { seenStore } from 'stores/nostr/seen.store'
 import { userStore } from 'stores/nostr/users.store'
@@ -108,8 +109,13 @@ class Note {
         filter((event) => event[2] === true),
         take(1),
       )
-      .subscribe(() => {
-        //notifications
+      .subscribe({
+        error: (error: unknown) => {
+          if (error instanceof Error) {
+            toast(error.message)
+          }
+        },
+        next: () => {},
       })
   }
 
