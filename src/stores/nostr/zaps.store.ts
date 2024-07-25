@@ -22,7 +22,7 @@ export class ZapStore {
       const z = values(zaps)
         .flatMap((x) => x.bolt11)
         .reduce((acc, current) => {
-          const amount = parseInt(current.amount.value)
+          const amount = parseInt(current.amount?.value || '0')
           return acc + amount
         }, 0)
       return z / 1000
