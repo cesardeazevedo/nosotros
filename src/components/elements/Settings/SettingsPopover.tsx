@@ -3,6 +3,8 @@ import { IconSettings } from '@tabler/icons-react'
 import { useState } from 'react'
 import Tooltip from '../Layouts/Tooltip'
 import SettingsNostr from './SettingsNostr'
+import { Row } from '../Layouts/Flex'
+import ThemeButton from '../Buttons/ThemeButton'
 
 function SettingsPopover() {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
@@ -39,9 +41,12 @@ function SettingsPopover() {
           horizontal: 'right',
         }}>
         <Box sx={{ width: 310 }}>
-          <Typography variant='h6' sx={{ px: 2, py: 1 }}>
-            Settings
-          </Typography>
+          <Row sx={{ justifyContent: 'space-between' }}>
+            <Typography variant='h6' sx={{ px: 2, py: 1 }}>
+              Settings
+            </Typography>
+            <ThemeButton />
+          </Row>
           <Divider />
           <SettingsNostr />
           <Divider />

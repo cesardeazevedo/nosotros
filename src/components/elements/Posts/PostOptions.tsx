@@ -11,7 +11,6 @@ import {
 
 import {
   IconBookmark,
-  IconColumnInsertRight,
   IconCopy,
   IconDots,
   IconEyeOff,
@@ -21,15 +20,12 @@ import {
   IconVolumeOff,
 } from '@tabler/icons-react'
 
-import { useMatch } from '@tanstack/react-router'
 import Dialog from 'components/elements/Layouts/Dialog'
 import { observer } from 'mobx-react-lite'
 import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 import type Note from 'stores/models/note'
-import { deckStore } from 'stores/ui/deck.store'
 import { Row } from '../Layouts/Flex'
-import Tooltip from '../Layouts/Tooltip'
 import PostStats from './PostDialogs/PostStats'
 
 type Props = {
@@ -103,32 +99,29 @@ const PostOptions = observer(function PostOptions(props: Props) {
   const [debugDialog, setDebugDialog] = useState(false)
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>()
   const isMobile = isMobileDevice()
-  const isDeck = useMatch({ strict: false }).routeId === '/deck'
 
   const handleClose = useCallback(() => {
     setDebugDialog(false)
     setAnchorEl(null)
   }, [])
 
-  const handleCopy = useCallback((value: string) => {
-    return () => {
-      const type = 'text/plain'
-      const blob = new Blob([value], { type })
-      window.navigator.clipboard.write([new ClipboardItem({ [type]: blob })]).then(() => {
-        toast('Copied', { closeButton: false, position: 'bottom-right', style: { right: 0, width: 'fit-content' } })
-        handleClose()
-      })
-    }
-  }, [handleClose])
+  const handleCopy = useCallback(
+    (value: string) => {
+      return () => {
+        const type = 'text/plain'
+        const blob = new Blob([value], { type })
+        window.navigator.clipboard.write([new ClipboardItem({ [type]: blob })]).then(() => {
+          toast('Copied', { closeButton: false, position: 'bottom-right', style: { right: 0, width: 'fit-content' } })
+          handleClose()
+        })
+      }
+    },
+    [handleClose],
+  )
 
   const handleDetailsDialog = useCallback(() => {
     setDebugDialog(!debugDialog)
   }, [debugDialog])
-
-  const handleNoteDeck = useCallback(() => {
-    deckStore.addNoteColumn({ id: note.id })
-  }, [note])
-
 
   const nevent = note.nevent
   const link = window.location.origin + '/' + nevent
@@ -139,13 +132,6 @@ const PostOptions = observer(function PostOptions(props: Props) {
         <PostStats note={note} />
       </Dialog>
       <Row>
-        {isDeck && note.meta.isRoot && (
-          <Tooltip arrow title='Add post on deck'>
-            <IconButton size='small' sx={{ color: 'text.secondary', mr: 1 }} onClick={handleNoteDeck}>
-              <IconColumnInsertRight stroke='currentColor' strokeWidth='1.4' />
-            </IconButton>
-          </Tooltip>
-        )}
         <IconButton size='small' sx={{ color: 'text.secondary' }} onClick={(e) => setAnchorEl(e.currentTarget)}>
           <IconDots stroke='currentColor' strokeWidth='2.0' size={20} />
         </IconButton>

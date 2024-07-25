@@ -19,7 +19,7 @@ export default function Video(props: Props) {
         marginLeft: dense ? 0 : 16,
         marginRight: dense ? 0 : 16,
         borderRadius: 8,
-        width: 'fit-content',
+        width: 'calc(100% - 32px)',
         maxWidth: 500,
         maxHeight: 450,
         marginTop: 10,

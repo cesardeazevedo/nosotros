@@ -1,15 +1,16 @@
 import LiteYouTubeEmbed from 'react-lite-youtube-embed'
 import 'react-lite-youtube-embed/dist/LiteYouTubeEmbed.css'
 import { Box } from '@mui/material'
-import { useMemo } from 'react'
+import { useContext, useMemo } from 'react'
+import { ContentContext } from '../Content'
 
 type Props = {
   src: string
-  dense?: boolean
 }
 
 function YoutubeEmbed(props: Props) {
   const { src } = props
+  const { dense } = useContext(ContentContext)
 
   const embedId = useMemo(() => {
     const url = new URL(src)
@@ -18,7 +19,7 @@ function YoutubeEmbed(props: Props) {
   }, [src])
 
   return (
-    <Box sx={{ mt: 1, px: 2 }}>
+    <Box sx={{ mt: 1, px: dense ? 0 : 2 }}>
       <style>
         {`
         .lty-playbtn {

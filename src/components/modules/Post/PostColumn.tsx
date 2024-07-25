@@ -14,7 +14,7 @@ const PostColumn = observer(function PostColumn(props: Props) {
   useModuleSubscription(module)
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', position: 'relative', p: 0 }}>
-      <DeckColumnHeader id={module.id}>
+      <DeckColumnHeader id={module.id} name='Post'>
         <Typography variant='h6' fontWeight='bold' sx={{ ml: 1 }}>
           Post
         </Typography>

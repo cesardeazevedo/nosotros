@@ -1,7 +1,6 @@
 import { Box, IconButton } from '@mui/material'
 import { IconLayoutSidebarLeftExpand, IconLayoutSidebarRightExpand } from '@tabler/icons-react'
 import { useCurrentRoute } from 'hooks/useNavigations'
-import ThemeButton from '../Buttons/ThemeButton'
 import Tooltip from '../Layouts/Tooltip'
 import LinkRouter from '../Links/LinkRouter'
 import RelaysPopover from '../Relays/RelayPopover'
@@ -30,7 +29,6 @@ function HeaderActions() {
           )}
         </>
       </Tooltip>
-      <ThemeButton />
       <RelaysPopover />
       <SettingsPopover />
       <Box sx={{ mx: 1 }} />

@@ -16,7 +16,7 @@ type Props = {
 }
 
 export function loadNote(props: Props) {
-  return deckStore.add(new NoteModule(props))
+  return deckStore.add(new NoteModule({ ...props, noteId: props.id }))
 }
 
 const NEventRoute = observer(function NoteRoute() {

@@ -15,7 +15,8 @@ const shouldForwardProp = (prop: string) => prop !== 'dense'
 
 const Img = styled('img', { shouldForwardProp })<{ dense?: boolean }>(({ dense }) => ({
   objectFit: 'cover',
-  width: 'fit-content',
+  width: '100%',
+  height: '100%',
   maxWidth: dense ? 360 : 400,
   maxHeight: dense ? 400 : 440,
   marginTop: dense ? 6 : 10,

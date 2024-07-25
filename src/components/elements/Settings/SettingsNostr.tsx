@@ -52,7 +52,11 @@ const SettingsNostr = observer(function SettingsNostr() {
           <IconBolt strokeWidth='1.4' />
         </ListItemIcon>
         <ListItemText primary={<Typography variant='subtitle1'>Zaps</Typography>} />
-        <Switch edge='end' checked={settingsStore.nostrSettings.nip57enabled} />
+        <Switch
+          edge='end'
+          checked={settingsStore.nostrSettings.nip57enabled}
+          onChange={() => settingsStore.toggleSettings('nip57enabled')}
+        />
       </ListItem>
     </List>
   )
