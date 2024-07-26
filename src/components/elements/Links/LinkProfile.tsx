@@ -1,40 +1,64 @@
-import { LinkOwnProps, LinkProps } from '@mui/material'
-import { Observer } from 'mobx-react-lite'
-import React from 'react'
-import { User } from 'stores/modules/user.store'
+import type { LinkProps } from '@mui/material'
+import { type LinkOwnProps } from '@mui/material'
+import { observer } from 'mobx-react-lite'
+import type User from 'stores/models/user'
 import LinkRouter from './LinkRouter'
+import { forwardRef, useCallback, useContext } from 'react'
+import { deckStore } from 'stores/ui/deck.store'
+import { useMatch } from '@tanstack/react-router'
+import { DeckContext } from '../Deck/DeckList'
 
-interface Props extends Omit<LinkProps, 'color'> {
+interface Props {
   user?: User
   color?: LinkOwnProps['color']
-  disabled?: boolean
+  underline?: LinkProps['underline']
+  disableLink?: boolean
   children: React.ReactNode
 }
 
-const LinkProfile = function LinkProfile(props: Props, ref: React.Ref<LinkProps['ref']>) {
-  const { user, color = 'inherit', disabled = false, children, ...rest } = props
+const LinkProfile = observer(
+  forwardRef<never, Props>(function LinkProfile(props, ref) {
+    const { user, color = 'inherit', disableLink = false, underline, children, ...rest } = props
+    const route = useMatch({ strict: false })
+    const isDeck = route.id === '/deck'
+    const { index } = useContext(DeckContext)
 
-  if (disabled || !user?.nprofile) {
-    return children
-  }
+    const handleClickDeck = useCallback(() => {
+      if (user) {
+        deckStore.addProfileColumn({ pubkey: user.data.pubkey }, index + 1)
+      }
+    }, [user, index])
 
-  return (
-    <Observer>
-      {() => (
+    if (disableLink || !user?.nprofile) {
+      return children
+    }
+
+    if (isDeck) {
+      return (
         <LinkRouter
-          to='/$nostr'
           color={color as string}
-          params={{ nostr: user?.nprofile }}
-          state={{ from: location.pathname }}
-          disabled={disabled}
-          underline={disabled ? 'none' : 'hover'}
+          onClick={handleClickDeck}
+          underline={underline}
           {...rest}
           ref={ref}>
           {children}
         </LinkRouter>
-      )}
-    </Observer>
-  )
-}
+      )
+    }
 
-export default React.forwardRef(LinkProfile)
+
+    return (
+      <LinkRouter
+        to='/$nostr'
+        color={color as string}
+        params={{ nostr: user?.nprofile }}
+        underline={underline}
+        {...rest}
+        ref={ref}>
+        {children}
+      </LinkRouter>
+    )
+  }),
+)
+
+export default LinkProfile

@@ -2,19 +2,17 @@ import { CssBaseline, Experimental_CssVarsProvider as CssVarsProvider, useColorS
 import { addons } from '@storybook/addons'
 import type { PartialStoryFn } from '@storybook/csf'
 import type { Preview, ReactRenderer } from '@storybook/react'
-import { RootRoute, Route, Router, RouterProvider } from '@tanstack/react-router'
+import { createRootRouteWithContext, createRoute, createRouter, RouterProvider } from '@tanstack/react-router'
 import React, { useEffect, useState } from 'react'
-import { RootStore, StoreProvider } from '../src/stores'
-import { dbBatcher } from '../src/stores/db/observabledb.store'
+import { storage } from '../src/nostr/storage'
 
-import { database } from '../src/stores/db/database.store'
 import theme from '../src/themes/theme'
 
 const channel = addons.getChannel()
 
-const App = (props: { Story: PartialStoryFn<ReactRenderer>; store: RootStore }) => {
+const App = (props: { Story: PartialStoryFn<ReactRenderer> }) => {
   const { setMode } = useColorScheme()
-  const { Story, store } = props
+  const { Story } = props
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
@@ -23,31 +21,26 @@ const App = (props: { Story: PartialStoryFn<ReactRenderer>; store: RootStore }) 
   }, [channel, setMode])
 
   useEffect(() => {
-    dbBatcher._subject.complete()
-    database.clear().then(() => setReady(true))
+    storage.clearDB().then(() => setReady(true))
   }, [])
 
-  return ready && <Story globals={{ store }} />
+  return ready && <Story />
 }
 
 const preview: Preview = {
   decorators: [
-    (Story, context) => {
-      const store = new RootStore()
-      const rootRoute = new RootRoute({
-        component: () => <App Story={Story} store={store} />,
+    (Story) => {
+      const rootRoute = createRootRouteWithContext()({
+        component: () => <App Story={Story} />,
       })
-      const index = new Route({ getParentRoute: () => rootRoute, path: '/' })
+      const index = createRoute({ getParentRoute: () => rootRoute, path: '/' })
       const routeTree = rootRoute.addChildren([index])
-      const router = new Router({ routeTree })
-      context.parameters.setup?.(store)
+      const router = createRouter({ routeTree })
       return (
-        <StoreProvider value={store}>
-          <CssVarsProvider theme={theme}>
-            <CssBaseline />
-            <RouterProvider router={router} />
-          </CssVarsProvider>
-        </StoreProvider>
+        <CssVarsProvider theme={theme}>
+          <CssBaseline />
+          <RouterProvider router={router} />
+        </CssVarsProvider>
       )
     },
   ],

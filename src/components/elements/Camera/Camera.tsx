@@ -2,7 +2,7 @@ import { Box, IconButton, Typography } from '@mui/material'
 import { IconBolt, IconBoltOff, IconX } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
 import { useState } from 'react'
-import { useStore } from 'stores'
+import { dialogStore } from 'stores/ui/dialogs.store'
 import { Row } from '../Layouts/Flex'
 
 const iconProps = {
@@ -12,7 +12,6 @@ const iconProps = {
 
 const Camera = observer(function CameraDialog() {
   const [flash, setFlash] = useState(false)
-  const store = useStore()
   return (
     <Box
       sx={{
@@ -23,7 +22,7 @@ const Camera = observer(function CameraDialog() {
         color: 'white',
       }}>
       <Row sx={{ p: 2, justifyContent: 'space-between' }}>
-        <IconButton color='inherit' onClick={store.dialogs.closeCamera}>
+        <IconButton color='inherit' onClick={dialogStore.closeCamera}>
           <IconX {...iconProps} />
         </IconButton>
         <Typography variant='subtitle1' sx={{ fontWeight: 600 }}>

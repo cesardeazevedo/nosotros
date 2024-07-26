@@ -1,4 +1,4 @@
-import { Theme, useMediaQuery } from '@mui/material'
+import { useMediaQuery, type Theme } from '@mui/material'
 
 /**
  * This likely needs to a lot more saphisticated than this

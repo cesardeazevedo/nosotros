@@ -1,26 +1,29 @@
 import { IconButton, Typography } from '@mui/material'
 import { IconChevronLeft } from '@tabler/icons-react'
-import { useMobile } from 'hooks/useMobile'
 import { useCurrentRoute, useGoBack, useNostrRoute } from 'hooks/useNavigations'
 import { Observer } from 'mobx-react-lite'
-import { useStore } from 'stores'
+import { userStore } from 'stores/nostr/users.store'
 import { isNprofile, isNpub } from 'utils/nip19'
 import { Row } from '../Layouts/Flex'
-import Search from '../Search/Search'
 
 function HeaderCenter() {
-  const store = useStore()
-  const isMobile = useMobile()
+  // const isMobile = useMobile()
   const handleBack = useGoBack()
   const route = useCurrentRoute()
+
   const nostrRoute = useNostrRoute()
-  const context = nostrRoute?.context
+
+  // TODO: This needs better inference
+  let context = null
+  if (nostrRoute?.context && 'decoded' in nostrRoute.context) {
+    context = nostrRoute.context
+  }
 
   const isNostrRoute = route.routeId === '/$nostr'
 
   return (
     <>
-      {!isNostrRoute && !isMobile && <Search />}
+      {/* {!isNostrRoute && !isMobile && <Search />} */}
       {isNostrRoute && (
         <Row>
           <IconButton sx={{ color: 'inherit' }} onClick={handleBack}>
@@ -30,7 +33,7 @@ function HeaderCenter() {
             {() => (
               <Typography variant='h6' sx={{ ml: 2 }}>
                 {isNpub(context?.decoded) || isNprofile(context?.decoded)
-                  ? store.users.getUserById(context.id)?.displayName
+                  ? userStore.get(context.id)?.displayName
                   : 'Post'}
               </Typography>
             )}

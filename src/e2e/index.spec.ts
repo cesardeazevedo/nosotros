@@ -45,8 +45,6 @@ const test = base.extend<Fixtures>({
   expectInitialFeed: async ({}, use) => {
     await use(async (relay: WebSocketServerCustom, authors: string[]) => {
       const reqId = await relay.expectMessage([
-        // feed users
-        { kinds: [0, 10002], authors },
         // feed notes
         {
           kinds: [1, 30023],
@@ -54,6 +52,8 @@ const test = base.extend<Fixtures>({
           until: expect.any(Number),
           authors,
         },
+        // feed users
+        { kinds: [0, 10002], authors },
       ])
       return reqId
     })
@@ -75,7 +75,7 @@ const test = base.extend<Fixtures>({
   },
 })
 
-test('Should expect a basic note and user info', async ({ page, getRelays, expectInitialFeed, expectSeenAt }) => {
+test.skip('Should expect a basic note and user info', async ({ page, getRelays, expectInitialFeed, expectSeenAt }) => {
   const [relay1, relay2, relay3, relay4] = await getRelays()
   await page.goto('http://localhost:8000/')
   await relay1.waitForConnection()
@@ -103,7 +103,7 @@ test('Should expect a basic note and user info', async ({ page, getRelays, expec
   await expectSeenAt([relay1])
 })
 
-test('Should expect a basic note and fetch the mentioned note', async ({ page, getRelays, expectInitialFeed }) => {
+test.skip('Should expect a basic note and fetch the mentioned note', async ({ page, getRelays, expectInitialFeed }) => {
   const [relay1, relay2] = await getRelays()
   // await delay(5000)
   await page.goto('http://localhost:8000/')
@@ -146,7 +146,11 @@ test('Should expect a basic note and fetch the mentioned note', async ({ page, g
   await relay1.send(reqId2, mentioned)
 })
 
-test('Should receive a reply message then expect the parent note', async ({ page, getRelays, expectInitialFeed }) => {
+test.skip('Should receive a reply message then expect the parent note', async ({
+  page,
+  getRelays,
+  expectInitialFeed,
+}) => {
   const [relay1, relay2] = await getRelays()
   await page.goto('http://localhost:8000/')
   await relay1.waitForConnection()

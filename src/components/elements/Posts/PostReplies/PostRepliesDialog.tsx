@@ -2,7 +2,7 @@ import { Box, Typography } from '@mui/material'
 import { IconMessageCircle2 } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
 import { useEffect, useMemo } from 'react'
-import { useStore } from 'stores'
+import { noteStore } from 'stores/nostr/notes.store'
 import PostRepliesLoading from './PostRepliesLoading'
 import { PostRepliesTree } from './PostReply'
 import PostReplyForm from './PostReplyForm'
@@ -13,11 +13,10 @@ type Props = {
 
 const PostRepliesDialog = observer(function PostRepliesDialog(props: Props) {
   const { noteId } = props
-  const store = useStore()
   // Avoid underfined noteId when closing the dialog, disappearing the content
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const id = useMemo(() => noteId, [])
-  const note = store.notes.getNoteById(id)
+  const id = useMemo(() => noteId || '', [])
+  const note = noteStore.get(id)
   const replies = note?.repliesSorted || []
 
   useEffect(() => {

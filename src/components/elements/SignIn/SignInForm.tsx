@@ -1,13 +1,16 @@
-import { Avatar, Box, Button, IconButton, Skeleton, TextField, Typography } from '@mui/material'
+import { Box, Button, IconButton, Skeleton, TextField, Typography } from '@mui/material'
 import { IconClipboardCopy, IconScan } from '@tabler/icons-react'
-import { useNavigate } from '@tanstack/react-router'
 import { useMobile } from 'hooks/useMobile'
 import { observer } from 'mobx-react-lite'
-import { useCallback, useEffect, useState } from 'react'
-import { Control, Controller, useForm, useWatch } from 'react-hook-form'
-import { useStore } from 'stores'
-import { Npub, decodeNIP19 } from 'utils/nip19'
+import { useCallback, useEffect } from 'react'
+import { Controller, useForm, useWatch, type Control } from 'react-hook-form'
+import { userStore } from 'stores/nostr/users.store'
+import { authStore } from 'stores/ui/auth.store'
+import { dialogStore } from 'stores/ui/dialogs.store'
+import { decodeNIP19, type Npub } from 'utils/nip19'
+import UserAvatar from '../User/UserAvatar'
 import UserName from '../User/UserName'
+import { OnboardMachineContext } from './SignInContext'
 
 type FormValues = {
   npub: string
@@ -22,43 +25,32 @@ const avatarStyle = {
 }
 
 const UserPreview = observer(function UserPreview(props: { control: Control<FormValues> }) {
-  const { users, auth } = useStore()
   const pubkey = useWatch({ name: 'pubkey', control: props.control })
-  const user = users.getUserById(pubkey)
-
-  useEffect(() => {
-    if (!user && pubkey) {
-      auth.fetchUser(pubkey)
-    }
-  }, [auth, pubkey, user])
+  const user = userStore.get(pubkey)
 
   return (
-    <Box sx={{ my: 1, mt: 2 }}>
-      {!user && pubkey ? (
-        <Skeleton variant='circular' sx={avatarStyle} />
-      ) : (
-        <Avatar src={user?.picture} sx={avatarStyle} />
-      )}
-      {user && <UserName disableLink disablePopover user={user} variant='h6' />}
+    <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', py: 1 }}>
+      {!user && pubkey ? <Skeleton variant='circular' sx={avatarStyle} /> : <UserAvatar user={user} size={80} />}
+      {user && <UserName disableLink disablePopover user={user} variant='h6' sx={{ py: 1 }} />}
     </Box>
   )
 })
 
 const SignInForm = function SignInForm() {
-  const { auth, dialogs } = useStore()
-  const [permissionError, setPermissionError] = useState<string>()
+  const onboardMachine = OnboardMachineContext.useActorRef()
+  const pubkey = OnboardMachineContext.useSelector((x) => x.context.pubkey)
+  const clipboardError = OnboardMachineContext.useSelector((x) => x.context.clipboardError)
   const isMobile = useMobile()
-  const navigate = useNavigate()
 
   const form = useForm<FormValues>({
     mode: 'all',
     reValidateMode: 'onChange',
     resolver: (field) => {
-      const pubkey = decodeNIP19(field.npub as Npub)
+      const pubkey = decodeNIP19(field.npub as Npub)?.data
       if (!pubkey) {
         return { values: {}, errors: { npub: { type: 'value', message: 'npub invalid' } } }
       }
-      form.setValue('pubkey', pubkey.data)
+      form.setValue('pubkey', pubkey)
       return { values: { npub: field.npub, pubkey }, errors: {} }
     },
     defaultValues: {
@@ -67,32 +59,23 @@ const SignInForm = function SignInForm() {
     },
   })
 
-  const onSubmit = useCallback(
-    (values: FormValues) => {
-      auth.addAccount(values.pubkey)
-      navigate({ to: '/' })
-    },
-    [auth, navigate],
-  )
+  useEffect(() => {
+    if (pubkey) {
+      form.setValue('npub', pubkey, {
+        shouldDirty: true,
+        shouldTouch: true,
+        shouldValidate: true,
+      })
+    }
+  }, [form, pubkey])
+
+  const onSubmit = useCallback((values: FormValues) => {
+    authStore.loginWithPubkey(values.pubkey)
+  }, [])
 
   const handleClipboard = useCallback(async () => {
-    try {
-      const permissionStatus = await navigator.permissions.query({ name: 'clipboard-read' as PermissionName })
-
-      if (permissionStatus.state === 'granted') {
-        form.setValue('npub', await window.navigator.clipboard.readText(), {
-          shouldDirty: true,
-          shouldTouch: true,
-          shouldValidate: true,
-        })
-        setPermissionError(undefined)
-      } else {
-        setPermissionError('Clipboard permission not granted')
-      }
-    } catch (error) {
-      console.log(error)
-    }
-  }, [form])
+    onboardMachine.send({ type: 'paste' })
+  }, [onboardMachine])
 
   return (
     <>
@@ -116,7 +99,7 @@ const SignInForm = function SignInForm() {
                 sx={{ mb: 2 }}
                 InputProps={{
                   endAdornment: isMobile && (
-                    <IconButton onClick={dialogs.openCamera}>
+                    <IconButton onClick={dialogStore.openCamera}>
                       <IconScan />
                     </IconButton>
                   ),
@@ -124,9 +107,9 @@ const SignInForm = function SignInForm() {
               />
             )}
           />
-          {permissionError && (
+          {clipboardError && (
             <Typography color='error' sx={{ mb: 1 }}>
-              {permissionError}
+              {clipboardError}
             </Typography>
           )}
           <Button

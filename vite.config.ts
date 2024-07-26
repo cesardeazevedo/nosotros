@@ -1,7 +1,9 @@
 /// <reference types="vitest" />
 import react from '@vitejs/plugin-react'
 import path from 'path'
+import Info from 'unplugin-info/vite'
 import { defineConfig } from 'vite'
+// import circleDependency from 'vite-plugin-circular-dependency'
 import mkcert from 'vite-plugin-mkcert'
 import { VitePWA } from 'vite-plugin-pwa'
 import tsconfigPaths from 'vite-tsconfig-paths'
@@ -12,23 +14,33 @@ export default defineConfig(({ mode }) => {
   return {
     server: {
       host: true,
-      https: !isTesting,
       port: 8000,
+    },
+    build: {
+      sourcemap: true,
     },
     test: {
       globals: true,
+      reporters: ['verbose'],
       environment: 'happy-dom',
       exclude: ['**/node_modules/**', '**/e2e/**'],
       browser: {
         name: 'chrome',
       },
       setupFiles: ['fake-indexeddb/auto', path.join(__dirname, `/jest.setup.ts`)],
+      server: {
+        deps: {
+          inline: ['react-tweet'],
+        },
+      },
     },
     plugins: [
+      // circleDependency({ outputFilePath: './circleDep' }),
       VitePWA({
         srcDir: 'src',
+        registerType: 'autoUpdate',
         devOptions: {
-          enabled: false,
+          enabled: true,
         },
         filename: 'serviceWorker.ts',
         strategies: 'injectManifest',
@@ -92,6 +104,7 @@ export default defineConfig(({ mode }) => {
       !isTesting ? mkcert({}) : null,
       tsconfigPaths(),
       react(),
+      Info(),
     ],
   }
 })

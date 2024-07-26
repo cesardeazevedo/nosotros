@@ -1,4 +1,4 @@
-import { Box, Typography, TypographyProps } from '@mui/material'
+import { Box, Typography, type TypographyProps } from '@mui/material'
 
 function ComingSoon(props: { variant?: TypographyProps['variant'] }) {
   return (

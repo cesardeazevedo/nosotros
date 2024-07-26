@@ -1,32 +1,20 @@
 import { styled } from '@mui/material'
-import { observer } from 'mobx-react-lite'
-import React from 'react'
-import { useStore } from 'stores'
 
-type Props = {
-  children: React.ReactNode | React.ReactNode[]
-}
-
-const Container = styled('div')({
+export const DeckContainer = styled('div')({
   display: 'flex',
   flexDirection: 'row',
   height: '100%',
-  overflowY: 'hidden',
   overflowX: 'auto',
+  overflowY: 'hidden',
+  marginLeft: 75,
   '> div': {
-    width: 550,
+    minWidth: 550,
     margin: 0,
     padding: 0,
-    borderRight: '4px solid var(--mui-palette-divider)',
+    borderRight: '1px solid var(--mui-palette-divider)',
     height: '100%',
     overflow: 'auto',
   },
-})
-
-const DeckContainer = observer(function DeckContainer(props: Props) {
-  const store = useStore()
-  const Wrapper = store.deck.enabled ? Container : React.Fragment
-  return <Wrapper>{props.children}</Wrapper>
 })
 
 export default DeckContainer

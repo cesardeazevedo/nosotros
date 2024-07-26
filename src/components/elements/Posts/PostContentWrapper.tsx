@@ -1,8 +1,9 @@
-import { Fab, styled, Theme } from '@mui/material'
+import { Fab, styled, type Theme } from '@mui/material'
 import { Kind } from 'constants/kinds'
-import { useState } from 'react'
+import React, { useState } from 'react'
 import useMeasure from 'react-use-measure'
-import { Note } from 'stores/modules/note.store'
+import type Note from 'stores/models/note'
+import { BubbleContainer } from '../Content/Layout/Bubble'
 import PostError from './PostError'
 
 type Props = {
@@ -53,12 +54,17 @@ function PostContentWrapper(props: Props) {
   const event = note?.event
 
   if (![Kind.Text, Kind.Article].includes(event.kind)) {
-    return <PostError bubble={bubble} kind={event.kind} />
+    const ErrorContainer = bubble ? BubbleContainer : React.Fragment
+    return (
+      <ErrorContainer>
+        <PostError kind={event.kind} />
+      </ErrorContainer>
+    )
   }
 
   return (
     <Container expanded={expanded}>
-      <div ref={ref} className='bounds'>
+      <div ref={ref} className='bounds' style={{ display: 'flex', flexDirection: 'column' }}>
         {props.children}
       </div>
       {canExpand && (

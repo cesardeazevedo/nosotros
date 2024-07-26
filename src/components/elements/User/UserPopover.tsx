@@ -1,16 +1,16 @@
-import { Avatar, Box, Button, Theme } from '@mui/material'
+import { Box, Button, type Theme } from '@mui/material'
 import { Row } from 'components/elements/Layouts/Flex'
-import { bindHover, bindPopover } from 'material-ui-popup-state'
-import { usePopupState } from 'material-ui-popup-state/hooks'
-import React from 'react'
-
 import { useDelayPopover } from 'hooks/useDelayPopover'
 import { useMobile } from 'hooks/useMobile'
+import { bindHover, bindPopover } from 'material-ui-popup-state'
 import HoverPopover from 'material-ui-popup-state/HoverPopover'
+import { usePopupState } from 'material-ui-popup-state/hooks'
 import { Observer } from 'mobx-react-lite'
-import { useStore } from 'stores'
-import { User } from 'stores/modules/user.store'
-import TextContent from '../Texts/TextContent'
+import React from 'react'
+import type User from 'stores/models/user'
+import { authStore } from 'stores/ui/auth.store'
+import UserAvatar from './UserAvatar'
+import UserContentAbout from './UserContentAbout'
 import UserName from './UserName'
 
 type Props = {
@@ -22,14 +22,13 @@ type Props = {
 function UserPopover(props: Props) {
   const popupState = usePopupState({ variant: 'popover', popupId: 'user-popup' })
   const open = useDelayPopover(popupState)
-  const store = useStore()
+
+  const me = authStore.currentUser
 
   const isMobile = useMobile()
   const { user, disabled = false } = props
 
   if (isMobile || disabled) {
-    // We are disabling this component on mobile, in the future we want to do a lot more sophisticated,
-    // but for now, it will just cause annoying problems.
     return props.children
   }
 
@@ -48,17 +47,15 @@ function UserPopover(props: Props) {
           },
         }}
         TransitionProps={{ in: open }}
-        transitionDuration={{ enter: 200, exit: 200 }}
+        transitionDuration={{ enter: 150, exit: 100 }}
         transformOrigin={{ horizontal: 'left', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}>
         <Observer>
           {() => (
-            <Box sx={{ width: 300, maxHeight: 270, p: 2 }}>
+            <Box sx={{ width: 340, maxHeight: 270, p: 2 }}>
               <Row sx={{ justifyContent: 'space-between' }}>
-                <Avatar src={user?.metadata.picture} sx={{ width: 60, height: 60 }}>
-                  {user?.initial}
-                </Avatar>
-                {store.contacts.isFollowing(user?.id) ? (
+                <UserAvatar disabledPopover size={60} user={user} />
+                {me?.following?.followsPubkey(user?.data.pubkey) ? (
                   <Button sx={{ minWidth: 95 }} variant='text' color='inherit'>
                     Following
                   </Button>
@@ -68,11 +65,9 @@ function UserPopover(props: Props) {
                   </Button>
                 )}
               </Row>
-              <UserName disablePopover user={user} />
-              <Box sx={{ mt: 1 }}>
-                {user?.metadata?.aboutParsed?.map((token, index) => (
-                  <TextContent dense key={token.kind + index} token={token} />
-                ))}
+              <UserName disablePopover user={user} sx={{ mt: 1 }} />
+              <Box sx={{ lineHeight: '1.2' }}>
+                <UserContentAbout user={user} />
               </Box>
             </Box>
           )}

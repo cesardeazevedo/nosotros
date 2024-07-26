@@ -1,4 +1,4 @@
-import { Box, Button, Divider, IconButton, InputBase } from '@mui/material'
+import { Box, Button, IconButton, InputBase } from '@mui/material'
 import { IconMoodSmile, IconPhotoPlus, IconServerBolt } from '@tabler/icons-react'
 import ComingSoon from 'components/elements/Layouts/ComingSoon'
 import { Row } from 'components/elements/Layouts/Flex'
@@ -6,55 +6,58 @@ import PaperContainer from 'components/elements/Layouts/PaperContainer'
 import Tooltip from 'components/elements/Layouts/Tooltip'
 import UserAvatar from 'components/elements/User/UserAvatar'
 import { Observer } from 'mobx-react-lite'
-import React from 'react'
-import { useStore } from 'stores'
+import { authStore } from 'stores/ui/auth.store'
 
-const PostCreateForm = React.memo(function PostCreateForm() {
-  const store = useStore()
+const PostCreateForm = function PostCreateForm() {
   return (
-    <PaperContainer sx={{ position: 'relative' }}>
-      <ComingSoon />
-      <Row sx={{ p: 2, alignItems: 'flex-start' }}>
-        <Observer>{() => <UserAvatar user={store.auth.currentUser} />}</Observer>
+    <PaperContainer>
+      <Row sx={{ position: 'relative', alignItems: 'flex-start', overflow: 'hidden' }}>
+        <ComingSoon />
         <Box
           sx={{
-            mx: 1,
-            pt: 1,
-            pl: 2,
-            pr: 1,
+            mx: 0,
+            p: 1,
+            px: 2,
             width: '100%',
-            backgroundColor: 'divider',
-            borderRadius: 1.5,
-            minHeight: 60,
           }}>
-          <InputBase fullWidth placeholder="What's in your mind?" />
+          <InputBase
+            multiline
+            fullWidth
+            rows={2}
+            placeholder="What's in your mind?"
+            sx={{ fontSize: '115%', fontWeight: 500 }}
+            startAdornment={
+              <Box sx={{ mr: 2, alignSelf: 'flex-start' }}>
+                <Observer>{() => <UserAvatar user={authStore.currentUser} size={34} />}</Observer>
+              </Box>
+            }
+          />
+          <Row>
+            <Box sx={{ flex: 1, button: { mr: 1.2 } }}>
+              <Tooltip arrow title='Add Picture'>
+                <IconButton size='small'>
+                  <IconPhotoPlus strokeWidth='1.4' size={22} />
+                </IconButton>
+              </Tooltip>
+              <Tooltip arrow title='Add Emoji'>
+                <IconButton size='small'>
+                  <IconMoodSmile strokeWidth='1.4' size={22} />
+                </IconButton>
+              </Tooltip>
+              <Tooltip arrow title='Select relays'>
+                <IconButton size='small'>
+                  <IconServerBolt strokeWidth='1.4' size={22} />
+                </IconButton>
+              </Tooltip>
+            </Box>
+            <Button variant='contained' size='small'>
+              Post
+            </Button>
+          </Row>
         </Box>
-      </Row>
-      <Divider />
-      <Row sx={{ p: 1, pr: 3 }}>
-        <Box sx={{ flex: 1, button: { mr: 1.2 } }}>
-          <Tooltip arrow title='Add Picture'>
-            <IconButton size='small'>
-              <IconPhotoPlus strokeWidth='1.4' />
-            </IconButton>
-          </Tooltip>
-          <Tooltip arrow title='Add Emoji'>
-            <IconButton size='small'>
-              <IconMoodSmile strokeWidth='1.4' />
-            </IconButton>
-          </Tooltip>
-          <Tooltip arrow title='Select relays'>
-            <IconButton size='small'>
-              <IconServerBolt strokeWidth='1.4' />
-            </IconButton>
-          </Tooltip>
-        </Box>
-        <Button variant='contained' size='small'>
-          Post
-        </Button>
       </Row>
     </PaperContainer>
   )
-})
+}
 
 export default PostCreateForm

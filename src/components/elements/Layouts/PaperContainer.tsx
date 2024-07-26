@@ -1,4 +1,4 @@
-import { Paper, SxProps, Theme, styled } from '@mui/material'
+import { Paper, styled, type SxProps, type Theme } from '@mui/material'
 
 const PaperContainer = styled(Paper)(({ theme }: { theme: Theme }) => {
   const compactStyle: SxProps = {
@@ -6,6 +6,9 @@ const PaperContainer = styled(Paper)(({ theme }: { theme: Theme }) => {
     borderRadius: 0,
     borderBottom: '1px solid',
     borderColor: theme.palette.divider,
+    borderTopWidth: 0,
+    borderLeftWidth: 0,
+    borderRightWidth: 0,
     boxShadow: 'none',
     backgroundImage: 'none',
     backgroundColor: theme.palette.mode === 'dark' ? theme.palette.common.black : theme.palette.common.white,

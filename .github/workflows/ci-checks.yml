@@ -1,28 +1,27 @@
 name: CI Checks
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
-    branches: [main, dev, production]
+    branches: [main, dev, prod]
+  push:
+    branches: [dev, prod]
 
 jobs:
-  build:
+  checks:
     runs-on: ubuntu-latest
     if: ${{ !github.event.pull_request.draft }}
 
     strategy:
       matrix:
-        node-version: [18]
+        node-version: [20]
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: pnpm/action-setup@v2
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
         with:
           version: 8
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'pnpm'
@@ -44,3 +43,51 @@ jobs:
 
       - name: Run Playwright tests
         run: pnpm run test:e2e
+
+  deploy:
+    needs: checks
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/prod' || github.ref == 'refs/heads/dev')
+
+    strategy:
+      matrix:
+        node-version: [20]
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Deploy (development)
+        uses: jakejarvis/s3-sync-action@master
+        if: github.ref == 'refs/heads/dev'
+        with:
+          args: --follow-symlinks
+        env:
+          AWS_S3_BUCKET: ${{ secrets.DEV_AWS_S3_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.DEV_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.DEV_AWS_SECRET_ACCESS_KEY }}
+          SOURCE_DIR: 'dist'
+
+      - name: Deploy (production)
+        uses: jakejarvis/s3-sync-action@master
+        if: github.ref == 'refs/heads/prod'
+        with:
+          args: --follow-symlinks
+        env:
+          AWS_S3_BUCKET: ${{ secrets.PROD_AWS_S3_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
+          SOURCE_DIR: 'dist'

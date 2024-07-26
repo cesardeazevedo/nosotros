@@ -1,59 +1,70 @@
+import type { NostrEvent } from 'core/types'
 import { makeAutoObservable, observable } from 'mobx'
-import { Event } from 'nostr-tools'
-import { isEventTag } from 'utils/utils'
-import type { RootStore } from '../root.store'
+import { isEventTag } from 'nostr/helpers/tags'
+import { authStore } from 'stores/ui/auth.store'
 
-type Reactions = {
+export type Reactions = {
   [emoji: string]: string[]
 }
 
-const fallbackEmojis: Record<string, string> = {
-  '+': '🤙',
-  '-': '👎',
-  '⚡': '⚡',
+export function fallbackEmoji(emoji?: string) {
+  switch (emoji) {
+    case '+':
+      return '🤙'
+    case '-':
+      return '👎'
+    default:
+      return emoji
+  }
 }
 
 export class ReactionStore {
-  reactions = observable.map<string, Reactions>()
+  reactions = observable.map<string, Reactions>({}, { deep: true })
+  myReactions = observable.map<string, string[]>({}, { deep: true })
 
-  constructor(private root: RootStore) {
+  constructor() {
     makeAutoObservable(this)
   }
 
-  getReactionByNoteId(noteId: string) {
+  getByNoteId(noteId: string) {
     return this.reactions.get(noteId)
   }
 
   getTopReactions(noteId: string) {
     // We might want to return the top 3 reactions in the future
-    const reactions = this.getReactionByNoteId(noteId)
+    const reactions = this.getByNoteId(noteId)
     return Object.entries(reactions || {})
       .sort((a, b) => b[1].length - a[1].length)
       .filter((x) => x[0].length !== 0) // ignore empty emojis
   }
 
-  getTotal(noteId: string | undefined) {
-    return noteId ? Object.values(this.getReactionByNoteId(noteId) || {}).flat().length : 0
+  getTotal(noteId: string) {
+    return Object.values(this.getByNoteId(noteId) || {}).flat().length || 0
   }
 
-  add(event: Event) {
-    const emoji = fallbackEmojis[event.content] || event.content
+  add(event: NostrEvent) {
+    const emoji = fallbackEmoji(event.content) as string
+    const tag = event.tags.findLast(isEventTag)
 
-    event.tags.forEach((tag) => {
-      if (isEventTag(tag)) {
-        const noteId = tag[1]
+    if (tag) {
+      const noteId = tag[1]
 
-        const reactionsForNote = this.reactions.get(noteId) || {}
-        const reactionsForEmoji = reactionsForNote[emoji] || []
+      const reactionsForNote = this.reactions.get(noteId) || {}
+      const reactionsForEmoji = reactionsForNote[emoji] || []
 
-        if (reactionsForEmoji.indexOf(event.pubkey) === -1) {
-          reactionsForEmoji.push(event.pubkey)
-        }
-
-        reactionsForNote[emoji] = reactionsForEmoji
-
-        this.reactions.set(noteId, reactionsForNote)
+      if (reactionsForEmoji.indexOf(event.pubkey) === -1) {
+        reactionsForEmoji.push(event.pubkey)
       }
-    })
+
+      reactionsForNote[emoji] = reactionsForEmoji
+      if (event.pubkey === authStore.pubkey) {
+        const myReactionsForNote = this.myReactions.get(noteId) || []
+        this.myReactions.set(noteId, [...myReactionsForNote, event.content])
+      }
+
+      this.reactions.set(noteId, reactionsForNote)
+    }
   }
 }
+
+export const reactionStore = new ReactionStore()

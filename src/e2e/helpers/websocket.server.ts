@@ -1,6 +1,6 @@
 import { expect } from '@playwright/test'
-import type { MessageReceived } from 'stores/core/relay'
-import { WebSocket, WebSocketServer } from 'ws'
+import type { MessageReceived } from 'core/types'
+import { WebSocketServer, type WebSocket } from 'ws'
 
 type ExpectedMessage = {
   message: unknown | unknown[]

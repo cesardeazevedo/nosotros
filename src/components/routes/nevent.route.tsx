@@ -1,37 +1,36 @@
+import { useLoaderData } from '@tanstack/react-router'
 import { CenteredContainer } from 'components/elements/Layouts/CenteredContainer'
 import Post from 'components/elements/Posts/Post'
 import PostLoading from 'components/elements/Posts/PostLoading'
+import { useModuleSubscription } from 'hooks/useFeedSubscription'
 import { observer } from 'mobx-react-lite'
 import { useEffect } from 'react'
-import { useStore } from 'stores'
+import { NoteModule } from 'stores/modules/note.module'
+import { deckStore } from 'stores/ui/deck.store'
 
 type Props = {
   id: string
+  kind?: number
   author?: string
   relays?: string[]
 }
 
-const NEventRoute = observer(function NoteRoute(props: Props) {
-  const { id, author, relays } = props
-  const store = useStore()
+export function loadNote(props: Props) {
+  return deckStore.add(new NoteModule({ ...props, noteId: props.id }))
+}
 
-  const post = store.notes.getNoteById(id)
+const NEventRoute = observer(function NoteRoute() {
+  const module = useLoaderData({ from: '/$nostr' }) as NoteModule
+
+  useModuleSubscription(module)
 
   useEffect(() => {
     window.scrollTo(0, 0)
-    store.initializePostRoute(id, author, relays)
-  }, [store, id, author, relays])
-
-  useEffect(() => {
-    if (post) {
-      post.openReplies()
-      store.subscriptions.subReactions([post.id])
-    }
-  }, [store, post])
+  }, [])
 
   return (
     <CenteredContainer maxWidth='sm' sx={{ mb: 20 }}>
-      {post ? <Post note={post} /> : <PostLoading />}
+      {module.note ? <Post note={module.note} /> : <PostLoading />}
     </CenteredContainer>
   )
 })

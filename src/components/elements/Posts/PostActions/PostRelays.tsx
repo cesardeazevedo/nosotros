@@ -4,17 +4,15 @@ import Tooltip from 'components/elements/Layouts/Tooltip'
 import { useMobile } from 'hooks/useMobile'
 import { observer } from 'mobx-react-lite'
 import { useState } from 'react'
-import { useStore } from 'stores'
-import ButtonContainer, { ContainerProps } from './PostButtonContainer'
+import type Note from 'stores/models/note'
+import ButtonContainer, { type ContainerProps } from './PostButtonContainer'
 
 type Props = {
-  eventId: string
+  note: Note
 }
 
 const PostButtonRelays = observer(function PostRelays(props: Props & ContainerProps) {
-  const { eventId, dense } = props
-  const store = useStore()
-  const relays = store.nostr.getEventRelays(eventId)
+  const { note, dense } = props
   const [open, setOpen] = useState(false)
   const isMobile = useMobile()
   const mobileProps = isMobile ? { open, onClose: () => setOpen(false) } : {}
@@ -25,9 +23,9 @@ const PostButtonRelays = observer(function PostRelays(props: Props & ContainerPr
       enterDelay={0}
       {...mobileProps}
       slotProps={{ arrow: { sx: { left: '-8px!important' } } }}
-      title={<Box>Seen on {relays?.map((relay) => <Box key={relay}>{new URL(relay).hostname}</Box>)}</Box>}>
+      title={<Box>{note.seenOn?.map((relay) => <Box key={relay}>{relay.replace('wss://', '')}</Box>)}</Box>}>
       <ButtonContainer
-        value={relays?.length || 0}
+        value={note.seenOn?.length || 0}
         dense={dense}
         onClick={() => isMobile && setOpen(true)}
         aria-label='Seen on relays'>

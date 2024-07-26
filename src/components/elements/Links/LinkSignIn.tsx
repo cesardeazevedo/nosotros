@@ -1,13 +1,8 @@
-import { LinkProps } from '@mui/material'
-import React, { forwardRef } from 'react'
+import { forwardRef } from 'react'
 import LinkRouter from './LinkRouter'
 
-interface Props extends LinkProps {
-  children: React.ReactElement
-}
-
-const LinkSignIn = forwardRef(function LinkSignIn(props: Props, ref: React.Ref<LinkProps['ref']>) {
-  return <LinkRouter {...props} color='inherit' to='/sign_in' state={{ from: location.pathname }} ref={ref} />
+const LinkSignIn = forwardRef<never, Partial<typeof LinkRouter>>(function LinkSignIn(props, ref) {
+  return <LinkRouter color='inherit' {...props} to='/sign_in' ref={ref} />
 })
 
 export default LinkSignIn

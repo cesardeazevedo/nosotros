@@ -1,8 +1,8 @@
-import { AppBar, Slide, SlideProps, Toolbar, useScrollTrigger } from '@mui/material'
+import { AppBar, Slide, Toolbar, useScrollTrigger, type SlideProps } from '@mui/material'
 import { useMatch } from '@tanstack/react-router'
 import { useMobile } from 'hooks/useMobile'
 import { useCurrentRoute } from 'hooks/useNavigations'
-import { ReactElement } from 'react'
+import type { ReactElement } from 'react'
 import { CenteredContainer } from '../Layouts/CenteredContainer'
 import { Row } from '../Layouts/Flex'
 import Sidebar from '../Navigation/Sidebar'
@@ -47,7 +47,7 @@ function Header() {
                 width: isMobile ? '100%' : 'auto',
               }}>
               {!isNostrRoute && isMobile && <Sidebar />}
-              {!isNostrRoute && <HeaderLogo />}
+              {isNostrRoute && isMobile ? null : <HeaderLogo />}
             </Row>
             <CenteredContainer maxWidth='sm' sx={{ pt: 0, mt: 0 }}>
               <HeaderCenter />

@@ -1,13 +1,12 @@
 import Dialog from 'components/elements/Layouts/Dialog'
-import PostImageDialog from 'components/elements/Posts/PostMedia/PostImageDialog'
+import PostImageDialog from 'components/elements/Posts/PostDialogs/PostImageDialog'
 import { observer } from 'mobx-react-lite'
-import { useStore } from 'stores'
+import { dialogStore } from 'stores/ui/dialogs.store'
 
 const ImagesDialog = observer(function ImagesDialog() {
-  const store = useStore()
   return (
     <>
-      {store.dialogs.images.map((dialog, index) => (
+      {dialogStore.images.map((dialog, index) => (
         <Dialog
           key={index}
           sx={{
@@ -23,7 +22,7 @@ const ImagesDialog = observer(function ImagesDialog() {
           mobileSlots={{ backdrop: { sx: { backgroundColor: 'rgba(0, 0, 0, 1)' } } }}
           desktopAnimation={false}
           open={Boolean(dialog)}
-          onClose={store.dialogs.closeImage}>
+          onClose={dialogStore.closeImage}>
           <PostImageDialog content={typeof dialog === 'object' ? dialog.content : ''} />
         </Dialog>
       ))}

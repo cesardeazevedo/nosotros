@@ -4,7 +4,7 @@ import { useMatch, useRouter } from '@tanstack/react-router'
 import { useNostrRoute } from 'hooks/useNavigations'
 import { observer } from 'mobx-react-lite'
 import { useCallback } from 'react'
-import { useStore } from 'stores'
+import { authStore } from 'stores/ui/auth.store'
 import { HideOnScroll } from '../Header/Header'
 import LinkProfile from '../Links/LinkProfile'
 import LinkSignIn from '../Links/LinkSignIn'
@@ -24,11 +24,16 @@ const Container = styled(Box)(({ theme }) =>
 )
 
 const BottomNavigation = observer(function BottomNavigation() {
-  const store = useStore()
-  const { currentUser } = store.auth
+  const { currentUser } = authStore
   const router = useRouter()
   useMatch({ from: '__root__' })
   const nostrRoute = useNostrRoute()
+
+  // TODO: This needs better inference
+  let context
+  if (nostrRoute?.context && 'decoded' in nostrRoute.context) {
+    context = nostrRoute.context
+  }
 
   const handleHome = useCallback(() => {
     router.navigate({ to: '/' })
@@ -42,10 +47,10 @@ const BottomNavigation = observer(function BottomNavigation() {
       <Container>
         <MuiBottomNavigation
           showLabels={false}
-          value={nostrRoute?.context?.id === store.auth.pubkey ? 'profile' : 'feed'}
+          value={context?.id === authStore.pubkey ? 'profile' : 'feed'}
           sx={{ backgroundColor: 'transparent' }}>
           <BottomNavigationAction
-            value='feed'
+            value='messages'
             onClick={handleHome}
             icon={
               <Badge badgeContent={0} color='primary'>
