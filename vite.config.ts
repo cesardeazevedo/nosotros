@@ -1,11 +1,14 @@
 /// <reference types="vitest" />
 import react from '@vitejs/plugin-react'
-import path from 'path'
 import Info from 'unplugin-info/vite'
 import { defineConfig } from 'vite'
 // import circleDependency from 'vite-plugin-circular-dependency'
+import { join, resolve } from 'node:path'
 import mkcert from 'vite-plugin-mkcert'
 import { VitePWA } from 'vite-plugin-pwa'
+// @ts-ignore
+import styleX from 'vite-plugin-stylex'
+import { visualizer } from 'rollup-plugin-visualizer'
 import tsconfigPaths from 'vite-tsconfig-paths'
 
 // https://vitejs.dev/config/
@@ -27,7 +30,7 @@ export default defineConfig(({ mode }) => {
       browser: {
         name: 'chrome',
       },
-      setupFiles: ['fake-indexeddb/auto', path.join(__dirname, `/jest.setup.ts`)],
+      setupFiles: ['fake-indexeddb/auto', join(__dirname, `/jest.setup.ts`)],
       server: {
         deps: {
           inline: ['react-tweet'],
@@ -104,7 +107,24 @@ export default defineConfig(({ mode }) => {
       !isTesting ? mkcert({}) : null,
       tsconfigPaths(),
       react(),
+      styleX({
+        importSources: [
+          {
+            from: 'react-strict-dom',
+            as: 'css',
+          },
+        ],
+        aliases: {
+          '@/*': [join(__dirname, './src', '*')],
+        },
+      }),
       Info(),
+      visualizer(),
     ],
+    resolve: {
+      alias: {
+        '@': resolve(__dirname, 'src'),
+      },
+    },
   }
 })

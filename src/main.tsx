@@ -1,12 +1,11 @@
 import Bugsnag from '@bugsnag/js'
 import BugsnagPluginReact from '@bugsnag/plugin-react'
-import { CssBaseline, Experimental_CssVarsProvider as CssVarsProvider } from '@mui/material'
 import { RouterProvider } from '@tanstack/react-router'
-import GlobalStyles from 'components/elements/Layouts/GlobalStyles'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import theme from 'themes/theme'
+import { StylexProvider } from './components/providers/StylexProvider'
 import { router } from './Router'
+import './styles/stylex.css'
 
 const bugsnagApiKey = import.meta.env.VITE_BUGSNAG_API_KEY
 
@@ -18,16 +17,15 @@ if (bugsnagApiKey) {
   })
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 const BugsnagErrorBoundary = bugsnagApiKey
   ? Bugsnag.getPlugin('react')?.createErrorBoundary(React) || React.Fragment
   : React.Fragment
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <BugsnagErrorBoundary>
-    <CssVarsProvider theme={theme}>
-      <CssBaseline />
-      <GlobalStyles />
+    <StylexProvider>
       <RouterProvider router={router} />
-    </CssVarsProvider>
+    </StylexProvider>
   </BugsnagErrorBoundary>,
 )
