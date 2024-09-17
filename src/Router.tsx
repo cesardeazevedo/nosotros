@@ -12,10 +12,9 @@ import HomeRoute, { loadHome } from 'components/routes/home.route'
 import NEventRoute, { loadNote } from 'components/routes/nevent.route'
 import NProfileRoute, { loadProfile } from 'components/routes/nprofile.route'
 import { decodeNIP19, isNevent, isNote, isNprofile, isNpub, type Prefixes } from 'utils/nip19'
+import NotificationsRoute from './components/routes/notifications.route'
 
-interface RouterContext {}
-
-const rootRoute = createRootRouteWithContext<RouterContext>()({
+const rootRoute = createRootRouteWithContext()({
   component: RootLayout,
   errorComponent: ErrorBoundary,
 })
@@ -33,6 +32,12 @@ export const deckRoute = createRoute({
   component: () => <DeckRoute />,
 })
 
+export const notificationsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/notifications',
+  component: () => <NotificationsRoute />,
+})
+
 const signinRoute = createRoute({
   getParentRoute: () => homeRoute,
   path: '/sign_in',
@@ -40,7 +45,12 @@ const signinRoute = createRoute({
 
 export const replyRoute = createRoute({
   getParentRoute: () => homeRoute,
-  path: '/$nostr/replies',
+  path: '/replies/$nevent',
+})
+
+export const replyRoute2 = createRoute({
+  getParentRoute: () => nostrRoute,
+  path: '/replies/$nevent',
 })
 
 export const nostrRoute = createRoute({
@@ -111,7 +121,13 @@ export const nostrRoute = createRoute({
   errorComponent: ErrorBoundary,
 })
 
-export const routeTree = rootRoute.addChildren([homeRoute, deckRoute, nostrRoute, signinRoute, replyRoute])
+export const routeTree = rootRoute.addChildren([
+  homeRoute.addChildren([replyRoute]),
+  nostrRoute.addChildren([replyRoute2]),
+  deckRoute,
+  notificationsRoute,
+  signinRoute,
+])
 
 export const router = createRouter({
   routeTree,
