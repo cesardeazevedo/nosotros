@@ -1,7 +1,8 @@
-import { Link, Typography } from '@mui/material'
-import { Link as LinkRouter } from '@tanstack/react-router'
+import { Text } from '@/components/ui/Text/Text'
 import { useMobile } from 'hooks/useMobile'
 import { useCallback } from 'react'
+import { css } from 'react-strict-dom'
+import LinkRouter from '../Links/LinkRouter'
 
 function HeaderLogo() {
   const isMobile = useMobile()
@@ -11,21 +12,28 @@ function HeaderLogo() {
   }, [])
 
   return (
-    <Link component={LinkRouter} to='/' onClick={handleClick} sx={{ margin: 'auto', textDecoration: 'none!important' }}>
-      <Typography
-        variant='h5'
-        fontWeight={900}
-        sx={[
-          { position: 'relative', whiteSpace: 'nowrap' },
-          isMobile && {
-            margin: 'auto',
-            right: 42,
-          },
-        ]}>
+    <LinkRouter to='/' onClick={handleClick} sx={styles.root}>
+      <Text variant='headline' size={isMobile ? 'sm' : 'sm'} sx={[styles.text, !!isMobile && styles.text$mobile]}>
         nosotros
-      </Typography>
-    </Link>
+      </Text>
+    </LinkRouter>
   )
 }
+
+const styles = css.create({
+  root: {
+    margin: 'auto',
+    textDecoration: 'none',
+    flex: 1,
+  },
+  text: {
+    position: 'relative',
+    whiteSpace: 'nowrap',
+    fontWeight: 900,
+  },
+  text$mobile: {
+    margin: 'auto',
+  },
+})
 
 export default HeaderLogo

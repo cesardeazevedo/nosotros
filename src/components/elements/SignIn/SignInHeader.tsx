@@ -1,14 +1,12 @@
-import { Box, Grow, IconButton, Typography } from '@mui/material'
+import { IconButton } from '@/components/ui/IconButton/IconButton'
+import { Stack } from '@/components/ui/Stack/Stack'
+import { Text } from '@/components/ui/Text/Text'
+import { spacing } from '@/themes/spacing.stylex'
 import { IconChevronLeft, IconX } from '@tabler/icons-react'
 import { useMobile } from 'hooks/useMobile'
 import { useCallback } from 'react'
-import { Row } from '../Layouts/Flex'
+import { css } from 'react-strict-dom'
 import { OnboardMachineContext } from './SignInContext'
-
-const easings = {
-  enter: 'cubic-bezier(0.33, 1, 0.68, 1)',
-  exit: 'cubic-bezier(0.33, 1, 0.68, 1)',
-}
 
 function SignInHeader() {
   const machine = OnboardMachineContext.useActorRef()
@@ -21,35 +19,26 @@ function SignInHeader() {
     machine.send({ type: 'back' })
   }, [machine])
 
-  const handleCamera = useCallback(() => {
-    //
-  }, [])
+  const handleCamera = useCallback(() => {}, [])
 
   return (
-    <Row sx={{ p: 2, justifyContent: 'center', height: 64 }}>
-      <Box sx={{ width: 38, height: 38 }}>
-        <Grow in={!camera && !state.matches('intro')} easing={easings}>
-          <IconButton
-            size='small'
-            onClick={handleBack}
-            sx={{ position: 'absolute', left: 16, color: 'text.primary', transitionDuration: '250ms!important' }}>
-            <IconChevronLeft size={28} strokeWidth='2.5' />
-          </IconButton>
-        </Grow>
-        <Grow in={camera} easing={easings}>
-          <IconButton
-            size='small'
-            onClick={handleCamera}
-            sx={{ position: 'absolute', left: 16, color: 'text.primary', transitionDuration: '250ms!important' }}>
-            <IconX size={28} strokeWidth='2.0' />
-          </IconButton>
-        </Grow>
-      </Box>
-      <Typography variant='h6' sx={{ flex: 1, textAlign: 'center', mr: 6 }}>
+    <Stack align='center' gap={1} justify='flex-start' sx={styles.root}>
+      {!camera && !state.matches('intro') && (
+        <IconButton size='sm' onClick={handleBack} icon={<IconChevronLeft size={28} strokeWidth='2.5' />} />
+      )}
+      {camera && <IconButton size='sm' onClick={handleCamera} icon={<IconX size={28} strokeWidth='2.0' />} />}
+      <Text variant='headline' size='sm'>
         {!isMobile ? 'Sign In' : camera ? 'Camera' : ''}
-      </Typography>
-    </Row>
+      </Text>
+    </Stack>
   )
 }
+
+const styles = css.create({
+  root: {
+    padding: spacing.padding2,
+    height: 64,
+  },
+})
 
 export default SignInHeader

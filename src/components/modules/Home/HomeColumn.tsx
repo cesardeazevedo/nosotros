@@ -1,5 +1,8 @@
-import { Box, Typography } from '@mui/material'
-import { IconHome } from '@tabler/icons-react'
+import { IconHomeFilled } from '@/components/elements/Icons/IconHomeFilled'
+import PaperContainer from '@/components/elements/Layouts/PaperContainer'
+import { Divider } from '@/components/ui/Divider/Divider'
+import { Stack } from '@/components/ui/Stack/Stack'
+import { Text } from '@/components/ui/Text/Text'
 import DeckColumnHeader from 'components/elements/Deck/DeckColumnHeader'
 import Post from 'components/elements/Posts/Post'
 import PostCreateForm from 'components/elements/Posts/PostCreate/PostCreateForm'
@@ -22,25 +25,34 @@ const HomeColumn = observer(function HomeColumn(props: Props) {
   useModuleSubscription(feed)
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', position: 'relative', p: 0 }}>
-      <DeckColumnHeader id={feed.id} name='Home Settings' settings={<HomeSettings />}>
-        <IconHome strokeWidth='2' size={24} />
-        <Typography variant='h6' fontWeight='bold' sx={{ ml: 1 }}>
-          Home
-        </Typography>
+    <>
+      <DeckColumnHeader id={feed.id} name='Home Settings' settings={<HomeSettings />} renderDelete={false}>
+        <Stack gap={2}>
+          <IconHomeFilled />
+          <Text variant='title' size='lg'>
+            Home
+          </Text>
+        </Stack>
       </DeckColumnHeader>
-      <VirtualList
-        feed={feed}
-        render={(id: string) => <Post key={id} id={id} />}
-        header={<PostCreateForm />}
-        footer={
-          <>
-            <PostLoading />
-            <PostLoading />
-          </>
-        }
-      />
-    </Box>
+      <PaperContainer elevation={0} shape='none'>
+        <VirtualList
+          feed={feed}
+          render={(id: string) => <Post key={id} id={id} />}
+          header={
+            <>
+              <PostCreateForm defaultOpen={false} allowLongForm />
+              <Divider />
+            </>
+          }
+          footer={
+            <>
+              <PostLoading />
+              <PostLoading />
+            </>
+          }
+        />
+      </PaperContainer>
+    </>
   )
 })
 

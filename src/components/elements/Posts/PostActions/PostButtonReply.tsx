@@ -1,21 +1,29 @@
-import { IconButton, type IconButtonProps } from '@mui/material'
+import { IconButton } from '@/components/ui/IconButton/IconButton'
+import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 import { IconMessageCircle } from '@tabler/icons-react'
-import Tooltip from 'components/elements/Layouts/Tooltip'
 import ButtonContainer, { type ContainerProps } from './PostButtonContainer'
+import { iconProps } from './utils'
 
 type Props = {
-  size?: IconButtonProps['size']
+  dense?: boolean
   onClick?: () => void
 }
 
 function ButtonReply(props: Props & ContainerProps) {
-  const { size = 'small', onClick, ...rest } = props
+  const { dense = false, onClick, ...rest } = props
   return (
     <ButtonContainer {...rest}>
-      <Tooltip arrow title='Comment'>
-        <IconButton size={size} onClick={onClick}>
-          <IconMessageCircle strokeWidth='1.5' />
-        </IconButton>
+      <Tooltip cursor='arrow' text='Replies'>
+        <IconButton
+          size={dense ? 'sm' : 'md'}
+          onClick={onClick}
+          icon={
+            <IconMessageCircle
+              size={dense ? iconProps.size$dense : iconProps.size}
+              strokeWidth={iconProps.strokeWidth}
+            />
+          }
+        />
       </Tooltip>
     </ButtonContainer>
   )

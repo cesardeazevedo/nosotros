@@ -1,20 +1,11 @@
 /// <reference types="vite/client" />
 /// <reference types="unplugin-info/client" />
-import '@mui/material'
+
+declare module 'eslint-plugin-react'
 
 declare global {
   interface Window {
     __WB_MANIFEST: never
-  }
-}
-
-declare module '@mui/material' {
-  interface Palette {
-    dividerSolid: string
-  }
-  // allow configuration using `createTheme`
-  interface PaletteOptions {
-    dividerSolid: string
   }
 }
 

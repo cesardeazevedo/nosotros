@@ -1,22 +1,26 @@
-import { Chip, Tooltip } from "@mui/material"
-import { IconServerBolt } from "@tabler/icons-react"
-import { observer } from "mobx-react-lite"
-import { relayStore } from "stores/nostr/relays.store"
-import { authStore } from "stores/ui/auth.store"
+import { Chip } from '@/components/ui/Chip/Chip'
+import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
+import { shape } from '@/themes/shape.stylex'
+import { IconServerBolt } from '@tabler/icons-react'
+import { observer } from 'mobx-react-lite'
+import { css } from 'react-strict-dom'
+import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDOMProps'
+import { relayStore } from 'stores/nostr/relays.store'
+import { authStore } from 'stores/ui/auth.store'
 
 type Props = {
-  onClick: (event: React.MouseEvent<HTMLDivElement>) => void
+  onClick?: (event: StrictClickEvent) => void
 }
 
 export const RelayIconButton = observer(function RelayIconButton(props: Props) {
   return (
-    <Tooltip arrow title='Configure Relays'>
+    <Tooltip cursor='arrow' text='Configure Relays'>
       <span>
         {authStore.pubkey && (
           <Chip
             onClick={props.onClick}
             icon={<IconServerBolt strokeWidth='1.5' />}
-            sx={{ minWidth: 24, span: { pr: 1 } }}
+            sx={styles.chip}
             label={`${relayStore.myConnectedRelays.length} / ${relayStore.myRelays.length}`}
           />
         )}
@@ -25,11 +29,17 @@ export const RelayIconButton = observer(function RelayIconButton(props: Props) {
           <Chip
             onClick={props.onClick}
             icon={<IconServerBolt strokeWidth='1.5' />}
-            sx={{ minWidth: 24, span: { pr: 1 } }}
+            sx={styles.chip}
             label={`${relayStore.connected.length} / ${relayStore.list.length}`}
           />
         )}
       </span>
     </Tooltip>
   )
+})
+
+const styles = css.create({
+  chip: {
+    borderRadius: shape.full,
+  },
 })

@@ -1,4 +1,4 @@
-import { Button } from '@mui/material'
+import { Button } from '@/components/ui/Button/Button'
 import { observer } from 'mobx-react-lite'
 import { authStore } from 'stores/ui/auth.store'
 import LinkSignIn from '../Links/LinkSignIn'
@@ -9,9 +9,7 @@ const HeaderSignIn = observer(function HeaderSignIn() {
     <>
       {!authStore.pubkey ? (
         <LinkSignIn>
-          <Button variant='contained' size='small' color='info'>
-            Sign In
-          </Button>
+          <Button variant='filled'>Sign In</Button>
         </LinkSignIn>
       ) : (
         <ProfilePopover />

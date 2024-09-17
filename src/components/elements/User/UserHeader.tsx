@@ -1,9 +1,11 @@
-import { Typography } from '@mui/material'
-import { Row } from 'components/elements/Layouts/Flex'
-import Tooltip from 'components/elements/Layouts/Tooltip'
+import { Stack } from '@/components/ui/Stack/Stack'
+import { Text } from '@/components/ui/Text/Text'
+import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
+import { palette } from '@/themes/palette.stylex'
 import { DateTime } from 'luxon'
 import { observer } from 'mobx-react-lite'
 import { useMemo } from 'react'
+import { css } from 'react-strict-dom'
 import type Note from 'stores/models/note'
 import { userStore } from 'stores/nostr/users.store'
 import LinkNEvent from '../Links/LinkNEvent'
@@ -12,6 +14,9 @@ import UserName from './UserName'
 
 type Props = {
   note: Note
+  // TODO
+  // pubkey: string
+  // date?: number
   dense?: boolean
   alignCenter?: boolean
   disableLink?: boolean
@@ -27,11 +32,11 @@ export const UserHeaderDate = function UserHeaderDate(props: { note: Note; disab
   )
   const fullDate = useMemo(() => DateTime.fromSeconds(createdAt).toLocaleString(DateTime.DATETIME_FULL), [createdAt])
   return (
-    <LinkNEvent note={note} disableLink={disableLink}>
-      <Tooltip arrow title={fullDate}>
-        <Typography variant='caption' color='textSecondary' sx={{ ml: 1, whiteSpace: 'nowrap' }}>
+    <LinkNEvent underline note={note} disableLink={disableLink}>
+      <Tooltip text={fullDate}>
+        <Text size='sm' sx={styles.shortDate}>
           {shortDate}
-        </Typography>
+        </Text>
       </Tooltip>
     </LinkNEvent>
   )
@@ -41,14 +46,23 @@ const UserHeader = observer(function UserHeader(props: Props) {
   const { note, dense, alignCenter = true, disableLink } = props
   const user = userStore.get(note.event.pubkey)
   return (
-    <Row sx={{ alignItems: alignCenter ? 'center' : 'flex-start', height: !alignCenter ? 42 : 46 }}>
-      <UserAvatar user={user} dense={dense} disableLink={disableLink} />
-      <Row>
-        <UserName user={user} sx={{ maxWidth: 260, ml: 2 }} disableLink={disableLink} />
-        <UserHeaderDate note={note} disableLink={disableLink} />
-      </Row>
-    </Row>
+    <Stack horizontal gap={2} align={alignCenter ? 'center' : 'flex-start'} sx={styles.root}>
+      <UserAvatar user={user} size={dense ? 'sm' : 'md'} disableLink={disableLink} />
+      <UserName user={user} disableLink={disableLink} />
+      <UserHeaderDate note={note} disableLink={disableLink} />
+    </Stack>
   )
+})
+
+const styles = css.create({
+  root: {
+    height: 46, // 42
+  },
+  shortDate: {
+    whiteSpace: 'nowrap',
+    color: palette.onSurfaceVariant,
+  },
+  name: {},
 })
 
 export default UserHeader

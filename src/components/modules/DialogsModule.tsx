@@ -3,8 +3,9 @@ import ImagesDialog from 'components/dialogs/images.dialog'
 import QRCodeDialog from 'components/dialogs/qrcode.dialog'
 import RepliesDialog from 'components/dialogs/replies.dialog'
 import SignInDialog from 'components/dialogs/signin.dialog'
+import React from 'react'
 
-const Dialogs = function Dialogs() {
+const Dialogs = React.memo(function Dialogs() {
   return (
     <>
       <SignInDialog />
@@ -14,6 +15,6 @@ const Dialogs = function Dialogs() {
       <QRCodeDialog />
     </>
   )
-}
+})
 
 export default Dialogs

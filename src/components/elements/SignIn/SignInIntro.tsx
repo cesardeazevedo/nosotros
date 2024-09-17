@@ -1,8 +1,14 @@
-import { Alert, Box, Button, Link, Typography } from '@mui/material'
+import { Button } from '@/components/ui/Button/Button'
+import { Divider } from '@/components/ui/Divider/Divider'
+import { Stack } from '@/components/ui/Stack/Stack'
+import { Text } from '@/components/ui/Text/Text'
+import { useGoBack } from '@/hooks/useNavigations'
 import { useMobile } from 'hooks/useMobile'
 import { observer } from 'mobx-react-lite'
 import { useCallback } from 'react'
+import { css, html } from 'react-strict-dom'
 import { authStore } from 'stores/ui/auth.store'
+import Link from '../Content/Link/Link'
 
 type Props = {
   onClickManual: () => void
@@ -10,72 +16,73 @@ type Props = {
 
 const SignInIntro = observer(function SignInIntro(props: Props) {
   const isMobile = useMobile()
+  const goBack = useGoBack()
 
   const handleLoginWithNostrExtension = useCallback(() => {
     authStore.loginWithNostrExtension()
+    goBack()
   }, [])
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%' }}>
-      {isMobile && (
-        <Typography variant='h4' sx={{ fontWeight: 400, ml: 4 }}>
-          Sign In
-        </Typography>
-      )}
-      <Box>
-        {authStore.hasExtension && (
-          <Alert severity='success' sx={{ mt: 0, border: 'none' }}>
-            Nostr extension detected
-          </Alert>
-        )}
-        <Button
-          size='large'
-          color='primary'
-          variant='text'
-          fullWidth
-          sx={{ mt: 1, height: 50, backgroundColor: 'action.hover' }}
-          disabled={!authStore.hasExtension}
-          onClick={handleLoginWithNostrExtension}>
-          Sign In with Nostr extension
-        </Button>
-        <Typography variant='body2' sx={{ textAlign: 'center', m: 'auto', mt: 1, width: '90%' }}>
-          {authStore.hasExtension === false && (
-            <strong>
-              Nostr extension not found.
-              <br />
-            </strong>
+    <>
+      <Stack horizontal={false} gap={2} align='center' justify='flex-start' sx={styles.root}>
+        <Stack align='flex-start' sx={styles.footer}>
+          {isMobile && (
+            <Text variant='display' size='lg'>
+              Sign In
+            </Text>
           )}
-          It&apos;s recommended you sign in by using a Nostr browser extension such as Alby, Nos2x or{' '}
-          <Link
-            color='primary'
-            href='https://github.com/nostr-protocol/nips/blob/master/07.md'
-            target='_blank'
-            rel='noopener noreferrer'>
-            others
-          </Link>
-          , This is the most secure way to use any nostr client, without exposing your private key (nsec), if you are in
-          a browser with no support for extensions (like on mobile), use the manual sign in option below.
-        </Typography>
-        <Typography variant='button' component='div' sx={{ width: '100%', textAlign: 'center', my: 4 }}>
-          OR
-        </Typography>
-        <Box sx={{ mt: 0, borderRadius: 1, p: 0 }}>
-          <Button
-            fullWidth
-            variant='contained'
-            color='info'
-            size='large'
-            sx={{ mt: 0, height: 50 }}
-            onClick={props.onClickManual}>
-            Manually Sign In
-          </Button>
-          <Typography variant='body2' sx={{ textAlign: 'center', m: 'auto', mt: 1, width: '80%' }}>
-            Sign In with your public key (npub).
-          </Typography>
-        </Box>
-      </Box>
-    </Box>
+        </Stack>
+        <Stack horizontal={false} gap={4} align='stretch' justify='flex-start' sx={styles.content}>
+          <Stack align='center' justify='flex-start' gap={2} horizontal={false}>
+            {authStore.hasExtension && <html.div>Nostr extension detected</html.div>}
+            <Button
+              fullWidth
+              variant='filled'
+              sx={styles.button}
+              disabled={!authStore.hasExtension}
+              onClick={handleLoginWithNostrExtension}>
+              Sign In with Nostr extension
+            </Button>
+          </Stack>
+          <Stack align='center' justify='center' gap={2} horizontal={false}>
+            <Text size='lg'>
+              {authStore.hasExtension === false && (
+                <strong>
+                  Nostr extension not found.
+                  <br />
+                </strong>
+              )}
+              It&apos;s recommended you sign in by using a Nostr browser extension such as Alby, Nos2x or{' '}
+              <Link href='https://github.com/nostr-protocol/nips/blob/master/07.md'>others</Link>
+            </Text>
+          </Stack>
+          <Divider>OR</Divider>
+          <Stack horizontal={false} align='center' gap={3}>
+            <Button fullWidth variant='outlined' sx={styles.button} onClick={props.onClickManual}>
+              Manually Sign In
+            </Button>
+            <Text>Sign In with your public key (npub).</Text>
+          </Stack>
+        </Stack>
+      </Stack>
+    </>
   )
+})
+
+const styles = css.create({
+  root: {
+    height: '100%',
+  },
+  content: {
+    flex: 1,
+  },
+  footer: {
+    flex: 0.2,
+  },
+  button: {
+    height: 50,
+  },
 })
 
 export default SignInIntro

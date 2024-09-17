@@ -1,8 +1,12 @@
-import { forwardRef } from 'react'
+import type { Props } from './LinkRouter'
 import LinkRouter from './LinkRouter'
 
-const LinkSignIn = forwardRef<never, Partial<typeof LinkRouter>>(function LinkSignIn(props, ref) {
-  return <LinkRouter color='inherit' {...props} to='/sign_in' ref={ref} />
-})
+const LinkSignIn = function LinkSignIn(props: Props) {
+  return (
+    <LinkRouter {...props} to='/sign_in'>
+      {props.children}
+    </LinkRouter>
+  )
+}
 
 export default LinkSignIn

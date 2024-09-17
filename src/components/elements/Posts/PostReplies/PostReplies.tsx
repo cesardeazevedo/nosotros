@@ -1,60 +1,47 @@
-import { Box, Button, Divider, Typography } from '@mui/material'
-import { IconMessageCircle2 } from '@tabler/icons-react'
+import { Stack } from '@/components/ui/Stack/Stack'
+import { spacing } from '@/themes/spacing.stylex'
 import { observer } from 'mobx-react-lite'
+import { css, html } from 'react-strict-dom'
 import type Note from 'stores/models/note'
+import { PostRepliesEmpty } from './PostRepliesEmpty'
 import PostRepliesLoading from './PostRepliesLoading'
 import { PostRepliesTree } from './PostReply'
-import PostReplyForm from './PostReplyForm'
 
 type Props = {
-  note: Note
-  onReplyClick: () => void
+  note?: Note
+  loadingRows?: number
+  renderEmpty?: boolean
 }
 
 const PostReplies = observer(function PostReplies(props: Props) {
-  const { note, onReplyClick } = props
+  const { note, loadingRows, renderEmpty = false } = props
 
-  const replies = note.repliesOpen === null ? note.repliesPreview : note.repliesSorted
+  const replies = note?.repliesOpen === null ? note.repliesPreview : note?.repliesSorted
 
-  if (note.repliesOpen === false || (replies.length === 0 && note.repliesStatus === 'IDLE')) {
+  const loading = note ? note.repliesStatus === 'LOADING' : true
+  const empty = note ? note?.repliesStatus === 'LOADED' && replies?.length === 0 : undefined
+
+  if (note?.repliesOpen === false || (!loading && empty)) {
     return
   }
 
   return (
-    <>
-      <Divider />
-      <PostReplyForm />
-      <Box sx={{ ml: -3, mr: 2 }}>
-        <PostRepliesTree replies={replies} repliesOpen={note.repliesOpen} level={1} />
-      </Box>
-      {note.repliesStatus === 'LOADED' && replies.length === 0 && (
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            py: 4,
-          }}>
-          <IconMessageCircle2 size={50} strokeWidth='1.0' />
-          <Typography variant='subtitle1' sx={{ fontWeight: 400 }}>
-            No Replies yet
-          </Typography>
-        </Box>
-      )}
-      {note.repliesStatus === 'IDLE' && (
-        <Box sx={{ p: 2, py: 1 }}>
-          <Button
-            color='info'
-            onClick={onReplyClick}
-            sx={{ fontWeight: 600, cursor: 'pointer', color: 'text.primary' }}>
-            See more replies
-          </Button>
-        </Box>
-      )}
-      {note.repliesStatus === 'LOADING' && <PostRepliesLoading contentHeight={50} />}
-    </>
+    <Stack horizontal={false} sx={styles.root} justify='flex-start'>
+      <html.div style={styles.repliesWrapper}>
+        {replies && note && <PostRepliesTree replies={replies} repliesOpen={note.repliesOpen} level={1} />}
+        {empty && renderEmpty && <PostRepliesEmpty />}
+        {loading && empty !== true && <PostRepliesLoading rows={loadingRows} />}
+      </html.div>
+    </Stack>
   )
+})
+
+const styles = css.create({
+  root: {},
+  repliesWrapper: {
+    width: '100%',
+    paddingBlock: spacing.padding1,
+  },
 })
 
 export default PostReplies

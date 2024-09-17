@@ -1,9 +1,15 @@
-import { Box, Button, IconButton, Skeleton, Typography } from '@mui/material'
+import { Button } from '@/components/ui/Button/Button'
+import { IconButton } from '@/components/ui/IconButton/IconButton'
+import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
+import { Stack } from '@/components/ui/Stack/Stack'
+import { Text } from '@/components/ui/Text/Text'
+import { spacing } from '@/themes/spacing.stylex'
 import { IconCameraFilled, IconX } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
 import { nip19 } from 'nostr-tools'
 import { QRCodeCanvas } from 'qrcode.react'
 import { useMemo } from 'react'
+import { css, html } from 'react-strict-dom'
 import { authStore } from 'stores/ui/auth.store'
 import { dialogStore } from 'stores/ui/dialogs.store'
 import { encodeSafe } from 'utils/nip19'
@@ -14,50 +20,63 @@ const QRCode = observer(function QRCodeDialog() {
   const { pubkey, currentUser: user } = authStore
   const npub = useMemo(() => encodeSafe(() => nip19.npubEncode(pubkey || '')), [pubkey])
   return (
-    <>
-      <Box sx={{ position: 'absolute', left: 20, top: 20, zIndex: 10000 }}>
-        <IconButton sx={{ color: 'inherit' }} onClick={dialogStore.closeQRCode}>
-          <IconX size={28} />
-        </IconButton>
-      </Box>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          height: '100%',
-          py: 6,
-          position: 'relative',
-        }}>
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-          <Box sx={{ mt: 2, border: '1px solid', borderColor: 'divider', borderRadius: 10, p: 0.5 }}>
-            <UserAvatar user={user} size={100} />
-          </Box>
-          <UserName user={user} variant='h4' sx={{ mt: 1 }}>
-            <Typography variant='subtitle1' sx={{ textAlign: 'center' }}>
-              @{user?.displayName}
-            </Typography>
+    <html.div style={styles.root}>
+      <IconButton sx={styles.close} onClick={dialogStore.closeQRCode} icon={<IconX />} />
+      <Stack horizontal={false} gap={2} sx={styles.content}>
+        <Stack horizontal={false} gap={2} align='center' justify='center'>
+          <UserAvatar user={user} size='lg' />
+          <UserName user={user}>
+            <Text size='lg'>@{user?.displayName}</Text>
           </UserName>
-        </Box>
-        <Box sx={{ p: 1, mt: 2 }}>
-          {npub ? (
-            <QRCodeCanvas value={npub} size={200} />
-          ) : (
-            <Skeleton variant='rectangular' animation='wave' width={200} height={200} sx={{ borderRadius: 1 }} />
-          )}
-        </Box>
-        <Typography sx={{ maxWidth: '70%', wordBreak: 'break-all', textAlign: 'center' }}>{npub}</Typography>
-        <Typography variant='h5' sx={{ my: 3 }}>
-          Follow me on Nostr
-        </Typography>
-        <Button size='large' variant='contained' sx={{ px: 5 }} onClick={dialogStore.openCamera}>
-          <IconCameraFilled strokeWidth='1.2' size={20} style={{ marginRight: 8 }} />
+        </Stack>
+        {npub ? (
+          <QRCodeCanvas value={npub} size={200} />
+        ) : (
+          <Skeleton variant='rectangular' animation='wave' sx={styles.loading} />
+        )}
+        <Text size='lg' sx={styles.npub}>
+          {npub}
+        </Text>
+        <Text>Follow me on Nostr</Text>
+        <Button
+          variant='filled'
+          onClick={dialogStore.openCamera}
+          icon={<IconCameraFilled strokeWidth='1.2' size={20} style={{ marginRight: 8 }} />}>
           Scan QRCode
         </Button>
-      </Box>
-    </>
+      </Stack>
+    </html.div>
   )
+})
+
+const styles = css.create({
+  root: {
+    position: 'relative',
+  },
+  button: {},
+  close: {
+    position: 'absolute',
+    top: 0,
+    right: -24,
+  },
+  content: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    height: '100%',
+    paddingTop: spacing.padding9,
+    position: 'relative',
+  },
+  loading: {
+    width: 200,
+    height: 200,
+  },
+  npub: {
+    maxWidth: '70%',
+    wordBreak: 'break-all',
+    textAlign: 'center',
+  },
 })
 
 export default QRCode

@@ -1,4 +1,3 @@
-import { appState } from 'stores/app.state'
 import { assign, fromPromise, setup } from 'xstate'
 
 const clipboard = fromPromise(async () => {
@@ -24,14 +23,6 @@ export const onboardMachine = setup({
   },
   actors: {
     clipboard,
-  },
-  actions: {
-    subscribeUser({ context }) {
-      const { pubkey } = context
-      if (pubkey) {
-        appState.client.users.subscribe([pubkey]).subscribe()
-      }
-    },
   },
 }).createMachine({
   initial: 'intro',

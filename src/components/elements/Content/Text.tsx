@@ -1,16 +1,17 @@
+import type { BlockQuoteNode, HeadingNode, Mark, ParagraphNode, TextNode } from 'nostr-editor'
 import React, { useContext } from 'react'
+import { ContentContext } from './Content'
 import Link from './Link/Link'
 import { CodeSpan } from './Markdown/CodeSpan'
-import { Mention } from './Mention/Mention'
+import { NProfile } from './NProfile/NProfile'
 import Tag from './Tag/Tag'
-import type { BlockQuoteNode, HeadingNode, Mark, ParagraphNode, TextNode } from '../../../content/types'
-import { ContentContext } from './Content'
+import { Text } from '@/components/ui/Text/Text'
 
 type Props = {
   node: TextNode
 }
 
-function Text(props: Props) {
+function TextMark(props: Props) {
   const { text, marks = [] } = props.node
   const { disableLink } = useContext(ContentContext)
   return (
@@ -42,14 +43,20 @@ function Text(props: Props) {
 
 export function TextContent(props: { node: ParagraphNode | HeadingNode | BlockQuoteNode }) {
   return (
-    <>
+    <Text size='lg'>
       {props.node.content?.map((node, index) => (
         <React.Fragment key={node.type + index}>
-          {node.type === 'mention' && <Mention pubkey={node.attrs.pubkey} />}
-          {node.type === 'text' && <Text node={node} />}
-          {node.type === 'hardBreak' && <br />}
+          {/* @ts-expect-error old schema */}
+          {(node.type === 'nprofile' || node.type === 'mention') && <NProfile pubkey={node.attrs.pubkey} />}
+          {node.type === 'text' && <TextMark node={node} />}
+          {node.type === 'hardBreak' && (
+            <>
+              <br />
+              <div style={{ marginTop: 8 }} />
+            </>
+          )}
         </React.Fragment>
       ))}
-    </>
+    </Text>
   )
 }

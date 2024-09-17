@@ -1,15 +1,14 @@
-import { type LinkProps } from '@mui/material'
 import { useMatch } from '@tanstack/react-router'
 import { observer } from 'mobx-react-lite'
 import React, { useCallback, useContext } from 'react'
 import type Note from 'stores/models/note'
 import { deckStore } from 'stores/ui/deck.store'
+import { DeckContext } from '../Deck/DeckContext'
+import type { Props as LinkRouterProps } from './LinkRouter'
 import LinkRouter from './LinkRouter'
-import { DeckContext } from '../Deck/DeckList'
 
-interface Props extends Omit<LinkProps, 'ref'> {
+interface Props extends LinkRouterProps {
   note: Note
-  component?: LinkProps['component']
   children: React.ReactNode
   disableLink?: boolean
 }
@@ -32,14 +31,14 @@ const LinkNEvent = observer(function LinkNEvent(props: Props) {
 
   if (isDeck) {
     return (
-      <LinkRouter onClick={handleClickDeck} sx={{ cursor: 'pointer' }} {...rest}>
+      <LinkRouter onClick={handleClickDeck} {...rest}>
         {props.children}
       </LinkRouter>
     )
   }
 
   return (
-    <LinkRouter to='/$nostr' params={{ nostr: note.nevent }} sx={{ cursor: 'pointer' }} {...rest}>
+    <LinkRouter to='/$nostr' params={{ nostr: note.nevent }} {...rest}>
       {props.children}
     </LinkRouter>
   )

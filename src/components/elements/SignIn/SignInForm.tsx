@@ -1,9 +1,19 @@
-import { Box, Button, IconButton, Skeleton, TextField, Typography } from '@mui/material'
+import { Button } from '@/components/ui/Button/Button'
+import { IconButton } from '@/components/ui/IconButton/IconButton'
+import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
+import { Stack } from '@/components/ui/Stack/Stack'
+import { Text } from '@/components/ui/Text/Text'
+import { TextField } from '@/components/ui/TextField/TextField'
+import { useGoBack } from '@/hooks/useNavigations'
+import { appState } from '@/stores/app.state'
+import { spacing } from '@/themes/spacing.stylex'
 import { IconClipboardCopy, IconScan } from '@tabler/icons-react'
 import { useMobile } from 'hooks/useMobile'
 import { observer } from 'mobx-react-lite'
+import { useObservable, useSubscription } from 'observable-hooks'
 import { useCallback, useEffect } from 'react'
 import { Controller, useForm, useWatch, type Control } from 'react-hook-form'
+import { css } from 'react-strict-dom'
 import { userStore } from 'stores/nostr/users.store'
 import { authStore } from 'stores/ui/auth.store'
 import { dialogStore } from 'stores/ui/dialogs.store'
@@ -17,22 +27,21 @@ type FormValues = {
   pubkey: string
 }
 
-const avatarStyle = {
-  width: 80,
-  height: 80,
-  mx: 'auto',
-  my: 1,
-}
-
 const UserPreview = observer(function UserPreview(props: { control: Control<FormValues> }) {
   const pubkey = useWatch({ name: 'pubkey', control: props.control })
+
+  const sub = useObservable(() => appState.client.users.subscribe([pubkey]))
+  useSubscription(sub)
+
   const user = userStore.get(pubkey)
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', py: 1 }}>
-      {!user && pubkey ? <Skeleton variant='circular' sx={avatarStyle} /> : <UserAvatar user={user} size={80} />}
-      {user && <UserName disableLink disablePopover user={user} variant='h6' sx={{ py: 1 }} />}
-    </Box>
+    pubkey && (
+      <Stack horizontal={false} gap={1} justify='center' align='center'>
+        {!user ? <Skeleton variant='circular' sx={styles.loading} /> : <UserAvatar user={user} size='lg' />}
+        {user && <UserName disableLink disablePopover variant='title' size='lg' user={user} />}
+      </Stack>
+    )
   )
 })
 
@@ -41,6 +50,7 @@ const SignInForm = function SignInForm() {
   const pubkey = OnboardMachineContext.useSelector((x) => x.context.pubkey)
   const clipboardError = OnboardMachineContext.useSelector((x) => x.context.clipboardError)
   const isMobile = useMobile()
+  const goBack = useGoBack()
 
   const form = useForm<FormValues>({
     mode: 'all',
@@ -71,6 +81,7 @@ const SignInForm = function SignInForm() {
 
   const onSubmit = useCallback((values: FormValues) => {
     authStore.loginWithPubkey(values.pubkey)
+    goBack()
   }, [])
 
   const handleClipboard = useCallback(async () => {
@@ -78,65 +89,57 @@ const SignInForm = function SignInForm() {
   }, [onboardMachine])
 
   return (
-    <>
-      <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100%' }}>
-        <Box>
-          <UserPreview control={form.control} />
-          <Typography variant='h5' sx={{ mb: 4 }}>
-            Sign In with Public Key
-          </Typography>
-          <Controller
-            name='npub'
-            control={form.control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                error={Boolean(form.formState.errors.npub) && form.formState.isSubmitted}
-                helperText={form.formState.isSubmitted ? form.formState.errors.npub?.message : ''}
-                fullWidth
-                label='Public key (npub)'
-                placeholder='npub...'
-                sx={{ mb: 2 }}
-                InputProps={{
-                  endAdornment: isMobile && (
-                    <IconButton onClick={dialogStore.openCamera}>
-                      <IconScan />
-                    </IconButton>
-                  ),
-                }}
-              />
-            )}
-          />
-          {clipboardError && (
-            <Typography color='error' sx={{ mb: 1 }}>
-              {clipboardError}
-            </Typography>
+    <Stack horizontal={false} gap={2} align='stretch' justify='flex-end' sx={styles.content}>
+      <UserPreview control={form.control} />
+      <Text variant='headline'>Sign In with Public Key</Text>
+      <Stack horizontal={false} gap={1}>
+        <Controller
+          name='npub'
+          control={form.control}
+          render={({ field }) => (
+            <TextField
+              {...field}
+              error={Boolean(form.formState.errors.npub) && form.formState.isSubmitted}
+              label='Public key (npub)'
+              placeholder='npub...'
+              trailing={isMobile && <IconButton onClick={dialogStore.openCamera} icon={<IconScan />} />}
+            />
           )}
-          <Button
-            fullWidth
-            size='large'
-            color='primary'
-            variant='text'
-            sx={{ height: 50, backgroundColor: 'action.hover' }}
-            onClick={handleClipboard}>
-            <IconClipboardCopy />
-            Paste from clipboard
-          </Button>
-        </Box>
-      </Box>
-      <Box sx={{ mt: 2, borderRadius: 1, p: 0 }}>
-        <Button
-          fullWidth
-          variant='contained'
-          color='info'
-          size='large'
-          onClick={() => form.handleSubmit(onSubmit)()}
-          sx={{ mt: 0, height: 50 }}>
+        />
+        {form.formState.isSubmitted && <Text>{form.formState.errors.npub?.message}</Text>}
+        <Button variant='outlined' sx={styles.button} onClick={handleClipboard} icon={<IconClipboardCopy size={20} />}>
+          Paste
+        </Button>
+        {clipboardError && <Text>{clipboardError}</Text>}
+      </Stack>
+      <Stack align='flex-end' sx={styles.footer}>
+        <Button sx={styles.button} variant='filled' onClick={() => form.handleSubmit(onSubmit)()}>
           Sign In
         </Button>
-      </Box>
-    </>
+      </Stack>
+    </Stack>
   )
 }
+
+const styles = css.create({
+  loading: {
+    width: 80,
+    height: 80,
+    marginInline: 'auto',
+    marginBlock: spacing.margin1,
+  },
+  content: {
+    flex: 0.8,
+    paddingTop: spacing.padding5,
+    paddingBottom: spacing.padding9,
+  },
+  footer: {
+    flex: 1,
+  },
+  button: {
+    width: '100%',
+    height: 50,
+  },
+})
 
 export default SignInForm

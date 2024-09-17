@@ -1,9 +1,9 @@
-import { Typography } from '@mui/material'
+import { Stack } from '@/components/ui/Stack/Stack'
+import { Text } from '@/components/ui/Text/Text'
+import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 import { Observer } from 'mobx-react-lite'
 import React from 'react'
 import { reactionStore } from 'stores/nostr/reactions.store'
-import { Row } from '../Layouts/Flex'
-import Tooltip from '../Layouts/Tooltip'
 
 type Props = {
   noteId: string
@@ -15,28 +15,24 @@ function ReactionsTooltip(props: Props) {
   const list = reactionStore.getTopReactions(props.noteId)
   return (
     <Tooltip
-      arrow
-      title={
+      cursor='arrow'
+      text={
         <>
-          <Typography variant='subtitle2'>Reactions</Typography>
+          <Text variant='label'>Reactions</Text>
           <Observer>
             {() => (
               <>
                 {list
                   .filter(([emoji]) => !emoji.includes(':'))
                   .map(([emoji, pubkeys]) => (
-                    <Row
-                      key={emoji}
-                      sx={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'flex-start',
-                        fontSize: '1.2rem',
-                        '>span': { flex: 1 },
-                      }}>
-                      <span>{emoji}</span>
-                      <span>{pubkeys.length}</span>
-                    </Row>
+                    <Stack key={emoji} gap={1}>
+                      <Text variant='title' size='md'>
+                        {emoji}
+                      </Text>
+                      <Text variant='title' size='md'>
+                        {pubkeys.length}
+                      </Text>
+                    </Stack>
                   ))}
               </>
             )}

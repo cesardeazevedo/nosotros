@@ -1,8 +1,9 @@
-import { Box } from "@mui/material"
-import { IconServerBolt, IconServerOff } from "@tabler/icons-react"
-import { observer } from "mobx-react-lite"
-import { relayStore } from "stores/nostr/relays.store"
-import Tooltip from "../Layouts/Tooltip"
+import { IconServerBolt, IconServerOff } from '@tabler/icons-react'
+import { observer } from 'mobx-react-lite'
+import { relayStore } from 'stores/nostr/relays.store'
+import { html, css } from 'react-strict-dom'
+import { colors } from '@stylexjs/open-props/lib/colors.stylex'
+import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 
 type Props = {
   url: string
@@ -12,19 +13,24 @@ const RelayIcon = observer(function RelayIcon(props: Props) {
   const relay = relayStore.pool.relays.get(props.url)
   const connected = relay?.connected || false
   return (
-    <Box color={connected ? 'success.main' : 'info'} sx={{ ml: 1, display: 'inline-flex' }}>
-      <Tooltip arrow title='Connected'>
-        <span>
-          {connected && <IconServerBolt color='currentColor' size={20} strokeWidth='1.6' />}
-        </span>
+    <html.span style={connected ? styles.connected : styles.disconnected}>
+      <Tooltip cursor='arrow' text='Connected'>
+        <span>{connected && <IconServerBolt color='currentColor' size={18} strokeWidth='1.6' />}</span>
       </Tooltip>
-      <Tooltip arrow title='Not connected'>
-        <span>
-          {!connected && <IconServerOff color='currentColor' size={20} strokeWidth='1.6' />}
-        </span>
+      <Tooltip cursor='arrow' text='Not connected'>
+        <span>{!connected && <IconServerOff color='currentColor' size={18} strokeWidth='1.6' />}</span>
       </Tooltip>
-    </Box>
+    </html.span>
   )
+})
+
+const styles = css.create({
+  connected: {
+    color: colors.green9,
+  },
+  disconnected: {
+    color: colors.red6,
+  },
 })
 
 export default RelayIcon

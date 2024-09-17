@@ -1,16 +1,18 @@
+import { Divider } from '@/components/ui/Divider/Divider'
 import { useRangeChange } from 'hooks/useRangeChange'
 import { observer } from 'mobx-react-lite'
-import { useLayoutEffect, useMemo, useRef } from 'react'
+import React, { useLayoutEffect, useMemo, useRef } from 'react'
 import type { FeedModule } from 'stores/modules/feed.module'
 import { WindowVirtualizer, type CacheSnapshot, type WindowVirtualizerHandle } from 'virtua'
 
 type Props = {
   feed: FeedModule
   render: (id: string) => React.ReactNode
+  divider?: boolean
 }
 
 const VirtualListWindow = observer(function VirtualListWindow(props: Props) {
-  const { render, feed } = props
+  const { render, feed, divider = true } = props
   const cacheKey = `window-list-cache-${feed.id}`
 
   const data = feed.list
@@ -22,6 +24,7 @@ const VirtualListWindow = observer(function VirtualListWindow(props: Props) {
     if (!serialized) return []
     try {
       return JSON.parse(serialized) as [number, CacheSnapshot]
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
       return []
     }
@@ -62,7 +65,12 @@ const VirtualListWindow = observer(function VirtualListWindow(props: Props) {
   return (
     <>
       <WindowVirtualizer ref={ref} cache={cache} onRangeChange={(start, end) => onRangeChange([start, end])}>
-        {data.map((id) => render(id))}
+        {data.map((id) => (
+          <React.Fragment key={id}>
+            {render(id)}
+            {divider && <Divider />}
+          </React.Fragment>
+        ))}
       </WindowVirtualizer>
     </>
   )

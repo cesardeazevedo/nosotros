@@ -5,7 +5,7 @@ export function useGoBack() {
   const router = useRouter()
   const goBack = useCallback(() => {
     const { from } = router.state.location.state as { from?: string }
-    from ? router.history.back() : router.navigate({ to: '/' })
+    return from ? router.history.back() : router.navigate({ to: '/' })
   }, [router])
   return goBack
 }

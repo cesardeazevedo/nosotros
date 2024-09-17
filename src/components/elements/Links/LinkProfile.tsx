@@ -1,16 +1,17 @@
-import type { LinkProps } from '@mui/material'
-import { type LinkOwnProps } from '@mui/material'
 import { observer } from 'mobx-react-lite'
 import type User from 'stores/models/user'
+import type { Props as LinkProps } from './LinkRouter'
 import LinkRouter from './LinkRouter'
 import { forwardRef, useCallback, useContext } from 'react'
 import { deckStore } from 'stores/ui/deck.store'
-import { useMatch } from '@tanstack/react-router'
-import { DeckContext } from '../Deck/DeckList'
+import { useMatch, useRouter } from '@tanstack/react-router'
+import { DeckContext } from '../Deck/DeckContext'
+import type { SxProps } from '@/components/ui/types'
 
 interface Props {
+  sx?: SxProps
   user?: User
-  color?: LinkOwnProps['color']
+  color?: LinkProps['color']
   underline?: LinkProps['underline']
   disableLink?: boolean
   children: React.ReactNode
@@ -18,8 +19,9 @@ interface Props {
 
 const LinkProfile = observer(
   forwardRef<never, Props>(function LinkProfile(props, ref) {
-    const { user, color = 'inherit', disableLink = false, underline, children, ...rest } = props
+    const { sx, user, color, disableLink = false, underline, children, ...rest } = props
     const route = useMatch({ strict: false })
+    const router = useRouter()
     const isDeck = route.id === '/deck'
     const { index } = useContext(DeckContext)
 
@@ -35,24 +37,21 @@ const LinkProfile = observer(
 
     if (isDeck) {
       return (
-        <LinkRouter
-          color={color as string}
-          onClick={handleClickDeck}
-          underline={underline}
-          {...rest}
-          ref={ref}>
+        <LinkRouter color={color} onClick={handleClickDeck} underline={underline} {...rest} ref={ref} sx={sx}>
           {children}
         </LinkRouter>
       )
     }
 
-
     return (
       <LinkRouter
         to='/$nostr'
-        color={color as string}
+        color={color}
         params={{ nostr: user?.nprofile }}
+        // @ts-ignore
+        state={{ from: router.latestLocation.pathname }}
         underline={underline}
+        sx={sx}
         {...rest}
         ref={ref}>
         {children}

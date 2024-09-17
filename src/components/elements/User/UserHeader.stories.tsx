@@ -1,4 +1,4 @@
-import { Paper } from '@mui/material'
+import { Paper } from '@/components/ui/Paper/Paper'
 import type { Meta, StoryObj } from '@storybook/react'
 import React from 'react'
 import { noteStore } from 'stores/nostr/notes.store'
@@ -8,9 +8,10 @@ type Props = Omit<React.ComponentProps<typeof UserHeader>, 'note'>
 
 const meta = {
   component: UserHeader,
+  // @ts-ignore
   render: function App(args) {
     const note = noteStore.get('1')
-    return <Paper sx={{ p: 2 }}>{note && <UserHeader {...args} note={note} />}</Paper>
+    return <Paper>{note && <UserHeader {...args} note={note} />}</Paper>
   },
   parameters: {
     layout: 'centered',

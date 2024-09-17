@@ -1,4 +1,4 @@
-import { Box, Typography } from '@mui/material'
+import { Text } from '@/components/ui/Text/Text'
 import DeckColumnHeader from 'components/elements/Deck/DeckColumnHeader'
 import Post from 'components/elements/Posts/Post'
 import PostLoading from 'components/elements/Posts/PostLoading'
@@ -13,11 +13,9 @@ type Props = {
 const FeedColumn = observer(function FeedModule(props: Props) {
   const { feed } = props
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', position: 'relative', p: 0 }}>
+    <>
       <DeckColumnHeader id={feed.id} name='Feed'>
-        <Typography variant='h6' fontWeight='bold'>
-          Feed
-        </Typography>
+        <Text variant='title'>Feed</Text>
       </DeckColumnHeader>
       <VirtualList
         feed={feed}
@@ -29,7 +27,7 @@ const FeedColumn = observer(function FeedModule(props: Props) {
           </>
         }
       />
-    </Box>
+    </>
   )
 })
 

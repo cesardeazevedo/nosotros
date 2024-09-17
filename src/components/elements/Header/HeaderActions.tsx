@@ -1,7 +1,8 @@
-import { Box, IconButton } from '@mui/material'
+import { IconButton } from '@/components/ui/IconButton/IconButton'
+import { Stack } from '@/components/ui/Stack/Stack'
+import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 import { IconLayoutSidebarLeftExpand, IconLayoutSidebarRightExpand } from '@tabler/icons-react'
 import { useCurrentRoute } from 'hooks/useNavigations'
-import Tooltip from '../Layouts/Tooltip'
 import LinkRouter from '../Links/LinkRouter'
 import RelaysPopover from '../Relays/RelayPopover'
 import SettingsPopover from '../Settings/SettingsPopover'
@@ -10,30 +11,25 @@ import HeaderSignIn from './HeaderSignIn'
 function HeaderActions() {
   const router = useCurrentRoute()
   return (
-    <>
-      <Tooltip title='Deck mode' enterDelay={0}>
+    <Stack gap={1}>
+      <Tooltip text='Deck mode' enterDelay={0}>
         <>
           {router.routeId !== '/deck' && (
             <LinkRouter to='/deck'>
-              <IconButton color='inherit' sx={{ m: 0.5 }}>
-                <IconLayoutSidebarLeftExpand strokeWidth='1.5' />
-              </IconButton>
+              <IconButton icon={<IconLayoutSidebarLeftExpand strokeWidth='1.5' />} />
             </LinkRouter>
           )}
           {router.routeId === '/deck' && (
             <LinkRouter to='/'>
-              <IconButton color='inherit' sx={{ m: 0.5 }}>
-                <IconLayoutSidebarRightExpand strokeWidth='1.5' />
-              </IconButton>
+              <IconButton icon={<IconLayoutSidebarRightExpand strokeWidth='1.5' />} />
             </LinkRouter>
           )}
         </>
       </Tooltip>
       <RelaysPopover />
       <SettingsPopover />
-      <Box sx={{ mx: 1 }} />
       <HeaderSignIn />
-    </>
+    </Stack>
   )
 }
 

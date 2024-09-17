@@ -1,6 +1,8 @@
-import { Box, Slide, styled } from '@mui/material'
-import { useMobile } from 'hooks/useMobile'
+import Slide from '@/components/ui/Slide/Slide'
+import { Stack } from '@/components/ui/Stack/Stack'
+import { spacing } from '@/themes/spacing.stylex'
 import { useCallback, useEffect, useRef } from 'react'
+import { css, html } from 'react-strict-dom'
 import { OnboardMachineContext } from './SignInContext'
 import SignInForm from './SignInForm'
 import SignInIntro from './SignInIntro'
@@ -10,21 +12,8 @@ const easings = {
   exit: 'cubic-bezier(0.33, 1, 0.68, 1)',
 }
 
-const AbsoluteContainer = styled(Box)({
-  position: 'absolute',
-  top: 0,
-  left: 32,
-  right: 32,
-  bottom: 20,
-  display: 'flex',
-  alignContent: 'center',
-  justifyContent: 'center',
-  textAlign: 'center',
-  flexDirection: 'column',
-})
-
 function SignInSlides() {
-  const isMobile = useMobile()
+  //const isMobile = useMobile()
   const state = OnboardMachineContext.useSelector((x) => x)
   const machine = OnboardMachineContext.useActorRef()
 
@@ -68,26 +57,58 @@ function SignInSlides() {
   }, [machine])
 
   return (
-    <Box
-      sx={{
-        position: 'relative',
-        p: 4,
-        pt: isMobile ? 0 : 2,
-        pb: isMobile ? 4 : 2,
-        height: '100%',
-      }}>
-      <Slide appear={false} in={state.matches('intro')} direction={handleDirection(0)} easing={easings}>
-        <div>
+    <html.div style={styles.root} id='asd'>
+      <Slide
+        style={{ height: '100%' }}
+        appear={false}
+        in={state.matches('intro')}
+        direction={handleDirection(0)}
+        easing={easings}>
+        <Stack horizontal={false} sx={styles.wrapper}>
           <SignInIntro onClickManual={handleNext} />
-        </div>
+        </Stack>
       </Slide>
-      <Slide unmountOnExit in={state.matches('withPubkey')} direction={handleDirection(1)} easing={easings}>
-        <AbsoluteContainer>
+      <Slide
+        style={{ height: '100%' }}
+        // unmountOnExit
+        in={state.matches('withPubkey')}
+        direction={handleDirection(1)}
+        easing={easings}>
+        <html.div style={styles.container}>
           <SignInForm />
-        </AbsoluteContainer>
+        </html.div>
       </Slide>
-    </Box>
+    </html.div>
   )
 }
+
+const styles = css.create({
+  root: {
+    position: 'relative',
+    padding: spacing.padding4,
+    height: '100%',
+  },
+  wrapper: {
+    color: 'red',
+    height: '100%',
+  },
+  container: {
+    position: 'absolute',
+    top: 20,
+    left: 0,
+    padding: spacing.padding4,
+    right: 0,
+    bottom: 10,
+    display: 'flex',
+    alignContent: 'center',
+    justifyContent: 'center',
+    textAlign: 'center',
+    flexDirection: 'column',
+    width: '100%',
+  },
+  slide: {
+    height: '100%',
+  },
+})
 
 export default SignInSlides

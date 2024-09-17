@@ -5,11 +5,7 @@ import { dialogStore } from 'stores/ui/dialogs.store'
 
 const QRCodeDialog = observer(function QRCodeDialog() {
   return (
-    <Dialog
-      maxWidth='xs'
-      sx={{ alignItems: 'center', justifyContent: 'center' }}
-      open={dialogStore.qrcode}
-      onClose={dialogStore.closeQRCode}>
+    <Dialog open={dialogStore.qrcode} onClose={dialogStore.closeQRCode} maxWidth='xs'>
       <QRCode />
     </Dialog>
   )

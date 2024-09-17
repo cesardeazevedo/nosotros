@@ -1,10 +1,14 @@
-import { Box, IconButton, TextField, Typography } from '@mui/material'
+import { IconButton } from '@/components/ui/IconButton/IconButton'
+import { Stack } from '@/components/ui/Stack/Stack'
+import { Text } from '@/components/ui/Text/Text'
+import { TextField } from '@/components/ui/TextField/TextField'
+import { spacing } from '@/themes/spacing.stylex'
 import type { TablerIconsProps } from '@tabler/icons-react'
 import { IconBell, IconHome, IconSearch, IconUser } from '@tabler/icons-react'
 import React, { useCallback, useState } from 'react'
+import { css } from 'react-strict-dom'
 import { authStore } from 'stores/ui/auth.store'
 import { deckStore } from 'stores/ui/deck.store'
-import { Row } from '../Layouts/Flex'
 
 type Props = {
   title: string
@@ -16,14 +20,17 @@ type Props = {
 function Item(props: Props) {
   const Icon = props.icon
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mx: 2 }}>
-      <IconButton color='info' onClick={props.onClick} disabled={props.disabled}>
-        <Icon size={40} strokeWidth='1.2' />
-      </IconButton>
-      <Typography variant='subtitle2' sx={{ mt: -1 }}>
+    <Stack horizontal={false} align='center'>
+      <IconButton
+        size='md'
+        onClick={props.onClick}
+        disabled={props.disabled}
+        icon={<Icon size={28} strokeWidth='1.2' />}
+      />
+      <Text variant='title' size='sm'>
         {props.title}
-      </Typography>
-    </Box>
+      </Text>
+    </Stack>
   )
 }
 
@@ -37,36 +44,34 @@ function DeckNew() {
   }, [author])
 
   return (
-    <>
-      <Box sx={{ py: 4, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-        <Typography variant='h6' sx={{ py: 4 }}>
-          Choose a column type to add
-        </Typography>
-        <Box sx={{ py: 2 }}>
-          <Row sx={{ justifyContent: 'space-between' }}>
-            <Item
-              title='Home'
-              icon={IconHome}
-              onClick={() => deckStore.addHomeColumn()}
-              disabled={!authStore.isLogged}
-            />
-            <Item title='User' icon={IconUser} onClick={handleAddProfile} />
-            <Item title='Notifications' icon={IconBell} />
-            <Item title='Search' icon={IconSearch} />
-          </Row>
-          <TextField
-            variant='outlined'
-            label='Author'
-            placeholder='pubkey'
-            fullWidth
-            sx={{ mt: 4 }}
-            value={author}
-            onChange={(e) => setAuthor(e.target.value)}
-          />
-        </Box>
-      </Box>
-    </>
+    <Stack horizontal={false} align='center' justify='center' sx={styles.root} gap={4}>
+      <Text variant='headline' size='sm'>
+        Choose a column type to add
+      </Text>
+      <Stack horizontal={false} align='center' gap={4}>
+        <Stack wrap align='center' justify='center' gap={4}>
+          <Item title='Home' icon={IconHome} onClick={() => deckStore.addHomeColumn()} disabled={!authStore.isLogged} />
+          <Item title='User' icon={IconUser} onClick={handleAddProfile} />
+          <Item title='Notifications' icon={IconBell} />
+          <Item title='Search' icon={IconSearch} />
+        </Stack>
+        <TextField
+          label='Author'
+          placeholder='pubkey'
+          fullWidth
+          value={author}
+          onChange={(e) => setAuthor(e.target.value)}
+        />
+      </Stack>
+    </Stack>
   )
 }
+
+const styles = css.create({
+  root: {
+    padding: spacing.padding6,
+    minWidth: 500,
+  },
+})
 
 export default DeckNew

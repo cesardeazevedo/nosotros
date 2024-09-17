@@ -5,7 +5,7 @@ import { dialogStore } from 'stores/ui/dialogs.store'
 
 const CameraDialog = observer(function CameraDialog() {
   return (
-    <Dialog maxWidth='xs' sx={{ justifyContent: 'center' }} open={dialogStore.camera} onClose={dialogStore.closeCamera}>
+    <Dialog maxWidth='xs' open={dialogStore.camera} onClose={dialogStore.closeCamera}>
       <Camera />
     </Dialog>
   )

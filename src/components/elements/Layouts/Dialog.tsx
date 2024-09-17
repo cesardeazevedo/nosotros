@@ -1,94 +1,102 @@
-import {
-  Box,
-  DialogTitle,
-  Dialog as MuiDialog,
-  Slide,
-  SwipeableDrawer,
-  type DialogProps,
-  type SwipeableDrawerProps,
-} from '@mui/material'
-
-import type { TransitionProps } from '@mui/material/transitions'
+import { Dialog } from '@/components/ui/Dialog/Dialog'
+import type { Props as DialogContentProps } from '@/components/ui/DialogContent/DialogContent'
+import { DialogContent } from '@/components/ui/DialogContent/DialogContent'
+import { DrawerSwipeable } from '@/components/ui/Drawer/DrawerSwipeable'
+import { Paper } from '@/components/ui/Paper/Paper'
+import type { SxProps } from '@/components/ui/types'
+import { palette } from '@/themes/palette.stylex'
+import { shape } from '@/themes/shape.stylex'
 import { useMobile } from 'hooks/useMobile'
-import React, { type JSXElementConstructor, type ReactNode } from 'react'
+import { type ReactNode } from 'react'
+import { css, html } from 'react-strict-dom'
 
 type Props = {
   open: boolean
   title?: string
   onClose: () => void
-  sx?: DialogProps['sx']
-  maxWidth?: DialogProps['maxWidth']
+  sx?: SxProps
   children: ReactNode
-  mobileHeight?: string | number
-  mobileSlots?: SwipeableDrawerProps['slotProps']
-  desktopAnimation?: boolean
+  surface?: DialogContentProps['surface'] | false
+  maxWidth?: DialogContentProps['maxWidth']
+  mobileAnchor?: 'middle' | 'full'
 }
-
-const Transition = React.forwardRef(function Transition(
-  props: TransitionProps & {
-    children: React.ReactElement<unknown, string | JSXElementConstructor<unknown>>
-  },
-  ref: React.Ref<unknown>,
-) {
-  return <Slide direction='up' ref={ref} {...props} />
-})
 
 function MobileDialog(props: Props) {
   const iOS = typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent)
-  const { open, onClose, children, mobileHeight, sx, mobileSlots } = props
+  const { sx, open, onClose, children, mobileAnchor } = props
   return (
-    <SwipeableDrawer
-      disableSwipeToOpen
+    <DrawerSwipeable
       disableDiscovery={iOS}
-      keepMounted={false}
       anchor='bottom'
-      open={open}
-      onOpen={() => {}}
+      opened={open}
+      sx={[styles.drawer, !!mobileAnchor && styles[`drawer$${mobileAnchor}`]]}
       onClose={onClose}
-      minFlingVelocity={800}
-      ModalProps={{ keepMounted: false }}
-      // slotProps={{ backdrop: { sx: { backgroundColor: 'rgba(0, 0, 0, 1)' } } }}
-      slotProps={mobileSlots}
-      PaperProps={{
-        sx: {
-          height: mobileHeight ? mobileHeight : '100%',
-          borderTopRightRadius: mobileHeight ? 20 : 0,
-          borderTopLeftRadius: mobileHeight ? 20 : 0,
-          backgroundImage: 'var(--mui-overlays-2)',
-          zIndex: 10000000,
-          overflowX: 'hidden', // needs some investigation here
-          ...sx,
-        },
-      }}>
-      {mobileHeight && (
-        <Box sx={{ backgroundColor: 'divider', width: 54, minHeight: 6, borderRadius: 8, m: '14px auto' }} />
-      )}
-      {children}
-    </SwipeableDrawer>
+      slotProps={{ floatingTransition: { sx: styles.floating } }}>
+      <Paper
+        surface='surfaceContainerLowest'
+        sx={[styles.drawerPaper, !!mobileAnchor && styles[`mobilePaper$${mobileAnchor}`], sx]}>
+        {!!mobileAnchor && <html.div style={styles.handler} />}
+        {children}
+      </Paper>
+    </DrawerSwipeable>
   )
 }
 
-function Dialog(props: Props) {
-  const { open, onClose, children, title, desktopAnimation = true, maxWidth = 'md', sx } = props
+function DialogSheet(props: Props) {
+  const { children, surface = 'surfaceContainerLowest' } = props
   const isMobile = useMobile()
   return (
     <>
       {isMobile && <MobileDialog {...props} />}
       {!isMobile && (
-        <MuiDialog
-          fullWidth
-          keepMounted={false}
-          open={open}
-          onClose={onClose}
-          maxWidth={maxWidth}
-          TransitionComponent={desktopAnimation ? Transition : undefined}
-          PaperProps={{ sx: { backgroundImage: 'var(--mui-overlays-2)', ...sx } }}>
-          {title && <DialogTitle>{title}</DialogTitle>}
-          {children}
-        </MuiDialog>
+        <Dialog {...props}>
+          {surface ? (
+            <DialogContent shape='lg' surface={surface} maxWidth={props.maxWidth} sx={styles.paper}>
+              {children}
+            </DialogContent>
+          ) : (
+            children
+          )}
+        </Dialog>
       )}
     </>
   )
 }
 
-export default Dialog
+const styles = css.create({
+  handler: {
+    backgroundColor: palette.surfaceContainerHighest,
+    width: 54,
+    minHeight: 6,
+    borderRadius: shape.full,
+    margin: '14px auto',
+  },
+  drawer: {
+    height: '100%',
+  },
+  drawer$middle: {
+    height: '50%',
+  },
+  drawer$full: {
+    height: '90%',
+  },
+  floating: {
+    height: '100vh',
+  },
+  paper: {},
+  drawerPaper: {
+    height: '100%',
+    borderRadius: shape.none,
+    zIndex: 10000,
+  },
+  mobilePaper$middle: {
+    borderTopRightRadius: shape.lg,
+    borderTopLeftRadius: shape.lg,
+  },
+  mobilePaper$full: {
+    borderTopRightRadius: shape.lg,
+    borderTopLeftRadius: shape.lg,
+  },
+})
+
+export default DialogSheet

@@ -1,33 +1,35 @@
-import { styled } from '@mui/material'
-import type { BlockQuoteNode } from 'content/types'
+import { palette } from '@/themes/palette.stylex'
+import { spacing } from '@/themes/spacing.stylex'
+import type { BlockQuoteNode } from 'nostr-editor'
 import React from 'react'
-import Paragraph from '../Layout/Paragraph'
+import { css, html } from 'react-strict-dom'
+import { Paragraph } from '../Layout/Paragraph'
 
 type Props = {
   node: BlockQuoteNode
 }
 
-const Container = styled('div')(({ theme }) =>
-  theme.unstable_sx({
-    ml: 2,
-    my: 4,
-    px: 2,
-    py: 1,
-    borderLeft: '6px solid',
-    borderColor: 'divider',
-    fontStyle: 'italic',
-    color: 'text.secondary',
-  }),
-)
-
-export default function BlockQuote(props: Props) {
+export function BlockQuote(props: Props) {
   return (
-    <Container>
+    <html.div style={styles.root}>
       {props.node.content?.map((node, index) => (
         <React.Fragment key={node.type + index}>
           {node.type === 'paragraph' && <Paragraph node={node} />}
         </React.Fragment>
       ))}
-    </Container>
+    </html.div>
   )
 }
+
+const styles = css.create({
+  root: {
+    marginLeft: spacing.margin2,
+    marginBlock: spacing.margin4,
+    paddingInline: spacing.padding2,
+    paddingBlock: spacing.padding1,
+    borderLeft: '6px solid',
+    borderColor: palette.outlineVariant,
+    fontStyle: 'italic',
+    opacity: 0.6,
+  },
+})

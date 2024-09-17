@@ -1,6 +1,8 @@
-import { Fab, styled, type Theme } from '@mui/material'
+import { Fab } from '@/components/ui/Fab/Fab'
+import { palette } from '@/themes/palette.stylex'
 import { Kind } from 'constants/kinds'
-import React, { useState } from 'react'
+import React, { useCallback, useState } from 'react'
+import { css, html } from 'react-strict-dom'
 import useMeasure from 'react-use-measure'
 import type Note from 'stores/models/note'
 import { BubbleContainer } from '../Content/Layout/Bubble'
@@ -13,38 +15,7 @@ type Props = {
   children: React.ReactNode
 }
 
-const Container = styled('div', { shouldForwardProp: (prop: string) => prop !== 'expanded' })<{ expanded: boolean }>(
-  ({ expanded }) => ({
-    position: 'relative',
-    maxHeight: expanded ? 'inherit' : MAX_HEIGHT,
-    overflow: 'hidden',
-  }),
-)
-
 const MAX_HEIGHT = 700
-
-const ExpandContainer = styled('div')({
-  position: 'absolute',
-  bottom: 0,
-  left: 0,
-  right: 0,
-  zIndex: 1000,
-  textAlign: 'center',
-  paddingBottom: 40,
-  transition: 'opacity 0.14s ease',
-})
-
-const ShadowIndicator = styled('div')(({ theme }: { theme: Theme }) => ({
-  position: 'absolute',
-  bottom: 0,
-  zIndex: 1000,
-  width: '100%',
-  height: 100,
-  background:
-    theme.palette.mode === 'light'
-      ? 'linear-gradient(0deg, rgba(0, 0, 0, 0.5), transparent)'
-      : 'linear-gradient(0deg, rgba(255, 255, 255, 0.2), transparent)',
-}))
 
 function PostContentWrapper(props: Props) {
   const { note, bubble = false, initialExpanded = false } = props
@@ -52,6 +23,10 @@ function PostContentWrapper(props: Props) {
   const [expanded, setExpanded] = useState(initialExpanded)
   const canExpand = bounds.height >= MAX_HEIGHT && !expanded
   const event = note?.event
+
+  const handleExpand = useCallback(() => {
+    setExpanded(true)
+  }, [])
 
   if (![Kind.Text, Kind.Article].includes(event.kind)) {
     const ErrorContainer = bubble ? BubbleContainer : React.Fragment
@@ -63,26 +38,54 @@ function PostContentWrapper(props: Props) {
   }
 
   return (
-    <Container expanded={expanded}>
-      <div ref={ref} className='bounds' style={{ display: 'flex', flexDirection: 'column' }}>
+    <html.div style={[styles.root, expanded && styles.root$expanded]}>
+      <html.div ref={ref} style={styles.bounds}>
         {props.children}
-      </div>
+      </html.div>
       {canExpand && (
-        <ExpandContainer>
-          <ShadowIndicator />
-          <Fab
-            size='large'
-            variant='extended'
-            color='info'
-            onClick={() => {
-              setExpanded(true)
-            }}>
-            View More
-          </Fab>
-        </ExpandContainer>
+        <html.div style={styles.container}>
+          <html.div style={styles.shadow} />
+          <Fab variant='primary' label='View More' onClick={handleExpand} />
+        </html.div>
       )}
-    </Container>
+    </html.div>
   )
 }
+
+const styles = css.create({
+  root: {
+    position: 'relative',
+    maxHeight: MAX_HEIGHT,
+    overflow: 'hidden',
+  },
+  root$expanded: {
+    maxHeight: 'inherit',
+  },
+  bounds: {
+    display: 'flex',
+    flexDirection: 'column',
+    width: '100%',
+  },
+  container: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    zIndex: 1000,
+    textAlign: 'center',
+    paddingBottom: 40,
+    transition: 'opacity 0.14s ease',
+  },
+  shadow: {
+    position: 'absolute',
+    bottom: 0,
+    zIndex: 1000,
+    width: '100%',
+    height: 100,
+    opacity: 0.2,
+    pointerEvents: 'none',
+    background: `linear-gradient(0deg, ${palette.inverseSurface}, transparent)`,
+  },
+})
 
 export default PostContentWrapper

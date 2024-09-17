@@ -1,3 +1,4 @@
+import { Divider } from '@/components/ui/Divider/Divider'
 import { useRangeChange } from 'hooks/useRangeChange'
 import { observer } from 'mobx-react-lite'
 import React, { useCallback, useRef } from 'react'
@@ -10,10 +11,11 @@ type Props = {
   render: (id: string) => React.ReactNode
   header?: React.ReactNode
   footer?: React.ReactNode
+  divider?: boolean
 }
 
 const VirtualList = observer(function VirtualList(props: Props) {
-  const { feed, render } = props
+  const { feed, render, divider = true } = props
 
   const data = feed.list
 
@@ -37,7 +39,12 @@ const VirtualList = observer(function VirtualList(props: Props) {
       onScroll={handleScroll}
       onRangeChange={(start, end) => onRangeChange([start, end])}>
       {props.header}
-      {data.map((noteId) => render(noteId))}
+      {data.map((id) => (
+        <React.Fragment key={id}>
+          {render(id)}
+          {divider && <Divider />}
+        </React.Fragment>
+      ))}
       {props.footer}
     </VList>
   )

@@ -9,7 +9,7 @@ const meta = {
   render: function Render() {
     const note = noteStore.get('1')
     note?.toggleReplies(true)
-    return <CenteredContainer maxWidth='sm'>{note ? <Post id={note.id} /> : <PostLoading />}</CenteredContainer>
+    return <CenteredContainer>{note ? <Post id={note.id} /> : <PostLoading />}</CenteredContainer>
   },
 } satisfies Meta<typeof Post>
 

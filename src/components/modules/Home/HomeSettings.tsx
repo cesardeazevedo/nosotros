@@ -1,16 +1,22 @@
-import { Box, Divider } from '@mui/material'
-import SettingsFilters from 'components/elements/Settings/SettingsFilters/SettingsFilters'
-import SettingsRelays from 'components/elements/Settings/SettingsRelays'
+import { Divider } from '@/components/ui/Divider/Divider'
+import { SettingsFilters } from '@/components/elements/DeckSettings/SettingsFilters'
+import { SettingsRelays } from '@/components/elements/DeckSettings/SettingsRelays'
+import { html, css } from 'react-strict-dom'
 
 function HomeSettings() {
   return (
-    <Box sx={{ p: 0, pb: 0 }}>
+    <html.div style={styles.root}>
       <Divider />
-      <SettingsFilters />
       <SettingsRelays />
-      <Divider />
-    </Box>
+      <SettingsFilters />
+    </html.div>
   )
 }
+
+const styles = css.create({
+  root: {
+    position: 'relative',
+  },
+})
 
 export default HomeSettings

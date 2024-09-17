@@ -1,72 +1,105 @@
-import { AccordionDetails, AccordionSummary, Box, Divider, Popover, Typography } from '@mui/material'
-import { IconChevronDown } from '@tabler/icons-react'
+import { Divider } from '@/components/ui/Divider/Divider'
+import { Expandable } from '@/components/ui/Expandable/Expandable'
+import { Paper } from '@/components/ui/Paper/Paper'
+import { PopoverBase } from '@/components/ui/Popover/PopoverBase'
+import { Stack } from '@/components/ui/Stack/Stack'
+import { Text } from '@/components/ui/Text/Text'
+import { spacing } from '@/themes/spacing.stylex'
 import { observer } from 'mobx-react-lite'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
+import { css, html } from 'react-strict-dom'
 import { relayStore } from 'stores/nostr/relays.store'
 import { authStore } from 'stores/ui/auth.store'
-import Accordion from '../Layouts/Accordion'
-import { Row } from '../Layouts/Flex'
 import { RelayIconButton } from './RelayIconButton'
 import RelayList from './RelayList'
 import RelayListOthers from './RelayListOthers'
 
 const RelaysPopover = observer(function RelaysPopover() {
-  const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null)
+  const [open, setOpen] = useState(false)
 
-  const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    setAnchorEl(event.currentTarget)
-  }
+  const handleOpen = useCallback(() => {
+    setOpen(true)
+  }, [])
 
-  const handleClose = () => {
-    setAnchorEl(null)
-  }
-
-  const open = Boolean(anchorEl)
+  const handleClose = useCallback(() => {
+    setOpen(false)
+  }, [])
 
   return (
-    <>
-      <RelayIconButton onClick={handleClick} />
-      <Popover
-        open={open}
-        anchorEl={anchorEl}
-        onClose={handleClose}
-        slotProps={{ paper: { sx: { ml: 8 } } }}
-        transitionDuration={100}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}>
-        <Box sx={{ minWidth: 250, maxWidth: 300 }}>
-          <Typography variant='subtitle1' sx={{ px: 2, py: 1 }}>
-            {authStore.pubkey ? 'My Relays' : 'Default Relays'}
-          </Typography>
+    <PopoverBase
+      opened={open}
+      onClose={handleClose}
+      placement='bottom-end'
+      contentRenderer={() => (
+        <Paper elevation={2} surface='surfaceContainerLowest' sx={styles.root}>
+          <html.div style={styles.header}>
+            <Text variant='label' size='lg'>
+              {authStore.pubkey ? 'My Relays' : 'Relays'}
+            </Text>
+          </html.div>
           <Divider />
-          <Box sx={{ px: 2, py: 1 }}>
-            {authStore.pubkey ? <RelayList relays={relayStore.myRelays} /> : <RelayListOthers relays={relayStore.others} />}
-          </Box>
+          <html.div style={styles.content}>
+            {authStore.pubkey ? (
+              <RelayList relays={relayStore.myRelays} />
+            ) : (
+              <RelayListOthers relays={relayStore.others} />
+            )}
+          </html.div>
           <Divider />
           {authStore.pubkey && (
-            <Row sx={{ px: 0 }}>
-              <Accordion sx={{ width: '100%' }}>
-                <AccordionSummary sx={{ height: 30 }} expandIcon={<IconChevronDown strokeWidth='1.5' />}>
-                  <Typography variant='subtitle1' sx={{ px: 2, py: 1 }}>
-                    Other Relays ({relayStore.others.length})
-                  </Typography>
-                </AccordionSummary>
-                <AccordionDetails>
-                  <RelayListOthers relays={relayStore.others} />
-                </AccordionDetails>
-              </Accordion>
-            </Row>
+            <Stack horizontal={false} sx={styles.footer}>
+              <Expandable
+                trigger={({ expand, expanded }) => (
+                  <html.div onClick={() => expand(!expanded)} style={styles.otherRelays}>
+                    <Text variant='label' size='lg'>
+                      Other Relays ({relayStore.others.length})
+                    </Text>
+                  </html.div>
+                )}>
+                <>
+                  <Divider />
+                  <html.div style={styles.wrapper}>
+                    <RelayListOthers relays={relayStore.others} />
+                  </html.div>
+                </>
+              </Expandable>
+            </Stack>
           )}
-        </Box>
-      </Popover>
-    </>
+        </Paper>
+      )}>
+      {({ getProps, setRef }) => (
+        <html.span ref={setRef} {...getProps()}>
+          <RelayIconButton onClick={handleOpen} />
+        </html.span>
+      )}
+    </PopoverBase>
   )
+})
+
+const styles = css.create({
+  root: {
+    minWidth: 250,
+    maxWidth: 300,
+  },
+  header: {
+    padding: spacing.padding2,
+  },
+  content: {
+    padding: spacing.padding1,
+    maxHeight: 350,
+    overflowY: 'auto',
+  },
+  wrapper: {
+    padding: spacing.padding1,
+  },
+  otherRelays: {
+    paddingBlock: spacing.padding1,
+    paddingInline: spacing.padding2,
+  },
+  footer: {
+    cursor: 'pointer',
+    overflow: 'hidden',
+  },
 })
 
 export default RelaysPopover

@@ -6,7 +6,7 @@ const meta = {
   component: PostLoading,
   render() {
     return (
-      <CenteredContainer maxWidth='sm'>
+      <CenteredContainer>
         <PostLoading />
       </CenteredContainer>
     )

@@ -1,5 +1,6 @@
-import { Typography } from '@mui/material'
+import { Text } from '@/components/ui/Text/Text'
 import { IconAlertCircle } from '@tabler/icons-react'
+import { css } from 'react-strict-dom'
 
 type Props = {
   kind: number
@@ -8,20 +9,21 @@ type Props = {
 function PostError(props: Props) {
   const { kind } = props
   return (
-    <Typography
-      variant='subtitle2'
-      color='text.secondary'
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        py: 2,
-        px: 3,
-      }}>
+    <Text size='lg' sx={styles.root}>
       <IconAlertCircle size={30} strokeWidth='1.4' style={{ marginBottom: 12 }} />
       {`Can't display content of kind ${kind}`}
-    </Typography>
+    </Text>
   )
 }
+
+const styles = css.create({
+  root: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    py: 2,
+    px: 3,
+  },
+})
 
 export default PostError

@@ -60,7 +60,7 @@ export const Skeleton = (props: Props) => {
         sx,
       ]}
       {...other}>
-      <html.div style={styles.hidden}>{children ?? '%'}</html.div>
+      <html.div style={styles.hidden}>{children}</html.div>
     </html.div>
   )
 }

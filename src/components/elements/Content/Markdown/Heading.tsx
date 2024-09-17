@@ -1,23 +1,25 @@
-import { Typography, styled } from '@mui/material'
-import type { HeadingNode } from 'content/types'
+import { Text } from '@/components/ui/Text/Text'
+import { spacing } from '@/themes/spacing.stylex'
+import type { HeadingNode } from 'nostr-editor'
+import { css } from 'react-strict-dom'
 import { TextContent } from '../Text'
-
-const Container = styled(Typography)(({ theme }) =>
-  theme.unstable_sx({
-    mt: 2,
-    ml: 2,
-    fontWeight: 900,
-  }),
-)
 
 type Props = {
   node: HeadingNode
 }
 
-export default function Heading(props: Props) {
+export function Heading(props: Props) {
   return (
-    <Container variant={props.node.attrs.level === 1 ? 'h5' : 'h6'}>
+    <Text sx={styles.root} variant='headline' size={props.node.attrs.level === 1 ? 'md' : 'lg'}>
       <TextContent node={props.node} />
-    </Container>
+    </Text>
   )
 }
+
+const styles = css.create({
+  root: {
+    marginTop: spacing.margin2,
+    marginBottom: spacing.margin1,
+    marginLeft: spacing.margin2,
+  },
+})

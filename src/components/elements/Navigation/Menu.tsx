@@ -1,6 +1,10 @@
-import { Divider, List, ListItemButton, ListSubheader, Typography, type TypographyProps } from '@mui/material'
-import { IconLogout, IconServerBolt, IconSettings, IconUser, IconWallet } from '@tabler/icons-react'
+import { Divider } from '@/components/ui/Divider/Divider'
+import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
+import { MenuList } from '@/components/ui/MenuList/MenuList'
+import { shape } from '@/themes/shape.stylex'
+import { IconLogout, IconUser } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
+import { css } from 'react-strict-dom'
 import { authStore } from 'stores/ui/auth.store'
 import { dialogStore } from 'stores/ui/dialogs.store'
 import LinkProfile from '../Links/LinkProfile'
@@ -16,56 +20,45 @@ const Menu = observer(function Menu(props: Props) {
     size: dense ? 24 : 30,
     strokeWidth: '1.4',
   }
-  const typographyProps: TypographyProps = {
-    variant: dense ? 'body1' : 'subtitle1',
-    sx: {
-      ml: dense ? 2 : 4,
-      fontSize: dense ? '100%' : '120%',
-    },
-  }
   return (
-    <List>
+    <MenuList elevation={0} sx={styles.root}>
       {authStore.currentUser && (
-        <LinkProfile user={authStore.currentUser} underline='none'>
-          <ListItemButton onClick={() => props.onAction?.()}>
-            <IconUser {...iconProps} />
-            <Typography {...typographyProps}>Profile</Typography>
-          </ListItemButton>
+        <LinkProfile user={authStore.currentUser} underline={false}>
+          <MenuItem
+            sx={styles.item}
+            onClick={() => props.onAction?.()}
+            leadingIcon={<IconUser {...iconProps} />}
+            label='Profile'
+          />
         </LinkProfile>
       )}
-      {!authStore.pubkey && (
-        <ListItemButton onClick={dialogStore.openAuth}>
-          <Typography {...typographyProps}>Sign In</Typography>
-        </ListItemButton>
-      )}
-      <ListSubheader sx={{ backgroundColor: 'transparent', mt: 2, lineHeight: '12px' }}>Coming Soon</ListSubheader>
-      <ListItemButton disabled>
-        <IconWallet {...iconProps} />
-        <Typography {...typographyProps}>Wallet</Typography>
-      </ListItemButton>
-      <ListItemButton disabled>
-        <IconServerBolt {...iconProps} />
-        <Typography {...typographyProps}>Relays</Typography>
-      </ListItemButton>
-      <ListItemButton disabled>
-        <IconSettings {...iconProps} />
-        <Typography {...typographyProps}>Settings</Typography>
-      </ListItemButton>
+      {!authStore.pubkey && <MenuItem onClick={dialogStore.openAuth} label='Sign In' />}
       {authStore.pubkey && (
         <>
-          <Divider sx={{ my: dense ? 1 : 0 }} />
-          <ListItemButton
+          <Divider />
+          <MenuItem
             onClick={() => {
               authStore.logout()
               props.onAction?.()
-            }}>
-            <IconLogout {...iconProps} />
-            <Typography {...typographyProps}>Log out</Typography>
-          </ListItemButton>
+            }}
+            leadingIcon={<IconLogout {...iconProps} />}
+            label='Log out'
+          />
         </>
       )}
-    </List>
+    </MenuList>
   )
+})
+
+const styles = css.create({
+  root: {
+    width: '100%',
+    borderRadius: shape.lg,
+    backgroundColor: 'transparent',
+  },
+  item: {
+    width: '100%',
+  },
 })
 
 export default Menu

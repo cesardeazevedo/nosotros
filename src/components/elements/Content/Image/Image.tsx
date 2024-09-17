@@ -1,69 +1,80 @@
-import { Box, styled } from '@mui/material'
-import type { SyntheticEvent } from 'react'
-import { useCallback, useContext, useRef } from 'react'
-import type Note from 'stores/models/note'
+import { shape } from '@/themes/shape.stylex'
+import { spacing } from '@/themes/spacing.stylex'
+import { memo, useCallback, useContext, useRef } from 'react'
+import { css, html } from 'react-strict-dom'
+import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDOMProps'
 import { dialogStore } from 'stores/ui/dialogs.store'
 import { settingsStore } from 'stores/ui/settings.store'
 import { ContentContext } from '../Content'
 
 type Props = {
   src: string
-  note: Note
+  proxy?: boolean
+  onClick?: (event?: StrictClickEvent) => void
 }
 
-const shouldForwardProp = (prop: string) => prop !== 'dense'
-
-const Img = styled('img', { shouldForwardProp })<{ dense?: boolean }>(({ dense }) => ({
-  objectFit: 'cover',
-  width: '100%',
-  height: '100%',
-  maxWidth: dense ? 360 : 400,
-  maxHeight: dense ? 400 : 440,
-  marginTop: dense ? 6 : 10,
-  marginBottom: 10,
-  borderRadius: 8,
-}))
-
-function Image(props: Props) {
-  const { note, src } = props
-  const { dense } = useContext(ContentContext)
+export const Image = memo((props: Props) => {
+  const { src, proxy = true } = props
+  const { dense, disableLink } = useContext(ContentContext)
   const ref = useRef<HTMLImageElement>(null)
 
-  const width = note.meta.imeta?.[src]?.dim?.width
-  const height = note.meta.imeta?.[src]?.dim?.height
-  // const blurhash = note.imeta?.metadata?.[url]?.blurhash
-
   const handleClick = useCallback(
-    (e: SyntheticEvent) => {
+    (e: StrictClickEvent) => {
       e.preventDefault()
       e.stopPropagation()
-      dialogStore.pushImage(src)
+      if (!disableLink) {
+        return props.onClick ? props.onClick() : dialogStore.pushImage(src)
+      }
     },
-    [src],
+    [src, disableLink, props.onClick],
   )
-
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        justifyContent: 'flex-start',
-        alignItems: 'center',
-        position: 'relative',
-        px: dense ? 0 : 2,
-      }}
-      onClick={handleClick}>
-      {/* Too slow, not worth it */}
-      {/* <ImageBlur width={width} height={height} blurhash={blurhash} render={!loaded} /> */}
-      <Img
+    <html.div style={[styles.root, dense && styles.root$dense]} onClick={handleClick}>
+      <html.img
         ref={ref}
-        dense={dense}
-        src={settingsStore.getImgProxyUrl('feed_img', src)}
+        src={proxy ? settingsStore.getImgProxyUrl('feed_img', src) : src}
         loading='lazy'
-        width={width || '100%'}
-        height={height || '100%'}
+        style={[styles.img, dense && styles.img$dense]}
       />
-    </Box>
+    </html.div>
   )
-}
+})
+
+const MOBILE = '@media (max-width: 599.95px)'
+
+const styles = css.create({
+  root: {
+    display: 'flex',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    position: 'relative',
+    paddingInline: spacing.padding2,
+  },
+  root$dense: {
+    paddingInline: 0,
+  },
+  img: {
+    objectFit: 'cover',
+    width: 'fit-content',
+    height: 'fit-content',
+    userSelect: 'none',
+    maxWidth: {
+      default: 400,
+      [MOBILE]: 'calc(100vw - 90px)',
+    },
+    maxHeight: 440,
+    marginTop: spacing.margin1,
+    marginBottom: spacing.margin1,
+    borderRadius: shape.lg,
+  },
+  img$dense: {
+    maxHeight: 400,
+    marginTop: 6,
+    maxWidth: {
+      default: 360,
+      [MOBILE]: '100%',
+    },
+  },
+})
 
 export default Image

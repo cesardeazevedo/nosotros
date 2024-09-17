@@ -1,31 +1,54 @@
-import { styled } from '@mui/material'
-import type { ParagraphNode } from 'content/types'
-import { useContext } from 'react'
+import { spacing } from '@/themes/spacing.stylex'
+import type { ReactNode } from '@tanstack/react-router'
+import type { ParagraphNode } from 'nostr-editor'
+import React, { useContext, useMemo } from 'react'
+import { css, html } from 'react-strict-dom'
 import { ContentContext } from '../Content'
 import { TextContent } from '../Text'
-
-const shouldForwardProp = (prop: string) => prop !== 'dense'
-
-export const Container = styled('div', { shouldForwardProp })<{ dense: boolean }>(({ dense, theme }) =>
-  theme.unstable_sx({
-    px: dense ? 0 : 2,
-    py: dense ? 0 : 0,
-    lineHeight: dense ? 1.5 : 1.7,
-    wordBreak: 'break-word',
-    height: 'auto',
-  }),
-)
+import { BubbleContainer } from './Bubble'
 
 type Props = {
   node: ParagraphNode
+  bubble?: boolean
+  children?: ReactNode
 }
 
-export default function Paragraph(props: Props) {
-  const { node } = props
+export function Paragraph(props: Props) {
+  const { node, bubble = false } = props
   const { dense } = useContext(ContentContext)
+
+  // We don't wanna render a empty paragraph with a hardBreak, we might have to fix it inside nostr-editor directly
+  const isInvalid = useMemo(() => {
+    return (node.content?.length === 1 && node.content[0].type === 'hardBreak') || !node.content
+  }, [node.content])
+
+  const BubbleWrapper = bubble ? BubbleContainer : React.Fragment
+
   return (
-    <Container dense={dense}>
-      <TextContent node={node} />
-    </Container>
+    <>
+      {!isInvalid && (
+        <BubbleWrapper>
+          {props.children}
+          <html.div style={[styles.container, dense && styles.container$dense]}>
+            <TextContent node={node} />
+          </html.div>
+        </BubbleWrapper>
+      )}
+      {isInvalid && props.children}
+    </>
   )
 }
+
+const styles = css.create({
+  container: {
+    paddingInline: spacing.padding2,
+    paddingBlock: 0,
+    lineHeight: 1.7,
+    wordBreak: 'break-word',
+    height: 'auto',
+  },
+  container$dense: {
+    padding: 0,
+    lineHeight: 1.5,
+  },
+})

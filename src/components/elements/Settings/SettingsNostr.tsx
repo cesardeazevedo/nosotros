@@ -1,65 +1,88 @@
-import { Divider, List, ListItem, ListItemIcon, ListItemText, ListSubheader, Switch, Typography } from '@mui/material'
+import { Divider } from '@/components/ui/Divider/Divider'
+import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
+import { MenuList } from '@/components/ui/MenuList/MenuList'
+import { Switch } from '@/components/ui/Switch/Switch'
+import { Text } from '@/components/ui/Text/Text'
+import { palette } from '@/themes/palette.stylex'
+import { shape } from '@/themes/shape.stylex'
+import { spacing } from '@/themes/spacing.stylex'
 import { IconBolt, IconHeart } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
+import { css } from 'react-strict-dom'
 import { settingsStore } from 'stores/ui/settings.store'
 
 const SettingsNostr = observer(function SettingsNostr() {
   return (
-    <List sx={{}}>
-      <ListSubheader sx={{ lineHeight: 2 }}>Config</ListSubheader>
-      <ListItem dense>
-        <ListItemText
-          primary={<Typography variant='subtitle1'>Outbox</Typography>}
-          secondary='The outbox model helps you find notes from others people relays'
-        />
-        <Switch
-          edge='end'
-          checked={settingsStore.nostrSettings.outboxEnabled}
-          onClick={() => settingsStore.toggleSettings('outboxEnabled')}
-        />
-      </ListItem>
-      <ListItem dense sx={{ mb: 1 }}>
-        <ListItemText primary={<Typography variant='subtitle1'>Relay Hints</Typography>} />
-        <Switch
-          edge='end'
-          checked={settingsStore.nostrSettings.hintsEnabled}
-          onChange={() => settingsStore.toggleSettings('hintsEnabled')}
-        />
-      </ListItem>
-      <ListItem dense sx={{ mb: 1 }}>
-        <ListItemText primary={<Typography variant='subtitle1'>NIP05</Typography>} />
-        <Switch
-          edge='end'
-          checked={settingsStore.nostrSettings.nip05enabled}
-          onChange={() => settingsStore.toggleSettings('nip05enabled')}
-        />
-      </ListItem>
+    <MenuList elevation={0} sx={styles.root}>
+      <Text size='md' sx={styles.subheader}>
+        Config
+      </Text>
+      <MenuItem
+        label='Outbox'
+        supportingText='The outbox model helps you find notes from others people relays'
+        trailing={
+          <Switch
+            checked={settingsStore.nostrSettings.outboxEnabled}
+            onChange={() => settingsStore.toggleSettings('outboxEnabled')}
+          />
+        }
+      />
+      <MenuItem
+        label='Relay hints'
+        supportingText='The outbox model helps you find notes from others people relays'
+        trailing={
+          <Switch
+            checked={settingsStore.nostrSettings.hintsEnabled}
+            onChange={() => settingsStore.toggleSettings('hintsEnabled')}
+          />
+        }
+      />
+      <MenuItem
+        label='NIP05'
+        trailing={
+          <Switch
+            checked={settingsStore.nostrSettings.nip05enabled}
+            onChange={() => settingsStore.toggleSettings('nip05enabled')}
+          />
+        }
+      />
       <Divider />
-      <ListSubheader sx={{ mt: 2, lineHeight: 2 }}>UI</ListSubheader>
-      <ListItem dense>
-        <ListItemIcon sx={{ minWidth: 32 }}>
-          <IconHeart strokeWidth='1.4' />
-        </ListItemIcon>
-        <ListItemText primary={<Typography variant='subtitle1'>Reactions</Typography>} />
-        <Switch
-          edge='end'
-          checked={settingsStore.nostrSettings.nip25enabled}
-          onChange={() => settingsStore.toggleSettings('nip25enabled')}
-        />
-      </ListItem>
-      <ListItem dense>
-        <ListItemIcon sx={{ minWidth: 32 }}>
-          <IconBolt strokeWidth='1.4' />
-        </ListItemIcon>
-        <ListItemText primary={<Typography variant='subtitle1'>Zaps</Typography>} />
-        <Switch
-          edge='end'
-          checked={settingsStore.nostrSettings.nip57enabled}
-          onChange={() => settingsStore.toggleSettings('nip57enabled')}
-        />
-      </ListItem>
-    </List>
+      <Text size='md' sx={styles.subheader}>
+        UI
+      </Text>
+      <MenuItem
+        label='Reactions'
+        leadingIcon={<IconHeart />}
+        trailing={
+          <Switch
+            checked={settingsStore.nostrSettings.nip25enabled}
+            onChange={() => settingsStore.toggleSettings('nip25enabled')}
+          />
+        }
+      />
+      <MenuItem
+        label='Zaps'
+        leadingIcon={<IconBolt />}
+        trailing={
+          <Switch
+            checked={settingsStore.nostrSettings.nip57enabled}
+            onChange={() => settingsStore.toggleSettings('nip57enabled')}
+          />
+        }
+      />
+    </MenuList>
   )
+})
+
+const styles = css.create({
+  root: {
+    borderRadius: shape.lg,
+    backgroundColor: 'inherit',
+  },
+  subheader: {
+    color: palette.onSurfaceVariant,
+    marginLeft: spacing.margin2,
+  },
 })
 
 export default SettingsNostr

@@ -1,37 +1,42 @@
-import { Box, IconButton } from '@mui/material'
 import { IconServerBolt } from '@tabler/icons-react'
-import Tooltip from 'components/elements/Layouts/Tooltip'
 import { useMobile } from 'hooks/useMobile'
 import { observer } from 'mobx-react-lite'
 import { useState } from 'react'
 import type Note from 'stores/models/note'
 import ButtonContainer, { type ContainerProps } from './PostButtonContainer'
+import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
+import { IconButton } from '@/components/ui/IconButton/IconButton'
+import { iconProps } from './utils'
 
 type Props = {
   note: Note
+  dense?: boolean
 }
 
 const PostButtonRelays = observer(function PostRelays(props: Props & ContainerProps) {
-  const { note, dense } = props
+  const { note, dense = false } = props
   const [open, setOpen] = useState(false)
   const isMobile = useMobile()
   const mobileProps = isMobile ? { open, onClose: () => setOpen(false) } : {}
   return (
     <Tooltip
-      arrow
+      cursor='arrow'
       key={isMobile.toString()}
       enterDelay={0}
       {...mobileProps}
-      slotProps={{ arrow: { sx: { left: '-8px!important' } } }}
-      title={<Box>{note.seenOn?.map((relay) => <Box key={relay}>{relay.replace('wss://', '')}</Box>)}</Box>}>
+      text={<div>{note.seenOn?.map((relay) => <div key={relay}>{relay.replace('wss://', '')}</div>)}</div>}>
       <ButtonContainer
         value={note.seenOn?.length || 0}
         dense={dense}
         onClick={() => isMobile && setOpen(true)}
         aria-label='Seen on relays'>
-        <IconButton disableRipple size='small'>
-          <IconServerBolt strokeWidth='1.5' />
-        </IconButton>
+        <IconButton
+          disabledRipple
+          size={dense ? 'sm' : 'md'}
+          icon={
+            <IconServerBolt size={dense ? iconProps.size$dense : iconProps.size} strokeWidth={iconProps.strokeWidth} />
+          }
+        />
       </ButtonContainer>
     </Tooltip>
   )
