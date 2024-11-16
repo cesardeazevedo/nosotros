@@ -1,10 +1,10 @@
 import { Button } from '@/components/ui/Button/Button'
 import { observer } from 'mobx-react-lite'
-import { authStore } from 'stores/ui/auth.store'
-import LinkSignIn from '../Links/LinkSignIn'
-import ProfilePopover from '../Navigation/ProfilePopover'
+import { authStore } from '@/stores/ui'
+import { LinkSignIn } from '../Links/LinkSignIn'
+import { ProfilePopover } from '../Navigation/ProfilePopover'
 
-const HeaderSignIn = observer(function HeaderSignIn() {
+export const HeaderSignIn = observer(function HeaderSignIn() {
   return (
     <>
       {!authStore.pubkey ? (
@@ -17,5 +17,3 @@ const HeaderSignIn = observer(function HeaderSignIn() {
     </>
   )
 })
-
-export default HeaderSignIn
