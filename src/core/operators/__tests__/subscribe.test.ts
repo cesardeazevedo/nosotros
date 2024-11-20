@@ -1,13 +1,14 @@
+import { RELAY_1 } from '@/constants/testRelays'
 import { subscribeSpyTo } from '@hirez_io/observer-spy'
 import { NostrSubscription } from 'core/NostrSubscription'
 import { Relay } from 'core/Relay'
 import { of } from 'rxjs'
 import { fakeNote } from 'utils/faker'
-import { RELAY_1, test } from 'utils/fixtures'
+import { test } from 'utils/fixtures'
 import { expectRelayReceived, relaySendClose, relaySendEose, relaySendEvents } from 'utils/testHelpers'
 import { subscribe } from '../subscribe'
 
-describe('onEvent()', () => {
+describe('subscribe()', () => {
   test('Assert events received and stream completed after eose', async ({ relay }) => {
     const relay1 = new Relay(RELAY_1)
     const sub = new NostrSubscription({ kinds: [0], authors: ['1'] })
@@ -35,13 +36,13 @@ describe('onEvent()', () => {
 
   test('Assert CLOSE message from relay', async ({ relay }) => {
     const relay1 = new Relay(RELAY_1)
-    const sub = new NostrSubscription({})
+    const sub = new NostrSubscription({ ids: ['1'] })
 
     const $ = of(sub).pipe(subscribe(relay1, sub.filters))
 
     const spy = subscribeSpyTo($)
 
-    const reqId = await expectRelayReceived(relay)
+    const reqId = await expectRelayReceived(relay, { ids: ['1'] })
 
     relaySendClose(relay, reqId, 'Auth required')
     relaySendEose(relay, reqId)
