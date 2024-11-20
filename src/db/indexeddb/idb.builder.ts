@@ -1,5 +1,6 @@
 import * as idb from 'idb'
 import type { IndexedDBSchema, Schemas } from './idb.schemas'
+import { migrate } from './idb.migrations'
 
 export async function buildDB(
   name: string,
@@ -20,6 +21,7 @@ export async function buildDB(
           }
         }
       })
+      migrate(db, transaction, _oldVersion)
     },
   })
 }

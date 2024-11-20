@@ -1,22 +1,25 @@
 import type { Kind } from 'constants/kinds'
 import { isReplaceable } from 'core/helpers'
 import type { NostrEvent, NostrFilter } from 'core/types'
-import type { EventDB } from 'db/types'
 import type * as idb from 'idb'
 import type { IndexedDBSchema } from '../idb.schemas'
-import IDBEventQuery from './idb.events.query'
+import { IDBEventQuery } from './idb.events.query'
 
 export class IDBEventStore {
   constructor(private db: Promise<idb.IDBPDatabase<IndexedDBSchema>>) {}
 
   async *query(filters: NostrFilter | NostrFilter[]) {
     const db = await this.db
-    yield* [filters].flat().map((filter) => new IDBEventQuery(db, filter).start())
+    yield* [filters].flat(1).map((filter) => new IDBEventQuery(db, filter).start())
   }
 
-  async queryEventByPubkey(kind: Kind, pubkey: string) {
+  async queryByPubkey(kind: Kind, pubkey: string) {
     const db = await this.db
-    return await db.getFromIndex('events', 'kind_pubkey', IDBKeyRange.only([kind, pubkey]))
+    return await db.getFromIndex(
+      'events',
+      'kind_pubkey_created_at',
+      IDBKeyRange.bound([kind, pubkey, 0], [kind, pubkey, Infinity]),
+    )
   }
 
   async insert(data: NostrEvent) {
@@ -28,8 +31,10 @@ export class IDBEventStore {
     const replaceable = isReplaceable(data.kind)
 
     if (replaceable) {
-      const index = events.index('kind_pubkey')
-      const eventFound = await index.get(IDBKeyRange.only([data.kind, data.pubkey]))
+      const index = events.index('kind_pubkey_created_at')
+      const eventFound = await index.get(
+        IDBKeyRange.bound([data.kind, data.pubkey, 0], [data.kind, data.pubkey, Infinity]),
+      )
       const latestDate = eventFound?.created_at || 0
 
       if (data.created_at > latestDate) {
@@ -41,7 +46,7 @@ export class IDBEventStore {
       }
     }
 
-    await events.put(data as EventDB)
+    await events.put(data)
 
     await Promise.all(
       data.tags
@@ -53,6 +58,7 @@ export class IDBEventStore {
             kind: data.kind,
             eventId: data.id,
             pubkey: data.pubkey,
+            created_at: data.created_at,
             tag: tag[0],
             value: tag[1],
             extras: tag.slice(2),
