@@ -1,70 +1,56 @@
-import type { Pool } from 'core/pool'
-import type { Relay } from 'core/Relay'
-import type { UserRelayDB } from 'db/types'
-import type { ObservableMap } from 'mobx'
-import { isObservable, makeAutoObservable, observable, values } from 'mobx'
-import { trackUserRelays } from 'nostr/operators/trackUserRelays'
-import { appState } from 'stores/app.state'
-import { authStore } from 'stores/ui/auth.store'
+import type { RelayStatsDB } from '@/db/types'
+import { makeAutoObservable, observable } from 'mobx'
+import { RelayStore } from './relay.store'
+import { userRelayStore } from './userRelay.store'
 
-class RelayStore {
-  data = observable.map<string, UserRelayDB[]>({}, { deep: false })
-
-  pool: Pool
+class RelaysStore {
+  relays = observable.map<string, RelayStore>()
 
   constructor() {
-    makeAutoObservable(this, {
-      list: false,
-      others: false,
-      myRelays: false,
-      myConnectedRelays: false
-    })
-
-    this.pool = makeAutoObservable(appState.client.pool, undefined, { deep: true })
-
-    const { pubkey } = authStore
-    if (pubkey) {
-      trackUserRelays(pubkey, { timeout: 8640000 }).subscribe((userRelays) => {
-        this.add(pubkey, userRelays)
-      })
-    }
+    makeAutoObservable(this)
   }
 
-  get myRelays() {
-    const pubkey = authStore.pubkey
-    if (pubkey) {
-      return this.data.get(pubkey) || []
+  add(url: string, stats?: RelayStatsDB) {
+    const relay = this.relays.get(url)
+    if (!relay) {
+      const newRelay = new RelayStore(url, stats)
+      this.relays.set(url, newRelay)
+      return newRelay
     }
-    return []
+    return relay
+  }
+
+  getByUrl(url: string) {
+    return this.relays.get(url)
+  }
+
+  select(config: { excluded?: Set<string> }) {
+    return this.list.filter((relay) => !config.excluded?.has(relay.url))
   }
 
   get list() {
-    return values(this.pool.relays as ObservableMap<string, Relay>).map((relay) => {
-      //Watch properties from the actual relay class, since mobx won't deep observe class properties
-      return isObservable(relay) ? relay : makeAutoObservable(relay)
-    }) as Relay[]
-  }
-
-  get others() {
-    const myRelays = new Set(this.myRelays.map((x) => x.relay))
-    return this.list.filter((relay) => !myRelays.has(relay.url))
+    return Array.from(this.relays.values())
   }
 
   get connected() {
     return this.list.filter((relay) => relay.connected)
   }
 
-  get unconnected() {
+  get disconnected() {
     return this.list.filter((relay) => !relay.connected)
   }
 
-  get myConnectedRelays() {
-    return this.myRelays.map((item) => this.pool.relays.get(item.relay)).filter((connected) => connected)
-  }
-
-  add(pubkey: string, userRelay: UserRelayDB[]) {
-    this.data.set(pubkey, userRelay)
+  /**
+   * Returns a relay list excluding the relay list by the given pubkey
+   */
+  difference(pubkey?: string) {
+    if (pubkey) {
+      const pubkeyRelays = userRelayStore.getRelays(pubkey)
+      const excluded = new Set(pubkeyRelays)
+      return this.select({ excluded })
+    }
+    return this.list
   }
 }
 
-export const relayStore = new RelayStore()
+export const relaysStore = new RelaysStore()

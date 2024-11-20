@@ -1,11 +1,7 @@
 import { LRUCache } from 'lru-cache'
-import { of } from 'rxjs'
 import { formatRelayUrl } from './helpers/formatRelayUrl'
-import type { NostrSubscription } from './NostrSubscription'
 import { onAuth } from './operators/onAuth'
-import { start } from './operators/start'
 import { Relay } from './Relay'
-import type { NostrFilter } from './types'
 
 type Options = {
   blacklist?: Array<{ pattern: RegExp }>
@@ -20,22 +16,29 @@ export class Pool {
     ttlAutopurge: true,
   })
 
-  constructor(private options?: Options) { }
+  constructor(private options?: Options) {}
 
-  private newRelay(url: string) {
+  private create(url: string) {
     const relay = this.options?.open?.(url) || new Relay(url)
     this.relays.set(url, relay)
 
     // Stablish WebSocket connection
-    relay.websocket$.pipe(onAuth((challenge) => this.options?.auth?.(relay, challenge))).subscribe({
-      error: () => {
-        this.delete(url)
-        this.blacklist(url)
-      },
-      complete: () => {
-        this.delete(url)
-      },
-    })
+    relay.websocket$
+      .pipe(
+        onAuth((challenge) => this.options?.auth?.(relay, challenge)),
+        // TODO
+        // retry({ count: 3, delay: 3000 })
+      )
+      .subscribe({
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        error: (error: Event) => {
+          this.delete(url)
+          this.blacklist(url)
+        },
+        complete: () => {
+          this.delete(url)
+        },
+      })
 
     return relay
   }
@@ -45,14 +48,12 @@ export class Pool {
   }
 
   blacklist(url: string) {
+    console.log('BLACKLIST????', url)
     this.blacklisted.set(url, true)
   }
 
-  getOrAddRelay(url: string): Relay | undefined {
+  get(url: string): Relay | undefined {
     url = formatRelayUrl(url)
-    if (!url.startsWith('wss://') && import.meta.env.MODE !== 'testing') {
-      return
-    }
     if (this.blacklisted.has(url)) {
       return
     }
@@ -62,10 +63,6 @@ export class Pool {
     if (this.relays.has(url)) {
       return this.relays.get(url)
     }
-    return this.newRelay(url)
-  }
-
-  subscribe(sub: NostrSubscription, refine?: (filters: NostrFilter[]) => NostrFilter[]) {
-    return of(sub).pipe(start(this, refine))
+    return this.create(url)
   }
 }
