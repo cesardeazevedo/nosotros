@@ -14,14 +14,13 @@ import {
   share,
   tap,
 } from 'rxjs'
-import type { NostrSubscription, SubscriptionOptions } from './NostrSubscription'
+import type { NostrSubscription } from './NostrSubscription'
 import { mergeSubscriptions } from './mergers/mergeSubscription'
 import { bufferTime } from './operators/bufferTime'
 import type { NostrEvent } from './types'
 
 type Options = {
   bufferTimeSpan?: number
-  outbox?: SubscriptionOptions['outbox']
   subscribe: (sub: NostrSubscription) => Observable<[string, NostrEvent]>
 }
 
@@ -34,7 +33,7 @@ export class NostrSubscriptionBatcher {
   constructor(options: Options) {
     this.buffer$ = this.subject.pipe(
       bufferTime(options.bufferTimeSpan || 1500),
-      map((subs) => (subs.length === 1 ? subs[0] : mergeSubscriptions(subs, options))),
+      map((subs) => (subs.length === 1 ? subs[0] : mergeSubscriptions(subs))),
       share(),
     )
 
