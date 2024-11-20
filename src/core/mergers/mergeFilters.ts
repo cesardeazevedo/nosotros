@@ -1,7 +1,8 @@
-import { dedupe, isReplaceable, pickBy } from 'core/helpers'
+import { Kind } from '@/constants/kinds'
+import { isReplaceable, pickBy } from 'core/helpers'
 import type { NostrFilter } from 'core/types'
 
-export const FILTER_ARRAY_FIELDS = ['kinds', 'authors', 'ids', '#e', '#p'] as (keyof NostrFilter)[]
+const FILTER_ARRAY_FIELDS = ['kinds', 'authors', 'ids', '#e', '#p'] as (keyof NostrFilter)[]
 
 export function mergeFilters(filters: NostrFilter[]): NostrFilter[] {
   const groups: Record<string, NostrFilter> = {}
@@ -12,8 +13,9 @@ export function mergeFilters(filters: NostrFilter[]): NostrFilter[] {
       mainKey.toString() +
       paginationKeys +
       [...(filter.kinds || [])]
+        // Do not merge follows kind, this needs some work
+        .map((kind) => (kind === Kind.Follows ? kind : isReplaceable(kind) ? 'replaceable' : 'nonreplaceable'))
         .sort()
-        .map((kind) => (isReplaceable(kind) ? 'replaceable' : kind))
         .toString()
 
     if (!groups[key]) {
@@ -22,7 +24,7 @@ export function mergeFilters(filters: NostrFilter[]): NostrFilter[] {
     for (const filterKey of FILTER_ARRAY_FIELDS) {
       const value = filter[filterKey] as string[]
       if (value) {
-        ;(groups[key][filterKey] as string[]) = dedupe(groups[key][filterKey] as string[], value)
+        ;(groups[key][filterKey] as string[]) = [...new Set([...(groups[key][filterKey] as string[]), ...value])]
       }
     }
   }

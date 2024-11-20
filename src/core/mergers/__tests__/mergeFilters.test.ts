@@ -83,11 +83,9 @@ describe('mergeFilters', () => {
       { kinds: [1], authors: ['npub1'] },
       { kinds: [6], authors: ['npub2'] },
     ])
-    expect(result).toHaveLength(3)
     expect(result).toStrictEqual([
       { kinds: [0, 10002], authors: ['npub1', 'npub2', 'npub3', 'npub4'] },
-      { kinds: [1], authors: ['npub1'] },
-      { kinds: [6], authors: ['npub2'] },
+      { kinds: [1, 6], authors: ['npub1', 'npub2'] },
     ])
   })
 
@@ -117,5 +115,17 @@ describe('mergeFilters', () => {
   test('Should merge ids without kind', () => {
     const result = mergeFilters([{ ids: ['1'] }, { ids: ['2'] }])
     expect(result).toStrictEqual([{ ids: ['1', '2'] }])
+  })
+
+  test('Should not merge follows kind', () => {
+    const result = mergeFilters([
+      { kinds: [0], authors: ['1', '2', '3'] },
+      { kinds: [10002], authors: ['1', '2', '3'] },
+      { kinds: [3], authors: ['8', '9'] },
+    ])
+    expect(result).toStrictEqual([
+      { kinds: [0, 10002], authors: ['1', '2', '3'] },
+      { kinds: [3], authors: ['8', '9'] },
+    ])
   })
 })
