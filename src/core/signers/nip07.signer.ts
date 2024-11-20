@@ -1,7 +1,7 @@
 import type { NostrEvent, UnsignedEvent } from 'nostr-tools'
 import type { Signer } from './signer'
 
-export type NostrExtension = {
+type NostrExtension = {
   getPublicKey(): Promise<string>
   signEvent(event: UnsignedEvent): Promise<NostrEvent>
 }
@@ -9,11 +9,11 @@ export type NostrExtension = {
 export class NIP07Signer implements Signer {
   constructor() {}
 
-  async sign(event: UnsignedEvent): Promise<NostrEvent | UnsignedEvent> {
+  async sign(event: UnsignedEvent): Promise<NostrEvent | false> {
     if ('nostr' in window) {
       const nostr = window.nostr as NostrExtension
       return await nostr.signEvent(event)
     }
-    return event
+    return false
   }
 }

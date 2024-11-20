@@ -1,27 +1,29 @@
+import { RELAY_1, RELAY_2, RELAY_3 } from '@/constants/testRelays'
+import { fakeNote } from '@/utils/faker'
 import { subscribeSpyTo } from '@hirez_io/observer-spy'
 import { Kind } from 'constants/kinds'
 import { NostrPublisher } from 'core/NostrPublish'
 import { Pool } from 'core/pool'
 import type { NostrEvent } from 'nostr-tools'
 import { of } from 'rxjs'
-import { RELAY_1, RELAY_2, RELAY_3, test } from 'utils/fixtures'
+import { test } from 'utils/fixtures'
 import { expectRelayPublish, relaySendEvents, relaySendNotice, relaySendOK } from 'utils/testHelpers'
 import { publish } from '../publish'
 
 describe('publish', () => {
   test('assert relays responses', async ({ relay, relay2, relay3 }) => {
     const pool = new Pool()
-    const event = {
+    const event = fakeNote({
       id: '1',
       kind: Kind.Text,
-      content: 'Hello',
       pubkey: '1',
-      created_at: Date.now(),
-      tags: [],
-    }
+    })
 
     const publisher = new NostrPublisher(event, {
       relays: of([RELAY_1, RELAY_2, RELAY_3]),
+      signer: {
+        sign: (event) => Promise.resolve(event as NostrEvent),
+      },
     })
 
     const $ = of(publisher).pipe(publish(pool))
@@ -42,39 +44,36 @@ describe('publish', () => {
     await spy.onComplete()
 
     expect(spy.getValues()).toStrictEqual([
-      [RELAY_1, event.id, true, 'status: OK'],
-      [RELAY_2, event.id, true, 'status: OK'],
-      [RELAY_3, event.id, false, 'status: duplicated event'],
+      [RELAY_1, event.id, true, 'status: OK', event],
+      [RELAY_2, event.id, true, 'status: OK', event],
+      [RELAY_3, event.id, false, 'status: duplicated event', event],
     ])
   })
 
   test('assert related events being published', async ({ relay }) => {
     const pool = new Pool()
-    const note = {
+    const note = fakeNote({
       id: '1',
-      kind: Kind.Text,
-      content: 'Hello',
       pubkey: '1',
-      created_at: Date.now(),
-      sig: '',
-      tags: [],
-    } as NostrEvent
+    })
 
-    const reaction = {
+    const reaction = fakeNote({
       id: '2',
       kind: Kind.Reaction,
       content: '+',
       pubkey: '2',
-      created_at: Date.now(),
       tags: [
         ['p', '1'],
         ['e', '1'],
       ],
-    }
+    })
 
     const publisher = new NostrPublisher(reaction, {
       relays: of([RELAY_1]),
-      include: of([note]),
+      include: [note],
+      signer: {
+        sign: (event) => Promise.resolve(event as NostrEvent),
+      },
     })
 
     const $ = of(publisher).pipe(publish(pool))
@@ -89,8 +88,8 @@ describe('publish', () => {
     await spy.onComplete()
 
     expect(spy.getValues()).toStrictEqual([
-      [RELAY_1, reaction.id, true, 'status: OK'],
-      [RELAY_1, note.id, true, 'status: OK'],
+      [RELAY_1, reaction.id, true, 'status: OK', reaction],
+      [RELAY_1, note.id, true, 'status: OK', note],
     ])
   })
 })
