@@ -4,6 +4,9 @@ import { createFilterPagination, paginateFilter } from './helpers'
 import type { NostrFilter } from './types'
 
 type PaginationBehaviorOptions = {
+  /**
+   * Range in minutes
+   */
   range?: number
   debounceTime?: number
   skipUntil?: number
@@ -19,15 +22,16 @@ export class PaginationSubject extends BehaviorSubject<NostrFilter> {
   private range: number
   private debounceTime: number
   private skipUntil: number
+
   initialValue: NostrFilter
 
   constructor(initialValue: NostrFilter, options?: PaginationBehaviorOptions) {
-    const range = options?.range || 120
+    const range = options?.range || 60
 
     super(createFilterPagination(initialValue, range))
 
     this.range = range
-    this.debounceTime = options?.debounceTime || 900
+    this.debounceTime = options?.debounceTime || 1200
     this.skipUntil = options?.skipUntil || 1000
     this.initialValue = initialValue
 
@@ -43,7 +47,7 @@ export class PaginationSubject extends BehaviorSubject<NostrFilter> {
   }
 
   get authors() {
-    return this.value.authors
+    return this.value.authors || []
   }
 
   next() {
@@ -51,11 +55,12 @@ export class PaginationSubject extends BehaviorSubject<NostrFilter> {
   }
 
   increaseRange(range?: number) {
-    this.range = range || this.range * 2
+    // 30 days max range, otherwise too many issues
+    this.range = Math.min(43200, range || this.range * 2)
   }
 
   setFilter(filter: NostrFilter) {
-    super.next(createFilterPagination({ ...this.value, ...filter }))
+    super.next(createFilterPagination({ ...this.value, ...filter }, this.range))
     return this
   }
 }

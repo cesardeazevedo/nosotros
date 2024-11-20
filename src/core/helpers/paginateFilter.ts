@@ -1,12 +1,12 @@
 import type { NostrFilter } from 'core/types'
 import { DateTime } from 'luxon'
 
-export function paginateFilter(filter: NostrFilter, range = 60): NostrFilter {
+export function paginateFilter(filter: NostrFilter, range: number): NostrFilter {
   if (filter.since && filter.until) {
-    const since = DateTime.fromSeconds(filter.since)
+    const since = DateTime.fromSeconds(filter.since).minus({ minutes: range })
     return {
       ...filter,
-      since: since.minus({ minutes: range }).toUnixInteger(),
+      since: since.toUnixInteger(),
       until: since.plus({ minutes: range }).toUnixInteger(),
     }
   }
