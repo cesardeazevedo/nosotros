@@ -1,23 +1,29 @@
-import { groupKeysFromArray, isFilterValid } from 'core/helpers'
+import { isFilterValid } from 'core/helpers'
 import type { RelayFilters } from 'core/NostrSubscription'
 import type { NostrFilter } from 'core/types'
 import { mergeFilters } from './mergeFilters'
 
-export function mergeRelayFilters(relayFilters: RelayFilters[], refine?: (filters: NostrFilter[]) => NostrFilter[]) {
-  const grouped = groupKeysFromArray(relayFilters.map((data) => Object.fromEntries([data])))
+export function mergeRelayFilters(relayFilters: RelayFilters[]) {
+  const grouped: Record<string, NostrFilter[]> = {}
 
-  return (
-    Object.entries(grouped)
+  for (const relayFilter of relayFilters) {
+    const relay = relayFilter[0]
+    const filters = relayFilter[1]
+    grouped[relay] ??= []
+    filters.forEach((filter) => {
+      if (isFilterValid(filter)) {
+        grouped[relay].push(filter)
+      }
+    })
+  }
 
-      // Merge filters by relay
-      .map(([relay, filters]) => [relay, [mergeFilters(filters)].flat()] as const)
+  const result: [string, NostrFilter[]][] = []
 
-      // Filter out any potential invalid/empty filters
-      .map(([relay, filters]) => [relay, filters.filter(isFilterValid)] as const)
-
-      // Refine filters
-      .map(([relay, filters]) => [relay, refine?.(filters) || filters] as const)
-
-      .filter(([, filters]) => filters.some(isFilterValid))
-  )
+  for (const [relay, filters] of Object.entries(grouped)) {
+    const merged = mergeFilters(filters)
+    if (merged.length > 0) {
+      result.push([relay, merged])
+    }
+  }
+  return result
 }
