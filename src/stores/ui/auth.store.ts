@@ -1,7 +1,7 @@
+import { STORAGE_ACCOUNTS_KEY } from '@/constants/localStorage'
 import type { Signer } from 'core/signers/signer'
 import type { ObservableMap } from 'mobx'
-import { autorun, makeAutoObservable, observable, reaction, runInAction } from 'mobx'
-import { getNostrExtension, getNostrExtensionPublicKey } from 'nostr/nips/nip07.extensions'
+import { autorun, makeAutoObservable, observable, reaction } from 'mobx'
 import { userStore } from 'stores/nostr/users.store'
 import { z } from 'zod'
 
@@ -15,38 +15,40 @@ const schema = z.object({
   pubkey: z.string(),
 })
 
-const item = localStorage.getItem('auth')
-const parsed = schema.safeParse(JSON.parse(item || '{}'))
-const data = parsed.success ? parsed.data : undefined
-
 export type Account = z.infer<typeof accountSchema>
 
 export class AuthStore {
   accounts: ObservableMap<string, Account>
-  signer: Signer | undefined
+  signer?: Signer
   pubkey: string | undefined
-  hasExtension?: boolean
 
   constructor() {
-    makeAutoObservable(this, { accounts: false })
-
-    this.accounts = observable.map(data?.accounts)
-    this.pubkey = data?.pubkey
+    const { accounts, pubkey } = this.deserialize
+    this.accounts = accounts
+    this.pubkey = pubkey
 
     autorun(() => {
-      const data = {
-        pubkey: this.pubkey,
-        accounts: Array.from(this.accounts),
-      }
-      localStorage.setItem('auth', JSON.stringify(data))
+      localStorage.setItem(STORAGE_ACCOUNTS_KEY, JSON.stringify(this.serialize))
     })
 
-    // Browser extension takes some time to load
-    setTimeout(() => {
-      runInAction(() => {
-        this.hasExtension = !!getNostrExtension()
-      })
-    }, 2000)
+    makeAutoObservable(this, { accounts: false })
+  }
+
+  get deserialize() {
+    const item = localStorage.getItem(STORAGE_ACCOUNTS_KEY)
+    const parsed = schema.safeParse(JSON.parse(item || '{}'))
+    const data = parsed.success ? parsed.data : undefined
+    return {
+      pubkey: data?.pubkey,
+      accounts: observable.map(data?.accounts),
+    }
+  }
+
+  get serialize() {
+    return {
+      pubkey: this.pubkey,
+      accounts: Array.from(this.accounts),
+    }
   }
 
   get currentAccount() {
@@ -72,25 +74,6 @@ export class AuthStore {
     )
   }
 
-  isPubkeyValid(pubkey: string | undefined) {
-    return pubkey !== undefined
-  }
-
-  async loginWithNostrExtension() {
-    const pubkey = await getNostrExtensionPublicKey()
-    if (pubkey) {
-      this.addAccount({ pubkey, signer: 'nip07' })
-      this.selectAccount(pubkey)
-    }
-  }
-
-  loginWithPubkey(pubkey: string) {
-    if (this.isPubkeyValid(pubkey)) {
-      this.addAccount({ pubkey, signer: 'readonly' })
-      this.selectAccount(pubkey)
-    }
-  }
-
   logout() {
     if (this.pubkey) {
       const pubkey = this.pubkey
@@ -108,6 +91,7 @@ export class AuthStore {
   addAccount(account: Account) {
     const { pubkey, signer } = account
     this.accounts.set(pubkey, { pubkey, signer })
+    this.selectAccount(pubkey)
   }
 
   removeAccount(pubkey: string) {
