@@ -1,69 +1,67 @@
+import type { NostrFilter } from '@/core/types'
+import type { Note } from '@/stores/models/note'
+import { zapStore } from '@/stores/nostr/zaps.store'
 import { Kind } from 'constants/kinds'
-import type { SubscriptionOptions } from 'core/NostrSubscription'
 import { decode } from 'light-bolt11-decoder'
 import type { NostrEvent } from 'nostr-tools'
-import { batcher } from 'nostr/batcher'
-import type { NostrClient } from 'nostr/nostr'
-import { insertEvent } from 'nostr/operators/insertEvent'
-import { onNewEvents } from 'nostr/operators/onNewEvents'
-import { withCache } from 'nostr/operators/queryCache'
-import type { NoteDB, ZapDB } from 'nostr/types'
-import { EMPTY, map, of, tap } from 'rxjs'
-import { addEventToStore } from 'stores/operators/addEventToStore'
+import type { NostrClient, ClientSubOptions } from 'nostr/nostr'
+import type { ZapMetadataDB } from 'nostr/types'
+import { EMPTY, tap } from 'rxjs'
+import { mapMetadata } from '../operators/mapMetadata'
 
 const kinds = [Kind.Zap]
 
 const BOLT11_KEYS = ['coin_network', 'amount', 'separator', 'timestamp', 'expiry', 'payment_hash', 'description']
 
 export class NIP57Zaps {
-  constructor(private client: NostrClient) { }
+  constructor(private client: NostrClient) {}
 
   decode(event: NostrEvent) {
     const bolt11 = event.tags.find((tag) => tag[0] === 'bolt11')?.[1]
     if (bolt11) {
-      decode
       const decoded = decode(bolt11)
       const data = decoded.sections.reduce(
         (acc, x) => {
           if (BOLT11_KEYS.includes(x.name)) {
-            acc[x.name as keyof ZapDB['metadata']['bolt11']] = {
+            acc[x.name as keyof ZapMetadataDB['bolt11']] = {
               letters: x.letters,
               value: x.value as never,
             }
           }
           return acc
         },
-        {} as ZapDB['metadata']['bolt11'],
+        {} as ZapMetadataDB['bolt11'],
       )
       return {
-        ...event,
-        metadata: {
-          bolt11: data,
-        },
-      } as ZapDB
+        id: event.id,
+        kind: event.kind,
+        bolt11: data,
+      } as ZapMetadataDB
     }
-    return event
+    return {
+      id: event.id,
+      kind: event.kind,
+    } as ZapMetadataDB
   }
 
-  subFromNote(note: NoteDB, options?: SubscriptionOptions) {
-    return this.subscribe([note.id, ...note.metadata.mentionedNotes], options)
+  subFromNote(note: Note, options?: ClientSubOptions) {
+    const ids = [note.id, ...note.meta.mentionedNotes]
+    const filter: NostrFilter = { kinds, '#e': ids }
+    return this.subscribe(
+      { ...filter, since: note.meta.lastSyncedAt },
+      {
+        ...options,
+        cacheFilter: filter,
+      },
+    )
   }
 
-  subscribe(eventIds: string[], options?: SubscriptionOptions) {
+  subscribe(filter: NostrFilter, options?: ClientSubOptions) {
     if (this.client.settings.nip57enabled) {
-      const sub = this.client.subscribe({ kinds, '#e': eventIds }, options)
-      return of(sub).pipe(
-        batcher.subscribe(),
+      return this.client.subscribe({ kinds, ...filter }, options).pipe(
+        mapMetadata(this.decode),
 
-        onNewEvents(sub),
-
-        map((event) => this.decode(event)),
-
-        insertEvent(),
-
-        withCache(sub.filters),
-
-        tap((event) => addEventToStore(event)),
+        tap(([event, metadata]) => zapStore.add(event, metadata)),
       )
     }
     return EMPTY
