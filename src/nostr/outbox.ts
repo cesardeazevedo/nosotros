@@ -1,41 +1,52 @@
-import type { NostrFilter } from 'core/types'
-import type { Observable } from 'rxjs'
-import { combineLatestWith, EMPTY, filter, from, map, merge, mergeMap, takeUntil, timer } from 'rxjs'
-import { type RelaySelectionConfig } from './operators/fromUserRelays'
-import { toRelayFilters, trackUsersRelays } from './operators/trackUserRelays'
+import type { RelayFilters } from '@/core/NostrSubscription'
+import type { NostrFilter, RelayHints } from '@/core/types'
+import { filter, from, identity, map, merge, mergeMap, takeUntil, timer } from 'rxjs'
+import type { RelaySelectionConfig } from './helpers/relaySelection'
+import type { NostrClient } from './nostr'
 
-interface OutboxConfig extends RelaySelectionConfig {
-  enabled?: boolean
-  ignoreRelays: Observable<string[]>
-}
+export class OutboxTracker {
+  private options: RelaySelectionConfig
 
-const defaultConfig = {
-  enabled: true,
-  maxRelaysPerUser: 10,
-} as OutboxConfig
-
-export function outbox(config: OutboxConfig = defaultConfig) {
-  const options = Object.assign({}, defaultConfig, config)
-  if (!options.enabled) {
-    return () => EMPTY
+  constructor(private client: NostrClient) {
+    this.options = {
+      permission: 'write',
+      ignore: client.outboxSets,
+      maxRelaysPerUser: client.settings.maxRelaysPerUserOutbox,
+    }
   }
 
-  return (filters: NostrFilter[]) => {
+  private trackPubkeys(filter: NostrFilter, tag: keyof Pick<NostrFilter, 'authors' | '#p'>) {
+    return from(filter[tag] || []).pipe(
+      mergeMap((pubkey) => this.client.mailbox.track(pubkey, this.options)),
+      mergeMap(identity),
+      map(({ relay, pubkey }) => [relay, [{ ...filter, [tag]: [pubkey] }]] as RelayFilters),
+    )
+  }
+
+  private trackIds(filter: NostrFilter, hints?: RelayHints) {
+    return from(Object.entries(hints?.fallback || {})).pipe(
+      mergeMap(([id, pubkeys]) => {
+        return from(pubkeys).pipe(
+          mergeMap((pubkey) => this.client.mailbox.track(pubkey, this.options)),
+          mergeMap(identity),
+          map((userRelay) => [id, userRelay.relay]),
+        )
+      }),
+      map(([id, relay]) => [relay, [{ ...filter, ids: [id] }]] as RelayFilters),
+    )
+  }
+
+  subscribe(filters: NostrFilter[], hints?: RelayHints) {
     return from(filters).pipe(
-      combineLatestWith(config.ignoreRelays.pipe(map((x) => new Set(x)))),
+      mergeMap((filter) => {
+        // Track relays based on (pubkey on e tags)
+        const ids$ = this.trackIds(filter, hints)
+        // Build relays for authors
+        const authors$ = this.trackPubkeys(filter, 'authors')
+        // Build relays for #p authors
+        const p$ = this.trackPubkeys(filter, '#p')
 
-      mergeMap(([filter, ignoreRelays]) => {
-        const relaySelection: RelaySelectionConfig = {
-          ignore: ignoreRelays,
-          maxRelaysPerUser: options.maxRelaysPerUser,
-        }
-        // Track pubkeys from authors property
-        const authors$ = trackUsersRelays(filter.authors, config).pipe(toRelayFilters(filter, 'authors'))
-
-        // Track pubkeys from #p property
-        const p$ = trackUsersRelays(filter['#p'], relaySelection).pipe(toRelayFilters(filter, '#p'))
-
-        return merge(authors$, p$)
+        return merge(ids$, authors$, p$)
       }),
 
       filter((x) => x.length > 0),
