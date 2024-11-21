@@ -1,10 +1,13 @@
 import type { NostrEvent } from 'core/types'
 import { makeAutoObservable, observable } from 'mobx'
-import { isEventTag } from 'nostr/helpers/tags'
-import { authStore } from 'stores/ui/auth.store'
+import { isEventTag } from '@/nostr/helpers/parseTags'
 
-export type Reactions = {
+type ReactionPubkeys = {
   [emoji: string]: string[]
+}
+
+type PubkeyReactions = {
+  [pubkey: string]: string[]
 }
 
 export function fallbackEmoji(emoji?: string) {
@@ -14,24 +17,37 @@ export function fallbackEmoji(emoji?: string) {
     case '-':
       return '👎'
     default:
+      if (emoji && emoji.indexOf(':') > -1) {
+        return '🤙'
+      }
       return emoji
   }
 }
 
 export class ReactionStore {
-  reactions = observable.map<string, Reactions>({}, { deep: true })
-  myReactions = observable.map<string, string[]>({}, { deep: true })
+  reactions = observable.map<string, ReactionPubkeys>({}, { deep: true })
+  reactionsByPubkey = observable.map<string, PubkeyReactions>({}, { deep: true })
 
   constructor() {
     makeAutoObservable(this)
+  }
+
+  clear() {
+    this.reactions.clear()
+    this.reactionsByPubkey.clear()
   }
 
   getByNoteId(noteId: string) {
     return this.reactions.get(noteId)
   }
 
-  getTopReactions(noteId: string) {
-    // We might want to return the top 3 reactions in the future
+  getByNoteIdAndPubkey(noteId: string, pubkey?: string) {
+    if (pubkey) {
+      return this.reactionsByPubkey.get(noteId)?.[pubkey]
+    }
+  }
+
+  sorted(noteId: string) {
     const reactions = this.getByNoteId(noteId)
     return Object.entries(reactions || {})
       .sort((a, b) => b[1].length - a[1].length)
@@ -49,19 +65,21 @@ export class ReactionStore {
     if (tag) {
       const noteId = tag[1]
 
+      // Append reactions by emoji
       const reactionsForNote = this.reactions.get(noteId) || {}
-      const reactionsForEmoji = reactionsForNote[emoji] || []
-
-      if (reactionsForEmoji.indexOf(event.pubkey) === -1) {
-        reactionsForEmoji.push(event.pubkey)
+      reactionsForNote[emoji] ??= []
+      if (reactionsForNote[emoji].indexOf(event.pubkey) === -1) {
+        reactionsForNote[emoji].push(event.pubkey)
       }
 
-      reactionsForNote[emoji] = reactionsForEmoji
-      if (event.pubkey === authStore.pubkey) {
-        const myReactionsForNote = this.myReactions.get(noteId) || []
-        this.myReactions.set(noteId, [...myReactionsForNote, event.content])
+      // Append reactions by pubkey
+      const pubkeysForNote = this.reactionsByPubkey.get(noteId) || {}
+      pubkeysForNote[event.pubkey] ??= []
+      if (pubkeysForNote[event.pubkey].indexOf(emoji) === -1) {
+        pubkeysForNote[event.pubkey].push(emoji)
       }
 
+      this.reactionsByPubkey.set(noteId, pubkeysForNote)
       this.reactions.set(noteId, reactionsForNote)
     }
   }

@@ -64,7 +64,7 @@ function ReactionDock({ onClick }: { onClick: Props['onClick'] }) {
   )
 }
 
-function ReactionPicker(props: Props) {
+export const ReactionPicker = (props: Props) => {
   const { children, onClick } = props
 
   return (
@@ -106,5 +106,3 @@ const styles = css.create({
     whiteSpace: 'nowrap',
   },
 })
-
-export default ReactionPicker

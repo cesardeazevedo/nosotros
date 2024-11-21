@@ -84,9 +84,77 @@ describe('Test ReactionStore', () => {
       },
     ]
     reactions.forEach((reaction) => store.add(fakeReaction(reaction)))
-    expect(store.getTopReactions('1')).toStrictEqual([
+    expect(store.sorted('1')).toStrictEqual([
       ['thumbs', ['1', '2']],
       ['heart', ['1']],
     ])
+  })
+
+  test('assert reactionsByPubkey', () => {
+    const store = new ReactionStore()
+    const reactions = [
+      {
+        content: 'thumbs',
+        pubkey: '1',
+        tags: [
+          ['e', '1'],
+          ['p', '1'],
+        ],
+      },
+      {
+        content: 'heart',
+        pubkey: '1',
+        tags: [
+          ['e', '1'],
+          ['p', '1'],
+        ],
+      },
+      {
+        content: 'thumbs',
+        pubkey: '2',
+        tags: [
+          ['e', '1'],
+          ['p', '1'],
+        ],
+      },
+      {
+        content: 'heart',
+        pubkey: '3',
+        tags: [
+          ['e', '1'],
+          ['p', '1'],
+        ],
+      },
+      {
+        content: 'heart',
+        pubkey: '3',
+        tags: [
+          ['e', '2'],
+          ['p', '1'],
+        ],
+      },
+      {
+        content: 'cry',
+        pubkey: '1',
+        tags: [
+          ['e', '1'],
+          ['p', '1'],
+        ],
+      },
+      {
+        content: 'heart',
+        pubkey: '1',
+        tags: [
+          ['e', '1'],
+          ['p', '1'],
+        ],
+      },
+    ]
+    reactions.forEach((reaction) => store.add(fakeReaction(reaction)))
+    expect(store.reactionsByPubkey.get('1')).toStrictEqual({
+      1: ['thumbs', 'heart', 'cry'],
+      2: ['thumbs'],
+      3: ['heart'],
+    })
   })
 })

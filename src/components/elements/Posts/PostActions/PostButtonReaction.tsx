@@ -1,14 +1,16 @@
 import { IconButton } from '@/components/ui/IconButton/IconButton'
+import { useNostrClientContext } from '@/hooks/useNostrClientContext'
+import { authStore } from '@/stores/ui'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconHeart, IconHeartFilled } from '@tabler/icons-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { observer } from 'mobx-react-lite'
 import { css, html } from 'react-strict-dom'
-import type Note from 'stores/models/note'
+import type { Note } from 'stores/models/note'
 import { fallbackEmoji, reactionStore } from 'stores/nostr/reactions.store'
-import ReactionPicker from '../../Reactions/ReactionPicker'
-import ReactionsTooltip from '../../Reactions/ReactionsTooltip'
-import ButtonContainer from './PostButtonContainer'
+import { ReactionPicker } from '../../Reactions/ReactionPicker'
+import { ReactionsTooltip } from '../../Reactions/ReactionsTooltip'
+import { ButtonContainer } from './PostButtonContainer'
 import { iconProps } from './utils'
 
 type Props = {
@@ -29,11 +31,12 @@ const emojiColors: Record<string, string> = {
   '😡': colors.orange7,
 }
 
-const PostButtonReaction = observer(function PostReactions(props: Props) {
+export const ButtonReaction = observer(function PostReactions(props: Props) {
   const { note, dense } = props
   const total = reactionStore.getTotal(note.id)
-  const myReaction = fallbackEmoji(reactionStore.myReactions.get(note.id)?.[0]) || ''
-  const color = emojiColors[myReaction] || colors.red7
+  const myReaction = fallbackEmoji(reactionStore.getByNoteIdAndPubkey(note.id, authStore.pubkey)?.[0])
+  const color = myReaction ? emojiColors[myReaction] || colors.red7 : colors.red7
+  const context = useNostrClientContext()
   return (
     <>
       <ButtonContainer
@@ -46,14 +49,13 @@ const PostButtonReaction = observer(function PostReactions(props: Props) {
             </ReactionsTooltip>
           )
         }>
-        <ReactionPicker onClick={(reaction) => note.react(reaction)}>
+        <ReactionPicker onClick={(reaction) => note.react(context.client, reaction)}>
           <span>
             <AnimatePresence initial={false}>
               <IconButton
                 size={dense ? 'sm' : 'md'}
                 selected={!!myReaction}
-                variant='standard'
-                onClick={() => note.react('❤️')}
+                onClick={() => note.react(context.client, '❤️')}
                 sx={[(color && styles[`button$${color}`]) || styles.button$red]}
                 selectedIcon={
                   <motion.div
@@ -69,7 +71,7 @@ const PostButtonReaction = observer(function PostReactions(props: Props) {
                         strokeWidth={iconProps.strokeWidth}
                       />
                     ) : (
-                      <html.span>{myReaction}</html.span>
+                      <html.span style={styles.myCustomReaction}>{myReaction}</html.span>
                     )}
                   </motion.div>
                 }
@@ -101,6 +103,7 @@ const styles = css.create({
   [colors.yellow7]: { color: colors.yellow7 },
   [colors.orange7]: { color: colors.orange7 },
   [colors.orange9]: { color: colors.orange9 },
+  myCustomReaction: {
+    fontSize: '130%',
+  },
 })
-
-export default PostButtonReaction
