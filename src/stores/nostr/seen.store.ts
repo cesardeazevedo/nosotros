@@ -9,8 +9,11 @@ class SeenStore {
     makeAutoObservable(this)
   }
 
-  get(eventId: string) {
-    return this.seen.get(eventId)
+  get(eventId?: string) {
+    if (eventId) {
+      return this.seen.get(eventId) || []
+    }
+    return []
   }
 
   add(seen: SeenDB) {

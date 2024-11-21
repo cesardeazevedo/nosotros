@@ -1,6 +1,5 @@
 import { action, makeObservable, observable } from 'mobx'
-import type { UserDB } from 'nostr/types'
-import User from '../models/user'
+import type { User } from '../models/user'
 
 class UserStore {
   users = observable.map<string, User>({}, { name: 'users', deep: false })
@@ -9,15 +8,19 @@ class UserStore {
     makeObservable(this, { add: action }, { deep: false })
   }
 
+  clear() {
+    this.users.clear()
+  }
+
   get(pubkey?: string) {
     if (pubkey) {
       return this.users.get(pubkey)
     }
   }
 
-  add(event: UserDB) {
-    if (!this.users.has(event.pubkey)) {
-      this.users.set(event.pubkey, new User(event))
+  add(user: User) {
+    if (!this.users.has(user.pubkey)) {
+      this.users.set(user.pubkey, user)
     }
   }
 }

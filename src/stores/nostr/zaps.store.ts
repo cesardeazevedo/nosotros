@@ -1,12 +1,13 @@
 import type { ObservableMap } from 'mobx'
 import { makeAutoObservable, observable, values } from 'mobx'
-import { isEventTag } from 'nostr/helpers/tags'
-import type { ZapDB } from 'nostr/types'
+import type { NostrEvent } from 'nostr-tools'
+import { isEventTag } from '@/nostr/helpers/parseTags'
+import type { ZapMetadataDB } from 'nostr/types'
 
-type ZapItem = {
+export type ZapItem = {
   id: string
   pubkey: string
-  bolt11: ZapDB['metadata']['bolt11']
+  bolt11: ZapMetadataDB['bolt11']
 }
 
 export class ZapStore {
@@ -30,7 +31,7 @@ export class ZapStore {
     return 0
   }
 
-  add(event: ZapDB) {
+  add(event: NostrEvent, metadata: ZapMetadataDB) {
     const eventTag = event.tags.find((tag) => isEventTag(tag))
     if (eventTag) {
       const eventId = eventTag[1]
@@ -38,7 +39,7 @@ export class ZapStore {
       const data: ZapItem = {
         id: event.id,
         pubkey: event.pubkey,
-        bolt11: event.metadata.bolt11,
+        bolt11: metadata.bolt11,
       }
       if (!eventZap) {
         this.zaps.set(eventId, observable.map([[event.id, data]]))

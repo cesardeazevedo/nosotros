@@ -1,0 +1,3 @@
+export const STORAGE_DECK_KEY = 'DECK'
+export const STORAGE_ACCOUNTS_KEY = 'ACCOUNTS'
+export const STORAGE_SETTINGS_KEY = 'SETTINGS'

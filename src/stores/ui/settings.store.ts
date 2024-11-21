@@ -1,4 +1,4 @@
-import { STORAGE_SETTINGS } from '@/constants/localStorage'
+import { STORAGE_SETTINGS_KEY } from '@/constants/localStorage'
 import type { ThemeKeys } from '@/themes/types'
 import { autorun, makeAutoObservable } from 'mobx'
 import { defaultNostrSettings, type NostrSettings } from 'nostr/settings'
@@ -18,7 +18,7 @@ type Settings = {
   nostrSettings: NostrSettings
 }
 
-export const defaultSettings: Settings = {
+const defaultSettings: Settings = {
   lang: Languages.EN,
   theme: 'auto',
   defaultEmoji: '',
@@ -26,14 +26,14 @@ export const defaultSettings: Settings = {
   nostrSettings: defaultNostrSettings,
 }
 
-const item = localStorage.getItem(STORAGE_SETTINGS)
+const item = localStorage.getItem(STORAGE_SETTINGS_KEY)
 const data = Object.assign({}, defaultSettings, item ? (JSON.parse(item || '{}') as Settings) : defaultSettings)
 
 export class SettingsStore {
   lang = data.lang
   defaultEmoji = data.defaultEmoji
   imgproxy = data.imgproxy
-  nostrSettings = data.nostrSettings
+  nostrSettings = Object.assign({}, defaultNostrSettings, data.nostrSettings)
   theme = data.theme
 
   constructor() {
@@ -41,7 +41,7 @@ export class SettingsStore {
 
     autorun(() => {
       localStorage.setItem(
-        STORAGE_SETTINGS,
+        STORAGE_SETTINGS_KEY,
         JSON.stringify({
           lang: this.lang,
           theme: this.theme,
@@ -64,10 +64,14 @@ export class SettingsStore {
     return `${this.imgproxy}/_/${preset}/plain/${src}`
   }
 
+  setField(field: keyof Pick<NostrSettings, 'maxRelaysPerUserOutbox' | 'maxRelaysPerUserInbox'>, value: number) {
+    this.nostrSettings[field] = value
+  }
+
   toggleSettings(
     field: keyof Pick<
       NostrSettings,
-      'outboxEnabled' | 'hintsEnabled' | 'nip05enabled' | 'nip25enabled' | 'nip57enabled'
+      'outboxEnabled' | 'hintsEnabled' | 'nip05enabled' | 'nip18enabled' | 'nip25enabled' | 'nip57enabled' | 'clientTag'
     >,
   ) {
     this.nostrSettings[field] = !this.nostrSettings[field]

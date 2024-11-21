@@ -1,11 +1,15 @@
 import { action, makeObservable, observable } from 'mobx'
-import type Follows from '../models/follow'
+import type { Follows } from '../models/follow'
 
 class FollowsStore {
-  follows = observable.map<string, Follows>({}, { name: 'users', deep: false, proxy: true })
+  follows = observable.map<string, Follows>({}, { name: 'users' })
 
   constructor() {
     makeObservable(this, { add: action })
+  }
+
+  clear() {
+    this.follows.clear()
   }
 
   get(pubkey: string) {
