@@ -1,7 +1,7 @@
 import type { NostrEvent } from 'nostr-tools'
 import { mergeMap, of } from 'rxjs'
 import type { RelaySelectionConfig } from './helpers/relaySelection'
-import { isAuthorTag } from './helpers/tags'
+import { isAuthorTag } from './helpers/parseTags'
 import { toArrayRelay } from './mailbox'
 import type { NostrClient } from './nostr'
 

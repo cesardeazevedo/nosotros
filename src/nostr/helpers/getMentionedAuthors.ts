@@ -1,13 +1,15 @@
 import { dedupe } from 'core/helpers'
-import type { NostrEvent } from 'nostr-tools'
-import { isAuthorTag } from 'nostr/helpers/tags'
-import type { NostrReference } from 'nostr/nips/nip27.references'
+import type { NEventAttributes, NProfileAttributes } from 'nostr-editor'
+import type { ParsedTags } from '@/nostr/helpers/parseTags'
 
-export function getMentionedAuthors(event: NostrEvent, references: NostrReference[]) {
-  const authorsTags = event.tags.filter((tag) => isAuthorTag(tag))
+export function getMentionedAuthors(
+  tags: ParsedTags,
+  nprofiles: NProfileAttributes[] = [],
+  nevents: NEventAttributes[] = [],
+) {
   return dedupe(
-    [event.pubkey],
-    authorsTags.map((x) => x[1]),
-    references.map((ref) => ref.author),
+    tags.p?.map((x) => x[1]),
+    nprofiles.map((ref) => ref.pubkey),
+    nevents.map((ref) => ref.author),
   )
 }

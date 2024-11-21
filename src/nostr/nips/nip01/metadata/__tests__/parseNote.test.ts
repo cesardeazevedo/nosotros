@@ -1,15 +1,18 @@
+// @vitest-environment happy-dom
+import { RELAY_2, RELAY_3 } from '@/constants/testRelays'
 import type { NostrEvent, RelayHints } from 'core/types'
 import { nip19 } from 'nostr-tools'
 import { fakeNote, fakeSignature } from 'utils/faker'
-import { RELAY_2, RELAY_3, test } from 'utils/fixtures'
+import { test } from 'utils/fixtures'
 import { parseNote } from '../parseNote'
 
-const parse = (partial: Partial<NostrEvent>) => parseNote(fakeNote(partial)).metadata
+const parse = (partial: Partial<NostrEvent>) => parseNote(fakeNote(partial))
 
-describe('Test noteStore', () => {
+describe('parseNote', () => {
   test('Should expect isRoot true', () => {
     const note = parse({ id: '1', tags: [] })
     expect(note.isRoot).toBe(true)
+    expect(note.parentNoteId).toBe(undefined)
     expect(note.rootNoteId).toBe(undefined)
   })
 
@@ -22,6 +25,7 @@ describe('Test noteStore', () => {
     expect(note.isRootReply).toBe(true)
     expect(note.isReplyOfAReply).toBe(false)
     expect(note.rootNoteId).toBe('2')
+    expect(note.parentNoteId).toBe('2')
   })
 
   test('Should expect isRoot with mention', () => {
@@ -137,10 +141,10 @@ describe('Test noteStore', () => {
     const note = parse({
       id: '1',
       content: `hello nostr:${encoded}`,
+      pubkey: '1',
       tags: [['p', '10']],
     })
     expect(note.mentionedAuthors).toStrictEqual([
-      '1',
       '10',
       'c6603b0f1ccfec625d9c08b753e4f774eaf7d1cf2769223125b5fd4da728019e',
     ])
@@ -182,17 +186,18 @@ describe('Test noteStore', () => {
         tags: [
           ['p', '1', RELAY_2],
           ['p', '2'],
-          ['e', '1', RELAY_2],
-          ['e', '1', RELAY_2],
-          ['e', '2'],
+          ['e', '1', RELAY_2, '', 'p1'],
+          ['e', '1', RELAY_2, '', 'p2'],
+          ['e', '2', '', '', 'p3'],
         ],
       }),
     )
-    expect(note.metadata.relayHints).toStrictEqual({
+    expect(note.relayHints).toStrictEqual({
       authors: { '1': [RELAY_2], [event1.pubkey]: [RELAY_2] },
       ids: { '1': [RELAY_2], [event1.id]: [RELAY_2, RELAY_3] },
       fallback: {
-        [event2.id]: note.metadata.mentionedAuthors,
+        '1': ['p1', 'p2'],
+        '2': ['p3'],
       },
     } as RelayHints)
   })
