@@ -1,13 +1,14 @@
-import type { ContentSchema } from 'content/types'
+import { Text } from '@/components/ui/Text/Text'
+import type { ContentSchema } from 'nostr-editor'
 import React from 'react'
-import type User from 'stores/models/user'
+import type { User } from 'stores/models/user'
 import { TextContent } from '../Content/Text'
 
 type Props = {
   user?: User
 }
 
-function UserContentAbout(props: Props) {
+export const UserContentAbout = (props: Props) => {
   const { user } = props
   const schema = user?.meta?.aboutParsed as ContentSchema
   return (
@@ -15,10 +16,9 @@ function UserContentAbout(props: Props) {
       {schema?.content?.map((node, index) => (
         <React.Fragment key={node.type + index}>
           {node.type === 'paragraph' && <TextContent node={node} />}
+          {node.type === 'nevent' && <Text size='lg'>{node.attrs.nevent}</Text>}
         </React.Fragment>
       ))}
     </>
   )
 }
-
-export default UserContentAbout

@@ -1,21 +1,24 @@
 import { Button } from '@/components/ui/Button/Button'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
+import { useNostrClientContext } from '@/hooks/useNostrClientContext'
 import { spacing } from '@/themes/spacing.stylex'
 import { observer } from 'mobx-react-lite'
 import { css, html } from 'react-strict-dom'
-import type User from 'stores/models/user'
+import type { User } from 'stores/models/user'
 import { settingsStore } from 'stores/ui/settings.store'
-import UserAvatar from './UserAvatar'
-import UserContentAbout from './UserContentAbout'
+import { UserAvatar } from './UserAvatar'
+import { UserContentAbout } from './UserContentAbout'
 
 type Props = {
   user?: User
 }
 
-const UserProfileHeader = observer(function UserProfileHeader(props: Props) {
+export const UserProfileHeader = observer(function UserProfileHeader(props: Props) {
   const { user } = props
   const { banner, nip05 } = user?.meta || {}
+  const { user: currentUser } = useNostrClientContext()
+  const isFollowing = currentUser?.following?.followsPubkey(user?.pubkey)
   return (
     <>
       <html.div style={styles.header}>
@@ -28,7 +31,7 @@ const UserProfileHeader = observer(function UserProfileHeader(props: Props) {
         )}
       </html.div>
       <Stack horizontal={false} gap={1} sx={styles.content}>
-        <UserAvatar sx={styles.avatar} user={user} size='xl' disableLink disabledPopover />
+        <UserAvatar sx={styles.avatar} pubkey={user?.pubkey} size='xl' disableLink disabledPopover />
         <Stack horizontal={false}>
           <Text variant='headline' size='sm'>
             {user?.displayName}
@@ -40,9 +43,15 @@ const UserProfileHeader = observer(function UserProfileHeader(props: Props) {
           )}
         </Stack>
         <UserContentAbout user={user} />
-        <Button variant='filled' sx={styles.follow}>
-          Follow
-        </Button>
+        {isFollowing ? (
+          <Button variant='outlined' sx={styles.follow}>
+            Unfollow
+          </Button>
+        ) : (
+          <Button variant='filled' sx={styles.follow}>
+            Follow
+          </Button>
+        )}
       </Stack>
     </>
   )
@@ -78,5 +87,3 @@ const styles = css.create({
     border: '4px solid white',
   },
 })
-
-export default UserProfileHeader

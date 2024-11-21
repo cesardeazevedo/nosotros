@@ -1,22 +1,24 @@
 import type { Props as AvatarProps } from '@/components/ui/Avatar/Avatar'
 import { Avatar } from '@/components/ui/Avatar/Avatar'
 import type { SxProps } from '@/components/ui/types'
+import { userStore } from '@/stores/nostr/users.store'
+import { observer } from 'mobx-react-lite'
 import { css } from 'react-strict-dom'
-import type User from 'stores/models/user'
 import { settingsStore } from 'stores/ui/settings.store'
-import LinkProfile from '../Links/LinkProfile'
-import UserPopover from './UserPopover'
+import { LinkProfile } from '../Links/LinkProfile'
+import { UserPopover } from './UserPopover'
 
-type Props = {
-  user?: User
+export type Props = {
+  pubkey?: string
   sx?: SxProps
   size?: AvatarProps['size']
   disableLink?: boolean
   disabledPopover?: boolean
 }
 
-function UserAvatar(props: Props) {
-  const { sx, user, size = 'md', disableLink = false, disabledPopover = false } = props
+export const UserAvatar = observer(function UserAvatar(props: Props) {
+  const { sx, pubkey, size = 'md', disableLink = false, disabledPopover = false } = props
+  const user = userStore.get(pubkey)
   const avatarProps = user?.meta?.picture
     ? { src: settingsStore.getImgProxyUrl('user_avatar', user.meta.picture) }
     : { src: '/placeholder.jpg' }
@@ -29,12 +31,10 @@ function UserAvatar(props: Props) {
       </LinkProfile>
     </UserPopover>
   )
-}
+})
 
 const styles = css.create({
   avatar: {
     cursor: 'pointer',
   },
 })
-
-export default UserAvatar
