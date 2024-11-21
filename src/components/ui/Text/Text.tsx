@@ -31,23 +31,24 @@ const elementMap: Record<TextVariantSize, StrictDomElements> = {
   label$sm: html.span,
 }
 
-export type TextVariant = 'display' | 'headline' | 'title' | 'body' | 'label'
+type TextVariant = 'display' | 'headline' | 'title' | 'body' | 'label'
 
-export type TextSize = 'lg' | 'md' | 'sm'
+type TextSize = 'lg' | 'md' | 'sm'
 
-export type TextVariantSize = `${TextVariant}$${TextSize}`
+type TextVariantSize = `${TextVariant}$${TextSize}`
 
 export type Props = {
   sx?: SxProps
   variant?: TextVariant
   size?: TextSize
   children: React.ReactNode
+  element?: typeof html.span | typeof html.div
 }
 
 export const Text = (props: Props) => {
   const { children, variant = 'body', size = 'sm', sx } = props
   const key = `${variant}$${size}` as const
-  const TextElement = elementMap[key]
+  const TextElement = props.element || elementMap[key]
   return <TextElement style={[styles[key], sx]}>{children}</TextElement>
 }
 

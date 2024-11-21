@@ -12,7 +12,7 @@ type Props = {
   elevation?: ElevationLevel
 }
 
-export function Elevation(props: Props) {
+export const Elevation = (props: Props) => {
   const { sx, elevation } = props
   return <html.div style={[styles.root, !!elevation && styles[`level${elevation}`], sx]} />
 }

@@ -12,7 +12,7 @@ import { elevationTokens } from '../Elevation/Elevation.stylex'
 import { rippleTokens } from '../Ripple/Ripple.stylex'
 import { buttonTokens } from './Button.stylex'
 
-export type ButtonVariant = 'elevated' | 'filled' | 'filledTonal' | 'outlined' | 'text' | 'danger'
+type ButtonVariant = 'elevated' | 'filled' | 'filledTonal' | 'outlined' | 'text' | 'danger'
 
 export interface Props extends ButtonBaseProps {
   variant?: ButtonVariant | false
@@ -72,7 +72,7 @@ const variants = css.create({
   filledTonal: {
     [rippleTokens.color$hover]: palette.onSecondaryContainer,
     [buttonTokens.labelTextColor]: palette.onSecondaryContainer,
-    [buttonTokens.containerColor]: palette.secondaryContainer,
+    [buttonTokens.containerColor]: palette.surfaceContainer,
     [buttonTokens.containerColor$disabled]: palette.onSurface,
     [buttonTokens.containerOpacity$disabled]: state.containerOpacity$disabled,
     [buttonTokens.containerElevation]: {

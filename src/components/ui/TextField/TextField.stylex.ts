@@ -5,6 +5,8 @@ const vars = {
   outlineWidth: 'unset',
   outlineLegend: 'unset',
   labelPosition: 'unset',
+
+  containerMinHeight: 56,
 }
 
 export const textFieldTokens = css.defineVars(vars)

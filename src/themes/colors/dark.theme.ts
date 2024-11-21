@@ -11,7 +11,7 @@ const blackTheme = css.createTheme(palette, {
 
   secondary: colors.stone4,
   onSecondary: colors.gray0,
-  secondaryContainer: colors.gray9,
+  secondaryContainer: colors.gray7,
   onSecondaryContainer: colors.gray0,
 
   tertiary: '#0066e2',
@@ -24,7 +24,7 @@ const blackTheme = css.createTheme(palette, {
   errorContainer: colors.red7,
   onErrorContainer: colors.red0,
 
-  surface: colors.gray12,
+  surface: '#02040a',
   onSurface: colors.stone0,
   onSurfaceVariant: colors.stone7,
 

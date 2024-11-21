@@ -15,7 +15,7 @@ export type Props = {
   alt?: string
   src?: string
   srcSet?: string
-  size?: 'sm' | 'md' | 'lg' | 'xl'
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
   crossOrigin?: null | ('anonymous' | 'use-credentials')
   referrerPolicy?:
     | null
@@ -76,7 +76,7 @@ function useLoaded({ crossOrigin, referrerPolicy, src, srcSet }: Props) {
   return loaded
 }
 
-export function Avatar(props: Props) {
+export const Avatar = (props: Props) => {
   const { variant = 'rounded', size = 'md', alt, src, srcSet, crossOrigin, referrerPolicy, children, sx } = props
   const loaded = useLoaded({ src, srcSet, crossOrigin, referrerPolicy })
   const hasImage = !!src || !!srcSet
@@ -106,6 +106,10 @@ const variants = css.create({
 } as Record<AvatarVariant, UserAuthoredStyles>)
 
 const sizes = css.create({
+  xs: {
+    [avatarTokens.containerSize]: '24px',
+    [avatarTokens.labelTextSize]: typeScale.bodySize$sm,
+  },
   sm: {
     [avatarTokens.containerSize]: '32px',
     [avatarTokens.labelTextSize]: typeScale.bodySize$sm,

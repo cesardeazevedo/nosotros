@@ -2,7 +2,7 @@ import React, { forwardRef } from 'react'
 import { css, html } from 'react-strict-dom'
 import type { SxProps } from '../types'
 
-type Props = {
+export type Props = {
   as?: 'div' | 'span' | 'p' | 'header' | 'main' | 'footer' | 'section' | 'article'
   sx?: SxProps
   horizontal?: boolean

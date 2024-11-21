@@ -24,10 +24,10 @@ export const vars = {
 
   surface: colors.gray0,
   onSurface: colors.stone11,
-  onSurfaceVariant: colors.stone10,
+  onSurfaceVariant: colors.stone8,
 
   surfaceContainerLowest: '#fff',
-  surfaceContainerLow: colors.gray1,
+  surfaceContainerLow: colors.stone0,
   surfaceContainer: colors.stone1,
   surfaceContainerHigh: colors.stone2,
   surfaceContainerHighest: colors.stone3,

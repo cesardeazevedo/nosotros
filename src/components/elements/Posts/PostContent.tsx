@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react-lite'
-import type Note from 'stores/models/note'
+import type { Note } from 'stores/models/note'
 import { Content } from '../Content/Content'
-import PostContentWrapper from './PostContentWrapper'
+import { PostContentWrapper } from './PostContentWrapper'
 
 type Props = {
   note: Note
@@ -10,7 +10,7 @@ type Props = {
   initialExpanded?: boolean
 }
 
-const PostContent = observer(function PostContent(props: Props) {
+export const PostContent = observer(function PostContent(props: Props) {
   const { note, dense = false, disableLink = false, initialExpanded = false } = props
   return (
     <PostContentWrapper note={note} initialExpanded={initialExpanded}>
@@ -18,5 +18,3 @@ const PostContent = observer(function PostContent(props: Props) {
     </PostContentWrapper>
   )
 })
-
-export default PostContent

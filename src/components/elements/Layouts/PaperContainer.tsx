@@ -9,7 +9,7 @@ type Props = PaperProps & {
   children?: React.ReactNode
 }
 
-const PaperContainer = forwardRef<HTMLDivElement, Props>((props, ref) => {
+export const PaperContainer = forwardRef<HTMLDivElement, Props>((props, ref) => {
   const { elevation = 0, children, ...rest } = props
   const mobile = useMobile()
   return (
@@ -33,5 +33,3 @@ const styles = css.create({
     borderBottomWidth: 1,
   },
 })
-
-export default PaperContainer

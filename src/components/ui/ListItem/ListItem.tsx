@@ -1,5 +1,4 @@
 import { palette } from '@/themes/palette.stylex'
-import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { typeScale } from '@/themes/typeScale.stylex'
 import { useMergeRefs } from '@floating-ui/react'
@@ -20,6 +19,8 @@ export type Props = {
   selected?: boolean
   role?: AriaRole
   href?: string
+  rel?: HTMLAnchorElement['rel']
+  target?: HTMLAnchorElement['target']
   tabIndex?: -1 | 0
   interactive?: boolean
   visualState?: IVisualState
@@ -36,9 +37,12 @@ export type Props = {
   noFocusRing?: boolean
 }
 
-export const ListItem = forwardRef<HTMLButtonElement, Props>((props, ref) => {
+export const ListItem = forwardRef<HTMLElement, Props>((props, ref) => {
   const {
     sx,
+    href,
+    rel,
+    target,
     variant = 'standard',
     disabled,
     //leading,
@@ -54,7 +58,7 @@ export const ListItem = forwardRef<HTMLButtonElement, Props>((props, ref) => {
     overline,
   } = props
 
-  //const isInteractive = !!onClick
+  const isInteractive = !!interactive || !!href
   const selected = !disabled && props.selected
   const adaptedSize = sizeProp // === 'md' && !!supportingText ? 'lg' : sizeProp
 
@@ -63,11 +67,16 @@ export const ListItem = forwardRef<HTMLButtonElement, Props>((props, ref) => {
 
   const refs = useMergeRefs([ref, setRef, actionRef])
 
+  const Element = href ? 'a' : 'button'
+
   const hasLeading = !!leadingIcon || leadingImage
   const hasTrailing = !!trailingIcon || trailing
 
   return (
-    <button
+    <Element
+      href={href}
+      target={target}
+      rel={rel}
       onClick={onClick}
       {...css.props([
         styles.root,
@@ -84,7 +93,7 @@ export const ListItem = forwardRef<HTMLButtonElement, Props>((props, ref) => {
         {/* <html.div */}
         {/*   style={[styles.background, selected && styles.background$selected, disabled && styles.background$disabled]} */}
         {/* /> */}
-        {interactive && (
+        {isInteractive && (
           <Ripple
             visualState={visualState}
             sx={[styles.ripple, selected && styles.ripple$selected, disabled && styles.ripple$disabled]}
@@ -107,14 +116,14 @@ export const ListItem = forwardRef<HTMLButtonElement, Props>((props, ref) => {
           {trailingIcon ? <html.span style={styles.trailing$icon}>{trailingIcon}</html.span> : trailing}
         </html.div>
       )}
-    </button>
+    </Element>
   )
 })
 
 const variants = css.create({
   standard: {
     [listItemTokens.containerColor]: 'transparent',
-    [listItemTokens.selectedContainerColor]: palette.primaryContainer,
+    [listItemTokens.selectedContainerColor]: palette.surfaceContainerHighest,
     [listItemTokens.selectedContainerOpacity]: '1',
     [listItemTokens.textColor]: palette.onSurface,
   },
@@ -188,6 +197,7 @@ const styles = css.create({
     flexGrow: 1,
     flexDirection: 'column',
     alignItems: 'flex-start',
+    textAlign: 'left',
     color: listItemTokens.textColor,
     opacity: listItemTokens.textOpacity,
   },
@@ -202,6 +212,9 @@ const styles = css.create({
   },
   supportingText: {
     textAlign: 'left',
+    maxWidth: 290,
+    textOverflow: 'ellipsis',
+    overflowX: 'auto',
     color: palette.onSurfaceVariant,
     fontFamily: typeScale.bodyFont$sm,
     fontSize: typeScale.bodySize$sm,
@@ -218,7 +231,7 @@ const styles = css.create({
     letterSpacing: typeScale.labelLetterSpacing$sm,
   },
   ripple: {
-    borderRadius: shape.sm,
+    borderRadius: listItemTokens.containerShape,
     marginInlineStart: spacing.padding1,
     marginInlineEnd: spacing.padding1,
   },

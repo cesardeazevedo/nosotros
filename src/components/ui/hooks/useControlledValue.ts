@@ -2,12 +2,6 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 const isProduction = () => process.env.NODE_ENV === 'production'
 
-export interface IControlledValueProps<TValue, TTargetElement extends HTMLElement = HTMLElement> {
-  defaultValue?: TValue
-  value?: TValue
-  onValueChange?: (value: TValue, targetElement: TTargetElement | null) => void
-}
-
 type IUseControlledProps<TValue> = {
   controlled: TValue | undefined
   default: TValue

@@ -1,4 +1,5 @@
 // from https://github.com/mui/material-ui/blob/master/packages/mui-material/src/Slide/Slide.js
+import { vars as easingVars } from '@/themes/easing.stylex'
 import debounce from '@mui/utils/debounce'
 import * as React from 'react'
 import { Transition } from 'react-transition-group'
@@ -6,7 +7,6 @@ import type { TransitionActions } from 'react-transition-group/Transition'
 import type { TransitionProps } from '../Drawer/utils'
 import { getTransitionProps, ownerWindow } from '../Drawer/utils'
 import { mergeRefs } from '../helpers/mergeRefs'
-import { vars as easingVars } from '@/themes/easing.stylex'
 
 type Direction = 'down' | 'left' | 'right' | 'up'
 type Easing = string | { enter: string; exit: string }
@@ -99,7 +99,7 @@ function setTranslateValue(direction: Direction, node: HTMLElement, containerPro
   }
 }
 
-const Slide = React.forwardRef<HTMLElement, Props>(function Slide(props, ref) {
+export const Slide = React.forwardRef<HTMLElement, Props>(function Slide(props, ref) {
   const defaultEasing = {
     enter: easingVars.emphasizedDecelerate,
     exit: easingVars.emphasizedDecelerate,
@@ -271,5 +271,3 @@ const Slide = React.forwardRef<HTMLElement, Props>(function Slide(props, ref) {
 function createTransition(props: string, transitionProps: TransitionProps): string {
   return `${props} ${transitionProps.duration}ms ${transitionProps.easing} 0ms`
 }
-
-export default Slide

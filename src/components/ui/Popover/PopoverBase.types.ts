@@ -88,6 +88,7 @@ export type IPopoverBaseProps<TForwardedProps extends object = object> = Pick<IP
     preventAutoFocus?: boolean
     matchTargetWidth?: boolean
     withScrim?: boolean
+    clientPoint?: { x?: number; y?: number }
     slotProps?: {
       floatingFocusManager?: Partial<FloatingFocusManagerProps>
       floatingTransition?: Partial<IFloatingTransitionProps> // & { ref?: MutableRefObject<HTMLDivElement | undefined> }

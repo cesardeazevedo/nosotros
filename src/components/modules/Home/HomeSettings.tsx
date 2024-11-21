@@ -3,7 +3,7 @@ import { SettingsFilters } from '@/components/elements/DeckSettings/SettingsFilt
 import { SettingsRelays } from '@/components/elements/DeckSettings/SettingsRelays'
 import { html, css } from 'react-strict-dom'
 
-function HomeSettings() {
+export const HomeSettings = () => {
   return (
     <html.div style={styles.root}>
       <Divider />
@@ -18,5 +18,3 @@ const styles = css.create({
     position: 'relative',
   },
 })
-
-export default HomeSettings

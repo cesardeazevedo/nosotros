@@ -12,7 +12,7 @@ import { IconGithub } from '../Icons/IconGithub'
 
 const lastUpdated = DateTime.fromJSDate(new Date(committerDate)).toLocaleString()
 
-const Stats = memo(function Stats() {
+export const Stats = memo(function Stats() {
   const isMobile = useMobile()
   const isDeck = useMatch({ from: '/deck', shouldThrow: false })
   if (isMobile || isDeck) return null
@@ -46,5 +46,3 @@ const styles = css.create({
     fontWeight: 500,
   },
 })
-
-export default Stats

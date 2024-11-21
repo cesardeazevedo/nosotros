@@ -24,7 +24,7 @@ export const SettingsHeader = (props: Props) => (
         <html.div style={[styles.root, props.inset && styles.inset]} onClick={() => expand(!expanded)}>
           <Stack horizontal gap={1}>
             <IconButton size='sm' icon={expanded ? <IconChevronDown /> : <IconChevronRight />} />
-            <Text variant='title' size='md'>
+            <Text variant='body' size='lg'>
               {props.label}
             </Text>
             {props.trailing}

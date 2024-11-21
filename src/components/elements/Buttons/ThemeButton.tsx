@@ -6,7 +6,7 @@ import { IconMoon, IconSun } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
 import { useCallback } from 'react'
 
-const ThemeButton = observer(function ThemeButton(props: IconButtonProps) {
+export const ThemeButton = observer(function ThemeButton(props: IconButtonProps) {
   const mode = settingsStore.theme
 
   const handleClick = useCallback(() => {
@@ -29,5 +29,3 @@ const ThemeButton = observer(function ThemeButton(props: IconButtonProps) {
     </Tooltip>
   )
 })
-
-export default ThemeButton

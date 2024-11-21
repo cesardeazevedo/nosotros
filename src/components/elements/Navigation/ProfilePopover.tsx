@@ -3,19 +3,19 @@ import { Paper } from '@/components/ui/Paper/Paper'
 import { PopoverBase } from '@/components/ui/Popover/PopoverBase'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
+import { authStore } from '@/stores/ui'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconQrcode } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
 import { useCallback, useState } from 'react'
 import { css, html } from 'react-strict-dom'
-import { authStore } from 'stores/ui/auth.store'
 import { dialogStore } from 'stores/ui/dialogs.store'
-import UserAvatar from '../User/UserAvatar'
-import UserName from '../User/UserName'
-import Menu from './Menu'
+import { UserAvatar } from '../User/UserAvatar'
+import { UserName } from '../User/UserName'
+import { Menu } from './Menu'
 
-const ProfilePopover = observer(function ProfilePopover() {
+export const ProfilePopover = observer(function ProfilePopover() {
   const { currentUser: user } = authStore
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null)
   const handleOpen = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -32,10 +32,10 @@ const ProfilePopover = observer(function ProfilePopover() {
       onClose={handleClose}
       placement='bottom-end'
       contentRenderer={() => (
-        <Paper elevation={2} shape='lg' surface='surfaceContainerLowest' sx={styles.root}>
+        <Paper elevation={2} shape='lg' surface='surfaceContainerLow' sx={styles.root}>
           <html.img src={user?.meta.banner} style={styles.image} />
           <Stack sx={styles.header} justify='space-between'>
-            <UserName user={user} disableLink disablePopover />
+            <UserName pubkey={user?.pubkey} disableLink disablePopover />
             <Tooltip cursor='arrow' placement='bottom' text='Use the QR Code to scan your npub on your mobile device'>
               <IconButton onClick={dialogStore.openQRCode} icon={<IconQrcode strokeWidth='1.5' />} />
             </Tooltip>
@@ -45,7 +45,7 @@ const ProfilePopover = observer(function ProfilePopover() {
       )}>
       {({ getProps, setRef }) => (
         <div onClick={handleOpen} {...getProps} ref={setRef}>
-          <UserAvatar user={user} disableLink disabledPopover />
+          <UserAvatar pubkey={user?.pubkey} disableLink disabledPopover />
         </div>
       )}
     </PopoverBase>
@@ -62,12 +62,10 @@ const styles = css.create({
     paddingInline: spacing.padding2,
   },
   image: {
-    maxHeight: 110,
+    height: 110,
     width: '100%',
     objectFit: 'cover',
     borderTopRightRadius: shape.lg,
     borderTopLeftRadius: shape.lg,
   },
 })
-
-export default ProfilePopover

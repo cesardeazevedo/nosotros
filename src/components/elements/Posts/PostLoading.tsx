@@ -3,7 +3,7 @@ import { Stack } from '@/components/ui/Stack/Stack'
 import { spacing } from '@/themes/spacing.stylex'
 import { css, html } from 'react-strict-dom'
 
-function PostLoading() {
+export const PostLoading = () => {
   return (
     <html.div style={styles.root}>
       <Stack horizontal>
@@ -44,5 +44,3 @@ const styles = css.create({
     height: 110,
   },
 })
-
-export default PostLoading

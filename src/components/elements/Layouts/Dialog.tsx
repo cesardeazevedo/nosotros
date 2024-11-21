@@ -42,7 +42,7 @@ function MobileDialog(props: Props) {
   )
 }
 
-function DialogSheet(props: Props) {
+export const DialogSheet = (props: Props) => {
   const { children, surface = 'surfaceContainerLowest' } = props
   const isMobile = useMobile()
   return (
@@ -98,5 +98,3 @@ const styles = css.create({
     borderTopLeftRadius: shape.lg,
   },
 })
-
-export default DialogSheet

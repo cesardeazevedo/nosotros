@@ -2,6 +2,7 @@ import { FloatingTree, useFloatingParentNodeId, type Placement } from '@floating
 import type React from 'react'
 import { forwardRef } from 'react'
 import type { IOrientation } from '../FloatingTransition/FloatingTransition'
+import type { Props as MenuListProps } from '../MenuList/MenuList'
 import type { SxProps } from '../types'
 import { MenuLeaf } from './MenuLeaf'
 
@@ -11,7 +12,7 @@ export type IMenuTriggerRenderProps = {
   getProps: (userProps?: React.ComponentPropsWithoutRef<'button'>) => Record<string, unknown>
 }
 
-export type Props = {
+export type Props = MenuListProps & {
   root?: HTMLElement | null | React.MutableRefObject<HTMLElement | null>
   sx?: SxProps
   disabled?: boolean

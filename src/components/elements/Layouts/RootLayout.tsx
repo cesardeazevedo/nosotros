@@ -1,11 +1,11 @@
 import { Outlet } from '@tanstack/react-router'
-import Dialogs from 'components/modules/DialogsModule'
-import Stats from '../Footer/Stats'
-import Header from '../Header/Header'
+import { Dialogs } from 'components/modules/DialogsModule'
+import { Stats } from '../Footer/Stats'
+import { Header } from '../Header/Header'
+import { BottomNavigation } from '../Navigation/BottomNavigation'
 import { Toaster } from './Toaster'
-import BottomNavigation from '../Navigation/BottomNavigation'
 
-function RootLayout() {
+export const RootLayout = () => {
   return (
     <>
       <Dialogs />
@@ -17,5 +17,3 @@ function RootLayout() {
     </>
   )
 }
-
-export default RootLayout

@@ -48,5 +48,7 @@ const styles = css.create({
     placeItems: 'center',
     overflow: 'auto',
     zIndex: 400,
+    margin: 'auto',
+    maxHeight: 'calc(100% - 100px)',
   },
 })

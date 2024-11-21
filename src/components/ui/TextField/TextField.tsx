@@ -1,6 +1,5 @@
 import { outline } from '@/themes/outline.stylex'
 import { palette } from '@/themes/palette.stylex'
-import { scale } from '@/themes/scale.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { typeFace } from '@/themes/typeFace.stylex'
@@ -16,6 +15,7 @@ import { textFieldTokens } from './TextField.stylex'
 
 type Props = {
   sx?: SxProps
+  size?: 'sm' | 'md'
   type?: 'text' | 'number' | 'text' | 'date' | 'email' | 'password'
   error?: boolean
   autoComplete?: boolean
@@ -39,6 +39,8 @@ type Props = {
 
 export const TextField = forwardRef<HTMLInputElement, Props>((props, ref) => {
   const {
+    sx,
+    size = 'md',
     type: inputType = 'text',
     defaultValue,
     error,
@@ -72,7 +74,10 @@ export const TextField = forwardRef<HTMLInputElement, Props>((props, ref) => {
   const shrink = visualState.focused || filled
 
   return (
-    <html.div style={[styles.root, fullWidth && styles.fullWidth]} {...dataProps(visualState)} data-shrink={shrink}>
+    <html.div
+      style={[styles.root, fullWidth && styles.fullWidth, sizes[size], sx]}
+      {...dataProps(visualState)}
+      data-shrink={shrink}>
       <html.label style={styles.label}>{label}</html.label>
       <html.div style={styles.content} {...dataProps(visualState)} data-shrink={shrink}>
         {leading && (
@@ -106,6 +111,23 @@ export const TextField = forwardRef<HTMLInputElement, Props>((props, ref) => {
   )
 })
 
+const sizes = css.create({
+  sm: {
+    [textFieldTokens.containerMinHeight]: 40,
+    [textFieldTokens.labelPosition]: {
+      default: 'translate(20px, 8px) scale(1)',
+      ':is([data-shrink="true"])': 'translate(20px, -9px) scale(0.75)',
+    },
+  },
+  md: {
+    [textFieldTokens.containerMinHeight]: 56,
+    [textFieldTokens.labelPosition]: {
+      default: 'translate(20px, 16px) scale(1)',
+      ':is([data-shrink="true"])': 'translate(20px, -9px) scale(0.75)',
+    },
+  },
+})
+
 const styles = css.create({
   root: {
     display: 'inline-flex',
@@ -115,11 +137,7 @@ const styles = css.create({
     padding: 0,
     border: 0,
     verticalAlign: 'top',
-    height: `calc(56px * ${scale.scale})`,
-    [textFieldTokens.labelPosition]: {
-      default: 'translate(20px, 16px) scale(1)',
-      ':is([data-shrink="true"])': 'translate(20px, -9px) scale(0.75)',
-    },
+    height: textFieldTokens.containerMinHeight,
     [textFieldTokens.outlineLegend]: {
       default: '0.01px',
       ':is([data-shrink="true"])': '100%',
@@ -161,7 +179,7 @@ const styles = css.create({
   },
   input: {
     border: 0,
-    height: `calc(56px * ${scale.scale})`,
+    height: textFieldTokens.containerMinHeight,
     display: 'block',
     width: '100%',
     paddingLeft: spacing.padding2,
