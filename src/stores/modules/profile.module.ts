@@ -2,8 +2,8 @@ import { Duration } from 'luxon'
 import { FeedModule } from './feed.module'
 
 export type ProfileOptions = {
-  id: string
-  type: 'user'
+  id?: string
+  type?: 'user'
   pubkey: string
   relays?: string[]
 }
@@ -12,11 +12,12 @@ export class ProfileModule {
   feed: FeedModule
   options: ProfileOptions
 
-  constructor(options: { id?: string; pubkey: string; relays?: string[] }) {
+  constructor(options: ProfileOptions) {
     const { id, pubkey, relays } = options
+
     this.feed = new FeedModule({
       id: id || pubkey,
-      pipeline: 'subFeed',
+      feed: 'subFeed',
       range: Duration.fromObject({ days: 1 }).as('minutes'),
       subscription: {
         relayHints: {

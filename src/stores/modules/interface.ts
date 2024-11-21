@@ -1,7 +1,9 @@
-export interface ModuleInterface {
+import type { Observable } from 'rxjs'
+
+export interface ModuleInterface<T = unknown> {
   id: string
-  start: () => void
-  stop: () => void
+  list?: T[]
+  start: () => Observable<unknown>
   reset?: () => void
   paginate?: () => void
   onRangeChange?: (index: number) => void

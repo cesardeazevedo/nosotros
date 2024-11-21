@@ -1,3 +1,4 @@
+import { Duration } from 'luxon'
 import { FeedModule } from './feed.module'
 
 export type HomeOptions = {
@@ -13,7 +14,8 @@ export class HomeModule {
   constructor(options: { pubkey: string; id?: string }) {
     this.feed = new FeedModule({
       id: options.id || 'home',
-      pipeline: 'subFeedFromFollows',
+      range: Duration.fromObject({ minutes: 30 }).as('minutes'),
+      feed: 'subFeedFromFollows',
       filter: { authors: [options.pubkey] },
     })
 
@@ -26,5 +28,9 @@ export class HomeModule {
 
   get id() {
     return this.feed.id
+  }
+
+  start() {
+    return this.feed.start()
   }
 }

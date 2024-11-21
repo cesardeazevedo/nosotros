@@ -1,5 +1,6 @@
 import { RECOMMENDED_PUBKEYS } from 'constants/recommended'
 import { FeedModule } from './feed.module'
+import { Duration } from 'luxon'
 
 export type GuestOptions = {
   id: 'guest'
@@ -9,7 +10,8 @@ export type GuestOptions = {
 export class GuestModule {
   feed = new FeedModule({
     id: 'guest',
-    pipeline: 'subFeed',
+    feed: 'subFeed',
+    range: Duration.fromObject({ hour: 1 }).as('minutes'),
     filter: { authors: RECOMMENDED_PUBKEYS },
   })
 
