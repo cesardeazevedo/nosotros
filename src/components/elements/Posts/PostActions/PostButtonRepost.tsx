@@ -1,7 +1,7 @@
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
-import { IconExchange } from '@tabler/icons-react'
-import ButtonContainer, { type ContainerProps } from './PostButtonContainer'
+import { IconShare3 } from '@tabler/icons-react'
+import { ButtonContainer, type ContainerProps } from './PostButtonContainer'
 import { iconProps } from './utils'
 
 type Props = {
@@ -9,22 +9,17 @@ type Props = {
   onClick?: (e?: unknown) => void
 }
 
-function ButtonRepost(props: Props & ContainerProps) {
+export const ButtonRepost = (props: Props & ContainerProps) => {
   const { dense = false, onClick, ...rest } = props
   return (
     <ButtonContainer {...rest}>
-      <Tooltip cursor='arrow' text='Repost (coming soon)'>
+      <Tooltip cursor='arrow' text='Repost'>
         <IconButton
-          disabled
           size={dense ? 'sm' : 'md'}
           onClick={onClick}
-          icon={
-            <IconExchange size={dense ? iconProps.size$dense : iconProps.size} strokeWidth={iconProps.strokeWidth} />
-          }
+          icon={<IconShare3 size={dense ? iconProps.size$dense : iconProps.size} strokeWidth={iconProps.strokeWidth} />}
         />
       </Tooltip>
     </ButtonContainer>
   )
 }
-
-export default ButtonRepost
