@@ -1,44 +1,43 @@
+import { dedupe } from '@/core/helpers'
+import { mapMetadata } from '@/nostr/operators/mapMetadata'
+import { pruneReplaceable } from '@/nostr/prune'
+import { ShareReplayCache } from '@/nostr/replay'
+import type { Note } from '@/stores/models/note'
+import { User } from '@/stores/models/user'
+import { userStore } from '@/stores/nostr/users.store'
 import { Kind } from 'constants/kinds'
-import { type SubscriptionOptions } from 'core/NostrSubscription'
-import { batcher } from 'nostr/batcher'
-import type { NostrClient } from 'nostr/nostr'
-import { insertEvent } from 'nostr/operators/insertEvent'
-import { onNewEvents } from 'nostr/operators/onNewEvents'
-import { withCache } from 'nostr/operators/queryCache'
-import type { NoteDB } from 'nostr/types'
-import { ignoreElements, map, merge, of, tap } from 'rxjs'
-import { addEventToStore } from 'stores/operators/addEventToStore'
+import type { ClientSubOptions, NostrClient } from 'nostr/nostr'
+import { EMPTY, from, ignoreElements, merge, mergeMap, tap } from 'rxjs'
 import { parseUser } from './metadata/parseUser'
 
 const kinds = [Kind.Metadata]
 
+export const replay = new ShareReplayCache()
+
 export class NIP01Users {
   constructor(private client: NostrClient) {}
 
-  subFromNote(note: NoteDB) {
-    const authors = note.metadata.mentionedAuthors
-    const relayHints = note.metadata.relayHints
-    return this.subscribe(authors, { relayHints })
+  subFromNote(note: Note) {
+    const authors = dedupe([note.event.pubkey], note.metadata?.mentionedAuthors)
+    const relayHints = note.metadata?.relayHints
+    const neededAuthors = pruneReplaceable(Kind.Metadata, authors)
+    if (neededAuthors.length > 0) {
+      return from(neededAuthors).pipe(mergeMap((pubkey) => this.subscribe(pubkey, { relayHints })))
+    }
+    return EMPTY
   }
 
-  subscribe(authors: string[], options?: SubscriptionOptions) {
-    const sub = this.client.subscribe({ kinds, authors }, options)
-    const relayLists$ = this.client.relayList.subscribe(authors)
+  subscribe = replay.wrap((pubkey: string, options?: ClientSubOptions) => {
+    const relayLists$ = this.client.relayList.subscribe(pubkey)
 
-    const stream$ = of(sub).pipe(
-      batcher.subscribe(),
+    const stream$ = this.client.subscribe({ kinds, authors: [pubkey] }, options).pipe(
+      mapMetadata(parseUser),
 
-      onNewEvents(sub),
-
-      map((event) => parseUser(event)),
-
-      insertEvent(),
-
-      withCache(sub.filters),
-
-      tap((user) => this.client.dns.enqueue(user)),
-      tap((user) => addEventToStore(user)),
+      tap(([event, metadata]) => {
+        userStore.add(new User(event, metadata))
+        this.client.dns.enqueue(metadata)
+      }),
     )
     return merge(stream$, relayLists$.pipe(ignoreElements()))
-  }
+  })
 }
