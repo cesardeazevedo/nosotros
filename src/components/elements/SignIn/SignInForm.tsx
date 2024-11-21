@@ -5,32 +5,38 @@ import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { TextField } from '@/components/ui/TextField/TextField'
 import { useGoBack } from '@/hooks/useNavigations'
-import { appState } from '@/stores/app.state'
+import { useObservableNostrContext } from '@/hooks/useNostrClientContext'
+import { signinStore } from '@/stores/ui/signin.store'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconClipboardCopy, IconScan } from '@tabler/icons-react'
 import { useMobile } from 'hooks/useMobile'
 import { observer } from 'mobx-react-lite'
-import { useObservable, useSubscription } from 'observable-hooks'
+import { useSubscription } from 'observable-hooks'
 import { useCallback, useEffect } from 'react'
 import { Controller, useForm, useWatch, type Control } from 'react-hook-form'
 import { css } from 'react-strict-dom'
+import { EMPTY } from 'rxjs'
 import { userStore } from 'stores/nostr/users.store'
-import { authStore } from 'stores/ui/auth.store'
 import { dialogStore } from 'stores/ui/dialogs.store'
 import { decodeNIP19, type Npub } from 'utils/nip19'
-import UserAvatar from '../User/UserAvatar'
-import UserName from '../User/UserName'
+import { UserAvatar } from '../User/UserAvatar'
+import { UserName } from '../User/UserName'
 import { OnboardMachineContext } from './SignInContext'
 
 type FormValues = {
-  npub: string
+  input: string
   pubkey: string
 }
 
 const UserPreview = observer(function UserPreview(props: { control: Control<FormValues> }) {
   const pubkey = useWatch({ name: 'pubkey', control: props.control })
 
-  const sub = useObservable(() => appState.client.users.subscribe([pubkey]))
+  const sub = useObservableNostrContext((context) => {
+    if (pubkey) {
+      context.client.users.subscribe(pubkey)
+    }
+    return EMPTY
+  })
   useSubscription(sub)
 
   const user = userStore.get(pubkey)
@@ -38,14 +44,14 @@ const UserPreview = observer(function UserPreview(props: { control: Control<Form
   return (
     pubkey && (
       <Stack horizontal={false} gap={1} justify='center' align='center'>
-        {!user ? <Skeleton variant='circular' sx={styles.loading} /> : <UserAvatar user={user} size='lg' />}
+        {!user ? <Skeleton variant='circular' sx={styles.loading} /> : <UserAvatar pubkey={user.pubkey} size='lg' />}
         {user && <UserName disableLink disablePopover variant='title' size='lg' user={user} />}
       </Stack>
     )
   )
 })
 
-const SignInForm = function SignInForm() {
+export const SignInForm = function SignInForm() {
   const onboardMachine = OnboardMachineContext.useActorRef()
   const pubkey = OnboardMachineContext.useSelector((x) => x.context.pubkey)
   const clipboardError = OnboardMachineContext.useSelector((x) => x.context.clipboardError)
@@ -56,22 +62,24 @@ const SignInForm = function SignInForm() {
     mode: 'all',
     reValidateMode: 'onChange',
     resolver: (field) => {
-      const pubkey = decodeNIP19(field.npub as Npub)?.data
-      if (!pubkey) {
-        return { values: {}, errors: { npub: { type: 'value', message: 'npub invalid' } } }
+      if (!field.input.includes('@')) {
+        const pubkey = decodeNIP19(field.input as Npub)?.data
+        if (!pubkey) {
+          return { values: {}, errors: { input: { type: 'value', message: 'npub invalid' } } }
+        }
+        form.setValue('pubkey', pubkey)
       }
-      form.setValue('pubkey', pubkey)
-      return { values: { npub: field.npub, pubkey }, errors: {} }
+      return { values: { input: field.input, pubkey }, errors: {} }
     },
     defaultValues: {
-      npub: '',
+      input: '',
       pubkey: '',
     },
   })
 
   useEffect(() => {
     if (pubkey) {
-      form.setValue('npub', pubkey, {
+      form.setValue('input', pubkey, {
         shouldDirty: true,
         shouldTouch: true,
         shouldValidate: true,
@@ -79,8 +87,15 @@ const SignInForm = function SignInForm() {
     }
   }, [form, pubkey])
 
-  const onSubmit = useCallback((values: FormValues) => {
-    authStore.loginWithPubkey(values.pubkey)
+  const onSubmit = useCallback(async (values: FormValues) => {
+    if (values.input.includes('@')) {
+      const pubkey = await signinStore.loginWithNostrAddress(values.input)
+      if (!pubkey) {
+        form.setError('input', { message: 'name not found' })
+      }
+    } else {
+      signinStore.loginWithPubkey(values.pubkey)
+    }
     goBack()
   }, [])
 
@@ -94,19 +109,18 @@ const SignInForm = function SignInForm() {
       <Text variant='headline'>Sign In with Public Key</Text>
       <Stack horizontal={false} gap={1}>
         <Controller
-          name='npub'
+          name='input'
           control={form.control}
           render={({ field }) => (
             <TextField
               {...field}
-              error={Boolean(form.formState.errors.npub) && form.formState.isSubmitted}
-              label='Public key (npub)'
-              placeholder='npub...'
+              error={Boolean(form.formState.errors.input) && form.formState.isSubmitted}
+              label='npub, nostr address (nip-05)'
               trailing={isMobile && <IconButton onClick={dialogStore.openCamera} icon={<IconScan />} />}
             />
           )}
         />
-        {form.formState.isSubmitted && <Text>{form.formState.errors.npub?.message}</Text>}
+        {form.formState.isSubmitted && <Text>{form.formState.errors.input?.message}</Text>}
         <Button variant='outlined' sx={styles.button} onClick={handleClipboard} icon={<IconClipboardCopy size={20} />}>
           Paste
         </Button>
@@ -141,5 +155,3 @@ const styles = css.create({
     height: 50,
   },
 })
-
-export default SignInForm

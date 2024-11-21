@@ -1,19 +1,18 @@
-import Slide from '@/components/ui/Slide/Slide'
+import { Slide } from '@/components/ui/Slide/Slide'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { spacing } from '@/themes/spacing.stylex'
 import { useCallback, useEffect, useRef } from 'react'
 import { css, html } from 'react-strict-dom'
 import { OnboardMachineContext } from './SignInContext'
-import SignInForm from './SignInForm'
-import SignInIntro from './SignInIntro'
+import { SignInForm } from './SignInForm'
+import { SignInIntro } from './SignInIntro'
 
 const easings = {
   enter: 'cubic-bezier(0.33, 1, 0.68, 1)',
   exit: 'cubic-bezier(0.33, 1, 0.68, 1)',
 }
 
-function SignInSlides() {
-  //const isMobile = useMobile()
+export const SignInSlides = () => {
   const state = OnboardMachineContext.useSelector((x) => x)
   const machine = OnboardMachineContext.useActorRef()
 
@@ -110,5 +109,3 @@ const styles = css.create({
     height: '100%',
   },
 })
-
-export default SignInSlides

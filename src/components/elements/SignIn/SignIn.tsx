@@ -2,10 +2,10 @@ import { Divider } from '@/components/ui/Divider/Divider'
 import { useMobile } from 'hooks/useMobile'
 import { css, html } from 'react-strict-dom'
 import { OnboardMachineContext } from './SignInContext'
-import SignInHeader from './SignInHeader'
-import SignInSlides from './SignInSlides'
+import { SignInHeader } from './SignInHeader'
+import { SignInSlides } from './SignInSlides'
 
-function SignIn() {
+export const SignIn = () => {
   const isMobile = useMobile()
   return (
     <OnboardMachineContext.Provider>
@@ -24,5 +24,3 @@ const styles = css.create({
     overflow: 'hidden',
   },
 })
-
-export default SignIn

@@ -3,23 +3,23 @@ import { Divider } from '@/components/ui/Divider/Divider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { useGoBack } from '@/hooks/useNavigations'
+import { signinStore } from '@/stores/ui/signin.store'
 import { useMobile } from 'hooks/useMobile'
 import { observer } from 'mobx-react-lite'
 import { useCallback } from 'react'
 import { css, html } from 'react-strict-dom'
-import { authStore } from 'stores/ui/auth.store'
-import Link from '../Content/Link/Link'
+import { Link } from '../Content/Link/Link'
 
 type Props = {
   onClickManual: () => void
 }
 
-const SignInIntro = observer(function SignInIntro(props: Props) {
+export const SignInIntro = observer(function SignInIntro(props: Props) {
   const isMobile = useMobile()
   const goBack = useGoBack()
 
   const handleLoginWithNostrExtension = useCallback(() => {
-    authStore.loginWithNostrExtension()
+    signinStore.loginWithNostrExtension()
     goBack()
   }, [])
 
@@ -35,19 +35,19 @@ const SignInIntro = observer(function SignInIntro(props: Props) {
         </Stack>
         <Stack horizontal={false} gap={4} align='stretch' justify='flex-start' sx={styles.content}>
           <Stack align='center' justify='flex-start' gap={2} horizontal={false}>
-            {authStore.hasExtension && <html.div>Nostr extension detected</html.div>}
+            {signinStore.hasExtension && <html.div>Nostr extension detected</html.div>}
             <Button
               fullWidth
               variant='filled'
               sx={styles.button}
-              disabled={!authStore.hasExtension}
+              disabled={!signinStore.hasExtension}
               onClick={handleLoginWithNostrExtension}>
               Sign In with Nostr extension
             </Button>
           </Stack>
           <Stack align='center' justify='center' gap={2} horizontal={false}>
             <Text size='lg'>
-              {authStore.hasExtension === false && (
+              {signinStore.hasExtension === false && (
                 <strong>
                   Nostr extension not found.
                   <br />
@@ -84,5 +84,3 @@ const styles = css.create({
     height: 50,
   },
 })
-
-export default SignInIntro

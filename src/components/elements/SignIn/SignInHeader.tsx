@@ -8,7 +8,7 @@ import { useCallback } from 'react'
 import { css } from 'react-strict-dom'
 import { OnboardMachineContext } from './SignInContext'
 
-function SignInHeader() {
+export const SignInHeader = () => {
   const machine = OnboardMachineContext.useActorRef()
   const state = OnboardMachineContext.useSelector((x) => x)
   const camera = OnboardMachineContext.useSelector((x) => x.context.camera)
@@ -40,5 +40,3 @@ const styles = css.create({
     height: 64,
   },
 })
-
-export default SignInHeader
