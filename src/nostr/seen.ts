@@ -1,0 +1,33 @@
+import { bufferTime } from '@/core/operators/bufferTime'
+import type { SeenDB } from '@/db/types'
+import { seenStore } from '@/stores/nostr/seen.store'
+import type { NostrEvent } from 'nostr-tools'
+import { identity, mergeMap, Subject } from 'rxjs'
+import { db } from './db'
+
+export class Seen {
+  private insert$ = new Subject<SeenDB>()
+  private query$ = new Subject<NostrEvent>()
+
+  constructor() {
+    this.insert$.pipe(bufferTime(5000)).subscribe((data) => db.seen.insertBulk(data))
+    this.query$
+      .pipe(
+        bufferTime(2000),
+        mergeMap(identity),
+        mergeMap((event) => db.seen.query(event.id)),
+        mergeMap(identity),
+      )
+      .subscribe((seen) => seenStore.add(seen))
+  }
+
+  insert(relay: string, event: NostrEvent) {
+    const data = { relay, kind: event.kind, eventId: event.id } as SeenDB
+    seenStore.add(data)
+    this.insert$.next(data)
+  }
+
+  query(event: NostrEvent) {
+    this.query$.next(event)
+  }
+}
