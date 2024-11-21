@@ -1,9 +1,8 @@
+import { ComposeForm } from '@/components/elements/Compose/ComposeForm'
+import { FeedItem } from '@/components/elements/Feed/FeedItem'
 import { Divider } from '@/components/ui/Divider/Divider'
-import Post from 'components/elements/Posts/Post'
-import PostCreateForm from 'components/elements/Posts/PostCreate/PostCreateForm'
-import PostLoading from 'components/elements/Posts/PostLoading'
-import VirtualListWindow from 'components/elements/VirtualLists/VirtualListWindow'
-import { useModuleSubscription } from 'hooks/useFeedSubscription'
+import { PostLoading } from 'components/elements/Posts/PostLoading'
+import { VirtualListWindow } from 'components/elements/VirtualLists/VirtualListWindow'
 import { observer } from 'mobx-react-lite'
 import type { FeedModule } from 'stores/modules/feed.module'
 
@@ -12,20 +11,23 @@ type Props = {
   renderCreatePost?: boolean
 }
 
-const FeedMain = observer(function FeedModule(props: Props) {
+export const FeedMain = observer(function FeedMain(props: Props) {
   const { feed, renderCreatePost } = props
 
-  useModuleSubscription(feed)
-
   return (
-    <div>
-      {renderCreatePost && <PostCreateForm defaultOpen={false} allowLongForm={false} />}
+    <>
+      {renderCreatePost && <ComposeForm initialOpen={false} allowLongForm={false} />}
       <Divider />
-      <VirtualListWindow feed={feed} render={(id) => <Post key={id} id={id} />} />
+      <VirtualListWindow
+        id={feed.id}
+        data={feed.list}
+        onScrollEnd={feed.paginate}
+        onRangeChange={feed.onRangeChange}
+        render={(item) => <FeedItem item={item} />}
+      />
       <PostLoading />
+      <Divider />
       <PostLoading />
-    </div>
+    </>
   )
 })
-
-export default FeedMain

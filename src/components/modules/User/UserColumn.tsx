@@ -1,15 +1,13 @@
-import PaperContainer from '@/components/elements/Layouts/PaperContainer'
+import { FeedItem } from '@/components/elements/Feed/FeedItem'
+import { PaperContainer } from '@/components/elements/Layouts/PaperContainer'
+import { UserHeader } from '@/components/elements/User/UserHeader'
 import { Stack } from '@/components/ui/Stack/Stack'
-import { Text } from '@/components/ui/Text/Text'
-import DeckColumnHeader from 'components/elements/Deck/DeckColumnHeader'
-import Post from 'components/elements/Posts/Post'
-import PostLoading from 'components/elements/Posts/PostLoading'
-import UserAvatar from 'components/elements/User/UserAvatar'
-import UserProfileHeader from 'components/elements/User/UserProfileHeader'
-import VirtualList from 'components/elements/VirtualLists/VirtualList'
-import { useModuleSubscription } from 'hooks/useFeedSubscription'
+import { DeckColumnHeader } from 'components/elements/Deck/DeckColumnHeader'
+import { PostLoading } from 'components/elements/Posts/PostLoading'
+import { UserProfileHeader } from 'components/elements/User/UserProfileHeader'
+import { VirtualList } from 'components/elements/VirtualLists/VirtualList'
 import { observer } from 'mobx-react-lite'
-import { css } from 'react-strict-dom'
+import { useObservable, useSubscription } from 'observable-hooks'
 import type { ProfileModule } from 'stores/modules/profile.module'
 import { userStore } from 'stores/nostr/users.store'
 
@@ -17,28 +15,29 @@ type Props = {
   module: ProfileModule
 }
 
-const UserColumn = observer(function FeedModule(props: Props) {
+export const UserColumn = observer(function FeedModule(props: Props) {
   const { module } = props
   const { feed } = module
   const user = userStore.get(module.options.pubkey)
 
-  useModuleSubscription(feed)
+  const sub = useObservable(() => feed.start())
+  useSubscription(sub)
 
   return (
     <>
       <DeckColumnHeader id={feed.id} name='Settings'>
         <Stack gap={2}>
-          <UserAvatar size='sm' user={user} />
-          <Text variant='title' size='lg' sx={styles.title}>
-            {user?.displayName}
-          </Text>
+          <UserHeader pubkey={user?.pubkey} />
         </Stack>
       </DeckColumnHeader>
       <PaperContainer elevation={0} shape='none'>
         <VirtualList
-          feed={feed}
+          id={feed.id}
+          data={feed.list}
+          onScrollEnd={feed.paginate}
+          onRangeChange={feed.onRangeChange}
           header={<UserProfileHeader user={user} />}
-          render={(id) => <Post key={id} id={id} />}
+          render={(item) => <FeedItem item={item} />}
           footer={
             <>
               <PostLoading />
@@ -50,14 +49,3 @@ const UserColumn = observer(function FeedModule(props: Props) {
     </>
   )
 })
-
-const styles = css.create({
-  title: {
-    maxWidth: 350,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-  },
-})
-
-export default UserColumn
