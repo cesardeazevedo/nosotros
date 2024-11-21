@@ -1,37 +1,73 @@
-import type { UserDB } from 'nostr/types'
 import { makeAutoObservable } from 'mobx'
+import type { NostrEvent } from 'nostr-tools'
 import { nip19 } from 'nostr-tools'
+import type { UserMetadataDB } from 'nostr/types'
 import { followsStore } from 'stores/nostr/follows.store'
 import { encodeSafe } from 'utils/nip19'
+import { relaysStore } from '../nostr/relays.store'
+import { userRelayStore } from '../nostr/userRelay.store'
 
-class User {
-  constructor(public data: UserDB) {
-    makeAutoObservable(this, { data: false })
+export class User {
+  constructor(
+    public event: NostrEvent,
+    public metadata: UserMetadataDB,
+  ) {
+    makeAutoObservable(this, { event: false, metadata: false })
+  }
+
+  get id() {
+    return this.event.id
   }
 
   get meta() {
-    return this.data.metadata
+    return this.metadata
+  }
+
+  get pubkey() {
+    return this.event.pubkey
   }
 
   get displayName() {
-    return this.meta?.displayName || this.meta?.display_name || this.meta?.name || this.data.id?.slice(0, 10)
+    return this.meta?.displayName || this.meta?.display_name || this.meta?.name || this.id?.slice(0, 10)
   }
 
   get initials() {
     return this.displayName[0]
   }
 
-  get nprofile() {
-    if (this.data.pubkey) {
-      return encodeSafe(() => {
-        return nip19.nprofileEncode({ pubkey: this.data.pubkey, relays: [] })
+  get userRelays() {
+    return userRelayStore.get(this.pubkey)
+  }
+
+  get relays() {
+    return userRelayStore.getRelays(this.pubkey) || []
+  }
+
+  get headRelay() {
+    return this.relays[0]
+  }
+
+  get connectedRelays() {
+    const relays = this.userRelays
+    if (relays) {
+      return relays.filter((userRelay) => {
+        const relay = relaysStore.relays.get(userRelay.relay)
+        return relay?.connected || false
       })
     }
+    return []
+  }
+
+  get nprofile() {
+    return encodeSafe(() => {
+      return nip19.nprofileEncode({
+        pubkey: this.pubkey,
+        relays: this.relays,
+      })
+    })
   }
 
   get following() {
-    return followsStore.get(this.data.pubkey)
+    return followsStore.get(this.pubkey)
   }
 }
-
-export default User
