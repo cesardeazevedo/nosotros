@@ -1,11 +1,11 @@
+import { IconButton } from '@/components/ui/IconButton/IconButton'
+import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 import { IconServerBolt } from '@tabler/icons-react'
 import { useMobile } from 'hooks/useMobile'
 import { observer } from 'mobx-react-lite'
-import { useState } from 'react'
-import type Note from 'stores/models/note'
-import ButtonContainer, { type ContainerProps } from './PostButtonContainer'
-import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
-import { IconButton } from '@/components/ui/IconButton/IconButton'
+import { useCallback } from 'react'
+import type { Note } from 'stores/models/note'
+import { ButtonContainer, type ContainerProps } from './PostButtonContainer'
 import { iconProps } from './utils'
 
 type Props = {
@@ -13,26 +13,24 @@ type Props = {
   dense?: boolean
 }
 
-const PostButtonRelays = observer(function PostRelays(props: Props & ContainerProps) {
+export const ButtonRelays = observer(function PostRelays(props: Props & ContainerProps) {
   const { note, dense = false } = props
-  const [open, setOpen] = useState(false)
   const isMobile = useMobile()
-  const mobileProps = isMobile ? { open, onClose: () => setOpen(false) } : {}
+
+  const handleClick = useCallback(() => {
+    note.toggleBroadcast()
+  }, [isMobile])
+
   return (
     <Tooltip
       cursor='arrow'
       key={isMobile.toString()}
       enterDelay={0}
-      {...mobileProps}
-      text={<div>{note.seenOn?.map((relay) => <div key={relay}>{relay.replace('wss://', '')}</div>)}</div>}>
-      <ButtonContainer
-        value={note.seenOn?.length || 0}
-        dense={dense}
-        onClick={() => isMobile && setOpen(true)}
-        aria-label='Seen on relays'>
+      text={<div>Seen on {note.seenOn?.map((relay) => <div key={relay}>{relay.replace('wss://', '')}</div>)}</div>}>
+      <ButtonContainer value={note.seenOn?.length || 0} dense={dense} aria-label='Seen on relays'>
         <IconButton
-          disabledRipple
           size={dense ? 'sm' : 'md'}
+          onClick={handleClick}
           icon={
             <IconServerBolt size={dense ? iconProps.size$dense : iconProps.size} strokeWidth={iconProps.strokeWidth} />
           }
@@ -41,5 +39,3 @@ const PostButtonRelays = observer(function PostRelays(props: Props & ContainerPr
     </Tooltip>
   )
 })
-
-export default PostButtonRelays

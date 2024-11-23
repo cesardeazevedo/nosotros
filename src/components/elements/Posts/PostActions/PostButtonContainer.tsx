@@ -18,7 +18,7 @@ type Props = {
   onClick?: (e?: unknown) => void
 }
 
-function ButtonContainer(props: Props & ContainerProps) {
+export const ButtonContainer = (props: Props & ContainerProps) => {
   const { sx, active, value, children, dense } = props
   return (
     <html.div style={[styles.root, sx]}>
@@ -50,5 +50,3 @@ const styles = css.create({
   },
   label$dense: {},
 })
-
-export default ButtonContainer

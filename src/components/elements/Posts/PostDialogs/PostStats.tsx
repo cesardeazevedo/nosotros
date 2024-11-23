@@ -1,5 +1,4 @@
 import { Button } from '@/components/ui/Button/Button'
-import { Divider } from '@/components/ui/Divider/Divider'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Paper } from '@/components/ui/Paper/Paper'
@@ -12,8 +11,7 @@ import { githubDarkTheme } from '@uiw/react-json-view/githubDark'
 import React from 'react'
 import { RemoveScroll } from 'react-remove-scroll'
 import { css, html } from 'react-strict-dom'
-import type Note from 'stores/models/note'
-import UserHeader from '../../User/UserHeader'
+import type { Note } from 'stores/models/note'
 
 type Props = {
   note: Note
@@ -25,12 +23,14 @@ const Panel = (props: { children: React.ReactNode; label: string; value?: object
     <Expandable
       defaultExpanded={defaultExpanded}
       trigger={({ expand, expanded }) => (
-        <Stack gap={1} sx={styles.panel} onClick={() => expand(!expanded)}>
-          <IconButton icon={expanded ? <IconChevronDown size={20} /> : <IconChevronRight size={20} />} />
-          <Text variant='title' size='md'>
-            {label}
-          </Text>
-        </Stack>
+        <>
+          <Stack gap={1} sx={styles.panel} onClick={() => expand(!expanded)}>
+            <IconButton icon={expanded ? <IconChevronDown size={20} /> : <IconChevronRight size={20} />} />
+            <Text variant='title' size='sm'>
+              {label}
+            </Text>
+          </Stack>
+        </>
       )}>
       {children}
     </Expandable>
@@ -54,7 +54,7 @@ const JsonContent = function PostUserJson(props: { value?: object }) {
   )
 }
 
-function PostStats(props: Props) {
+export const PostStats = (props: Props) => {
   const { note } = props
   return (
     <RemoveScroll>
@@ -72,7 +72,6 @@ function PostStats(props: Props) {
             <Panel defaultExpanded label='Raw Event'>
               <JsonContent value={note.event} />
             </Panel>
-            <Divider />
             <Panel label='User Raw Event'>
               <JsonContent value={note.user?.meta} />
             </Panel>
@@ -107,8 +106,7 @@ const styles = css.create({
     overflow: 'hidden',
   },
   panel: {
+    cursor: 'pointer',
     padding: spacing.padding1,
   },
 })
-
-export default PostStats

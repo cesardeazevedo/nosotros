@@ -1,14 +1,15 @@
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 import { settingsStore } from '@/stores/ui/settings.store'
-import { IconBolt } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
-import type Note from 'stores/models/note'
+import type { Note } from 'stores/models/note'
 import { zapStore } from 'stores/nostr/zaps.store'
-import ButtonContainer, { type ContainerProps } from './PostButtonContainer'
+import { ButtonContainer, type ContainerProps } from './PostButtonContainer'
 import { iconProps } from './utils'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { css } from 'react-strict-dom'
+import { IconBolt } from '@tabler/icons-react'
+import { useTheme } from '@/hooks/useTheme'
 
 type Props = {
   note: Note
@@ -17,7 +18,7 @@ type Props = {
 }
 
 const themes = {
-  light: [colors.violet11, colors.violet10, colors.violet9, colors.violet8, colors.violet7, colors.violet6],
+  light: [colors.violet10, colors.violet10, colors.violet9, colors.violet8, colors.violet7, colors.violet6],
   dark: [colors.violet1, colors.violet2, colors.violet3, colors.violet4, colors.violet5, colors.violet6],
 } as const
 
@@ -39,11 +40,11 @@ function getZapColor(zapAmount: number, palette: (typeof themes)['light'] | (typ
 
 const formatter = new Intl.NumberFormat()
 
-const ButtonZap = observer(function ButtonZap(props: Props & ContainerProps) {
+export const ButtonZap = observer(function ButtonZap(props: Props & ContainerProps) {
   const { dense, onClick, note, ...rest } = props
-  const theme = settingsStore.theme === 'light' ? 'light' : 'dark'
+  const theme = useTheme(settingsStore.theme)
   const total = zapStore.getTotal(note.id) || ''
-  const palette = themes[theme]
+  const palette = themes[theme.key as 'light' | 'dark']
   return (
     <ButtonContainer
       {...rest}
@@ -77,5 +78,3 @@ const styles = css.create({
   [colors.violet11]: { color: colors.violet11 },
   [colors.violet12]: { color: colors.violet12 },
 })
-
-export default ButtonZap

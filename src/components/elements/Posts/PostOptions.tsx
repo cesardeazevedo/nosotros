@@ -1,3 +1,4 @@
+import { Avatar } from '@/components/ui/Avatar/Avatar'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Menu } from '@/components/ui/Menu/Menu'
@@ -10,18 +11,19 @@ import {
   IconBookmark,
   IconCopy,
   IconDotsVertical,
+  IconExternalLink,
   IconEyeOff,
   IconInfoSquareRounded,
   IconLink,
   IconUserMinus,
 } from '@tabler/icons-react'
-import Dialog from 'components/elements/Layouts/Dialog'
+import { DialogSheet } from 'components/elements/Layouts/Dialog'
 import { observer } from 'mobx-react-lite'
 import { useCallback, useState } from 'react'
-import { css } from 'react-strict-dom'
+import { css, html } from 'react-strict-dom'
 import { toast } from 'sonner'
-import type Note from 'stores/models/note'
-import PostStats from './PostDialogs/PostStats'
+import type { Note } from 'stores/models/note'
+import { PostStats } from './PostDialogs/PostStats'
 
 type Props = {
   note: Note
@@ -29,6 +31,7 @@ type Props = {
 }
 
 type PropsOptions = {
+  note: Note
   onCopyIdClick: () => void
   onCopyAuthorIdClick: () => void
   onCopyLinkClick: () => void
@@ -39,7 +42,93 @@ function isMobileDevice() {
   return 'ontouchstart' in window
 }
 
-function Options(props: PropsOptions) {
+const PostMenuOpenInItems = (props: { nevent: string; isMobile?: boolean }) => {
+  const { nevent, isMobile = false } = props
+  return (
+    <>
+      <MenuItem
+        href={`https://coracle.social/notes/${nevent}`}
+        target='_blank'
+        rel='noreferrer'
+        leadingIcon={<Avatar size='xs' src='/clients/coracle.png' />}
+        label='Coracle'
+        onClick={() => {}}
+      />
+      <MenuItem
+        href={`https://njump.me/${nevent}`}
+        target='_blank'
+        rel='noreferrer'
+        leadingIcon={<Avatar size='xs' src='/clients/njump.png' />}
+        label='Njump'
+      />
+      <MenuItem
+        href={`https://nostrudel.ninja/#/n/${nevent}`}
+        target='_blank'
+        rel='noreferrer'
+        leadingIcon={<Avatar size='xs' src='/clients/nostrudel.png' />}
+        label='NoStrudel'
+      />
+      <MenuItem
+        href={`https://snort.social/${nevent}`}
+        target='_blank'
+        rel='noreferrer'
+        leadingIcon={<Avatar size='xs' src='/clients/snort.svg' />}
+        label='Snort'
+      />
+      <MenuItem
+        href={`https://iris.to/${nevent}`}
+        target='_blank'
+        rel='noreferrer'
+        leadingIcon={<Avatar size='xs' src='/clients/iris.webp' />}
+        label='Iris'
+      />
+      <MenuItem
+        href={isMobile ? `primal:nostr:${nevent}` : `https://primal.net/e/${nevent}`}
+        target='_blank'
+        rel='noreferrer'
+        leadingIcon={<Avatar size='xs' src='/clients/primal.svg' />}
+        label='Primal'
+        onClick={() => {}}
+      />
+      <MenuItem
+        href={isMobile ? `damus:nostr:${nevent}` : `https://damus.io/${nevent}`}
+        target='_blank'
+        rel='noreferrer'
+        leadingIcon={<Avatar size='xs' src='/clients/damus.png' />}
+        label='Damus'
+        onClick={() => {}}
+      />
+    </>
+  )
+}
+
+const PostMenuOpenIn = observer(function PostMenuOpenIn(props: { nevent: string }) {
+  const { nevent } = props
+  const isMobile = isMobileDevice()
+  const [open, setOpen] = useState(false)
+  return (
+    <>
+      <Divider />
+      {isMobile && (
+        <DialogSheet open={open} onClose={() => setOpen(false)} mobileAnchor='middle'>
+          <html.div style={styles.clientHeader}>
+            <Text variant='label' size='lg'>
+              Choose a nostr app
+            </Text>
+          </html.div>
+          <MenuList elevation={0} sx={styles.menuList}>
+            <PostMenuOpenInItems nevent={nevent} />
+          </MenuList>
+        </DialogSheet>
+      )}
+      <MenuItem leadingIcon={<IconExternalLink />} label='Open In' onClick={() => isMobile && setOpen(true)}>
+        {!isMobile && <PostMenuOpenInItems nevent={nevent} />}
+      </MenuItem>
+    </>
+  )
+})
+
+const Options = observer(function (props: PropsOptions) {
   return (
     <>
       <MenuItem leadingIcon={<IconInfoSquareRounded />} label='Details' onClick={props.onDetailsClick} />
@@ -47,6 +136,7 @@ function Options(props: PropsOptions) {
       <MenuItem leadingIcon={<IconCopy />} label='Copy ID' onClick={props.onCopyIdClick} />
       <MenuItem leadingIcon={<IconCopy />} label='Copy Author ID' onClick={props.onCopyAuthorIdClick} />
       <MenuItem leadingIcon={<IconLink />} label='Copy Link' onClick={props.onCopyLinkClick} />
+      <PostMenuOpenIn nevent={props.note.nevent} />
       <Divider />
       <Text variant='label' size='sm' sx={styles.label}>
         Coming Soon
@@ -56,9 +146,9 @@ function Options(props: PropsOptions) {
       <MenuItem disabled variant='danger' leadingIcon={<IconUserMinus />} label='Unfollow' />
     </>
   )
-}
+})
 
-const PostOptions = observer(function PostOptions(props: Props) {
+export const PostOptions = observer(function PostOptions(props: Props) {
   const { dense = false, note } = props
   const [debugDialog, setDebugDialog] = useState(false)
   const [open, setOpen] = useState(false)
@@ -75,13 +165,17 @@ const PostOptions = observer(function PostOptions(props: Props) {
           const type = 'text/plain'
           const blob = new Blob([value], { type })
           window.navigator.clipboard.write([new ClipboardItem({ [type]: blob })]).then(() => {
-            toast('Copied', { closeButton: false, position: 'bottom-right', style: { right: 0, width: 'fit-content' } })
+            toast('Copied', {
+              closeButton: false,
+              position: 'top-right',
+              style: { top: 50, right: 0, width: 'fit-content' },
+            })
             handleClose()
           })
         }
       }
     },
-    [handleClose],
+    [note, handleClose],
   )
 
   const handleDetailsDialog = useCallback(() => {
@@ -93,13 +187,14 @@ const PostOptions = observer(function PostOptions(props: Props) {
 
   return (
     <>
-      <Dialog title='Stats' open={debugDialog} onClose={handleClose} maxWidth='sm'>
+      <DialogSheet title='Stats' open={debugDialog} onClose={handleClose} maxWidth='sm'>
         <PostStats note={note} />
-      </Dialog>
+      </DialogSheet>
       {!isMobile && (
         <Menu
           sx={styles.menu}
           placement='bottom-end'
+          surface='surfaceContainerLow'
           trigger={({ getProps }) => (
             <IconButton
               {...getProps()}
@@ -108,6 +203,7 @@ const PostOptions = observer(function PostOptions(props: Props) {
             />
           )}>
           <Options
+            note={note}
             onCopyIdClick={handleCopy(nevent)}
             onCopyAuthorIdClick={handleCopy(note.nprofile as string | undefined)}
             onCopyLinkClick={handleCopy(link)}
@@ -122,10 +218,11 @@ const PostOptions = observer(function PostOptions(props: Props) {
             onClick={() => setOpen(true)}
             icon={<IconDotsVertical stroke='currentColor' strokeWidth='2.0' size={20} />}
           />
-          <Dialog open={open} onClose={() => setOpen(false)} mobileAnchor='middle'>
+          <DialogSheet open={open} onClose={() => setOpen(false)} mobileAnchor='middle'>
             <Stack horizontal={false}>
               <MenuList elevation={0} sx={styles.menuList}>
                 <Options
+                  note={note}
                   onCopyIdClick={handleCopy(nevent)}
                   onCopyAuthorIdClick={handleCopy(note.nprofile as string | undefined)}
                   onCopyLinkClick={handleCopy(link)}
@@ -133,7 +230,7 @@ const PostOptions = observer(function PostOptions(props: Props) {
                 />
               </MenuList>
             </Stack>
-          </Dialog>
+          </DialogSheet>
         </>
       )}
     </>
@@ -148,8 +245,11 @@ const styles = css.create({
     marginLeft: spacing.margin2,
   },
   menuList: {
+    backgroundColor: 'transparent',
     width: '100%',
   },
+  clientHeader: {
+    paddingBlock: spacing.padding1,
+    paddingInline: spacing.padding2,
+  },
 })
-
-export default PostOptions

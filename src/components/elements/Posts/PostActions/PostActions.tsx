@@ -1,13 +1,14 @@
 import { Stack } from '@/components/ui/Stack/Stack'
-import { Observer } from 'mobx-react-lite'
-import { css } from 'react-strict-dom'
-import type Note from 'stores/models/note'
-import ButtonReaction from './PostButtonReaction'
-import ButtonRelays from './PostButtonRelay'
-import ButtonReply from './PostButtonReply'
-import ButtonRepost from './PostButtonRepost'
-import ButtonZap from './PostButtonZap'
+import type { SxProps } from '@/components/ui/types'
 import { useMobile } from '@/hooks/useMobile'
+import { observer } from 'mobx-react-lite'
+import { css } from 'react-strict-dom'
+import type { Note } from 'stores/models/note'
+import { ButtonReaction } from './PostButtonReaction'
+import { ButtonRelays } from './PostButtonRelay'
+import { ButtonReply } from './PostButtonReply'
+import { ButtonRepost } from './PostButtonRepost'
+import { ButtonZap } from './PostButtonZap'
 
 type Props = {
   note: Note
@@ -17,26 +18,38 @@ type Props = {
   renderRepost?: boolean
   renderReply?: boolean
   renderZap?: boolean
+  sx?: SxProps
 }
 
-function PostActions(props: Props) {
-  const { note, renderRepost = true, renderReply = true, renderZap = true, renderRelays = true, dense = false } = props
+export const PostActions = observer(function PostActions(props: Props) {
+  const {
+    note,
+    renderRepost = true,
+    renderReply = true,
+    renderZap = true,
+    renderRelays = true,
+    dense = false,
+    sx,
+  } = props
   const mobile = useMobile()
 
   return (
-    <Stack horizontal sx={[styles.root, dense && styles.root$dense]} gap={dense ? 0 : mobile ? 0 : 1}>
+    <Stack horizontal sx={[styles.root, dense && styles.root$dense, sx]} gap={dense ? 0 : mobile ? 0 : 1}>
       <ButtonReaction note={note} dense={dense} />
-      {renderRepost && <ButtonRepost dense={dense} />}
-      <Observer>
-        {() => (
-          <>{renderReply && <ButtonReply dense={dense} value={note.totalReplies} onClick={props.onReplyClick} />}</>
-        )}
-      </Observer>
+      {renderRepost && <ButtonRepost dense={dense} value={note.repostTotal} />}
+      {renderReply && (
+        <ButtonReply
+          dense={dense}
+          value={note.repliesTotal}
+          selected={note.repliesOpen || note.isReplying || false}
+          onClick={props.onReplyClick}
+        />
+      )}
       {renderZap && <ButtonZap dense={dense} note={note} />}
       {renderRelays && <ButtonRelays dense={dense} note={note} />}
     </Stack>
   )
-}
+})
 
 const styles = css.create({
   root: {
@@ -48,5 +61,3 @@ const styles = css.create({
     justifyContent: 'flex-start',
   },
 })
-
-export default PostActions
