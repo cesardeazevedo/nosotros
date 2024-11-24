@@ -1,33 +1,55 @@
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Content } from 'components/elements/Content/Content'
-import { UserHeaderDate } from 'components/elements/User/UserHeader'
-import UserName from 'components/elements/User/UserName'
+import { UserName } from 'components/elements/User/UserName'
 import { observer } from 'mobx-react-lite'
-import type Note from 'stores/models/note'
-import { userStore } from 'stores/nostr/users.store'
-import PostContentWrapper from '../PostContentWrapper'
+import type { Node } from 'nostr-editor'
+import React from 'react'
+import type { Note } from 'stores/models/note'
+import { BubbleContainer } from '../../Content/Layout/Bubble'
+import { UserHeaderDate } from '../../User/UserHeaderDate'
+import { UserNIP05 } from '../../User/UserNIP05'
+import { PostContentWrapper } from '../PostContentWrapper'
 
 type Props = {
   note: Note
 }
 
+const NonBubbleNodes = [
+  'image',
+  'video',
+  'youtube',
+  'nevent',
+  'bolt11',
+  'naddr',
+  'bolt11',
+  'tweet',
+  'codeBlock',
+] as Node['type'][]
+
 export const ReplyUserHeader = observer((props: { note: Note }) => {
-  const user = userStore.get(props.note.event?.pubkey)
+  const { note } = props
   return (
-    <Stack gap={1}>
-      <UserName user={user} />
-      <UserHeaderDate note={props.note} />
+    <Stack horizontal={false}>
+      <Stack gap={1} align='center'>
+        <UserName pubkey={note.event.pubkey} />
+        <UserHeaderDate nevent={note.nevent} date={note.event.created_at} />
+      </Stack>
+      <UserNIP05 pubkey={note.event.pubkey} />
     </Stack>
   )
 })
 
-const PostReplyContent = observer(function PostReplyContent(props: Props) {
+export const PostReplyContent = observer(function PostReplyContent(props: Props) {
   const { note } = props
   return (
     <PostContentWrapper bubble note={note}>
-      <Content dense bubble note={note} header={<ReplyUserHeader note={note} />} />
+      <Content
+        dense
+        bubble
+        note={note}
+        children={(index) => index === 0 && <ReplyUserHeader note={note} />}
+        wrapper={(node) => (NonBubbleNodes.includes(node.type) ? React.Fragment : BubbleContainer)}
+      />
     </PostContentWrapper>
   )
 })
-
-export default PostReplyContent

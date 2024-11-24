@@ -9,7 +9,7 @@ type Props = {
   rows?: number
 }
 
-const PostRepliesLoading = React.memo((props: Props) => {
+export const PostRepliesLoading = React.memo((props: Props) => {
   const { rows = 1 } = props
   return (
     <>
@@ -29,7 +29,7 @@ const PostRepliesLoading = React.memo((props: Props) => {
 const styles = css.create({
   root: {
     position: 'relative',
-    paddingBlock: spacing['padding0.5'],
+    paddingBottom: spacing.padding1,
     paddingInline: spacing.padding2,
   },
   content: {
@@ -51,5 +51,3 @@ const styles = css.create({
     borderRadius: shape.lg,
   },
 })
-
-export default PostRepliesLoading
