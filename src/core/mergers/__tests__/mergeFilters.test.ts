@@ -128,4 +128,20 @@ describe('mergeFilters', () => {
       { kinds: [3], authors: ['8', '9'] },
     ])
   })
+
+  test('Should not mutate original filters', () => {
+    const filter1 = { kinds: [1], author: ['1'] }
+    const filter2 = { kinds: [6], author: ['2'] }
+    const clone1 = structuredClone(filter1)
+    const clone2 = structuredClone(filter2)
+    const result = mergeFilters([filter1, filter2])
+    expect(result).toStrictEqual([
+      {
+        kinds: [1, 6],
+        author: ['1'],
+      },
+    ])
+    expect(filter1).toStrictEqual(clone1)
+    expect(filter2).toStrictEqual(clone2)
+  })
 })

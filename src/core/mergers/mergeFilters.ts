@@ -19,12 +19,18 @@ export function mergeFilters(filters: NostrFilter[]): NostrFilter[] {
         .toString()
 
     if (!groups[key]) {
-      groups[key] = { ...filter }
+      groups[key] = structuredClone(filter)
     }
     for (const filterKey of FILTER_ARRAY_FIELDS) {
-      const value = filter[filterKey] as string[]
-      if (value) {
-        ;(groups[key][filterKey] as string[]) = [...new Set([...(groups[key][filterKey] as string[]), ...value])]
+      const values = filter[filterKey]
+      if (values && Array.isArray(values)) {
+        for (const value of values) {
+          if (value) {
+            if ((groups[key][filterKey] as unknown[]).indexOf(value) === -1) {
+              ;(groups[key][filterKey] as unknown[]).push(value)
+            }
+          }
+        }
       }
     }
   }
