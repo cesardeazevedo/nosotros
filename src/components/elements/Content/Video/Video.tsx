@@ -4,7 +4,7 @@ import { useContext, useMemo } from 'react'
 import { css } from 'react-strict-dom'
 import { ContentContext } from '../Content'
 
-export type Props = {
+type Props = {
   src: string
   loop?: boolean
   muted?: boolean
@@ -13,7 +13,7 @@ export type Props = {
   preload?: HTMLVideoElement['preload']
 }
 
-export function Video(props: Props) {
+export const Video = (props: Props) => {
   const { src, controls = true, muted = false, loop = false, autoPlay = false, preload = 'metadata' } = props
   const { dense } = useContext(ContentContext)
   const extension = useMemo(() => new URL(src).pathname.split('.').pop(), [src])
@@ -39,8 +39,9 @@ const styles = css.create({
     marginRight: spacing.margin2,
     marginBottom: spacing.margin1,
     borderRadius: shape.lg,
-    width: 'calc(100% - 32px)',
+    width: 'fit-content',
     maxHeight: 400,
+    maxWidth: 'calc(100% - 32px)',
     backgroundColor: '#000',
   },
   root$dense: {
