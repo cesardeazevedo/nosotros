@@ -1,9 +1,10 @@
+import { Kind } from '@/constants/kinds'
+import { RELAY_1 } from '@/constants/testRelays'
 import { IDBStorage } from 'db/indexeddb/idb'
 import type { IDBPDatabase } from 'idb'
 import { fakeNote } from 'utils/faker'
 import { test } from 'utils/fixtures'
 import type { IndexedDBSchema } from '../../idb.schemas'
-import { RELAY_1 } from '@/constants/testRelays'
 
 async function getAndAssertEvent(db: IDBPDatabase<IndexedDBSchema>, id: string) {
   expect((await db.get('events', id))?.id).toStrictEqual(id)
@@ -107,5 +108,49 @@ describe('Test storage', () => {
     expect(await idb.event.queryByPubkey(10002, '1')).toStrictEqual(event2)
     await idb.event.insert(event3)
     expect(await idb.event.queryByPubkey(10002, '1')).toStrictEqual(event2)
+  })
+
+  test('assert deleted tags from replaceable events', async () => {
+    const base = { kind: Kind.Reaction, content: '+', pubkey: '2' }
+    const eventId = '10'
+    const event1 = fakeNote({ ...base, id: '1', tags: [['e', eventId]] })
+    const event2 = fakeNote({ ...base, id: '2', tags: [['e', eventId]] })
+    const event3 = fakeNote({ ...base, id: '3', tags: [['e', eventId]] })
+    const event4 = fakeNote({ ...base, id: '4', tags: [['e', eventId]] })
+    const event5 = fakeNote({
+      ...base,
+      id: '5',
+      tags: [
+        ['e', eventId],
+        ['e', eventId],
+      ],
+    }) // duplicated
+    const event6 = fakeNote({ kind: Kind.Follows, id: '20', pubkey: '1', created_at: 10, tags: [['p', '1']] })
+    const event7 = fakeNote({
+      kind: Kind.Follows,
+      id: '30',
+      pubkey: '1',
+      created_at: 12,
+      tags: [
+        ['p', '1'],
+        ['p', '2'],
+      ],
+    })
+    const idb = new IDBStorage('testtags')
+    await idb.event.insert(event1)
+    await idb.event.insert(event2)
+    await idb.event.insert(event3)
+    expect(await idb.event.countTags(Kind.Reaction, 'e', eventId)).toBe(3)
+    await idb.event.insert(event4)
+    expect(await idb.event.countTags(Kind.Reaction, 'e', eventId)).toBe(4)
+    await idb.event.insert(event5)
+    expect(await idb.event.countTags(Kind.Reaction, 'e', eventId)).toBe(5)
+    await idb.event.insert(event6)
+    expect(await idb.event.countTags(Kind.Follows, 'p', '1')).toBe(1)
+    expect(await idb.event.countTags(Kind.Follows, 'p', '2')).toBe(0)
+    await idb.event.insert(event7)
+    expect(await idb.event.countTags(Kind.Follows, 'p', '1')).toBe(1)
+    expect(await idb.event.countTags(Kind.Follows, 'p', '2')).toBe(1)
+    expect(await idb.event.countTags(Kind.Reaction, 'e', eventId)).toBe(5)
   })
 })

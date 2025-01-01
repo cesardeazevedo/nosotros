@@ -22,6 +22,12 @@ export class IDBEventStore {
     )
   }
 
+  async countTags(kind: Kind, tag: string, value: string, created_at?: number) {
+    const db = await this.db
+    const key = IDBKeyRange.bound([kind, tag, value, created_at || 0], [kind, tag, value, created_at || Infinity])
+    return await db.countFromIndex('tags', 'kind_tag_value_created_at', key)
+  }
+
   async insert(data: NostrEvent) {
     const db = await this.db
     const tx = db.transaction(['events', 'tags'], 'readwrite')
@@ -39,10 +45,11 @@ export class IDBEventStore {
 
       if (data.created_at > latestDate) {
         if (eventFound) {
-          await Promise.all([events.delete(eventFound.id), tags.delete(IDBKeyRange.lowerBound([eventFound.id]))])
+          await Promise.all([
+            events.delete(eventFound.id),
+            ...eventFound.tags.map((tag) => tags.delete([eventFound.id, tag[0], tag[1]])),
+          ])
         }
-      } else {
-        return false
       }
     }
 
