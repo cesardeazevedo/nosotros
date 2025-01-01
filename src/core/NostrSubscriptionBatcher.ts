@@ -12,6 +12,7 @@ import {
   of,
   pipe,
   share,
+  shareReplay,
   tap,
 } from 'rxjs'
 import type { NostrSubscription } from './NostrSubscription'
@@ -38,7 +39,7 @@ export class NostrSubscriptionBatcher {
     )
 
     this.buffer$.subscribe((parent) => {
-      const events$ = options.subscribe(parent).pipe(share())
+      const events$ = options.subscribe(parent).pipe(shareReplay())
       this.subscriptions.set(parent.id, events$)
     })
   }
