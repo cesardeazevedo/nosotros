@@ -2,14 +2,14 @@ export function dedupe<T>(...arrays: Array<Array<T | T[] | undefined | null> | u
   const set = new Set()
   const data = [].concat(...(arrays as never[]))
   for (const item of data) {
-    if (item != null) {
+    if (item !== '' && item != null) {
       if (Array.isArray(item)) {
         for (const item2 of item as never[]) {
-          if (item2 != null) {
+          if (item2 !== '' && item2 != null) {
             set.add(item2)
           }
         }
-      } else if (item != null) {
+      } else if (item !== '' && item != null) {
         set.add(item)
       }
     }
