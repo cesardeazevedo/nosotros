@@ -1,43 +1,48 @@
-import { DEFAULT_RELAYS } from 'constants/relays'
-import { NIP07Signer } from 'core/signers/nip07.signer'
-import { makeAutoObservable } from 'mobx'
-import type { NostrClientOptions } from 'nostr/nostr'
-import { authStore, type Account } from './ui/auth.store'
-import { NostrContext } from './ui/nostr.context'
-import { settingsStore } from './ui/settings.store'
+import { APP_STORAGE_KEY } from '@/constants/app'
+import { reactotron } from '@/ReactotronConfig'
+import type { Instance, SnapshotIn } from 'mobx-state-tree'
+import { applySnapshot, onSnapshot, t } from 'mobx-state-tree'
+import { AuthStoreModel } from './auth/auth.store'
+import { NostrContextModel } from './context/nostr.context.store'
+import { NostrSettingsModel } from './context/nostr.settings.store'
+import { DeckStoreModel } from './deck/deck.store'
+import { initialState } from './helpers/initialState'
+import { storage } from './persisted/storage'
+import { GlobalSettingsModel } from './settings/settings.global.store'
+import { WelcomeModuleModel } from './welcome/welcome.module'
 
-class RootStore {
-  rootContext: NostrContext
+export const RootStoreModel = t.model('RootStoreModel', {
+  auth: AuthStoreModel,
+  decks: DeckStoreModel,
 
-  constructor() {
-    this.rootContext = new NostrContext(this.getContextOptions(authStore.currentAccount))
+  defaultContext: NostrContextModel,
+  nostrSettings: NostrSettingsModel,
+  globalSettings: GlobalSettingsModel,
 
-    authStore.on({
-      onLogin: this.onLogin.bind(this),
-      onLogout: this.onLogout.bind(this),
-    })
+  welcome: WelcomeModuleModel,
+})
 
-    makeAutoObservable(this)
-  }
+const RootStoreViewsModel = RootStoreModel.views((self) => ({
+  get rootContext() {
+    return self.auth.selected?.context || self.defaultContext
+  },
+}))
 
-  getContextOptions(account?: Account): NostrClientOptions {
-    const settings = settingsStore.nostrSettings
-    if (account) {
-      const pubkey = account.pubkey
-      const signer = account.signer === 'nip07' ? new NIP07Signer() : undefined
-      return { pubkey, signer, settings }
-    } else {
-      return { relays: DEFAULT_RELAYS, settings }
-    }
-  }
+export const rootStore = RootStoreViewsModel.create({
+  ...initialState,
+})
 
-  onLogin(account: Account) {
-    this.rootContext.setClient(this.getContextOptions(account))
-  }
-
-  onLogout() {
-    this.rootContext.setClient(this.getContextOptions())
-  }
+const snapshot = storage.getItem(APP_STORAGE_KEY)
+if (RootStoreViewsModel.is(snapshot)) {
+  applySnapshot(rootStore, snapshot)
 }
 
-export const rootStore = new RootStore()
+// @ts-ignore
+reactotron.trackMstNode(rootStore)
+
+onSnapshot(rootStore, (snapshot) => {
+  storage.setItem(APP_STORAGE_KEY, snapshot)
+})
+
+export interface RootStore extends Instance<typeof RootStoreModel> {}
+export interface RootStoreSnapshotIn extends SnapshotIn<typeof RootStoreModel> {}
