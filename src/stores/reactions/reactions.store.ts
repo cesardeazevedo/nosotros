@@ -1,6 +1,6 @@
+import { isEventTag } from '@/nostr/helpers/parseTags'
 import type { NostrEvent } from 'core/types'
 import { makeAutoObservable, observable } from 'mobx'
-import { isEventTag } from '@/nostr/helpers/parseTags'
 
 type ReactionPubkeys = {
   [emoji: string]: string[]
@@ -27,6 +27,7 @@ export function fallbackEmoji(emoji?: string) {
 export class ReactionStore {
   reactions = observable.map<string, ReactionPubkeys>({}, { deep: true })
   reactionsByPubkey = observable.map<string, PubkeyReactions>({}, { deep: true })
+  reactionsCount = observable.map<string, number>()
 
   constructor() {
     makeAutoObservable(this)
@@ -45,6 +46,7 @@ export class ReactionStore {
     if (pubkey) {
       return this.reactionsByPubkey.get(noteId)?.[pubkey]
     }
+    return undefined
   }
 
   sorted(noteId: string) {
@@ -55,7 +57,9 @@ export class ReactionStore {
   }
 
   getTotal(noteId: string) {
-    return Object.values(this.getByNoteId(noteId) || {}).flat().length || 0
+    const total = Object.values(this.getByNoteId(noteId) || {}).flat().length || 0
+    const totalCount = this.reactionsCount.get(noteId) || 0
+    return total + totalCount
   }
 
   add(event: NostrEvent) {
@@ -82,6 +86,10 @@ export class ReactionStore {
       this.reactionsByPubkey.set(noteId, pubkeysForNote)
       this.reactions.set(noteId, reactionsForNote)
     }
+  }
+
+  addCount(id: string, count: number) {
+    this.reactionsCount.set(id, count)
   }
 }
 

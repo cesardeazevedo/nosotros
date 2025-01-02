@@ -1,12 +1,12 @@
 import type { NostrFilter } from '@/core/types'
-import type { Note } from '@/stores/models/note'
-import { zapStore } from '@/stores/nostr/zaps.store'
+import { zapStore } from '@/stores/zaps/zaps.store'
 import { Kind } from 'constants/kinds'
 import { decode } from 'light-bolt11-decoder'
 import type { NostrEvent } from 'nostr-tools'
-import type { NostrClient, ClientSubOptions } from 'nostr/nostr'
+import type { ClientSubOptions, NostrClient } from 'nostr/nostr'
 import type { ZapMetadataDB } from 'nostr/types'
-import { EMPTY, tap } from 'rxjs'
+import { tap } from 'rxjs'
+import { parseTags } from '../helpers/parseTags'
 import { mapMetadata } from '../operators/mapMetadata'
 
 const kinds = [Kind.Zap]
@@ -17,9 +17,10 @@ export class NIP57Zaps {
   constructor(private client: NostrClient) {}
 
   decode(event: NostrEvent) {
-    const bolt11 = event.tags.find((tag) => tag[0] === 'bolt11')?.[1]
-    if (bolt11) {
-      const decoded = decode(bolt11)
+    const { bolt11, ...tags } = parseTags(event.tags)
+    const lnbc = bolt11?.[0][1]
+    if (lnbc) {
+      const decoded = decode(lnbc)
       const data = decoded.sections.reduce(
         (acc, x) => {
           if (BOLT11_KEYS.includes(x.name)) {
@@ -36,6 +37,7 @@ export class NIP57Zaps {
         id: event.id,
         kind: event.kind,
         bolt11: data,
+        tags,
       } as ZapMetadataDB
     }
     return {
@@ -44,26 +46,13 @@ export class NIP57Zaps {
     } as ZapMetadataDB
   }
 
-  subFromNote(note: Note, options?: ClientSubOptions) {
-    const ids = [note.id, ...note.meta.mentionedNotes]
-    const filter: NostrFilter = { kinds, '#e': ids }
-    return this.subscribe(
-      { ...filter, since: note.meta.lastSyncedAt },
-      {
-        ...options,
-        cacheFilter: filter,
-      },
-    )
-  }
-
   subscribe(filter: NostrFilter, options?: ClientSubOptions) {
-    if (this.client.settings.nip57enabled) {
-      return this.client.subscribe({ kinds, ...filter }, options).pipe(
+    return this.client
+      .subscribe({ kinds, ...filter }, { ...options, cacheFilter: { kinds, ...options?.cacheFilter } })
+      .pipe(
         mapMetadata(this.decode),
 
         tap(([event, metadata]) => zapStore.add(event, metadata)),
       )
-    }
-    return EMPTY
   }
 }

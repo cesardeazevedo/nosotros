@@ -1,7 +1,6 @@
 import type { ObservableMap } from 'mobx'
 import { makeAutoObservable, observable, values } from 'mobx'
 import type { NostrEvent } from 'nostr-tools'
-import { isEventTag } from '@/nostr/helpers/parseTags'
 import type { ZapMetadataDB } from 'nostr/types'
 
 export type ZapItem = {
@@ -23,7 +22,7 @@ export class ZapStore {
       const z = values(zaps)
         .flatMap((x) => x.bolt11)
         .reduce((acc, current) => {
-          const amount = parseInt(current.amount?.value || '0')
+          const amount = parseInt(current?.amount?.value || '0')
           return acc + amount
         }, 0)
       return z / 1000
@@ -32,9 +31,8 @@ export class ZapStore {
   }
 
   add(event: NostrEvent, metadata: ZapMetadataDB) {
-    const eventTag = event.tags.find((tag) => isEventTag(tag))
-    if (eventTag) {
-      const eventId = eventTag[1]
+    const eventId = metadata.tags['e']?.[0][1]
+    if (eventId) {
       const eventZap = this.zaps.get(eventId)
       const data: ZapItem = {
         id: event.id,

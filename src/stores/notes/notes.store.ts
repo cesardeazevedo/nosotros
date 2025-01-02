@@ -1,6 +1,8 @@
+import type { NoteMetadataDB } from '@/nostr/types'
 import { dedupe } from 'core/helpers'
 import { action, makeObservable, observable } from 'mobx'
-import type { Note } from '../models/note'
+import type { NostrEvent } from 'nostr-tools'
+import { Note } from './note'
 
 export class NoteStore {
   notes = observable.map<string, Note>({}, { name: 'notes', deep: false })
@@ -8,7 +10,7 @@ export class NoteStore {
   addresses = new Map<string, string>()
 
   constructor() {
-    makeObservable<NoteStore, 'addReply'>(this, { add: action, addReply: action })
+    makeObservable(this, { add: action, addReply: action })
   }
 
   clear() {
@@ -20,21 +22,25 @@ export class NoteStore {
     return this.notes.get(id || '')
   }
 
-  add(note: Note) {
-    if (!this.notes.has(note.id)) {
+  add(event: NostrEvent, metadata: NoteMetadataDB) {
+    const found = this.notes.get(event.id)
+    if (!found) {
+      const note = new Note(event, metadata)
       this.notes.set(note.id, note)
       this.addAddress(note)
-      if (!note.meta.isRoot) {
+      if (!note.metadata.isRoot) {
         this.addReply(note)
       }
+      return note
     }
+    return found
   }
 
-  private addAddress(note: Note) {
-    this.addresses.set(`${note.event.kind}:${note.event.pubkey}:${note.meta.tags.dtags}`, note.id)
+  addAddress(note: Note) {
+    this.addresses.set(`${note.event.kind}:${note.event.pubkey}:${note.metadata.tags.dtags}`, note.id)
   }
 
-  private addReply(note: Note) {
+  addReply(note: Note) {
     const parentId = note.metadata.parentNoteId
     if (parentId) {
       this.replies.set(parentId, dedupe(this.replies.get(parentId), [note.id]))

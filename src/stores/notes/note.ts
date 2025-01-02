@@ -1,19 +1,18 @@
 import { pool } from '@/nostr/pool'
+import { noteStore } from '@/stores/notes/notes.store'
+import { seenStore } from '@/stores/seen/seen.store'
+import { userStore } from '@/stores/users/users.store'
+import { encodeSafe } from '@/utils/nip19'
 import { computed, makeAutoObservable } from 'mobx'
 import { computedFn } from 'mobx-utils'
 import type { NostrEvent } from 'nostr-tools'
 import { nip19 } from 'nostr-tools'
 import type { NostrClient } from 'nostr/nostr'
-import type { NoteMetadataDB, ZapMetadataDB } from 'nostr/types'
-import type { Observable } from 'rxjs'
-import { EMPTY, filter, finalize, merge, mergeMap, take } from 'rxjs'
-import { toast } from 'sonner'
-import { noteStore } from 'stores/nostr/notes.store'
-import { seenStore } from 'stores/nostr/seen.store'
-import { userStore } from 'stores/nostr/users.store'
-import { repostStore } from '../nostr/reposts.store'
-import type { Repost } from './repost'
-import type { User } from './user'
+import type { NoteMetadataDB } from 'nostr/types'
+import { filter, take } from 'rxjs'
+import { createComposeStore } from '../compose/compose.store'
+import { repostStore } from '../reposts/reposts.store'
+import type { User } from '../users/user'
 
 type ReplyStatus = 'IDLE' | 'LOADING' | 'LOADED'
 
@@ -27,9 +26,6 @@ export class Note {
   repliesStatus: ReplyStatus = 'IDLE'
 
   limit = PAGINATION_SIZE
-  offset = 0
-
-  localLastSyncedAt: number | null = null
 
   constructor(
     public event: NostrEvent,
@@ -38,7 +34,6 @@ export class Note {
     makeAutoObservable(this, {
       id: false,
       event: false,
-      meta: false,
       metadata: false,
       seenOn: computed.struct,
       replies: computed.struct,
@@ -46,15 +41,12 @@ export class Note {
       pow: computed.struct,
       images: computed.struct,
       headImage: computed.struct,
+      compose: computed({ keepAlive: true }),
     })
   }
 
   get id() {
     return this.event.id
-  }
-
-  get meta() {
-    return this.metadata
   }
 
   get user() {
@@ -70,11 +62,11 @@ export class Note {
   }
 
   get root() {
-    return noteStore.get(this.meta.rootNoteId)
+    return noteStore.get(this.metadata.rootNoteId)
   }
 
   get parent() {
-    return noteStore.get(this.meta.parentNoteId)
+    return noteStore.get(this.metadata.parentNoteId)
   }
 
   get totalReplies() {
@@ -82,12 +74,14 @@ export class Note {
   }
 
   get nevent() {
-    return nip19.neventEncode({
-      id: this.id,
-      author: this.event.pubkey,
-      kind: this.event.kind,
-      relays: this.seenOn,
-    })
+    return encodeSafe(() =>
+      nip19.neventEncode({
+        id: this.id,
+        author: this.event.pubkey,
+        kind: this.event.kind,
+        relays: this.seenOn,
+      }),
+    )
   }
 
   get nprofile() {
@@ -95,11 +89,15 @@ export class Note {
   }
 
   get pow() {
-    return this.meta.tags.nonce?.flat()
+    return this.metadata.tags.nonce?.flat()
   }
 
   get alt() {
-    return this.meta.tags.alt?.flat()?.[0]
+    return this.metadata.tags.alt?.flat()?.[0]
+  }
+
+  get compose() {
+    return createComposeStore({ parentNote: this })
   }
 
   isFollowing(user?: User) {
@@ -137,14 +135,14 @@ export class Note {
   })
 
   get replyTags(): NostrEvent['tags'] {
-    if (this.meta.isRoot) {
+    if (this.metadata.isRoot) {
       return [
         ['e', this.id, this.headRelay || '', 'root', this.event.pubkey],
         ['p', this.event.pubkey, this.user?.headRelay].filter((x) => x !== undefined),
       ]
     }
     return [
-      ['e', this.meta.rootNoteId, this.root?.headRelay || '', 'root', this.root?.event.pubkey].filter(
+      ['e', this.metadata.rootNoteId, this.root?.headRelay || '', 'root', this.root?.event.pubkey].filter(
         (x) => x !== undefined,
       ),
       ['e', this.id, this.headRelay || '', 'reply', this.event.pubkey],
@@ -161,7 +159,7 @@ export class Note {
   }
 
   get repostTotal() {
-    return repostStore.reposts.get(this.id)?.size || 0
+    return repostStore.byNotes.get(this.id)?.size || 0
   }
 
   get isLoading() {
@@ -192,8 +190,8 @@ export class Note {
     this.isReplying = open ?? !this.isReplying
   }
 
-  toggleReplies(open?: boolean) {
-    this.repliesOpen = open ?? !this.repliesOpen
+  toggleReplies(open?: boolean | null) {
+    this.repliesOpen = open !== null ? !this.repliesOpen : open
   }
 
   toggleBroadcast(open?: boolean) {
@@ -215,60 +213,6 @@ export class Note {
         filter((event) => event[2] === true),
         take(1),
       )
-      .subscribe({
-        error: (error: unknown) => {
-          if (error instanceof Error) {
-            toast(error.message)
-          }
-        },
-        next: () => {},
-      })
-  }
-
-  subscribe(
-    client: NostrClient,
-    options: {
-      zaps?: boolean
-      replies?: boolean
-      reactions?: boolean
-      reposts?: boolean
-    } = {},
-  ): Observable<Note | Repost | NostrEvent | [NostrEvent, ZapMetadataDB]> {
-    return merge(
-      options.zaps !== false ? this.subscribeZaps(client) : EMPTY,
-      options.replies !== false ? this.subscribeReplies(client) : EMPTY,
-      options.reposts !== false ? this.subscribeReposts(client) : EMPTY,
-      options.reactions !== false ? this.subscribeReactions(client) : EMPTY,
-    )
-    // TODO: better tests
-    // finalize(() => {
-    //   runInAction(() => {
-    //     // this.localLastSyncedAt = Date.now()
-    //     // storage.metadata.insert({ ...this.metadata, lastSyncedAt: this.localLastSyncedAt })
-    //   })
-    // }),
-  }
-
-  subscribeReposts(client: NostrClient) {
-    return client.reposts.subFromNote(this)
-  }
-
-  subscribeZaps(client: NostrClient) {
-    return client.zaps.subFromNote(this)
-  }
-
-  subscribeReactions(client: NostrClient) {
-    return client.reactions.subFromNote(this)
-  }
-
-  subscribeReplies(client: NostrClient) {
-    this.setRepliesStatus('LOADING')
-    return client.notes.subReplies(this.metadata).pipe(
-      // get reactions, reposts of replies
-      mergeMap((note) => note.subscribe(client, { replies: false })),
-      finalize(() => {
-        this.setRepliesStatus('LOADED')
-      }),
-    )
+      .subscribe()
   }
 }

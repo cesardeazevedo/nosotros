@@ -17,8 +17,6 @@ export class DialogStore {
     makeAutoObservable(this, {
       openCamera: action.bound,
       openQRCode: action.bound,
-      openUpdateSW: action.bound,
-      closeUpdateSW: action.bound,
       pushReply: action.bound,
       pushImage: action.bound,
       closeCamera: action.bound,
@@ -43,14 +41,6 @@ export class DialogStore {
 
   closeQRCode() {
     this.qrcode = false
-  }
-
-  openUpdateSW() {
-    this.updateSW = true
-  }
-
-  closeUpdateSW() {
-    this.updateSW = false
   }
 
   pushImage(content: string) {

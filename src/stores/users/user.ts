@@ -2,10 +2,10 @@ import { makeAutoObservable } from 'mobx'
 import type { NostrEvent } from 'nostr-tools'
 import { nip19 } from 'nostr-tools'
 import type { UserMetadataDB } from 'nostr/types'
-import { followsStore } from 'stores/nostr/follows.store'
+import { followsStore } from '@/stores/follows/follows.store'
 import { encodeSafe } from 'utils/nip19'
-import { relaysStore } from '../nostr/relays.store'
-import { userRelayStore } from '../nostr/userRelay.store'
+import { relaysStore } from '../relays/relays.store'
+import { userRelayStore } from '../userRelays/userRelay.store'
 
 export class User {
   constructor(
@@ -37,6 +37,14 @@ export class User {
 
   get userRelays() {
     return userRelayStore.get(this.pubkey)
+  }
+
+  get outboxRelays() {
+    return this.userRelays?.filter((x) => x.permission !== 'write') || []
+  }
+
+  get inboxRelays() {
+    return this.userRelays?.filter((x) => x.permission !== 'read') || []
   }
 
   get relays() {

@@ -1,5 +1,5 @@
 import { action, makeObservable, observable } from 'mobx'
-import type { User } from '../models/user'
+import type { User } from './user'
 
 class UserStore {
   users = observable.map<string, User>({}, { name: 'users', deep: false })
@@ -16,6 +16,7 @@ class UserStore {
     if (pubkey) {
       return this.users.get(pubkey)
     }
+    return undefined
   }
 
   add(user: User) {

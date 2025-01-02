@@ -1,5 +1,5 @@
 import { action, makeObservable, observable } from 'mobx'
-import type { Follows } from '../models/follow'
+import type { Follows } from './follow'
 
 class FollowsStore {
   follows = observable.map<string, Follows>({}, { name: 'users' })
