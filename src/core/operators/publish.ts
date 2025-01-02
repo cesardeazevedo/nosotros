@@ -17,18 +17,16 @@ export function publish(pool: Pool): OperatorFunction<NostrPublisher, PublishRes
 
       if (relay) {
         relay.websocket$.next([ClientToRelay.EVENT, event] as never)
-        // return of([relay.url, event.id, true, 'ok', event] as PublishResponse).pipe(delay(5000)) // test
 
         return relay.websocket$.pipe(
           filter((res) => res[1] === event.id),
           filter((res): res is MessageReceivedOK => res[0].toLowerCase() === RelayToClient.OK),
           take(1),
           map((res) => [url, res[1], res[2], res[3], event] as PublishResponse),
+          takeUntil(timer(10000)),
         )
       }
       return EMPTY
     }),
-
-    takeUntil(timer(10000)),
   )
 }
