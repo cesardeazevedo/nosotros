@@ -76,7 +76,7 @@ export class IDBEventQuery {
   }
 
   private async *iterateTags(index: TagIndexes, range: IDBKeyRange) {
-    for await (const cursor of index.iterate(range)) {
+    for await (const cursor of index.iterate(range, 'prev')) {
       yield* this.getByKey(this.events, cursor.value.eventId)
     }
   }
