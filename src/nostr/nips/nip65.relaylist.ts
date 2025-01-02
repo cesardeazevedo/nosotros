@@ -1,5 +1,5 @@
 import { formatRelayUrl } from '@/core/helpers/formatRelayUrl'
-import { userRelayStore } from '@/stores/nostr/userRelay.store'
+import { userRelayStore } from '@/stores/userRelays/userRelay.store'
 import { Kind } from 'constants/kinds'
 import { OUTBOX_RELAYS } from 'constants/relays'
 import type { NostrEvent } from 'nostr-tools'
@@ -11,8 +11,12 @@ import { ShareReplayCache } from '../replay'
 export interface UserRelayDB {
   pubkey: string
   relay: string
-  permission: 'read' | 'write' | undefined
+  permission: number
 }
+
+export const READ = 1 << 0
+export const WRITE = 1 << 1
+const PERMISSIONS = { READ, WRITE }
 
 export const replay = new ShareReplayCache<UserRelayDB[]>()
 
@@ -20,15 +24,26 @@ export class NIP65RelayList {
   constructor(private client: NostrClient) {}
 
   parse(event: NostrEvent) {
-    return event.tags
+    const { tags, pubkey } = event
+    const grouped = tags
       .filter((tag) => tag[0] === 'r')
-      .map((tag) => {
+      .reduce<Record<string, UserRelayDB>>((acc, tag) => {
+        const [, url, perm] = tag
+        const relay = formatRelayUrl(url)
+        const prev = acc[relay] || {}
+        const name = perm?.toUpperCase() as keyof typeof PERMISSIONS | undefined
+        const permission = name ? PERMISSIONS[name] : READ | WRITE
         return {
-          pubkey: event.pubkey,
-          relay: formatRelayUrl(tag[1]),
-          permission: tag[2] as UserRelayDB['permission'],
-        } as UserRelayDB
-      })
+          ...acc,
+          [relay]: {
+            ...prev,
+            pubkey,
+            relay,
+            permission: prev.permission | permission,
+          },
+        }
+      }, {})
+    return Object.values(grouped)
   }
 
   subscribe = replay.wrap((pubkey: string, options?: ClientSubOptions): Observable<UserRelayDB[]> => {

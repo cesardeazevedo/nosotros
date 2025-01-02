@@ -3,6 +3,7 @@ import { test } from '@/utils/fixtures'
 import { subscribeSpyTo } from '@hirez_io/observer-spy'
 import { from, mergeMap } from 'rxjs'
 import { Mailbox, toArrayRelay } from '../mailbox'
+import { READ, WRITE } from '../nips/nip65.relaylist'
 
 describe('Mailbox Tracker', () => {
   test('assert user relays', async ({ createClient, insertRelayList }) => {
@@ -47,7 +48,7 @@ describe('Mailbox Tracker', () => {
     })
 
     const client = createClient()
-    const $ = client.mailbox.track('1', { permission: 'read' }).pipe(toArrayRelay)
+    const $ = client.mailbox.track('1', { permission: READ }).pipe(toArrayRelay)
 
     const spy = subscribeSpyTo($)
 
@@ -69,7 +70,7 @@ describe('Mailbox Tracker', () => {
 
     const client = createClient()
     const mailbox = new Mailbox(client)
-    const $ = mailbox.track('1', { permission: 'write' }).pipe(toArrayRelay)
+    const $ = mailbox.track('1', { permission: WRITE }).pipe(toArrayRelay)
 
     const spy = subscribeSpyTo($)
 
@@ -117,7 +118,7 @@ describe('Mailbox Tracker', () => {
       ],
     })
     const client = createClient()
-    const $1 = from(['1', '2', '3']).pipe(mergeMap((x) => client.mailbox.track(x, { permission: 'read', timeout: 1 })))
+    const $1 = from(['1', '2', '3']).pipe(mergeMap((x) => client.mailbox.track(x, { permission: READ, timeout: 1 })))
     const spy1 = subscribeSpyTo($1)
     await spy1.onComplete()
     expect(spy1.getValues()).toStrictEqual([
@@ -131,7 +132,7 @@ describe('Mailbox Tracker', () => {
       ],
     ])
     // We should make sure the selectRelays result doesn't get cached
-    const $2 = from(['1', '2', '3']).pipe(mergeMap((x) => client.mailbox.track(x, { permission: 'write', timeout: 1 })))
+    const $2 = from(['1', '2', '3']).pipe(mergeMap((x) => client.mailbox.track(x, { permission: WRITE, timeout: 1 })))
     const spy2 = subscribeSpyTo($2)
     await spy2.onComplete()
     expect(spy2.getValues()).toStrictEqual([

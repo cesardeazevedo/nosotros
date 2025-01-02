@@ -2,6 +2,7 @@ import type { RelayFilters } from '@/core/NostrSubscription'
 import type { NostrFilter, RelayHints } from '@/core/types'
 import { filter, from, identity, map, merge, mergeMap, takeUntil, timer } from 'rxjs'
 import type { RelaySelectionConfig } from './helpers/relaySelection'
+import { WRITE } from './nips/nip65.relaylist'
 import type { NostrClient } from './nostr'
 
 export class OutboxTracker {
@@ -9,7 +10,7 @@ export class OutboxTracker {
 
   constructor(private client: NostrClient) {
     this.options = {
-      permission: 'write',
+      permission: WRITE,
       ignore: client.outboxSets,
       maxRelaysPerUser: client.settings.maxRelaysPerUserOutbox,
     }
@@ -39,7 +40,7 @@ export class OutboxTracker {
   subscribe(filters: NostrFilter[], hints?: RelayHints) {
     return from(filters).pipe(
       mergeMap((filter) => {
-        // Track relays based on (pubkey on e tags)
+        // Track relays based on pubkey hints
         const ids$ = this.trackIds(filter, hints)
         // Build relays for authors
         const authors$ = this.trackPubkeys(filter, 'authors')

@@ -1,8 +1,9 @@
 import type { NostrEvent } from 'nostr-tools'
 import { mergeMap, of } from 'rxjs'
-import type { RelaySelectionConfig } from './helpers/relaySelection'
 import { isAuthorTag } from './helpers/parseTags'
+import type { RelaySelectionConfig } from './helpers/relaySelection'
 import { toArrayRelay } from './mailbox'
+import { READ } from './nips/nip65.relaylist'
 import type { NostrClient } from './nostr'
 
 export class InboxTracker {
@@ -10,7 +11,7 @@ export class InboxTracker {
 
   constructor(private client: NostrClient) {
     this.options = {
-      permission: 'read',
+      permission: READ,
       ignore: client.inboxSets,
       maxRelaysPerUser: client.settings.maxRelaysPerUserInbox,
     }

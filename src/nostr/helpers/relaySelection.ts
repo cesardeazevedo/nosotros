@@ -13,7 +13,7 @@ export function selectRelays(data: UserRelayDB[], config?: RelaySelectionConfig)
     .filter((data) => !config?.blacklist?.has(data.relay))
     .filter((data) => !config?.ignore?.has(data.relay))
     .filter((data) => {
-      return config?.permission !== undefined ? data.permission === config.permission || !data.permission : true
+      return config?.permission !== undefined ? !!(data.permission & config.permission) || !data.permission : true
     })
-    .slice(0, config?.maxRelaysPerUser)
+    .slice(0, config?.maxRelaysPerUser || 10)
 }

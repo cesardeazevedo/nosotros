@@ -1,8 +1,9 @@
+import { READ, WRITE } from '@/nostr/nips/nip65.relaylist'
+import { followsStore } from '@/stores/follows/follows.store'
 import { makeAutoObservable } from 'mobx'
 import type { NostrEvent } from 'nostr-tools'
 import { nip19 } from 'nostr-tools'
 import type { UserMetadataDB } from 'nostr/types'
-import { followsStore } from '@/stores/follows/follows.store'
 import { encodeSafe } from 'utils/nip19'
 import { relaysStore } from '../relays/relays.store'
 import { userRelayStore } from '../userRelays/userRelay.store'
@@ -40,11 +41,11 @@ export class User {
   }
 
   get outboxRelays() {
-    return this.userRelays?.filter((x) => x.permission !== 'write') || []
+    return this.userRelays?.filter((x) => !!(x.permission & READ)) || []
   }
 
   get inboxRelays() {
-    return this.userRelays?.filter((x) => x.permission !== 'read') || []
+    return this.userRelays?.filter((x) => !!(x.permission & WRITE)) || []
   }
 
   get relays() {
