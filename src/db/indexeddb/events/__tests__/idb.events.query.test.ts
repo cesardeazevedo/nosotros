@@ -44,8 +44,8 @@ describe('Test event query', () => {
 
     const query = new IDBEventQuery(db, { kinds: [1], '#e': ['1'] })
     const res = query.start()
-    expect((await res.next()).value).toStrictEqual(note2)
     expect((await res.next()).value).toStrictEqual(note3)
+    expect((await res.next()).value).toStrictEqual(note2)
     expect((await res.next()).value).toStrictEqual(undefined)
   })
 
@@ -66,8 +66,8 @@ describe('Test event query', () => {
 
     const query = new IDBEventQuery(db, { kinds: [7], '#e': ['1'], since: 4 })
     const res = query.start()
-    expect((await res.next()).value).toStrictEqual(note4)
     expect((await res.next()).value).toStrictEqual(note5)
+    expect((await res.next()).value).toStrictEqual(note4)
     expect((await res.next()).value).toStrictEqual(undefined)
   })
 
@@ -125,9 +125,9 @@ describe('Test event query', () => {
 
     const query = new IDBEventQuery(db, { kinds: [7], '#p': ['1'], since: 3, until: 5 })
     const res = query.start()
-    expect((await res.next()).value).toStrictEqual(note3)
-    expect((await res.next()).value).toStrictEqual(note4)
     expect((await res.next()).value).toStrictEqual(note5)
+    expect((await res.next()).value).toStrictEqual(note4)
+    expect((await res.next()).value).toStrictEqual(note3)
     expect((await res.next()).value).toStrictEqual(undefined) // note6 is out
   })
 })

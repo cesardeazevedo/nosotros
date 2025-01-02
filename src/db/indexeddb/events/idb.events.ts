@@ -50,6 +50,8 @@ export class IDBEventStore {
             ...eventFound.tags.map((tag) => tags.delete([eventFound.id, tag[0], tag[1]])),
           ])
         }
+      } else {
+        return false
       }
     }
 
