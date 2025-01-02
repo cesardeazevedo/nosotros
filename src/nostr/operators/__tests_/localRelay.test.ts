@@ -4,21 +4,16 @@ import { NostrSubscription } from '@/core/NostrSubscription'
 import { Pool } from '@/core/pool'
 import { fakeNote } from '@/utils/faker'
 import { test } from '@/utils/fixtures'
-import {
-  expectRelayPublish,
-  expectRelayReceived,
-  relaySendEose,
-  relaySendEvents,
-  relaySendOK,
-} from '@/utils/testHelpers'
+import { expectRelayPublish, relaySendOK } from '@/utils/testHelpers'
 import { subscribeSpyTo } from '@hirez_io/observer-spy'
 import { from } from 'rxjs'
 import { insertEvent, query } from '../localRelay'
 
 describe('localRelay', () => {
-  test('query()', async ({ relay }) => {
+  test('query()', async ({ createMockRelay }) => {
     const note1 = fakeNote({ id: '1', created_at: 1, kind: Kind.Text, pubkey: '1' })
     const note2 = fakeNote({ id: '2', created_at: 2, kind: Kind.Text, pubkey: '1' })
+    const relay = createMockRelay(RELAY_1, [note1, note2])
 
     const sub = new NostrSubscription({ kinds: [Kind.Text], authors: ['1'] })
     const pool = new Pool()
@@ -26,13 +21,9 @@ describe('localRelay', () => {
 
     const spy = subscribeSpyTo($)
 
-    await expectRelayReceived(relay, { kinds: [Kind.Text], authors: ['1'] })
-
-    relaySendEvents(relay, sub.id, [note1, note2])
-    relaySendEose(relay, sub.id)
-
     await spy.onComplete()
-
+    await relay.close()
+    expect(relay.received).toStrictEqual([['REQ', '1', { kinds: [Kind.Text], authors: ['1'] }]])
     expect(spy.getValues()).toStrictEqual([note1, note2])
   })
 
