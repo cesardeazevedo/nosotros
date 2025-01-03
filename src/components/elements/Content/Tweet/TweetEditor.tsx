@@ -1,13 +1,11 @@
 import { NodeViewWrapper, type NodeViewRendererProps } from '@tiptap/react'
-import Tweet, { type Props as TweetProps } from './Tweet'
+import { Tweet, type Props as TweetProps } from './Tweet'
 
-function TweetEditor(props: NodeViewRendererProps) {
+export const TweetEditor = (props: NodeViewRendererProps) => {
   const attrs = props.node.attrs as TweetProps
   return (
-    <NodeViewWrapper as='div' style={{ maxHeight: 565 }}>
+    <NodeViewWrapper data-drag-handle='' draggable={props.node.type.spec.draggable} style={{ maxHeight: 565 }}>
       <Tweet src={attrs.src} />
     </NodeViewWrapper>
   )
 }
-
-export default TweetEditor

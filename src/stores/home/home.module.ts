@@ -1,7 +1,7 @@
 import { Duration } from 'luxon'
 import type { Instance, SnapshotIn, SnapshotOut } from 'mobx-state-tree'
 import { t } from 'mobx-state-tree'
-import { createComposeStore } from '../compose/compose.store'
+import { createEditorStore } from '../editor/editor.store'
 import { NotesFeedSubscriptionModel } from '../feeds/feed.notes'
 import { BaseModuleModel } from '../modules/module'
 import { Kind } from '@/constants/kinds'
@@ -14,7 +14,7 @@ export const HomeModuleModel = t.snapshotProcessor(
       feed: NotesFeedSubscriptionModel,
     })
     .volatile((self) => ({
-      compose: createComposeStore({ feed: self.feed }),
+      editor: createEditorStore({ feed: self.feed }),
     })),
   {
     preProcessor(snapshot: { pubkey: string }) {

@@ -1,5 +1,5 @@
-import { Composer } from '@/components/elements/Compose/Composer'
 import { DeckColumnHeader } from '@/components/elements/Deck/DeckColumnHeader'
+import { Editor } from '@/components/elements/Editor/Editor'
 import { FeedItem } from '@/components/elements/Feed/FeedItem'
 import { IconHomeFilled } from '@/components/elements/Icons/IconHomeFilled'
 import { PaperContainer } from '@/components/elements/Layouts/PaperContainer'
@@ -44,7 +44,7 @@ export const HomeColumn = (props: Props) => {
           onRangeChange={onRangeChange}
           header={
             <>
-              <Composer initialOpen={false} compose={module.compose} />
+              <Editor initialOpen={false} store={module.editor} />
               <Divider />
             </>
           }

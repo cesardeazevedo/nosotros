@@ -3,7 +3,7 @@ import { RECOMMENDED_PUBKEYS } from '@/constants/recommended'
 import { Duration } from 'luxon'
 import type { Instance, SnapshotIn, SnapshotOut } from 'mobx-state-tree'
 import { t } from 'mobx-state-tree'
-import { createComposeStore } from '../compose/compose.store'
+import { createEditorStore } from '../editor/editor.store'
 import { NotesFeedSubscriptionModel } from '../feeds/feed.notes'
 import { BaseModuleModel } from '../modules/module'
 
@@ -16,8 +16,8 @@ export const WelcomeModuleModel = BaseModuleModel.named('WelcomeModule')
       filter: { kinds: [Kind.Text], authors: RECOMMENDED_PUBKEYS },
     }),
   })
-  .volatile(() => ({
-    compose: createComposeStore(),
+  .volatile((self) => ({
+    editor: createEditorStore({ feed: self.feed }),
   }))
 
 export interface WelcomeModule extends Instance<typeof WelcomeModuleModel> {}

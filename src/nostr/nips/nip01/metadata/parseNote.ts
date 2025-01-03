@@ -1,10 +1,10 @@
+import { parseNoteContent } from '@/nostr/helpers/parseNotes'
 import { mergeRelayHints } from '@/core/mergers/mergeRelayHints'
-import { parseNoteContent } from 'content/parser'
+import { isMention, parseTags } from '@/nostr/helpers/parseTags'
 import type { NostrEvent } from 'core/types'
 import { getMentionedAuthors } from 'nostr/helpers/getMentionedAuthors'
 import { getMentionedNotes } from 'nostr/helpers/getMentionedNotes'
 import { getRelayHintsFromNIP19 } from 'nostr/helpers/getRelayHints'
-import { isMention, parseTags } from '@/nostr/helpers/parseTags'
 import type { NoteMetadataDB } from 'nostr/types'
 
 export function parseNote(event: NostrEvent) {

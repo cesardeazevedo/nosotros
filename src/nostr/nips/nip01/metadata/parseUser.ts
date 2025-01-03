@@ -1,5 +1,5 @@
+import { parseUserAbout } from '@/nostr/helpers/parseNotes'
 import type { UserMetadataDB } from '@/nostr/types'
-import { parseUserAbout } from 'content/parser'
 import type { NostrEvent } from 'core/types'
 import { nip19 } from 'nostr-tools'
 import { encodeSafe } from 'utils/nip19'

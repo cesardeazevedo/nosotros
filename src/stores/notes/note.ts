@@ -10,7 +10,7 @@ import { nip19 } from 'nostr-tools'
 import type { NostrClient } from 'nostr/nostr'
 import type { NoteMetadataDB } from 'nostr/types'
 import { filter, take } from 'rxjs'
-import { createComposeStore } from '../compose/compose.store'
+import { createEditorStore } from '../editor/editor.store'
 import { repostStore } from '../reposts/reposts.store'
 import type { User } from '../users/user'
 
@@ -41,7 +41,7 @@ export class Note {
       pow: computed.struct,
       images: computed.struct,
       headImage: computed.struct,
-      compose: computed({ keepAlive: true }),
+      editor: computed({ keepAlive: true }),
     })
   }
 
@@ -96,8 +96,8 @@ export class Note {
     return this.metadata.tags.alt?.flat()?.[0]
   }
 
-  get compose() {
-    return createComposeStore({ parentNote: this })
+  get editor() {
+    return createEditorStore({ parentNote: this })
   }
 
   isFollowing(user?: User) {
