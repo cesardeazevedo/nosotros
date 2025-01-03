@@ -1,20 +1,18 @@
 import { Stack } from '@/components/ui/Stack/Stack'
-import type { UserRelayDB } from 'db/types'
+import type { RelayStore } from '@/stores/relays/relay'
 import { observer } from 'mobx-react-lite'
-import RelayUserChip from './RelayUserChip'
+import { RelayChip } from './RelayChip'
 
 type Props = {
-  relays: UserRelayDB[]
+  relays: RelayStore[]
 }
 
-const RelayList = observer(function RelayList(props: Props) {
+export const RelayList = observer(function RelayListOthers(props: Props) {
   return (
-    <Stack horizontal={false} gap={1} align='flex-start'>
-      {props.relays.map((userRelay) => (
-        <RelayUserChip key={userRelay.relay} userRelay={userRelay} />
+    <Stack horizontal={false} gap={0.5} align='flex-start'>
+      {props.relays.map(({ url }) => (
+        <RelayChip key={url} url={url} />
       ))}
     </Stack>
   )
 })
-
-export default RelayList

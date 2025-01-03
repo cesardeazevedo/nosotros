@@ -1,17 +1,29 @@
 import { Chip } from '@/components/ui/Chip/Chip'
-import type { Relay } from 'core/Relay'
+import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 import { observer } from 'mobx-react-lite'
-import { useMemo } from 'react'
-import RelayIcon from './RelayIcon'
+import React, { useMemo } from 'react'
+import { RelayConnectedIcon } from './RelayConnectedIcon'
 
 type Props = {
-  relay: Relay
+  url: string
+  icon?: React.ReactNode
 }
 
-const RelayChip = observer(function RelayChip(props: Props) {
-  const { relay } = props
-  const formatted = useMemo(() => new URL(relay.url), [relay])
-  return <Chip icon={<RelayIcon url={relay.url} />} label={formatted.hostname} />
+export const RelayChip = observer(function RelayChip(props: Props) {
+  const { url, icon } = props
+  const formatted = useMemo(() => {
+    try {
+      return new URL(url)
+    } catch (error) {
+      console.log('error url', error)
+    }
+  }, [url])
+  return (
+    formatted && (
+      <Chip
+        icon={icon || <RelayConnectedIcon url={url} />}
+        label={<Tooltip text={url}>{formatted?.hostname}</Tooltip>}
+      />
+    )
+  )
 })
-
-export default RelayChip
