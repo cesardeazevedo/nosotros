@@ -1,7 +1,7 @@
-import { dedupe } from 'core/helpers'
-import type { NEventAttributes } from 'nostr-editor'
+import { dedupe } from '@/core/helpers/dedupe'
 import type { ParsedTags } from '@/nostr/helpers/parseTags'
 import { isMention } from '@/nostr/helpers/parseTags'
+import type { NEventAttributes } from 'nostr-editor'
 
 export function getMentionedNotes(tags: ParsedTags, nevents: NEventAttributes[] = []) {
   return dedupe(

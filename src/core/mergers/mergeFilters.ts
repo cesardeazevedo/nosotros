@@ -1,8 +1,9 @@
 import { Kind } from '@/constants/kinds'
-import { isReplaceable, pickBy } from 'core/helpers'
 import type { NostrFilter } from 'core/types'
+import { isReplaceableKind } from 'nostr-tools/kinds'
+import { pickBy } from '../helpers/pickBy'
 
-const FILTER_ARRAY_FIELDS = ['kinds', 'authors', 'ids', '#e', '#p'] as (keyof NostrFilter)[]
+export const FILTER_ARRAY_FIELDS = ['kinds', 'authors', 'ids', '#e', '#p'] as (keyof NostrFilter)[]
 
 export function mergeFilters(filters: NostrFilter[]): NostrFilter[] {
   const groups: Record<string, NostrFilter> = {}
@@ -14,7 +15,7 @@ export function mergeFilters(filters: NostrFilter[]): NostrFilter[] {
       paginationKeys +
       [...(filter.kinds || [])]
         // Do not merge follows kind, this needs some work
-        .map((kind) => (kind === Kind.Follows ? kind : isReplaceable(kind) ? 'replaceable' : 'nonreplaceable'))
+        .map((kind) => (kind === Kind.Follows ? kind : isReplaceableKind(kind) ? 'replaceable' : 'nonreplaceable'))
         .sort()
         .toString()
 

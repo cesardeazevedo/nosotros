@@ -1,13 +1,15 @@
 import type { NostrEvent } from 'nostr-tools'
 import { EMPTY, filter, map, merge, mergeMap, of, type Observable } from 'rxjs'
-import { createFilter, isFilterValid } from './helpers'
+import { createFilter } from './helpers/createFilter'
 import { hintsToRelayFilters } from './helpers/hintsToRelayFilters'
+import { isFilterValid } from './helpers/isFilterValid'
 import { relaysToRelayFilters } from './helpers/relaysToRelayFilters'
 import type { NostrFilter, RelayHints } from './types'
 
 export type RelayFilters = [string, NostrFilter[]]
 
 export type SubscriptionOptions = {
+  id?: string
   relays?: Observable<string[]>
   relayFilters?: Observable<RelayFilters>
   relayHints?: RelayHints
@@ -28,14 +30,14 @@ export class NostrSubscription {
   events: Map<string, NostrEvent>
 
   constructor(filters: NostrFilter | NostrFilter[], options: SubscriptionOptions = {}) {
-    this.id = Math.random().toString().slice(2, 10)
+    this.id = options.id || Math.random().toString().slice(2, 10)
 
     this.filters = [filters].flat().map(createFilter).filter(isFilterValid)
 
     this.relays = options.relays || of([])
-    this.relayHints = options.relayHints
     this.outbox = options.outbox || (() => EMPTY)
     this.events = options.events || new Map()
+    this.relayHints = options.relayHints
 
     if (options.relayFilters) {
       // Pipeline already defined

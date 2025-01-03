@@ -1,4 +1,4 @@
-import { dedupe } from 'core/helpers'
+import { dedupe } from '@/core/helpers/dedupe'
 import type { RelayHints } from 'core/types'
 import type { NEventAttributes, NProfileAttributes } from 'nostr-editor'
 

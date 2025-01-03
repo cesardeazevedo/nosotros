@@ -1,6 +1,6 @@
-import { dedupe } from 'core/helpers'
-import type { NEventAttributes, NProfileAttributes } from 'nostr-editor'
+import { dedupe } from '@/core/helpers/dedupe'
 import type { ParsedTags } from '@/nostr/helpers/parseTags'
+import type { NEventAttributes, NProfileAttributes } from 'nostr-editor'
 
 export function getMentionedAuthors(
   tags: ParsedTags,

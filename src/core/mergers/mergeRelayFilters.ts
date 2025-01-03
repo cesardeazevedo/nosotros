@@ -1,6 +1,6 @@
-import { isFilterValid } from 'core/helpers'
 import type { RelayFilters } from 'core/NostrSubscription'
 import type { NostrFilter } from 'core/types'
+import { isFilterValid } from '../helpers/isFilterValid'
 import { mergeFilters } from './mergeFilters'
 
 export function mergeRelayFilters(relayFilters: RelayFilters[]) {

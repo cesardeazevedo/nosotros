@@ -1,7 +1,7 @@
 import type { Kind } from 'constants/kinds'
-import { isReplaceable } from 'core/helpers'
 import type { NostrEvent, NostrFilter } from 'core/types'
 import type * as idb from 'idb'
+import { isReplaceableKind } from 'nostr-tools/kinds'
 import type { IndexedDBSchema } from '../idb.schemas'
 import { IDBEventQuery } from './idb.events.query'
 
@@ -34,7 +34,7 @@ export class IDBEventStore {
     const events = tx.objectStore('events')
     const tags = tx.objectStore('tags')
 
-    const replaceable = isReplaceable(data.kind)
+    const replaceable = isReplaceableKind(data.kind)
 
     if (replaceable) {
       const index = events.index('kind_pubkey_created_at')

@@ -1,6 +1,7 @@
 import type { ThrottleConfig } from 'rxjs'
 import { BehaviorSubject, Subject, skipUntil, throttleTime, timer } from 'rxjs'
-import { createFilterPagination, paginateFilter } from './helpers'
+import { createFilterPagination } from './helpers/createPaginationFilter'
+import { paginateFilter } from './helpers/paginateFilter'
 import type { NostrFilter } from './types'
 
 export type PaginationBehaviorOptions = {

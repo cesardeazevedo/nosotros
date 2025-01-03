@@ -1,7 +1,7 @@
-import { isReplaceable } from '@/core/helpers'
 import type { NostrEvent } from 'nostr-tools'
+import { isReplaceableKind } from 'nostr-tools/kinds'
 
-export const cache = new Map<string, boolean>()
+export const cache = new Map<string, NostrEvent>()
 export const cacheReplaceablePrune = new Map<string, NostrEvent>()
 export const cacheReplaceable = new Map<string, NostrEvent>()
 
@@ -13,8 +13,8 @@ export function clearCache() {
 
 export function setCache(event: NostrEvent, prune?: boolean) {
   const { id, kind, pubkey } = event
-  cache.set(id, true)
-  if (isReplaceable(kind)) {
+  cache.set(id, event)
+  if (isReplaceableKind(kind)) {
     cacheReplaceable.set(`${kind}:${pubkey}`, event)
     if (prune) {
       cacheReplaceablePrune.set(`${kind}:${pubkey}`, event)
@@ -23,7 +23,7 @@ export function setCache(event: NostrEvent, prune?: boolean) {
 }
 
 export function hasEventInCache(event: NostrEvent) {
-  if (isReplaceable(event.kind)) {
+  if (isReplaceableKind(event.kind)) {
     const found = cacheReplaceable.get(`${event.kind}:${event.pubkey}`)
     return (found?.created_at || 0) >= event.created_at
   }

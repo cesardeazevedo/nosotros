@@ -1,4 +1,4 @@
-import { dedupe } from 'core/helpers'
+import { dedupe } from '@/core/helpers/dedupe'
 import type { SeenDB } from 'db/types'
 import { makeAutoObservable } from 'mobx'
 

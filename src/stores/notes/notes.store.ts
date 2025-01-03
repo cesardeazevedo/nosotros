@@ -1,5 +1,5 @@
 import type { NoteMetadataDB } from '@/nostr/types'
-import { dedupe } from 'core/helpers'
+import { dedupe } from 'core/helpers/dedupe'
 import { action, makeObservable, observable } from 'mobx'
 import type { NostrEvent } from 'nostr-tools'
 import { Note } from './note'
