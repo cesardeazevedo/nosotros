@@ -1,10 +1,11 @@
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
-import LinkProfile from 'components/elements/Links/LinkProfile'
-import UserPopover from 'components/elements/User/UserPopover'
+import { palette } from '@/themes/palette.stylex'
+import { LinkProfile } from 'components/elements/Links/LinkProfile'
+import { UserPopover } from 'components/elements/User/UserPopover'
 import { observer } from 'mobx-react-lite'
 import { useContext } from 'react'
 import { css, html } from 'react-strict-dom'
-import { userStore } from 'stores/nostr/users.store'
+import { userStore } from '@/stores/users/users.store'
 import { ContentContext } from '../Content'
 
 export type Props = {
@@ -19,7 +20,7 @@ export const NProfile = observer(function TextMention(props: Props) {
       {!user && <Skeleton sx={styles.loading} animation='wave' variant='rectangular' />}
       {user && (
         <UserPopover user={user}>
-          <LinkProfile underline color='tertiary' user={user} disableLink={disableLink}>
+          <LinkProfile underline user={user} disableLink={disableLink} sx={styles.link}>
             @{user.displayName}
           </LinkProfile>
         </UserPopover>
@@ -44,5 +45,8 @@ const styles = css.create({
     borderRadius: 8,
     width: 80,
     height: 16,
+  },
+  link: {
+    color: palette.tertiary,
   },
 })

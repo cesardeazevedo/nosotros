@@ -8,7 +8,7 @@ export type Props = {
   src: string
 }
 
-export function Tweet(props: Props) {
+export const Tweet = (props: Props) => {
   const { src } = props
   const { dense } = useContext(ContentContext)
   const id = src.slice(src.lastIndexOf('/') + 1)

@@ -9,7 +9,7 @@ type Props = {
   node: BlockQuoteNode
 }
 
-export function BlockQuote(props: Props) {
+export const BlockQuote = (props: Props) => {
   return (
     <html.div style={styles.root}>
       {props.node.content?.map((node, index) => (
@@ -30,6 +30,6 @@ const styles = css.create({
     borderLeft: '6px solid',
     borderColor: palette.outlineVariant,
     fontStyle: 'italic',
-    opacity: 0.6,
+    opacity: 0.5,
   },
 })

@@ -1,7 +1,7 @@
 import type { BulletListNode, OrderedListNode } from 'nostr-editor'
 import React from 'react'
 import { html } from 'react-strict-dom'
-import type Note from 'stores/models/note'
+import type { Note } from '@/stores/notes/note'
 import { Paragraph } from '../Layout/Paragraph'
 import { CodeBlock } from './CodeBlock'
 
@@ -16,7 +16,7 @@ const Elements = {
   ul: html.ul,
 }
 
-export function List(props: Props) {
+export const List = (props: Props) => {
   const { type, node } = props
   const Component = Elements[type]
   return (

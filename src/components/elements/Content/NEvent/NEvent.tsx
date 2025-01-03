@@ -1,23 +1,22 @@
+import { LinkNEvent } from '@/components/elements/Links/LinkNEvent'
+import { PostActions } from '@/components/elements/Posts/PostActions/PostActions'
+import { PostContent } from '@/components/elements/Posts/PostContent'
+import { UserHeader } from '@/components/elements/User/UserHeader'
 import { Paper } from '@/components/ui/Paper/Paper'
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import LinkNEvent from 'components/elements/Links/LinkNEvent'
-import PostActions from 'components/elements/Posts/PostActions/PostActions'
-import PostContent from 'components/elements/Posts/PostContent'
-import UserHeader from 'components/elements/User/UserHeader'
 import { observer } from 'mobx-react-lite'
 import { useContext } from 'react'
 import { css, html } from 'react-strict-dom'
-import { noteStore } from 'stores/nostr/notes.store'
+import { noteStore } from '@/stores/notes/notes.store'
 import { ContentContext } from '../Content'
 
 type Props = {
   noteId: string
-  author: string | undefined
 }
 
-export const NEvent = observer(function PostNote(props: Props) {
+export const NEvent = observer(function NEvent(props: Props) {
   const { dense, disableLink } = useContext(ContentContext)
   const note = noteStore.get(props.noteId)
   return (
@@ -32,7 +31,7 @@ export const NEvent = observer(function PostNote(props: Props) {
           </html.div>
           {disableLink && <PostContent initialExpanded note={note} disableLink />}
           {!disableLink && (
-            <LinkNEvent note={note} sx={styles.link}>
+            <LinkNEvent nevent={note.nevent}>
               <PostContent initialExpanded note={note} disableLink />
             </LinkNEvent>
           )}
@@ -50,7 +49,7 @@ export const NEvent = observer(function PostNote(props: Props) {
 const styles = css.create({
   root: {
     width: '100%',
-    marginTop: spacing.margin1,
+    paddingBlock: spacing.margin1,
     paddingInline: spacing.padding2,
   },
   root$dense: {

@@ -2,7 +2,7 @@ import type { SxProps } from '@/components/ui/types'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import React from 'react'
-import { html, css } from 'react-strict-dom'
+import { css, html } from 'react-strict-dom'
 
 type Props = {
   sx?: SxProps
