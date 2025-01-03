@@ -1,28 +1,63 @@
+import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 import { palette } from '@/themes/palette.stylex'
+import { shape } from '@/themes/shape.stylex'
+import { spacing } from '@/themes/spacing.stylex'
 import { typeFace } from '@/themes/typeFace.stylex'
+import React from 'react'
 import { css, html } from 'react-strict-dom'
+import type { Styles } from 'react-strict-dom/dist/types/styles'
+import { RelayPopoverLink } from '../../Relays/RelayPopoverLink'
 
 type Props = {
-  href?: string
-  children: React.ReactNode
+  href: string
+  underline?: boolean
+  children?: React.ReactNode | string
 }
 
-function Link(props: Props) {
-  return (
-    <html.a href={props.href} target='_blank' rel='noopener noreferrer' style={styles.root}>
+export const ContentLink = (props: Props) => {
+  const { href, underline } = props
+  const isLongLink = (href?.length || 0) > 36
+  const isRelayLink = href?.startsWith('wss://')
+  const sx = [styles.root, underline && styles.root$underline] as Styles
+  const content = (
+    <html.a href={href} target='_blank' rel='noopener noreferrer' style={sx}>
       {props.children}
     </html.a>
   )
+  if (isRelayLink) {
+    return (
+      <RelayPopoverLink url={href}>
+        <html.a href={href} target='_blank' rel='noopener noreferrer' style={sx}>
+          {props.children}
+        </html.a>
+      </RelayPopoverLink>
+    )
+  }
+  if (isLongLink && href) {
+    return <Tooltip text={href}>{content}</Tooltip>
+  }
+  return <>{content}</>
 }
 
 const styles = css.create({
   root: {
     color: palette.tertiary,
     fontWeight: typeFace.bold,
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    maxWidth: 300,
+    display: 'inline-block',
+    verticalAlign: 'top',
+  },
+  root$underline: {
     ':hover': {
       textDecoration: 'underline',
     },
   },
+  background: {
+    paddingInline: spacing['padding1'],
+    backgroundColor: palette.surfaceContainer,
+    borderRadius: shape.lg,
+  },
 })
-
-export default Link

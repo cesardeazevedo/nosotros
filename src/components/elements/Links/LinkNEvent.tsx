@@ -1,47 +1,64 @@
-import { useMatch } from '@tanstack/react-router'
+import { useRootStore } from '@/hooks/useRootStore'
+import { decodeNIP19 } from '@/utils/nip19'
+import { Link, useRouter } from '@tanstack/react-router'
 import { observer } from 'mobx-react-lite'
+import type { NEvent } from 'nostr-tools/nip19'
 import React, { useCallback, useContext } from 'react'
-import type Note from 'stores/models/note'
-import { deckStore } from 'stores/ui/deck.store'
+import { css } from 'react-strict-dom'
 import { DeckContext } from '../Deck/DeckContext'
-import type { Props as LinkRouterProps } from './LinkRouter'
-import LinkRouter from './LinkRouter'
 
-interface Props extends LinkRouterProps {
-  note: Note
+export type Props = {
+  nevent?: NEvent
   children: React.ReactNode
+  underline?: boolean
   disableLink?: boolean
 }
 
-const LinkNEvent = observer(function LinkNEvent(props: Props) {
-  const { note, disableLink, ...rest } = props
-  const route = useMatch({ strict: false })
-  const isDeck = route.id === '/deck'
+export const LinkNEvent = observer(function LinkNEvent(props: Props) {
+  const { nevent, disableLink, underline, ...rest } = props
+  const router = useRouter()
+  const root = useRootStore()
   const { index } = useContext(DeckContext)
 
   const handleClickDeck = useCallback(() => {
-    if (note) {
-      deckStore.addNoteColumn({ noteId: note.id }, index + 1)
+    if (nevent) {
+      const decoded = decodeNIP19(nevent)
+      if (decoded?.type === 'nevent') {
+        root.decks.selected.addNEvent({ options: decoded.data }, (index || 0) + 1)
+      }
     }
-  }, [note, index])
+  }, [nevent, index])
 
-  if (disableLink) {
+  if (disableLink || !nevent) {
     return props.children
   }
 
-  if (isDeck) {
+  if (index !== undefined) {
     return (
-      <LinkRouter onClick={handleClickDeck} {...rest}>
+      <Link onClick={handleClickDeck} {...rest}>
         {props.children}
-      </LinkRouter>
+      </Link>
     )
   }
 
   return (
-    <LinkRouter to='/$nostr' params={{ nostr: note.nevent }} {...rest}>
+    <Link
+      to={`/$nostr`}
+      // @ts-ignore
+      state={{ from: router.latestLocation.pathname }}
+      {...rest}
+      {...css.props([underline && styles.underline])}
+      params={{ nostr: nevent }}>
       {props.children}
-    </LinkRouter>
+    </Link>
   )
 })
 
-export default LinkNEvent
+const styles = css.create({
+  underline: {
+    textDecoration: {
+      default: 'inherit',
+      ':hover': 'underline',
+    },
+  },
+})
