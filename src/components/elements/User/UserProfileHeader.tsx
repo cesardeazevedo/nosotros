@@ -1,12 +1,11 @@
 import { Button } from '@/components/ui/Button/Button'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
-import { useNostrClientContext } from '@/hooks/useNostrClientContext'
+import { useCurrentUser, useGlobalSettings } from '@/hooks/useRootStore'
+import type { User } from '@/stores/users/user'
 import { spacing } from '@/themes/spacing.stylex'
 import { observer } from 'mobx-react-lite'
 import { css, html } from 'react-strict-dom'
-import type { User } from 'stores/models/user'
-import { settingsStore } from 'stores/ui/settings.store'
 import { UserAvatar } from './UserAvatar'
 import { UserContentAbout } from './UserContentAbout'
 
@@ -17,14 +16,15 @@ type Props = {
 export const UserProfileHeader = observer(function UserProfileHeader(props: Props) {
   const { user } = props
   const { banner, nip05 } = user?.meta || {}
-  const { user: currentUser } = useNostrClientContext()
+  const currentUser = useCurrentUser()
+  const globalSettings = useGlobalSettings()
   const isFollowing = currentUser?.following?.followsPubkey(user?.pubkey)
   return (
     <>
       <html.div style={styles.header}>
         {banner && (
           <img
-            key={settingsStore.getImgProxyUrl('user_avatar', banner)}
+            key={globalSettings.getImgProxyUrl('user_avatar', banner)}
             style={{ objectFit: 'cover', width: '100%', height: '100%' }}
             src={banner}
           />

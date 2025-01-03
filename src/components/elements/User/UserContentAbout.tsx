@@ -1,7 +1,7 @@
 import { Text } from '@/components/ui/Text/Text'
 import type { ContentSchema } from 'nostr-editor'
 import React from 'react'
-import type { User } from 'stores/models/user'
+import type { User } from '@/stores/users/user'
 import { TextContent } from '../Content/Text'
 
 type Props = {

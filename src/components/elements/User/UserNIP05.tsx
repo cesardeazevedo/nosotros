@@ -1,5 +1,5 @@
 import { Text } from '@/components/ui/Text/Text'
-import { userStore } from '@/stores/nostr/users.store'
+import { userStore } from '@/stores/users/users.store'
 import { observer } from 'mobx-react-lite'
 import { css } from 'react-strict-dom'
 
@@ -8,13 +8,13 @@ type Props = {
   hideForFollowing?: boolean
 }
 
-export const UserNIP05 = observer((props: Props) => {
+export const UserNIP05 = observer(function UserNIP05(props: Props) {
   const { pubkey } = props
   const user = userStore.get(pubkey)
   if (!user || !user.meta.nip05) {
     return
   }
-  // if (hideForFollowing && authStore.currentUser?.following?.followsPubkey(pubkey)) {
+  // if (hideForFollowing && user?.following?.followsPubkey(pubkey)) {
   //   return
   // }
   return (

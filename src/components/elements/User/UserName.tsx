@@ -3,8 +3,9 @@ import { Stack } from '@/components/ui/Stack/Stack'
 import type { Props as TextProps } from '@/components/ui/Text/Text'
 import { Text } from '@/components/ui/Text/Text'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
-import { useNostrClientContext } from '@/hooks/useNostrClientContext'
-import { userStore } from '@/stores/nostr/users.store'
+import { useCurrentUser } from '@/hooks/useRootStore'
+import type { User } from '@/stores/users/user'
+import { userStore } from '@/stores/users/users.store'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
@@ -12,7 +13,6 @@ import { IconUserCheck } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
 import React from 'react'
 import { css, html } from 'react-strict-dom'
-import type { User } from 'stores/models/user'
 import { LinkProfile } from '../Links/LinkProfile'
 import { UserPopover } from './UserPopover'
 
@@ -27,7 +27,7 @@ interface Props extends Omit<TextProps, 'children'> {
 export const UserName = observer(function UserName(props: Props) {
   const { pubkey, children, disableLink = false, disablePopover = false, size = 'lg', ...rest } = props
   const user = userStore.get(pubkey)
-  const { user: currentUser } = useNostrClientContext()
+  const currentUser = useCurrentUser()
   return (
     <Stack gap={0.5} sx={props.sx}>
       {!user && <Skeleton variant='rectangular' sx={styles.loading} />}

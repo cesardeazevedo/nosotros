@@ -2,15 +2,15 @@ import { Text } from '@/components/ui/Text/Text'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 import type { SxProps } from '@/components/ui/types'
 import { palette } from '@/themes/palette.stylex'
-import type { Nevent } from '@/utils/nip19'
 import { DateTime } from 'luxon'
 import { observer } from 'mobx-react-lite'
+import type { NEvent } from 'nostr-tools/nip19'
 import { useMemo } from 'react'
 import { css } from 'react-strict-dom'
 import { LinkNEvent } from '../Links/LinkNEvent'
 
 type Props = {
-  nevent?: Nevent
+  nevent?: NEvent
   date: number
   disableLink?: boolean
   sx?: SxProps

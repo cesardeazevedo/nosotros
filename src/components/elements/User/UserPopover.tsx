@@ -2,13 +2,13 @@ import { Button } from '@/components/ui/Button/Button'
 import { Paper } from '@/components/ui/Paper/Paper'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { TooltipRich } from '@/components/ui/TooltipRich/TooltipRich'
-import { useNostrClientContext } from '@/hooks/useNostrClientContext'
+import { useCurrentUser } from '@/hooks/useRootStore'
+import type { User } from '@/stores/users/user'
 import { spacing } from '@/themes/spacing.stylex'
 import { useMobile } from 'hooks/useMobile'
 import { Observer } from 'mobx-react-lite'
 import React from 'react'
 import { css, html } from 'react-strict-dom'
-import type { User } from 'stores/models/user'
 import { UserAvatar } from './UserAvatar'
 import { UserContentAbout } from './UserContentAbout'
 import { UserName } from './UserName'
@@ -23,7 +23,7 @@ type Props = {
 export const UserPopover = (props: Props) => {
   const isMobile = useMobile()
   const { user, disabled = false } = props
-  const { user: currentUser } = useNostrClientContext()
+  const currentUser = useCurrentUser()
 
   if (isMobile || disabled) {
     return props.children
