@@ -1,4 +1,4 @@
-import { useMatch, useRouter } from '@tanstack/react-router'
+import { useMatch } from '@tanstack/react-router'
 import { DialogSheet } from 'components/elements/Layouts/Dialog'
 import { SignIn } from 'components/elements/SignIn/SignIn'
 import { useGoBack } from 'hooks/useNavigations'
@@ -6,8 +6,11 @@ import { observer } from 'mobx-react-lite'
 import { useCallback } from 'react'
 
 export const SignInDialog = observer(function SignInDialog() {
-  useMatch({ from: '__root__' })
-  const router = useRouter()
+  const match = useMatch({
+    from: '__root__',
+    // @ts-ignore
+    select: (x) => x.search.sign_in === true,
+  })
   const goBack = useGoBack()
 
   const handleClose = useCallback(() => {
@@ -15,7 +18,7 @@ export const SignInDialog = observer(function SignInDialog() {
   }, [goBack])
 
   return (
-    <DialogSheet maxWidth='xs' open={router.latestLocation.pathname.includes('/sign_in')} onClose={handleClose}>
+    <DialogSheet maxWidth='xs' open={match} onClose={handleClose}>
       <SignIn />
     </DialogSheet>
   )
