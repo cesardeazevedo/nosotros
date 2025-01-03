@@ -1,42 +1,40 @@
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Stack } from '@/components/ui/Stack/Stack'
-import { Text } from '@/components/ui/Text/Text'
+import { signinStore } from '@/stores/signin/signin.store'
 import { spacing } from '@/themes/spacing.stylex'
-import { IconChevronLeft, IconX } from '@tabler/icons-react'
-import { useMobile } from 'hooks/useMobile'
-import { useCallback } from 'react'
+import { IconChevronLeft } from '@tabler/icons-react'
+import { observer } from 'mobx-react-lite'
+import React from 'react'
 import { css } from 'react-strict-dom'
-import { OnboardMachineContext } from './SignInContext'
 
-export const SignInHeader = () => {
-  const machine = OnboardMachineContext.useActorRef()
-  const state = OnboardMachineContext.useSelector((x) => x)
-  const camera = OnboardMachineContext.useSelector((x) => x.context.camera)
+type Props = {
+  children: React.ReactNode
+}
 
-  const isMobile = useMobile()
-
-  const handleBack = useCallback(() => {
-    machine.send({ type: 'back' })
-  }, [machine])
-
-  const handleCamera = useCallback(() => {}, [])
-
+export const SignInHeader = observer((props: Props) => {
+  const { children } = props
   return (
-    <Stack align='center' gap={1} justify='flex-start' sx={styles.root}>
-      {!camera && !state.matches('intro') && (
-        <IconButton size='sm' onClick={handleBack} icon={<IconChevronLeft size={28} strokeWidth='2.5' />} />
+    <Stack align='center' gap={1} justify='center' sx={styles.root}>
+      {!signinStore.matches('SELECT') && (
+        <IconButton
+          size='sm'
+          onClick={() => signinStore.back()}
+          icon={<IconChevronLeft size={28} strokeWidth='2.5' />}
+          sx={styles.back}
+        />
       )}
-      {camera && <IconButton size='sm' onClick={handleCamera} icon={<IconX size={28} strokeWidth='2.0' />} />}
-      <Text variant='headline' size='sm'>
-        {!isMobile ? 'Sign In' : camera ? 'Camera' : ''}
-      </Text>
+      {children}
     </Stack>
   )
-}
+})
 
 const styles = css.create({
   root: {
-    padding: spacing.padding2,
-    height: 64,
+    padding: spacing.padding4,
+  },
+  back: {
+    position: 'absolute',
+    left: 20,
+    top: 36,
   },
 })

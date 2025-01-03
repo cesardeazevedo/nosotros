@@ -1,111 +1,76 @@
 import { Slide } from '@/components/ui/Slide/Slide'
-import { Stack } from '@/components/ui/Stack/Stack'
-import { spacing } from '@/themes/spacing.stylex'
-import { useCallback, useEffect, useRef } from 'react'
+import { signinStore } from '@/stores/signin/signin.store'
+import { observer } from 'mobx-react-lite'
+import { useRef } from 'react'
 import { css, html } from 'react-strict-dom'
-import { OnboardMachineContext } from './SignInContext'
-import { SignInForm } from './SignInForm'
-import { SignInIntro } from './SignInIntro'
+import { SignInNostrExtension } from './SignInNostrExtension'
+import { SignInReadOnly } from './SignInReadOnly'
+import { SignInRemoteSigner } from './SignInRemoteSigner'
+import { SignInSelect } from './SignInSelect'
 
-const easings = {
+const easing = {
   enter: 'cubic-bezier(0.33, 1, 0.68, 1)',
   exit: 'cubic-bezier(0.33, 1, 0.68, 1)',
 }
 
-export const SignInSlides = () => {
-  const state = OnboardMachineContext.useSelector((x) => x)
-  const machine = OnboardMachineContext.useActorRef()
-
-  const stepRef = useRef(0)
-  const prevStepRef = useRef(0)
-
-  // There might be a better way to do this with xstate
-  useEffect(() => {
-    const subscription = machine.subscribe((snapshot) => {
-      const [, next] = Object.entries(snapshot.getMeta()).flat() as [string, { index: number }]
-      prevStepRef.current = stepRef.current
-      stepRef.current = next.index
-    })
-    return subscription.unsubscribe
-  }, [machine])
-
-  const handleDirection = useCallback((nextStep: number) => {
-    const step = stepRef.current
-    const prev = prevStepRef.current
-
-    if (nextStep > step) {
-      // If the next step is greater than the current step, move from right to left.
-      return 'left'
-    } else if (nextStep < step) {
-      // If the next step is less than the current step, move from left to right.
-      return 'right'
-    } else if (nextStep === step) {
-      // If the next step is the same as the current step, consider the previous step.
-      if (prev < nextStep) {
-        return 'left'
-      } else if (prev > nextStep) {
-        return 'right'
-      }
-      return 'left'
-    }
-    return 'left'
-  }, [])
-
-  const handleNext = useCallback(() => {
-    machine.send({ type: 'next' })
-  }, [machine])
-
+export const SignInSlides = observer(function SignInSlides() {
+  const ref = useRef<HTMLDivElement | null>(null)
+  const props = {
+    container: ref.current,
+    style: { height: '100%' },
+    easing,
+  }
   return (
-    <html.div style={styles.root} id='asd'>
+    <html.div style={styles.root} ref={ref}>
       <Slide
-        style={{ height: '100%' }}
+        {...props}
         appear={false}
-        in={state.matches('intro')}
-        direction={handleDirection(0)}
-        easing={easings}>
-        <Stack horizontal={false} sx={styles.wrapper}>
-          <SignInIntro onClickManual={handleNext} />
-        </Stack>
+        in={signinStore.matches('SELECT')}
+        direction={signinStore.getSlideDirection('SELECT')}>
+        <html.div style={styles.wrapper}>
+          <SignInSelect />
+        </html.div>
+      </Slide>
+      <Slide {...props} in={signinStore.matches('READ_ONLY')} direction={signinStore.getSlideDirection('READ_ONLY')}>
+        <html.span style={styles.container}>
+          <SignInReadOnly />
+        </html.span>
       </Slide>
       <Slide
-        style={{ height: '100%' }}
-        // unmountOnExit
-        in={state.matches('withPubkey')}
-        direction={handleDirection(1)}
-        easing={easings}>
+        {...props}
+        in={signinStore.matches('NOSTR_EXTENSION')}
+        direction={signinStore.getSlideDirection('NOSTR_EXTENSION')}>
         <html.div style={styles.container}>
-          <SignInForm />
+          <SignInNostrExtension />
+        </html.div>
+      </Slide>
+      <Slide
+        {...props}
+        in={signinStore.matches('REMOTE_SIGN')}
+        direction={signinStore.getSlideDirection('REMOTE_SIGN')}>
+        <html.div style={styles.container}>
+          <SignInRemoteSigner />
         </html.div>
       </Slide>
     </html.div>
   )
-}
+})
 
 const styles = css.create({
   root: {
     position: 'relative',
-    padding: spacing.padding4,
     height: '100%',
   },
   wrapper: {
-    color: 'red',
+    position: 'relative',
     height: '100%',
   },
   container: {
     position: 'absolute',
-    top: 20,
+    top: 0,
     left: 0,
-    padding: spacing.padding4,
     right: 0,
-    bottom: 10,
-    display: 'flex',
-    alignContent: 'center',
-    justifyContent: 'center',
-    textAlign: 'center',
-    flexDirection: 'column',
-    width: '100%',
-  },
-  slide: {
+    bottom: 0,
     height: '100%',
   },
 })
