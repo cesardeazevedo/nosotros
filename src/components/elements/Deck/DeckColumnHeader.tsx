@@ -5,11 +5,11 @@ import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Paper } from '@/components/ui/Paper/Paper'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
+import { useRootStore } from '@/hooks/useRootStore'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconSettings, IconSettingsFilled } from '@tabler/icons-react'
 import React, { useCallback } from 'react'
 import { css } from 'react-strict-dom'
-import { deckStore } from 'stores/ui/deck.store'
 
 type Props = {
   id: string
@@ -18,13 +18,15 @@ type Props = {
   children: React.ReactElement | React.ReactElement[]
   renderSettings?: boolean
   renderDelete?: boolean
+  onDelete?: () => void
 }
 
-function DeckColumnHeader(props: Props) {
-  const { renderDelete = true, renderSettings = true } = props
+export const DeckColumnHeader = (props: Props) => {
+  const { renderDelete = true, renderSettings = true, onDelete } = props
+  const root = useRootStore()
 
   const handleDelete = useCallback(() => {
-    deckStore.removeColumn(props.id)
+    root.decks.selected.delete(props.id)
   }, [props.id])
 
   return (
@@ -58,17 +60,18 @@ function DeckColumnHeader(props: Props) {
             {props.settings}
             {(props.settings || renderDelete) && (
               <>
+                <Divider />
                 <Stack sx={styles.footer} justify={props.settings ? 'space-between' : 'flex-end'} gap={1}>
                   {renderSettings && (
-                    <Button variant='danger' onClick={handleDelete}>
+                    <Button variant='danger' onClick={onDelete || handleDelete}>
                       Delete
                     </Button>
                   )}
                   {props.settings && (
-                    <div>
-                      <Button>Cancel</Button>
+                    <Stack gap={0.5}>
+                      <Button onClick={() => {}}>Reset</Button>
                       <Button variant='filled'>Apply filters</Button>
-                    </div>
+                    </Stack>
                   )}
                 </Stack>
               </>
@@ -94,5 +97,3 @@ const styles = css.create({
     padding: spacing.padding1,
   },
 })
-
-export default DeckColumnHeader
