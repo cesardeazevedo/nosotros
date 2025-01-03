@@ -1,7 +1,8 @@
 import { Button } from '@/components/ui/Button/Button'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { Stack } from '@/components/ui/Stack/Stack'
-import { useNostrClientContext } from '@/hooks/useNostrClientContext'
+import { useCurrentUser } from '@/hooks/useRootStore'
+import type { Note } from '@/stores/notes/note'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { useNavigate, useRouter } from '@tanstack/react-router'
@@ -12,10 +13,8 @@ import { useMobile } from 'hooks/useMobile'
 import { observer } from 'mobx-react-lite'
 import { useCallback, useState } from 'react'
 import { css, html } from 'react-strict-dom'
-import type { Note } from 'stores/models/note'
-import { ComposeForm } from '../../Compose/ComposeForm'
+import { Editor } from '../../Editor/Editor'
 import { PostActions } from '../PostActions/PostActions'
-import { PostOptions } from '../PostOptions'
 import { PostReplyContent } from './PostReplyContent'
 
 type Props = {
@@ -44,7 +43,7 @@ export const PostReply = observer(function PostReply(props: Props) {
   const isMobile = useMobile()
   const collapsedLevel = isMobile ? 4 : 4
   const [open, setOpen] = useState(level < collapsedLevel)
-  const context = useNostrClientContext()
+  const user = useCurrentUser()
   const event = note.event
 
   const handleOpen = useCallback(() => {
@@ -91,16 +90,15 @@ export const PostReply = observer(function PostReply(props: Props) {
           </Stack>
           <html.div style={styles.actions}>
             <Stack>
-              <PostActions dense note={note} onReplyClick={() => note.toggleReplying()} />
-              <PostOptions dense note={note} />
+              <PostActions dense renderOptions note={note} onReplyClick={() => note.toggleReplying()} />
             </Stack>
             <Expandable expanded={note.isReplying} trigger={() => <></>}>
-              <ComposeForm dense initialOpen renderBubble renderDiscard={false} parentNote={note} />
+              {note.isReplying && <Editor dense initialOpen renderBubble renderDiscard={false} store={note.editor} />}
             </Expandable>
           </html.div>
           {nested && (
             <PostRepliesTree
-              replies={note.repliesSorted(context.user)}
+              replies={note.repliesSorted(user)}
               repliesOpen={repliesOpen}
               level={level + 1}
               nested={nested}

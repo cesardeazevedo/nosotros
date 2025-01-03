@@ -3,7 +3,7 @@ import { Paper } from '@/components/ui/Paper/Paper'
 import { PopoverBase } from '@/components/ui/Popover/PopoverBase'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
-import { authStore } from '@/stores/ui'
+import { useRootStore } from '@/hooks/useRootStore'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconQrcode } from '@tabler/icons-react'
@@ -16,7 +16,8 @@ import { UserName } from '../User/UserName'
 import { Menu } from './Menu'
 
 export const ProfilePopover = observer(function ProfilePopover() {
-  const { currentUser: user } = authStore
+  const root = useRootStore()
+  const { currentUser: user } = root.auth
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null)
   const handleOpen = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     setAnchorEl(e.currentTarget)

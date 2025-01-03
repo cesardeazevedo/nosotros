@@ -1,8 +1,17 @@
-import { Toaster as SonnerToaster } from 'sonner'
-import { settingsStore } from '@/stores/ui/settings.store'
+import { useGlobalSettings } from '@/hooks/useRootStore'
 import { observer } from 'mobx-react-lite'
+import { Toaster as SonnerToaster } from 'sonner'
 
 export const Toaster = observer(() => {
-  const theme = settingsStore.theme
-  return <SonnerToaster theme={theme === 'light' ? 'dark' : 'light'} visibleToasts={4} closeButton />
+  const globalSettings = useGlobalSettings()
+  const theme = globalSettings.theme
+  return (
+    <SonnerToaster
+      position='top-right'
+      theme={theme === 'light' ? 'light' : 'dark'}
+      style={{ marginTop: 62 }}
+      visibleToasts={4}
+      closeButton
+    />
+  )
 })

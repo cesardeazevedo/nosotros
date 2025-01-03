@@ -1,7 +1,7 @@
 import type { RelayStatsDB } from '@/db/types'
 import { db } from '@/nostr/db'
 import { autorun, makeAutoObservable, toJS } from 'mobx'
-import type { RelayInformation } from 'nostr-tools/lib/types/nip11'
+import type { RelayInformation } from 'nostr-tools/nip11'
 
 export type RelayStore = ReturnType<typeof createRelayStore>
 

@@ -1,9 +1,9 @@
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
+import { reactionStore } from '@/stores/reactions/reactions.store'
 import { observer, Observer } from 'mobx-react-lite'
 import React from 'react'
-import { reactionStore } from 'stores/nostr/reactions.store'
 import { UserAvatar } from '../User/UserAvatar'
 
 type Props = {

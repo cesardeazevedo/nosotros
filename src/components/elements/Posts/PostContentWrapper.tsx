@@ -5,7 +5,7 @@ import { observer } from 'mobx-react-lite'
 import React from 'react'
 import { css, html } from 'react-strict-dom'
 import useMeasure from 'react-use-measure'
-import type { Note } from 'stores/models/note'
+import type { Note } from '@/stores/notes/note'
 import { BubbleContainer } from '../Content/Layout/Bubble'
 import { PostError } from './PostError'
 import { ReplyUserHeader } from './PostReplies/PostReplyContent'
@@ -26,7 +26,7 @@ export const PostContentWrapper = observer(function PostContentWrapper(props: Pr
   const canExpand = bounds.height >= MAX_HEIGHT && !expanded
   const event = note?.event
 
-  if (![Kind.Text, Kind.Article].includes(event.kind)) {
+  if (![Kind.Text, Kind.Article, Kind.Photos].includes(event.kind)) {
     const ErrorContainer = bubble ? BubbleContainer : React.Fragment
     return (
       <ErrorContainer>

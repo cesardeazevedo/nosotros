@@ -23,11 +23,11 @@ type Props = {
   disabled?: boolean
   fullWidth?: boolean
   id?: string
-  label: string
-  maxRows?: number
-  minRows?: number
+  label?: string
+  rows?: number
   multiline?: boolean
   value?: string
+  shrink?: boolean
   defaultValue?: string
   onBlur?: () => void
   onFocus?: () => void
@@ -71,7 +71,7 @@ export const TextField = forwardRef<HTMLInputElement, Props>((props, ref) => {
     onChange?.(e)
   }, [])
 
-  const shrink = visualState.focused || filled
+  const shrink = props.shrink || visualState.focused || filled
 
   return (
     <html.div
@@ -85,21 +85,40 @@ export const TextField = forwardRef<HTMLInputElement, Props>((props, ref) => {
             {leading}
           </html.div>
         )}
-        <html.input
-          type={inputType}
-          ref={refs}
-          style={styles.input}
-          onChange={handleChange}
-          onBlur={onBlur}
-          onFocus={onFocus}
-          placeholder={placeholder}
-          value={value}
-          defaultValue={defaultValue}
-          {...dataProps(visualState)}
-          data-shrink={shrink}
-          aria-invalid={!!error}
-          aria-label={label}
-        />
+        {props.multiline && (
+          <html.textarea
+            rows={props.rows}
+            ref={refs}
+            style={[styles.input, styles.textarea]}
+            onChange={handleChange}
+            onBlur={onBlur}
+            onFocus={onFocus}
+            placeholder={placeholder}
+            // value={value}
+            defaultValue={defaultValue}
+            {...dataProps(visualState)}
+            data-shrink
+            aria-invalid={!!error}
+            aria-label={label}
+          />
+        )}
+        {!props.multiline && (
+          <html.input
+            type={inputType}
+            ref={refs}
+            style={styles.input}
+            onChange={handleChange}
+            onBlur={onBlur}
+            onFocus={onFocus}
+            placeholder={placeholder}
+            value={value}
+            defaultValue={defaultValue}
+            {...dataProps(visualState)}
+            data-shrink={shrink}
+            aria-invalid={!!error}
+            aria-label={label}
+          />
+        )}
         {trailing && <html.div style={styles.trailing}>{trailing}</html.div>}
         <html.fieldset style={[styles.fieldset, error && styles.fieldset$error]}>
           <legend {...css.props(styles.legend)}>
@@ -137,7 +156,7 @@ const styles = css.create({
     padding: 0,
     border: 0,
     verticalAlign: 'top',
-    height: textFieldTokens.containerMinHeight,
+    minHeight: textFieldTokens.containerMinHeight,
     [textFieldTokens.outlineLegend]: {
       default: '0.01px',
       ':is([data-shrink="true"])': '100%',
@@ -189,6 +208,13 @@ const styles = css.create({
       default: 1,
       ':is(:not([data-shrink="true"]))': 0,
     },
+  },
+  textarea: {
+    height: 'auto',
+    // minHeight: textFieldTokens.containerMinHeight,
+    paddingTop: spacing.padding2,
+    resize: 'none',
+    maxHeight: 200,
   },
   content: {
     fontWeight: 400,

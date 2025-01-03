@@ -1,7 +1,7 @@
+import { db } from '@/nostr/db'
 import { IconTrashXFilled } from '@tabler/icons-react'
 import { CenteredContainer } from 'components/elements/Layouts/CenteredContainer'
-import PaperContainer from 'components/elements/Layouts/PaperContainer'
-import { storage } from 'nostr/storage'
+import { PaperContainer } from 'components/elements/Layouts/PaperContainer'
 import { useCallback, useState } from 'react'
 import { css } from 'react-strict-dom'
 import { Button } from './components/ui/Button/Button'
@@ -9,18 +9,18 @@ import { Text } from './components/ui/Text/Text'
 import { palette } from './themes/palette.stylex'
 import { spacing } from './themes/spacing.stylex'
 
-function ErrorBoundary() {
+export const ErrorBoundary = () => {
   const [cleaning, setCleaning] = useState(false)
 
   const handleClick = useCallback(async () => {
     setCleaning(true)
-    await storage.clearDB()
+    await db.clearDB()
     setCleaning(false)
   }, [])
 
   return (
     <CenteredContainer>
-      <PaperContainer sx={styles.root}>
+      <PaperContainer sx={styles.root} elevation={2}>
         <Text variant='headline' size='lg' sx={styles.title}>
           ERROR
         </Text>
@@ -59,5 +59,3 @@ const styles = css.create({
     marginTop: spacing.margin2,
   },
 })
-
-export default ErrorBoundary

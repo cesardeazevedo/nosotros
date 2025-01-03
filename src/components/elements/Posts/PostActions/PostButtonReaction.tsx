@@ -1,13 +1,12 @@
 import { IconButton } from '@/components/ui/IconButton/IconButton'
-import { useNostrClientContext } from '@/hooks/useNostrClientContext'
-import { authStore } from '@/stores/ui'
+import { useRootContext } from '@/hooks/useRootStore'
+import type { Note } from '@/stores/notes/note'
+import { fallbackEmoji, reactionStore } from '@/stores/reactions/reactions.store'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconHeart, IconHeartFilled } from '@tabler/icons-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { observer } from 'mobx-react-lite'
 import { css, html } from 'react-strict-dom'
-import type { Note } from 'stores/models/note'
-import { fallbackEmoji, reactionStore } from 'stores/nostr/reactions.store'
 import { ReactionPicker } from '../../Reactions/ReactionPicker'
 import { ReactionsTooltip } from '../../Reactions/ReactionsTooltip'
 import { ButtonContainer } from './PostButtonContainer'
@@ -34,9 +33,10 @@ const emojiColors: Record<string, string> = {
 export const ButtonReaction = observer(function PostReactions(props: Props) {
   const { note, dense } = props
   const total = reactionStore.getTotal(note.id)
-  const myReaction = fallbackEmoji(reactionStore.getByNoteIdAndPubkey(note.id, authStore.pubkey)?.[0])
+  const pubkey = useRootContext().pubkey
+  const myReaction = fallbackEmoji(reactionStore.getByNoteIdAndPubkey(note.id, pubkey)?.[0])
   const color = myReaction ? emojiColors[myReaction] || colors.red7 : colors.red7
-  const context = useNostrClientContext()
+  const context = useRootContext()
   return (
     <>
       <ButtonContainer

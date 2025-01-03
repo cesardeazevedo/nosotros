@@ -67,7 +67,7 @@ export const ListItem = forwardRef<HTMLElement, Props>((props, ref) => {
 
   const refs = useMergeRefs([ref, setRef, actionRef])
 
-  const Element = href ? 'a' : 'button'
+  const Element = href ? 'a' : 'label'
 
   const hasLeading = !!leadingIcon || leadingImage
   const hasTrailing = !!trailingIcon || trailing

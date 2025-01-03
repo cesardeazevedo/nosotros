@@ -1,10 +1,9 @@
-import { Editor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
+import { Editor } from '@tiptap/core'
 import { Kind } from 'constants/kinds'
-import type { ContentSchema, NEventAttributes, NProfileAttributes } from 'nostr-editor'
+import type { ContentSchema, IMetaTags, NEventAttributes, NProfileAttributes } from 'nostr-editor'
 import { NEventExtension, NostrExtension } from 'nostr-editor'
 import type { NostrEvent } from 'nostr-tools'
-import type { IMetaTags } from 'nostr/nips/nip92.imeta'
 import { Markdown as MarkdownExtension } from 'tiptap-markdown'
 
 export const editorText = new Editor({

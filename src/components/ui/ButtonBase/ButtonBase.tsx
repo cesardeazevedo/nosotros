@@ -53,6 +53,7 @@ const styles = css.create({
     userSelect: 'none',
     textDecoration: 'none',
     borderWidth: 0,
+    borderRadius: 'inherit',
     [focusRingTokens.shape]: buttonTokens.containerShape,
   },
   disabled: {

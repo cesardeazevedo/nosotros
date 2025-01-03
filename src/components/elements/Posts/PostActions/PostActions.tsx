@@ -1,9 +1,10 @@
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { SxProps } from '@/components/ui/types'
 import { useMobile } from '@/hooks/useMobile'
+import type { Note } from '@/stores/notes/note'
 import { observer } from 'mobx-react-lite'
 import { css } from 'react-strict-dom'
-import type { Note } from 'stores/models/note'
+import { PostOptions } from '../PostOptions'
 import { ButtonReaction } from './PostButtonReaction'
 import { ButtonRelays } from './PostButtonRelay'
 import { ButtonReply } from './PostButtonReply'
@@ -18,6 +19,7 @@ type Props = {
   renderRepost?: boolean
   renderReply?: boolean
   renderZap?: boolean
+  renderOptions?: boolean
   sx?: SxProps
 }
 
@@ -28,6 +30,7 @@ export const PostActions = observer(function PostActions(props: Props) {
     renderReply = true,
     renderZap = true,
     renderRelays = true,
+    renderOptions = false,
     dense = false,
     sx,
   } = props
@@ -36,7 +39,7 @@ export const PostActions = observer(function PostActions(props: Props) {
   return (
     <Stack horizontal sx={[styles.root, dense && styles.root$dense, sx]} gap={dense ? 0 : mobile ? 0 : 1}>
       <ButtonReaction note={note} dense={dense} />
-      {renderRepost && <ButtonRepost dense={dense} value={note.repostTotal} />}
+      {renderRepost && <ButtonRepost dense={dense} note={note} />}
       {renderReply && (
         <ButtonReply
           dense={dense}
@@ -47,6 +50,7 @@ export const PostActions = observer(function PostActions(props: Props) {
       )}
       {renderZap && <ButtonZap dense={dense} note={note} />}
       {renderRelays && <ButtonRelays dense={dense} note={note} />}
+      {renderOptions && <PostOptions dense={dense} note={note} />}
     </Stack>
   )
 })

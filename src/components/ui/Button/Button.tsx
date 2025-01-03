@@ -32,7 +32,7 @@ export const Button = forwardRef<HTMLButtonElement, Props>(function Button(props
       disabled={disabled}
       outlined={outlined}
       {...rest}>
-      {!!elevation && <Elevation sx={styles.elevation} />}
+      {elevation && <Elevation sx={styles.elevation} />}
       {icon && <html.div style={[styles.icon, disabled && styles.label$disabled]}>{icon}</html.div>}
       {children && <html.span style={[styles.label, disabled && styles.label$disabled]}>{children}</html.span>}
       {trailingIcon && <html.div style={[styles.icon, disabled && styles.label$disabled]}>{trailingIcon}</html.div>}

@@ -11,13 +11,13 @@ import { useLoaderData } from '@tanstack/react-router'
 import { CenteredContainer } from 'components/elements/Layouts/CenteredContainer'
 import { PostLoading } from 'components/elements/Posts/PostLoading'
 import { observer } from 'mobx-react-lite'
-import type { EventPointer } from 'nostr-tools/lib/types/nip19'
+import type { EventPointer } from 'nostr-tools/nip19'
 import { css } from 'react-strict-dom'
 import { PaperContainer } from '../../elements/Layouts/PaperContainer'
 
 export type Props = EventPointer
 
-export const NEventRoute = observer(function NoteRoute() {
+export const NEventRoute = observer(function NEventRoute() {
   const module = useLoaderData({ from: '/$nostr' }) as NEventModule
   const isMobile = useMobile()
 

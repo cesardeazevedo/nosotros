@@ -11,5 +11,3 @@ const vars = {
 }
 
 export const focusRingTokens = css.defineVars(vars)
-
-export const focusRingTheme = css.createTheme(focusRingTokens, vars)

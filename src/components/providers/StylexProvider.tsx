@@ -1,5 +1,5 @@
+import { useGlobalSettings } from '@/hooks/useRootStore'
 import { useTheme } from '@/hooks/useTheme'
-import { settingsStore } from '@/stores/ui/settings.store'
 import { palette } from '@/themes/palette.stylex'
 import { typeFace } from '@/themes/typeFace.stylex'
 import { typeScale } from '@/themes/typeScale.stylex'
@@ -13,7 +13,8 @@ type Props = {
 }
 
 export const StylexProvider = observer(function StylexProvider(props: Props) {
-  const theme = useTheme(settingsStore.theme)
+  const globalSettings = useGlobalSettings()
+  const theme = useTheme(globalSettings.theme)
 
   return (
     <>

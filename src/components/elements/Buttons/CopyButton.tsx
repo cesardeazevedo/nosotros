@@ -6,13 +6,17 @@ import { spacing } from '@/themes/spacing.stylex'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconCheck, IconCopy } from '@tabler/icons-react'
 import { AnimatePresence, motion, MotionConfig } from 'framer-motion'
-import { useCallback, useState } from 'react'
+import { forwardRef, useCallback, useImperativeHandle, useState } from 'react'
 import { css, html } from 'react-strict-dom'
 
 type Props = {
-  title: string
+  title?: string
   text: string | undefined
   sx?: SxProps
+}
+
+export type CopyButtonRef = {
+  copy: () => void
 }
 
 const variants = {
@@ -20,7 +24,8 @@ const variants = {
   hidden: { opacity: 0, scale: 0.5 },
 }
 
-export const CopyButton = (props: Props) => {
+export const CopyButton = forwardRef<CopyButtonRef, Props>((props, ref) => {
+  const { title = 'Copy text' } = props
   const [copied, setCopied] = useState(false)
 
   const handleCopy = useCallback(() => {
@@ -34,6 +39,10 @@ export const CopyButton = (props: Props) => {
     }
   }, [props.text])
 
+  useImperativeHandle(ref, () => ({
+    copy: handleCopy,
+  }))
+
   return (
     <html.div style={props.sx}>
       <Tooltip
@@ -46,7 +55,7 @@ export const CopyButton = (props: Props) => {
               Copied <IconCheck size={18} />
             </Stack>
           ) : (
-            props.title
+            title
           )
         }>
         <IconButton
@@ -83,7 +92,7 @@ export const CopyButton = (props: Props) => {
       </Tooltip>
     </html.div>
   )
-}
+})
 
 const styles = css.create({
   copied: {

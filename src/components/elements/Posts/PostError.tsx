@@ -1,7 +1,7 @@
 import { Paper } from '@/components/ui/Paper/Paper'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
-import type { Note } from '@/stores/models/note'
+import type { Note } from '@/stores/notes/note'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconAlertCircle } from '@tabler/icons-react'
 import { css } from 'react-strict-dom'

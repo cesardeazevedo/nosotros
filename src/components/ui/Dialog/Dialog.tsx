@@ -47,7 +47,7 @@ const styles = css.create({
     display: 'grid',
     placeItems: 'center',
     overflow: 'auto',
-    zIndex: 400,
+    zIndex: 200,
     margin: 'auto',
     maxHeight: 'calc(100% - 100px)',
   },

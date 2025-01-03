@@ -1,4 +1,4 @@
-import { Composer } from '@/components/elements/Compose/Composer'
+import { Editor } from '@/components/elements/Editor/Editor'
 import { FeedItem } from '@/components/elements/Feed/FeedItem'
 import { PostLoading } from '@/components/elements/Posts/PostLoading'
 import { VirtualListWindow } from '@/components/elements/VirtualLists/VirtualListWindow'
@@ -44,7 +44,7 @@ export const HomeRoute = observer(function HomeRoute() {
       <CenteredContainer margin>
         <PaperContainer elevation={1}>
           {!mobile && (!auth.pubkey ? <SignInButtonFab /> : <PostFab />)}
-          <Composer initialOpen={false} allowLongForm={false} compose={module.compose} />
+          <Editor initialOpen={false} allowLongForm={false} store={module.editor} />
         </PaperContainer>
         <br />
         <PaperContainer elevation={1}>

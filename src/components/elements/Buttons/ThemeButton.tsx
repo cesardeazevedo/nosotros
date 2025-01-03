@@ -1,16 +1,17 @@
 import type { Props as IconButtonProps } from '@/components/ui/IconButton/IconButton'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
-import { settingsStore } from '@/stores/ui/settings.store'
+import { useGlobalSettings } from '@/hooks/useRootStore'
 import { IconMoon, IconSun } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
 import { useCallback } from 'react'
 
 export const ThemeButton = observer(function ThemeButton(props: IconButtonProps) {
-  const mode = settingsStore.theme
+  const globalSettings = useGlobalSettings()
+  const mode = globalSettings.theme
 
   const handleClick = useCallback(() => {
-    settingsStore.setTheme(settingsStore.theme === 'dark' ? 'light' : 'dark')
+    globalSettings.set('theme', globalSettings.theme === 'dark' ? 'light' : 'dark')
   }, [])
 
   return (

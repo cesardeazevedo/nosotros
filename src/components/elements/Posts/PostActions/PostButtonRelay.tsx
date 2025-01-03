@@ -4,7 +4,7 @@ import { IconServerBolt } from '@tabler/icons-react'
 import { useMobile } from 'hooks/useMobile'
 import { observer } from 'mobx-react-lite'
 import { useCallback } from 'react'
-import type { Note } from 'stores/models/note'
+import type { Note } from '@/stores/notes/note'
 import { ButtonContainer, type ContainerProps } from './PostButtonContainer'
 import { iconProps } from './utils'
 

@@ -7,7 +7,7 @@ import type { NostrClient } from '@/nostr/nostr'
 import type { Editor } from '@tiptap/core'
 import { computed, makeAutoObservable } from 'mobx'
 import type { FileUploadStorage, NostrStorage } from 'nostr-editor'
-import type { NostrEvent, UnsignedEvent } from 'nostr-tools'
+import type { EventTemplate, NostrEvent, UnsignedEvent } from 'nostr-tools'
 import { catchError, EMPTY, first, from, mergeMap, of, tap, type Subscription } from 'rxjs'
 import { toast } from 'sonner'
 import type { NostrContext } from '../context/nostr.context.store'
@@ -225,12 +225,13 @@ export const createEditorStore = (options?: EditorStoreOptions) => {
         this.excludedMentions.add(pubkey)
       },
 
-      async sign(event?: UnsignedEvent) {
+      async sign(event?: EventTemplate) {
         const signed = await this.client?.signer?.sign(event || this.rawEvent)
         if (signed) {
           this.signedEvent = signed
+          return this.signedEvent
         }
-        return this.signedEvent
+        return Promise.reject('Signing rejected')
       },
 
       onDiscard() {

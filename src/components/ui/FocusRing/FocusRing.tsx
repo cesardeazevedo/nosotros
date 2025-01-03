@@ -21,7 +21,7 @@ type IFocusRingEvent = Event & {
   [HANDLED_BY_FOCUS_RING]?: true
 }
 
-export function FocusRing(props: Props) {
+export const FocusRing = function FocusRing(props: Props) {
   const { sx, visualState, element, inward } = props
   const ref = useRef<HTMLDivElement>(null)
   const [visible, setVisible] = useState(false)

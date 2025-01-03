@@ -1,13 +1,13 @@
 import { Divider } from '@/components/ui/Divider/Divider'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { useMobile } from '@/hooks/useMobile'
-import type { Note } from '@/stores/models/note'
+import type { Note } from '@/stores/notes/note'
 import { spacing } from '@/themes/spacing.stylex'
 import { useRouter } from '@tanstack/react-router'
 import { observer } from 'mobx-react-lite'
 import { useCallback } from 'react'
 import { css, html } from 'react-strict-dom'
-import { ComposeForm } from '../Compose/ComposeForm'
+import { Editor } from '../Editor/Editor'
 import { PostActions } from './PostActions/PostActions'
 import { PostBroadcaster } from './PostBroadcaster'
 import { PostContent } from './PostContent'
@@ -36,7 +36,7 @@ export const PostRoot = observer(function PostRoot(props: Props) {
         state: { from: router.latestLocation.pathname },
       })
     } else {
-      note!.toggleReplies()
+      note.toggleReplies()
     }
   }, [router.latestLocation.pathname, isMobile, note])
 
@@ -59,8 +59,8 @@ export const PostRoot = observer(function PostRoot(props: Props) {
       {note.repliesOpen && (
         <>
           <Divider />
-          <html.div style={styles.compose}>
-            <ComposeForm dense renderBubble initialOpen={false} parentNote={note} />
+          <html.div style={styles.editor}>
+            <Editor renderBubble initialOpen={false} store={note.editor} />
           </html.div>
           <PostReplies note={note} renderEmpty onLoadMoreClick={handleLoadMore} />
         </>
@@ -74,7 +74,7 @@ const styles = css.create({
   root: {
     minHeight: 147,
   },
-  compose: {
-    paddingInline: spacing.padding2,
+  editor: {
+    paddingInline: spacing.padding1,
   },
 })

@@ -12,7 +12,7 @@ export const isAuthorTag = (tag: string[]) => tag[0] === PUBKEY
 export const isMention = (tag: string[]) => tag[3] === MENTION
 
 export type ParsedTags = {
-  [key: string]: string[][]
+  [key: string]: string[][] | undefined
 } & {
   hints?: RelayHints
 }

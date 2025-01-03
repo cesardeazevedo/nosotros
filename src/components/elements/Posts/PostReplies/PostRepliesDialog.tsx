@@ -1,16 +1,13 @@
 import { Stack } from '@/components/ui/Stack/Stack'
 import { useMobile } from '@/hooks/useMobile'
-import { useObservableNostrContext } from '@/hooks/useNostrClientContext'
+import { noteStore } from '@/stores/notes/notes.store'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { observer } from 'mobx-react-lite'
-import { useSubscription } from 'observable-hooks'
 import { useEffect } from 'react'
 import { RemoveScroll } from 'react-remove-scroll'
 import { css, html } from 'react-strict-dom'
-import { EMPTY } from 'rxjs'
-import { noteStore } from 'stores/nostr/notes.store'
-import { ComposeForm } from '../../Compose/ComposeForm'
+import { Editor } from '../../Editor/Editor'
 import { PostReplies } from './PostReplies'
 
 type Props = {
@@ -21,9 +18,6 @@ export const PostRepliesDialog = observer(function PostRepliesDialog(props: Prop
   const { noteId } = props
   const note = noteStore.get(noteId)
   const mobile = useMobile()
-
-  const sub = useObservableNostrContext((context) => note?.subscribe(context.client) || EMPTY)
-  useSubscription(sub)
 
   useEffect(() => {
     note?.toggleReplies(true)
@@ -40,7 +34,7 @@ export const PostRepliesDialog = observer(function PostRepliesDialog(props: Prop
         </html.div>
       </RemoveScroll>
       <html.div style={[styles.footer, mobile && styles.footer$mobile]}>
-        <ComposeForm dense renderBubble renderDiscard={false} />
+        {note && <Editor dense renderBubble store={note?.editor} renderDiscard={false} />}
       </html.div>
     </Stack>
   )

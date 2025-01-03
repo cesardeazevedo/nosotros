@@ -1,15 +1,15 @@
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
-import { settingsStore } from '@/stores/ui/settings.store'
+import { useGlobalSettings } from '@/hooks/useRootStore'
+import { useTheme } from '@/hooks/useTheme'
+import type { Note } from '@/stores/notes/note'
+import { zapStore } from '@/stores/zaps/zaps.store'
+import { colors } from '@stylexjs/open-props/lib/colors.stylex'
+import { IconBolt } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
-import type { Note } from 'stores/models/note'
-import { zapStore } from 'stores/nostr/zaps.store'
+import { css } from 'react-strict-dom'
 import { ButtonContainer, type ContainerProps } from './PostButtonContainer'
 import { iconProps } from './utils'
-import { colors } from '@stylexjs/open-props/lib/colors.stylex'
-import { css } from 'react-strict-dom'
-import { IconBolt } from '@tabler/icons-react'
-import { useTheme } from '@/hooks/useTheme'
 
 type Props = {
   note: Note
@@ -42,7 +42,8 @@ const formatter = new Intl.NumberFormat()
 
 export const ButtonZap = observer(function ButtonZap(props: Props & ContainerProps) {
   const { dense, onClick, note, ...rest } = props
-  const theme = useTheme(settingsStore.theme)
+  const globalSettings = useGlobalSettings()
+  const theme = useTheme(globalSettings.theme)
   const total = zapStore.getTotal(note.id) || ''
   const palette = themes[theme.key as 'light' | 'dark']
   return (

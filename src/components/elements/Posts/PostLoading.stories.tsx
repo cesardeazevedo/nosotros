@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { CenteredContainer } from '../Layouts/CenteredContainer'
-import PostLoading from './PostLoading'
+import { PostLoading } from './PostLoading'
 
 const meta = {
   component: PostLoading,

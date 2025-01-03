@@ -5,7 +5,7 @@ import { useGoBack } from 'hooks/useNavigations'
 import { observer } from 'mobx-react-lite'
 import { useCallback, useEffect } from 'react'
 import { dialogStore } from 'stores/ui/dialogs.store'
-import { decodeNIP19, type Nevent } from 'utils/nip19'
+import { decodeNIP19 } from 'utils/nip19'
 
 export const RepliesDialog = observer(function RepliesDialog() {
   const router = useRouter()
@@ -13,7 +13,8 @@ export const RepliesDialog = observer(function RepliesDialog() {
   const params = useParams({ strict: false })
 
   useEffect(() => {
-    const id = params.nevent ? decodeNIP19(params.nevent as Nevent)?.data?.id : undefined
+    const decoded = params.nevent ? decodeNIP19(params.nevent) : undefined
+    const id = decoded?.type === 'nevent' ? decoded.data.id : undefined
     if (router.latestLocation.pathname.includes('/replies')) {
       if (id && dialogStore.replies.indexOf(id) === -1) {
         dialogStore.pushReply(id)

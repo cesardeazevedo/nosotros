@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/Button/Button'
-import type { Note } from '@/stores/models/note'
+import type { Note } from '@/stores/notes/note'
 import { spacing } from '@/themes/spacing.stylex'
 import { observer } from 'mobx-react-lite'
 import { css, html } from 'react-strict-dom'

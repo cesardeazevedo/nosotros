@@ -87,11 +87,16 @@ const vars = {
   selectedHandleColor$disabled: palette.surface,
   selectedHandleOpacity$disabled: '1',
   // &:focus
-  selectedHandleColor$focus: palette.primaryContainer,
-  // &:hover
+  selectedHandleColor$focus: palette.onPrimaryContainer,
+  // // &:hover
+  // selectedHandleColor$hover: palette.primaryContainer,
+  // // &:pressed
+  // selectedHandleColor$pressed: palette.primaryContainer,
+
+  // TODO: modified. fix primaryContainer later
   selectedHandleColor$hover: palette.onPrimaryContainer,
   // &:pressed
-  selectedHandleColor$pressed: palette.primaryContainer,
+  selectedHandleColor$pressed: palette.onPrimaryContainer,
 
   // icon
   iconColor: palette.surfaceContainerHighest,

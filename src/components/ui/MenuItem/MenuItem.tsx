@@ -8,6 +8,7 @@ import { MenuNestedItem } from './MenuNestedItem'
 
 export type Props = ListItemProps & {
   label: React.ReactNode
+  htmlFor?: string
   keepOpenOnClick?: boolean
 }
 

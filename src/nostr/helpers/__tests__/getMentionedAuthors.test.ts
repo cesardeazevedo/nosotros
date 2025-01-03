@@ -1,5 +1,5 @@
-import { parseNoteContent } from '@/content/parser'
 import { getMentionedAuthors } from '../getMentionedAuthors'
+import { parseNoteContent } from '../parseNotes'
 import { parseTags } from '../parseTags'
 
 test('getMentionedAuthors', () => {

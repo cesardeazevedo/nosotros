@@ -57,7 +57,7 @@ export const Editor = observer(function Editor(props: Props) {
         horizontal
         align='flex-start'
         justify='space-between'
-        gap={dense ? 1 : 2}
+        gap={renderBubble ? 1 : 2}
         onClick={() => store.open.toggle(true)}
         sx={[styles.root, dense && styles.root$dense, store.open && styles.root$open]}>
         <UserAvatar disabledPopover disableLink size='md' pubkey={context.user?.pubkey} />
@@ -127,7 +127,7 @@ const styles = css.create({
     cursor: 'pointer',
     padding: spacing.padding1,
     paddingTop: 12,
-    paddingLeft: 12,
+    //paddingLeft: 12,
   },
   root$dense: {},
   root$open: {

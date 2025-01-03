@@ -1,9 +1,8 @@
 import type { MetadataDB } from '@/db/types'
 import type { RelayHints } from 'core/types'
-import type { ContentSchema } from 'nostr-editor'
+import type { ContentSchema, IMetaTags } from 'nostr-editor'
 import type { ParsedTags } from './helpers/parseTags'
 import type { UserMetadata } from './nips/nip01/metadata/parseUser'
-import type { IMetaTags } from './nips/nip92.imeta'
 
 export interface NoteMetadataDB extends MetadataDB {
   contentSchema: ContentSchema
@@ -29,6 +28,7 @@ export interface RepostDB extends MetadataDB {
 export type UserMetadataDB = MetadataDB & UserMetadata
 
 export interface ZapMetadataDB extends MetadataDB {
+  tags: ParsedTags
   bolt11: {
     amount?: {
       value: string

@@ -9,7 +9,7 @@ import type { ISize } from '../hooks/useElementSize'
 import { useElementSize } from '../hooks/useElementSize'
 import { ExpandableContext, type IExpandableContextValue } from './Expandable.context'
 
-type ICssSizeValue = number | string
+export type ICssSizeValue = number | string
 
 type IExpandableTriggerRenderProps = {
   expand: (expanded: boolean) => void

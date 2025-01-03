@@ -4,6 +4,7 @@ import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Paper } from '@/components/ui/Paper/Paper'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
+import type { Note } from '@/stores/notes/note'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconChevronDown, IconChevronRight } from '@tabler/icons-react'
 import JsonView from '@uiw/react-json-view'
@@ -11,7 +12,6 @@ import { githubDarkTheme } from '@uiw/react-json-view/githubDark'
 import React from 'react'
 import { RemoveScroll } from 'react-remove-scroll'
 import { css, html } from 'react-strict-dom'
-import type { Note } from 'stores/models/note'
 
 type Props = {
   note: Note

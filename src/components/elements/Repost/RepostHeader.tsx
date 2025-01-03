@@ -1,6 +1,6 @@
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
-import type { Repost } from '@/stores/models/repost'
+import type { Repost } from '@/stores/reposts/repost'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconArrowForward } from '@tabler/icons-react'

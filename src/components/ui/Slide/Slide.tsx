@@ -257,7 +257,7 @@ export const Slide = React.forwardRef<HTMLElement, Props>(function Slide(props, 
         return React.cloneElement(children, {
           ref: handleRef,
           style: {
-            visibility: state === 'exited' && !inProp ? 'hidden' : undefined,
+            visibility: state === 'exited' && !inProp ? 'hidden' : 'visible',
             ...style,
             ...children.props.style,
           },
