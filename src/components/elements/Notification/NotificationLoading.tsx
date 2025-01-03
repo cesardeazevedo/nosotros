@@ -2,15 +2,15 @@ import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import { useMemo } from 'react'
+import { memo } from 'react'
 import { css } from 'react-strict-dom'
 
 type Props = {
   rows?: number
 }
 
-export const NotificationLoading = ({ rows = 2 }: Props) => {
-  const list = useMemo(() => [...Array(rows).keys()], [rows])
+export const NotificationLoading = memo(({ rows = 2 }: Props) => {
+  const list = [...Array(rows).keys()]
 
   return list.map((key) => (
     <Stack key={key} gap={2} sx={styles.root}>
@@ -18,7 +18,7 @@ export const NotificationLoading = ({ rows = 2 }: Props) => {
       <Skeleton variant='rectangular' animation='wave' sx={styles.content} />
     </Stack>
   ))
-}
+})
 
 const styles = css.create({
   root: {

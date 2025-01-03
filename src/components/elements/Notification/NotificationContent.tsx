@@ -1,4 +1,4 @@
-import { noteStore } from '@/stores/nostr/notes.store'
+import { noteStore } from '@/stores/notes/notes.store'
 import React from 'react'
 import { TextContent } from '../Content/Text'
 import { html, css } from 'react-strict-dom'

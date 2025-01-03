@@ -1,9 +1,9 @@
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
-import type { Notification } from '@/stores/models/notification'
-import { noteStore } from '@/stores/nostr/notes.store'
-import { fallbackEmoji } from '@/stores/nostr/reactions.store'
-import { authStore } from '@/stores/ui'
+import { useCurrentUser } from '@/hooks/useRootStore'
+import { noteStore } from '@/stores/notes/notes.store'
+import type { Notification } from '@/stores/notifications/notification'
+import { fallbackEmoji } from '@/stores/reactions/reactions.store'
 import { spacing } from '@/themes/spacing.stylex'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconAt, IconBolt, IconHeartFilled, IconMessage, IconShare3 } from '@tabler/icons-react'
@@ -18,18 +18,15 @@ import { NotificationContent } from './NotificationContent'
 import { NotificationMedia } from './NotificationMedia'
 
 type Props = {
-  notification: Notification
+  item: Notification
 }
 
 export const NotificationItem = observer(function NotificationItem(props: Props) {
-  const { notification } = props
-  if (!notification) {
-    return null
-  }
+  const { item } = props
+  const user = useCurrentUser()
+  const { type, pubkey } = item
 
-  const { type, pubkey } = notification
-
-  const linkId = type === 'reply' || type === 'mention' ? notification.id : notification.related?.id
+  const linkId = type === 'reply' || type === 'mention' ? item.id : item.related?.id
   const note = noteStore.get(linkId)
 
   return (
@@ -42,12 +39,12 @@ export const NotificationItem = observer(function NotificationItem(props: Props)
         )}
         {type === 'reaction' && (
           <>
-            {notification.event.content === '❤️' ? (
+            {item.event.content === '❤️' ? (
               <html.span style={styles.heartIcon}>
                 <IconHeartFilled />
               </html.span>
             ) : (
-              <html.span style={styles.reactionIcon}>{fallbackEmoji(notification.event.content)}</html.span>
+              <html.span style={styles.reactionIcon}>{fallbackEmoji(item.event.content)}</html.span>
             )}
           </>
         )}
@@ -57,7 +54,7 @@ export const NotificationItem = observer(function NotificationItem(props: Props)
           </html.span>
         )}
         {type === 'mention' && <IconAt size={28} strokeWidth='1.5' />}
-        {type === 'repost' && <IconShare3 size={28} strokeWidth='1.5' />}
+        {type === 'repost' && <IconShare3 fill='currentColor' size={28} strokeWidth='1.5' />}
       </Stack>
       <Stack gap={2} justify='flex-start' align='flex-start' grow>
         <ContentContext.Provider value={{ disableLink: true, dense: true }}>
@@ -68,37 +65,37 @@ export const NotificationItem = observer(function NotificationItem(props: Props)
               {type === 'zap' && (
                 <>
                   <Text size='md'>zapped to your note:</Text>
-                  <NotificationContent id={notification.id} />
+                  <NotificationContent id={item.id} />
                 </>
               )}
               {type === 'reaction' && (
                 <>
-                  <Text size='md'>reacted to your note:</Text> <NotificationContent id={notification.related?.id} />
+                  <Text size='md'>reacted to your note:</Text> <NotificationContent id={item.related?.id} />
                 </>
               )}
               {type === 'reply' && (
                 <>
                   <Text size='md'>
-                    replied to {note?.event.pubkey === authStore.pubkey ? 'your note' : 'a note you were mentioned'}
+                    replied to {note?.event.pubkey === user?.pubkey ? 'your note' : 'a note you were mentioned'}
                     {': '}
                   </Text>{' '}
-                  <NotificationContent id={notification.id} />
+                  <NotificationContent id={item.id} />
                 </>
               )}
               {type === 'mention' && (
                 <>
-                  <Text size='md'>mentioned you in a note:</Text> <NotificationContent id={notification.id} />
+                  <Text size='md'>mentioned you in a note:</Text> <NotificationContent id={item.id} />
                 </>
               )}
               {type === 'repost' && (
                 <>
                   <Text size='md'>
-                    reposted {note?.event.pubkey === authStore.pubkey ? 'your note' : 'a note you were mentioned'}
+                    reposted {note?.event.pubkey === user?.pubkey ? 'your note' : 'a note you were mentioned'}
                   </Text>{' '}
-                  <NotificationContent id={notification.related?.id} />
+                  <NotificationContent id={item.related?.id} />
                 </>
               )}
-              <UserHeaderDate date={notification.event.created_at} />
+              <UserHeaderDate date={item.event.created_at} />
             </Stack>
           </LinkNEvent>
         </ContentContext.Provider>

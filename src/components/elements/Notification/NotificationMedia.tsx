@@ -1,4 +1,4 @@
-import { noteStore } from '@/stores/nostr/notes.store'
+import { noteStore } from '@/stores/notes/notes.store'
 import { shape } from '@/themes/shape.stylex'
 import { observer } from 'mobx-react-lite'
 import { css, html } from 'react-strict-dom'

@@ -2,22 +2,20 @@ import { DeckColumnHeader } from '@/components/elements/Deck/DeckColumnHeader'
 import { PaperContainer } from '@/components/elements/Layouts/PaperContainer'
 import { NotificationItem } from '@/components/elements/Notification/NotificationItem'
 import { NotificationLoading } from '@/components/elements/Notification/NotificationLoading'
-import { VirtualList } from '@/components/elements/VirtualLists/VirtualList'
+import { VirtualListColumn } from '@/components/elements/VirtualLists/VirtualListColumn'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
-import type { NotificationModule } from '@/stores/modules/notification.module'
+import type { NotificationModule } from '@/stores/notifications/notification.module'
 import { IconBellFilled } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
-import { useObservable, useSubscription } from 'observable-hooks'
 
 type Props = {
   module: NotificationModule
 }
 
-export const NotificationsColumn = observer(function NotificationsColumns(props: Props) {
+export const NotificationsColumn = observer(function NotificationsColumn(props: Props) {
   const { module } = props
-  const sub = useObservable(() => module.start())
-  useSubscription(sub)
+  const { id, feed } = module
   return (
     <>
       <DeckColumnHeader id={module.id} name='Home Settings'>
@@ -29,12 +27,11 @@ export const NotificationsColumn = observer(function NotificationsColumns(props:
         </Stack>
       </DeckColumnHeader>
       <PaperContainer elevation={0} shape='none'>
-        <VirtualList
-          divider
-          id={module.id}
-          data={module.list}
-          onScrollEnd={module.paginate}
-          render={(notification) => <NotificationItem notification={notification} />}
+        <VirtualListColumn
+          id={id}
+          feed={feed}
+          onScrollEnd={() => feed.paginate()}
+          render={(item) => <NotificationItem item={item} />}
           footer={<NotificationLoading rows={10} />}
         />
       </PaperContainer>
