@@ -1,14 +1,13 @@
 import { Divider } from '@/components/ui/Divider/Divider'
-import { useRangeChange } from 'hooks/useRangeChange'
 import { observer } from 'mobx-react-lite'
 import React, { useLayoutEffect, useMemo, useRef } from 'react'
 import { WindowVirtualizer, type CacheSnapshot, type WindowVirtualizerHandle } from 'virtua'
-import type { VirtualListProps } from './VirtualLists.types'
+import type { FeedAbstract, VirtualListProps } from './VirtualLists.types'
 
-export const VirtualListWindow = observer(function VirtualListWindow<T extends { id: string }>(
+export const VirtualListWindow = observer(function VirtualListWindow<T extends FeedAbstract>(
   props: VirtualListProps<T>,
 ) {
-  const { id, render, data, divider = true, onScrollEnd, onRangeChange } = props
+  const { id, render, feed, divider = true, onScrollEnd, onRangeChange } = props
   const cacheKey = `window-list-cache-${id}`
 
   const ref = useRef<WindowVirtualizerHandle>(null)
@@ -34,8 +33,8 @@ export const VirtualListWindow = observer(function VirtualListWindow<T extends {
 
     const onScroll = () => {
       const scrolledTo = window.scrollY + window.innerHeight
-      if (scrolledTo >= document.body.scrollHeight - 200) {
-        onScrollEnd()
+      if (scrolledTo >= document.body.scrollHeight - 250) {
+        onScrollEnd?.()
       }
     }
 
@@ -54,26 +53,18 @@ export const VirtualListWindow = observer(function VirtualListWindow<T extends {
     }
   }, [cacheKey, offset])
 
-  const onRangeChangeCallback = useRangeChange(onRangeChange)
-
-  const content = useMemo(() => {
-    return data?.map((item) => (
-      <React.Fragment key={item.id}>
-        {render(item)}
-        {divider && <Divider />}
-      </React.Fragment>
-    ))
-  }, [data, divider])
-
   return (
     <>
-      <WindowVirtualizer
-        ref={ref}
-        overscan={4}
-        cache={cache}
-        onRangeChange={(start, end) => onRangeChange && onRangeChangeCallback([start, end])}>
-        {content}
+      {props.header}
+      <WindowVirtualizer ref={ref} overscan={4} cache={cache} onRangeChange={onRangeChange}>
+        {feed.list.map((item) => (
+          <React.Fragment key={item.id}>
+            {render(item)}
+            {divider && <Divider />}
+          </React.Fragment>
+        ))}
       </WindowVirtualizer>
+      {props.footer}
     </>
   )
 })
