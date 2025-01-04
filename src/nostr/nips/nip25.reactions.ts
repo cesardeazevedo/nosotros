@@ -1,10 +1,10 @@
 import type { NostrFilter } from '@/core/types'
-import type { Note } from '@/stores/models/note'
-import { reactionStore } from '@/stores/nostr/reactions.store'
+import { reactionStore } from '@/stores/reactions/reactions.store'
 import { Kind } from 'constants/kinds'
 import type { NostrEvent } from 'nostr-tools'
 import type { ClientSubOptions, NostrClient } from 'nostr/nostr'
-import { EMPTY, tap } from 'rxjs'
+import { from, ignoreElements, mergeMap, mergeWith, tap } from 'rxjs'
+import { db } from '../db'
 
 const kinds = [Kind.Reaction]
 
@@ -31,22 +31,19 @@ export class NIP25Reactions {
     )
   }
 
-  subFromNote(note: Note, options?: ClientSubOptions) {
-    const ids = [note.id, ...note.meta.mentionedNotes]
-    const filter: NostrFilter = { kinds, '#e': ids }
-    if (note.meta.lastSyncedAt) {
-      filter.since = note.meta.lastSyncedAt
-    }
-    return this.subscribe(filter, {
-      ...options,
-      cacheFilter: filter,
-    })
-  }
-
   subscribe(filter: NostrFilter, options?: ClientSubOptions) {
-    if (this.client.settings.nip25enabled) {
-      return this.client.subscribe({ kinds, ...filter }, options).pipe(tap((event) => reactionStore.add(event)))
-    }
-    return EMPTY
+    return this.client.subscribe({ kinds, ...filter }, { ...options }).pipe(
+      mergeWith(
+        from(filter['#e'] || []).pipe(
+          mergeMap((id) => {
+            return from(db.event.countTags(Kind.Reaction, 'e', id)).pipe(
+              tap((count) => reactionStore.addCount(id, count)),
+            )
+          }),
+          ignoreElements(),
+        ),
+      ),
+      tap((event) => reactionStore.add(event)),
+    )
   }
 }

@@ -8,6 +8,7 @@ describe('ReactionStore', () => {
     const store = new ReactionStore()
     let reaction = fakeNote({
       kind: Kind.Reaction,
+      content: 'like',
       pubkey: '1',
       tags: [
         ['e', '10'],
@@ -19,10 +20,11 @@ describe('ReactionStore', () => {
     })
     store.add(reaction)
     store.add(reaction) // test some duplicated
-    expect(store.getByNoteId('1')).toEqual({ '🤙': ['1'] })
+    expect(store.getByNoteId('1')).toEqual({ like: ['1'] })
 
     reaction = fakeNote({
       kind: Kind.Reaction,
+      content: 'like',
       pubkey: '2',
       tags: [
         ['e', '1'],
@@ -30,21 +32,22 @@ describe('ReactionStore', () => {
       ],
     })
     store.add(reaction)
-    expect(store.getByNoteId('1')).toEqual({ '🤙': ['1', '2'] })
+    expect(store.getByNoteId('1')).toEqual({ like: ['1', '2'] })
 
     reaction = fakeNote({
       kind: Kind.Reaction,
       pubkey: '2',
+      content: 'like',
       tags: [
         ['e', '2'],
         ['p', '10'],
       ],
     })
     store.add(reaction)
-    expect(store.getByNoteId('2')).toEqual({ '🤙': ['2'] })
+    expect(store.getByNoteId('2')).toEqual({ like: ['2'] })
     expect(store.reactions.toJSON()).toEqual([
-      ['1', { '🤙': ['1', '2'] }],
-      ['2', { '🤙': ['2'] }],
+      ['1', { like: ['1', '2'] }],
+      ['2', { like: ['2'] }],
     ])
 
     reaction = fakeNote({
@@ -57,7 +60,7 @@ describe('ReactionStore', () => {
       ],
     })
     store.add(reaction)
-    expect(store.getByNoteId('2')).toEqual({ '🤙': ['2'], heart: ['1'] })
+    expect(store.getByNoteId('2')).toEqual({ like: ['2'], heart: ['1'] })
   })
 
   test('getTopReaction()', () => {
