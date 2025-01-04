@@ -201,7 +201,14 @@ export const createEditorStore = (options?: EditorStoreOptions) => {
       },
 
       focus() {
-        this.editor?.commands.focus()
+        setTimeout(() => {
+          this.editor?.commands.focus()
+        })
+      },
+
+      setOpen() {
+        this.open.toggle(true)
+        this.focus()
       },
 
       selectFiles() {

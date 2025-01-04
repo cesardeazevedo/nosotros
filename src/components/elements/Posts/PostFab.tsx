@@ -1,6 +1,7 @@
 import { buttonTokens } from '@/components/ui/Button/Button.stylex'
 import { Fab } from '@/components/ui/Fab/Fab'
 import { typeScale } from '@/themes/typeScale.stylex'
+import { Link, useRouter } from '@tanstack/react-router'
 import { useMobile } from 'hooks/useMobile'
 import React from 'react'
 import { css } from 'react-strict-dom'
@@ -8,10 +9,14 @@ import { IconPencil } from '../Icons/IconPencil'
 
 export const PostFab = React.memo(function PostFab() {
   const isMobile = useMobile()
+  const router = useRouter()
   return (
-    <Fab variant='primary' label='Post' sx={[styles.root, isMobile && styles.root$mobile]}>
-      <IconPencil />
-    </Fab>
+    // @ts-ignore
+    <Link from={router.fullPath} search={{ compose: true }}>
+      <Fab variant='primary' label='Post' sx={[styles.root, isMobile && styles.root$mobile]}>
+        <IconPencil />
+      </Fab>
+    </Link>
   )
 })
 

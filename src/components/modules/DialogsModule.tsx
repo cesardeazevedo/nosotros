@@ -4,6 +4,9 @@ import { QRCodeDialog } from 'components/dialogs/qrcode.dialog'
 import { RepliesDialog } from 'components/dialogs/replies.dialog'
 import { SignInDialog } from 'components/dialogs/signin.dialog'
 import React from 'react'
+import { EditorDialog } from '../dialogs/editor.dialog'
+import { EditorQuoteDialog } from '../dialogs/editor.quote.dialog'
+import { EditorReplyDialog } from '../dialogs/editor.reply.dialog'
 
 export const Dialogs = React.memo(function Dialogs() {
   return (
@@ -13,6 +16,9 @@ export const Dialogs = React.memo(function Dialogs() {
       <ImagesDialog />
       <RepliesDialog />
       <QRCodeDialog />
+      <EditorDialog />
+      <EditorQuoteDialog />
+      <EditorReplyDialog />
     </>
   )
 })

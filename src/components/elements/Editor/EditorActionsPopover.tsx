@@ -106,6 +106,7 @@ const styles = css.create({
     maxWidth: 490,
   },
   button: {
+    borderRadius: 12,
     minHeight: 32,
   },
 })

@@ -28,7 +28,7 @@ export const NEventEditor = (props: NodeViewProps) => {
       data-nevent={attrs.nevent}
       data-drag-handle=''
       draggable={props.node.type.spec.draggable}
-      style={{ position: 'relative', height: 'fit-content', width: 'fit-content' }}>
+      style={{ position: 'relative', height: 'fit-content', width: 'auto' }}>
       <DeleteButton onClick={() => props.deleteNode()} />
       <html.div style={[styles.wrapper, props.selected && styles.wrapper$selected]}>
         <NEvent noteId={attrs.id} />
@@ -39,6 +39,7 @@ export const NEventEditor = (props: NodeViewProps) => {
 
 const styles = css.create({
   wrapper: {
+    width: '100%',
     marginBlock: spacing.padding2,
     backgroundColor: 'transparent',
     borderRadius: 2,
