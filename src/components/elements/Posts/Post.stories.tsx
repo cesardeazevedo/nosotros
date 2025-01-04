@@ -1,27 +1,28 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { Kind } from 'constants/kinds'
 import type { NostrEvent } from 'core/types'
-import { noteStore } from 'stores/nostr/notes.store'
+import { noteStore } from '@/stores/notes/notes.store'
 import { fakeImageUrl } from 'utils/faker'
 import { CenteredContainer } from '../Layouts/CenteredContainer'
-import Post from './Post'
-import PostLoading from './PostLoading'
+import { PostRoot } from './Post'
+import { PostLoading } from './PostLoading'
 
 const meta = {
-  component: Post,
+  component: PostRoot,
   excludeStories: /.*setup$/,
   decorators: [
+    // @ts-ignore
     (Story) => (
-      <CenteredContainer maxWidth='sm'>
+      <CenteredContainer>
         <Story />
       </CenteredContainer>
     ),
   ],
   render: function Render() {
     const note = noteStore.get('1')
-    return note ? <Post id={note.id} /> : <PostLoading />
+    return note ? <PostRoot note={note} /> : <PostLoading />
   },
-} satisfies Meta<typeof Post>
+} satisfies Meta<typeof PostRoot>
 
 export const setup = (note: Partial<NostrEvent>) => ({
   parameters: {
@@ -57,7 +58,7 @@ export const MultiLineTest = {
   }),
 } satisfies StoryObj
 
-export const Link = {
+export const LinkDefault = {
   ...setup({ content: 'Check this out! https://google.com' }),
 } satisfies StoryObj
 
@@ -158,7 +159,7 @@ console.log("Hello World")
   }),
 } satisfies StoryObj
 
-export const Note = {
+export const NoteText = {
   parameters: {
     setup() {
       // store.users.add(fakeUser('1'))

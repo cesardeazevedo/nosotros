@@ -1,17 +1,17 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { CenteredContainer } from 'components/elements/Layouts/CenteredContainer'
-import { noteStore } from 'stores/nostr/notes.store'
-import Post from '../Post'
-import PostLoading from '../PostLoading'
+import { noteStore } from '@/stores/notes/notes.store'
+import { PostRoot } from '../Post'
+import { PostLoading } from '../PostLoading'
 
 const meta = {
-  component: Post,
+  component: PostRoot,
   render: function Render() {
     const note = noteStore.get('1')
     note?.toggleReplies(true)
-    return <CenteredContainer>{note ? <Post id={note.id} /> : <PostLoading />}</CenteredContainer>
+    return <CenteredContainer>{note ? <PostRoot note={note} /> : <PostLoading />}</CenteredContainer>
   },
-} satisfies Meta<typeof Post>
+} satisfies Meta<typeof PostRoot>
 
 export default meta
 
@@ -25,32 +25,7 @@ export const Tree = {
 
 export const ReplyPreview = {
   parameters: {
-    async setup() {
-      // store.auth.pubkey = '1'
-      // await store.contacts.add(
-      //   fakeNote({
-      //     id: '1',
-      //     pubkey: '1',
-      //     content: faker.lorem.lines(2),
-      //     tags: [
-      //       ['p', '3'],
-      //       ['p', '7'],
-      //     ],
-      //   }),
-      // )
-      // const notes = await store.notes.loadNotes([
-      //   fakeNote({ id: '1', pubkey: '1', content: 'following users [3, 7]', tags: [] }),
-      //   fakeNote({ id: '4', pubkey: '4', content: 'post 4', tags: [['e', '1', '', 'reply']] }),
-      //   fakeNote({ id: '5', pubkey: '5', content: 'post 5', tags: [['e', '4', '', 'reply']] }),
-      //   fakeNote({ id: '6', pubkey: '6', content: 'post 6', tags: [['e', '5', '', 'reply']] }),
-      //   fakeNote({ id: '2', pubkey: '2', content: 'post 2', tags: [['e', '1', '', 'reply']] }),
-      //   fakeNote({ id: '2_1', pubkey: '3', content: 'post 2_1', tags: [['e', '2', '', 'reply']] }),
-      //   fakeNote({ id: '2_1_1', pubkey: '4', content: 'post 2_1_1', tags: [['e', '2_1', '', 'reply']] }),
-      //   fakeNote({ id: '3', pubkey: '3', content: 'post 3', tags: [['e', '1', '', 'reply']] }),
-      //   fakeNote({ id: '7', pubkey: '7', content: 'post 7', tags: [['e', '1', '', 'reply']] }),
-      // ])
-      // notes.forEach((note) => store.users.add(fakeUser(note.event.id, { name: note.event.id })))
-    },
+    async setup() {},
   },
 }
 

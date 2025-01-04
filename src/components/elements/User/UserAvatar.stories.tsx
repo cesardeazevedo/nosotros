@@ -1,17 +1,12 @@
-import { Paper } from '@mui/material'
 import type { Meta, StoryObj } from '@storybook/react'
-import { userStore } from 'stores/nostr/users.store'
-import UserAvatar from './UserAvatar'
+import { userStore } from '@/stores/users/users.store'
+import { UserAvatar } from './UserAvatar'
 
 const meta = {
   component: UserAvatar,
   render: function Render() {
     const user = userStore.get('1')
-    return (
-      <Paper sx={{ p: 2 }}>
-        <UserAvatar user={user} />
-      </Paper>
-    )
+    return <UserAvatar pubkey={user?.pubkey} />
   },
   parameters: {
     layout: 'centered',

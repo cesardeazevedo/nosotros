@@ -1,8 +1,8 @@
 import { Paper } from '@/components/ui/Paper/Paper'
 import type { Meta, StoryObj } from '@storybook/react'
 import React from 'react'
-import { noteStore } from 'stores/nostr/notes.store'
-import UserHeader from './UserHeader'
+import { noteStore } from '@/stores/notes/notes.store'
+import { UserHeader } from './UserHeader'
 
 type Props = Omit<React.ComponentProps<typeof UserHeader>, 'note'>
 
