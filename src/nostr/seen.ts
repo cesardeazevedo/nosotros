@@ -1,6 +1,6 @@
 import { bufferTime } from '@/core/operators/bufferTime'
 import type { SeenDB } from '@/db/types'
-import { seenStore } from '@/stores/nostr/seen.store'
+import { seenStore } from '@/stores/seen/seen.store'
 import type { NostrEvent } from 'nostr-tools'
 import { identity, mergeMap, Subject } from 'rxjs'
 import { db } from './db'
@@ -13,7 +13,7 @@ export class Seen {
     this.insert$.pipe(bufferTime(5000)).subscribe((data) => db.seen.insertBulk(data))
     this.query$
       .pipe(
-        bufferTime(2000),
+        bufferTime(500),
         mergeMap(identity),
         mergeMap((event) => db.seen.query(event.id)),
         mergeMap(identity),

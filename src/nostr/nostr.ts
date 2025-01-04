@@ -6,9 +6,10 @@ import { NostrSubscription, type SubscriptionOptions } from 'core/NostrSubscript
 import type { Pool } from 'core/pool'
 import type { Signer } from 'core/signers/signer'
 import type { NostrFilter } from 'core/types'
-import type { NostrEvent, UnsignedEvent } from 'nostr-tools'
+import type { EventTemplate, NostrEvent } from 'nostr-tools'
 import type { OperatorFunction } from 'rxjs'
-import { EMPTY, merge, mergeWith, of, pipe, tap, throwError, type Observable } from 'rxjs'
+import { catchError, EMPTY, merge, mergeWith, of, pipe, tap, throwError, type Observable } from 'rxjs'
+import { toast } from 'sonner'
 import { batcher } from './batcher'
 import { setCache } from './cache'
 import { NostrFeeds } from './feeds'
@@ -23,7 +24,7 @@ import { NIP18Reposts } from './nips/nip18.reposts'
 import { NIP25Reactions } from './nips/nip25.reactions'
 import { NIP50Search } from './nips/nip50.search'
 import { NIP57Zaps } from './nips/nip57.zaps'
-import { NIP65RelayList } from './nips/nip65.relaylist'
+import { NIP65RelayList, READ, WRITE } from './nips/nip65.relaylist'
 import { Notifications } from './notifications'
 import { distinctEvent } from './operators/distinctEvents'
 import * as localDB from './operators/localDB'
@@ -37,10 +38,11 @@ export type NostrClientOptions = {
   relays?: string[]
   pubkey?: string
   signer?: Signer
-  settings?: Partial<NostrSettings>
+  settings?: NostrSettings
 }
 
 export type ClientSubOptions = Omit<SubscriptionOptions, 'outbox'> & {
+  queryLocal?: boolean
   cacheFilter?: NostrFilter
   outbox?: boolean
 }
@@ -82,13 +84,14 @@ export class NostrClient {
     this.signer = options.signer
     this.pubkey = options.pubkey
     this.relays = options.relays || []
-    this.settings = { ...defaultNostrSettings, ...options.settings }
+    this.settings = options.settings || defaultNostrSettings
 
     this.localSets = new Set([...this.settings.localRelays])
 
-    if (options.pubkey) {
-      this.outbox$ = this.mailbox.track(options.pubkey, { permission: 'read' }).pipe(toArrayRelay)
-      this.inbox$ = this.mailbox.track(options.pubkey, { permission: 'write' }).pipe(toArrayRelay)
+    // ownership of this client
+    if (this.pubkey) {
+      this.outbox$ = this.mailbox.track(this.pubkey, { permission: WRITE }).pipe(toArrayRelay)
+      this.inbox$ = this.mailbox.track(this.pubkey, { permission: READ }).pipe(toArrayRelay)
     } else {
       this.outbox$ = of(this.relays)
       this.inbox$ = of(this.relays)
@@ -96,14 +99,11 @@ export class NostrClient {
 
     this.inboxTracker = new InboxTracker(this)
     this.outboxTracker = new OutboxTracker(this)
-
-    this.initialize()
   }
 
   initialize() {
     this.initializeLocalRelays()
-    this.initializeInboxRelays()
-    this.initializeOutboxRelays()
+    return merge(this.initializeInboxRelays(), this.initializeOutboxRelays())
   }
 
   private initializeLocalRelays() {
@@ -113,26 +113,30 @@ export class NostrClient {
   }
 
   private initializeInboxRelays() {
-    this.inbox$.subscribe((relays) => {
-      relays.forEach((url) => {
-        this.pool.get(url)
-        this.inboxSets.add(url)
-      })
-    })
+    return this.inbox$.pipe(
+      tap((relays) => {
+        relays.forEach((url) => {
+          this.pool.get(url)
+          this.inboxSets.add(url)
+        })
+      }),
+    )
   }
 
   private initializeOutboxRelays() {
-    this.outbox$.subscribe((relays) => {
-      relays.forEach((url) => {
-        this.pool.get(url)
-        this.outboxSets.add(url)
-      })
-    })
+    return this.outbox$.pipe(
+      tap((relays) => {
+        relays.forEach((url) => {
+          this.pool.get(url)
+          this.outboxSets.add(url)
+        })
+      }),
+    )
   }
 
   // Query locally, IndexedDB or local relays
-  query(sub: NostrSubscription, filter?: NostrFilter[]) {
-    const filters = filter || sub.filters
+  query(sub: NostrSubscription, filter?: NostrFilter) {
+    const filters = filter ? [filter] : sub.filters
     if (filters.length > 0) {
       const localDB$ = this.settings.localDB ? localDB.query(filters) : EMPTY
       const localRelays$ = localRelay.query(this.pool, Array.from(this.localSets), sub, filters)
@@ -153,10 +157,23 @@ export class NostrClient {
   createSubscription(filters: NostrFilter | NostrFilter[], options?: ClientSubOptions) {
     return new NostrSubscription(filters, {
       ...options,
-      relays: merge(this.outbox$, options?.relays || EMPTY),
-      relayHints: this.settings.hintsEnabled ? options?.relayHints : {},
+      // Fixed relays
+      relays:
+        // custom relays
+        options?.relays ||
+        // inbox / outbox relays
+        merge(
+          // Inbox relays: Seek events about a user
+          this.inbox$,
+          // Outbox relays: Seek events from a user
+          this.outbox$,
+          // client fixed relays
+          of(this.relays),
+        ),
+      relayHints: this.settings.hints ? options?.relayHints : {},
+      // Tracking outbox relays for each filter authors/#p tags
       outbox:
-        this.settings.outboxEnabled && options?.outbox !== false
+        this.settings.outbox && options?.outbox !== false
           ? this.outboxTracker.subscribe.bind(this.outboxTracker)
           : () => EMPTY,
       transform: pruneFilters,
@@ -178,33 +195,42 @@ export class NostrClient {
       this.insert(),
 
       mergeWith(
-        this.query(sub).pipe(
-          tap((event) => {
-            sub.add(event)
-            this.seen.query(event)
-            setCache(event)
-          }),
-        ),
+        options?.queryLocal !== false
+          ? this.query(sub, options?.cacheFilter).pipe(
+              tap((event) => {
+                sub.add(event)
+                this.seen.query(event)
+                setCache(event)
+              }),
+            )
+          : EMPTY,
       ),
     )
   }
 
-  publish(unsignedEvent: Omit<UnsignedEvent, 'created_at' | 'pubkey'>, options: PublisherOptions = {}) {
-    if (this.pubkey && this.signer) {
-      const event = {
-        ...unsignedEvent,
-        pubkey: this.pubkey,
-        created_at: parseInt((Date.now() / 1000).toString()),
-      }
-      const pub = new NostrPublisher(event, {
-        ...options,
-        signer: this.signer,
-        relays: options.relays || this.inbox$,
-        inbox: !options.relays ? this.inboxTracker.subscribe.bind(this.inboxTracker) : () => EMPTY,
-      })
+  publish(unsignedEvent: Omit<EventTemplate, 'created_at'>, options: PublisherOptions = {}) {
+    if (!this.pubkey) return throwError(() => new Error('Not authenticated'))
+    if (!this.signer) return throwError(() => new Error('Authenticated as read only'))
 
-      return of(pub).pipe(publish(this.pool))
+    const event = {
+      ...unsignedEvent,
+      pubkey: this.pubkey,
+      created_at: parseInt((Date.now() / 1000).toString()),
     }
-    return throwError(() => new Error('Not authenticated'))
+    const pub = new NostrPublisher(event, {
+      ...options,
+      signer: this.signer,
+      relays: options.relays || this.inbox$,
+      inbox: !options.relays ? this.inboxTracker.subscribe.bind(this.inboxTracker) : () => EMPTY,
+    })
+
+    return of(pub).pipe(
+      publish(this.pool),
+      catchError((res) => {
+        const error = res as Error
+        toast.error(error.message.charAt(0).toUpperCase() + error.message.slice(1))
+        throw error
+      }),
+    )
   }
 }
