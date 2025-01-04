@@ -30,7 +30,6 @@ vi.mock('nostr-tools', async () => {
 })
 
 vi.mock('constants/relays')
-vi.mock('constants/recommended')
 
 // Reset Indexeddb
 beforeEach(() => db.clearDB())
