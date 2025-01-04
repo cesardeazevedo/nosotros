@@ -43,12 +43,16 @@ export class Pool {
     return relay
   }
 
+  reset() {
+    this.relays.clear()
+    this.blacklisted.clear()
+  }
+
   delete(url: string) {
     this.relays.delete(url)
   }
 
   blacklist(url: string) {
-    console.log('BLACKLIST????', url)
     this.blacklisted.set(url, true)
   }
 
