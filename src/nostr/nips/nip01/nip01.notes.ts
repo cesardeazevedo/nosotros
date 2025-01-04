@@ -1,39 +1,34 @@
-import type { PublisherOptions } from '@/core/NostrPublish'
+import { dedupe } from '@/core/helpers/dedupe'
 import { mapMetadata } from '@/nostr/operators/mapMetadata'
 import { pruneIds } from '@/nostr/prune'
+import type { Note } from '@/stores/notes/note'
+import { noteStore } from '@/stores/notes/notes.store'
 import { Kind } from 'constants/kinds'
 import type { NostrFilter } from 'core/types'
-import type { UnsignedEvent } from 'nostr-tools'
-import type { NostrClient, ClientSubOptions } from 'nostr/nostr'
-import { type NoteMetadataDB } from 'nostr/types'
-import { EMPTY, connect, expand, ignoreElements, map, merge, mergeMap, of } from 'rxjs'
-import { Note } from 'stores/models/note'
-import { noteStore } from 'stores/nostr/notes.store'
+import type { ClientSubOptions, NostrClient } from 'nostr/nostr'
+import type { Observable } from 'rxjs'
+import { EMPTY, connect, expand, filter, from, ignoreElements, map, merge, mergeMap, of, pipe } from 'rxjs'
 import { parseNote } from './metadata/parseNote'
 
 export class NIP01Notes {
   constructor(private client: NostrClient) {}
 
-  publish(event: UnsignedEvent, options: PublisherOptions) {
-    return this.client.publish(event, options)
-  }
-
-  subscribe(filters: NostrFilter, options?: ClientSubOptions) {
-    return this.client.subscribe(filters, options).pipe(
+  process() {
+    return pipe(
       mapMetadata(parseNote),
 
-      map(([event, metadata]) => {
-        const note = new Note(event, metadata)
-        noteStore.add(note)
-        return note
-      }),
+      map(([event, metadata]) => noteStore.add(event, metadata)),
 
       connect((notes$) => {
         return merge(
           notes$,
           // Get the note author
           notes$.pipe(
-            mergeMap((note) => this.client.users.subFromNote(note)),
+            mergeMap((note) => {
+              const relayHints = note.metadata?.relayHints
+              const authors = dedupe([note.event.pubkey, ...(note.metadata.mentionedAuthors || [])])
+              return from(authors).pipe(mergeMap((pubkey) => this.client.users.subscribe(pubkey, { relayHints })))
+            }),
             ignoreElements(),
           ),
         )
@@ -41,12 +36,45 @@ export class NIP01Notes {
     )
   }
 
-  subReplies(note: NoteMetadataDB, options?: ClientSubOptions) {
-    return this.subWithRelated({ kinds: [Kind.Text], '#e': [note.id] }, options)
+  subscribe(filters: NostrFilter, options?: ClientSubOptions) {
+    return this.client.subscribe(filters, options).pipe(
+      // filter out any non text article
+      filter((event) => [Kind.Text, Kind.Article, Kind.Photos].indexOf(event.kind) > -1),
+
+      this.process(),
+    )
+  }
+
+  subReplies(id: string, options?: ClientSubOptions) {
+    return this.subWithRelated({ kinds: [Kind.Text], '#e': [id] }, options)
+  }
+
+  subRelated(note: Note, options?: ClientSubOptions): Observable<Note> {
+    return of(note).pipe(
+      expand((note, depth) => {
+        // Make this configurable
+        if (depth >= 16) {
+          return EMPTY
+        }
+        const mentioned = note.metadata.mentionedNotes || []
+        const related = note.metadata.tags.e?.map((x) => x[1]).filter((x) => mentioned.indexOf(x) === -1) || []
+        const relayHints = note.metadata.relayHints
+        const subOptions = { ...options, relayHints }
+        return merge(
+          this.subIds(related, subOptions),
+          this.subIds(mentioned, subOptions).pipe(
+            mergeMap((note) => this.subRelated(note)),
+            // Don't include quoted notes on the feed
+            ignoreElements(),
+          ),
+        )
+      }),
+    )
   }
 
   subIds(ids: string[], options?: ClientSubOptions) {
-    const neededIds = pruneIds(ids)
+    // filter out ids from d tags
+    const neededIds = pruneIds(ids).filter((x) => x.indexOf(':') === -1)
     if (neededIds.length > 0) {
       return this.subscribe({ ids: neededIds }, options)
     }
@@ -54,31 +82,6 @@ export class NIP01Notes {
   }
 
   subWithRelated(filters: NostrFilter, options?: ClientSubOptions) {
-    return this.subscribe(filters, options).pipe(
-      // Get the related notes (parent, mentioned quote notes)
-      connect((shared$) => {
-        return shared$.pipe(
-          mergeMap((note) => {
-            return of(note).pipe(
-              expand((note, depth) => {
-                // Make this configurable
-                if (depth >= 16) {
-                  return EMPTY
-                }
-                const mentioned = note.meta.mentionedNotes
-                const related = note.meta.tags.e?.map((x) => x[1]).filter((x) => mentioned.indexOf(x) === -1)
-                const relayHints = note.meta.relayHints
-                const subOptions = { ...options, relayHints }
-                return merge(
-                  this.subIds(related, subOptions),
-                  // Don't include quoted notes on the feed
-                  this.subIds(mentioned, subOptions).pipe(ignoreElements()),
-                )
-              }),
-            )
-          }),
-        )
-      }),
-    )
+    return this.subscribe(filters, options).pipe(mergeMap((note) => this.subRelated(note)))
   }
 }
