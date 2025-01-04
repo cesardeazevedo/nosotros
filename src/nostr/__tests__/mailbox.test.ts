@@ -93,10 +93,10 @@ describe('Mailbox Tracker', () => {
     await spy.onComplete()
 
     expect(spy.getValues()).toStrictEqual([
-      [{ pubkey: '1', relay: 'relay1', permission: undefined }],
-      [{ pubkey: '2', relay: 'relay2', permission: undefined }],
-      [{ pubkey: '3', relay: 'relay3', permission: undefined }],
-      [{ pubkey: '4', relay: 'relay4', permission: undefined }],
+      [{ pubkey: '1', relay: 'relay1', permission: READ | WRITE }],
+      [{ pubkey: '2', relay: 'relay2', permission: READ | WRITE }],
+      [{ pubkey: '3', relay: 'relay3', permission: READ | WRITE }],
+      [{ pubkey: '4', relay: 'relay4', permission: READ | WRITE }],
     ])
   })
 
@@ -123,12 +123,12 @@ describe('Mailbox Tracker', () => {
     await spy1.onComplete()
     expect(spy1.getValues()).toStrictEqual([
       [
-        { pubkey: '1', relay: RELAY_1, permission: 'read' },
-        { pubkey: '1', relay: RELAY_3, permission: undefined },
+        { pubkey: '1', relay: RELAY_1, permission: READ },
+        { pubkey: '1', relay: RELAY_3, permission: READ | WRITE },
       ],
       [
-        { pubkey: '2', relay: RELAY_2, permission: 'read' },
-        { pubkey: '2', relay: RELAY_3, permission: undefined },
+        { pubkey: '2', relay: RELAY_2, permission: READ },
+        { pubkey: '2', relay: RELAY_3, permission: READ | WRITE },
       ],
     ])
     // We should make sure the selectRelays result doesn't get cached
@@ -137,12 +137,12 @@ describe('Mailbox Tracker', () => {
     await spy2.onComplete()
     expect(spy2.getValues()).toStrictEqual([
       [
-        { pubkey: '1', relay: RELAY_2, permission: 'write' },
-        { pubkey: '1', relay: RELAY_3, permission: undefined },
+        { pubkey: '1', relay: RELAY_2, permission: WRITE },
+        { pubkey: '1', relay: RELAY_3, permission: READ | WRITE },
       ],
       [
-        { pubkey: '2', relay: RELAY_1, permission: 'write' },
-        { pubkey: '2', relay: RELAY_3, permission: undefined },
+        { pubkey: '2', relay: RELAY_1, permission: WRITE },
+        { pubkey: '2', relay: RELAY_3, permission: READ | WRITE },
       ],
     ])
   })

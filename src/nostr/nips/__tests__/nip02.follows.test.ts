@@ -1,6 +1,6 @@
 import { Kind } from '@/constants/kinds'
 import { RELAY_1 } from '@/constants/testRelays'
-import { fakeNote, fakeUser } from '@/utils/faker'
+import { fakeNote } from '@/utils/faker'
 import { test } from '@/utils/fixtures'
 import { subscribeSpyTo } from '@hirez_io/observer-spy'
 
@@ -16,8 +16,8 @@ describe('NIP02', () => {
           ['p', '3'],
         ],
       }),
-      fakeUser('2'),
-      fakeUser('3'),
+      fakeNote({ kind: Kind.Metadata, pubkey: '2' }),
+      fakeNote({ kind: Kind.Metadata, pubkey: '3' }),
       fakeNote({ kind: Kind.RelayList, pubkey: '2' }),
       fakeNote({ kind: Kind.RelayList, pubkey: '3' }),
     ])

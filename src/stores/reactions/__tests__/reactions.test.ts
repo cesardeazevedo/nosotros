@@ -1,11 +1,13 @@
-import { fakeReaction } from 'utils/faker'
+import { Kind } from '@/constants/kinds'
+import { fakeNote } from 'utils/faker'
 import { test } from 'utils/fixtures'
 import { ReactionStore } from '../reactions.store'
 
-describe('Test ReactionStore', () => {
+describe('ReactionStore', () => {
   test('add()', () => {
     const store = new ReactionStore()
-    let reaction = fakeReaction({
+    let reaction = fakeNote({
+      kind: Kind.Reaction,
       pubkey: '1',
       tags: [
         ['e', '10'],
@@ -19,7 +21,8 @@ describe('Test ReactionStore', () => {
     store.add(reaction) // test some duplicated
     expect(store.getByNoteId('1')).toEqual({ '🤙': ['1'] })
 
-    reaction = fakeReaction({
+    reaction = fakeNote({
+      kind: Kind.Reaction,
       pubkey: '2',
       tags: [
         ['e', '1'],
@@ -29,7 +32,8 @@ describe('Test ReactionStore', () => {
     store.add(reaction)
     expect(store.getByNoteId('1')).toEqual({ '🤙': ['1', '2'] })
 
-    reaction = fakeReaction({
+    reaction = fakeNote({
+      kind: Kind.Reaction,
       pubkey: '2',
       tags: [
         ['e', '2'],
@@ -43,7 +47,8 @@ describe('Test ReactionStore', () => {
       ['2', { '🤙': ['2'] }],
     ])
 
-    reaction = fakeReaction({
+    reaction = fakeNote({
+      kind: Kind.Reaction,
       content: 'heart',
       pubkey: '1',
       tags: [
@@ -59,6 +64,7 @@ describe('Test ReactionStore', () => {
     const store = new ReactionStore()
     const reactions = [
       {
+        kind: Kind.Reaction,
         content: 'thumbs',
         pubkey: '1',
         tags: [
@@ -67,6 +73,7 @@ describe('Test ReactionStore', () => {
         ],
       },
       {
+        kind: Kind.Reaction,
         content: 'heart',
         pubkey: '1',
         tags: [
@@ -75,6 +82,7 @@ describe('Test ReactionStore', () => {
         ],
       },
       {
+        kind: Kind.Reaction,
         content: 'thumbs',
         pubkey: '2',
         tags: [
@@ -83,7 +91,7 @@ describe('Test ReactionStore', () => {
         ],
       },
     ]
-    reactions.forEach((reaction) => store.add(fakeReaction(reaction)))
+    reactions.forEach((reaction) => store.add(fakeNote(reaction)))
     expect(store.sorted('1')).toStrictEqual([
       ['thumbs', ['1', '2']],
       ['heart', ['1']],
@@ -150,7 +158,7 @@ describe('Test ReactionStore', () => {
         ],
       },
     ]
-    reactions.forEach((reaction) => store.add(fakeReaction(reaction)))
+    reactions.forEach((reaction) => store.add(fakeNote({ kind: Kind.Reaction, ...reaction })))
     expect(store.reactionsByPubkey.get('1')).toStrictEqual({
       1: ['thumbs', 'heart', 'cry'],
       2: ['thumbs'],

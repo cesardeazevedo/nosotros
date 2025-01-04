@@ -1,4 +1,3 @@
-// @vitest-environment happy-dom
 import { RELAY_2, RELAY_3 } from '@/constants/testRelays'
 import type { NostrEvent, RelayHints } from 'core/types'
 import { nip19 } from 'nostr-tools'

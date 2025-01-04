@@ -4,14 +4,13 @@ import { subscribeSpyTo } from '@hirez_io/observer-spy'
 import { Kind } from 'constants/kinds'
 import { NostrPublisher } from 'core/NostrPublish'
 import { Pool } from 'core/pool'
-import type { NostrEvent } from 'nostr-tools'
 import { of } from 'rxjs'
 import { test } from 'utils/fixtures'
 import { expectRelayPublish, relaySendEvents, relaySendNotice, relaySendOK } from 'utils/testHelpers'
 import { publish } from '../publish'
 
 describe('publish', () => {
-  test('assert relays responses', async ({ relay, relay2, relay3 }) => {
+  test('assert relays responses', async ({ relay, relay2, relay3, signer }) => {
     const pool = new Pool()
     const event = fakeNote({
       id: '1',
@@ -21,9 +20,7 @@ describe('publish', () => {
 
     const publisher = new NostrPublisher(event, {
       relays: of([RELAY_1, RELAY_2, RELAY_3]),
-      signer: {
-        sign: (event) => Promise.resolve(event as NostrEvent),
-      },
+      signer,
     })
 
     const $ = of(publisher).pipe(publish(pool))
@@ -50,7 +47,7 @@ describe('publish', () => {
     ])
   })
 
-  test('assert related events being published', async ({ relay }) => {
+  test('assert related events being published', async ({ relay, signer }) => {
     const pool = new Pool()
     const note = fakeNote({
       id: '1',
@@ -71,9 +68,7 @@ describe('publish', () => {
     const publisher = new NostrPublisher(reaction, {
       relays: of([RELAY_1]),
       include: [note],
-      signer: {
-        sign: (event) => Promise.resolve(event as NostrEvent),
-      },
+      signer,
     })
 
     const $ = of(publisher).pipe(publish(pool))
