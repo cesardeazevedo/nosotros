@@ -7,6 +7,7 @@ import { selectRelays } from './helpers/relaySelection'
 import type { UserRelayDB } from './nips/nip65.relaylist'
 import type { NostrClient } from './nostr'
 import { ShareReplayCache } from './replay'
+import { parseRelayList } from './helpers/parseRelayList'
 
 export const toArrayRelay = pipe(map((data: UserRelayDB[]) => data.map((x) => x.relay)))
 
@@ -21,7 +22,7 @@ export class Mailbox {
   private subscribe = replay.wrap((pubkey: string) => {
     const sub = new NostrSubscription({ kinds: [Kind.RelayList], authors: [pubkey], limit: 1 })
     return from(this.client.query(sub)).pipe(
-      map((event) => this.client.relayList.parse(event)),
+      map((event) => parseRelayList(event)),
       filter((x) => x.length > 0),
     )
   })
@@ -31,7 +32,7 @@ export class Mailbox {
       mergeWith(
         this.updates$.pipe(
           filter((x) => x[0] === pubkey),
-          map(([, event]) => this.client.relayList.parse(event)),
+          map(([, event]) => parseRelayList(event)),
           takeUntil(timer(config?.timeout || 4000)),
         ),
       ),
