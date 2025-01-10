@@ -1,13 +1,17 @@
-import type { RelaySelectionConfig } from '@/nostr/helpers/relaySelection'
-import { selectRelays } from '@/nostr/helpers/relaySelection'
-import type { UserRelayDB } from '@/nostr/nips/nip65.relaylist'
+import type { RelaySelectionConfig } from '@/nostr/helpers/selectRelays'
+import { selectRelays } from '@/nostr/helpers/selectRelays'
+import type { UserRelay, UserRelayListMetadata } from '@/nostr/types'
+import type { ObservableSet } from 'mobx'
 import { makeAutoObservable, observable } from 'mobx'
+import type { NostrEvent } from 'nostr-tools'
 
 export class UserRelayStore {
-  mailbox = observable.map<string, UserRelayDB[]>()
+  mailbox = observable.map<string, UserRelay[]>()
   // todo
-  dm = observable.map<string, UserRelayDB[]>()
-  search = observable.map<string, UserRelayDB[]>()
+  dm = observable.map<string, UserRelay[]>()
+  search = observable.map<string, UserRelay[]>()
+
+  pubkeysByRelay = observable.map<string, ObservableSet>()
 
   constructor() {
     makeAutoObservable(this)
@@ -27,12 +31,28 @@ export class UserRelayStore {
     return this.get(pubkey)?.map((x) => x.relay)
   }
 
+  getPubkeysFromRelay(relay: string) {
+    return [...(this.pubkeysByRelay.get(relay) || [])]
+  }
+
   select(pubkey: string, config: RelaySelectionConfig) {
     return selectRelays(this.get(pubkey) || [], config)
   }
 
-  add(pubkey: string, userRelays: UserRelayDB[]) {
-    this.mailbox.set(pubkey, userRelays)
+  add(event: NostrEvent, metadata: UserRelayListMetadata) {
+    this.mailbox.set(event.pubkey, metadata.relayList)
+    metadata.relayList.forEach((userRelay) => {
+      this.addPubkeyToRelay(userRelay.relay, userRelay.pubkey)
+    })
+  }
+
+  addPubkeyToRelay(relay: string, pubkey: string) {
+    const found = this.pubkeysByRelay.get(relay)
+    if (found) {
+      found.add(pubkey)
+      return
+    }
+    this.pubkeysByRelay.set(relay, observable.set([pubkey]))
   }
 
   addDM() {}
