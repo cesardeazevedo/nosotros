@@ -1,5 +1,5 @@
 import { getMentionedAuthors } from '../getMentionedAuthors'
-import { parseNoteContent } from '../parseNotes'
+import { parseNoteContent } from '../parseNoteContent'
 import { parseTags } from '../parseTags'
 
 test('getMentionedAuthors', () => {
@@ -15,9 +15,9 @@ test('getMentionedAuthors', () => {
       ['p', '3'],
     ],
   }
-  const { nevents, nprofiles } = parseNoteContent(event)
+  const { nevents, nprofiles, naddress } = parseNoteContent(event)
   const tags = parseTags(event.tags)
-  expect(getMentionedAuthors(tags, nprofiles, nevents)).toStrictEqual([
+  expect(getMentionedAuthors(tags, nprofiles, nevents, naddress)).toStrictEqual([
     '2',
     '3',
     '79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798',

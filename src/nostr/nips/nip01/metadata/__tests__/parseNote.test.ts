@@ -1,4 +1,4 @@
-import { RELAY_2, RELAY_3 } from '@/constants/testRelays'
+import { RELAY_1, RELAY_2, RELAY_3 } from '@/constants/testRelays'
 import type { NostrEvent, RelayHints } from 'core/types'
 import { nip19 } from 'nostr-tools'
 import { fakeNote, fakeSignature } from 'utils/faker'
@@ -116,8 +116,9 @@ describe('parseNote', () => {
     const event = fakeSignature(fakeNote({ content: 'related' }))
     const encoded = nip19.neventEncode({
       id: event.id,
+      kind: 7,
       author: event.pubkey,
-      relays: [],
+      relays: [RELAY_1],
     })
     const note = parse({
       id: '1',
@@ -128,8 +129,34 @@ describe('parseNote', () => {
       ],
     })
     expect(note.mentionedNotes).toStrictEqual(['1', '2', event.id])
+    expect(note.relayHints).toStrictEqual({
+      ids: { [event.id]: [RELAY_1] },
+      kinds: { [event.id]: 7 },
+    })
     expect(note.rootNoteId).toBe(undefined)
     expect(note.parentNoteId).toBeUndefined()
+  })
+
+  test('Should expect mentionedNotes and mentionedAuthors from naddress', () => {
+    const event = fakeSignature(fakeNote({ kind: 30023, content: 'related' }))
+    const encoded = nip19.naddrEncode({
+      kind: event.kind,
+      pubkey: event.pubkey,
+      identifier: 'myarticle',
+      relays: [RELAY_1],
+    })
+    const note = parse({
+      id: '1',
+      content: `nostr:${encoded}`,
+      tags: [
+        ['e', '1', '', 'mention'],
+        ['p', '1'],
+      ],
+    })
+    const id = `${event.kind}:${event.pubkey}:myarticle`
+    expect(note.relayHints).toStrictEqual({ ids: { [id]: [RELAY_1] } })
+    expect(note.mentionedNotes).toStrictEqual(['1', id])
+    expect(note.mentionedAuthors).toStrictEqual(['1', event.pubkey])
   })
 
   test('Should expect mentionedAuthors from a nevent encoded author', () => {
