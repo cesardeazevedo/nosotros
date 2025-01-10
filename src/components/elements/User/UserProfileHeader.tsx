@@ -1,24 +1,23 @@
-import { Button } from '@/components/ui/Button/Button'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
-import { useCurrentUser, useGlobalSettings } from '@/hooks/useRootStore'
-import type { User } from '@/stores/users/user'
+import { useGlobalSettings } from '@/hooks/useRootStore'
+import { userStore } from '@/stores/users/users.store'
 import { spacing } from '@/themes/spacing.stylex'
 import { observer } from 'mobx-react-lite'
 import { css, html } from 'react-strict-dom'
 import { UserAvatar } from './UserAvatar'
 import { UserContentAbout } from './UserContentAbout'
+import { UserFollowButton } from './UserFollowButton'
 
 type Props = {
-  user?: User
+  pubkey: string
 }
 
 export const UserProfileHeader = observer(function UserProfileHeader(props: Props) {
-  const { user } = props
+  const { pubkey } = props
+  const user = userStore.get(pubkey)
   const { banner, nip05 } = user?.meta || {}
-  const currentUser = useCurrentUser()
   const globalSettings = useGlobalSettings()
-  const isFollowing = currentUser?.following?.followsPubkey(user?.pubkey)
   return (
     <>
       <html.div style={styles.header}>
@@ -31,7 +30,7 @@ export const UserProfileHeader = observer(function UserProfileHeader(props: Prop
         )}
       </html.div>
       <Stack horizontal={false} gap={1} sx={styles.content}>
-        <UserAvatar sx={styles.avatar} pubkey={user?.pubkey} size='xl' disableLink disabledPopover />
+        <UserAvatar sx={styles.avatar} pubkey={pubkey} size='xl' disableLink disabledPopover />
         <Stack horizontal={false}>
           <Text variant='headline' size='sm'>
             {user?.displayName}
@@ -42,16 +41,10 @@ export const UserProfileHeader = observer(function UserProfileHeader(props: Prop
             </Text>
           )}
         </Stack>
-        <UserContentAbout user={user} />
-        {isFollowing ? (
-          <Button variant='outlined' sx={styles.follow}>
-            Unfollow
-          </Button>
-        ) : (
-          <Button variant='filled' sx={styles.follow}>
-            Follow
-          </Button>
-        )}
+        <UserContentAbout pubkey={pubkey} />
+        <html.div style={styles.follow}>
+          <UserFollowButton pubkey={pubkey} />
+        </html.div>
       </Stack>
     </>
   )
