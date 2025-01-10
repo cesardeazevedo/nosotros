@@ -3,7 +3,7 @@ import { test } from '@/utils/fixtures'
 import { subscribeSpyTo } from '@hirez_io/observer-spy'
 import type { RelayFilters } from 'core/NostrSubscription'
 import { NostrSubscription } from 'core/NostrSubscription'
-import { from, of } from 'rxjs'
+import { from, merge, of } from 'rxjs'
 
 describe('NostrSubscription', () => {
   test('assert filters format', async () => {
@@ -86,6 +86,22 @@ describe('NostrSubscription', () => {
           { kinds: [1], authors: ['4'] },
         ],
       ],
+    ])
+  })
+
+  test('assert duplicated relays', async () => {
+    const sub = new NostrSubscription(
+      { ids: ['1'] },
+      {
+        relays: merge(of([RELAY_1, RELAY_2]), of([RELAY_1, RELAY_2])),
+      },
+    )
+    const spy = subscribeSpyTo(sub.relayFilters)
+
+    await spy.onComplete()
+    expect(spy.getValues()).toStrictEqual([
+      [RELAY_1, [{ ids: ['1'] }]],
+      [RELAY_2, [{ ids: ['1'] }]],
     ])
   })
 })
