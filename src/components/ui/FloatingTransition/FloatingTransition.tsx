@@ -133,7 +133,7 @@ const styles = css.create({
       default: 'opacity',
       ':is([data-pattern^="enterExit"])': 'opacity, transform',
     },
-    transitionDuration: duration.short3,
+    transitionDuration: duration.short2,
     transitionTimingFunction: easing.emphasizedDecelerate,
   },
   transition$open$horizontal: {
@@ -161,7 +161,7 @@ const styles = css.create({
       default: 'opacity',
       ':is([data-pattern^="enterExit"])': 'opacity, transform',
     },
-    transitionDuration: duration.short3,
+    transitionDuration: duration.short2,
     transitionTimingFunction: easing.emphasizedAccelerate,
   },
   transition$close$horizontal: {
