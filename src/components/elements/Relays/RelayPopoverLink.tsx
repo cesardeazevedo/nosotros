@@ -16,7 +16,7 @@ export const RelayPopoverLink = (props: Props) => {
   const url = useMemo(() => new URL(props.url), [props.url])
   return (
     <TooltipRich
-      content={
+      content={() => (
         <Paper elevation={2} surface='surfaceContainerLow' sx={styles.root}>
           <html.div style={styles.header}>
             <Text variant='title' size='lg'>
@@ -26,7 +26,7 @@ export const RelayPopoverLink = (props: Props) => {
           <Divider />
           <html.div style={styles.content}></html.div>
         </Paper>
-      }>
+      )}>
       <html.span>{props.children}</html.span>
     </TooltipRich>
   )

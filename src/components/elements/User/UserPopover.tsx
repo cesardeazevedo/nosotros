@@ -1,9 +1,6 @@
-import { Button } from '@/components/ui/Button/Button'
 import { Paper } from '@/components/ui/Paper/Paper'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { TooltipRich } from '@/components/ui/TooltipRich/TooltipRich'
-import { useCurrentUser } from '@/hooks/useRootStore'
-import type { User } from '@/stores/users/user'
 import { spacing } from '@/themes/spacing.stylex'
 import { useMobile } from 'hooks/useMobile'
 import { Observer } from 'mobx-react-lite'
@@ -13,17 +10,17 @@ import { UserAvatar } from './UserAvatar'
 import { UserContentAbout } from './UserContentAbout'
 import { UserName } from './UserName'
 import { UserNIP05 } from './UserNIP05'
+import { UserFollowButton } from './UserFollowButton'
 
 type Props = {
-  user?: User
+  pubkey: string
   children: React.ReactNode
   disabled?: boolean
 }
 
-export const UserPopover = (props: Props) => {
+export const UserPopover = function UserPopover(props: Props) {
   const isMobile = useMobile()
-  const { user, disabled = false } = props
-  const currentUser = useCurrentUser()
+  const { pubkey, disabled = false } = props
 
   if (isMobile || disabled) {
     return props.children
@@ -34,32 +31,28 @@ export const UserPopover = (props: Props) => {
       enterDelay={500}
       placement='bottom-start'
       cursor='dot'
-      content={
+      content={() => (
         <Observer>
           {() => (
             <Paper elevation={2} shape='lg' surface='surfaceContainerLow' sx={styles.root}>
               <Stack justify='space-between'>
-                <UserAvatar disabledPopover size='lg' pubkey={user?.pubkey} />
-                {currentUser?.following?.followsPubkey(user?.pubkey) ? (
-                  <Button variant='outlined'>Following</Button>
-                ) : (
-                  <Button variant='filled'>Follow</Button>
-                )}
+                <UserAvatar disabledPopover size='lg' pubkey={pubkey} />
+                <UserFollowButton pubkey={pubkey} />
               </Stack>
               <br />
               <Stack horizontal={false} gap={2}>
                 <Stack horizontal={false}>
-                  <UserName disablePopover pubkey={user?.pubkey} />
-                  <UserNIP05 pubkey={user?.pubkey} hideForFollowing={false} />
+                  <UserName disablePopover pubkey={pubkey} />
+                  <UserNIP05 pubkey={pubkey} hideForFollowing={false} />
                 </Stack>
                 <html.span style={styles.scroller}>
-                  <UserContentAbout user={user} />
+                  <UserContentAbout pubkey={pubkey} />
                 </html.span>
               </Stack>
             </Paper>
           )}
         </Observer>
-      }>
+      )}>
       {props.children}
     </TooltipRich>
   )

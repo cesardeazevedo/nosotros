@@ -68,7 +68,7 @@ export const ReactionPicker = (props: Props) => {
   const { children, onClick } = props
 
   return (
-    <TooltipRich cursor={false} placement='top-start' content={<ReactionDock onClick={onClick} />}>
+    <TooltipRich cursor={false} placement='top-start' content={() => <ReactionDock onClick={onClick} />}>
       {children}
     </TooltipRich>
   )

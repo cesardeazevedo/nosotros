@@ -7,7 +7,7 @@ import type { IPopoverBaseProps, IPopoverBaseTriggerRendererProps } from '../Pop
 import { tooltipTokens } from '../Tooltip/Tooltip.stylex'
 
 type Props = Omit<IPopoverBaseProps, 'children' | 'contentRenderer'> & {
-  content: React.ReactNode
+  content: () => React.ReactNode
   enterDelay?: number
   persistent?: boolean
   elevation?: ElevationLevel
@@ -28,7 +28,7 @@ export const TooltipRich = (props: Props) => {
           return (
             <>
               {renderCursor({ ...css.props(styles.cursor) })}
-              {content}
+              {content()}
             </>
           )
         }}
