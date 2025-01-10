@@ -23,13 +23,17 @@ test('parseRelayList()', () => {
     ],
   })
   const result = parseRelayList(event)
-  expect(result).toStrictEqual([
-    { pubkey: '1', relay: 'wss://relay1.com', permission: READ | WRITE },
-    { pubkey: '1', relay: 'wss://relay2.com', permission: READ | WRITE },
-    { pubkey: '1', relay: 'wss://relay3.com', permission: READ | WRITE },
-    { pubkey: '1', relay: 'wss://relay4.com', permission: READ | WRITE },
-    { pubkey: '1', relay: 'wss://relay5.com', permission: READ },
-    { pubkey: '1', relay: 'wss://relay6.com', permission: WRITE },
-    { pubkey: '1', relay: 'wss://relay7.com', permission: WRITE },
-  ])
+  expect(result).toStrictEqual({
+    id: '1',
+    kind: 10002,
+    relayList: [
+      { pubkey: '1', relay: 'wss://relay1.com', permission: READ | WRITE },
+      { pubkey: '1', relay: 'wss://relay2.com', permission: READ | WRITE },
+      { pubkey: '1', relay: 'wss://relay3.com', permission: READ | WRITE },
+      { pubkey: '1', relay: 'wss://relay4.com', permission: READ | WRITE },
+      { pubkey: '1', relay: 'wss://relay5.com', permission: READ },
+      { pubkey: '1', relay: 'wss://relay6.com', permission: WRITE },
+      { pubkey: '1', relay: 'wss://relay7.com', permission: WRITE },
+    ],
+  })
 })

@@ -129,10 +129,7 @@ describe('parseNote', () => {
       ],
     })
     expect(note.mentionedNotes).toStrictEqual(['1', '2', event.id])
-    expect(note.relayHints).toStrictEqual({
-      ids: { [event.id]: [RELAY_1] },
-      kinds: { [event.id]: 7 },
-    })
+    expect(note.relayHints).toStrictEqual({ ids: { [event.id]: [RELAY_1] } })
     expect(note.rootNoteId).toBe(undefined)
     expect(note.parentNoteId).toBeUndefined()
   })

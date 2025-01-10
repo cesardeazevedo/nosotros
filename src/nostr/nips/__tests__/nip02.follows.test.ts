@@ -32,6 +32,7 @@ describe('NIP02', () => {
       ['REQ', '1', { kinds: [3], authors: ['1'] }],
       ['CLOSE', '1'],
       ['REQ', '2', { kinds: [0, 10002], authors: ['2', '3'] }],
+      ['CLOSE', '2'],
     ])
   })
 })

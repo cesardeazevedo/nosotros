@@ -10,9 +10,10 @@ describe('NostrFeeds', () => {
   test('assert following', async ({ createMockRelay, createClient }) => {
     const note1 = fakeNote({ id: '1', pubkey: '2', content: 'note' })
     const note2 = fakeNote({ id: '2', pubkey: '2', content: 'note', tags: [['e', '3', '', 'root']] })
+    const note3 = fakeNote({ id: '3', pubkey: '3', content: 'note', tags: [] })
     const follows = fakeNote({ kind: Kind.Follows, tags: [['p', '2']] })
 
-    const relay = createMockRelay(RELAY_1, [follows, note1, note2])
+    const relay = createMockRelay(RELAY_1, [follows, note1, note2, note3])
 
     const client = createClient({ relays: [RELAY_1], settings: { outbox: false } })
     const pagination$ = new PaginationSubject({ kinds: [Kind.Text], authors: ['1'] })
@@ -38,10 +39,12 @@ describe('NostrFeeds', () => {
         { kinds: [0, 10002], authors: ['2'] },
       ],
       ['CLOSE', '2'],
-      ['REQ', '3', { ids: ['3'] }],
+      ['REQ', '3', { ids: ['3'], kinds: [1] }],
       ['CLOSE', '3'],
+      ['REQ', '4', { authors: ['3'], kinds: [0, 10002] }],
+      ['CLOSE', '4'],
     ])
 
-    expect(spy.getValues().map((x) => x.id)).toStrictEqual(['1', '2'])
+    expect(spy.getValues().map((x) => x.id)).toStrictEqual(['1', '3'])
   })
 })

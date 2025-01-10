@@ -45,7 +45,7 @@ describe('ReactionStore', () => {
     })
     store.add(reaction)
     expect(store.getByNoteId('2')).toEqual({ like: ['2'] })
-    expect(store.reactions.toJSON()).toEqual([
+    expect(store.reactionsByEvent.toJSON()).toEqual([
       ['1', { like: ['1', '2'] }],
       ['2', { like: ['2'] }],
     ])
