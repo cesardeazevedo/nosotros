@@ -61,8 +61,8 @@ const styles = css.create({
   root: {
     position: 'relative',
     overflowY: 'scroll',
-    //padding: spacing['padding0.5'],
-    //paddingBottom: 6,
+    paddingTop: spacing.padding2,
+    paddingLeft: spacing.padding2,
     maxHeight: '60vh',
   },
 })

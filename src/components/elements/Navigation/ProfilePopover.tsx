@@ -3,7 +3,7 @@ import { Paper } from '@/components/ui/Paper/Paper'
 import { PopoverBase } from '@/components/ui/Popover/PopoverBase'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
-import { useRootStore } from '@/hooks/useRootStore'
+import { useCurrentPubkey, useCurrentUser } from '@/hooks/useRootStore'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconQrcode } from '@tabler/icons-react'
@@ -16,8 +16,8 @@ import { UserName } from '../User/UserName'
 import { Menu } from './Menu'
 
 export const ProfilePopover = observer(function ProfilePopover() {
-  const root = useRootStore()
-  const { currentUser: user } = root.auth
+  const user = useCurrentUser()
+  const pubkey = useCurrentPubkey()
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null)
   const handleOpen = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     setAnchorEl(e.currentTarget)
@@ -36,7 +36,7 @@ export const ProfilePopover = observer(function ProfilePopover() {
         <Paper elevation={2} shape='lg' surface='surfaceContainerLow' sx={styles.root}>
           <html.img src={user?.meta.banner} style={styles.image} />
           <Stack sx={styles.header} justify='space-between'>
-            <UserName pubkey={user?.pubkey} disableLink disablePopover />
+            {pubkey && <UserName pubkey={pubkey} disableLink disablePopover />}
             <Tooltip cursor='arrow' placement='bottom' text='Use the QR Code to scan your npub on your mobile device'>
               <IconButton onClick={dialogStore.openQRCode} icon={<IconQrcode strokeWidth='1.5' />} />
             </Tooltip>

@@ -8,10 +8,12 @@ import React from 'react'
 import { BubbleContainer } from '../../Content/Layout/Bubble'
 import { UserHeaderDate } from '../../User/UserHeaderDate'
 import { UserNIP05 } from '../../User/UserNIP05'
+import type { Props as PostContentWrapperProps } from '../PostContentWrapper'
 import { PostContentWrapper } from '../PostContentWrapper'
 
 type Props = {
   note: Note
+  size?: PostContentWrapperProps['size']
 }
 
 const NonBubbleNodes = [
@@ -40,9 +42,9 @@ export const ReplyUserHeader = observer((props: { note: Note }) => {
 })
 
 export const PostReplyContent = observer(function PostReplyContent(props: Props) {
-  const { note } = props
+  const { note, size } = props
   return (
-    <PostContentWrapper bubble note={note}>
+    <PostContentWrapper bubble note={note} size={size}>
       <Content
         dense
         bubble

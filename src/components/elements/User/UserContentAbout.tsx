@@ -1,15 +1,16 @@
 import { Text } from '@/components/ui/Text/Text'
+import { userStore } from '@/stores/users/users.store'
 import type { ContentSchema } from 'nostr-editor'
 import React from 'react'
-import type { User } from '@/stores/users/user'
 import { TextContent } from '../Content/Text'
 
 type Props = {
-  user?: User
+  pubkey: string
 }
 
 export const UserContentAbout = (props: Props) => {
-  const { user } = props
+  const { pubkey } = props
+  const user = userStore.get(pubkey)
   const schema = user?.meta?.aboutParsed as ContentSchema
   return (
     <>

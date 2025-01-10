@@ -25,7 +25,7 @@ export const SearchFollowingUsers = observer(
     const user = useCurrentUser()
 
     const usersData = useMemo(() => {
-      return [...(user?.following?.authors || [])].map((author) => userStore.get(author)).filter((x) => !!x)
+      return [...(user?.following?.tags.get('p') || [])].map((author) => userStore.get(author)).filter((x) => !!x)
     }, [])
 
     const users = useMemo(() => {

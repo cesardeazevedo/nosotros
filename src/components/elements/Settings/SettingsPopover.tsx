@@ -71,9 +71,6 @@ export const SettingsPopover = () => {
                 </Stack>
               )}>
               <Stack gap={1} horizontal={false} sx={styles.content}>
-                <Text sx={styles.description}>
-                  Reactions and zaps are loaded as you scroll through the feed, you can disable them to save bandwidth.
-                </Text>
                 <SettingsContent />
               </Stack>
             </Expandable>

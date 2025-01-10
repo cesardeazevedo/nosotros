@@ -18,15 +18,15 @@ import { NotificationContent } from './NotificationContent'
 import { NotificationMedia } from './NotificationMedia'
 
 type Props = {
-  item: Notification
+  notification: Notification
 }
 
 export const NotificationItem = observer(function NotificationItem(props: Props) {
-  const { item } = props
+  const { notification } = props
   const user = useCurrentUser()
-  const { type, pubkey } = item
+  const { type, pubkey } = notification
 
-  const linkId = type === 'reply' || type === 'mention' ? item.id : item.related?.id
+  const linkId = type === 'reply' || type === 'mention' ? notification.id : notification.related?.id
   const note = noteStore.get(linkId)
 
   return (
@@ -39,12 +39,12 @@ export const NotificationItem = observer(function NotificationItem(props: Props)
         )}
         {type === 'reaction' && (
           <>
-            {item.event.content === '❤️' ? (
+            {notification.event.content === '❤️' ? (
               <html.span style={styles.heartIcon}>
                 <IconHeartFilled />
               </html.span>
             ) : (
-              <html.span style={styles.reactionIcon}>{fallbackEmoji(item.event.content)}</html.span>
+              <html.span style={styles.reactionIcon}>{fallbackEmoji(notification.event.content)}</html.span>
             )}
           </>
         )}
@@ -65,12 +65,12 @@ export const NotificationItem = observer(function NotificationItem(props: Props)
               {type === 'zap' && (
                 <>
                   <Text size='md'>zapped to your note:</Text>
-                  <NotificationContent id={item.id} />
+                  <NotificationContent id={notification.id} />
                 </>
               )}
               {type === 'reaction' && (
                 <>
-                  <Text size='md'>reacted to your note:</Text> <NotificationContent id={item.related?.id} />
+                  <Text size='md'>reacted to your note:</Text> <NotificationContent id={notification.related?.id} />
                 </>
               )}
               {type === 'reply' && (
@@ -79,12 +79,12 @@ export const NotificationItem = observer(function NotificationItem(props: Props)
                     replied to {note?.event.pubkey === user?.pubkey ? 'your note' : 'a note you were mentioned'}
                     {': '}
                   </Text>{' '}
-                  <NotificationContent id={item.id} />
+                  <NotificationContent id={notification.id} />
                 </>
               )}
               {type === 'mention' && (
                 <>
-                  <Text size='md'>mentioned you in a note:</Text> <NotificationContent id={item.id} />
+                  <Text size='md'>mentioned you in a note:</Text> <NotificationContent id={notification.id} />
                 </>
               )}
               {type === 'repost' && (
@@ -92,10 +92,10 @@ export const NotificationItem = observer(function NotificationItem(props: Props)
                   <Text size='md'>
                     reposted {note?.event.pubkey === user?.pubkey ? 'your note' : 'a note you were mentioned'}
                   </Text>{' '}
-                  <NotificationContent id={item.related?.id} />
+                  <NotificationContent id={notification.related?.id} />
                 </>
               )}
-              <UserHeaderDate date={item.event.created_at} />
+              <UserHeaderDate date={notification.event.created_at} />
             </Stack>
           </LinkNEvent>
         </ContentContext.Provider>

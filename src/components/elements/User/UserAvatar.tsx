@@ -23,15 +23,21 @@ export const UserAvatar = observer(function UserAvatar(props: Props) {
   const avatarProps = user?.meta?.picture
     ? { src: globalSettings.getImgProxyUrl('user_avatar', user.meta.picture) }
     : { src: '/placeholder.jpg' }
-  return (
-    <UserPopover user={user} disabled={disabledPopover}>
-      <LinkProfile user={user} disableLink={disableLink}>
-        <Avatar {...avatarProps} size={size} sx={[styles.avatar, sx]}>
-          {user?.initials}
-        </Avatar>
-      </LinkProfile>
-    </UserPopover>
+  const avatar = (
+    <Avatar {...avatarProps} size={size} sx={[styles.avatar, sx]}>
+      {user?.initials || pubkey}
+    </Avatar>
   )
+  if (pubkey) {
+    return (
+      <UserPopover pubkey={pubkey} disabled={disabledPopover}>
+        <LinkProfile user={user} disableLink={disableLink}>
+          {avatar}
+        </LinkProfile>
+      </UserPopover>
+    )
+  }
+  return <>{avatar}</>
 })
 
 const styles = css.create({

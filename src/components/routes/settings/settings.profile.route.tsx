@@ -12,7 +12,7 @@ export const SettingsProfileRoute = observer(() => {
   return (
     <>
       <Stack sx={styles.root}>
-        {user && <UserProfileHeader user={user} />}
+        {user && <UserProfileHeader pubkey={user.pubkey} />}
         {!user && (
           <LinkSignIn>
             <Button variant='filled'>Sign In</Button>

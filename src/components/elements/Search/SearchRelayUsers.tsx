@@ -4,6 +4,7 @@ import { useCurrentUser } from '@/hooks/useRootStore'
 import { useNostrClientContext } from '@/stores/context/nostr.context.hooks'
 import type { NostrContext } from '@/stores/context/nostr.context.store'
 import type { User } from '@/stores/users/user'
+import { userStore } from '@/stores/users/users.store'
 import { spacing } from '@/themes/spacing.stylex'
 import { observer } from 'mobx-react-lite'
 import { pluckFirst, useObservable, useObservableState } from 'observable-hooks'
@@ -25,7 +26,7 @@ type SearchRef = {
 }
 
 export const SearchRelayUsers = observer(
-  forwardRef<SearchRef, Props>(function SearchUsers(props, ref) {
+  forwardRef<SearchRef, Props>(function SearchRelayUsers(props, ref) {
     const { query, limit = 10, onSelect } = props
     const context = useNostrClientContext()
     const user = useCurrentUser()
@@ -39,9 +40,8 @@ export const SearchRelayUsers = observer(
           withLatestFrom(context$),
           throttleTime(1000, undefined, { trailing: true }),
           mergeMap(([query, context]) => context.client.search.subscribe(query, limit)),
-          map((results) => {
-            return results.sort((_, b) => (user?.following?.followsPubkey(b.pubkey) ? 1 : -1))
-          }),
+          map((results) => results.sort((_, b) => (user?.following?.followsPubkey(b.pubkey) ? 1 : -1))),
+          map((events) => events.map((x) => userStore.get(x.id)).filter((x) => !!x)),
         ),
       [],
     )

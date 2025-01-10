@@ -51,7 +51,7 @@ export const EditorBroadcaster = observer(function EditorBroadcaster(props: Prop
                   Mentions
                 </Text>
                 <Text variant='body' size='md'>
-                  You can remove some authors from being notified when mentioning them.
+                  You can remove some authors from being notified when mentioning or replying to them.
                 </Text>
               </span>
               <Stack wrap gap={0.5}>

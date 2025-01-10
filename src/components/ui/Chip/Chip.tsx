@@ -25,7 +25,7 @@ import { chipTokens } from './Chip.stylex'
 
 type ChipVariants = 'assist' | 'filter' | 'input' | 'suggestion'
 
-type Props = {
+export type Props = {
   sx?: SxProps
   variant?: ChipVariants
   avatarUrl?: string
