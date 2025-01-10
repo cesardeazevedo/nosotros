@@ -1,4 +1,5 @@
 import { pool } from '@/nostr/pool'
+import type { NoteMetadata } from '@/nostr/types'
 import { noteStore } from '@/stores/notes/notes.store'
 import { seenStore } from '@/stores/seen/seen.store'
 import { userStore } from '@/stores/users/users.store'
@@ -8,8 +9,6 @@ import { computedFn } from 'mobx-utils'
 import type { NostrEvent } from 'nostr-tools'
 import { nip19 } from 'nostr-tools'
 import type { NostrClient } from 'nostr/nostr'
-import type { NoteMetadataDB } from 'nostr/types'
-import { filter, take } from 'rxjs'
 import { createEditorStore } from '../editor/editor.store'
 import { repostStore } from '../reposts/reposts.store'
 import type { User } from '../users/user'
@@ -29,7 +28,7 @@ export class Note {
 
   constructor(
     public event: NostrEvent,
-    public metadata: NoteMetadataDB,
+    public metadata: NoteMetadata,
   ) {
     makeAutoObservable(this, {
       id: false,
@@ -47,6 +46,10 @@ export class Note {
 
   get id() {
     return this.event.id
+  }
+
+  get pubkey() {
+    return this.event.pubkey
   }
 
   get user() {
@@ -159,7 +162,7 @@ export class Note {
   }
 
   get repostTotal() {
-    return repostStore.byNotes.get(this.id)?.size || 0
+    return repostStore.repostsByNote.get(this.id)?.size || 0
   }
 
   get isLoading() {
@@ -207,12 +210,6 @@ export class Note {
   }
 
   react(client: NostrClient, reaction: string) {
-    client.reactions
-      .publish(this.event, reaction)
-      .pipe(
-        filter((event) => event[2] === true),
-        take(1),
-      )
-      .subscribe()
+    return client.reactions.publish(this.event, reaction).subscribe()
   }
 }

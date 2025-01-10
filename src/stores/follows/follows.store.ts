@@ -1,5 +1,7 @@
+import type { FollowsMetadata } from '@/nostr/types'
 import { action, makeObservable, observable } from 'mobx'
-import type { Follows } from './follow'
+import type { NostrEvent } from 'nostr-tools'
+import { Follows } from './follow'
 
 class FollowsStore {
   follows = observable.map<string, Follows>({}, { name: 'users' })
@@ -16,10 +18,16 @@ class FollowsStore {
     return this.follows.get(pubkey)
   }
 
-  add(data: Follows) {
-    if (!this.follows.has(data.pubkey)) {
-      this.follows.set(data.pubkey, data)
+  add(event: NostrEvent, metadata: FollowsMetadata) {
+    const found = this.get(event.pubkey)
+    if (!found) {
+      const follows = new Follows(event, metadata)
+      if (!this.follows.has(event.pubkey)) {
+        this.follows.set(event.pubkey, follows)
+      }
+      return follows
     }
+    return found
   }
 }
 

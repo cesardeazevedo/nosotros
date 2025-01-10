@@ -1,36 +1,25 @@
-import { userRelayStore } from '@/stores/userRelays/userRelay.store'
+import { ofKind } from '@/core/operators/ofKind'
 import { Kind } from 'constants/kinds'
 import { OUTBOX_RELAYS } from 'constants/relays'
+import type { NostrEvent } from 'nostr-tools'
 import type { ClientSubOptions, NostrClient } from 'nostr/nostr'
 import type { Observable } from 'rxjs'
-import { map, of } from 'rxjs'
-import { parseRelayList } from '../helpers/parseRelayList'
+import { of, tap } from 'rxjs'
 import { ShareReplayCache } from '../replay'
 
-export interface UserRelayDB {
-  pubkey: string
-  relay: string
-  permission: number
-}
+export const replay = new ShareReplayCache<NostrEvent>()
 
-export const READ = 1 << 0
-export const WRITE = 1 << 1
-export const PERMISSIONS = { READ, WRITE }
-
-export const replay = new ShareReplayCache<UserRelayDB[]>()
+const kinds = [Kind.RelayList]
 
 export class NIP65RelayList {
   constructor(private client: NostrClient) {}
 
-  subscribe = replay.wrap((pubkey: string, options?: ClientSubOptions): Observable<UserRelayDB[]> => {
-    const filter = { kinds: [Kind.RelayList], authors: [pubkey] }
-    return this.client.subscribe(filter, { relays: of(OUTBOX_RELAYS), ...options }).pipe(
-      map((event) => {
-        const userRelay = parseRelayList(event)
-        userRelayStore.add(event.pubkey, userRelay)
-        this.client.mailbox.emit(event)
-        return userRelay
-      }),
+  subscribe = replay.wrap((pubkey: string, options?: ClientSubOptions): Observable<NostrEvent> => {
+    const filter = { kinds, authors: [pubkey] }
+    const subOptions = { relays: of(OUTBOX_RELAYS), ...options }
+    return this.client.subscribe(filter, subOptions).pipe(
+      ofKind(kinds),
+      tap((event) => this.client.mailbox.emit(event)),
     )
   })
 }

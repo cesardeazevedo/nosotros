@@ -17,7 +17,7 @@ export enum Kind {
   Blank = 255,
   Report = 1984,
   ZapRequest = 9734,
-  Zap = 9735,
+  ZapReceipt = 9735,
   RelayList = 10002,
   ClientAuth = 22242,
   // replaceable

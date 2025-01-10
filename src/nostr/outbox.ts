@@ -1,8 +1,8 @@
 import type { RelayFilters } from '@/core/NostrSubscription'
 import type { NostrFilter, RelayHints } from '@/core/types'
 import { filter, from, identity, map, merge, mergeMap, takeUntil, timer } from 'rxjs'
-import type { RelaySelectionConfig } from './helpers/relaySelection'
-import { WRITE } from './nips/nip65.relaylist'
+import { WRITE } from './helpers/parseRelayList'
+import type { RelaySelectionConfig } from './helpers/selectRelays'
 import type { NostrClient } from './nostr'
 
 export class OutboxTracker {

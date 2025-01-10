@@ -1,4 +1,4 @@
-import type { NoteMetadataDB } from '@/nostr/types'
+import type { NoteMetadata } from '@/nostr/types'
 import { dedupe } from 'core/helpers/dedupe'
 import { action, makeObservable, observable } from 'mobx'
 import type { NostrEvent } from 'nostr-tools'
@@ -22,7 +22,7 @@ export class NoteStore {
     return this.notes.get(id || '')
   }
 
-  add(event: NostrEvent, metadata: NoteMetadataDB) {
+  add(event: NostrEvent, metadata: NoteMetadata) {
     const found = this.notes.get(event.id)
     if (!found) {
       const note = new Note(event, metadata)

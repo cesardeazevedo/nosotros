@@ -4,6 +4,7 @@ import { pool } from '@/nostr/pool'
 import type { Instance, SnapshotIn } from 'mobx-state-tree'
 import { t } from 'mobx-state-tree'
 import { EMPTY, merge } from 'rxjs'
+import { addNostrEventToStore } from '../helpers/addNostrEventToStore'
 import { rootStore } from '../root.store'
 import { SignersModel } from '../signers/signers'
 import { userStore } from '../users/users.store'
@@ -29,6 +30,7 @@ export const NostrContextModel = t
         ...self.options,
         signer: self.signer?.signer,
         settings: self.settings || rootStore.nostrSettings,
+        onEvent: (event) => addNostrEventToStore(event),
       }),
     }
   })

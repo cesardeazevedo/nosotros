@@ -7,14 +7,11 @@ export function parseHintsFromNIP19(
   nprofiles: NProfileAttributes[],
   naddresses: NAddrAttributes[],
 ) {
-  const hints: Required<RelayHints> = { authors: {}, fallback: {}, ids: {}, kinds: {} }
+  const hints: Required<RelayHints> = { authors: {}, fallback: {}, ids: {} }
   for (const nevent of nevents) {
-    const { id, relays, kind } = nevent
+    const { id, relays } = nevent
     if (relays?.length !== 0) {
       hints.ids[id] = dedupe(hints.ids[id], relays)
-      if (kind != null) {
-        hints.kinds[id] = kind
-      }
     }
   }
   for (const naddress of naddresses) {

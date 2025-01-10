@@ -1,50 +1,43 @@
-import type { MetadataDB } from '@/db/types'
-import type { RelayHints } from 'core/types'
-import type { ContentSchema, IMetaTags } from 'nostr-editor'
-import type { ParsedTags } from './helpers/parseTags'
+import type { Kind } from '@/constants/kinds'
+import type { NostrEvent } from 'nostr-tools'
+import type { FollowsMetadata } from './helpers/parseFollowList'
+import type { UserRelayListMetadata } from './helpers/parseRelayList'
+import type { RepostMetadata } from './helpers/parseRepost'
+import type { ZapReceiptMetadata } from './helpers/parseZap'
+import type { NoteMetadata } from './nips/nip01/metadata/parseNote'
 import type { UserMetadata } from './nips/nip01/metadata/parseUser'
 
-export interface NoteMetadataDB extends MetadataDB {
-  contentSchema: ContentSchema
-  imeta: IMetaTags
-  mentionedAuthors: string[]
-  mentionedNotes: string[]
-  tags: ParsedTags
-  relayHints: Partial<RelayHints>
-  isRoot: boolean
-  isRootReply: boolean
-  isReplyOfAReply: boolean
-  rootNoteId: string | undefined
-  parentNoteId: string | undefined
-  lastSyncedAt: number | undefined
-}
+export type * from './helpers/parseFollowList'
+export * from './helpers/parseRelayList'
+export type * from './helpers/parseRepost'
+export type * from './nips/nip01/metadata/parseNote'
+export type * from './nips/nip01/metadata/parseUser'
 
-export interface RepostDB extends MetadataDB {
-  tags: ParsedTags
-  relayHints: Partial<RelayHints>
-  mentionedNotes: string[]
-}
+export const metadataSymbol = Symbol('metadata')
 
-export type UserMetadataDB = MetadataDB & UserMetadata
+export type MetadataSymbol<T> = { [metadataSymbol]: T }
 
-export interface ZapMetadataDB extends MetadataDB {
-  tags: ParsedTags
-  bolt11: {
-    amount?: {
-      value: string
-      letters: string
-    }
-    separator?: {
-      letters: string
-      value: string
-    }
-    timestamp?: {
-      letters: string
-      value: number
-    }
-    payment_hash?: {
-      letters: string
-      value: string
-    }
-  }
-}
+type Metadata =
+  | UserMetadata
+  | NoteMetadata
+  | FollowsMetadata
+  | RepostMetadata
+  | UserRelayListMetadata
+  | ZapReceiptMetadata
+
+export type NostrEventUserMetadata = NostrEvent & MetadataSymbol<UserMetadata>
+export type NostrEventNote = NostrEvent & MetadataSymbol<NoteMetadata>
+export type NostrEventFollow = NostrEvent & MetadataSymbol<FollowsMetadata>
+export type NostrEventRepost = NostrEvent & MetadataSymbol<RepostMetadata>
+export type NostrEventRelayList = NostrEvent & MetadataSymbol<UserRelayListMetadata>
+export type NostrEventZapReceipt = NostrEvent & MetadataSymbol<ZapReceiptMetadata>
+export type NostrEventGeneric = NostrEvent & MetadataSymbol<{ kind: Exclude<Kind, Pick<Metadata, 'kind'>['kind']> }> // generic event
+
+export type NostrEventMetadata =
+  | NostrEventUserMetadata
+  | NostrEventNote
+  | NostrEventFollow
+  | NostrEventRepost
+  | NostrEventRelayList
+  | NostrEventZapReceipt
+  | NostrEventGeneric

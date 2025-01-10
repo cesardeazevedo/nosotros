@@ -1,5 +1,6 @@
-import { parseUserAbout } from '@/nostr/helpers/parseNotes'
-import type { UserMetadataDB } from '@/nostr/types'
+import { Kind } from '@/constants/kinds'
+import type { MetadataDB } from '@/db/types'
+import { parseUserAbout } from '@/nostr/helpers/parseNoteContent'
 import type { NostrEvent } from 'core/types'
 import { nip19 } from 'nostr-tools'
 import { encodeSafe } from 'utils/nip19'
@@ -37,9 +38,9 @@ export const schema = z
   })
   .readonly()
 
-export type UserMetadata = z.infer<typeof schema>
+export type UserMetadata = MetadataDB & z.infer<typeof schema> & { kind: Kind.Metadata }
 
-export function parseUser(event: NostrEvent): UserMetadataDB {
+export function parseUser(event: NostrEvent): UserMetadata {
   try {
     const content = JSON.parse(event.content || '{}')
     const aboutParsed = parseUserAbout(event)
@@ -47,13 +48,13 @@ export function parseUser(event: NostrEvent): UserMetadataDB {
     return {
       ...metadata,
       id: event.id,
-      kind: event.kind,
+      kind: Kind.Metadata,
     }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
+    console.dir(error)
     return {
       id: event.id,
-      kind: event.kind,
+      kind: Kind.Metadata,
     }
   }
 }

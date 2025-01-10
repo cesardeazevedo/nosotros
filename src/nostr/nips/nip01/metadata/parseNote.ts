@@ -1,21 +1,40 @@
-import { parseNoteContent } from '@/nostr/helpers/parseNotes'
+import { Kind } from '@/constants/kinds'
 import { mergeRelayHints } from '@/core/mergers/mergeRelayHints'
+import type { MetadataDB } from '@/db/types'
+import { parseHintsFromNIP19 } from '@/nostr/helpers/getHintsFromNIP19'
+import { parseNoteContent } from '@/nostr/helpers/parseNoteContent'
+import type { ParsedTags } from '@/nostr/helpers/parseTags'
 import { isMention, parseTags } from '@/nostr/helpers/parseTags'
-import type { NostrEvent } from 'core/types'
+import type { NostrEvent, RelayHints } from 'core/types'
+import type { ContentSchema, IMetaTags } from 'nostr-editor'
 import { getMentionedAuthors } from 'nostr/helpers/getMentionedAuthors'
 import { getMentionedNotes } from 'nostr/helpers/getMentionedNotes'
-import { getRelayHintsFromNIP19 } from 'nostr/helpers/getRelayHints'
-import type { NoteMetadataDB } from 'nostr/types'
 
-export function parseNote(event: NostrEvent) {
-  const { contentSchema, imeta, nevents, nprofiles } = parseNoteContent(event)
+export interface NoteMetadata extends MetadataDB {
+  kind: Kind.Text | Kind.Article
+  contentSchema: ContentSchema
+  imeta: IMetaTags
+  mentionedAuthors: string[]
+  mentionedNotes: string[]
+  tags: ParsedTags
+  relayHints: Partial<RelayHints>
+  isRoot: boolean
+  isRootReply: boolean
+  isReplyOfAReply: boolean
+  rootNoteId: string | undefined
+  parentNoteId: string | undefined
+  lastSyncedAt: number | undefined
+}
+
+export function parseNote(event: NostrEvent): NoteMetadata {
+  const { contentSchema, imeta, nevents, nprofiles, naddress } = parseNoteContent(event)
   const { hints = {}, ...tags } = parseTags(event.tags)
 
   const repliesTags = tags.e?.filter((tag) => !isMention(tag)) || []
 
-  const mentionedNotes = getMentionedNotes(tags, nevents)
-  const mentionedAuthors = getMentionedAuthors(tags, nprofiles, nevents)
-  const relayHints = mergeRelayHints([hints, getRelayHintsFromNIP19(nevents, nprofiles)])
+  const mentionedNotes = getMentionedNotes(tags, nevents, naddress)
+  const mentionedAuthors = getMentionedAuthors(tags, nprofiles, nevents, naddress)
+  const relayHints = mergeRelayHints([hints, parseHintsFromNIP19(nevents, nprofiles, naddress)])
 
   const isRoot = repliesTags.length === 0
   const isRootReply = repliesTags.length === 1
@@ -25,7 +44,7 @@ export function parseNote(event: NostrEvent) {
 
   return {
     id: event.id,
-    kind: event.kind,
+    kind: Kind.Text,
     imeta,
     contentSchema,
     relayHints,
@@ -38,5 +57,5 @@ export function parseNote(event: NostrEvent) {
     isRootReply,
     isReplyOfAReply,
     lastSyncedAt: 0,
-  } as NoteMetadataDB
+  }
 }

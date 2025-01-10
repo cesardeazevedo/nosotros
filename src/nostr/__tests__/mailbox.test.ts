@@ -2,8 +2,8 @@ import { RELAY_1, RELAY_2, RELAY_3, RELAY_4 } from '@/constants/testRelays'
 import { test } from '@/utils/fixtures'
 import { subscribeSpyTo } from '@hirez_io/observer-spy'
 import { from, mergeMap } from 'rxjs'
+import { READ, WRITE } from '../helpers/parseRelayList'
 import { Mailbox, toArrayRelay } from '../mailbox'
-import { READ, WRITE } from '../nips/nip65.relaylist'
 
 describe('Mailbox Tracker', () => {
   test('assert user relays', async ({ createClient, insertRelayList }) => {

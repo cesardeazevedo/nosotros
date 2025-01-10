@@ -33,7 +33,7 @@ export interface DB {
 
 export interface MetadataDB {
   id: string
-  kind: number
+  kind: Kind
 }
 
 export interface TagDB {

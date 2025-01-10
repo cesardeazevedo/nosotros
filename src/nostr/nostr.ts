@@ -8,11 +8,12 @@ import type { Signer } from 'core/signers/signer'
 import type { NostrFilter } from 'core/types'
 import type { EventTemplate, NostrEvent } from 'nostr-tools'
 import type { OperatorFunction } from 'rxjs'
-import { catchError, EMPTY, merge, mergeWith, of, pipe, tap, throwError, type Observable } from 'rxjs'
+import { EMPTY, merge, mergeWith, of, pipe, tap, throwError, type Observable } from 'rxjs'
 import { toast } from 'sonner'
 import { batcher } from './batcher'
 import { setCache } from './cache'
 import { NostrFeeds } from './feeds'
+import { READ, WRITE } from './helpers/parseRelayList'
 import { InboxTracker } from './inbox'
 import { Mailbox, toArrayRelay } from './mailbox'
 import { NIP01Notes } from './nips/nip01/nip01.notes'
@@ -24,21 +25,24 @@ import { NIP18Reposts } from './nips/nip18.reposts'
 import { NIP25Reactions } from './nips/nip25.reactions'
 import { NIP50Search } from './nips/nip50.search'
 import { NIP57Zaps } from './nips/nip57.zaps'
-import { NIP65RelayList, READ, WRITE } from './nips/nip65.relaylist'
+import { NIP65RelayList } from './nips/nip65.relaylist'
 import { Notifications } from './notifications'
 import { distinctEvent } from './operators/distinctEvents'
 import * as localDB from './operators/localDB'
 import * as localRelay from './operators/localRelay'
+import { parseEventMetadata } from './operators/parseMetadata'
 import { OutboxTracker } from './outbox'
 import { pruneFilters } from './prune'
 import { Seen } from './seen'
 import { defaultNostrSettings, type NostrSettings } from './settings'
+import type { NostrEventMetadata } from './types'
 
 export type NostrClientOptions = {
   relays?: string[]
   pubkey?: string
   signer?: Signer
   settings?: NostrSettings
+  onEvent?: (event: NostrEventMetadata) => void
 }
 
 export type ClientSubOptions = Omit<SubscriptionOptions, 'outbox'> & {
@@ -69,7 +73,6 @@ export class NostrClient {
   inboxSets = new Set<string>()
   outboxSets = new Set<string>()
 
-  pool: Pool
   signer?: Signer
   pubkey?: string
   relays: string[]
@@ -79,8 +82,10 @@ export class NostrClient {
   outboxTracker: OutboxTracker
   settings: NostrSettings
 
-  constructor(pool: Pool, options: NostrClientOptions = {}) {
-    this.pool = pool
+  constructor(
+    public pool: Pool,
+    public options: NostrClientOptions = {},
+  ) {
     this.signer = options.signer
     this.pubkey = options.pubkey
     this.relays = options.relays || []
@@ -205,12 +210,19 @@ export class NostrClient {
             )
           : EMPTY,
       ),
+
+      parseEventMetadata(),
+
+      tap((event) => this.options.onEvent?.(event)),
     )
   }
 
   publish(unsignedEvent: Omit<EventTemplate, 'created_at'>, options: PublisherOptions = {}) {
-    if (!this.pubkey) return throwError(() => new Error('Not authenticated'))
-    if (!this.signer) return throwError(() => new Error('Authenticated as read only'))
+    if (!this.pubkey || !this.signer) {
+      const error = 'Not authenticated'
+      toast.error(error)
+      return throwError(() => new Error(error))
+    }
 
     const event = {
       ...unsignedEvent,
@@ -224,13 +236,6 @@ export class NostrClient {
       inbox: !options.relays ? this.inboxTracker.subscribe.bind(this.inboxTracker) : () => EMPTY,
     })
 
-    return of(pub).pipe(
-      publish(this.pool),
-      catchError((res) => {
-        const error = res as Error
-        toast.error(error.message.charAt(0).toUpperCase() + error.message.slice(1))
-        throw error
-      }),
-    )
+    return of(pub).pipe(publish(this.pool))
   }
 }

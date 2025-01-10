@@ -1,8 +1,7 @@
 import { Kind } from '@/constants/kinds'
 import type { PaginationSubject } from '@/core/PaginationRangeSubject'
 import type { NostrFilter } from '@/core/types'
-import { notificationStore } from '@/stores/notifications/notifications.store'
-import { connect, ignoreElements, map, merge, mergeMap } from 'rxjs'
+import { connect, ignoreElements, merge, mergeMap } from 'rxjs'
 import { isEventTag } from './helpers/parseTags'
 import type { NostrClient } from './nostr'
 
@@ -10,12 +9,7 @@ export class Notifications {
   constructor(private client: NostrClient) {}
 
   subMentions(nostrFilter: NostrFilter) {
-    const sub = this.client.notes.subscribe({ kinds: [Kind.Text], ...nostrFilter })
-    return sub.pipe(
-      map((note) => {
-        return notificationStore.addMention(note)
-      }),
-    )
+    return this.client.notes.subscribe({ kinds: [Kind.Text], ...nostrFilter })
   }
 
   subReactions(filter: NostrFilter) {
@@ -27,7 +21,7 @@ export class Notifications {
             mergeMap((event) => {
               return merge(
                 // get reacted note
-                this.client.notes.subIds(event.tags.filter(isEventTag).flatMap((x) => x[1])),
+                this.client.notes.subNotesWithRelated({ ids: event.tags.filter(isEventTag).flatMap((x) => x[1]) }),
                 // get author of reaction
                 this.client.users.subscribe(event.pubkey),
               )
@@ -36,7 +30,6 @@ export class Notifications {
           ),
         )
       }),
-      map((event) => notificationStore.addReactions(event)),
     )
   }
 
@@ -47,17 +40,16 @@ export class Notifications {
           shared$,
           shared$.pipe(
             // move this to the zap subscriber directly
-            mergeMap(([event]) => this.client.users.subscribe(event.pubkey)),
+            mergeMap((event) => this.client.users.subscribe(event.pubkey)),
             ignoreElements(),
           ),
         )
       }),
-      map(([event]) => notificationStore.addZap(event)),
     )
   }
 
   subReposts(filter: NostrFilter) {
-    return this.client.reposts.subscribe(filter).pipe(map((note) => notificationStore.addRepost(note)))
+    return this.client.reposts.subscribeWithRepostedEvent(filter)
   }
 
   subscribe(filter: NostrFilter) {

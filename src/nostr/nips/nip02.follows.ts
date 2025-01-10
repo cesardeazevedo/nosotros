@@ -1,30 +1,35 @@
+import { ofKind } from '@/core/operators/ofKind'
 import { Kind } from 'constants/kinds'
-import type { NostrClient, ClientSubOptions } from 'nostr/nostr'
-import { connect, from, ignoreElements, map, merge, mergeMap, tap } from 'rxjs'
-import { Follows } from 'stores/models/follow'
-import { followsStore } from 'stores/nostr/follows.store'
+import type { ClientSubOptions, NostrClient } from 'nostr/nostr'
+import { connect, from, ignoreElements, merge, mergeMap } from 'rxjs'
 import { ShareReplayCache } from '../replay'
+import type { NostrEventFollow } from '../types'
+import { metadataSymbol } from '../types'
 
-export const replay = new ShareReplayCache<Follows>()
+export const replay = new ShareReplayCache<NostrEventFollow>()
+
+const kinds = [Kind.Follows]
 
 export class NIP02Follows {
   constructor(private client: NostrClient) {}
 
   subscribe = replay.wrap((pubkey: string, options?: ClientSubOptions) => {
-    return this.client.subscribe({ kinds: [Kind.Follows], authors: [pubkey] }, options).pipe(
-      map((event) => new Follows(event)),
+    return this.client.subscribe({ kinds, authors: [pubkey] }, options).pipe(
+      ofKind<NostrEventFollow>(kinds),
 
       connect((shared$) => {
         return merge(
           shared$,
           shared$.pipe(
-            mergeMap((data) => from([...data.authors]).pipe(mergeMap((pubkey) => this.client.users.subscribe(pubkey)))),
+            mergeMap((event) =>
+              from(event[metadataSymbol].tags.get('p') || []).pipe(
+                mergeMap((pubkey) => this.client.users.subscribe(pubkey)),
+              ),
+            ),
             ignoreElements(),
           ),
         )
       }),
-
-      tap((follows: Follows) => followsStore.add(follows)),
     )
   })
 }

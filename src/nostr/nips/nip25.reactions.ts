@@ -43,7 +43,6 @@ export class NIP25Reactions {
           ignoreElements(),
         ),
       ),
-      tap((event) => reactionStore.add(event)),
     )
   }
 }

@@ -1,6 +1,5 @@
-import { READ, WRITE } from '@/nostr/nips/nip65.relaylist'
 import { fakeNote } from '@/utils/faker'
-import { parseRelayList } from '../parseRelayList'
+import { parseRelayList, READ, WRITE } from '../parseRelayList'
 
 test('parseRelayList()', () => {
   const event = fakeNote({

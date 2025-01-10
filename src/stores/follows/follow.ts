@@ -1,25 +1,24 @@
+import type { FollowsMetadata } from '@/nostr/helpers/parseFollowList'
 import type { NostrEvent } from 'core/types'
 
 export class Follows {
-  id: string
-  pubkey: string
-  created_at: number
-  authors = new Set<string>()
-  tags = new Set<string>() // todo
+  event: NostrEvent
+  tags = new Map<string, Set<string>>()
 
-  constructor(data: NostrEvent) {
-    this.id = data.id
-    this.pubkey = data.pubkey
-    this.created_at = data.created_at
+  constructor(event: NostrEvent, metadata: FollowsMetadata) {
+    this.event = event
+    this.tags = metadata.tags
+  }
 
-    this.authors = new Set(
-      data.tags
-        .filter((tag) => tag[0] === 'p' && (tag[1].length === 64 || import.meta.env.MODE === 'test'))
-        .map((tag) => tag[1]),
-    )
+  get id() {
+    return this.event.id
+  }
+
+  get pubkey() {
+    return this.event.pubkey
   }
 
   followsPubkey(pubkey?: string) {
-    return this.authors.has(pubkey || '')
+    return this.tags.get('p')?.has(pubkey || '')
   }
 }
