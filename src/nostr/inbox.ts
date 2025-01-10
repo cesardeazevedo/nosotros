@@ -1,9 +1,9 @@
 import type { NostrEvent } from 'nostr-tools'
 import { mergeMap, of } from 'rxjs'
+import { READ } from './helpers/parseRelayList'
 import { isAuthorTag } from './helpers/parseTags'
-import type { RelaySelectionConfig } from './helpers/relaySelection'
+import type { RelaySelectionConfig } from './helpers/selectRelays'
 import { toArrayRelay } from './mailbox'
-import { READ } from './nips/nip65.relaylist'
 import type { NostrClient } from './nostr'
 
 export class InboxTracker {

@@ -1,87 +1,151 @@
-import { dedupe } from '@/core/helpers/dedupe'
-import { mapMetadata } from '@/nostr/operators/mapMetadata'
-import { pruneIds } from '@/nostr/prune'
-import type { Note } from '@/stores/notes/note'
-import { noteStore } from '@/stores/notes/notes.store'
+import { ofKind } from '@/core/operators/ofKind'
+import { subscribeIdsFromQuotes } from '@/nostr/operators/subscribeIdsFromQuotes'
+import { metadataSymbol, type NostrEventNote } from '@/nostr/types'
 import { Kind } from 'constants/kinds'
 import type { NostrFilter } from 'core/types'
 import type { ClientSubOptions, NostrClient } from 'nostr/nostr'
 import type { Observable } from 'rxjs'
-import { EMPTY, connect, expand, filter, from, ignoreElements, map, merge, mergeMap, of, pipe } from 'rxjs'
-import { parseNote } from './metadata/parseNote'
+import { EMPTY, connect, expand, filter, from, ignoreElements, merge, mergeMap, of, skip } from 'rxjs'
+
+export type Note$ = Observable<NostrEventNote>
+
+type ThreadsOptions = {
+  includeRoot?: boolean
+  depth?: number
+}
+
+type QuoteOptions = {
+  depth?: number
+}
+
+type RelatedOptions = ClientSubOptions & {
+  threads?: ThreadsOptions
+  quotes?: QuoteOptions
+}
 
 export class NIP01Notes {
   constructor(private client: NostrClient) {}
 
-  process() {
-    return pipe(
-      mapMetadata(parseNote),
+  subscribeNoteAuthors() {
+    return (source$: Note$) => {
+      return source$.pipe(
+        mergeMap((event) => {
+          const metadata = event[metadataSymbol]
+          const authors = [event.pubkey, ...(metadata.mentionedAuthors || [])]
+          const relayHints = metadata.relayHints
+          return from(authors).pipe(mergeMap((pubkey) => this.client.users.subscribe(pubkey, { relayHints })))
+        }),
+      )
+    }
+  }
 
-      map(([event, metadata]) => noteStore.add(event, metadata)),
-
-      connect((notes$) => {
-        return merge(
-          notes$,
-          // Get the note author
-          notes$.pipe(
-            mergeMap((note) => {
-              const relayHints = note.metadata?.relayHints
-              const authors = dedupe([note.event.pubkey, ...(note.metadata.mentionedAuthors || [])])
-              return from(authors).pipe(mergeMap((pubkey) => this.client.users.subscribe(pubkey, { relayHints })))
+  subscribeParent() {
+    return (source$: Note$) => {
+      return source$.pipe(
+        mergeMap((event) => {
+          return of(event).pipe(
+            expand((event, depth) => {
+              if (depth > 1) {
+                return EMPTY
+              }
+              const { parentNoteId } = event[metadataSymbol]
+              if (parentNoteId) {
+                return this.subNotesWithRelated({ kinds: [Kind.Text], ids: [parentNoteId] })
+              }
+              return EMPTY
             }),
-            ignoreElements(),
-          ),
-        )
-      }),
-    )
+            filter((x) => {
+              // Only return the first parent
+              const parent = event[metadataSymbol].parentNoteId
+              if (parent) {
+                return x.id === parent
+              }
+              return true
+            }),
+          )
+        }),
+      )
+    }
+  }
+
+  subscribeQuotes(options?: QuoteOptions) {
+    const maxDepth = options?.depth || 16
+    return (source$: Note$) => {
+      return source$.pipe(
+        mergeMap((event) => {
+          return of(event).pipe(
+            expand((event, depth) => {
+              if (depth >= maxDepth) {
+                return EMPTY
+              }
+              const metadata = event[metadataSymbol]
+              const ids = metadata.mentionedNotes || []
+              const relayHints = metadata.relayHints
+
+              if (ids.length) {
+                return from(ids).pipe(
+                  mergeMap((id) => {
+                    return subscribeIdsFromQuotes(this.client, id, { relayHints }).pipe(
+                      ofKind<NostrEventNote>([Kind.Text]),
+                    )
+                  }),
+                )
+              }
+              return EMPTY
+            }),
+            skip(1), // skip the source
+          )
+        }),
+      )
+    }
+  }
+
+  withThreads() {
+    return connect((event$: Note$) => {
+      return merge(
+        event$,
+        event$.pipe(
+          mergeMap((event) => {
+            const root = event[metadataSymbol].rootNoteId
+            if (root) {
+              return merge(this.subNotesWithRelated({ ids: [root] }), this.subReplies(root))
+            }
+            return EMPTY
+          }),
+        ),
+      )
+    })
+  }
+
+  withRelatedAuthors() {
+    return connect((shared$: Observable<NostrEventNote>) => {
+      return merge(shared$, shared$.pipe(this.subscribeNoteAuthors(), ignoreElements()))
+    })
+  }
+
+  withRelatedNotes(options?: RelatedOptions) {
+    return connect((event$: Note$) => {
+      return merge(
+        event$,
+        event$.pipe(this.subscribeNoteAuthors(), ignoreElements()),
+        event$.pipe(this.subscribeQuotes(options?.quotes), ignoreElements()), // quotes are never included in the feed
+      )
+    })
   }
 
   subscribe(filters: NostrFilter, options?: ClientSubOptions) {
-    return this.client.subscribe(filters, options).pipe(
-      // filter out any non text article
-      filter((event) => [Kind.Text, Kind.Article, Kind.Photos].indexOf(event.kind) > -1),
-
-      this.process(),
-    )
+    return this.client.subscribe(filters, options).pipe(ofKind<NostrEventNote>(filters.kinds || []))
   }
 
   subReplies(id: string, options?: ClientSubOptions) {
-    return this.subWithRelated({ kinds: [Kind.Text], '#e': [id] }, options)
+    return this.subNotesWithRelated({ kinds: [Kind.Text], '#e': [id] }, options)
   }
 
-  subRelated(note: Note, options?: ClientSubOptions): Observable<Note> {
-    return of(note).pipe(
-      expand((note, depth) => {
-        // Make this configurable
-        if (depth >= 16) {
-          return EMPTY
-        }
-        const mentioned = note.metadata.mentionedNotes || []
-        const related = note.metadata.tags.e?.map((x) => x[1]).filter((x) => mentioned.indexOf(x) === -1) || []
-        const relayHints = note.metadata.relayHints
-        const subOptions = { ...options, relayHints }
-        return merge(
-          this.subIds(related, subOptions),
-          this.subIds(mentioned, subOptions).pipe(
-            mergeMap((note) => this.subRelated(note)),
-            // Don't include quoted notes on the feed
-            ignoreElements(),
-          ),
-        )
-      }),
-    )
+  subNotesWithRelated(filters: NostrFilter, options?: RelatedOptions) {
+    return this.subscribe(filters, options).pipe(this.withRelatedNotes(options))
   }
 
-  subIds(ids: string[], options?: ClientSubOptions) {
-    // filter out ids from d tags
-    const neededIds = pruneIds(ids).filter((x) => x.indexOf(':') === -1)
-    if (neededIds.length > 0) {
-      return this.subscribe({ ids: neededIds }, options)
-    }
-    return EMPTY
-  }
-
-  subWithRelated(filters: NostrFilter, options?: ClientSubOptions) {
-    return this.subscribe(filters, options).pipe(mergeMap((note) => this.subRelated(note)))
+  subRelatedNotesWithParent(filters: NostrFilter, options?: RelatedOptions) {
+    return this.subNotesWithRelated(filters, options).pipe(this.subscribeParent())
   }
 }
