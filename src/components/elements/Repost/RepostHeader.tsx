@@ -6,6 +6,7 @@ import { spacing } from '@/themes/spacing.stylex'
 import { IconArrowForward } from '@tabler/icons-react'
 import { css, html } from 'react-strict-dom'
 import { PostOptions } from '../Posts/PostOptions'
+import { PostUserHeader } from '../Posts/PostUserHeader'
 import { UserHeader } from '../User/UserHeader'
 
 type Props = {
@@ -27,7 +28,7 @@ export const RepostHeader = (props: Props) => {
           align='flex-start'
           size='sm'
         />
-        <UserHeader dense note={note} sx={styles.bottom} align='center' userAvatarProps={{ sx: styles.avatar }} />
+        <PostUserHeader dense note={note} align='center' sx={styles.bottom} userAvatarProps={{ sx: styles.avatar }} />
         <Tooltip placement='bottom' text='Reposted'>
           <html.span style={styles.icon}>
             <IconArrowForward size={20} strokeWidth='1.8' />

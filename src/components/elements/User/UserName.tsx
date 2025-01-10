@@ -17,8 +17,7 @@ import { LinkProfile } from '../Links/LinkProfile'
 import { UserPopover } from './UserPopover'
 
 interface Props extends Omit<TextProps, 'children'> {
-  user?: User
-  pubkey?: string
+  pubkey: string
   disableLink?: boolean
   disablePopover?: boolean
   children?: React.ReactNode
@@ -31,7 +30,7 @@ export const UserName = observer(function UserName(props: Props) {
   return (
     <Stack gap={0.5} sx={props.sx}>
       {!user && <Skeleton variant='rectangular' sx={styles.loading} />}
-      <UserPopover user={user} disabled={disablePopover}>
+      <UserPopover pubkey={pubkey} disabled={disablePopover}>
         <LinkProfile underline user={user} disableLink={disableLink}>
           <Text variant='body' sx={[styles.text, rest.sx]} size={size} {...rest} element={html.div}>
             {user?.displayName}
