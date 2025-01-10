@@ -3,49 +3,56 @@ import { subscribeSpyTo } from '@hirez_io/observer-spy'
 import { Kind } from 'constants/kinds'
 import { fakeNote } from 'utils/faker'
 import { test } from 'utils/fixtures'
+import { vi } from 'vitest'
 
 describe('NIP01Notes', () => {
-  test('assert related events', async ({ createMockRelay, createClient }) => {
-    const relay = createMockRelay(RELAY_1, [
-      fakeNote({
-        id: '1',
-        pubkey: '1',
-        tags: [
-          ['e', '7', '', 'root'],
-          ['e', '3', '', 'reply'],
-          ['e', '2', '', 'mention'],
-        ],
-      }),
-      fakeNote({ id: '2', pubkey: '2', tags: [['e', '22', '', 'mention']] }), // test deep quoted notes
-      fakeNote({ id: '3', pubkey: '3', tags: [['e', '4', '', 'reply']] }),
-      fakeNote({ id: '4', pubkey: '4', tags: [['e', '5', '', 'reply']] }),
-      fakeNote({ id: '5', pubkey: '5', tags: [['e', '6', '', 'reply']] }),
-      fakeNote({ id: '6', pubkey: '6', tags: [['e', '7', '', 'root']] }),
-      fakeNote({ id: '7', pubkey: '7' }),
-      fakeNote({ id: '22', pubkey: '2' }), // test deep quoted notes
-    ])
-    const client = createClient({ relays: [RELAY_1], settings: { outbox: false } })
+  test('assert parent event and quotes', async ({ createMockRelay, createClient }) => {
+    const event1 = fakeNote({ id: '1', pubkey: '1', tags: [] })
+    const event2 = fakeNote({
+      id: '2',
+      pubkey: '2',
+      tags: [
+        ['e', '3', 'reply'],
+        ['e', '22', '', 'mention'],
+      ],
+    })
+    const event3 = fakeNote({
+      id: '3',
+      pubkey: '3',
+      tags: [
+        ['e', '4', '', 'reply'],
+        ['e', '23', '', 'mention'],
+      ],
+    })
+    const event4 = fakeNote({ id: '4', pubkey: '4', tags: [['e', '5', '', 'reply']] })
+    const event5 = fakeNote({ id: '5', pubkey: '5', tags: [['e', '6', '', 'reply']] })
+    const event6 = fakeNote({ id: '6', pubkey: '6', tags: [['e', '7', '', 'reply']] })
+    const event7 = fakeNote({ id: '22', pubkey: '10' })
+    const event8 = fakeNote({ id: '23', pubkey: '11' })
 
-    const filter = { kinds: [Kind.Text, Kind.Article], authors: ['1'] }
-    const spy = subscribeSpyTo(client.notes.subWithRelated(filter))
+    const relay = createMockRelay(RELAY_1, [event1, event2, event3, event4, event5, event6, event7, event8])
+
+    const eventSpy = vi.fn()
+    const client = createClient({ relays: [RELAY_1], settings: { outbox: false }, onEvent: eventSpy })
+
+    const filter = { kinds: [Kind.Text, Kind.Article], authors: ['1', '2'] }
+    const spy = subscribeSpyTo(client.notes.subRelatedNotesWithParent(filter))
     await spy.onComplete()
     await relay.close()
 
     expect(relay.received).toStrictEqual([
-      ['REQ', '1', { kinds: [1, 30023], authors: ['1'] }],
+      ['REQ', '1', { kinds: [1, 30023], authors: ['1', '2'] }],
       ['CLOSE', '1'],
-      ['REQ', '2', { ids: ['7', '3', '2'] }, { kinds: [0, 10002], authors: ['1'] }],
+      ['REQ', '2', { kinds: [0, 10002], authors: ['1', '2'] }, { ids: ['3'], kinds: [1] }, { ids: ['22'] }],
       ['CLOSE', '2'],
-      ['REQ', '3', { ids: ['22', '4'] }, { kinds: [0, 10002], authors: ['2', '3', '7'] }],
+      ['REQ', '3', { ids: ['4'], kinds: [1] }, { kinds: [0, 10002], authors: ['3', '10'] }, { ids: ['23'] }],
       ['CLOSE', '3'],
-      ['REQ', '4', { ids: ['5'] }, { kinds: [0, 10002], authors: ['4'] }],
-      ['CLOSE', '4'],
-      ['REQ', '5', { ids: ['6'] }, { kinds: [0, 10002], authors: ['5'] }],
-      ['CLOSE', '5'],
-      ['REQ', '6', { kinds: [0, 10002], authors: ['6'] }],
-      // ['CLOSE', '6'],
+      ['REQ', '4', { kinds: [0, 10002], authors: ['4', '11'] }],
     ])
 
-    expect(spy.getValues().map((x) => x.id)).toStrictEqual(['1', '3', '7', '4', '5', '6'])
+    // The pipeline successfully returned all the related notes
+    expect(eventSpy.mock.calls.flatMap((x) => x[0].id)).toStrictEqual(['1', '2', '3', '22', '4', '23'])
+    // Only note 1 and 3 are included in the stream
+    expect(spy.getValues().map((x) => x.id)).toStrictEqual(['1', '3'])
   })
 })
