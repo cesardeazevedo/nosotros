@@ -1,3 +1,4 @@
+import { CopyIconButton } from '@/components/elements/Buttons/CopyIconButton'
 import { Button } from '@/components/ui/Button/Button'
 import { Dialog } from '@/components/ui/Dialog/Dialog'
 import { DialogContent } from '@/components/ui/DialogContent/DialogContent'
@@ -6,7 +7,6 @@ import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconBolt } from '@tabler/icons-react'
-import { CopyButton } from 'components/elements/Buttons/CopyButton'
 import type { decode } from 'light-bolt11-decoder'
 import QRCode from 'qrcode.react'
 import { useCallback, useContext, useMemo, useState } from 'react'
@@ -44,7 +44,7 @@ export const LNInvoice = function LNInvoice(props: Props) {
     <>
       <Dialog open={dialog} onClose={handleClose}>
         <DialogContent maxWidth='xs' sx={styles.dialog}>
-          <CopyButton sx={styles.copy} title='Copy invoice' text={lnbc} />
+          <CopyIconButton sx={styles.copy} title='Copy invoice' text={lnbc} />
           <Stack align='center' horizontal={false} gap={3}>
             <Text variant='headline' size='sm'>
               Pay invoice
@@ -60,7 +60,7 @@ export const LNInvoice = function LNInvoice(props: Props) {
         </DialogContent>
       </Dialog>
       <Paper outlined sx={[styles.root, dense && styles.root$dense]}>
-        <CopyButton sx={styles.copy} title='Copy invoice' text={lnbc} />
+        <CopyIconButton sx={styles.copy} title='Copy invoice' text={lnbc} />
         <Stack align='flex-end' justify='space-between'>
           <Stack horizontal={false} gap={0.5}>
             <IconBolt strokeWidth='1.8' size={28} />

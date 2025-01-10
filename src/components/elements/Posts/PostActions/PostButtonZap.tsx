@@ -1,13 +1,14 @@
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
-import { useGlobalSettings } from '@/hooks/useRootStore'
+import { useCurrentPubkey, useGlobalSettings } from '@/hooks/useRootStore'
 import { useTheme } from '@/hooks/useTheme'
 import type { Note } from '@/stores/notes/note'
 import { zapStore } from '@/stores/zaps/zaps.store'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconBolt } from '@tabler/icons-react'
+import { Link, useRouter } from '@tanstack/react-router'
 import { observer } from 'mobx-react-lite'
-import { css } from 'react-strict-dom'
+import { css, html } from 'react-strict-dom'
 import { ButtonContainer, type ContainerProps } from './PostButtonContainer'
 import { iconProps } from './utils'
 
@@ -42,23 +43,35 @@ const formatter = new Intl.NumberFormat()
 
 export const ButtonZap = observer(function ButtonZap(props: Props & ContainerProps) {
   const { dense, onClick, note, ...rest } = props
+  const pubkey = useCurrentPubkey()
   const globalSettings = useGlobalSettings()
   const theme = useTheme(globalSettings.theme)
+  const myZaps = zapStore.zapsByPubkey.get(pubkey || '')
+  const hasZapped = myZaps?.has(note.id) || false
   const total = zapStore.getTotal(note.id) || ''
+  const router = useRouter()
   const palette = themes[theme.key as 'light' | 'dark']
+
+  const color = getZapColor(total || 0, palette)
+
   return (
-    <ButtonContainer
-      {...rest}
-      active={false}
-      sx={styles[getZapColor(total || 0, palette)]}
-      value={<>{total ? formatter.format(total) : ''}</>}>
+    <ButtonContainer {...rest} sx={styles[color]} value={<>{total ? formatter.format(total) : ''}</>}>
       <Tooltip cursor='arrow' text='Send a Zap (coming soon)'>
-        <IconButton
-          size={dense ? 'sm' : 'md'}
-          onClick={onClick}
-          icon={
-            <IconBolt size={dense ? iconProps.size$dense : iconProps.size} strokeWidth={iconProps.strokeWidth} />
-          }></IconButton>
+        {/* @ts-ignore */}
+        <Link search={{ zap: note.nevent }} from={router.fullPath} state={{ from: router.latestLocation.pathname }}>
+          <IconButton
+            size={dense ? 'sm' : 'md'}
+            icon={
+              <html.span style={hasZapped && styles[color]}>
+                <IconBolt
+                  {...(hasZapped ? { fill: 'currentColor' } : {})}
+                  size={dense ? iconProps.size$dense : iconProps.size}
+                  strokeWidth={iconProps.strokeWidth}
+                />
+              </html.span>
+            }
+          />
+        </Link>
       </Tooltip>
     </ButtonContainer>
   )

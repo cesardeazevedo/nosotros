@@ -1,9 +1,12 @@
 import { dedupe } from '@/core/helpers/dedupe'
+import { start } from '@/core/operators/start'
 import type { NostrFilter } from '@/core/types'
 import { Kind } from 'constants/kinds'
 import type { ClientSubOptions, NostrClient } from 'nostr/nostr'
 import type { Observable } from 'rxjs'
-import { connect, from, ignoreElements, merge, mergeMap } from 'rxjs'
+import { connect, filter, from, ignoreElements, merge, mergeMap, of } from 'rxjs'
+import { parseTags } from '../helpers/parseTags'
+import { distinctEvent } from '../operators/distinctEvents'
 import type { NostrEventZapReceipt } from '../types'
 import { metadataSymbol } from '../types'
 
@@ -11,6 +14,19 @@ const kinds = [Kind.ZapReceipt]
 
 export class NIP57Zaps {
   constructor(private client: NostrClient) {}
+
+  waitForReceipt(id: string, invoice: string, options?: ClientSubOptions) {
+    const sub = this.client.createSubscription({ kinds, '#e': [id] }, options)
+    return of(sub).pipe(
+      start(this.client.pool, false),
+      distinctEvent(),
+      filter((event) => {
+        // Make sure the zap receipt is the one we are looking for
+        const tags = parseTags(event.tags)
+        return tags.bolt11?.flat()[0] === invoice
+      }),
+    )
+  }
 
   withRelatedAuthors() {
     return connect((shared$: Observable<NostrEventZapReceipt>) => {
