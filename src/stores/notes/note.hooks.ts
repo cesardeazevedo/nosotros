@@ -1,11 +1,12 @@
 import { useGlobalNostrSettings } from '@/hooks/useRootStore'
+import type { NoteStatsOptions } from '@/nostr/stats'
 import { subscribeNoteStats } from '@/nostr/stats'
 import { pluckFirst, useObservable, useSubscription } from 'observable-hooks'
 import { filter, finalize, from, mergeMap } from 'rxjs'
 import { useObservableNostrContext } from '../context/nostr.context.hooks'
 import type { Note } from './note'
 
-export function useNoteStats(note: Note) {
+export function useNoteStats(note: Note, options?: NoteStatsOptions) {
   const settings = useGlobalNostrSettings()
   const notes$ = useObservable((note$) => note$.pipe(pluckFirst), [note])
 
@@ -18,7 +19,7 @@ export function useNoteStats(note: Note) {
           mergeMap((id) => {
             return subscribeNoteStats(id, client, {
               ...settings.scroll,
-              replies: true,
+              ...options,
             }).pipe(
               finalize(() => {
                 note.setRepliesStatus('LOADED')

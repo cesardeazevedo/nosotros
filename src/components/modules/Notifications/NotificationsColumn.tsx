@@ -31,7 +31,10 @@ export const NotificationsColumn = observer(function NotificationsColumn(props: 
           id={id}
           feed={feed}
           onScrollEnd={() => feed.paginate()}
-          render={(item) => <NotificationItem item={item} />}
+          render={(event) => {
+            const notification = module.feed.notifications.get(event.id)
+            return notification && <NotificationItem notification={notification} />
+          }}
           footer={<NotificationLoading rows={10} />}
         />
       </PaperContainer>

@@ -13,7 +13,7 @@ export const WelcomeModuleModel = BaseModuleModel.named('WelcomeModule')
     feed: t.optional(NotesFeedSubscriptionModel, {
       scope: 'self',
       range: Duration.fromObject({ hour: 6 }).as('minutes'),
-      filter: { kinds: [Kind.Text], authors: RECOMMENDED_PUBKEYS },
+      filter: { kinds: [Kind.Text, Kind.Repost], authors: RECOMMENDED_PUBKEYS },
     }),
   })
   .volatile((self) => ({

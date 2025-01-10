@@ -1,9 +1,11 @@
+import { Kind } from '@/constants/kinds'
 import { useGlobalNostrSettings } from '@/hooks/useRootStore'
 import { db } from '@/nostr/db'
 import { subscribeNoteStats } from '@/nostr/stats'
+import { metadataSymbol } from '@/nostr/types'
+import { modelStore } from '@/stores/base/model.store'
 import { useNostrClientContext } from '@/stores/context/nostr.context.hooks'
 import { Note } from '@/stores/notes/note'
-import { noteStore } from '@/stores/notes/notes.store'
 import { Repost } from '@/stores/reposts/repost'
 import { DateTime } from 'luxon'
 import { useObservableCallback, useSubscription } from 'observable-hooks'
@@ -21,20 +23,33 @@ export function useFeedScroll(feed: NotesFeed) {
       filter((index) => !!feed.list[index]),
       distinct(),
       mergeMap((index) => {
-        const item = feed.list[index]
-        if (item) {
-          if (item instanceof Note) {
-            return of(item)
-          } else if (item instanceof Repost) {
-            return of(item.note)
-          } else {
+        const event = feed.list[index]
+        const metadata = event[metadataSymbol]
+        switch (metadata.kind) {
+          case Kind.Text:
+          case Kind.Article: {
+            return [metadata.id, ...metadata.mentionedNotes]
+          }
+          case Kind.Repost: {
+            return metadata.mentionedNotes
+          }
+          default: {
             return EMPTY
+          }
+        }
+      }),
+      mergeMap((id) => {
+        const item = modelStore.get(id)
+        switch (true) {
+          case item instanceof Note: {
+            return of(item)
+          }
+          case item instanceof Repost: {
+            return of(item.note)
           }
         }
         return EMPTY
       }),
-
-      mergeMap((note) => [note.id, ...note.metadata.mentionedNotes].map((id) => noteStore.get(id)).filter((x) => !!x)),
       tap((note) => {
         const now = DateTime.now().set({ second: 0, millisecond: 0 })
         db.metadata.insert({ ...note.metadata, lastSyncedAt: now.toSeconds() })

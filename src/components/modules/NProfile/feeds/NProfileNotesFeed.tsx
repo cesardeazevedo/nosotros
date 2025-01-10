@@ -1,4 +1,4 @@
-import { FeedItem } from '@/components/elements/Feed/FeedItem'
+import { NostrEventRoot } from '@/components/elements/Event/NostrEventRoot'
 import { PostLoading } from '@/components/elements/Posts/PostLoading'
 import { VirtualList } from '@/components/elements/VirtualLists/VirtualList'
 import type { FeedAbstract, VirtualListProps } from '@/components/elements/VirtualLists/VirtualLists.types'
@@ -22,7 +22,7 @@ export const NProfileNotesFeed = function NProfileNotesFeed(props: Props) {
       feed={notes}
       onScrollEnd={() => notes.paginate()}
       onRangeChange={onRangeChange}
-      render={(item) => <FeedItem item={item} />}
+      render={(event) => <NostrEventRoot event={event} />}
       footer={<PostLoading />}
       {...rest}
     />

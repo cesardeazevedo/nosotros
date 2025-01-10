@@ -23,7 +23,7 @@ export const HomeModuleModel = t.snapshotProcessor(
         pubkey,
         feed: {
           scope: 'following' as const,
-          filter: { kinds: [Kind.Text], authors: [pubkey] },
+          filter: { kinds: [Kind.Text, Kind.Repost], authors: [pubkey] },
           range: Duration.fromObject({ minutes: 60 }).as('minutes'),
         },
       }

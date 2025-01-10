@@ -1,5 +1,5 @@
 import { Editor } from '@/components/elements/Editor/Editor'
-import { FeedItem } from '@/components/elements/Feed/FeedItem'
+import { NostrEventRoot } from '@/components/elements/Event/NostrEventRoot'
 import { PostLoading } from '@/components/elements/Posts/PostLoading'
 import { VirtualListWindow } from '@/components/elements/VirtualLists/VirtualListWindow'
 import { Button } from '@/components/ui/Button/Button'
@@ -66,7 +66,7 @@ export const HomeRoute = observer(function HomeRoute() {
             feed={module.feed}
             onRangeChange={onRangeChange}
             onScrollEnd={() => module.feed.paginate()}
-            render={(item) => <FeedItem item={item} />}
+            render={(event) => <NostrEventRoot event={event} />}
             footer={<PostLoading />}
           />
         </PaperContainer>

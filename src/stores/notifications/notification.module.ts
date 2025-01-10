@@ -3,13 +3,13 @@ import type { Instance, SnapshotIn, SnapshotOut } from 'mobx-state-tree'
 import { t } from 'mobx-state-tree'
 import type { BaseModuleSnapshotIn } from '../modules/module'
 import { BaseModuleModel } from '../modules/module'
-import { NotificationFeedSubscription } from './notification.feed'
+import { NotificationFeedModel } from './notification.feed'
 
 export const NotificationModuleModel = t.snapshotProcessor(
   BaseModuleModel.named('NotificationModuleModel').props({
     type: t.optional(t.literal('notification'), 'notification'),
     pubkey: t.string,
-    feed: NotificationFeedSubscription,
+    feed: NotificationFeedModel,
   }),
   {
     preProcessor(snapshot: BaseModuleSnapshotIn & { pubkey: string }) {

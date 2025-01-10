@@ -3,9 +3,7 @@ import type { Instance, SnapshotIn } from 'mobx-state-tree'
 import { t } from 'mobx-state-tree'
 import { EMPTY, finalize, mergeWith, switchMap, tap } from 'rxjs'
 import { toStream } from '../helpers/toStream'
-import type { Note } from '../notes/note'
-import type { Repost } from '../reposts/repost'
-import { createFeedStore } from './feed.store'
+import { FeedStoreModel } from './feed.store'
 
 export const FeedScope = t.enumeration('FeedScope', [
   'self',
@@ -17,9 +15,7 @@ export const FeedScope = t.enumeration('FeedScope', [
   'wot',
 ])
 
-export const NotesFeedModel = createFeedStore<Note | Repost>().named('NotesFeedModel')
-
-export const NotesFeedSubscriptionModel = NotesFeedModel.named('NotesFeedSubscriptionModel')
+export const NotesFeedSubscriptionModel = FeedStoreModel.named('NotesFeedSubscriptionModel')
   .props({
     scope: FeedScope,
     // Feed options
