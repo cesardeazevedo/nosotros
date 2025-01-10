@@ -1,14 +1,14 @@
-import type { UserRelayDB } from '../nips/nip65.relaylist'
+import type { UserRelay } from './parseRelayList'
 
 export type RelaySelectionConfig = {
   timeout?: number
-  permission?: UserRelayDB['permission']
+  permission?: UserRelay['permission']
   blacklist?: Map<string, unknown>
   ignore?: Set<string>
   maxRelaysPerUser?: number
 }
 
-export function selectRelays(data: UserRelayDB[], config?: RelaySelectionConfig) {
+export function selectRelays(data: UserRelay[], config?: RelaySelectionConfig) {
   return data
     .filter((data) => !config?.blacklist?.has(data.relay))
     .filter((data) => !config?.ignore?.has(data.relay))

@@ -20,8 +20,11 @@ test('parseTags()', () => {
     ['i', '2'],
     ['t', 'tag1'],
     ['t', 'tag2'],
+    // d tags
+    ['a', '30023:123'],
   ]
   expect(parseTags(tags)).toStrictEqual({
+    a: [['a', '30023:123']],
     e: [
       ['e', '1', 'wss://relay1.com'],
       ['e', '2', 'wss://relay2.com', 'mention'],
