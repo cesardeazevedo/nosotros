@@ -1,45 +1,31 @@
-import { LinkNEvent } from '@/components/elements/Links/LinkNEvent'
-import { PostActions } from '@/components/elements/Posts/PostActions/PostActions'
-import { PostContent } from '@/components/elements/Posts/PostContent'
-import { UserHeader } from '@/components/elements/User/UserHeader'
 import { Paper } from '@/components/ui/Paper/Paper'
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
+import { modelStore } from '@/stores/base/model.store'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { observer } from 'mobx-react-lite'
+import type { EventPointer } from 'nostr-tools/nip19'
 import { useContext } from 'react'
 import { css, html } from 'react-strict-dom'
-import { noteStore } from '@/stores/notes/notes.store'
+import { NostrEventQuote } from '../../Event/NostrEventQuote'
 import { ContentContext } from '../Content'
 
 type Props = {
-  noteId: string
+  pointer: EventPointer
 }
 
 export const NEvent = observer(function NEvent(props: Props) {
-  const { dense, disableLink } = useContext(ContentContext)
-  const note = noteStore.get(props.noteId)
+  const { dense } = useContext(ContentContext)
+  const { pointer } = props
+  const item = modelStore.get(pointer.id)
   return (
     <html.div style={[styles.root, dense && styles.root$dense]}>
-      {!note && (
-        <Skeleton variant='rectangular' animation='wave' sx={[styles.loading, dense && styles.loading$dense]} />
+      {!item && (
+        <Skeleton variant='rectangular' animation='wave' sx={[styles.skeleton, dense && styles.skeleton$dense]} />
       )}
-      {note && (
+      {item && (
         <Paper outlined sx={styles.content}>
-          <html.div style={styles.header}>
-            <UserHeader dense note={note} disableLink={disableLink} />
-          </html.div>
-          {disableLink && <PostContent initialExpanded note={note} disableLink />}
-          {!disableLink && (
-            <LinkNEvent nevent={note.nevent}>
-              <PostContent initialExpanded note={note} disableLink />
-            </LinkNEvent>
-          )}
-          {!dense && (
-            <html.div style={styles.actions}>
-              <PostActions dense note={note} />
-            </html.div>
-          )}
+          <NostrEventQuote id={pointer.id} />
         </Paper>
       )}
     </html.div>
@@ -56,34 +42,18 @@ const styles = css.create({
     paddingInline: 0,
     maxWidth: 'calc(100vw - 90px)',
   },
-  header: {
-    paddingInline: spacing.padding2,
-    paddingBlock: spacing.padding1,
-  },
   content: {
     position: 'relative',
-    paddingBottom: spacing.padding1,
     background: 'transparent',
   },
-  content$dense: {
-    marginInline: 0,
-  },
-  actions: {
-    marginTop: spacing.margin1,
-    marginLeft: spacing.margin1,
-  },
-  link: {
-    cursor: 'pointer',
-    fontWeight: 'normal',
-  },
-  loading: {
+  skeleton: {
     paddingInline: spacing.padding2,
     width: '100%',
     minWidth: 340,
     height: 80,
     borderRadius: shape.lg,
   },
-  loading$dense: {
+  skeleton$dense: {
     paddingInline: 0,
   },
 })

@@ -1,4 +1,4 @@
-import { FeedItem } from '@/components/elements/Feed/FeedItem'
+import { NostrEventRoot } from '@/components/elements/Event/NostrEventRoot'
 import { PaperContainer } from '@/components/elements/Layouts/PaperContainer'
 import { PostLoading } from '@/components/elements/Posts/PostLoading'
 import { Divider } from '@/components/ui/Divider/Divider'
@@ -15,10 +15,9 @@ type Props = {
   module: NEventModule
 }
 
-export const NEventColumn = observer(function PostColumn(props: Props) {
+export const NEventColumn = observer(function NEventColumn(props: Props) {
   const { module } = props
-
-  const note = module.note
+  const { event } = module
 
   const sub = useObservableNostrContext((context) => module.start(context.client))
   useSubscription(sub)
@@ -31,7 +30,8 @@ export const NEventColumn = observer(function PostColumn(props: Props) {
         </Text>
       </DeckColumnHeader>
       <PaperContainer elevation={0} shape='none' sx={styles.container}>
-        {note ? <FeedItem item={note} /> : <PostLoading rows={1} />}
+        {!event && <PostLoading rows={1} />}
+        {event && <NostrEventRoot event={event} />}
         <Divider />
       </PaperContainer>
     </>

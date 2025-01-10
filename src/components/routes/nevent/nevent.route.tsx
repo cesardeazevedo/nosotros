@@ -1,4 +1,5 @@
-import { FeedItem } from '@/components/elements/Feed/FeedItem'
+import { NostrEventRoot } from '@/components/elements/Event/NostrEventRoot'
+import { PostLoading } from '@/components/elements/Posts/PostLoading'
 import { NostrProvider } from '@/components/providers/NostrProvider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Stack } from '@/components/ui/Stack/Stack'
@@ -9,7 +10,6 @@ import { spacing } from '@/themes/spacing.stylex'
 import { IconChevronLeft } from '@tabler/icons-react'
 import { useLoaderData } from '@tanstack/react-router'
 import { CenteredContainer } from 'components/elements/Layouts/CenteredContainer'
-import { PostLoading } from 'components/elements/Posts/PostLoading'
 import { observer } from 'mobx-react-lite'
 import type { EventPointer } from 'nostr-tools/nip19'
 import { css } from 'react-strict-dom'
@@ -20,10 +20,9 @@ export type Props = EventPointer
 export const NEventRoute = observer(function NEventRoute() {
   const module = useLoaderData({ from: '/$nostr' }) as NEventModule
   const isMobile = useMobile()
+  const { event } = module
 
   const goBack = useGoBack()
-  const note = module.note
-
   return (
     <NostrProvider nostrContext={() => module.context!}>
       <CenteredContainer sx={styles.root}>
@@ -33,7 +32,8 @@ export const NEventRoute = observer(function NEventRoute() {
           </Stack>
         )}
         <PaperContainer elevation={isMobile ? 0 : 2}>
-          {note ? <FeedItem item={note} /> : <PostLoading rows={1} />}
+          {!event && <PostLoading rows={1} />}
+          {event && <NostrEventRoot renderThread event={event} />}
         </PaperContainer>
       </CenteredContainer>
     </NostrProvider>

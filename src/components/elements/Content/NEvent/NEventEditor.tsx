@@ -14,7 +14,7 @@ export const NEventEditor = (props: NodeViewProps) => {
   const attrs = props.node.attrs as NEventAttributes
   const sub = useObservableNostrContext((context) => {
     return merge(
-      context.client.notes.subWithRelated(
+      context.client.notes.subNotesWithRelated(
         { ids: [attrs.id] },
         { relayHints: { fallback: { [attrs.id]: [attrs.author] } } },
       ),
@@ -31,7 +31,7 @@ export const NEventEditor = (props: NodeViewProps) => {
       style={{ position: 'relative', height: 'fit-content', width: 'auto' }}>
       <DeleteButton onClick={() => props.deleteNode()} />
       <html.div style={[styles.wrapper, props.selected && styles.wrapper$selected]}>
-        <NEvent noteId={attrs.id} />
+        <NEvent pointer={attrs} />
       </html.div>
     </NodeViewWrapper>
   )

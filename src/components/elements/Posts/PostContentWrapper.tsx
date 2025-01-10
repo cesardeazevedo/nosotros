@@ -1,43 +1,34 @@
 import { Fab } from '@/components/ui/Fab/Fab'
+import type { Note } from '@/stores/notes/note'
 import { palette } from '@/themes/palette.stylex'
-import { Kind } from 'constants/kinds'
 import { observer } from 'mobx-react-lite'
 import React from 'react'
 import { css, html } from 'react-strict-dom'
 import useMeasure from 'react-use-measure'
-import type { Note } from '@/stores/notes/note'
-import { BubbleContainer } from '../Content/Layout/Bubble'
-import { PostError } from './PostError'
-import { ReplyUserHeader } from './PostReplies/PostReplyContent'
 
-type Props = {
+export type Props = {
   note: Note
+  size?: 'xs' | 'sm' | 'md'
   bubble?: boolean
   initialExpanded?: boolean
   children: React.ReactNode
 }
 
-const MAX_HEIGHT = 700
+const sizes = {
+  xs: 200,
+  sm: 400,
+  md: 700,
+}
 
 export const PostContentWrapper = observer(function PostContentWrapper(props: Props) {
-  const { note, bubble = false, initialExpanded = false } = props
+  const { note, initialExpanded = false, size = 'md' } = props
   const [ref, bounds] = useMeasure({ debounce: 200 })
   const expanded = initialExpanded || note.contentOpen
-  const canExpand = bounds.height >= MAX_HEIGHT && !expanded
-  const event = note?.event
-
-  if (![Kind.Text, Kind.Article, Kind.Photos].includes(event.kind)) {
-    const ErrorContainer = bubble ? BubbleContainer : React.Fragment
-    return (
-      <ErrorContainer>
-        {bubble && <ReplyUserHeader note={note} />}
-        <PostError note={note} />
-      </ErrorContainer>
-    )
-  }
+  const maxHeight = sizes[size]
+  const canExpand = bounds.height >= maxHeight && !expanded
 
   return (
-    <html.div style={[styles.root, expanded && styles.root$expanded]}>
+    <html.div style={[styles.root, styles[size], expanded && styles.root$expanded]}>
       <html.div ref={ref} style={styles.bounds}>
         {props.children}
       </html.div>
@@ -54,8 +45,16 @@ export const PostContentWrapper = observer(function PostContentWrapper(props: Pr
 const styles = css.create({
   root: {
     position: 'relative',
-    maxHeight: MAX_HEIGHT,
     overflow: 'hidden',
+  },
+  xs: {
+    maxHeight: sizes.xs,
+  },
+  sm: {
+    maxHeight: sizes.sm,
+  },
+  md: {
+    maxHeight: sizes.md,
   },
   root$expanded: {
     maxHeight: 'inherit',
