@@ -1,9 +1,9 @@
-import { READ, WRITE } from '@/nostr/nips/nip65.relaylist'
+import { READ, WRITE, type UserMetadata } from '@/nostr/types'
 import { followsStore } from '@/stores/follows/follows.store'
 import { makeAutoObservable } from 'mobx'
+import { computedFn } from 'mobx-utils'
 import type { NostrEvent } from 'nostr-tools'
 import { nip19 } from 'nostr-tools'
-import type { UserMetadataDB } from 'nostr/types'
 import { encodeSafe } from 'utils/nip19'
 import { relaysStore } from '../relays/relays.store'
 import { userRelayStore } from '../userRelays/userRelay.store'
@@ -11,7 +11,7 @@ import { userRelayStore } from '../userRelays/userRelay.store'
 export class User {
   constructor(
     public event: NostrEvent,
-    public metadata: UserMetadataDB,
+    public metadata: UserMetadata,
   ) {
     makeAutoObservable(this, { event: false, metadata: false })
   }
@@ -79,4 +79,8 @@ export class User {
   get following() {
     return followsStore.get(this.pubkey)
   }
+
+  joinedRelay = computedFn((relay: string) => {
+    return !!this.userRelays?.find((x) => x.relay === relay)
+  })
 }

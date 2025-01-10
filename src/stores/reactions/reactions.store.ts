@@ -25,7 +25,8 @@ export function fallbackEmoji(emoji?: string) {
 }
 
 export class ReactionStore {
-  reactions = observable.map<string, ReactionPubkeys>({}, { deep: true })
+  reactions = observable.map<string, NostrEvent>({}, { deep: false })
+  reactionsByEvent = observable.map<string, ReactionPubkeys>({}, { deep: true })
   reactionsByPubkey = observable.map<string, PubkeyReactions>({}, { deep: true })
   reactionsCount = observable.map<string, number>()
 
@@ -34,12 +35,16 @@ export class ReactionStore {
   }
 
   clear() {
-    this.reactions.clear()
+    this.reactionsByEvent.clear()
     this.reactionsByPubkey.clear()
   }
 
+  get(id: string) {
+    return this.reactions.get(id)
+  }
+
   getByNoteId(noteId: string) {
-    return this.reactions.get(noteId)
+    return this.reactionsByEvent.get(noteId)
   }
 
   getByNoteIdAndPubkey(noteId: string, pubkey?: string) {
@@ -65,27 +70,33 @@ export class ReactionStore {
   add(event: NostrEvent) {
     const emoji = fallbackEmoji(event.content) as string
     const tag = event.tags.findLast(isEventTag)
+    const found = this.get(event.id)
+    if (!found) {
+      this.reactions.set(event.id, event)
 
-    if (tag) {
-      const noteId = tag[1]
+      if (tag) {
+        const noteId = tag[1]
 
-      // Append reactions by emoji
-      const reactionsForNote = this.reactions.get(noteId) || {}
-      reactionsForNote[emoji] ??= []
-      if (reactionsForNote[emoji].indexOf(event.pubkey) === -1) {
-        reactionsForNote[emoji].push(event.pubkey)
+        // Append reactions by emoji
+        const reactionsForNote = this.reactionsByEvent.get(noteId) || {}
+        reactionsForNote[emoji] ??= []
+        if (reactionsForNote[emoji].indexOf(event.pubkey) === -1) {
+          reactionsForNote[emoji].push(event.pubkey)
+        }
+
+        // Append reactions by pubkey
+        const pubkeysForNote = this.reactionsByPubkey.get(noteId) || {}
+        pubkeysForNote[event.pubkey] ??= []
+        if (pubkeysForNote[event.pubkey].indexOf(emoji) === -1) {
+          pubkeysForNote[event.pubkey].push(emoji)
+        }
+
+        this.reactionsByPubkey.set(noteId, pubkeysForNote)
+        this.reactionsByEvent.set(noteId, reactionsForNote)
       }
-
-      // Append reactions by pubkey
-      const pubkeysForNote = this.reactionsByPubkey.get(noteId) || {}
-      pubkeysForNote[event.pubkey] ??= []
-      if (pubkeysForNote[event.pubkey].indexOf(emoji) === -1) {
-        pubkeysForNote[event.pubkey].push(emoji)
-      }
-
-      this.reactionsByPubkey.set(noteId, pubkeysForNote)
-      this.reactions.set(noteId, reactionsForNote)
+      return event
     }
+    return found
   }
 
   addCount(id: string, count: number) {

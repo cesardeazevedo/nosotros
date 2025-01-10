@@ -1,7 +1,7 @@
+import type { UserMetadata } from '@/nostr/types'
 import { action, makeObservable, observable } from 'mobx'
 import type { NostrEvent } from 'nostr-tools'
 import { User } from './user'
-import type { UserMetadataDB } from '@/nostr/types'
 
 class UserStore {
   users = observable.map<string, User>({}, { name: 'users', deep: false })
@@ -21,7 +21,7 @@ class UserStore {
     return undefined
   }
 
-  add(event: NostrEvent, metadata: UserMetadataDB) {
+  add(event: NostrEvent, metadata: UserMetadata) {
     const found = this.users.get(event.pubkey)
     if (!found) {
       const user = new User(event, metadata)

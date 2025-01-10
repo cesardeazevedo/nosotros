@@ -1,19 +1,26 @@
-import type { RepostDB } from '@/nostr/types'
+import type { RepostMetadata } from '@/nostr/types'
 import type { NostrEvent } from 'nostr-tools'
-import type { Note } from '../notes/note'
+import { noteStore } from '../notes/notes.store'
 
 export class Repost {
   constructor(
     public event: NostrEvent,
-    public meta: RepostDB,
-    public note: Note,
+    public meta: RepostMetadata,
   ) {}
 
   get id() {
     return this.event.id
   }
 
-  // subscribe(...args: Parameters<Note['subscribe']>) {
-  //   return this.note.subscribe(...args)
-  // }
+  get pubkey() {
+    return this.event.pubkey
+  }
+
+  get ref() {
+    return this.meta.mentionedNotes?.[0]
+  }
+
+  get note() {
+    return noteStore.get(this.ref)!
+  }
 }
