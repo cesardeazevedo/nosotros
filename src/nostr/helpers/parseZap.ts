@@ -8,7 +8,6 @@ const BOLT11_KEYS = ['coin_network', 'amount', 'separator', 'timestamp', 'expiry
 
 export interface ZapReceiptMetadata extends MetadataDB {
   kind: Kind.ZapReceipt
-  // tags: ParsedTags
   zapper: string | undefined
   receiver: string | undefined
   receiverEvent: string | undefined

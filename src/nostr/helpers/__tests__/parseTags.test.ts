@@ -20,29 +20,16 @@ test('parseTags()', () => {
     ['i', '2'],
     ['t', 'tag1'],
     ['t', 'tag2'],
-    // d tags
-    ['a', '30023:123'],
+    ['a', '30023:pubkey:123'],
   ]
   expect(parseTags(tags)).toStrictEqual({
-    a: [['a', '30023:123']],
+    a: [['a', '30023:pubkey:123']],
     e: [
       ['e', '1', 'wss://relay1.com'],
       ['e', '2', 'wss://relay2.com', 'mention'],
       ['e', '3', '', '', '1'],
       ['e', '4', '', '', '2'],
     ],
-    hints: {
-      ids: {
-        '1': ['wss://relay1.com'],
-        '2': ['wss://relay2.com'],
-        '3': ['wss://relay3.com'],
-      },
-      fallback: { '3': ['1'], '4': ['2'] },
-      authors: {
-        '3': ['wss://relay4.com', 'wss://relay5.com'],
-        '4': ['wss://relay6.com'],
-      },
-    },
     q: [['q', '3', 'wss://relay3.com']],
     p: [
       ['p', '3', 'wss://relay4.com'],

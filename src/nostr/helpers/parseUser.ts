@@ -1,7 +1,10 @@
 import { Kind } from '@/constants/kinds'
 import type { MetadataDB } from '@/db/types'
-import { parseUserAbout } from '@/nostr/helpers/parseNoteContent'
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
 import type { NostrEvent } from 'core/types'
+import type { ContentSchema } from 'nostr-editor'
+import { NEventExtension, NostrExtension } from 'nostr-editor'
 import { nip19 } from 'nostr-tools'
 import { encodeSafe } from 'utils/nip19'
 import { z } from 'zod'
@@ -39,6 +42,29 @@ export const schema = z
   .readonly()
 
 export type UserMetadata = MetadataDB & z.infer<typeof schema> & { kind: Kind.Metadata }
+
+const editor = new Editor({
+  extensions: [
+    StarterKit.configure({ history: false }),
+    NostrExtension.configure({
+      image: false,
+      video: false,
+      nevent: false,
+      youtube: false,
+      tweet: false,
+      nsecReject: false,
+    }),
+    NEventExtension.extend({
+      inline: true,
+      group: 'inline',
+    }),
+  ],
+})
+
+export function parseUserAbout(event: NostrEvent): ContentSchema {
+  editor.commands.setEventContentKind0(event)
+  return editor.getJSON() as ContentSchema
+}
 
 export function parseUser(event: NostrEvent): UserMetadata {
   try {

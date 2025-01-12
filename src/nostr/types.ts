@@ -1,17 +1,17 @@
 import type { Kind } from '@/constants/kinds'
 import type { NostrEvent } from 'nostr-tools'
 import type { FollowsMetadata } from './helpers/parseFollowList'
+import type { NoteMetadata } from './helpers/parseNote'
 import type { UserRelayListMetadata } from './helpers/parseRelayList'
 import type { RepostMetadata } from './helpers/parseRepost'
+import type { UserMetadata } from './helpers/parseUser'
 import type { ZapReceiptMetadata } from './helpers/parseZap'
-import type { NoteMetadata } from './nips/nip01/metadata/parseNote'
-import type { UserMetadata } from './nips/nip01/metadata/parseUser'
 
 export type * from './helpers/parseFollowList'
+export type * from './helpers/parseNote'
 export * from './helpers/parseRelayList'
 export type * from './helpers/parseRepost'
-export type * from './nips/nip01/metadata/parseNote'
-export type * from './nips/nip01/metadata/parseUser'
+export type * from './helpers/parseUser'
 
 export const metadataSymbol = Symbol('metadata')
 

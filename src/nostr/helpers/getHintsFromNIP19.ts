@@ -2,7 +2,7 @@ import { dedupe } from '@/core/helpers/dedupe'
 import type { RelayHints } from 'core/types'
 import type { NAddrAttributes, NEventAttributes, NProfileAttributes } from 'nostr-editor'
 
-export function parseHintsFromNIP19(
+export function getHintsFromNIP19(
   nevents: NEventAttributes[],
   nprofiles: NProfileAttributes[],
   naddresses: NAddrAttributes[],

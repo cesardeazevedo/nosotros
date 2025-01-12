@@ -1,4 +1,4 @@
-import { parseNote } from '@/nostr/nips/nip01/metadata/parseNote'
+import { parseNote } from '@/nostr/helpers/parseNote'
 import { fakeNote } from '@/utils/faker'
 import { NoteStore } from '../notes.store'
 
