@@ -1,9 +1,11 @@
+import { Kind } from '@/constants/kinds'
 import { modelStore } from '@/stores/base/model.store'
 import { Note } from '@/stores/notes/note'
 import { Repost } from '@/stores/reposts/repost'
 import { ZapReceipt } from '@/stores/zaps/zap.receipt.store'
 import { observer } from 'mobx-react-lite'
 import type { NostrEvent } from 'nostr-tools'
+import { ArticleRoot } from '../Articles/ArticleRoot'
 import { PostRoot } from '../Posts/Post'
 import { PostThread } from '../Posts/PostThread'
 import { RepostRoot } from '../Repost/Repost'
@@ -24,7 +26,7 @@ export const NostrEventRoot = observer(function NostrEventRoot(props: Props) {
         if (renderThread) {
           return item.metadata.isRoot ? <PostRoot note={item} /> : <PostThread note={item} />
         }
-        return <PostRoot note={item} />
+        return item.event.kind === Kind.Article ? <ArticleRoot note={item} /> : <PostRoot note={item} />
       }
       case item instanceof Repost: {
         return <RepostRoot repost={item} />

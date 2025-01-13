@@ -2,12 +2,13 @@ import { Kind } from '@/constants/kinds'
 import type { NostrEvent } from 'nostr-tools'
 import type { Observable } from 'rxjs'
 import { mergeMap, of } from 'rxjs'
+import { parseArticle } from '../helpers/parseArticle'
 import { parseFollowList } from '../helpers/parseFollowList'
+import { parseNote } from '../helpers/parseNote'
 import { parseRelayList } from '../helpers/parseRelayList'
 import { parseRepost } from '../helpers/parseRepost'
+import { parseUser } from '../helpers/parseUser'
 import { parseZapEvent } from '../helpers/parseZap'
-import { parseNote } from '../nips/nip01/metadata/parseNote'
-import { parseUser } from '../nips/nip01/metadata/parseUser'
 import { mergeMetadata, persistMetadata } from './mapMetadata'
 
 export function parseEventMetadata() {
@@ -18,9 +19,11 @@ export function parseEventMetadata() {
           case Kind.Metadata: {
             return of(event).pipe(persistMetadata(parseUser))
           }
-          case Kind.Text:
-          case Kind.Article: {
+          case Kind.Text: {
             return of(event).pipe(persistMetadata(parseNote))
+          }
+          case Kind.Article: {
+            return of(event).pipe(persistMetadata(parseArticle))
           }
           case Kind.Follows: {
             return of(event).pipe(mergeMetadata(parseFollowList))
