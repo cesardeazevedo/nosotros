@@ -6,6 +6,7 @@ import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { MenuList } from '@/components/ui/MenuList/MenuList'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
+import type { Note } from '@/stores/notes/note'
 import { spacing } from '@/themes/spacing.stylex'
 import {
   IconBookmark,
@@ -21,9 +22,8 @@ import { DialogSheet } from 'components/elements/Layouts/Dialog'
 import { observer } from 'mobx-react-lite'
 import { useCallback, useState } from 'react'
 import { css, html } from 'react-strict-dom'
-import { toast } from 'sonner'
-import type { Note } from 'stores/models/note'
 import { PostStats } from './PostDialogs/PostStats'
+import { toastStore } from '@/stores/ui/toast.store'
 
 type Props = {
   note: Note
@@ -38,11 +38,16 @@ type PropsOptions = {
   onDetailsClick: () => void
 }
 
+type PropsMenuItems = {
+  nevent?: string
+  isMobile?: boolean
+}
+
 function isMobileDevice() {
   return 'ontouchstart' in window
 }
 
-const PostMenuOpenInItems = (props: { nevent: string; isMobile?: boolean }) => {
+const PostMenuOpenInItems = (props: PropsMenuItems) => {
   const { nevent, isMobile = false } = props
   return (
     <>
@@ -102,7 +107,7 @@ const PostMenuOpenInItems = (props: { nevent: string; isMobile?: boolean }) => {
   )
 }
 
-const PostMenuOpenIn = observer(function PostMenuOpenIn(props: { nevent: string }) {
+const PostMenuOpenIn = observer(function PostMenuOpenIn(props: PropsMenuItems) {
   const { nevent } = props
   const isMobile = isMobileDevice()
   const [open, setOpen] = useState(false)
@@ -165,11 +170,7 @@ export const PostOptions = observer(function PostOptions(props: Props) {
           const type = 'text/plain'
           const blob = new Blob([value], { type })
           window.navigator.clipboard.write([new ClipboardItem({ [type]: blob })]).then(() => {
-            toast('Copied', {
-              closeButton: false,
-              position: 'top-right',
-              style: { top: 50, right: 0, width: 'fit-content' },
-            })
+            toastStore.enqueue('Copied', { duration: 4000 })
             handleClose()
           })
         }

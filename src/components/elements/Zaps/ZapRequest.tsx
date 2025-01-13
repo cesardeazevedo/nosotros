@@ -6,6 +6,7 @@ import { Text } from '@/components/ui/Text/Text'
 import { TextField } from '@/components/ui/TextField/TextField'
 import { useCurrentUser, useRootContext } from '@/hooks/useRootStore'
 import { noteStore } from '@/stores/notes/notes.store'
+import { toastStore } from '@/stores/ui/toast.store'
 import type { User } from '@/stores/users/user'
 import { createZapRequestStore } from '@/stores/zaps/zap.request.store'
 import { spacing } from '@/themes/spacing.stylex'
@@ -22,7 +23,6 @@ import { useMemo } from 'react'
 import { css } from 'react-strict-dom'
 import { catchError, filter, first, from, map, mergeMap, of, startWith, tap, throwError } from 'rxjs'
 import { fromFetch } from 'rxjs/fetch'
-import { toast } from 'sonner'
 import { UserAvatar } from '../User/UserAvatar'
 import { UserName } from '../User/UserName'
 import { ZapChipAmount } from './ZapChipAmount'
@@ -107,7 +107,7 @@ export const ZapRequest = observer(function ZapRequest(props: Props) {
           startWith(true),
           catchError((res) => {
             const error = res as Error
-            toast.error(error.message)
+            toastStore.enqueue(error.message, { duration: 5000 })
             return of(false)
           }),
         )

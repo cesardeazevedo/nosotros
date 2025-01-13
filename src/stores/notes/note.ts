@@ -9,8 +9,10 @@ import { computedFn } from 'mobx-utils'
 import type { NostrEvent } from 'nostr-tools'
 import { nip19 } from 'nostr-tools'
 import type { NostrClient } from 'nostr/nostr'
+import { filter, map, take, tap } from 'rxjs'
 import { createEditorStore } from '../editor/editor.store'
 import { repostStore } from '../reposts/reposts.store'
+import { toastStore } from '../ui/toast.store'
 import type { User } from '../users/user'
 
 type ReplyStatus = 'IDLE' | 'LOADING' | 'LOADED'
@@ -100,7 +102,12 @@ export class Note {
   }
 
   get editor() {
-    return createEditorStore({ parentNote: this })
+    return createEditorStore({
+      parentNote: this,
+      onPublish: () => {
+        this.toggleReplying(false)
+      },
+    })
   }
 
   isFollowing(user?: User) {
@@ -210,6 +217,16 @@ export class Note {
   }
 
   react(client: NostrClient, reaction: string) {
-    return client.reactions.publish(this.event, reaction).subscribe()
+    return client.reactions
+      .publish(this.event, reaction)
+      .pipe(
+        map((x) => x[4]),
+        filter((event) => event.kind === 7),
+        take(1),
+        tap((event) => {
+          toastStore.enqueue(`Reaction ${event.content} published`, { duration: 3000 })
+        }),
+      )
+      .subscribe()
   }
 }
