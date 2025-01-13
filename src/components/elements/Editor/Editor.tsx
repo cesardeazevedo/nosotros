@@ -15,26 +15,26 @@ import { observer } from 'mobx-react-lite'
 import { useEffect } from 'react'
 import { css } from 'react-strict-dom'
 import { BubbleContainer } from '../Content/Layout/Bubble'
-import { EditorActions } from './EditorActions'
-import { EditorActionsPopover } from './EditorActionsPopover'
 import { EditorBroadcaster } from './EditorBroadcaster'
 import { EditorHeader } from './EditorHeader'
-import { EditorJson } from './EditorJson'
-import { EditorMode } from './EditorMode'
+import { EditorMentions } from './EditorMentions'
 import { EditorPow } from './EditorPow'
+import { EditorSettings } from './EditorSettings'
+import { EditorSubmit } from './EditorSubmit'
+import { EditorToolbar } from './EditorToolbar'
+import { EditorActionsPopover } from './EditorToolbarPopover'
 
 type Props = {
   dense?: boolean
   store: EditorStore
   initialOpen?: boolean
-  allowLongForm?: boolean
   renderDiscard?: boolean
   renderBubble?: boolean
   sx?: SxProps
 }
 
 export const Editor = observer(function Editor(props: Props) {
-  const { store, initialOpen, dense = false, allowLongForm = false, renderDiscard = true, renderBubble = false } = props
+  const { store, initialOpen, dense = false, renderDiscard = true, renderBubble = false } = props
 
   const context = useRootContext()
 
@@ -75,7 +75,6 @@ export const Editor = observer(function Editor(props: Props) {
                         exit={{ translateY: -6, opacity: 0 }}>
                         <EditorHeader />
                       </motion.div>
-                      {allowLongForm && <EditorMode store={store} />}
                     </>
                   )}
                 </Stack>
@@ -90,28 +89,40 @@ export const Editor = observer(function Editor(props: Props) {
                 )}
               </Stack>
             </Stack>
-            {(!dense || store.open.value) &&
-              (renderBubble ? (
-                <EditorActionsPopover store={store} renderDiscard={renderDiscard} />
-              ) : (
-                <EditorActions dense={dense} store={store} renderDiscard={renderDiscard} />
-              ))}
+            {(!dense || store.open.value) && (
+              <>
+                {renderBubble && (
+                  <EditorActionsPopover store={store}>
+                    <EditorSubmit dense={dense} store={store} renderDiscard={renderDiscard} />
+                  </EditorActionsPopover>
+                )}
+                {!renderBubble && (
+                  <EditorToolbar dense={dense} store={store}>
+                    <EditorSubmit dense={dense} store={store} renderDiscard={renderDiscard} />
+                  </EditorToolbar>
+                )}
+              </>
+            )}
           </Stack>
         </Container>
       </Stack>
       {!renderBubble && (
         <>
-          <Expandable expanded={store.broadcast.value}>
+          <Expandable expanded={store.section === 'broadcast'}>
             <Divider />
             <EditorBroadcaster store={store} />
           </Expandable>
-          <Expandable expanded={store.jsonView.value}>
+          <Expandable expanded={store.section === 'mentions'}>
             <Divider />
-            <EditorJson key='json' editor={store} />
+            <EditorMentions key='mentions' store={store} />
+          </Expandable>
+          <Expandable expanded={store.section === 'settings'}>
+            <Divider />
+            <EditorSettings key='json' store={store} />
           </Expandable>
           {/* eslint-disable-next-line no-constant-binary-expression */}
           {false && (
-            <Expandable expanded={store.pow.value}>
+            <Expandable expanded={store.section === 'pow'}>
               <Divider />
               <EditorPow key='pow' editor={store} />
             </Expandable>
