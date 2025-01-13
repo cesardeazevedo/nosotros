@@ -63,6 +63,7 @@ const variants = css.create({
   standard: {
     [buttonTokens.labelTextColor]: palette.onSurfaceVariant,
     [iconButtonTokens.toggleIconColorSelected]: palette.primary,
+    [iconButtonTokens.toggleContainerColorSelected]: palette.surfaceContainer,
   },
   filled: {
     [buttonTokens.containerColor]: palette.primary,

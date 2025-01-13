@@ -15,7 +15,7 @@ export const PostContent = observer(function PostContent(props: Props) {
   const { note, dense = false, disableLink = false, initialExpanded = false } = props
   return (
     <PostContentWrapper note={note} initialExpanded={initialExpanded}>
-      {!note.metadata.isRoot && <PostReplyingHeader disableLink={disableLink} note={note} />}
+      {note.metadata.isRoot === false && <PostReplyingHeader disableLink={disableLink} note={note} />}
       <Content note={note} dense={dense} disableLink={disableLink} />
     </PostContentWrapper>
   )

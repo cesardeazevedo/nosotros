@@ -2,23 +2,26 @@ import { Text } from '@/components/ui/Text/Text'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 import type { SxProps } from '@/components/ui/types'
 import { useRelativeDate } from '@/hooks/useRelativeDate'
-import type { Note } from '@/stores/notes/note'
 import { palette } from '@/themes/palette.stylex'
+import type { StringUnitLength } from 'luxon'
 import { observer } from 'mobx-react-lite'
+import type { NEvent } from 'nostr-tools/nip19'
 import { css } from 'react-strict-dom'
 import { LinkNEvent } from '../Links/LinkNEvent'
 
 type Props = {
-  note: Note
+  date: number
   disableLink?: boolean
+  nevent?: NEvent
   sx?: SxProps
+  dateStyle?: StringUnitLength
 }
 
 export const PostHeaderDate = observer(function PostHeaderDate(props: Props) {
-  const { note, disableLink, sx } = props
-  const [shortDate, fullDate] = useRelativeDate(note.event.created_at)
+  const { date, nevent, disableLink, sx, dateStyle } = props
+  const [shortDate, fullDate] = useRelativeDate(date, dateStyle)
   return (
-    <LinkNEvent underline nevent={note.nevent} disableLink={disableLink}>
+    <LinkNEvent underline nevent={nevent} disableLink={disableLink}>
       <Tooltip text={fullDate}>
         <Text size='sm' sx={[styles.root, sx]}>
           {shortDate}

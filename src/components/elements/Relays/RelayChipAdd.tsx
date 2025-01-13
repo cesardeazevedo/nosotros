@@ -8,7 +8,7 @@ import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { TextField } from '@/components/ui/TextField/TextField'
 import { spacing } from '@/themes/spacing.stylex'
-import { IconPlus, IconX } from '@tabler/icons-react'
+import { IconBroadcast, IconX } from '@tabler/icons-react'
 import { useCallback, useState } from 'react'
 import { css, html } from 'react-strict-dom'
 import { SearchRelays } from '../Search/SearchRelays'
@@ -79,8 +79,8 @@ export const RelayChipAdd = (props: Props) => {
             {...getProps()}
             onClick={() => setOpen(true)}
             variant='input'
-            label='Add Relay'
-            icon={<IconPlus size={18} />}
+            label='Broadcast'
+            icon={<IconBroadcast strokeWidth='1.5' size={18} />}
           />
         )}
       </PopoverBase>

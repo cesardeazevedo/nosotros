@@ -1,5 +1,6 @@
 import { buttonTokens } from '@/components/ui/Button/Button.stylex'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
+import { palette } from '@/themes/palette.stylex'
 import { IconX } from '@tabler/icons-react'
 import { css } from 'react-strict-dom'
 
@@ -14,18 +15,18 @@ export const DeleteButton = (props: Props) => {
       sx={styles.root}
       variant='filled'
       onClick={() => props.onClick()}
-      icon={<IconX strokeWidth='2.0' size={18} />}
+      icon={<IconX strokeWidth='2.5' size={16} />}
     />
   )
 }
 
 const styles = css.create({
   root: {
-    [buttonTokens.containerColor]: 'black',
-    [buttonTokens.labelTextColor]: 'white',
+    [buttonTokens.containerColor]: palette.surfaceContainer,
+    [buttonTokens.labelTextColor]: palette.onSurface,
     position: 'absolute',
-    right: 8,
-    top: 12,
+    right: 12,
+    top: 22,
     color: 'white',
     zIndex: 1000,
   },

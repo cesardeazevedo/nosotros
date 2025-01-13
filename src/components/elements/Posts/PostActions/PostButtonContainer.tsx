@@ -8,7 +8,6 @@ import { css, html } from 'react-strict-dom'
 
 export interface ContainerProps {
   value?: number | false | React.ReactElement
-  active?: boolean
   dense?: boolean
 }
 
@@ -19,11 +18,11 @@ type Props = {
 }
 
 export const ButtonContainer = (props: Props & ContainerProps) => {
-  const { sx, active, value, children, dense } = props
+  const { sx, value, children } = props
   return (
     <html.div style={[styles.root, sx]}>
       {children}
-      <Text size='md' sx={[styles.label, active && styles.label$active, dense && styles.label$dense]}>
+      <Text size='md' sx={styles.label}>
         {value || ''}
       </Text>
     </html.div>
@@ -45,8 +44,4 @@ const styles = css.create({
     fontWeight: 500,
     fontSize: typeScale.bodySize$lg,
   },
-  label$active: {
-    fontWeight: 600,
-  },
-  label$dense: {},
 })

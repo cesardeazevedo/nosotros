@@ -15,12 +15,13 @@ export const NProfilePhotosFeed = function NProfilePhotosFeed(props: Props) {
     id,
     feeds: { photos },
   } = module
-  useFeedScroll(photos)
+  const onRangeChange = useFeedScroll(photos)
   return (
     <VirtualList
       id={id}
       feed={photos}
       onScrollEnd={() => photos.paginate()}
+      onRangeChange={onRangeChange}
       render={(event) => <NostrEventRoot event={event} />}
       footer={<PostLoading />}
       {...rest}

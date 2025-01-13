@@ -12,7 +12,7 @@ export const PostUserHeader = (props: Props) => {
   return (
     <UserHeader pubkey={note.event.pubkey} {...rest}>
       <PostPow note={note} />
-      <PostHeaderDate note={note} />
+      <PostHeaderDate nevent={note.nevent} date={note.event.created_at} />
     </UserHeader>
   )
 }

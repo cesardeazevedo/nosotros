@@ -2,7 +2,7 @@ import { Paper } from '@/components/ui/Paper/Paper'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { spacing } from '@/themes/spacing.stylex'
-import { IconAlertCircle } from '@tabler/icons-react'
+import { IconAlertCircleFilled } from '@tabler/icons-react'
 import type { NostrEvent } from 'nostr-tools'
 import { css } from 'react-strict-dom'
 
@@ -17,8 +17,8 @@ export const NostrEventUnsupported = (props: Props) => {
     <Stack sx={styles.root}>
       <Paper sx={styles.paper} surface='surfaceContainer'>
         <Stack horizontal={false} gap={1} align='center' justify='center'>
-          <IconAlertCircle size={34} strokeWidth='1.6' />
-          <Text size='lg'>Can't display content of kind {event.kind}</Text>
+          <IconAlertCircleFilled size={28} strokeWidth='1.0' />
+          <Text size='lg'>Can't display content of event (kind:{event.kind})</Text>
           {alt && (
             <Text size='lg' sx={styles.alt}>
               Description: {alt}

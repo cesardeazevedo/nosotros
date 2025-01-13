@@ -3,7 +3,7 @@ import { Switch } from '@/components/ui/Switch/Switch'
 import { useGlobalNostrSettings } from '@/hooks/useRootStore'
 import { observer } from 'mobx-react-lite'
 
-export const SettingsNIP05 = observer(function SettingsOutbox() {
+export const SettingsNIP05 = observer(function SettingsNIP05() {
   const settings = useGlobalNostrSettings()
   return (
     <MenuItem

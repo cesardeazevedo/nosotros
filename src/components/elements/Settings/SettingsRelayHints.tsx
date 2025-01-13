@@ -3,7 +3,7 @@ import { Switch } from '@/components/ui/Switch/Switch'
 import { useGlobalNostrSettings } from '@/hooks/useRootStore'
 import { observer } from 'mobx-react-lite'
 
-export const SettingsRelayHints = observer(function SettingsOutbox() {
+export const SettingsRelayHints = observer(function SettingsRelayHints() {
   const settings = useGlobalNostrSettings()
   return (
     <MenuItem

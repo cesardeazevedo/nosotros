@@ -18,7 +18,7 @@ export const PostReplyingHeader = observer(function PostReplyingHeader(props: Pr
   return (
     <Stack sx={styles.root} gap={1}>
       <IconDotsVertical size={20} {...css.props(styles.icon)} />
-      <LinkNEvent nevent={note.parent?.nevent} disableLink={disableLink}>
+      <LinkNEvent nevent={note.parent?.nevent || note.nevent} disableLink={disableLink}>
         <Button sx={styles.button} variant='filledTonal'>
           Replying to {note.parent?.user?.displayName}
         </Button>

@@ -12,7 +12,7 @@ const iconProps = {
   size: 26,
 }
 
-export const Camera = observer(function CameraDialog() {
+export const Camera = observer(function Camera() {
   const [flash, setFlash] = useState(false)
 
   return (

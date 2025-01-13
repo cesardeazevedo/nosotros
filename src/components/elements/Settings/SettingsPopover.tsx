@@ -92,7 +92,7 @@ export const SettingsPopover = () => {
             </Expandable>
             <Divider />
             <Stack sx={styles.footer}>
-              <Link to='/settings'>
+              <Link to='/settings' onClick={() => handleClose()}>
                 <Button variant='filledTonal'>See full settings</Button>
               </Link>
             </Stack>

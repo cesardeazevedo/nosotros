@@ -12,7 +12,7 @@ type Props = {
   onDelete?: () => void
 }
 
-export const RelayInputChip = observer(function RelayUserChip(props: Props) {
+export const RelayInputChip = observer(function RelayInputChip(props: Props) {
   const { url, eventId, icon, onDelete, renderConnectedIcon } = props
   const formatted = useMemo(() => new URL(url), [url])
   const seens = seenStore.get(eventId)

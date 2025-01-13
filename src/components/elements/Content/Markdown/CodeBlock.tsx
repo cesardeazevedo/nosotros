@@ -2,7 +2,7 @@ import type { SxProps } from '@/components/ui/types'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import { CopyButton } from 'components/elements/Buttons/CopyButton'
+import { CopyIconButton } from '@/components/elements/Buttons/CopyIconButton'
 import type { CodeBlockNode } from 'nostr-editor'
 import React, { useRef } from 'react'
 import { css, html } from 'react-strict-dom'
@@ -21,7 +21,7 @@ export const CodeBlock = (props: Props) => {
         {props.node.content.map((node, index) => (
           <React.Fragment key={node.type + index}>{node.type === 'text' && node.text}</React.Fragment>
         ))}
-        <CopyButton text={refPre.current?.innerText} title='Copy code' sx={styles.copy} />
+        <CopyIconButton text={refPre.current?.innerText} title='Copy code' sx={styles.copy} />
       </html.pre>
     </html.div>
   )

@@ -13,7 +13,7 @@ type Props = {
   dense?: boolean
 }
 
-export const ButtonRelays = observer(function PostRelays(props: Props & ContainerProps) {
+export const ButtonRelays = observer(function ButtonRelays(props: Props & ContainerProps) {
   const { note, dense = false } = props
   const isMobile = useMobile()
 
@@ -29,6 +29,7 @@ export const ButtonRelays = observer(function PostRelays(props: Props & Containe
       text={<div>Seen on {note.seenOn?.map((relay) => <div key={relay}>{relay.replace('wss://', '')}</div>)}</div>}>
       <ButtonContainer value={note.seenOn?.length || 0} dense={dense} aria-label='Seen on relays'>
         <IconButton
+          toggle={note.broadcastOpen}
           size={dense ? 'sm' : 'md'}
           onClick={handleClick}
           icon={

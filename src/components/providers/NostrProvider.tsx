@@ -11,6 +11,7 @@ type Props = {
   children: React.ReactNode
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const NostrClientContext = createContext<NostrContext>(rootStore.rootContext)
 
 export const NostrProvider = observer(function NostrProvider(props: Props) {

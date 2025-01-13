@@ -21,7 +21,7 @@ import { useCallback, useState } from 'react'
 import { css, html } from 'react-strict-dom'
 import { RelayChipAdd } from './RelayChipAdd'
 import { RelayIconButton } from './RelayIconButton'
-import { RelayUserList } from './RelayUserList'
+import { RelayUserChipList } from './RelayUserChipList'
 
 export const RelayPopoverSummary = observer(function RelayPopoverSummary() {
   const [open, setOpen] = useState(false)
@@ -67,7 +67,7 @@ export const RelayPopoverSummary = observer(function RelayPopoverSummary() {
             {user && (
               <Stack gap={1} horizontal={false} sx={styles.content}>
                 <Text>These are the relays you are reading from</Text>
-                <RelayUserList relays={user.outboxRelays} />
+                <RelayUserChipList relays={user.outboxRelays} />
               </Stack>
             )}
           </Expandable>
@@ -87,7 +87,7 @@ export const RelayPopoverSummary = observer(function RelayPopoverSummary() {
             {user && (
               <Stack gap={1} horizontal={false} sx={styles.content}>
                 <Text>These are the relays you are writing notes to</Text>
-                <RelayUserList relays={user.outboxRelays} />
+                <RelayUserChipList relays={user.outboxRelays} />
               </Stack>
             )}
           </Expandable>

@@ -22,7 +22,9 @@ export const RelayChip = observer(function RelayChip(props: Props) {
     formatted && (
       <Chip
         icon={icon || <RelayConnectedIcon url={url} />}
-        label={<Tooltip text={url}>{formatted?.hostname}</Tooltip>}
+        label={
+          formatted?.hostname.length > 24 ? <Tooltip text={url}>{formatted?.hostname}</Tooltip> : formatted.hostname
+        }
       />
     )
   )

@@ -121,7 +121,7 @@ export const ZapRequestInvoice = (props: Props) => {
                 <html.div style={styles.qrcode}>
                   <QRCodeCanvas
                     onClick={() => copyButtonRef.current?.copy()}
-                    size={300}
+                    size={250}
                     value={invoice.toUpperCase()}
                   />
                 </html.div>
@@ -150,6 +150,8 @@ const styles = css.create({
     top: 0,
   },
   qrcode: {
+    margin: 'auto',
+    width: 'fit-content',
     backgroundColor: 'white',
     borderRadius: shape.xl,
     padding: spacing.padding2,
