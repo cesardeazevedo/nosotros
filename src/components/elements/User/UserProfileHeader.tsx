@@ -1,7 +1,9 @@
+import { Divider } from '@/components/ui/Divider/Divider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { useGlobalSettings } from '@/hooks/useRootStore'
 import { userStore } from '@/stores/users/users.store'
+import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { observer } from 'mobx-react-lite'
 import { css, html } from 'react-strict-dom'
@@ -21,14 +23,17 @@ export const UserProfileHeader = observer(function UserProfileHeader(props: Prop
   return (
     <>
       <html.div style={styles.header}>
-        {banner && (
+        {banner && banner.includes('http') ? (
           <img
             key={globalSettings.getImgProxyUrl('user_avatar', banner)}
             style={{ objectFit: 'cover', width: '100%', height: '100%' }}
             src={banner}
           />
+        ) : (
+          <html.div style={styles.bannerFallback} />
         )}
       </html.div>
+      <Divider />
       <Stack horizontal={false} gap={1} sx={styles.content}>
         <UserAvatar sx={styles.avatar} pubkey={pubkey} size='xl' disableLink disabledPopover />
         <Stack horizontal={false}>
@@ -78,5 +83,9 @@ const styles = css.create({
     left: 24,
     top: -50,
     border: '4px solid white',
+  },
+  bannerFallback: {
+    backgroundColor: palette.surfaceContainerLow,
+    height: '100%',
   },
 })

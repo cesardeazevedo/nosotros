@@ -1,8 +1,11 @@
+import { Stack } from '@/components/ui/Stack/Stack'
 import type { SxProps } from '@/components/ui/types'
 import { useGlobalSettings } from '@/hooks/useRootStore'
+import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import { memo, useCallback, useContext, useRef } from 'react'
+import { IconPhotoOff } from '@tabler/icons-react'
+import { memo, useCallback, useContext, useRef, useState } from 'react'
 import { css, html } from 'react-strict-dom'
 import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDOMProps'
 import { dialogStore } from 'stores/ui/dialogs.store'
@@ -19,6 +22,7 @@ type Props = {
 export const Image = memo((props: Props) => {
   const { src, proxy = true, sx } = props
   const { dense: denseContext, disableLink } = useContext(ContentContext)
+  const [error, setError] = useState(false)
   const dense = props.dense ?? denseContext
   const globalSettings = useGlobalSettings()
   const ref = useRef<HTMLImageElement>(null)
@@ -27,20 +31,33 @@ export const Image = memo((props: Props) => {
     (e: StrictClickEvent) => {
       e.preventDefault()
       e.stopPropagation()
-      if (!disableLink) {
+      if (!disableLink && !error) {
         return props.onClick ? props.onClick() : dialogStore.pushImage(src)
       }
     },
-    [src, disableLink],
+    [src, disableLink, error],
   )
+
+  const handleError = useCallback(() => {
+    setError(true)
+  }, [])
+
   return (
     <html.div style={[styles.root, dense && styles.root$dense]} onClick={handleClick}>
-      <html.img
-        ref={ref}
-        src={proxy ? globalSettings.getImgProxyUrl('feed_img', src) : src}
-        loading='lazy'
-        style={[styles.img, dense && styles.img$dense, sx]}
-      />
+      {error && (
+        <Stack sx={styles.fallback} align='center' justify='center'>
+          <IconPhotoOff size={44} strokeWidth='0.8' />
+        </Stack>
+      )}
+      {!error && (
+        <html.img
+          ref={ref}
+          src={proxy ? globalSettings.getImgProxyUrl('feed_img', src) : src}
+          loading='lazy'
+          onError={handleError}
+          style={[styles.img, dense && styles.img$dense, sx]}
+        />
+      )}
     </html.div>
   )
 })
@@ -82,5 +99,12 @@ const styles = css.create({
       default: 360,
       [MOBILE]: '100%',
     },
+  },
+  fallback: {
+    width: 180,
+    height: 200,
+    backgroundColor: palette.surfaceContainer,
+    color: palette.onSurfaceVariant,
+    borderRadius: shape.lg,
   },
 })
