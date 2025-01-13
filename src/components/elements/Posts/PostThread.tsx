@@ -6,7 +6,7 @@ import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconDotsVertical } from '@tabler/icons-react'
 import { useMatch } from '@tanstack/react-router'
-import { observer } from 'mobx-react-lite'
+import { Observer } from 'mobx-react-lite'
 import { useEffect, useRef } from 'react'
 import { css, html } from 'react-strict-dom'
 import { Editor } from '../Editor/Editor'
@@ -26,7 +26,7 @@ type Props = {
   renderEditor?: boolean
 }
 
-export const PostThread = observer(function PostThread(props: Props) {
+export const PostThread = function PostThread(props: Props) {
   const { note, renderEditor = true, renderParents = true, renderReplies = true } = props
   const route = useMatch({ from: '/$nostr', shouldThrow: false })
   const ref = useRef<HTMLDivElement>(null)
@@ -37,90 +37,102 @@ export const PostThread = observer(function PostThread(props: Props) {
       // This needs to be better
       setTimeout(() => {
         ref.current?.scrollIntoView({ behavior: 'instant', block: 'start' })
-      }, 500)
+      }, 100)
     }
   }, [isCurrentNote, note.id])
 
   if (!note.metadata.isRoot) {
     // replies parents
     return (
-      <>
-        {renderParents && (
+      <Observer>
+        {() => (
           <>
-            {note.parent ? (
-              <PostThread note={note.parent} />
-            ) : (
-              <Stack sx={styles.fullthread} gap={2}>
-                <IconDotsVertical />
-                <LinkNEvent nevent={note.nevent}>
-                  <Button variant='filledTonal'>See full thread</Button>
-                </LinkNEvent>
+            {renderParents && (
+              <>
+                {note.parent ? (
+                  <PostThread renderEditor={renderEditor} note={note.parent} />
+                ) : (
+                  // Some events are missing in the middle
+                  <>
+                    {note.root && <PostThread note={note.root} />}
+                    <Stack sx={styles.fullthread} gap={2}>
+                      <IconDotsVertical />
+                      <LinkNEvent nevent={note.root?.nevent || note.nevent}>
+                        <Button variant='filledTonal'>See full thread</Button>
+                      </LinkNEvent>
+                    </Stack>
+                  </>
+                )}
+              </>
+            )}
+            <html.div style={styles.reply} ref={ref}>
+              {isCurrentNote && <html.div style={styles.current}></html.div>}
+              <Stack align='flex-start' gap={1} sx={styles.content}>
+                <html.div style={styles.thread} />
+                <UserAvatar pubkey={note.event.pubkey} />
+                <Stack gap={1}>
+                  <Stack horizontal={false}>
+                    <PostReplyContent note={note} />
+                    <html.div style={styles.root$actions}>
+                      <PostActions dense renderOptions note={note} onReplyClick={() => note.toggleReplies()} />
+                    </html.div>
+                  </Stack>
+                </Stack>
               </Stack>
+            </html.div>
+            {renderEditor && isCurrentNote && note.repliesOpen && (
+              <Stack sx={styles.divider}>
+                <IconDotsVertical />
+                <WaveDivider />
+              </Stack>
+            )}
+            {renderEditor && (
+              <html.div style={styles.editor}>
+                <Expandable expanded={note.repliesOpen || false} trigger={() => <></>}>
+                  <Editor renderBubble initialOpen store={note.editor} />
+                </Expandable>
+              </html.div>
+            )}
+            {renderReplies && isCurrentNote && note.repliesOpen && (
+              <PostReplies note={note} onLoadMoreClick={() => note.toggleReplies()} />
             )}
           </>
         )}
-        <html.div style={styles.reply} ref={ref}>
-          {isCurrentNote && <html.div style={styles.current}></html.div>}
-          <Stack align='flex-start' gap={1} sx={styles.content}>
-            <html.div style={styles.thread} />
-            <UserAvatar pubkey={note.event.pubkey} />
-            <Stack gap={1}>
-              <Stack horizontal={false}>
-                <PostReplyContent note={note} />
-                <html.div style={styles.root$actions}>
-                  <PostActions dense renderOptions note={note} onReplyClick={() => note.toggleReplies()} />
-                </html.div>
-              </Stack>
-            </Stack>
-          </Stack>
-        </html.div>
-        {renderEditor && isCurrentNote && note.repliesOpen && (
-          <Stack sx={styles.divider}>
-            <IconDotsVertical />
-            <WaveDivider />
-          </Stack>
-        )}
-        {renderEditor && (
-          <html.div style={styles.editor}>
-            <Expandable expanded={note.repliesOpen || false} trigger={() => <></>}>
-              <Editor renderBubble initialOpen store={note.editor} />
-            </Expandable>
-          </html.div>
-        )}
-        {renderReplies && isCurrentNote && note.repliesOpen && (
-          <PostReplies note={note} onLoadMoreClick={() => note.toggleReplies()} />
-        )}
-      </>
+      </Observer>
     )
   }
 
   // root post
   return (
-    <Stack gap={2} align='flex-start' sx={styles.root}>
-      <html.div style={styles.thread} />
-      <Stack horizontal={false} grow>
-        <PostHeader note={note} renderOptions={false} />
-        <Stack horizontal={false} sx={styles.rootWrapper}>
-          <PostContent dense note={note} />
-          <PostActions
-            dense
-            note={note}
-            renderOptions
-            onReplyClick={() => note.toggleReplies()}
-            sx={styles.root$actions}
-          />
+    <Observer>
+      {() => (
+        <Stack gap={2} align='flex-start' sx={styles.root}>
+          <html.div style={styles.thread} />
+          <Stack horizontal={false} grow>
+            <PostHeader note={note} renderOptions={false} />
+            <Stack horizontal={false} sx={styles.rootWrapper}>
+              <PostContent dense note={note} />
+              <PostActions
+                dense
+                note={note}
+                renderOptions
+                onReplyClick={() => note.toggleReplies()}
+                sx={styles.root$actions}
+              />
+            </Stack>
+            {renderEditor && (
+              <html.div style={styles.editor}>
+                <Expandable expanded={note.repliesOpen || false} trigger={() => <></>}>
+                  <Editor renderBubble initialOpen store={note.editor} />
+                </Expandable>
+              </html.div>
+            )}
+          </Stack>
         </Stack>
-        {renderEditor && (
-          <html.div style={styles.editor}>
-            <Expandable expanded={note.repliesOpen || false} trigger={() => <></>}>
-              <Editor renderBubble initialOpen store={note.editor} />
-            </Expandable>
-          </html.div>
-        )}
-      </Stack>
-    </Stack>
+      )}
+    </Observer>
   )
-})
+}
 
 const styles = css.create({
   root: {
@@ -180,12 +192,13 @@ const styles = css.create({
   },
   fullthread: {
     color: palette.outline,
-    paddingTop: spacing.padding2,
+    paddingTop: spacing.padding1,
     paddingBottom: spacing.padding1,
     paddingInline: spacing.padding3,
   },
   editor: {
     position: 'relative',
+    paddingLeft: spacing.padding1,
     paddingRight: spacing.padding4,
   },
 })
