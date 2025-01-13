@@ -201,7 +201,7 @@ export class Note {
   }
 
   toggleReplies(open?: boolean | null) {
-    this.repliesOpen = open !== null ? !this.repliesOpen : open
+    this.repliesOpen = open ?? !this.repliesOpen
   }
 
   toggleBroadcast(open?: boolean) {

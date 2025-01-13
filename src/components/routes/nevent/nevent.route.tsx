@@ -5,6 +5,8 @@ import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { useMobile } from '@/hooks/useMobile'
 import { useGoBack } from '@/hooks/useNavigations'
+import { modelStore } from '@/stores/base/model.store'
+import { useNoteOpen } from '@/stores/nevent/nevent.hooks'
 import type { NEventModule } from '@/stores/nevent/nevent.module'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconChevronLeft } from '@tabler/icons-react'
@@ -20,8 +22,8 @@ export type Props = EventPointer
 export const NEventRoute = observer(function NEventRoute() {
   const module = useLoaderData({ from: '/$nostr' }) as NEventModule
   const isMobile = useMobile()
-  const { event } = module
-
+  const event = modelStore.getEvent(module.options.id)
+  useNoteOpen(module.options.id)
   const goBack = useGoBack()
   return (
     <NostrProvider nostrContext={() => module.context!}>

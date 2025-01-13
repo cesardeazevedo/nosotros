@@ -3,7 +3,9 @@ import { PaperContainer } from '@/components/elements/Layouts/PaperContainer'
 import { PostLoading } from '@/components/elements/Posts/PostLoading'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { Text } from '@/components/ui/Text/Text'
+import { modelStore } from '@/stores/base/model.store'
 import { useObservableNostrContext } from '@/stores/context/nostr.context.hooks'
+import { useNoteOpen } from '@/stores/nevent/nevent.hooks'
 import type { NEventModule } from '@/stores/nevent/nevent.module'
 import { spacing } from '@/themes/spacing.stylex'
 import { DeckColumnHeader } from 'components/elements/Deck/DeckColumnHeader'
@@ -17,7 +19,9 @@ type Props = {
 
 export const NEventColumn = observer(function NEventColumn(props: Props) {
   const { module } = props
-  const { event } = module
+
+  const event = modelStore.getEvent(module.options.id)
+  useNoteOpen(module.options.id)
 
   const sub = useObservableNostrContext((context) => module.start(context.client))
   useSubscription(sub)
