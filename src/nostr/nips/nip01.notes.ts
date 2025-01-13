@@ -1,3 +1,4 @@
+import { mergeRelayHints } from '@/core/mergers/mergeRelayHints'
 import { ofKind } from '@/core/operators/ofKind'
 import { subscribeIdsFromQuotes } from '@/nostr/operators/subscribeIdsFromQuotes'
 import { metadataSymbol, type NostrEventNote } from '@/nostr/types'
@@ -80,12 +81,12 @@ export class NIP01Notes {
               }
               const metadata = event[metadataSymbol]
               const ids = metadata.mentionedNotes || []
-              const relayHints = metadata.relayHints
 
               if (ids.length) {
                 return from(ids).pipe(
                   mergeMap((id) => {
-                    return subscribeIdsFromQuotes(this.client, id, { relayHints }).pipe(
+                    const relayHints = mergeRelayHints([metadata.relayHints, { fallback: { [id]: [event.pubkey] } }])
+                    return subscribeIdsFromQuotes(id, this.client, { relayHints }).pipe(
                       ofKind<NostrEventNote>([Kind.Text]),
                     )
                   }),
@@ -134,7 +135,7 @@ export class NIP01Notes {
   }
 
   subscribe(filters: NostrFilter, options?: ClientSubOptions) {
-    return this.client.subscribe(filters, options).pipe(ofKind<NostrEventNote>(filters.kinds || []))
+    return this.client.subscribe({ ...filters, kinds: [Kind.Text] }, options).pipe(ofKind<NostrEventNote>([Kind.Text]))
   }
 
   subReplies(id: string, options?: ClientSubOptions) {
