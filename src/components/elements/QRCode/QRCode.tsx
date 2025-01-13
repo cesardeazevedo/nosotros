@@ -4,6 +4,7 @@ import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { useCurrentUser } from '@/hooks/useRootStore'
+import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconCameraFilled, IconX } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
@@ -17,22 +18,26 @@ import { UserAvatar } from '../User/UserAvatar'
 import { UserName } from '../User/UserName'
 import { UserNIP05 } from '../User/UserNIP05'
 
-export const QRCode = observer(function QRCodeDialog() {
+export const QRCode = observer(function QRCode() {
   const user = useCurrentUser()
   const npub = useMemo(() => encodeSafe(() => nip19.npubEncode(user?.pubkey || '')), [user])
   return (
     <html.div style={styles.root}>
       <IconButton sx={styles.close} onClick={dialogStore.closeQRCode} icon={<IconX />} />
       <Stack horizontal={false} gap={2} sx={styles.content}>
-        <Stack horizontal={false} gap={2} align='center' justify='center'>
-          <UserAvatar pubkey={user?.pubkey} size='lg' />
-          <Stack horizontal={false} align='center'>
-            <UserName variant='title' size='lg' pubkey={user?.pubkey}></UserName>
-            <UserNIP05 pubkey={user?.pubkey} />
+        {user && (
+          <Stack horizontal={false} gap={2} align='center' justify='center'>
+            <UserAvatar disableLink disabledPopover pubkey={user.pubkey} size='xl' sx={styles.avatar} />
+            <Stack horizontal={false} align='center'>
+              <UserName disableLink disablePopover variant='title' size='lg' pubkey={user?.pubkey}></UserName>
+              <UserNIP05 pubkey={user?.pubkey} />
+            </Stack>
           </Stack>
-        </Stack>
+        )}
         {npub ? (
-          <QRCodeCanvas value={npub} size={240} />
+          <html.div style={styles.qrcode}>
+            <QRCodeCanvas value={npub} size={200} />
+          </html.div>
         ) : (
           <Skeleton variant='rectangular' animation='wave' sx={styles.loading} />
         )}
@@ -56,6 +61,14 @@ const styles = css.create({
     position: 'relative',
     paddingBottom: spacing.padding8,
   },
+  qrcode: {
+    backgroundColor: 'white',
+    padding: spacing.padding2,
+    borderRadius: shape.md,
+  },
+  avatar: {
+    boxShadow: `0px 0px 0px 4px white`,
+  },
   button: {},
   close: {
     position: 'absolute',
@@ -77,8 +90,8 @@ const styles = css.create({
     height: 200,
   },
   npub: {
-    maxWidth: '70%',
+    maxWidth: '51%',
     wordBreak: 'break-all',
-    textAlign: 'center',
+    fontFamily: 'monospace',
   },
 })
