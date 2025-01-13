@@ -8,6 +8,7 @@ import { css, html } from 'react-strict-dom'
 import { PostOptions } from '../Posts/PostOptions'
 import { PostUserHeader } from '../Posts/PostUserHeader'
 import { UserHeader } from '../User/UserHeader'
+import { UserHeaderDate } from '../User/UserHeaderDate'
 
 type Props = {
   repost: Repost
@@ -26,8 +27,9 @@ export const RepostHeader = (props: Props) => {
           gap={2}
           sx={styles.top}
           align='flex-start'
-          size='sm'
-        />
+          size='sm'>
+          <UserHeaderDate date={repost.event.created_at} />
+        </UserHeader>
         <PostUserHeader dense note={note} align='center' sx={styles.bottom} userAvatarProps={{ sx: styles.avatar }} />
         <Tooltip placement='bottom' text='Reposted'>
           <html.span style={styles.icon}>
