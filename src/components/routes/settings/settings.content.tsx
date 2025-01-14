@@ -1,3 +1,4 @@
+import { SettingsClientTag } from '@/components/elements/Settings/SettingsClientTag'
 import { SettingsContent } from '@/components/elements/Settings/SettingsContent'
 import { SettingsSubHeader } from '@/components/elements/Settings/SettingsSubHeader'
 import { MenuList } from '@/components/ui/MenuList/MenuList'
@@ -9,6 +10,8 @@ export const SettingsContentRoute = () => {
   return (
     <Stack gap={1} horizontal={false} sx={styles.root}>
       <MenuList sx={styles.menu} elevation={0} surface='surfaceContainerLowest'>
+        <SettingsClientTag />
+        <br />
         <SettingsSubHeader>Content Settings</SettingsSubHeader>
         <SettingsContent />
       </MenuList>
@@ -18,11 +21,11 @@ export const SettingsContentRoute = () => {
 
 const styles = css.create({
   root: {
-    padding: spacing.padding6,
+    padding: spacing.padding2,
     width: '100%',
   },
   menu: {
     width: '100%',
-    maxWidth: 400,
+    //maxWidth: 400,
   },
 })

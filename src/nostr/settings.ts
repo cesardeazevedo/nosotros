@@ -7,7 +7,7 @@ export const defaultNostrSettings = {
   offline: false,
   localDB: true,
   localRelays: [] as string[],
-  maxRelaysPerUserInbox: 4,
-  maxRelaysPerUserOutbox: 4,
+  maxRelaysPerUserInbox: 2,
+  maxRelaysPerUserOutbox: 2,
   clientTag: true,
 }

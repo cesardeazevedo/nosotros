@@ -1,6 +1,8 @@
-import { SettingsMaxRelaysInbox } from '@/components/elements/Settings/SettingsMaxRelaysInbox'
+import { SettingsClientTag } from '@/components/elements/Settings/SettingsClientTag'
 import { SettingsMaxRelaysOutbox } from '@/components/elements/Settings/SettingsMaxRelaysOutbox'
-import { SettingsNetwork } from '@/components/elements/Settings/SettingsNetwork'
+import { SettingsNIP05 } from '@/components/elements/Settings/SettingsNIP05'
+import { SettingsOutbox } from '@/components/elements/Settings/SettingsOutbox'
+import { SettingsRelayHints } from '@/components/elements/Settings/SettingsRelayHints'
 import { SettingsSubHeader } from '@/components/elements/Settings/SettingsSubHeader'
 import { MenuList } from '@/components/ui/MenuList/MenuList'
 import { Stack } from '@/components/ui/Stack/Stack'
@@ -14,13 +16,14 @@ export const SettingsNetworkRoute = () => {
     <Stack horizontal={false} sx={[styles.root, isMobile && styles.root$mobile]}>
       <MenuList sx={styles.menu} elevation={0} surface='surfaceContainerLowest'>
         <SettingsSubHeader>Network Settings</SettingsSubHeader>
-        <SettingsNetwork />
+        <SettingsOutbox />
+        <SettingsRelayHints />
+        <SettingsNIP05 />
+        <SettingsClientTag />
         <br />
         <SettingsSubHeader>Relay Settings</SettingsSubHeader>
         <SettingsMaxRelaysOutbox />
-        <SettingsMaxRelaysInbox />
         <br />
-        <SettingsSubHeader>Local Relays</SettingsSubHeader>
       </MenuList>
     </Stack>
   )
@@ -28,7 +31,7 @@ export const SettingsNetworkRoute = () => {
 
 const styles = css.create({
   root: {
-    padding: spacing.padding6,
+    padding: spacing.padding2,
     width: '100%',
   },
   root$mobile: {
