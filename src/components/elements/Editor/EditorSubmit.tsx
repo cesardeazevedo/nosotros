@@ -17,7 +17,7 @@ export const EditorSubmit = (props: Props) => {
   const handleDiscard = useCallback((event: StrictClickEvent) => {
     event.stopPropagation()
     event.preventDefault()
-    store.onDiscard()
+    store.reset()
   }, [])
 
   return (

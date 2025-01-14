@@ -16,22 +16,18 @@ export const NProfileFeedTabs = () => {
   return (
     <Stack justify='space-evenly' sx={styles.root}>
       <Tabs anchor={current.routeId}>
-        <Link to={'/$nostr'} params={{ nostr: params.nostr }}>
+        <Link to='/$nostr' params={{ nostr: params.nostr }}>
           <Tab sx={styles.tab} anchor='/$nostr/' label='Notes' />
         </Link>
-
-        <Link to={'/$nostr/replies'} params={{ nostr: params.nostr }}>
+        <Link to='/$nostr/replies' params={{ nostr: params.nostr }}>
           <Tab sx={styles.tab} anchor='/$nostr/replies' label='Replies' />
         </Link>
-
-        <Link to={'/$nostr/photos'} params={{ nostr: params.nostr }}>
-          <Tab sx={styles.tab} anchor='/$nostr/photos' label='Photos' />
+        <Link to='/$nostr/media' params={{ nostr: params.nostr }}>
+          <Tab sx={styles.tab} anchor='/$nostr/media' label='Photos' />
         </Link>
-
-        <Link to={'/$nostr/articles'} params={{ nostr: params.nostr }}>
+        <Link to='/$nostr/articles' params={{ nostr: params.nostr }}>
           <Tab sx={styles.tab} anchor='/$nostr/articles' label='Articles' />
         </Link>
-
         {/* <Tab sx={styles.tab} anchor='/$nostr/bookmarks' label='Bookmarks' /> */}
         <Tab sx={styles.tab} anchor='/$nostr/reactions' label='Reactions' />
         <Tab sx={styles.tab} anchor='/$nostr/zaps' label='Zaps' />

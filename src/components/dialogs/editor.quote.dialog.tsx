@@ -21,14 +21,22 @@ export const EditorQuoteDialog = observer(function EditorQuoteDialog() {
     goBack()
   }, [goBack])
 
-  const store = useMemo(() => createEditorStore({}), [quoting])
+  const store = useMemo(
+    () =>
+      createEditorStore({
+        onPublish: () => {
+          handleClose()
+        },
+      }),
+    [quoting],
+  )
 
   useEffect(() => {
     if (quoting && store.editor) {
       store.editor
         .chain()
         .insertContent({ type: 'text', text: ' ' })
-        .insertNEvent({ nevent: quoting })
+        .insertNEvent({ nevent: 'nostr:' + quoting })
         .focus('start')
         .run()
     }
@@ -61,8 +69,6 @@ const styles = css.create({
   root: {
     position: 'relative',
     overflowY: 'scroll',
-    paddingTop: spacing.padding2,
-    paddingLeft: spacing.padding2,
     maxHeight: '60vh',
   },
 })

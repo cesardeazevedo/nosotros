@@ -4,7 +4,7 @@ import { useMatch } from '@tanstack/react-router'
 import { DialogSheet } from 'components/elements/Layouts/Dialog'
 import { useGoBack } from 'hooks/useNavigations'
 import { observer } from 'mobx-react-lite'
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { RemoveScroll } from 'react-remove-scroll'
 import { css, html } from 'react-strict-dom'
 import { Editor } from '../elements/Editor/Editor'
@@ -21,7 +21,7 @@ export const EditorDialog = observer(function EditorDialog() {
     goBack()
   }, [goBack])
 
-  const store = useMemo(() => createEditorStore({}), [])
+  const [store] = useState(createEditorStore({ onPublish: () => handleClose() }))
 
   useEffect(() => {
     if (store.editor) {

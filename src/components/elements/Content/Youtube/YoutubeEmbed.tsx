@@ -27,7 +27,7 @@ export const YoutubeEmbed = (props: Props) => {
     <html.div style={[styles.root, dense && styles.root$dense]}>
       {embedId && (
         <html.div style={styles.content}>
-          {!open && <Image proxy={false} src={posterUrl} onClick={() => setOpen(true)} sx={styles.image} />}
+          {!open && <Image dense proxy={false} src={posterUrl} onClick={() => setOpen(true)} sx={styles.image} />}
           {open && (
             <html.div style={styles.iframe}>
               <iframe src={iframeSrc} width={400} height={280} />

@@ -13,7 +13,7 @@ export const PostFab = React.memo(function PostFab() {
   return (
     // @ts-ignore
     <Link from={router.fullPath} search={{ compose: true }}>
-      <Fab variant='primary' label='Post' sx={[styles.root, isMobile && styles.root$mobile]}>
+      <Fab variant='primary' label='Create note' sx={[styles.root, isMobile && styles.root$mobile]}>
         <IconPencil />
       </Fab>
     </Link>

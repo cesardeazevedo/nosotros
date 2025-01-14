@@ -22,7 +22,7 @@ export const ErrorBoundary = () => {
     <CenteredContainer>
       <PaperContainer sx={styles.root} elevation={2}>
         <Text variant='headline' size='lg' sx={styles.title}>
-          ERROR
+          Error
         </Text>
         <Text variant='body' size='lg'>
           {`An error occurred during the content render. To fix this, try clearing the browser's cache and local IndexedDB

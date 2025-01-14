@@ -1,7 +1,6 @@
 import { Paper } from '@/components/ui/Paper/Paper'
 import { PopoverBase } from '@/components/ui/Popover/PopoverBase'
 import { useMobile } from '@/hooks/useMobile'
-import { useGlobalSettings } from '@/hooks/useRootStore'
 import { toastStore } from '@/stores/ui/toast.store'
 import { spacing } from '@/themes/spacing.stylex'
 import { observer } from 'mobx-react-lite'
@@ -11,7 +10,6 @@ import { css, html } from 'react-strict-dom'
 export const Toaster = observer(function Toaster() {
   const toast = toastStore.peek
   const isMobile = useMobile()
-  const { theme } = useGlobalSettings()
 
   useEffect(() => {
     if (toast && toast.duration) {
@@ -30,7 +28,7 @@ export const Toaster = observer(function Toaster() {
           <Paper
             elevation={2}
             sx={typeof toast?.component === 'string' && styles.paper}
-            surface={theme === 'dark' ? 'surfaceContainer' : 'surfaceContainerLow'}>
+            surface={'surfaceContainerLow'}>
             {toast?.component}
           </Paper>
         }>

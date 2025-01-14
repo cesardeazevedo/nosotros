@@ -34,7 +34,7 @@ type Props = {
 }
 
 export const Editor = observer(function Editor(props: Props) {
-  const { store, initialOpen, dense = false, renderDiscard = true, renderBubble = false } = props
+  const { store, initialOpen, dense = false, renderDiscard = true, renderBubble = false, sx } = props
 
   const context = useRootContext()
 
@@ -59,7 +59,7 @@ export const Editor = observer(function Editor(props: Props) {
         justify='space-between'
         gap={renderBubble ? 1 : 2}
         onClick={() => store.setOpen()}
-        sx={[styles.root, dense && styles.root$dense, store.open && styles.root$open]}>
+        sx={[styles.root, dense && styles.root$dense, store.open && styles.root$open, sx]}>
         <UserAvatar disabledPopover disableLink size='md' pubkey={context.user?.pubkey} />
         <Container {...ContainerProps}>
           <Stack horizontal={false} grow>
@@ -89,7 +89,7 @@ export const Editor = observer(function Editor(props: Props) {
                 )}
               </Stack>
             </Stack>
-            {(!dense || store.open.value) && (
+            {store.open.value && (
               <>
                 {renderBubble && (
                   <EditorActionsPopover store={store}>
@@ -136,6 +136,7 @@ export const Editor = observer(function Editor(props: Props) {
 const styles = css.create({
   root: {
     cursor: 'pointer',
+    width: '100%',
     padding: spacing.padding1,
   },
   root$dense: {},
@@ -161,6 +162,8 @@ const styles = css.create({
     width: '100%',
   },
   placeholder: {
+    cursor: 'pointer',
+    userSelect: 'none',
     minHeight: 40,
     opacity: 0.6,
   },
