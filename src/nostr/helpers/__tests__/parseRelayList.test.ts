@@ -1,5 +1,5 @@
 import { fakeNote } from '@/utils/faker'
-import { parseRelayList, READ, WRITE } from '../parseRelayList'
+import { parseRelayListToTags, parseRelayList, READ, WRITE } from '../parseRelayList'
 
 test('parseRelayList()', () => {
   const event = fakeNote({
@@ -34,6 +34,18 @@ test('parseRelayList()', () => {
       { pubkey: '1', relay: 'wss://relay5.com', permission: READ },
       { pubkey: '1', relay: 'wss://relay6.com', permission: WRITE },
       { pubkey: '1', relay: 'wss://relay7.com', permission: WRITE },
+    ],
+  })
+  expect(parseRelayListToTags({ ...event, ...result })).toStrictEqual({
+    ...event,
+    tags: [
+      ['r', 'wss://relay1.com'],
+      ['r', 'wss://relay2.com'],
+      ['r', 'wss://relay3.com'],
+      ['r', 'wss://relay4.com'],
+      ['r', 'wss://relay5.com', 'read'],
+      ['r', 'wss://relay6.com', 'write'],
+      ['r', 'wss://relay7.com', 'write'],
     ],
   })
 })

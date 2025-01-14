@@ -51,3 +51,19 @@ export function parseRelayList(event: NostrEvent): UserRelayListMetadata {
     relayList,
   }
 }
+
+export function parseRelayListToTags(event: NostrEvent & UserRelayListMetadata) {
+  const { relayList, ...rest } = event
+  const tags = relayList.reduce(
+    (acc, userRelay) => {
+      const tag = ['r', userRelay.relay]
+      if (userRelay.permission === (READ | WRITE)) {
+        return [...acc, tag]
+      }
+      return [...acc, [...tag, userRelay.permission === READ ? 'read' : 'write']]
+    },
+    [] as NostrEvent['tags'],
+  )
+
+  return { ...rest, tags }
+}
