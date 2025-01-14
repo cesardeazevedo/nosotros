@@ -58,8 +58,7 @@ export class PaginationSubject extends BehaviorSubject<NostrFilter> {
   reset() {}
 
   increaseRange(range?: number) {
-    // 30 days max range, otherwise too many issues
-    this.range = Math.min(43200, range || this.range * 2)
+    this.range = range || this.range * 2
   }
 
   setFilter(filter: NostrFilter) {
