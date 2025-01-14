@@ -16,8 +16,8 @@ export const WelcomeModuleModel = BaseModuleModel.named('WelcomeModule')
       filter: { kinds: [Kind.Text, Kind.Repost], authors: RECOMMENDED_PUBKEYS },
     }),
   })
-  .volatile((self) => ({
-    editor: createEditorStore({ feed: self.feed }),
+  .volatile(() => ({
+    editor: createEditorStore({}),
   }))
 
 export interface WelcomeModule extends Instance<typeof WelcomeModuleModel> {}

@@ -1,10 +1,10 @@
+import { Kind } from '@/constants/kinds'
 import { Duration } from 'luxon'
 import type { Instance, SnapshotIn, SnapshotOut } from 'mobx-state-tree'
 import { t } from 'mobx-state-tree'
 import { createEditorStore } from '../editor/editor.store'
 import { NotesFeedSubscriptionModel } from '../feeds/feed.notes'
 import { BaseModuleModel } from '../modules/module'
-import { Kind } from '@/constants/kinds'
 
 export const HomeModuleModel = t.snapshotProcessor(
   BaseModuleModel.named('HomeModuleModel')
@@ -14,7 +14,7 @@ export const HomeModuleModel = t.snapshotProcessor(
       feed: NotesFeedSubscriptionModel,
     })
     .volatile((self) => ({
-      editor: createEditorStore({ feed: self.feed }),
+      editor: createEditorStore({ onPublish: self.feed.addPublish }),
     })),
   {
     preProcessor(snapshot: { pubkey: string }) {
