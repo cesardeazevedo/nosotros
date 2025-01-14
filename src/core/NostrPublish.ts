@@ -17,6 +17,7 @@ export class NostrPublisher {
   signer?: Signer
   relays: Observable<string[]>
   relayEvent: Observable<[string, NostrEvent]>
+  signedEvent: Observable<NostrEvent>
 
   constructor(
     public event: UnsignedEvent | undefined,
@@ -26,7 +27,7 @@ export class NostrPublisher {
 
     this.relays = options.relays || of([])
 
-    this.relayEvent = of(event).pipe(
+    this.signedEvent = of(event).pipe(
       filter((x) => !!x),
 
       sign(this.signer),
@@ -34,7 +35,9 @@ export class NostrPublisher {
       verify(),
 
       tap((event) => options?.onSigned?.(event)),
+    )
 
+    this.relayEvent = this.signedEvent.pipe(
       concatWith(from(options.include || [])),
 
       mergeMap((event) => {

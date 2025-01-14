@@ -1,3 +1,4 @@
+import type { PublishResponse } from '@/core/operators/publish'
 import { publish } from '@/core/operators/publish'
 import { verify } from '@/core/operators/verify'
 import type { PublisherOptions } from 'core/NostrPublish'
@@ -8,20 +9,33 @@ import type { Signer } from 'core/signers/signer'
 import type { NostrFilter } from 'core/types'
 import type { EventTemplate, NostrEvent } from 'nostr-tools'
 import type { OperatorFunction } from 'rxjs'
-import { EMPTY, merge, mergeWith, of, pipe, tap, throwError, type Observable } from 'rxjs'
-import { toast } from 'sonner'
+import {
+  connect,
+  EMPTY,
+  ignoreElements,
+  merge,
+  mergeMap,
+  mergeWith,
+  of,
+  pipe,
+  shareReplay,
+  tap,
+  throwError,
+  type Observable,
+} from 'rxjs'
 import { batcher } from './batcher'
 import { setCache } from './cache'
 import { NostrFeeds } from './feeds'
 import { READ, WRITE } from './helpers/parseRelayList'
 import { InboxTracker } from './inbox'
 import { Mailbox, toArrayRelay } from './mailbox'
-import { NIP01Notes } from './nips/nip01/nip01.notes'
-import { NIP01Users } from './nips/nip01/nip01.users'
+import { NIP01Notes } from './nips/nip01.notes'
+import { NIP01Users } from './nips/nip01.users'
 import { NIP02Follows } from './nips/nip02.follows'
 import { NIP05Dns } from './nips/nip05.dns'
 import { NIP11RelayInfo } from './nips/nip11.relayinfo'
 import { NIP18Reposts } from './nips/nip18.reposts'
+import { NIP23Articles } from './nips/nip23.articles'
 import { NIP25Reactions } from './nips/nip25.reactions'
 import { NIP50Search } from './nips/nip50.search'
 import { NIP57Zaps } from './nips/nip57.zaps'
@@ -43,6 +57,7 @@ export type NostrClientOptions = {
   signer?: Signer
   settings?: NostrSettings
   onEvent?: (event: NostrEventMetadata) => void
+  onPublish?: (response: PublishResponse) => void
 }
 
 export type ClientSubOptions = Omit<SubscriptionOptions, 'outbox'> & {
@@ -58,6 +73,7 @@ export class NostrClient {
   dns = new NIP05Dns(this)
   relayInfo = new NIP11RelayInfo()
   reposts = new NIP18Reposts(this)
+  articles = new NIP23Articles(this)
   reactions = new NIP25Reactions(this)
   search = new NIP50Search(this)
   zaps = new NIP57Zaps(this)
@@ -213,14 +229,13 @@ export class NostrClient {
 
       parseEventMetadata(),
 
-      tap((event) => this.options.onEvent?.(event)),
+      tap(this.options.onEvent),
     )
   }
 
   publish(unsignedEvent: Omit<EventTemplate, 'created_at'>, options: PublisherOptions = {}) {
     if (!this.pubkey || !this.signer) {
       const error = 'Not authenticated'
-      toast.error(error)
       return throwError(() => new Error(error))
     }
 
@@ -236,6 +251,23 @@ export class NostrClient {
       inbox: !options.relays ? this.inboxTracker.subscribe.bind(this.inboxTracker) : () => EMPTY,
     })
 
-    return of(pub).pipe(publish(this.pool))
+    return of(pub).pipe(
+      connect((shared$) => {
+        return merge(
+          shared$.pipe(
+            publish(this.pool),
+            tap(this.options.onPublish),
+            // We don't want the actual response from the relays in the main stream
+            ignoreElements(),
+          ),
+          shared$.pipe(
+            mergeMap((x) => x.signedEvent),
+            parseEventMetadata(),
+            tap(this.options.onEvent),
+          ),
+        )
+      }),
+      shareReplay(),
+    )
   }
 }
