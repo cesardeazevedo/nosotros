@@ -3,7 +3,7 @@ import { action, makeObservable, observable } from 'mobx'
 import type { NostrEvent } from 'nostr-tools'
 import { User } from './user'
 
-class UserStore {
+export class UserStore {
   users = observable.map<string, User>({}, { name: 'users', deep: false })
 
   constructor() {
@@ -22,13 +22,9 @@ class UserStore {
   }
 
   add(event: NostrEvent, metadata: UserMetadata) {
-    const found = this.users.get(event.pubkey)
-    if (!found) {
-      const user = new User(event, metadata)
-      this.users.set(user.pubkey, user)
-      return user
-    }
-    return found
+    const user = new User(event, metadata)
+    this.users.set(user.pubkey, user)
+    return user
   }
 }
 

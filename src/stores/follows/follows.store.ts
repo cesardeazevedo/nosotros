@@ -19,15 +19,9 @@ class FollowsStore {
   }
 
   add(event: NostrEvent, metadata: FollowsMetadata) {
-    const found = this.get(event.pubkey)
-    if (!found) {
-      const follows = new Follows(event, metadata)
-      if (!this.follows.has(event.pubkey)) {
-        this.follows.set(event.pubkey, follows)
-      }
-      return follows
-    }
-    return found
+    const follows = new Follows(event, metadata)
+    this.follows.set(event.pubkey, follows)
+    return follows
   }
 }
 
