@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/Button/Button'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { CircularProgress } from '@/components/ui/Progress/CircularProgress'
 import { Stack } from '@/components/ui/Stack/Stack'
@@ -10,6 +11,7 @@ import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconChevronLeft, IconCircleCheck } from '@tabler/icons-react'
+import { Link, useRouter } from '@tanstack/react-router'
 import { AnimatePresence, motion, MotionConfig } from 'framer-motion'
 import { decode } from 'light-bolt11-decoder'
 import { DateTime } from 'luxon'
@@ -40,6 +42,7 @@ export const ZapRequestInvoice = (props: Props) => {
   const context = useRootContext()
   const copyButtonRef = useRef<CopyButtonRef | null>(null)
   const goBack = useGoBack()
+  const router = useRouter()
 
   const bolt11 = useMemo(() => parseBolt11(decode(invoice)), [invoice])
 
@@ -73,22 +76,35 @@ export const ZapRequestInvoice = (props: Props) => {
           <IconButton sx={styles.back} onClick={goBack}>
             <IconChevronLeft />
           </IconButton>
-          <Text variant='headline' size='sm'>
-            {!isExpired ? 'Waiting for payment' : 'Invoice expired'}
-          </Text>
+          {!paid && (
+            <Text variant='headline' size='sm'>
+              {!isExpired ? 'Waiting for payment' : 'Invoice expired'}
+            </Text>
+          )}
           <div />
         </Stack>
         <MotionConfig transition={{ duration: 0.06 }}>
           <AnimatePresence initial mode='wait'>
             {paid && (
               <motion.div animate='visible' exit='hidden' variants={variants} initial='hidden' key='paid'>
-                <Stack horizontal={false} align='center' justify='center'>
+                <Stack horizontal={false} align='center' justify='flex-start' gap={2}>
                   <Text variant='headline' size='sm'>
-                    Zap Paid
+                    Zap Sent
                   </Text>
                   <Stack sx={styles.paid}>
-                    <IconCircleCheck size={140} strokeWidth='0.6' />
+                    <IconCircleCheck size={120} strokeWidth='1' />
                   </Stack>
+                  <Stack>
+                    <Text variant='label' size='lg' sx={styles.amount}>
+                      Amount: {amount} SATS
+                    </Text>
+                  </Stack>
+                  {/* @ts-ignore */}
+                  <Link from={router.fullPath} search={{}}>
+                    <Button fullWidth variant='filledTonal'>
+                      Close
+                    </Button>
+                  </Link>
                 </Stack>
               </motion.div>
             )}
@@ -99,7 +115,7 @@ export const ZapRequestInvoice = (props: Props) => {
                   {!isExpired && <CircularProgress size='lg' />}
                   {amount && (
                     <>
-                      <Text variant='display' size='md'>
+                      <Text variant='display' size='md' sx={styles.amount}>
                         <Stack horizontal={false} align='center'>
                           {formatter.format(parseInt(amount) / 1000)}
                           <Text variant='headline' size='sm'>
@@ -137,8 +153,7 @@ export const ZapRequestInvoice = (props: Props) => {
 
 const styles = css.create({
   root: {
-    padding: spacing.padding4,
-    paddingTop: spacing.padding6,
+    padding: spacing.padding2,
   },
   header: {
     position: 'relative',
@@ -176,5 +191,8 @@ const styles = css.create({
   title: {
     flex: 1,
     textAlign: 'center',
+  },
+  amount: {
+    fontFamily: 'monospace',
   },
 })

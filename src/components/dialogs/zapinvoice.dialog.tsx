@@ -1,6 +1,5 @@
-import { useGoBack } from '@/hooks/useNavigations'
 import { decodeNIP19 } from '@/utils/nip19'
-import { useMatch } from '@tanstack/react-router'
+import { useMatch, useRouter } from '@tanstack/react-router'
 import { useCallback } from 'react'
 import { DialogSheet } from '../elements/Layouts/Dialog'
 import { ZapRequestInvoice } from '../elements/Zaps/ZapRequestInvoice'
@@ -17,11 +16,12 @@ export const ZapRequestInvoiceDialog = () => {
     select: (x) => x.search.nevent,
   })
 
-  const goBack = useGoBack()
+  const router = useRouter()
 
   const handleClose = useCallback(() => {
-    goBack()
-  }, [goBack])
+    // @ts-ignore
+    router.navigate({ from: router.fullPath, search: {} })
+  }, [])
 
   const decoded = decodeNIP19(nevent)
   const data = decoded?.type === 'nevent' ? decoded?.data : undefined

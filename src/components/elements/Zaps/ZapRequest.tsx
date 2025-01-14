@@ -11,7 +11,7 @@ import type { User } from '@/stores/users/user'
 import { createZapRequestStore } from '@/stores/zaps/zap.request.store'
 import { spacing } from '@/themes/spacing.stylex'
 import { bech32, utf8 } from '@scure/base'
-import { IconBolt } from '@tabler/icons-react'
+import { IconBolt, IconAlertCircleFilled } from '@tabler/icons-react'
 import { useNavigate, useRouter } from '@tanstack/react-router'
 import { observer } from 'mobx-react-lite'
 import { nip19 } from 'nostr-tools'
@@ -40,6 +40,7 @@ export const ZapRequest = observer(function ZapRequest(props: Props) {
   const navigate = useNavigate()
   const router = useRouter()
   const note = noteStore.get(id)
+  const zapEnabled = note?.user ? note.user.canReceiveZap : true
 
   const [pending, onSubmit] = useObservableState<boolean, User | undefined>((input$) => {
     return input$.pipe(
@@ -132,7 +133,15 @@ export const ZapRequest = observer(function ZapRequest(props: Props) {
         {/*   </html.div> */}
         {/* )} */}
       </Stack>
-      <Stack grow horizontal={false} sx={styles.content} gap={1} align='center'>
+      {!zapEnabled && (
+        <Stack gap={1} horizontal={false} align='center' sx={styles.content}>
+          <IconAlertCircleFilled size={32} />
+          <Text variant='label' size='lg' sx={styles.disabledMsg}>
+            This user can't receive zaps yet
+          </Text>
+        </Stack>
+      )}
+      <Stack grow horizontal={false} sx={[styles.content, !zapEnabled && styles.disabled]} gap={1} align='center'>
         <Text variant='body' size='sm'>
           Amount in sats
         </Text>
@@ -174,7 +183,7 @@ const styles = css.create({
     paddingTop: spacing.padding6,
   },
   content: {
-    marginTop: spacing.margin2,
+    marginBlock: spacing.margin2,
     textAlign: 'center',
   },
   note: {
@@ -202,5 +211,14 @@ const styles = css.create({
   },
   button: {
     height: 50,
+  },
+  disabled: {
+    opacity: 0.5,
+    pointerEvents: 'none',
+    filter: 'blur(2px)',
+  },
+  disabledMsg: {
+    width: 250,
+    textAlign: 'center',
   },
 })
