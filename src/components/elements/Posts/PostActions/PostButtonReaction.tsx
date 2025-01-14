@@ -1,5 +1,5 @@
 import { IconButton } from '@/components/ui/IconButton/IconButton'
-import { useRootContext } from '@/hooks/useRootStore'
+import { useCurrentPubkey, useRootContext } from '@/hooks/useRootStore'
 import type { Note } from '@/stores/notes/note'
 import { fallbackEmoji, reactionStore } from '@/stores/reactions/reactions.store'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
@@ -30,17 +30,17 @@ const emojiColors: Record<string, string> = {
   '😡': colors.orange7,
 }
 
-export const ButtonReaction = observer(function PostReactions(props: Props) {
+export const ButtonReaction = observer(function ButtonReaction(props: Props) {
   const { note, dense } = props
   const total = reactionStore.getTotal(note.id)
-  const pubkey = useRootContext().pubkey
-  const myReaction = fallbackEmoji(reactionStore.getByNoteIdAndPubkey(note.id, pubkey)?.[0])
+  const pubkey = useCurrentPubkey()
+  const myReactions = reactionStore.getByPubkey(pubkey)
+  const myReaction = fallbackEmoji(myReactions?.[note.id]?.[0])
   const color = myReaction ? emojiColors[myReaction] || colors.red7 : colors.red7
   const context = useRootContext()
   return (
     <>
       <ButtonContainer
-        active={!!myReaction}
         dense={dense}
         value={
           !!total && (

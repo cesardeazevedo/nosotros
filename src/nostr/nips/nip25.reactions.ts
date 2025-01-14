@@ -23,10 +23,6 @@ export class NIP25Reactions {
       },
       {
         include: [event],
-        // Optimistic updates
-        onSigned: (event) => {
-          reactionStore.add(event)
-        },
       },
     )
   }

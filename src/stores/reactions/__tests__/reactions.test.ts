@@ -21,6 +21,7 @@ describe('ReactionStore', () => {
     store.add(reaction)
     store.add(reaction) // test some duplicated
     expect(store.getByNoteId('1')).toEqual({ like: ['1'] })
+    expect(store.getByPubkey('1')).toEqual({ ['1']: ['like'] })
 
     reaction = fakeNote({
       kind: Kind.Reaction,
@@ -124,7 +125,7 @@ describe('ReactionStore', () => {
         content: 'thumbs',
         pubkey: '2',
         tags: [
-          ['e', '1'],
+          ['e', '5'],
           ['p', '1'],
         ],
       },
@@ -164,8 +165,13 @@ describe('ReactionStore', () => {
     reactions.forEach((reaction) => store.add(fakeNote({ kind: Kind.Reaction, ...reaction })))
     expect(store.reactionsByPubkey.get('1')).toStrictEqual({
       1: ['thumbs', 'heart', 'cry'],
-      2: ['thumbs'],
-      3: ['heart'],
+    })
+    expect(store.reactionsByPubkey.get('2')).toStrictEqual({
+      5: ['thumbs'],
+    })
+    expect(store.reactionsByPubkey.get('3')).toStrictEqual({
+      1: ['heart'],
+      2: ['heart'],
     })
   })
 })
