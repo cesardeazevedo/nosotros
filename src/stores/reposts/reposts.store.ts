@@ -7,6 +7,7 @@ import { Repost } from './repost'
 export const repostStore = makeAutoObservable({
   reposts: new Map<string, Repost>(),
   repostsByNote: new Map<string, ObservableSet<string>>(),
+  repostsByPubkey: new Map<string, ObservableSet<string>>(),
 
   clear() {
     this.reposts.clear()
@@ -15,6 +16,10 @@ export const repostStore = makeAutoObservable({
 
   get(id: string) {
     return this.reposts.get(id)
+  },
+
+  getByPubkey(pubkey?: string) {
+    return this.repostsByPubkey.get(pubkey || '')
   },
 
   add(event: NostrEvent, metadata: RepostMetadata) {
@@ -28,6 +33,14 @@ export const repostStore = makeAutoObservable({
       } else {
         this.repostsByNote.set(repost.ref, observable.set([event.id]))
       }
+
+      const pubkeyRepost = this.repostsByPubkey.get(event.pubkey)
+      if (!pubkeyRepost) {
+        this.repostsByPubkey.set(event.pubkey, observable.set([repost.ref]))
+      } else {
+        pubkeyRepost.add(repost.ref)
+      }
+
       return repost
     }
     return found
