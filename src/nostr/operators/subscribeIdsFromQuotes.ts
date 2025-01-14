@@ -1,12 +1,24 @@
 import { Kind } from '@/constants/kinds'
 import { ofKind } from '@/core/operators/ofKind'
+import type { NostrFilter } from '@/core/types'
 import { connect, EMPTY, ignoreElements, merge, mergeMap, of } from 'rxjs'
 import type { ClientSubOptions, NostrClient } from '../nostr'
 import type { NostrEventNote, NostrEventZapReceipt } from '../types'
+import { replay } from './subscribeIds'
+
+export function parseId(id: string): NostrFilter {
+  if (id.includes(':')) {
+    const [kind, pubkey, identifier] = id.split(':')
+    return { kinds: [parseInt(kind)], authors: [pubkey], '#d': [identifier] }
+  } else {
+    return { ids: [id] }
+  }
+}
 
 // Sligly different than subscribeIds but avoids circular references
-export function subscribeIdsFromQuotes(client: NostrClient, id: string, options: ClientSubOptions) {
-  return client.subscribe({ ids: [id] }, options).pipe(
+export const subscribeIdsFromQuotes = replay.wrap((id: string, client: NostrClient, options: ClientSubOptions) => {
+  const filter = parseId(id)
+  return client.subscribe(filter, options).pipe(
     mergeMap((event) => {
       switch (event.kind) {
         case Kind.Text:
@@ -37,4 +49,4 @@ export function subscribeIdsFromQuotes(client: NostrClient, id: string, options:
       }
     }),
   )
-}
+})

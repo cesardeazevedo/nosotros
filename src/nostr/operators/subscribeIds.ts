@@ -2,9 +2,13 @@ import { Kind } from '@/constants/kinds'
 import { ofKind } from '@/core/operators/ofKind'
 import { connect, ignoreElements, merge, mergeMap, of } from 'rxjs'
 import type { ClientSubOptions, NostrClient } from '../nostr'
+import { ShareReplayCache } from '../replay'
+import type { NostrEventMetadata } from '../types'
 import { type NostrEventNote, type NostrEventRepost, type NostrEventZapReceipt } from '../types'
 
-export function subscribeIds(client: NostrClient, id: string, options: ClientSubOptions) {
+export const replay = new ShareReplayCache<NostrEventMetadata>()
+
+export const subscribeIds = replay.wrap((id: string, client: NostrClient, options: ClientSubOptions) => {
   return client.subscribe({ ids: [id] }, options).pipe(
     mergeMap((event) => {
       // Attach related pipelines based on kind
@@ -40,4 +44,4 @@ export function subscribeIds(client: NostrClient, id: string, options: ClientSub
       }
     }),
   )
-}
+})
