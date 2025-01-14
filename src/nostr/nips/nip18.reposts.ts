@@ -1,12 +1,26 @@
 import { Kind } from '@/constants/kinds'
 import { ofKind } from '@/core/operators/ofKind'
 import type { NostrFilter } from '@/core/types'
+import type { NostrEvent } from 'nostr-tools'
 import { EMPTY, filter, ignoreElements, map, merge, mergeMap } from 'rxjs'
 import type { ClientSubOptions, NostrClient } from '../nostr'
 import { metadataSymbol, type NostrEventRepost } from '../types'
 
+const kinds = [Kind.Repost]
+
 export class NIP18Reposts {
   constructor(private client: NostrClient) {}
+
+  publish(event: NostrEvent) {
+    return this.client.publish({
+      kind: Kind.Repost,
+      content: JSON.stringify(event),
+      tags: [
+        ['e', event.id],
+        ['p', event.pubkey],
+      ],
+    })
+  }
 
   withRelatedEvent() {
     return mergeMap((event: NostrEventRepost) => {
@@ -30,7 +44,7 @@ export class NIP18Reposts {
 
   subscribe(filter: NostrFilter, options?: ClientSubOptions) {
     return this.client
-      .subscribe({ ...filter, kinds: [Kind.Repost] }, options)
+      .subscribe({ ...filter, kinds }, { ...options, cacheFilter: { kinds, ...options?.cacheFilter } })
       .pipe(ofKind<NostrEventRepost>([Kind.Repost]))
   }
 
