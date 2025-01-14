@@ -7,7 +7,7 @@ import { EMPTY, mergeMap, of } from 'rxjs'
 import { bufferTime } from './bufferTime'
 import { subscribe } from './subscribe'
 
-export function start(pool: Pool): OperatorFunction<NostrSubscription, [string, NostrEvent]> {
+export function start(pool: Pool, closeOnEose = true): OperatorFunction<NostrSubscription, [string, NostrEvent]> {
   return mergeMap((sub) => {
     return sub.relayFilters.pipe(
       bufferTime(700),
@@ -18,7 +18,7 @@ export function start(pool: Pool): OperatorFunction<NostrSubscription, [string, 
         const relay = pool.get(url)
 
         if (relay && filters.length > 0) {
-          return of(sub).pipe(subscribe(relay, filters))
+          return of(sub).pipe(subscribe(relay, filters, closeOnEose))
         }
         return EMPTY
       }),
