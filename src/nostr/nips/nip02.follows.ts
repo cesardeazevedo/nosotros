@@ -1,7 +1,7 @@
 import { ofKind } from '@/core/operators/ofKind'
 import { Kind } from 'constants/kinds'
 import type { ClientSubOptions, NostrClient } from 'nostr/nostr'
-import { connect, EMPTY, from, ignoreElements, last, merge, mergeMap } from 'rxjs'
+import { connect, EMPTY, from, ignoreElements, last, merge, mergeMap, tap } from 'rxjs'
 import { ShareReplayCache } from '../replay'
 import type { NostrEventFollow } from '../types'
 import { metadataSymbol } from '../types'
@@ -24,9 +24,18 @@ export class NIP02Follows {
             case 'p': {
               // Follows or unfollow the related author
               const authors = metadata.tags.get('p') || new Set()
-              const tags = authors.has(related)
-                ? event.tags.filter((pubkey) => pubkey[1] !== related)
-                : [...event.tags, ['p', related]]
+              const tags = (
+                authors.has(related)
+                  ? event.tags.filter((pubkey) => pubkey[1] !== related)
+                  : [...event.tags, ['p', related]]
+              ).filter((tag) => {
+                // Remove bad stuff from p tags
+                if (tag[0] === 'p') {
+                  return tag[1].length === 64
+                }
+                return true
+              })
+
               return this.client.publish({
                 kind: Kind.Follows,
                 content: event.content,
@@ -52,6 +61,7 @@ export class NIP02Follows {
         return merge(
           shared$,
           shared$.pipe(
+            tap((x) => console.log(x)),
             mergeMap((event) =>
               from(event[metadataSymbol].tags.get('p') || []).pipe(
                 mergeMap((pubkey) => this.client.users.subscribe(pubkey)),
