@@ -22,7 +22,7 @@ export const UserAvatar = observer(function UserAvatar(props: Props) {
   const user = userStore.get(pubkey)
   const avatarProps = user?.meta?.picture
     ? { src: globalSettings.getImgProxyUrl('user_avatar', user.meta.picture) }
-    : { src: '/placeholder.jpg' }
+    : {}
   const avatar = (
     <Avatar {...avatarProps} size={size} sx={[styles.avatar, sx]}>
       {user?.initials || pubkey}
