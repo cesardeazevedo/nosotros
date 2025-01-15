@@ -12,7 +12,6 @@ import { NostrEventUnsupported } from './NostrEventUnsupported'
 
 type Props = {
   id: string
-  dense?: boolean
   addressable?: boolean
 }
 

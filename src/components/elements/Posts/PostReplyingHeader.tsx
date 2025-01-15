@@ -1,3 +1,4 @@
+import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Button } from '@/components/ui/Button/Button'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { Note } from '@/stores/notes/note'
@@ -10,11 +11,11 @@ import { LinkNEvent } from '../Links/LinkNEvent'
 
 type Props = {
   note: Note
-  disableLink?: boolean
 }
 
 export const PostReplyingHeader = observer(function PostReplyingHeader(props: Props) {
-  const { note, disableLink } = props
+  const { note } = props
+  const { disableLink } = useNoteContext()
   return (
     <Stack sx={styles.root} gap={1}>
       <IconDotsVertical size={20} {...css.props(styles.icon)} />
@@ -29,7 +30,6 @@ export const PostReplyingHeader = observer(function PostReplyingHeader(props: Pr
 
 const styles = css.create({
   root: {
-    paddingInline: spacing.padding2,
     paddingBottom: spacing.padding1,
   },
   vertical: {

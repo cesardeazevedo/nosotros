@@ -28,7 +28,7 @@ const NonBubbleNodes = [
   'codeBlock',
 ] as Node['type'][]
 
-export const ReplyUserHeader = observer((props: { note: Note }) => {
+export const ReplyUserHeader = observer(function ReplyUserHeader(props: { note: Note }) {
   const { note } = props
   return (
     <Stack horizontal={false}>
@@ -46,7 +46,6 @@ export const PostReplyContent = observer(function PostReplyContent(props: Props)
   return (
     <PostContentWrapper bubble note={note} size={size}>
       <Content
-        dense
         bubble
         note={note}
         children={(index) => index === 0 && <ReplyUserHeader note={note} />}

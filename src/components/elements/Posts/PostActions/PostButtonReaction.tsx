@@ -1,3 +1,4 @@
+import { useNoteContext } from '@/components/providers/NoteProvider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { useCurrentPubkey, useRootContext } from '@/hooks/useRootStore'
 import type { Note } from '@/stores/notes/note'
@@ -14,7 +15,6 @@ import { iconProps } from './utils'
 
 type Props = {
   note: Note
-  dense?: boolean
 }
 
 // Only known emojis
@@ -31,7 +31,8 @@ const emojiColors: Record<string, string> = {
 }
 
 export const ButtonReaction = observer(function ButtonReaction(props: Props) {
-  const { note, dense } = props
+  const { note } = props
+  const { dense } = useNoteContext()
   const total = reactionStore.getTotal(note.id)
   const pubkey = useCurrentPubkey()
   const myReactions = reactionStore.getByPubkey(pubkey)
@@ -41,7 +42,6 @@ export const ButtonReaction = observer(function ButtonReaction(props: Props) {
   return (
     <>
       <ButtonContainer
-        dense={dense}
         value={
           !!total && (
             <ReactionsTooltip noteId={note.id}>

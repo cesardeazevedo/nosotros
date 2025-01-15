@@ -24,5 +24,6 @@ export const PostLoadMore = observer(function PostLoadMore(props: Props) {
 const styles = css.create({
   root: {
     paddingLeft: spacing.padding1,
+    marginBottom: spacing.margin1,
   },
 })

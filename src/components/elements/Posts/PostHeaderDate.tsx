@@ -4,7 +4,6 @@ import type { SxProps } from '@/components/ui/types'
 import { useRelativeDate } from '@/hooks/useRelativeDate'
 import { palette } from '@/themes/palette.stylex'
 import type { StringUnitLength } from 'luxon'
-import { observer } from 'mobx-react-lite'
 import type { NEvent } from 'nostr-tools/nip19'
 import { css } from 'react-strict-dom'
 import { LinkNEvent } from '../Links/LinkNEvent'
@@ -17,7 +16,7 @@ type Props = {
   dateStyle?: StringUnitLength
 }
 
-export const PostHeaderDate = observer(function PostHeaderDate(props: Props) {
+export const PostHeaderDate = function PostHeaderDate(props: Props) {
   const { date, nevent, disableLink, sx, dateStyle } = props
   const [shortDate, fullDate] = useRelativeDate(date, dateStyle)
   return (
@@ -29,7 +28,7 @@ export const PostHeaderDate = observer(function PostHeaderDate(props: Props) {
       </Tooltip>
     </LinkNEvent>
   )
-})
+}
 
 const styles = css.create({
   root: {

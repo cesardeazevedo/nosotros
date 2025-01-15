@@ -1,8 +1,8 @@
+import { useNoteContext } from '@/components/providers/NoteProvider'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import { useContext, useMemo } from 'react'
+import { useMemo } from 'react'
 import { css } from 'react-strict-dom'
-import { ContentContext } from '../Content'
 
 type Props = {
   src: string
@@ -15,7 +15,7 @@ type Props = {
 
 export const Video = (props: Props) => {
   const { src, controls = true, muted = false, loop = false, autoPlay = false, preload = 'metadata' } = props
-  const { dense } = useContext(ContentContext)
+  const { dense } = useNoteContext()
   const extension = useMemo(() => new URL(src).pathname.split('.').pop(), [src])
 
   return (

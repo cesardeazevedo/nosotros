@@ -7,14 +7,15 @@ import { useCallback } from 'react'
 import type { Note } from '@/stores/notes/note'
 import { ButtonContainer, type ContainerProps } from './PostButtonContainer'
 import { iconProps } from './utils'
+import { useNoteContext } from '@/components/providers/NoteProvider'
 
 type Props = {
   note: Note
-  dense?: boolean
 }
 
 export const ButtonRelays = observer(function ButtonRelays(props: Props & ContainerProps) {
-  const { note, dense = false } = props
+  const { note } = props
+  const { dense } = useNoteContext()
   const isMobile = useMobile()
 
   const handleClick = useCallback(() => {
@@ -27,7 +28,7 @@ export const ButtonRelays = observer(function ButtonRelays(props: Props & Contai
       key={isMobile.toString()}
       enterDelay={0}
       text={<div>Seen on {note.seenOn?.map((relay) => <div key={relay}>{relay.replace('wss://', '')}</div>)}</div>}>
-      <ButtonContainer value={note.seenOn?.length || 0} dense={dense} aria-label='Seen on relays'>
+      <ButtonContainer value={note.seenOn?.length || 0} aria-label='Seen on relays'>
         <IconButton
           toggle={note.broadcastOpen}
           size={dense ? 'sm' : 'md'}

@@ -1,3 +1,4 @@
+import { NoteContext } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { useCurrentUser } from '@/hooks/useRootStore'
@@ -9,7 +10,6 @@ import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconAt, IconBolt, IconHeartFilled, IconMessage, IconShare3 } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
 import { css, html } from 'react-strict-dom'
-import { ContentContext } from '../Content/Content'
 import { LinkNEvent } from '../Links/LinkNEvent'
 import { UserAvatar } from '../User/UserAvatar'
 import { UserHeaderDate } from '../User/UserHeaderDate'
@@ -57,7 +57,7 @@ export const NotificationItem = observer(function NotificationItem(props: Props)
         {type === 'repost' && <IconShare3 fill='currentColor' size={28} strokeWidth='1.5' />}
       </Stack>
       <Stack gap={2} justify='flex-start' align='flex-start' grow>
-        <ContentContext.Provider value={{ disableLink: true, dense: true }}>
+        <NoteContext.Provider value={{ disableLink: true, dense: true }}>
           <UserAvatar disableLink pubkey={pubkey} />
           <LinkNEvent nevent={note?.nevent}>
             <Stack sx={styles.content} wrap grow>
@@ -98,7 +98,7 @@ export const NotificationItem = observer(function NotificationItem(props: Props)
               <UserHeaderDate date={notification.event.created_at} />
             </Stack>
           </LinkNEvent>
-        </ContentContext.Provider>
+        </NoteContext.Provider>
       </Stack>
       <html.div style={styles.trailing}>
         <NotificationMedia id={linkId} />

@@ -3,15 +3,16 @@ import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 import { IconMessageCircle, IconMessageCircle2Filled } from '@tabler/icons-react'
 import { ButtonContainer, type ContainerProps } from './PostButtonContainer'
 import { iconProps } from './utils'
+import { useNoteContext } from '@/components/providers/NoteProvider'
 
 type Props = {
-  dense?: boolean
   selected?: boolean
   onClick?: () => void
 }
 
 export const ButtonReply = (props: Props & ContainerProps) => {
-  const { dense = false, selected = false, onClick, ...rest } = props
+  const { selected = false, onClick, ...rest } = props
+  const { dense } = useNoteContext()
   return (
     <ButtonContainer {...rest}>
       <Tooltip cursor='arrow' text='Replies'>

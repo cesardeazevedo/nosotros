@@ -1,8 +1,7 @@
+import { useNoteContext } from '@/components/providers/NoteProvider'
 import { spacing } from '@/themes/spacing.stylex'
 import type { HeadingNode } from 'nostr-editor'
-import { useContext } from 'react'
 import { css } from 'react-strict-dom'
-import { ContentContext } from '../Content'
 import { TextContent } from '../Text'
 
 type Props = {
@@ -10,7 +9,7 @@ type Props = {
 }
 
 export const Heading = (props: Props) => {
-  const { dense } = useContext(ContentContext)
+  const { dense } = useNoteContext()
   return (
     <TextContent
       node={props.node}

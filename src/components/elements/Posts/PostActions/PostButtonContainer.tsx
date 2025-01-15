@@ -8,13 +8,11 @@ import { css, html } from 'react-strict-dom'
 
 export interface ContainerProps {
   value?: number | false | React.ReactElement
-  dense?: boolean
 }
 
 type Props = {
   sx?: SxProps
   children: React.ReactNode
-  onClick?: (e?: unknown) => void
 }
 
 export const ButtonContainer = (props: Props & ContainerProps) => {

@@ -1,3 +1,4 @@
+import { useNoteContext } from '@/components/providers/NoteProvider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 import { useCurrentPubkey } from '@/hooks/useRootStore'
@@ -12,12 +13,12 @@ import { iconProps } from './utils'
 
 type Props = {
   note: Note
-  dense?: boolean
   onClick?: (e?: unknown) => void
 }
 
 export const ButtonRepost = observer(function ButtonRepost(props: Props) {
-  const { dense = false, note } = props
+  const { note } = props
+  const { dense } = useNoteContext()
   const pubkey = useCurrentPubkey()
   const myReposts = repostStore.getByPubkey(pubkey)
   const reposted = myReposts?.has(note.event.id)

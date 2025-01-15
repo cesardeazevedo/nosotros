@@ -1,3 +1,4 @@
+import { useNoteContext } from '@/components/providers/NoteProvider'
 import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { MenuList } from '@/components/ui/MenuList/MenuList'
 import { PopoverBase } from '@/components/ui/Popover/PopoverBase'
@@ -7,11 +8,12 @@ import type { Note } from '@/stores/notes/note'
 import { toastStore } from '@/stores/ui/toast.store'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconBlockquote, IconShare3 } from '@tabler/icons-react'
-import { Link, useRouter } from '@tanstack/react-router'
+import { useRouter } from '@tanstack/react-router'
 import { useObservableState } from 'observable-hooks'
 import React, { useCallback, useState } from 'react'
 import { css } from 'react-strict-dom'
 import { endWith, map, mergeMap, startWith, tap } from 'rxjs'
+import { LinkBase } from '../Links/LinkBase'
 import { ToastEventPublished } from '../Toasts/ToastEventPublished'
 
 type Props = {
@@ -25,6 +27,7 @@ export const RepostPopover = (props: Props) => {
   const { note, children } = props
   const router = useRouter()
   const context = useRootContext()
+  const { disableLink } = useNoteContext()
   const [open, setOpen] = useState(false)
 
   const [isReposting, submit] = useObservableState<boolean, void>((input$) => {
@@ -67,14 +70,13 @@ export const RepostPopover = (props: Props) => {
             label={isReposting ? `Reposting...` : 'Repost'}
             onClick={() => submit()}
           />
-          {/* @ts-ignore */}
-          <Link
+          <LinkBase
+            disabled={disableLink}
             search={{ quoting: note.nevent }}
             // @ts-ignore
-            from={router.fullPath}
             state={{ from: router.latestLocation.pathname }}>
             <MenuItem leadingIcon={<IconBlockquote strokeWidth='1.5' />} label='Quote' onClick={handleClose} />
-          </Link>
+          </LinkBase>
         </MenuList>
       )}>
       {(props) => children({ ...props, open, handleOpen })}

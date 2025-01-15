@@ -1,10 +1,10 @@
+import { NoteContext } from '@/components/providers/NoteProvider'
 import { type EditorStore } from '@/stores/editor/editor.store'
 import { spacing } from '@/themes/spacing.stylex'
 import { EditorContent as TiptapEditorContent } from '@tiptap/react'
 import { observer } from 'mobx-react-lite'
 import { useEffect, useId, useMemo } from 'react'
 import { css } from 'react-strict-dom'
-import { ContentContext } from '../Content/Content'
 import { createEditor } from './createEditor'
 
 type Props = {
@@ -40,13 +40,13 @@ export const EditorTiptap = observer(function EditorTiptap(props: Props) {
           }
       `}
       </style>
-      <ContentContext.Provider value={{ dense: true, disableLink: true }}>
+      <NoteContext.Provider value={{ dense: true, disableLink: true }}>
         <TiptapEditorContent
           id={id}
           editor={editor}
           {...css.props([styles.root, dense && styles.root$dense, !store.open && styles.root$disabled])}
         />
-      </ContentContext.Provider>
+      </NoteContext.Provider>
     </>
   )
 })

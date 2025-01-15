@@ -1,3 +1,4 @@
+import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { SxProps } from '@/components/ui/types'
 import { useGlobalSettings } from '@/hooks/useRootStore'
@@ -5,11 +6,10 @@ import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconPhotoOff } from '@tabler/icons-react'
-import { memo, useCallback, useContext, useRef, useState } from 'react'
+import { memo, useCallback, useRef, useState } from 'react'
 import { css, html } from 'react-strict-dom'
 import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDOMProps'
 import { dialogStore } from 'stores/ui/dialogs.store'
-import { ContentContext } from '../Content'
 
 type Props = {
   src: string
@@ -21,7 +21,7 @@ type Props = {
 
 export const Image = memo((props: Props) => {
   const { src, proxy = true, sx } = props
-  const { dense: denseContext, disableLink } = useContext(ContentContext)
+  const { dense: denseContext, disableLink } = useNoteContext()
   const [error, setError] = useState(false)
   const dense = props.dense ?? denseContext
   const globalSettings = useGlobalSettings()

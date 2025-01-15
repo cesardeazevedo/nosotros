@@ -10,7 +10,7 @@ type Props = {
   renderOptions?: boolean
 }
 
-export const PostHeader = (props: Props) => {
+export const PostHeader = function PostHeader(props: Props) {
   const { note, renderOptions = true } = props
   return (
     <Stack horizontal justify='space-between' sx={styles.root}>

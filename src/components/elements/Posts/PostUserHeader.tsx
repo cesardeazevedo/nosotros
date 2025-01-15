@@ -7,12 +7,12 @@ type Props = Omit<UserHeaderProps, 'pubkey'> & {
   note: Note
 }
 
-export const PostUserHeader = (props: Props) => {
-  const { note, ...rest } = props
+export const PostUserHeader = function PostUserHeader(props: Props) {
+  const { note, disableLink, ...rest } = props
   return (
-    <UserHeader pubkey={note.event.pubkey} {...rest}>
+    <UserHeader pubkey={note.event.pubkey} {...rest} disableLink={disableLink}>
       <PostPow note={note} />
-      <PostHeaderDate nevent={note.nevent} date={note.event.created_at} />
+      <PostHeaderDate nevent={note.nevent} date={note.event.created_at} disableLink={disableLink} />
     </UserHeader>
   )
 }

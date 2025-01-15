@@ -1,10 +1,10 @@
+import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Button } from '@/components/ui/Button/Button'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconPlayerPlayFilled } from '@tabler/icons-react'
-import { useContext, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { css, html } from 'react-strict-dom'
-import { ContentContext } from '../Content'
 import { Image } from '../Image/Image'
 
 const REGEX_VIDEO_ID = /.*(?:youtu.be\/|v\/|u\/\w\/|shorts|embed\/|watch\?v=)([^#&?]*).*/
@@ -16,7 +16,7 @@ type Props = {
 export const YoutubeEmbed = (props: Props) => {
   const { src } = props
   const [open, setOpen] = useState(false)
-  const { dense } = useContext(ContentContext)
+  const { dense } = useNoteContext()
 
   const embedId = useMemo(() => src.match(REGEX_VIDEO_ID)?.[1].replace('/', ''), [src])
 

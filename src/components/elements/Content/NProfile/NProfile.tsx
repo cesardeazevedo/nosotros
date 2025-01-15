@@ -1,12 +1,11 @@
+import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
 import { userStore } from '@/stores/users/users.store'
 import { palette } from '@/themes/palette.stylex'
 import { LinkProfile } from 'components/elements/Links/LinkProfile'
 import { UserPopover } from 'components/elements/User/UserPopover'
 import { observer } from 'mobx-react-lite'
-import { useContext } from 'react'
 import { css, html } from 'react-strict-dom'
-import { ContentContext } from '../Content'
 
 export type Props = {
   pubkey: string
@@ -15,7 +14,7 @@ export type Props = {
 export const NProfile = observer(function NProfile(props: Props) {
   const { pubkey } = props
   const user = userStore.get(pubkey)
-  const { disableLink } = useContext(ContentContext)
+  const { disableLink } = useNoteContext()
   return (
     <html.span style={styles.root}>
       {!user && <Skeleton sx={styles.loading} animation='wave' variant='rectangular' />}

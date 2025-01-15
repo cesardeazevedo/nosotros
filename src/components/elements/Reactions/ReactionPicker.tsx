@@ -3,7 +3,7 @@ import { elevation } from '@/themes/elevation.stylex'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { motion, useMotionValue, useTransform, type MotionValue } from 'framer-motion'
-import React, { useRef } from 'react'
+import React, { memo, useRef } from 'react'
 import { css } from 'react-strict-dom'
 
 type Props = {
@@ -64,7 +64,7 @@ function ReactionDock({ onClick }: { onClick: Props['onClick'] }) {
   )
 }
 
-export const ReactionPicker = (props: Props) => {
+export const ReactionPicker = memo(function ReactionPicker(props: Props) {
   const { children, onClick } = props
 
   return (
@@ -72,7 +72,7 @@ export const ReactionPicker = (props: Props) => {
       {children}
     </TooltipRich>
   )
-}
+})
 
 const styles = css.create({
   dock: {

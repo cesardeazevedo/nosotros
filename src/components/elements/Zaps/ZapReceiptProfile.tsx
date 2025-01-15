@@ -1,3 +1,4 @@
+import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
@@ -8,9 +9,7 @@ import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconBolt } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
-import { useContext } from 'react'
 import { css, html } from 'react-strict-dom'
-import { ContentContext } from '../Content/Content'
 import { UserHeader } from '../User/UserHeader'
 
 type Props = {
@@ -21,7 +20,7 @@ const formatter = new Intl.NumberFormat()
 
 export const ZapReceiptProfile = observer(function ZapReceiptProfile(props: Props) {
   const { zap } = props
-  const { disableLink } = useContext(ContentContext)
+  const { disableLink } = useNoteContext()
   const [shortDate, fullDate] = useRelativeDate(zap.event.created_at, 'long')
   return (
     <html.div style={styles.root}>

@@ -1,8 +1,8 @@
+import { useNoteContext } from '@/components/providers/NoteProvider'
 import type { Props as TextProps } from '@/components/ui/Text/Text'
 import { Text } from '@/components/ui/Text/Text'
 import type { BlockQuoteNode, HeadingNode, Mark, ParagraphNode, TextNode } from 'nostr-editor'
-import React, { useContext } from 'react'
-import { ContentContext } from './Content'
+import React from 'react'
 import { ContentLink } from './Link/Link'
 import { CodeSpan } from './Markdown/CodeSpan'
 import { NEventInline } from './NEvent/NEventInline'
@@ -15,7 +15,7 @@ type TextMarkProps = {
 
 function TextMark(props: TextMarkProps) {
   const { text, marks = [] } = props.node
-  const { disableLink } = useContext(ContentContext)
+  const { disableLink } = useNoteContext()
   return (
     <>
       {marks.reduce(

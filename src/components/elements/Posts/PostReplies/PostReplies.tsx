@@ -21,7 +21,7 @@ type Props = {
 
 export const PostReplies = observer(function PostReplies(props: Props) {
   const { note, loadingRows, renderEmpty = false } = props
-  useNoteStats(note.root || note)
+  useNoteStats(note.root || note, { replies: true })
 
   const user = useCurrentUser()
   const isMobile = useMobile()
@@ -53,6 +53,6 @@ export const PostReplies = observer(function PostReplies(props: Props) {
 const styles = css.create({
   root: {
     width: '100%',
-    paddingBlock: spacing.padding1,
+    paddingTop: spacing.padding1,
   },
 })

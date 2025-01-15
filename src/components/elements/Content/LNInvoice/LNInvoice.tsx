@@ -1,4 +1,5 @@
 import { CopyIconButton } from '@/components/elements/Buttons/CopyIconButton'
+import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Button } from '@/components/ui/Button/Button'
 import { Dialog } from '@/components/ui/Dialog/Dialog'
 import { DialogContent } from '@/components/ui/DialogContent/DialogContent'
@@ -9,9 +10,8 @@ import { spacing } from '@/themes/spacing.stylex'
 import { IconBolt } from '@tabler/icons-react'
 import type { decode } from 'light-bolt11-decoder'
 import QRCode from 'qrcode.react'
-import { useCallback, useContext, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { css } from 'react-strict-dom'
-import { ContentContext } from '../Content'
 
 type Props = {
   bolt11: ReturnType<typeof decode>
@@ -20,7 +20,7 @@ type Props = {
 
 export const LNInvoice = function LNInvoice(props: Props) {
   const { bolt11, lnbc } = props
-  const { dense } = useContext(ContentContext)
+  const { dense } = useNoteContext()
   const [dialog, setDialog] = useState(false)
 
   const amount = useMemo(() => {

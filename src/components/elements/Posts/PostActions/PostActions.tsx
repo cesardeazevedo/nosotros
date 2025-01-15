@@ -1,3 +1,4 @@
+import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { SxProps } from '@/components/ui/types'
 import { useMobile } from '@/hooks/useMobile'
@@ -13,44 +14,28 @@ import { ButtonZap } from './PostButtonZap'
 
 type Props = {
   note: Note
-  dense?: boolean
   onReplyClick?: () => void
-  renderRelays?: boolean
-  renderRepost?: boolean
-  renderReply?: boolean
-  renderZap?: boolean
   renderOptions?: boolean
   sx?: SxProps
 }
 
 export const PostActions = observer(function PostActions(props: Props) {
-  const {
-    note,
-    renderRepost = true,
-    renderReply = true,
-    renderZap = true,
-    renderRelays = true,
-    renderOptions = false,
-    dense = false,
-    sx,
-  } = props
+  const { note, renderOptions = false, sx } = props
+  const { dense } = useNoteContext()
   const mobile = useMobile()
 
   return (
     <Stack horizontal sx={[styles.root, dense && styles.root$dense, sx]} gap={dense ? 0 : mobile ? 0 : 1}>
-      <ButtonReaction note={note} dense={dense} />
-      {renderRepost && <ButtonRepost dense={dense} note={note} />}
-      {renderReply && (
-        <ButtonReply
-          dense={dense}
-          value={note.repliesTotal}
-          selected={note.repliesOpen || note.isReplying || false}
-          onClick={props.onReplyClick}
-        />
-      )}
-      {renderZap && <ButtonZap dense={dense} note={note} />}
-      {renderRelays && <ButtonRelays dense={dense} note={note} />}
-      {renderOptions && <PostOptions dense={dense} note={note} />}
+      <ButtonReaction note={note} />
+      <ButtonRepost note={note} />
+      <ButtonReply
+        value={note.repliesTotal}
+        selected={note.repliesOpen || note.isReplying || false}
+        onClick={props.onReplyClick}
+      />
+      <ButtonZap note={note} />
+      <ButtonRelays note={note} />
+      {renderOptions && <PostOptions note={note} />}
     </Stack>
   )
 })

@@ -1,3 +1,4 @@
+import { NoteContext } from '@/components/providers/NoteProvider'
 import { Button } from '@/components/ui/Button/Button'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { Stack } from '@/components/ui/Stack/Stack'
@@ -81,21 +82,23 @@ export const PostReply = observer(function PostReply(props: Props) {
       )}
       {open && (
         <>
-          <Stack align='flex-start'>
-            {level !== 1 && <html.div style={styles.anchor} />}
-            <UserAvatar pubkey={event.pubkey} />
-            <Stack gap={1} sx={styles.content}>
-              <PostReplyContent note={note} />
+          <NoteContext.Provider value={{ dense: true }}>
+            <Stack align='flex-start'>
+              {level !== 1 && <html.div style={styles.anchor} />}
+              <UserAvatar pubkey={event.pubkey} />
+              <Stack gap={1} sx={styles.content}>
+                <PostReplyContent note={note} />
+              </Stack>
             </Stack>
-          </Stack>
-          <html.div style={styles.actions}>
-            <Stack>
-              <PostActions dense renderOptions note={note} onReplyClick={() => note.toggleReplying()} />
-            </Stack>
-            <Expandable expanded={note.isReplying} trigger={() => <></>}>
-              {note.isReplying && <Editor dense initialOpen renderBubble renderDiscard={false} store={note.editor} />}
-            </Expandable>
-          </html.div>
+            <html.div style={styles.actions}>
+              <Stack>
+                <PostActions renderOptions note={note} onReplyClick={() => note.toggleReplying()} />
+              </Stack>
+              <Expandable expanded={note.isReplying} trigger={() => <></>}>
+                {note.isReplying && <Editor dense initialOpen renderBubble renderDiscard={false} store={note.editor} />}
+              </Expandable>
+            </html.div>
+          </NoteContext.Provider>
           {nested && (
             <PostRepliesTree
               replies={note.repliesSorted(user)}
