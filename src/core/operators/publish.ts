@@ -4,7 +4,7 @@ import type { MessageReceivedOK } from 'core/types'
 import { ClientToRelay, RelayToClient } from 'core/types'
 import type { NostrEvent } from 'nostr-tools'
 import type { OperatorFunction } from 'rxjs'
-import { EMPTY, filter, map, mergeMap, pipe, take, takeUntil, timer } from 'rxjs'
+import { catchError, EMPTY, filter, map, mergeMap, pipe, take, takeUntil, timer } from 'rxjs'
 
 export type PublishResponse = [url: string, eventId: string, status: boolean, msg: string, event: NostrEvent]
 
@@ -24,6 +24,7 @@ export function publish(pool: Pool): OperatorFunction<NostrPublisher, PublishRes
           take(1),
           map((res) => [url, res[1], res[2], res[3], event] as PublishResponse),
           takeUntil(timer(10000)),
+          catchError(() => EMPTY),
         )
       }
       return EMPTY
