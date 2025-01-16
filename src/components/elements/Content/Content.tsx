@@ -44,7 +44,9 @@ export const Content = observer(function Content(props: Props) {
               {node.type === 'blockquote' && <BlockQuote node={node} />}
               {node.type === 'tweet' && <Tweet src={node.attrs.src} />}
               {node.type === 'youtube' && <YoutubeEmbed src={node.attrs.src} />}
-              {node.type === 'bolt11' && <LNInvoice bolt11={node.attrs.bolt11} lnbc={node.attrs.lnbc} />}
+              {node.type === 'bolt11' && (
+                <LNInvoice nevent={note.nevent} bolt11={node.attrs.bolt11} lnbc={node.attrs.lnbc} />
+              )}
             </>
           </Wrapper>
         )
