@@ -1,11 +1,11 @@
 import { Kind } from '@/constants/kinds'
 import { NostrSubscription } from '@/core/NostrSubscription'
 import { start } from '@/core/operators/start'
-import { User } from '@/stores/users/user'
-import { userStore } from '@/stores/users/users.store'
-import { map, of, toArray } from 'rxjs'
+import { map, of, tap, toArray } from 'rxjs'
 import type { NostrClient } from '../nostr'
-import { parseUser } from './nip01/metadata/parseUser'
+import { parseUser } from '../helpers/parseUser'
+import { mergeMetadata } from '../operators/mapMetadata'
+import { addNostrEventToStore } from '@/stores/helpers/addNostrEventToStore'
 
 export class NIP50Search {
   constructor(private client: NostrClient) {}
@@ -23,11 +23,8 @@ export class NIP50Search {
       start(this.client.pool),
       map(([, event]) => event),
 
-      map((event) => {
-        const user = new User(event, parseUser(event))
-        userStore.add(user)
-        return user
-      }),
+      mergeMetadata(parseUser),
+      tap(addNostrEventToStore),
 
       toArray(),
       // TODO: filter web of trust

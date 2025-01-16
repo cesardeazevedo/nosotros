@@ -41,11 +41,10 @@ export const SearchRelayUsers = observer(
           throttleTime(1000, undefined, { trailing: true }),
           mergeMap(([query, context]) => context.client.search.subscribe(query, limit)),
           map((results) => results.sort((_, b) => (user?.following?.followsPubkey(b.pubkey) ? 1 : -1))),
-          map((events) => events.map((x) => userStore.get(x.id)).filter((x) => !!x)),
+          map((events) => events.map((x) => userStore.get(x.pubkey)).filter((x) => !!x)),
         ),
       [],
     )
-
     useImperativeHandle(ref, () => ({ users }))
 
     return (
