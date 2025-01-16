@@ -1,4 +1,5 @@
-import type { NostrClient } from '@/nostr/nostr'
+import type { FeedOptions } from '@/nostr/feeds'
+import { type NostrClient } from '@/nostr/nostr'
 import type { Instance, SnapshotIn } from 'mobx-state-tree'
 import { t } from 'mobx-state-tree'
 import { EMPTY, finalize, mergeWith, switchMap, tap } from 'rxjs'
@@ -18,21 +19,7 @@ export const FeedScope = t.enumeration('FeedScope', [
 export const NotesFeedSubscriptionModel = FeedStoreModel.named('NotesFeedSubscriptionModel')
   .props({
     scope: FeedScope,
-    // Feed options
-    options: t.optional(
-      t.model({
-        includeRoot: t.boolean,
-        includeReplies: t.boolean,
-        includeReposts: t.boolean,
-        includeParents: t.boolean,
-      }),
-      {
-        includeRoot: true,
-        includeReplies: false,
-        includeReposts: true,
-        includeParents: true,
-      },
-    ),
+    options: t.optional(t.frozen<FeedOptions>(), {}),
   })
   .views((self) => ({
     subscribe(client: NostrClient) {
@@ -55,7 +42,8 @@ export const NotesFeedSubscriptionModel = FeedStoreModel.named('NotesFeedSubscri
           }
         }
       }
-      return toStream(() => self.scope).pipe(
+      return toStream(() => [self.scope, self.filter]).pipe(
+        tap(() => self.pagination.setFilter({ kinds: self.filter.kinds })),
         switchMap(() => {
           return getFeedSubscription().pipe(
             // trigger pagination if the feed.notes still empty

@@ -29,12 +29,8 @@ export const DeckModel = t
     },
   }))
   .actions((self) => ({
-    addHome(pubkey: string) {
-      self.add(HomeModuleModel.create({ pubkey }))
-    },
-
-    addWelcome() {
-      self.add(WelcomeModuleModel.create({}))
+    addHome() {
+      self.add(HomeModuleModel.create({}))
     },
 
     addNotification(snapshot: NotificationModuleSnapshotIn) {

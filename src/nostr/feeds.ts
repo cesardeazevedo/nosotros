@@ -6,10 +6,8 @@ import type { ClientSubOptions, NostrClient } from './nostr'
 import { metadataSymbol } from './types'
 
 export type FeedOptions = ClientSubOptions & {
-  includeRoot?: boolean
-  includeReplies?: boolean
-  includeReposts?: boolean
   includeParents?: boolean
+  includeReplies?: boolean
 }
 
 export class NostrFeeds {
@@ -20,16 +18,23 @@ export class NostrFeeds {
       mergeMap((kind) => {
         switch (kind) {
           case Kind.Text: {
-            return this.client.notes.subRelatedNotesWithParent(filters, options).pipe(
-              filter((event) => {
-                const metadata = event[metadataSymbol]
-                if (options?.includeReplies && metadata.isRoot) return false
-                return true
+            const sub =
+              options?.includeParents === false
+                ? this.client.notes.subNotesWithRelated.bind(this.client.notes)
+                : this.client.notes.subRelatedNotesWithParent.bind(this.client.notes)
+            return sub(filters, options).pipe(
+              filter((note) => {
+                return options?.includeReplies === false ? note[metadataSymbol].isRoot : !note[metadataSymbol].isRoot
               }),
             )
           }
+          case Kind.Article: {
+            return options?.includeReplies !== false
+              ? this.client.articles.subscribe(filters, options).pipe(this.client.notes.withRelatedNotes(options))
+              : EMPTY
+          }
           case Kind.Repost: {
-            return options?.includeReposts ? this.client.reposts.subscribeWithRepostedEvent(filters) : EMPTY
+            return this.client.reposts.subscribeWithRepostedEvent(filters, options)
           }
           default: {
             return EMPTY

@@ -7,9 +7,9 @@ import { NostrContextModel } from './context/nostr.context.store'
 import { NostrSettingsModel } from './context/nostr.settings.store'
 import { DeckStoreModel } from './deck/deck.store'
 import { initialState } from './helpers/initialState'
+import { HomeModuleModel } from './home/home.module'
 import { storage } from './persisted/storage'
 import { GlobalSettingsModel } from './settings/settings.global.store'
-import { WelcomeModuleModel } from './welcome/welcome.module'
 
 export const RootStoreModel = t.model('RootStoreModel', {
   auth: AuthStoreModel,
@@ -18,11 +18,10 @@ export const RootStoreModel = t.model('RootStoreModel', {
   defaultContext: NostrContextModel,
   nostrSettings: NostrSettingsModel,
   globalSettings: GlobalSettingsModel,
-
-  welcome: WelcomeModuleModel,
+  home: HomeModuleModel,
 })
 
-const RootStoreViewsModel = RootStoreModel.views((self) => ({
+export const RootStoreViewsModel = RootStoreModel.views((self) => ({
   get rootContext() {
     return self.auth.selected?.context || self.defaultContext
   },
