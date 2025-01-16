@@ -67,15 +67,13 @@ export const Editor = observer(function Editor(props: Props) {
               <Stack horizontal={false} sx={styles.wrapper}>
                 <Stack justify='space-between' sx={styles.header}>
                   {store.open.value && !dense && (
-                    <>
-                      <motion.div
-                        key='username'
-                        initial={{ translateY: -6, opacity: 0 }}
-                        animate={{ translateY: 2, opacity: 1 }}
-                        exit={{ translateY: -6, opacity: 0 }}>
-                        <EditorHeader />
-                      </motion.div>
-                    </>
+                    <motion.div
+                      key='username'
+                      initial={{ translateY: -6, opacity: 0 }}
+                      animate={{ translateY: 2, opacity: 1 }}
+                      exit={{ translateY: -6, opacity: 0 }}>
+                      <EditorHeader />
+                    </motion.div>
                   )}
                 </Stack>
                 {store.open.value ? (

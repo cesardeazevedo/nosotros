@@ -1,3 +1,4 @@
+import { NoteContext } from '@/components/providers/NoteProvider'
 import { Button } from '@/components/ui/Button/Button'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { Stack } from '@/components/ui/Stack/Stack'
@@ -71,12 +72,14 @@ export const PostThread = function PostThread(props: Props) {
                 <html.div style={styles.thread} />
                 <UserAvatar pubkey={note.event.pubkey} />
                 <Stack gap={1}>
-                  <Stack horizontal={false}>
-                    <PostReplyContent note={note} />
-                    <html.div style={styles.root$actions}>
-                      <PostActions dense renderOptions note={note} onReplyClick={() => note.toggleReplies()} />
-                    </html.div>
-                  </Stack>
+                  <NoteContext.Provider value={{ dense: true }}>
+                    <Stack horizontal={false}>
+                      <PostReplyContent note={note} />
+                      <html.div style={styles.root$actions}>
+                        <PostActions renderOptions note={note} onReplyClick={() => note.toggleReplies()} />
+                      </html.div>
+                    </Stack>
+                  </NoteContext.Provider>
                 </Stack>
               </Stack>
             </html.div>
@@ -111,14 +114,15 @@ export const PostThread = function PostThread(props: Props) {
           <Stack horizontal={false} grow>
             <PostHeader note={note} renderOptions={false} />
             <Stack horizontal={false} sx={styles.rootWrapper}>
-              <PostContent dense note={note} />
-              <PostActions
-                dense
-                note={note}
-                renderOptions
-                onReplyClick={() => note.toggleReplies()}
-                sx={styles.root$actions}
-              />
+              <NoteContext.Provider value={{ dense: true }}>
+                <PostContent note={note} />
+                <PostActions
+                  note={note}
+                  renderOptions
+                  onReplyClick={() => note.toggleReplies()}
+                  sx={styles.root$actions}
+                />
+              </NoteContext.Provider>
             </Stack>
             {renderEditor && (
               <html.div style={styles.editor}>

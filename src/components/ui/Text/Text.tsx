@@ -45,7 +45,7 @@ export type Props = {
   element?: typeof html.span | typeof html.div
 }
 
-export const Text = (props: Props) => {
+export const Text = function Text(props: Props) {
   const { children, variant = 'body', size = 'sm', sx } = props
   const key = `${variant}$${size}` as const
   const TextElement = props.element || elementMap[key]

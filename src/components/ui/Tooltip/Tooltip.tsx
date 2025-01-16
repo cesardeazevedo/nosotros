@@ -13,7 +13,7 @@ export type Props = Omit<IPopoverBaseProps, 'children' | 'contentRenderer'> & {
     | React.ReactNode
 }
 
-export const Tooltip = (props: Props) => {
+export const Tooltip = function Tooltip(props: Props) {
   const { enterDelay = 700, placement = 'bottom', children, text, ...other } = props
   return (
     <FloatingDelayGroup delay={enterDelay}>

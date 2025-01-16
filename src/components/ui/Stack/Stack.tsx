@@ -16,7 +16,7 @@ export type Props = {
   children?: React.ReactNode
 }
 
-export const Stack = forwardRef<HTMLDivElement, Props>((props, ref) => {
+export const Stack = forwardRef<HTMLDivElement, Props>(function Stack(props, ref) {
   const {
     sx,
     as = 'div',

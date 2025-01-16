@@ -1,5 +1,5 @@
 import { FloatingDelayGroup } from '@floating-ui/react'
-import React from 'react'
+import React, { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 import type { ElevationLevel } from '../Elevation/Elevation'
 import { PopoverBase } from '../Popover/PopoverBase'
@@ -16,7 +16,7 @@ type Props = Omit<IPopoverBaseProps, 'children' | 'contentRenderer'> & {
     | React.ReactNode
 }
 
-export const TooltipRich = (props: Props) => {
+export const TooltipRich = memo(function TooltipRich(props: Props) {
   const { persistent = false, enterDelay = 700, placement = 'bottom', children, content, cursor, ...other } = props
   return (
     <FloatingDelayGroup delay={enterDelay}>
@@ -52,7 +52,7 @@ export const TooltipRich = (props: Props) => {
       </PopoverBase>
     </FloatingDelayGroup>
   )
-}
+})
 
 const styles = css.create({
   content: {

@@ -22,7 +22,7 @@ export const NProfileRepliesFeed = function NProfileRepliesFeed(props: Props) {
       feed={replies}
       onScrollEnd={() => replies.paginate()}
       onRangeChange={onRangeChange}
-      render={(event) => <NostrEventRoot renderThread event={event} />}
+      render={(event) => <NostrEventRoot event={event} />}
       footer={<PostLoading />}
       {...rest}
     />

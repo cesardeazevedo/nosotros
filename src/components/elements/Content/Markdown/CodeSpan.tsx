@@ -14,6 +14,6 @@ const styles = css.create({
   root: {
     padding: '.1em .4em .22em',
     borderRadius: 6,
-    backgroundColor: palette.outlineVariant,
+    backgroundColor: palette.surfaceContainerHigh,
   },
 })
