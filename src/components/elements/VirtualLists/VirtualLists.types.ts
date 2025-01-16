@@ -9,7 +9,7 @@ export type VirtualListProps<T extends FeedAbstract> = {
   feed: T
   window?: boolean
   onScrollEnd?: VListProps['onScrollEnd']
-  onRangeChange?: VListProps['onRangeChange']
+  onRangeChange?: (start: number, end: number) => void
   render: (item: T['list'][number]) => React.ReactNode
   divider?: boolean
   header?: React.ReactNode

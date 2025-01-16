@@ -1,6 +1,6 @@
 import { Divider } from '@/components/ui/Divider/Divider'
 import { observer } from 'mobx-react-lite'
-import React, { useLayoutEffect, useMemo, useRef } from 'react'
+import React, { useCallback, useLayoutEffect, useMemo, useRef } from 'react'
 import { WindowVirtualizer, type CacheSnapshot, type WindowVirtualizerHandle } from 'virtua'
 import type { FeedAbstract, VirtualListProps } from './VirtualLists.types'
 
@@ -31,32 +31,35 @@ export const VirtualListWindow = observer(function VirtualListWindow<T extends F
 
     window.scrollTo(0, offset ?? 0)
 
-    const onScroll = () => {
-      const scrolledTo = window.scrollY + window.innerHeight
-      if (scrolledTo >= document.body.scrollHeight - 250) {
-        onScrollEnd?.()
-      }
-    }
-
     const onUnload = () => {
-      sessionStorage.setItem(cacheKey, JSON.stringify([window.scrollY, handle.cache]))
+      // Don't persist scroll position after page refresh (unload)
+      sessionStorage.removeItem(cacheKey)
     }
 
-    window.addEventListener('scroll', onScroll)
     window.addEventListener('beforeunload', onUnload)
-    onScroll()
 
     return () => {
-      window.removeEventListener('scroll', onScroll)
       window.removeEventListener('beforeunload', onUnload)
       sessionStorage.setItem(cacheKey, JSON.stringify([window.scrollY, handle.cache]))
     }
   }, [cacheKey, offset])
 
+  const handleScroll = useCallback(() => {
+    const start = ref.current?.findStartIndex()
+    const end = ref.current?.findEndIndex()
+    if (start && end) {
+      onRangeChange?.(start, end)
+    }
+    const scrolledTo = window.scrollY + window.innerHeight
+    if (scrolledTo >= document.body.scrollHeight - 250) {
+      onScrollEnd?.()
+    }
+  }, [])
+
   return (
     <>
       {props.header}
-      <WindowVirtualizer ref={ref} overscan={4} cache={cache} onRangeChange={onRangeChange}>
+      <WindowVirtualizer ref={ref} overscan={4} cache={cache} onScroll={handleScroll}>
         {feed.list.map((item) => (
           <React.Fragment key={item.id}>
             {render(item)}

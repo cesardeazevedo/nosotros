@@ -10,7 +10,7 @@ import { Repost } from '@/stores/reposts/repost'
 import { DateTime } from 'luxon'
 import { useObservableCallback, useSubscription } from 'observable-hooks'
 import { useCallback } from 'react'
-import { delay, distinct, EMPTY, filter, from, mergeMap, of, range, tap } from 'rxjs'
+import { distinct, EMPTY, filter, finalize, from, mergeMap, of, range } from 'rxjs'
 import { type NotesFeed } from '../feed.notes'
 
 export function useFeedScroll(feed: NotesFeed) {
@@ -18,7 +18,6 @@ export function useFeedScroll(feed: NotesFeed) {
   const settings = useGlobalNostrSettings()
   const [onRangeChange, rangeChange$] = useObservableCallback<unknown, [number, number]>((event$) => {
     return event$.pipe(
-      delay(1000),
       mergeMap(([start, end]) => (start === end ? of(start) : from(range(start, end - start)))),
       filter((index) => !!feed.list[index]),
       distinct(),
@@ -50,15 +49,16 @@ export function useFeedScroll(feed: NotesFeed) {
         }
         return EMPTY
       }),
-      tap((note) => {
-        const now = DateTime.now().set({ second: 0, millisecond: 0 })
-        db.metadata.insert({ ...note.metadata, lastSyncedAt: now.toSeconds() })
-      }),
       mergeMap((note: Note) => {
         return subscribeNoteStats(note.id, client, {
           ...settings.scroll,
           lastSyncedAt: note.metadata.lastSyncedAt,
-        })
+        }).pipe(
+          finalize(() => {
+            const now = DateTime.now().set({ second: 0, millisecond: 0 })
+            db.metadata.insert({ ...note.metadata, lastSyncedAt: now.toSeconds() })
+          }),
+        )
       }),
     )
   })
