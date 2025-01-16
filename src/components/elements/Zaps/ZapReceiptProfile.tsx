@@ -25,13 +25,16 @@ export const ZapReceiptProfile = observer(function ZapReceiptProfile(props: Prop
   return (
     <html.div style={styles.root}>
       <Stack justify='space-between' align='center' gap={1}>
-        <UserHeader pubkey={zap.zapper!} disableLink={disableLink}>
-          <Tooltip text={fullDate}>
-            <Text variant='body' size='sm'>
-              {shortDate}
-            </Text>
-          </Tooltip>
-        </UserHeader>
+        <UserHeader
+          pubkey={zap.zapper!}
+          disableLink={disableLink}
+          footer={
+            <Tooltip text={fullDate}>
+              <Text variant='body' size='sm' sx={styles.date}>
+                {shortDate}
+              </Text>
+            </Tooltip>
+          }></UserHeader>
         <Stack horizontal={false} gap={0.5}>
           <Stack sx={styles.icon} gap={1} align='center' justify='center'>
             <IconBolt size={22} fill='currentColor' strokeOpacity='0' />
@@ -48,12 +51,15 @@ export const ZapReceiptProfile = observer(function ZapReceiptProfile(props: Prop
 
 const styles = css.create({
   root: {
-    padding: spacing.padding2,
+    paddingBlock: spacing.padding2,
   },
   icon: {
     padding: spacing.padding1,
     border: '1px solid',
     borderColor: palette.outlineVariant,
     borderRadius: shape.full,
+  },
+  date: {
+    whiteSpace: 'nowrap',
   },
 })

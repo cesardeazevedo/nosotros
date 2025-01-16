@@ -13,6 +13,7 @@ export type Props = StackProps & {
   pubkey: string
   dense?: boolean
   children?: React.ReactNode
+  footer?: React.ReactNode
   userAvatarProps?: Omit<UserAvatarProps, 'pubkey'>
   size?: TextProps['size']
   renderNIP05?: boolean
@@ -20,7 +21,7 @@ export type Props = StackProps & {
 }
 
 export const UserHeader = observer(function UserHeader(props: Props) {
-  const { pubkey, dense, disableLink, children, size, userAvatarProps, renderNIP05 = true, ...rest } = props
+  const { pubkey, dense, disableLink, children, footer, size, userAvatarProps, renderNIP05 = true, ...rest } = props
   return (
     <Stack horizontal gap={2} align='center' sx={styles.root} {...rest}>
       <UserAvatar pubkey={pubkey} size={dense ? 'sm' : 'md'} disableLink={disableLink} {...userAvatarProps} />
@@ -30,6 +31,7 @@ export const UserHeader = observer(function UserHeader(props: Props) {
           {children}
         </Stack>
         {renderNIP05 && <UserNIP05 pubkey={pubkey} />}
+        {footer}
       </Stack>
     </Stack>
   )
