@@ -1,6 +1,6 @@
 import type { PublishResponse } from '@/core/operators/publish'
 import { publish } from '@/core/operators/publish'
-import { verify } from '@/core/operators/verify'
+import { verifyWorker } from '@/core/operators/verifyWorker'
 import type { PublisherOptions } from 'core/NostrPublish'
 import { NostrPublisher } from 'core/NostrPublish'
 import { NostrSubscription, type SubscriptionOptions } from 'core/NostrSubscription'
@@ -211,7 +211,7 @@ export class NostrClient {
 
       distinctEvent(),
 
-      verify(),
+      verifyWorker(),
 
       this.insert(),
 
