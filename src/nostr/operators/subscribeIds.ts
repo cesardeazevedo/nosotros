@@ -6,9 +6,9 @@ import { ShareReplayCache } from '../replay'
 import type { NostrEventMetadata } from '../types'
 import { type NostrEventNote, type NostrEventRepost, type NostrEventZapReceipt } from '../types'
 
-export const replay = new ShareReplayCache<NostrEventMetadata>()
+export const replayIds = new ShareReplayCache<NostrEventMetadata>()
 
-export const subscribeIds = replay.wrap((id: string, client: NostrClient, options: ClientSubOptions) => {
+export const subscribeIds = replayIds.wrap((id: string, client: NostrClient, options: ClientSubOptions) => {
   return client.subscribe({ ids: [id] }, options).pipe(
     mergeMap((event) => {
       // Attach related pipelines based on kind

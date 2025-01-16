@@ -4,7 +4,7 @@ import type { NostrFilter } from '@/core/types'
 import { connect, EMPTY, ignoreElements, merge, mergeMap, of } from 'rxjs'
 import type { ClientSubOptions, NostrClient } from '../nostr'
 import type { NostrEventNote, NostrEventZapReceipt } from '../types'
-import { replay } from './subscribeIds'
+import { replayIds } from './subscribeIds'
 
 export function parseId(id: string): NostrFilter {
   if (id.includes(':')) {
@@ -16,7 +16,7 @@ export function parseId(id: string): NostrFilter {
 }
 
 // Sligly different than subscribeIds but avoids circular references
-export const subscribeIdsFromQuotes = replay.wrap((id: string, client: NostrClient, options: ClientSubOptions) => {
+export const subscribeIdsFromQuotes = replayIds.wrap((id: string, client: NostrClient, options: ClientSubOptions) => {
   const filter = parseId(id)
   return client.subscribe(filter, options).pipe(
     mergeMap((event) => {

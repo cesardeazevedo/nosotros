@@ -11,8 +11,8 @@ export class ShareReplayCache<T> {
     this.cache.delete(value)
   }
 
-  wrap<P>(target: (...args: [string, ...P[]]) => Observable<T>) {
-    return (...args: [string, ...P[]]) => {
+  wrap<P extends [string, ...unknown[]]>(target: (...args: P) => Observable<T>) {
+    return (...args: P) => {
       const cached = this.cache.get(args[0])
       if (cached) {
         return cached

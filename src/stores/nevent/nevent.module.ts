@@ -1,5 +1,5 @@
 import type { ClientSubOptions, NostrClient } from '@/nostr/nostr'
-import { subscribeIds } from '@/nostr/operators/subscribeIds'
+import { replayIds, subscribeIds } from '@/nostr/operators/subscribeIds'
 import type { Instance, SnapshotIn, SnapshotOut } from 'mobx-state-tree'
 import { t } from 'mobx-state-tree'
 import { filter } from 'rxjs'
@@ -21,6 +21,7 @@ export const NEventModuleModel = BaseModuleModel.named('NEventModuleModel')
     subscribe(client: NostrClient) {
       const { id, relays } = self.options
       const options = { relayHints: { ids: { [id]: relays } } } as ClientSubOptions
+      replayIds.invalidate(id)
       return subscribeIds(id, client, options).pipe(filter((event) => event.id === self.options.id))
     },
   }))
