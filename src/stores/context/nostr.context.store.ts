@@ -3,7 +3,7 @@ import { NostrClient } from '@/nostr/nostr'
 import { pool } from '@/nostr/pool'
 import type { Instance, SnapshotIn } from 'mobx-state-tree'
 import { t } from 'mobx-state-tree'
-import { EMPTY, merge } from 'rxjs'
+import { EMPTY, merge, mergeMap, timer } from 'rxjs'
 import { addNostrEventToStore } from '../helpers/addNostrEventToStore'
 import { publishStore } from '../publish/publish.store'
 import { rootStore } from '../root.store'
@@ -43,7 +43,10 @@ export const NostrContextModel = t
       return merge(
         self.client.initialize(),
         pubkey ? self.client.users.subscribe(pubkey) : EMPTY,
-        pubkey && subFollows !== false ? self.client.follows.subscribe(pubkey) : EMPTY,
+        pubkey && subFollows !== false
+          ? // Low priority subscription
+            timer(1000).pipe(mergeMap(() => self.client.follows.subscribe(pubkey)))
+          : EMPTY,
       )
     },
   }))
