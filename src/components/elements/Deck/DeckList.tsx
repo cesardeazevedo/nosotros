@@ -4,20 +4,14 @@ import { NProfileColumn } from '@/components/modules/NProfile/NProfileColumn'
 import { NostrProvider } from '@/components/providers/NostrProvider'
 import { useRootStore } from '@/hooks/useRootStore'
 import type { BaseModule } from '@/stores/modules/module'
-import {
-  isHomeModule,
-  isNEventModule,
-  isNotificationModule,
-  isNProfileModule,
-  isWelcomeModule,
-} from '@/stores/modules/module.store'
+import { isHomeModule, isNEventModule, isNotificationModule, isNProfileModule } from '@/stores/modules/module.store'
 import { HomeColumn } from 'components/modules/Home/HomeColumn'
 import { observer } from 'mobx-react-lite'
 import React from 'react'
 import { DeckColumn } from './DeckColumn'
 import { DeckContext } from './DeckContext'
 
-const DeckModuleContext = (props: { children: React.ReactNode; module: BaseModule }) => {
+const DeckModuleContext = function DeckModuleContext(props: { children: React.ReactNode; module: BaseModule }) {
   const { module, children } = props
   if (module.context) {
     return <NostrProvider nostrContext={() => module.context!}>{children}</NostrProvider>
@@ -36,7 +30,6 @@ export const DeckList = observer(function DeckList() {
             <DeckContext.Provider value={{ index }}>
               <DeckModuleContext module={module}>
                 {isHomeModule(module) && <HomeColumn module={module} />}
-                {isWelcomeModule(module) && <HomeColumn module={module} />}
                 {isNProfileModule(module) && <NProfileColumn module={module} />}
                 {isNEventModule(module) && <NEventColumn module={module} />}
                 {isNotificationModule(module) && <NotificationsColumn module={module} />}

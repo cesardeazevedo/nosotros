@@ -13,7 +13,6 @@ import { css } from 'react-strict-dom'
 
 type Props = {
   id: string
-  name: string
   settings?: React.ReactElement
   children: React.ReactElement | React.ReactElement[]
   renderSettings?: boolean
@@ -64,14 +63,8 @@ export const DeckColumnHeader = (props: Props) => {
                 <Stack sx={styles.footer} justify={props.settings ? 'space-between' : 'flex-end'} gap={1}>
                   {renderSettings && (
                     <Button variant='danger' onClick={onDelete || handleDelete}>
-                      Delete
+                      Delete Column
                     </Button>
-                  )}
-                  {props.settings && (
-                    <Stack gap={0.5}>
-                      <Button onClick={() => {}}>Reset</Button>
-                      <Button variant='filled'>Apply filters</Button>
-                    </Stack>
                   )}
                 </Stack>
               </>
@@ -90,7 +83,7 @@ const styles = css.create({
     flexGrow: 0,
   },
   header: {
-    height: 60,
+    height: 66,
     padding: spacing.padding2,
   },
   footer: {

@@ -1,12 +1,15 @@
 import { Kind } from '@/constants/kinds'
 import type { SubscriptionOptions } from '@/core/NostrSubscription'
+import type { NostrClient } from '@/nostr/nostr'
 import type { DurationLikeObject } from 'luxon'
 import { Duration } from 'luxon'
 import type { Instance, SnapshotIn, SnapshotOut } from 'mobx-state-tree'
 import { t } from 'mobx-state-tree'
+import type { NotesFeedSubscription } from '../feeds/feed.notes'
 import { NotesFeedSubscriptionModel } from '../feeds/feed.notes'
 import type { BaseModuleSnapshotIn } from '../modules/module'
 import { BaseModuleModel } from '../modules/module'
+import { EMPTY } from 'rxjs'
 
 export type NProfileOptions = {
   pubkey: string
@@ -18,7 +21,7 @@ const getRange = (obj: DurationLikeObject) => Duration.fromObject(obj).as('minut
 const NProfileFeedsModel = t.model('NProfileFeeds', {
   notes: NotesFeedSubscriptionModel,
   replies: NotesFeedSubscriptionModel,
-  photos: NotesFeedSubscriptionModel,
+  media: NotesFeedSubscriptionModel,
   articles: NotesFeedSubscriptionModel,
   bookmarks: NotesFeedSubscriptionModel,
   reactions: NotesFeedSubscriptionModel,
@@ -32,9 +35,21 @@ export const NProfileModuleModel = t.snapshotProcessor(
       selected: t.string,
       feeds: NProfileFeedsModel,
     })
+    .views((self) => ({
+      get feed() {
+        return self.feeds[self.selected as keyof NProfileFeeds] as NotesFeedSubscription
+      },
+    }))
     .actions((self) => ({
-      select(selected: string) {
-        self.selected = selected
+      select(selected: keyof NProfileFeeds) {
+        self.selected = selected as string
+      },
+      subscribe(client: NostrClient) {
+        if (!self.feed.started) {
+          self.feed.started = true
+          return self.feed.subscribe(client)
+        }
+        return EMPTY
       },
     })),
   {
@@ -49,27 +64,28 @@ export const NProfileModuleModel = t.snapshotProcessor(
           notes: {
             ...props,
             range: getRange({ days: 1 }),
-            filter: { kinds: [Kind.Text], authors: [pubkey] },
+            filter: { kinds: [Kind.Text, Kind.Repost], authors: [pubkey] },
+            options: {
+              includeParents: false,
+              includeReplies: false,
+            },
           },
           replies: {
             ...props,
             range: getRange({ days: 1 }),
             filter: { kinds: [Kind.Text], authors: [pubkey] },
             options: {
-              includeRoot: false,
               includeReplies: true,
-              includeReposts: false,
-              includeParents: false,
             },
           },
-          photos: {
+          media: {
             ...props,
             range: getRange({ days: 30 }),
-            filter: { kinds: [Kind.Photos], authors: [pubkey] },
+            filter: { kinds: [Kind.Media], authors: [pubkey] },
           },
           articles: {
             ...props,
-            range: getRange({ days: 30 }),
+            range: getRange({ days: 360 }),
             filter: { kinds: [Kind.Article], authors: [pubkey] },
           },
           bookmarks: {
@@ -90,6 +106,7 @@ export const NProfileModuleModel = t.snapshotProcessor(
   },
 )
 
+export interface NProfileFeeds extends Instance<typeof NProfileFeedsModel> {}
 export interface NProfileModule extends Instance<typeof NProfileModuleModel> {}
 export interface NProfileModuleSnapshotIn extends SnapshotIn<typeof NProfileModuleModel> {}
 export interface NProfileModuleSnapshotOut extends SnapshotOut<typeof NProfileModuleModel> {}

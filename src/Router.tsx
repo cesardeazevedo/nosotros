@@ -10,14 +10,15 @@ import {
 } from '@tanstack/react-router'
 import { ErrorBoundary } from 'ErrorBoundary'
 import { RootLayout } from 'components/elements/Layouts/RootLayout'
-import { DeckRoute } from 'components/routes/deck.route'
+import { firstValueFrom, timer } from 'rxjs'
 import { decodeNIP19 } from 'utils/nip19'
 import { NProfileArticlesFeed } from './components/modules/NProfile/feeds/NProfileArticlesFeed'
 import { NProfileMediaFeed } from './components/modules/NProfile/feeds/NProfileMediaFeed'
 import { NProfileNotesFeed } from './components/modules/NProfile/feeds/NProfileNotesFeed'
 import { NProfileRepliesFeed } from './components/modules/NProfile/feeds/NProfileRepliesFeed'
-import { homeLoader, welcomeLoader } from './components/routes/home/home.loader'
-import { HomePending } from './components/routes/home/home.pending'
+import { deckLoader } from './components/routes/deck/deck.loader'
+import { DeckRoute } from './components/routes/deck/deck.route'
+import { homeLoader } from './components/routes/home/home.loader'
 import { neventLoader } from './components/routes/nevent/nevent.loader'
 import { notificationLoader } from './components/routes/notification/notification.loader'
 import { NotificationsRoute } from './components/routes/notification/notifications.route'
@@ -38,30 +39,28 @@ const rootRoute = createRootRouteWithContext()({
 export const homeRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
-  pendingMinMs: 700,
   staleTime: 500000,
-  loader: (options) => {
-    const { pubkey } = rootStore.auth
-    if (pubkey) {
-      return homeLoader(pubkey, options.abortController.signal)
-    } else {
-      return welcomeLoader(options.abortController.signal)
-    }
-  },
+  loader: () => homeLoader(),
   component: () => <HomeRoute />,
-  pendingComponent: () => <HomePending />,
+  pendingComponent: () => <HomeRoute />,
 })
 
 export const deckRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/deck',
+  staleTime: 500000,
+  beforeLoad: (options) => {
+    const context = options.matches[options.matches.length - 1].context as { delay?: Promise<0> }
+    return { delay: context.delay || firstValueFrom(timer(1000)) }
+  },
+  loader: () => deckLoader(),
   component: () => <DeckRoute />,
+  pendingComponent: () => <DeckRoute />,
 })
 
 export const notificationsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/notifications',
-  pendingMinMs: 0,
   staleTime: 500000,
   beforeLoad: () => {
     const { pubkey } = rootStore.auth
@@ -72,15 +71,12 @@ export const notificationsRoute = createRoute({
   },
   loader: (options) => notificationLoader({ pubkey: options.context.pubkey }),
   component: () => <NotificationsRoute />,
-  // Notifications need to be sorted
-  pendingMs: 600,
 })
 
 export const nostrRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '$nostr',
   staleTime: 500000,
-  pendingMs: 1000,
   parseParams: (params) => ({ nostr: params.nostr }),
   beforeLoad: (options) => {
     const decoded = decodeNIP19(options.params.nostr)
@@ -150,17 +146,21 @@ export const nostrRoute = createRoute({
 const nprofileIndexRoute = createRoute({
   getParentRoute: () => nostrRoute,
   path: '/',
-  loader: (options) => nprofileFeedLoader(options),
+  loader: (options) => {
+    if (options.context.decoded?.type === 'nprofile') {
+      return nprofileFeedLoader(options)
+    }
+  },
   component: function NProfileIndexRoute() {
     const module = nprofileIndexRoute.useLoaderData()
-    return <NProfileNotesFeed window module={module} />
+    return module && <NProfileNotesFeed window module={module} />
   },
 })
 
 const nprofileRepliesRoute = createRoute({
   getParentRoute: () => nostrRoute,
   path: 'replies',
-  loader: async (options) => nprofileFeedLoader(options),
+  loader: (options) => nprofileFeedLoader(options),
   component: function NProfileReplieRoute() {
     const module = nprofileRepliesRoute.useLoaderData()
     return <NProfileRepliesFeed window module={module} />
@@ -170,7 +170,7 @@ const nprofileRepliesRoute = createRoute({
 const nprofileMediaRoute = createRoute({
   getParentRoute: () => nostrRoute,
   path: 'media',
-  loader: async (options) => nprofileFeedLoader(options),
+  loader: (options) => nprofileFeedLoader(options),
   component: function NProfilePhotosRoute() {
     const module = nprofileMediaRoute.useLoaderData()
     return <NProfileMediaFeed window module={module} />
@@ -180,7 +180,7 @@ const nprofileMediaRoute = createRoute({
 const nprofileArticlesRoute = createRoute({
   getParentRoute: () => nostrRoute,
   path: 'articles',
-  loader: async (options) => nprofileFeedLoader(options),
+  loader: (options) => nprofileFeedLoader(options),
   component: function NProfileArticleRoute() {
     const module = nprofileArticlesRoute.useLoaderData()
     return <NProfileArticlesFeed window module={module} />

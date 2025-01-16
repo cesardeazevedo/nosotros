@@ -6,8 +6,7 @@ import { NEventModuleModel, type NEventModule, type NEventModuleSnapshotOut } fr
 import type { NotificationModule, NotificationModuleSnapshotOut } from '../notifications/notification.module'
 import { NotificationModuleModel } from '../notifications/notification.module'
 import { NProfileModuleModel, type NProfileModule, type NProfileModuleSnapshotOut } from '../nprofile/nprofile.module'
-import type { WelcomeModule, WelcomeModuleSnapshotOut } from '../welcome/welcome.module'
-import { WelcomeModuleModel } from '../welcome/welcome.module'
+import type { WelcomeModuleSnapshotOut } from '../welcome/welcome.module'
 
 export type ModulesSnapshotOuts =
   | HomeModuleSnapshotOut
@@ -16,21 +15,14 @@ export type ModulesSnapshotOuts =
   | NProfileModuleSnapshotOut
   | NEventModuleSnapshotOut
 
-export type ModulesInstances = HomeModule | WelcomeModule | NotificationModule | NProfileModule | NEventModule
+export type ModulesInstances = HomeModule | NotificationModule | NProfileModule | NEventModule
 
 export const isHomeModule = (m: ModulesInstances): m is HomeModule => m.type === 'home'
-export const isWelcomeModule = (m: ModulesInstances): m is WelcomeModule => m.type === 'welcome'
 export const isNProfileModule = (m: ModulesInstances): m is NProfileModule => m.type === 'nprofile'
 export const isNEventModule = (m: ModulesInstances): m is NEventModule => m.type === 'nevent'
 export const isNotificationModule = (m: ModulesInstances): m is NotificationModule => m.type === 'notification'
 
-export const Modules = t.union(
-  HomeModuleModel,
-  WelcomeModuleModel,
-  NotificationModuleModel,
-  NProfileModuleModel,
-  NEventModuleModel,
-)
+export const Modules = t.union(HomeModuleModel, NotificationModuleModel, NProfileModuleModel, NEventModuleModel)
 
 export const ModuleStoreModel = t
   .model('ModuleStoreModel', {

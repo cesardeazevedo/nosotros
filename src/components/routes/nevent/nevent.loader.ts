@@ -11,6 +11,6 @@ export function neventLoader(props: Props) {
       },
     },
   })
-  module.start(module.context!.client).subscribe()
+  module.subscribe(module.context!.client).subscribe()
   return module
 }

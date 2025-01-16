@@ -21,7 +21,7 @@ type Props = {
   onClose?: () => void
 }
 
-export const DeckNewColumnList = (props: Props) => {
+export const DeckNewColumnList = function DeckNewColumnList(props: Props) {
   const [view, setView] = useState<Views | null>(null)
   const deck = useRootStore().decks.selected
   const pubkey = useCurrentPubkey()
@@ -35,11 +35,7 @@ export const DeckNewColumnList = (props: Props) => {
   }, [])
 
   const handleAddHome = useCallback(() => {
-    if (pubkey) {
-      deck.addHome(pubkey)
-    } else {
-      deck.addWelcome()
-    }
+    deck.addHome()
     props.onClose?.()
   }, [pubkey])
 
@@ -57,7 +53,7 @@ export const DeckNewColumnList = (props: Props) => {
 
   return (
     <DeckColumn size='sm'>
-      <DeckColumnHeader id='addcolumn' name='Add Column' onDelete={props.onClose}>
+      <DeckColumnHeader id='addcolumn' onDelete={props.onClose}>
         <Stack gap={1}>
           {!!view && <IconButton onClick={handleBack} icon={<IconChevronLeft />} />}
           <Text variant='title' size='md'>
@@ -80,6 +76,7 @@ export const DeckNewColumnList = (props: Props) => {
             </ListItem>
             <ListItem
               interactive
+              disabled={!pubkey}
               sx={styles.item}
               leadingIcon={<IconBellFilled size={26} />}
               onClick={handleAddNotification}>

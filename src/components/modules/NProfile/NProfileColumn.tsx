@@ -1,12 +1,14 @@
 import { PaperContainer } from '@/components/elements/Layouts/PaperContainer'
+import { PostAwait } from '@/components/elements/Posts/PostAwait'
 import { UserHeader } from '@/components/elements/User/UserHeader'
 import { Divider } from '@/components/ui/Divider/Divider'
-import { useFeed } from '@/stores/feeds/hooks/useFeed'
-import type { NProfileModule, NProfileModuleSnapshotOut } from '@/stores/nprofile/nprofile.module'
+import type { NProfileFeeds, NProfileModule, NProfileModuleSnapshotOut } from '@/stores/nprofile/nprofile.module'
+import { useRouteContext, useRouter } from '@tanstack/react-router'
 import { DeckColumnHeader } from 'components/elements/Deck/DeckColumnHeader'
 import { UserProfileHeader } from 'components/elements/User/UserProfileHeader'
+import { reaction } from 'mobx'
 import { observer } from 'mobx-react-lite'
-import { useCallback } from 'react'
+import { useCallback, useEffect } from 'react'
 import { NProfileArticlesFeed } from './feeds/NProfileArticlesFeed'
 import { NProfileMediaFeed } from './feeds/NProfileMediaFeed'
 import { NProfileNotesFeed } from './feeds/NProfileNotesFeed'
@@ -19,14 +21,24 @@ type Props = {
 
 export const NProfileColumn = observer(function NProfileColumn(props: Props) {
   const { module } = props
-  const { id, feeds } = module
-  const selected = module.selected as keyof NProfileModuleSnapshotOut['feeds']
+  const { id } = module
+  const router = useRouter()
+  const context = useRouteContext({ from: '/deck' })
 
-  useFeed(feeds[selected])
+  const selected = module.selected as keyof NProfileModuleSnapshotOut['feeds']
+  useEffect(() => {
+    const disposer = reaction(
+      () => [module.selected],
+      () => {
+        router.invalidate()
+      },
+    )
+    return () => disposer()
+  }, [])
 
   const handleChange = useCallback((anchor: string | undefined) => {
     if (anchor) {
-      module.select(anchor)
+      module.select(anchor as keyof NProfileFeeds)
     }
   }, [])
 
@@ -41,14 +53,18 @@ export const NProfileColumn = observer(function NProfileColumn(props: Props) {
 
   return (
     <>
-      <DeckColumnHeader id={id} name='Settings'>
+      <DeckColumnHeader id={id}>
         <UserHeader pubkey={module.options.pubkey} />
       </DeckColumnHeader>
       <PaperContainer elevation={0} shape='none'>
-        {selected === 'notes' && <NProfileNotesFeed header={header} module={module} />}
-        {selected === 'replies' && <NProfileRepliesFeed header={header} module={module} />}
-        {selected === 'media' && <NProfileMediaFeed header={header} module={module} />}
-        {selected === 'articles' && <NProfileArticlesFeed header={header} module={module} />}
+        <PostAwait promise={context.delay}>
+          <>
+            {selected === 'notes' && <NProfileNotesFeed header={header} module={module} />}
+            {selected === 'replies' && <NProfileRepliesFeed header={header} module={module} />}
+            {selected === 'media' && <NProfileMediaFeed header={header} module={module} />}
+            {selected === 'articles' && <NProfileArticlesFeed header={header} module={module} />}
+          </>
+        </PostAwait>
       </PaperContainer>
     </>
   )

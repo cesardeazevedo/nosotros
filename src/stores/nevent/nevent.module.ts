@@ -17,8 +17,8 @@ export const NEventModuleModel = BaseModuleModel.named('NEventModuleModel')
     type: t.optional(t.literal('nevent'), 'nevent'),
     options: t.frozen<NEventOptions>(),
   })
-  .actions((self) => ({
-    start(client: NostrClient) {
+  .views((self) => ({
+    subscribe(client: NostrClient) {
       const { id, relays } = self.options
       const options = { relayHints: { ids: { [id]: relays } } } as ClientSubOptions
       return subscribeIds(id, client, options).pipe(filter((event) => event.id === self.options.id))

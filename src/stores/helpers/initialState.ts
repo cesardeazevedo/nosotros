@@ -3,8 +3,8 @@ import { defaultNostrSettings } from '@/nostr/settings'
 import type { RootStoreSnapshotIn } from '../root.store'
 
 export const initialState: RootStoreSnapshotIn = {
-  welcome: {
-    id: 'root_welcome',
+  home: {
+    selected: 'notes',
   },
   auth: {},
   decks: {

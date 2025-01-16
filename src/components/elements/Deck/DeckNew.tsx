@@ -14,7 +14,12 @@ export const DeckNew = () => {
       <DeckColumn sx={styles.noborder}>
         <Stack horizontal={false} align='center' justify='center' sx={styles.root} gap={4}>
           <Stack horizontal={false} align='center' gap={4}>
-            <Button disabled={open} variant='filled' icon={<IconNewSection />} onClick={() => setOpen(true)}>
+            <Button
+              disabled={open}
+              variant='filled'
+              sx={styles.button}
+              icon={<IconNewSection />}
+              onClick={() => setOpen(true)}>
               Add Column
             </Button>
           </Stack>
@@ -30,5 +35,8 @@ const styles = css.create({
   },
   noborder: {
     border: 'none',
+  },
+  button: {
+    height: 50,
   },
 })

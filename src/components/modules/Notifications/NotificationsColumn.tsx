@@ -18,7 +18,7 @@ export const NotificationsColumn = observer(function NotificationsColumn(props: 
   const { id, feed } = module
   return (
     <>
-      <DeckColumnHeader id={module.id} name='Home Settings'>
+      <DeckColumnHeader id={module.id}>
         <Stack gap={2}>
           <IconBellFilled />
           <Text variant='title' size='md'>

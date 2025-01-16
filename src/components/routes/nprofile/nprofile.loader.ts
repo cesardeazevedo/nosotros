@@ -1,4 +1,3 @@
-import type { NotesFeedSubscription } from '@/stores/feeds/feed.notes'
 import type { NProfileModule } from '@/stores/nprofile/nprofile.module'
 import { NProfileModuleModel } from '@/stores/nprofile/nprofile.module'
 import type { AnyRoute, AnyRouteMatch } from '@tanstack/react-router'
@@ -29,8 +28,6 @@ export async function nprofileFeedLoader(options: {
 }) {
   const parent = await options.parentMatchPromise
   const module = parent.loaderData as NProfileModule
-  const key = (options.route.path === '/' ? 'notes' : options.route.path) as keyof NProfileModule['feeds']
-  const feed = module.feeds[key] as NotesFeedSubscription
-  feed.subscribe(module.context!.client).subscribe()
+  module.subscribe(module.context!.client).subscribe()
   return module
 }
