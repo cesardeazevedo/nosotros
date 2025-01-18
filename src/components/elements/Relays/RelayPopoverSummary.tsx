@@ -19,7 +19,7 @@ import {
 import { observer } from 'mobx-react-lite'
 import { useCallback, useState } from 'react'
 import { css, html } from 'react-strict-dom'
-import { RelayChipAdd } from './RelayChipAdd'
+import { RelaySelectPopover } from './RelaySelectPopover'
 import { RelayIconButton } from './RelayIconButton'
 import { RelayUserChipList } from './RelayUserChipList'
 
@@ -45,7 +45,7 @@ export const RelayPopoverSummary = observer(function RelayPopoverSummary() {
         <Paper elevation={2} surface='surfaceContainerLow' sx={styles.root}>
           <html.div style={styles.header}>
             <Text variant='label' size='lg'>
-              <>{`My Relays ${user?.userRelays ? `(${user.userRelays.length})` : ''}`}</>
+              My Relays
             </Text>
           </html.div>
           <Divider />
@@ -108,7 +108,7 @@ export const RelayPopoverSummary = observer(function RelayPopoverSummary() {
             <Stack gap={1} horizontal={false} sx={styles.content} align='flex-start'>
               <Text>Local cache relays runs in your machine only, it's used to cache events and faster lookups</Text>
               <Chip icon={<IconDatabaseSearch size={18} strokeWidth='1.5' />} variant='filter' label='Browser Relay' />
-              <RelayChipAdd onSubmit={() => {}} />
+              <RelaySelectPopover onSubmit={() => {}} />
             </Stack>
           </Expandable>
           {/* eslint-disable-next-line no-constant-binary-expression */}

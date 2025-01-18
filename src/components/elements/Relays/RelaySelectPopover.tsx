@@ -9,15 +9,18 @@ import { Text } from '@/components/ui/Text/Text'
 import { TextField } from '@/components/ui/TextField/TextField'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconBroadcast, IconX } from '@tabler/icons-react'
-import { useCallback, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { css, html } from 'react-strict-dom'
 import { SearchRelays } from '../Search/SearchRelays'
 
 type Props = {
+  label?: string
+  icon?: React.ReactNode
   onSubmit: (relay: string) => void
 }
 
-export const RelayChipAdd = (props: Props) => {
+export const RelaySelectPopover = (props: Props) => {
+  const { label = 'Add Relay', icon, onSubmit } = props
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [error, setError] = useState('')
@@ -27,10 +30,16 @@ export const RelayChipAdd = (props: Props) => {
     setQuery(e.target.value)
   }, [])
 
+  const handleSelect = useCallback((relay: string) => {
+    setQuery(relay)
+    setError('')
+  }, [])
+
   const handleSubmit = useCallback(() => {
     try {
       const url = new URL(query)
-      props.onSubmit(url.href)
+      onSubmit(url.href)
+      setOpen(false)
     } catch (error) {
       console.log('error', error)
       setError('Invalid url')
@@ -42,7 +51,7 @@ export const RelayChipAdd = (props: Props) => {
       <PopoverBase
         opened={open}
         onClose={() => setOpen(false)}
-        placement='bottom-end'
+        placement='bottom-start'
         contentRenderer={() => (
           <Paper elevation={2} surface='surfaceContainerLow' sx={styles.paper}>
             <Stack justify='space-between' sx={styles.header}>
@@ -54,18 +63,24 @@ export const RelayChipAdd = (props: Props) => {
             <html.div style={styles.content}>
               <TextField
                 size='sm'
+                shrink
                 fullWidth
                 error={!!error}
                 label='Search or add a relay'
                 placeholder='wss://'
                 value={query}
                 onChange={handleChange}
+                trailing={
+                  <IconButton size='sm' onClick={() => setQuery('')}>
+                    <IconX size={18} />
+                  </IconButton>
+                }
               />
               {error && <Text>{error}</Text>}
             </html.div>
             <Divider />
             <Stack gap={0.5} horizontal={false} sx={styles.content} align='flex-start'>
-              <SearchRelays query={query} onSelect={() => {}} />
+              <SearchRelays query={query} onSelect={handleSelect} />
             </Stack>
             <Divider />
             <Stack horizontal={false} sx={styles.actions} align='flex-end'>
@@ -79,8 +94,8 @@ export const RelayChipAdd = (props: Props) => {
             {...getProps()}
             onClick={() => setOpen(true)}
             variant='input'
-            label='Broadcast'
-            icon={<IconBroadcast strokeWidth='1.5' size={18} />}
+            label={label}
+            icon={icon || <IconBroadcast strokeWidth='1.5' size={18} />}
           />
         )}
       </PopoverBase>

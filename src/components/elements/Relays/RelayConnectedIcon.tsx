@@ -22,7 +22,7 @@ export const RelayConnectedIcon = observer(function RelayConnectedIcon(props: Pr
     )
   }
   return (
-    <Tooltip cursor='arrow' text='Disconnected' placement='left'>
+    <Tooltip cursor='arrow' text={`Couldn't establish connection`} placement='left'>
       <html.span style={styles.disconnected}>
         <IconAntennaBars1 color='currentColor' size={22} strokeWidth='1.8' />
       </html.span>

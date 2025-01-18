@@ -10,6 +10,11 @@ export class IDBRelayStats {
     return await db.get('relayStats', url)
   }
 
+  async queryAll() {
+    const db = await this.db
+    return await db.getAll('relayStats')
+  }
+
   async insert(data: RelayStatsDB) {
     const db = await this.db
     await db.put('relayStats', data)

@@ -7,7 +7,7 @@ import { IconCheck } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
 import { css } from 'react-strict-dom'
 import { RelayChip } from '../Relays/RelayChip'
-import { RelayChipAdd } from '../Relays/RelayChipAdd'
+import { RelaySelectPopover } from '../Relays/RelaySelectPopover'
 
 type Props = {
   note: Note
@@ -27,7 +27,7 @@ export const PostBroadcaster = observer(function PostBroadcaster(props: Props) {
           </Text>
           <Stack horizontal wrap gap={0.5}>
             {seens?.map((url) => <RelayChip key={url} url={url} icon={<IconCheck size={18} />} />)}
-            <RelayChipAdd onSubmit={() => {}} />
+            <RelaySelectPopover onSubmit={() => {}} />
           </Stack>
         </Stack>
       </Stack>
