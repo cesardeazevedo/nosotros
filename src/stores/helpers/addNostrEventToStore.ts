@@ -1,9 +1,11 @@
 import { Kind } from '@/constants/kinds'
+import type { NostrEventRelayDiscovery } from '@/nostr/types'
 import { metadataSymbol, type NostrEventMetadata } from '@/nostr/types'
 import { modelStore } from '../base/model.store'
 import { followsStore } from '../follows/follows.store'
 import { noteStore } from '../notes/notes.store'
 import { reactionStore } from '../reactions/reactions.store'
+import { relayDiscoveryStore } from '../relayDiscovery/relayDiscovery.store'
 import { repostStore } from '../reposts/reposts.store'
 import { userRelayStore } from '../userRelays/userRelay.store'
 import { userStore } from '../users/users.store'
@@ -41,7 +43,12 @@ export function addNostrEventToStore(event: NostrEventMetadata) {
       modelStore.add(reactionStore.add(event))
       break
     }
+    case Kind.RelayDiscovery: {
+      modelStore.add(relayDiscoveryStore.add(event as NostrEventRelayDiscovery))
+      break
+    }
     default: {
+      modelStore.add(event)
       break
     }
   }

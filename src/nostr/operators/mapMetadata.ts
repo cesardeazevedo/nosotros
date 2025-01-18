@@ -23,7 +23,7 @@ export function persistMetadata<T extends MetadataDB>(
   })
 }
 
-export function mergeMetadata<T extends MetadataDB>(parser: (event: NostrEvent) => T) {
+export function mergeMetadata<T>(parser: (event: NostrEvent) => T) {
   return map((event: NostrEvent) => {
     const newMetadata = parser(event)
     return { ...event, [metadataSymbol]: newMetadata }

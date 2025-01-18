@@ -10,6 +10,7 @@ import { parseRepost } from '../helpers/parseRepost'
 import { parseUser } from '../helpers/parseUser'
 import { parseZapEvent } from '../helpers/parseZap'
 import { mergeMetadata, persistMetadata } from './mapMetadata'
+import { parseRelayDiscovery } from '../helpers/parseRelayDiscovery'
 
 export function parseEventMetadata() {
   return (source$: Observable<NostrEvent>) => {
@@ -36,6 +37,9 @@ export function parseEventMetadata() {
           }
           case Kind.ZapReceipt: {
             return of(event).pipe(persistMetadata(parseZapEvent))
+          }
+          case Kind.RelayDiscovery: {
+            return of(event).pipe(mergeMetadata(parseRelayDiscovery))
           }
           default: {
             // to guarantee types
