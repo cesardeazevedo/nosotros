@@ -5,7 +5,7 @@ import { useCurrentUser, useRootContext } from '@/hooks/useRootStore'
 import type { NostrContext } from '@/stores/context/nostr.context.store'
 import { observer } from 'mobx-react-lite'
 import { useObservableState } from 'observable-hooks'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { html } from 'react-strict-dom'
 import { catchError, last, map, mergeMap, of, startWith } from 'rxjs'
 
@@ -36,9 +36,11 @@ export const UserFollowButton = observer(function UserFollowButton(props: Props)
     )
   }, false)
 
+  const isFollowing = useMemo(() => currentUser?.following?.followsPubkey(pubkey), [pending])
+
   return (
     <>
-      {currentUser?.following?.followsPubkey(pubkey) ? (
+      {isFollowing ? (
         <html.div onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
           <Button disabled={pending} variant={hover ? 'danger' : 'outlined'} onClick={() => onSubmit(rootContext)}>
             <Stack gap={1}>
