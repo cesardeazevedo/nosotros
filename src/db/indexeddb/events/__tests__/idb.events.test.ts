@@ -10,7 +10,14 @@ async function getAndAssertEvent(db: IDBPDatabase<IndexedDBSchema>, id: string) 
   expect((await db.get('events', id))?.id).toStrictEqual(id)
 }
 
-describe('Test storage', () => {
+describe('IDBEventStore', () => {
+  beforeEach(async () => {
+    const idb = new IDBStorage('test')
+    const db = await idb.db
+    await db.clear('events')
+    await db.clear('tags')
+  })
+
   test('assert insert replaceable events', async () => {
     const idb = new IDBStorage('test')
     const db = await idb.db
@@ -77,6 +84,41 @@ describe('Test storage', () => {
     await getAndAssertEvent(db, event4.id)
     expect(await db.getAll('events')).toHaveLength(1)
     expect(await db.getAll('tags')).toHaveLength(4)
+  })
+
+  test('assert insert parameterized (addressable) replaceable events', async () => {
+    const idb = new IDBStorage('test')
+    const db = await idb.db
+    const event = fakeNote({
+      id: '1',
+      kind: 30023,
+      pubkey: 'pubkey1',
+      created_at: 1,
+      tags: [
+        ['d', 'd1'],
+        ['title', 'lorem ipsum'],
+      ],
+    })
+
+    await idb.event.insert(event)
+    await getAndAssertEvent(db, event.id)
+
+    // Insert a newer event
+    const event2 = fakeNote({
+      id: '2',
+      kind: 30023,
+      pubkey: 'pubkey1',
+      created_at: 2,
+      tags: [
+        ['d', 'd1'],
+        ['title', 'lorem ipsum'],
+        ['published_at', '123'],
+      ],
+    })
+    await idb.event.insert(event2)
+    await getAndAssertEvent(db, event2.id)
+    expect(await db.getAll('events')).toHaveLength(1)
+    expect(await db.getAll('tags')).toHaveLength(3)
   })
 
   test('assert queryByPubkey', async () => {

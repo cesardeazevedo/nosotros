@@ -1,7 +1,7 @@
 import type { Kind } from 'constants/kinds'
 import type { NostrEvent, NostrFilter } from 'core/types'
 import type * as idb from 'idb'
-import { isReplaceableKind } from 'nostr-tools/kinds'
+import { isParameterizedReplaceableKind, isReplaceableKind } from 'nostr-tools/kinds'
 import type { IndexedDBSchema } from '../idb.schemas'
 import { IDBEventQuery } from './idb.events.query'
 
@@ -49,6 +49,31 @@ export class IDBEventStore {
             events.delete(eventFound.id),
             ...eventFound.tags.map((tag) => tags.delete([eventFound.id, tag[0], tag[1]])),
           ])
+        }
+      } else {
+        return false
+      }
+    }
+
+    const addressable = isParameterizedReplaceableKind(data.kind)
+    if (addressable) {
+      const index = tags.index('kind_tag_value_created_at')
+      const dTag = data.tags.find((x) => x[0] === 'd')
+      if (dTag) {
+        const tagFound = await index.get(
+          IDBKeyRange.bound([data.kind, 'd', dTag[1], 0], [data.kind, 'd', dTag[1], Infinity]),
+        )
+        if (tagFound && tagFound.pubkey === data.pubkey) {
+          const latestDate = tagFound?.created_at || 0
+          if (data.created_at > latestDate) {
+            const eventFound = await events.get(tagFound.eventId)
+            if (eventFound) {
+              await Promise.all([
+                events.delete(tagFound.eventId),
+                ...eventFound.tags.map((tag) => tags.delete([eventFound.id, tag[0], tag[1]])),
+              ])
+            }
+          }
         }
       } else {
         return false
