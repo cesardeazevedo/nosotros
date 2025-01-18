@@ -96,7 +96,7 @@ describe('IDBEventStore', () => {
       created_at: 1,
       tags: [
         ['d', 'd1'],
-        ['title', 'lorem ipsum'],
+        ['p', '1'],
       ],
     })
 
@@ -111,14 +111,15 @@ describe('IDBEventStore', () => {
       created_at: 2,
       tags: [
         ['d', 'd1'],
-        ['title', 'lorem ipsum'],
-        ['published_at', '123'],
+        ['p', '1'],
+        ['p', '2'],
+        ['p', '3'],
       ],
     })
     await idb.event.insert(event2)
     await getAndAssertEvent(db, event2.id)
     expect(await db.getAll('events')).toHaveLength(1)
-    expect(await db.getAll('tags')).toHaveLength(3)
+    expect(await db.getAll('tags')).toHaveLength(4)
   })
 
   test('assert queryByPubkey', async () => {

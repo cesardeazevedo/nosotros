@@ -34,9 +34,9 @@ export class IDBEventStore {
     const events = tx.objectStore('events')
     const tags = tx.objectStore('tags')
 
-    const replaceable = isReplaceableKind(data.kind)
+    const isReplaceable = isReplaceableKind(data.kind)
 
-    if (replaceable) {
+    if (isReplaceable) {
       const index = events.index('kind_pubkey_created_at')
       const eventFound = await index.get(
         IDBKeyRange.bound([data.kind, data.pubkey, 0], [data.kind, data.pubkey, Infinity]),
@@ -55,8 +55,8 @@ export class IDBEventStore {
       }
     }
 
-    const addressable = isParameterizedReplaceableKind(data.kind)
-    if (addressable) {
+    const isAddressable = isParameterizedReplaceableKind(data.kind)
+    if (isAddressable) {
       const index = tags.index('kind_tag_value_created_at')
       const dTag = data.tags.find((x) => x[0] === 'd')
       if (dTag) {
@@ -84,8 +84,7 @@ export class IDBEventStore {
 
     await Promise.all(
       data.tags
-        // some relays sending bad data
-        .filter((tags) => tags.length > 1)
+        .filter((tags) => tags.length > 1 && tags[0].length === 1)
         .map((tag, index) => {
           return tags.put({
             index,
