@@ -1,28 +1,12 @@
-import type { PublishResponse } from '@/core/operators/publish'
-import { publish } from '@/core/operators/publish'
+import type { BroadcastResponse } from '@/core/operators/broadcast'
 import { verifyWorker } from '@/core/operators/verifyWorker'
-import type { PublisherOptions } from 'core/NostrPublish'
-import { NostrPublisher } from 'core/NostrPublish'
 import { NostrSubscription, type SubscriptionOptions } from 'core/NostrSubscription'
 import type { Pool } from 'core/pool'
 import type { Signer } from 'core/signers/signer'
 import type { NostrFilter } from 'core/types'
-import type { EventTemplate, NostrEvent } from 'nostr-tools'
+import type { NostrEvent } from 'nostr-tools'
 import type { OperatorFunction } from 'rxjs'
-import {
-  connect,
-  EMPTY,
-  ignoreElements,
-  merge,
-  mergeMap,
-  mergeWith,
-  of,
-  pipe,
-  shareReplay,
-  tap,
-  throwError,
-  type Observable,
-} from 'rxjs'
+import { EMPTY, merge, mergeWith, of, pipe, tap, type Observable } from 'rxjs'
 import { batcher } from './batcher'
 import { setCache } from './cache'
 import { NostrFeeds } from './feeds'
@@ -57,7 +41,7 @@ export type NostrClientOptions = {
   signer?: Signer
   settings?: NostrSettings
   onEvent?: (event: NostrEventMetadata) => void
-  onPublish?: (response: PublishResponse) => void
+  onPublish?: (response: BroadcastResponse) => void
 }
 
 export type ClientSubOptions = Omit<SubscriptionOptions, 'outbox'> & {
@@ -216,45 +200,6 @@ export class NostrClient {
       parseEventMetadata(),
 
       tap(this.options.onEvent),
-    )
-  }
-
-  publish(unsignedEvent: Omit<EventTemplate, 'created_at'>, options: PublisherOptions = {}) {
-    if (!this.pubkey || !this.signer) {
-      const error = 'Not authenticated'
-      return throwError(() => new Error(error))
-    }
-
-    const event = {
-      ...unsignedEvent,
-      pubkey: this.pubkey,
-      created_at: parseInt((Date.now() / 1000).toString()),
-    }
-    const pub = new NostrPublisher(event, {
-      ...options,
-      signer: this.signer,
-      relays: options.relays || this.inbox$,
-      inbox: !options.relays ? this.inboxTracker.subscribe.bind(this.inboxTracker) : () => EMPTY,
-    })
-
-    return of(pub).pipe(
-      connect((shared$) => {
-        return merge(
-          shared$.pipe(
-            publish(this.pool),
-            tap(this.options.onPublish),
-            // We don't want the actual response from the relays in the main stream
-            ignoreElements(),
-          ),
-          shared$.pipe(
-            mergeMap((x) => x.signedEvent),
-            this.insert(),
-            parseEventMetadata(),
-            tap(this.options.onEvent),
-          ),
-        )
-      }),
-      shareReplay(),
     )
   }
 }

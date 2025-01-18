@@ -1,4 +1,5 @@
 import { pool } from '@/nostr/pool'
+import { publishReaction } from '@/nostr/publish/publishReaction'
 import type { NoteMetadata } from '@/nostr/types'
 import { noteStore } from '@/stores/notes/notes.store'
 import { seenStore } from '@/stores/seen/seen.store'
@@ -9,7 +10,7 @@ import { computedFn } from 'mobx-utils'
 import type { NostrEvent } from 'nostr-tools'
 import { nip19 } from 'nostr-tools'
 import type { NostrClient } from 'nostr/nostr'
-import { filter, map, take, tap } from 'rxjs'
+import { tap } from 'rxjs'
 import { createEditorStore } from '../editor/editor.store'
 import { repostStore } from '../reposts/reposts.store'
 import { toastStore } from '../ui/toast.store'
@@ -217,12 +218,8 @@ export class Note {
   }
 
   react(client: NostrClient, reaction: string) {
-    return client.reactions
-      .publish(this.event, reaction)
+    return publishReaction(client, this.event, reaction)
       .pipe(
-        map((x) => x[4]),
-        filter((event) => event.kind === 7),
-        take(1),
         tap((event) => {
           toastStore.enqueue(`Reaction ${event.content} published`, { duration: 3000 })
         }),

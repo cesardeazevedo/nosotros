@@ -4,6 +4,7 @@ import { MenuList } from '@/components/ui/MenuList/MenuList'
 import { PopoverBase } from '@/components/ui/Popover/PopoverBase'
 import type { IPopoverBaseTriggerRendererProps } from '@/components/ui/Popover/PopoverBase.types'
 import { useRootContext } from '@/hooks/useRootStore'
+import { publishRepost } from '@/nostr/publish/publishRepost'
 import type { Note } from '@/stores/notes/note'
 import { toastStore } from '@/stores/ui/toast.store'
 import { spacing } from '@/themes/spacing.stylex'
@@ -33,7 +34,7 @@ export const RepostPopover = (props: Props) => {
   const [isReposting, submit] = useObservableState<boolean, void>((input$) => {
     return input$.pipe(
       mergeMap(() => {
-        return context.client.reposts.publish(note.event).pipe(
+        return publishRepost(context.client, note.event).pipe(
           tap((event) => {
             toastStore.enqueue(<ToastEventPublished event={event} eventLabel='Repost' />, { duration: 10000_000 })
           }),

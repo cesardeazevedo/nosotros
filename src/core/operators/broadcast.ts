@@ -6,9 +6,9 @@ import type { NostrEvent } from 'nostr-tools'
 import type { OperatorFunction } from 'rxjs'
 import { catchError, EMPTY, filter, map, mergeMap, pipe, take, takeUntil, timer } from 'rxjs'
 
-export type PublishResponse = [url: string, eventId: string, status: boolean, msg: string, event: NostrEvent]
+export type BroadcastResponse = [url: string, eventId: string, status: boolean, msg: string, event: NostrEvent]
 
-export function publish(pool: Pool): OperatorFunction<NostrPublisher, PublishResponse> {
+export function broadcast(pool: Pool): OperatorFunction<NostrPublisher, BroadcastResponse> {
   return pipe(
     mergeMap((publisher: NostrPublisher) => publisher.relayEvent),
 
@@ -22,7 +22,7 @@ export function publish(pool: Pool): OperatorFunction<NostrPublisher, PublishRes
           filter((res) => res[1] === event.id),
           filter((res): res is MessageReceivedOK => res[0].toLowerCase() === RelayToClient.OK),
           take(1),
-          map((res) => [url, res[1], res[2], res[3], event] as PublishResponse),
+          map((res) => [url, res[1], res[2], res[3], event] as BroadcastResponse),
           takeUntil(timer(10000)),
           catchError(() => EMPTY),
         )

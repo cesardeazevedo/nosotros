@@ -5,6 +5,7 @@ import type { UserRelay } from '@/nostr/helpers/parseRelayList'
 import { READ, WRITE } from '@/nostr/helpers/parseRelayList'
 import { isAuthorTag, isQuoteTag } from '@/nostr/helpers/parseTags'
 import type { NostrClient } from '@/nostr/nostr'
+import { publish } from '@/nostr/publish/publish'
 import type { NostrEventMetadata } from '@/nostr/types'
 import type { Editor } from '@tiptap/core'
 import { action, computed, makeAutoObservable } from 'mobx'
@@ -281,7 +282,7 @@ export class EditorStore {
     this.submit$ = from(uploader.start())
       .pipe(
         mergeMap(() => {
-          return client.publish(this.rawEvent, {
+          return publish(client, this.rawEvent, {
             relays: of(this.allRelays.map((x) => x.relay)),
           })
         }),
@@ -290,7 +291,6 @@ export class EditorStore {
           const component = createElement(ToastEventPublished, {
             event,
             eventLabel: this.title,
-            initiallyExpanded: true,
           })
           toastStore.enqueue(component, { duration: 10000 })
         }),

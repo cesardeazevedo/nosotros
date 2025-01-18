@@ -1,7 +1,7 @@
 import { ofKind } from '@/core/operators/ofKind'
 import { Kind } from 'constants/kinds'
 import type { ClientSubOptions, NostrClient } from 'nostr/nostr'
-import { connect, EMPTY, from, ignoreElements, last, merge, mergeMap, tap } from 'rxjs'
+import { connect, from, ignoreElements, merge, mergeMap } from 'rxjs'
 import { ShareReplayCache } from '../replay'
 import type { NostrEventFollow } from '../types'
 import { metadataSymbol } from '../types'
@@ -13,46 +13,6 @@ const kinds = [Kind.Follows]
 export class NIP02Follows {
   constructor(private client: NostrClient) {}
 
-  publish(tag: 'p', pubkey: string, related: string) {
-    // Always get the latest follows list (without cache) before modifying it
-    return this.subscribe(pubkey, { queryLocal: false }).pipe(
-      last(undefined, null),
-      mergeMap((event) => {
-        if (event) {
-          const metadata = event[metadataSymbol]
-          switch (tag) {
-            case 'p': {
-              // Follows or unfollow the related author
-              const authors = metadata.tags.get('p') || new Set()
-              const tags = (
-                authors.has(related)
-                  ? event.tags.filter((pubkey) => pubkey[1] !== related)
-                  : [...event.tags, ['p', related]]
-              ).filter((tag) => {
-                // Remove bad stuff from p tags
-                if (tag[0] === 'p') {
-                  return tag[1].length === 64
-                }
-                return true
-              })
-
-              return this.client.publish({
-                kind: Kind.Follows,
-                content: event.content,
-                tags,
-              })
-            }
-            // todo: other tags to follow (topics)
-            default: {
-              return EMPTY
-            }
-          }
-        }
-        return EMPTY
-      }),
-    )
-  }
-
   subscribe = replay.wrap((pubkey: string, options?: ClientSubOptions) => {
     return this.client.subscribe({ kinds, authors: [pubkey] }, options).pipe(
       ofKind<NostrEventFollow>(kinds),
@@ -61,7 +21,6 @@ export class NIP02Follows {
         return merge(
           shared$,
           shared$.pipe(
-            tap((x) => console.log(x)),
             mergeMap((event) =>
               from(event[metadataSymbol].tags.get('p') || []).pipe(
                 mergeMap((pubkey) => this.client.users.subscribe(pubkey)),

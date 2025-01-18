@@ -1,4 +1,4 @@
-import type { PublishResponse } from '@/core/operators/publish'
+import type { BroadcastResponse } from '@/core/operators/broadcast'
 import { encodeSafe } from '@/utils/nip19'
 import { makeAutoObservable, observable } from 'mobx'
 import { nip19, type NostrEvent } from 'nostr-tools'
@@ -66,7 +66,7 @@ export const publishStore = makeAutoObservable({
     })
   },
 
-  add([relay, eventId, status, msg, event]: PublishResponse) {
+  add([relay, eventId, status, msg, event]: BroadcastResponse) {
     const found = this.publishes.get(eventId)
     if (found) {
       found.push({ relay, eventId, status, msg, event })

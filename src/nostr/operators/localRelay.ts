@@ -1,6 +1,6 @@
 import { NostrPublisher } from '@/core/NostrPublish'
 import type { NostrSubscription } from '@/core/NostrSubscription'
-import { publish } from '@/core/operators/publish'
+import { broadcast } from '@/core/operators/broadcast'
 import { subscribe } from '@/core/operators/subscribe'
 import type { Pool } from '@/core/pool'
 import type { NostrFilter } from '@/core/types'
@@ -28,7 +28,7 @@ export function insertEvent<T extends NostrEvent>(pool: Pool, relays: string[]):
             include: [event],
           })
         }),
-        publish(pool),
+        broadcast(pool),
         ignoreElements(),
       ),
     )

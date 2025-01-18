@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/Button/Button'
 import { CircularProgress } from '@/components/ui/Progress/CircularProgress'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { useCurrentUser, useRootContext } from '@/hooks/useRootStore'
+import { publishFollowList } from '@/nostr/publish/publishFollowList'
 import type { NostrContext } from '@/stores/context/nostr.context.store'
 import { observer } from 'mobx-react-lite'
 import { useObservableState } from 'observable-hooks'
@@ -23,7 +24,7 @@ export const UserFollowButton = observer(function UserFollowButton(props: Props)
     return input$.pipe(
       mergeMap((context) => {
         if (context.client.pubkey) {
-          return context.client.follows.publish('p', context.client.pubkey, pubkey).pipe(
+          return publishFollowList(context.client, 'p', pubkey).pipe(
             map(() => true),
             last(),
             map(() => false),
