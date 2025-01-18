@@ -156,43 +156,39 @@ export class NostrClient {
   }
 
   // Query locally, IndexedDB or local relays
-  query(sub: NostrSubscription, filter?: NostrFilter) {
-    const filters = filter ? [filter] : sub.filters
-    if (filters.length > 0) {
+  query(sub: NostrSubscription, options?: ClientSubOptions) {
+    const filters = options?.cacheFilter ? [options.cacheFilter] : sub.filters
+    if (filters.length > 0 && options?.queryLocal !== false) {
       const localDB$ = this.settings.localDB ? localDB.query(filters) : EMPTY
       const localRelays$ = localRelay.query(this.pool, Array.from(this.localSets), sub, filters)
-      return merge(localDB$, localRelays$)
+      return merge(localDB$, localRelays$).pipe(
+        tap((event) => {
+          sub.add(event)
+          this.seen.query(event)
+          setCache(event)
+        }),
+      )
     }
     return EMPTY
   }
 
   // Insert locally, IndexedDB or local relays
-  insert(): OperatorFunction<NostrEvent, NostrEvent> {
+  insert(options?: ClientSubOptions): OperatorFunction<NostrEvent, NostrEvent> {
     const localRelays = Array.from(this.localSets)
-    return pipe(
-      this.settings.localDB ? localDB.insertEvent() : mergeWith(EMPTY),
-      localRelays.length > 0 ? localRelay.insertEvent(this.pool, localRelays) : mergeWith(EMPTY),
-    )
+    if (options?.queryLocal !== false) {
+      return pipe(
+        this.settings.localDB ? localDB.insertEvent() : mergeWith(EMPTY),
+        localRelays.length > 0 ? localRelay.insertEvent(this.pool, localRelays) : mergeWith(EMPTY),
+      )
+    }
+    return mergeWith(EMPTY)
   }
 
   createSubscription(filters: NostrFilter | NostrFilter[], options?: ClientSubOptions) {
     return new NostrSubscription(filters, {
       ...options,
-      // Fixed relays
-      relays:
-        // custom relays
-        options?.relays ||
-        // inbox / outbox relays
-        merge(
-          // Inbox relays: Seek events about a user
-          this.inbox$,
-          // Outbox relays: Seek events from a user
-          this.outbox$,
-          // client fixed relays
-          of(this.relays),
-        ),
+      relays: options?.relays || merge(this.inbox$, this.outbox$, of(this.relays)),
       relayHints: this.settings.hints ? options?.relayHints : {},
-      // Tracking outbox relays for each filter authors/#p tags
       outbox:
         this.settings.outbox && options?.outbox !== false
           ? this.outboxTracker.subscribe.bind(this.outboxTracker)
@@ -213,19 +209,9 @@ export class NostrClient {
 
       verifyWorker(),
 
-      this.insert(),
+      this.insert(options),
 
-      mergeWith(
-        options?.queryLocal !== false
-          ? this.query(sub, options?.cacheFilter).pipe(
-              tap((event) => {
-                sub.add(event)
-                this.seen.query(event)
-                setCache(event)
-              }),
-            )
-          : EMPTY,
-      ),
+      mergeWith(this.query(sub, options)),
 
       parseEventMetadata(),
 
@@ -262,6 +248,7 @@ export class NostrClient {
           ),
           shared$.pipe(
             mergeMap((x) => x.signedEvent),
+            this.insert(),
             parseEventMetadata(),
             tap(this.options.onEvent),
           ),
