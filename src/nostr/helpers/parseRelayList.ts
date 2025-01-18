@@ -52,9 +52,8 @@ export function parseRelayList(event: NostrEvent): UserRelayListMetadata {
   }
 }
 
-export function parseRelayListToTags(event: NostrEvent & UserRelayListMetadata) {
-  const { relayList, ...rest } = event
-  const tags = relayList.reduce(
+export function parseRelayListToTags(relayList: UserRelay[]) {
+  return relayList.reduce(
     (acc, userRelay) => {
       const tag = ['r', userRelay.relay]
       if (userRelay.permission === (READ | WRITE)) {
@@ -64,6 +63,20 @@ export function parseRelayListToTags(event: NostrEvent & UserRelayListMetadata) 
     },
     [] as NostrEvent['tags'],
   )
+}
 
-  return { ...rest, tags }
+export function addPermission(relayList: UserRelay[], userRelay: UserRelay) {
+  return relayList
+    .map((relay) =>
+      relay.relay === userRelay.relay ? { ...relay, permission: relay.permission | userRelay.permission } : relay,
+    )
+    .concat(relayList.some((relay) => relay.relay === userRelay.relay) ? [] : [userRelay])
+}
+
+export function revokePermission(relayList: UserRelay[], userRelay: UserRelay) {
+  return relayList
+    .map((relay) =>
+      relay.relay === userRelay.relay ? { ...relay, permission: relay.permission & ~userRelay.permission } : relay,
+    )
+    .filter((relay) => relay.relay !== userRelay.relay || relay.permission !== 0)
 }
