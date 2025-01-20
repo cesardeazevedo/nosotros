@@ -102,3 +102,10 @@ export interface RelayStatsDB {
   lastAuth: number
   lastConnected: number
 }
+
+export interface Nip05DB {
+  nip05: string
+  pubkey: string
+  relays: string[]
+  timestamp: number
+}

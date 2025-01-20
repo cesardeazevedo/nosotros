@@ -4,7 +4,7 @@ import type { NostrEventUserMetadata } from '@/nostr/types'
 import { metadataSymbol } from '@/nostr/types'
 import { Kind } from 'constants/kinds'
 import type { ClientSubOptions, NostrClient } from 'nostr/nostr'
-import { ignoreElements, merge, tap } from 'rxjs'
+import { connect, ignoreElements, merge, mergeMap, tap } from 'rxjs'
 
 const kinds = [Kind.Metadata]
 
@@ -18,7 +18,16 @@ export class NIP01Users {
 
     const stream$ = this.client.subscribe({ kinds, authors: [pubkey] }, options).pipe(
       ofKind<NostrEventUserMetadata>(kinds),
-      tap((event) => this.client.dns.enqueue(event[metadataSymbol].nip05)),
+      connect((shared) => {
+        return merge(
+          shared,
+          shared.pipe(
+            tap((event) => this.client.dns.enqueue(event[metadataSymbol].nip05)),
+            mergeMap((event) => this.client.dns.get(event[metadataSymbol].nip05)),
+            ignoreElements(),
+          ),
+        )
+      }),
     )
     return merge(stream$, relayLists$.pipe(ignoreElements()))
   })

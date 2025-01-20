@@ -43,7 +43,7 @@ export const UserPopover = function UserPopover(props: Props) {
               <Stack horizontal={false} gap={2}>
                 <Stack horizontal={false}>
                   <UserName disablePopover pubkey={pubkey} />
-                  <UserNIP05 pubkey={pubkey} hideForFollowing={false} />
+                  <UserNIP05 pubkey={pubkey} />
                 </Stack>
                 <html.span style={styles.scroller}>
                   <UserContentAbout pubkey={pubkey} />

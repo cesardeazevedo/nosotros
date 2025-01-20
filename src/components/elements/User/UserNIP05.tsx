@@ -5,21 +5,17 @@ import { css } from 'react-strict-dom'
 
 type Props = {
   pubkey?: string
-  hideForFollowing?: boolean
 }
 
 export const UserNIP05 = observer(function UserNIP05(props: Props) {
   const { pubkey } = props
   const user = userStore.get(pubkey)
-  if (!user || !user.meta.nip05) {
+  if (!user || !user.nip05) {
     return
   }
-  // if (hideForFollowing && user?.following?.followsPubkey(pubkey)) {
-  //   return
-  // }
   return (
     <Text variant='label' size='sm' sx={styles.root}>
-      {user.meta.nip05}
+      {user.nip05}
     </Text>
   )
 })

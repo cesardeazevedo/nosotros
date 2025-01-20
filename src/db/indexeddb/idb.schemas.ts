@@ -1,6 +1,6 @@
 import type { NostrEvent } from '@/core/types'
 import type { Kind } from 'constants/kinds'
-import type { MetadataDB, RelayInfoDB, RelayStatsDB, SeenDB, TagDB } from 'db/types'
+import type { MetadataDB, Nip05DB, RelayInfoDB, RelayStatsDB, SeenDB, TagDB } from 'db/types'
 import type { DBSchema } from 'idb'
 
 export interface IndexedDBSchema extends DBSchema {
@@ -37,6 +37,15 @@ export interface IndexedDBSchema extends DBSchema {
   relayStats: {
     key: string
     value: RelayStatsDB
+  }
+  nip05: {
+    key: string
+    value: {
+      nip05: string
+      pubkey: string
+      relays: string[]
+      timestamp: number
+    }
   }
 }
 
@@ -89,6 +98,12 @@ const metadata = {
   indexes: [],
 }
 
-export const schemas = { events, tags, seen, relayInfo, relayStats, metadata }
+const nip05 = {
+  name: 'nip05' as const,
+  keyPath: 'nip05',
+  indexes: [],
+} satisfies Schema<Nip05DB>
+
+export const schemas = { events, tags, seen, relayInfo, relayStats, metadata, nip05 }
 
 export type Schemas = typeof schemas

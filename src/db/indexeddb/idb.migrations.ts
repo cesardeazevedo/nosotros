@@ -1,7 +1,7 @@
 import type * as idb from 'idb'
 import type { IndexedDBSchema } from './idb.schemas'
 
-type StoreNames = 'events' | 'tags' | 'metadata' | 'seen' | 'relayInfo' | 'relayStats'
+type StoreNames = 'events' | 'tags' | 'metadata' | 'seen' | 'relayInfo' | 'relayStats' | 'nip05'
 type IDBStore = idb.IDBPObjectStore<IndexedDBSchema, ArrayLike<StoreNames>, StoreNames, 'versionchange'>
 
 function deleteObjectStore(db: idb.IDBPDatabase<IndexedDBSchema>, name: string) {

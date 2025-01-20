@@ -7,8 +7,9 @@ import { IDBMetadata } from './metadata/idb.metadata'
 import { IDBRelayStats } from './relayStats/idb.relayStats'
 import { IDBSeenStore } from './seen/idb.seen'
 import { IDBStats } from './stats/idb.stats'
+import { IDBNip05 } from './nip05/idb.nip05'
 
-const DB_VERSION = 11
+const DB_VERSION = 12
 
 export class IDBStorage implements DB {
   db: Promise<idb.IDBPDatabase<IndexedDBSchema>>
@@ -18,6 +19,7 @@ export class IDBStorage implements DB {
   relayStats: IDBRelayStats
   metadata: IDBMetadata
   stats: IDBStats
+  nip05: IDBNip05
 
   constructor(name: string) {
     this.db = buildDB(name, DB_VERSION, schemas)
@@ -27,6 +29,7 @@ export class IDBStorage implements DB {
     this.relayStats = new IDBRelayStats(this.db)
     this.metadata = new IDBMetadata(this.db)
     this.stats = new IDBStats(this.db)
+    this.nip05 = new IDBNip05(this.db)
   }
 
   async export() {
