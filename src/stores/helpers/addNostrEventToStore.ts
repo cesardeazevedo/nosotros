@@ -10,6 +10,7 @@ import { repostStore } from '../reposts/reposts.store'
 import { userRelayStore } from '../userRelays/userRelay.store'
 import { userStore } from '../users/users.store'
 import { zapStore } from '../zaps/zaps.store'
+import { listStore } from '../lists/lists.store'
 
 export function addNostrEventToStore(event: NostrEventMetadata) {
   const metadata = event[metadataSymbol]
@@ -45,6 +46,10 @@ export function addNostrEventToStore(event: NostrEventMetadata) {
     }
     case Kind.RelayDiscovery: {
       modelStore.add(relayDiscoveryStore.add(event as NostrEventRelayDiscovery))
+      break
+    }
+    case Kind.Mutelist: {
+      listStore.add(event)
       break
     }
     default: {

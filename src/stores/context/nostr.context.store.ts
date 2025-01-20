@@ -1,6 +1,7 @@
 import type { NostrClientOptions } from '@/nostr/nostr'
 import { NostrClient } from '@/nostr/nostr'
 import { pool } from '@/nostr/pool'
+import { subscribeMutes } from '@/nostr/subscriptions/subscribeMutes'
 import type { Instance, SnapshotIn } from 'mobx-state-tree'
 import { t } from 'mobx-state-tree'
 import { EMPTY, merge, mergeMap, timer } from 'rxjs'
@@ -47,6 +48,7 @@ export const NostrContextModel = t
           ? // Low priority subscription
             timer(1000).pipe(mergeMap(() => self.client.follows.subscribe(pubkey)))
           : EMPTY,
+        pubkey ? subscribeMutes(self.client, pubkey) : EMPTY,
       )
     },
   }))

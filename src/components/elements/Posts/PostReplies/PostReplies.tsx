@@ -10,6 +10,7 @@ import { css, html } from 'react-strict-dom'
 import { PostLoadMore } from '../PostLoadMore'
 import { PostRepliesEmpty } from './PostRepliesEmpty'
 import { PostRepliesLoading } from './PostRepliesLoading'
+import { PostRepliesMuted } from './PostRepliesMuted'
 import { PostRepliesTree } from './PostReply'
 
 type Props = {
@@ -41,7 +42,8 @@ export const PostReplies = observer(function PostReplies(props: Props) {
   return (
     <Stack horizontal={false} sx={styles.root} justify='flex-start'>
       <html.div style={styles.root}>
-        {replies && note && <PostRepliesTree replies={replies} repliesOpen={note.repliesOpen} level={1} />}
+        {replies.length > 0 && note && <PostRepliesTree replies={replies} repliesOpen={note.repliesOpen} level={1} />}
+        <PostRepliesMuted level={0} note={note} />
         {empty && renderEmpty && <PostRepliesEmpty />}
         {loading && empty !== true && <PostRepliesLoading rows={loadingRows} />}
         {note.hasRepliesLeft && <PostLoadMore note={note} onClick={handleLoadMore} />}

@@ -16,6 +16,7 @@ import { useCallback, useState } from 'react'
 import { css, html } from 'react-strict-dom'
 import { Editor } from '../../Editor/Editor'
 import { PostActions } from '../PostActions/PostActions'
+import { PostRepliesMuted } from './PostRepliesMuted'
 import { PostReplyContent } from './PostReplyContent'
 
 type Props = {
@@ -109,13 +110,13 @@ export const PostReply = observer(function PostReply(props: Props) {
           )}
         </>
       )}
+      <PostRepliesMuted level={level} note={note} />
     </html.div>
   )
 })
 
 const styles = css.create({
   root: {
-    // width: 'calc(100% - 8px)',
     paddingInline: spacing.padding2,
     position: 'relative',
   },
@@ -158,7 +159,6 @@ const styles = css.create({
     borderBottomLeftRadius: 12,
   },
   actions: {
-    //width: 'auto',
     padding: 0,
     paddingTop: spacing['padding0.5'],
     paddingBottom: spacing.padding2,
@@ -170,8 +170,5 @@ const styles = css.create({
   },
   expandButton: {
     marginBottom: spacing.padding1,
-  },
-  createNote: {
-    padding: 0,
   },
 })

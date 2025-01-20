@@ -115,6 +115,10 @@ export class Note {
     return user?.following?.followsPubkey(this.event.pubkey) || false
   }
 
+  get mentionNotes() {
+    return this.metadata.mentionedNotes.map((id) => noteStore.get(id)).filter((note) => !!note)
+  }
+
   get replies() {
     const data = noteStore.replies.get(this.id) || []
     return data.map((id) => noteStore.get(id)).filter((note): note is Note => !!note)
@@ -123,10 +127,24 @@ export class Note {
   repliesSorted = computedFn((user?: User) => {
     return (
       this.replies
+        // filter out muted authors and notes
+        .filter((reply) => {
+          const isMutedEvent = user?.mutedNotes?.has(reply.id)
+          const isMutedAuthor = user?.mutedAuthors?.has(reply.pubkey)
+          return !isMutedEvent && !isMutedAuthor
+        })
         .sort((a) => (a.isFollowing(user) ? -1 : 1))
         // always put the current user at the top
         .sort((a) => (a.event.pubkey === user?.pubkey ? -1 : 1))
     )
+  })
+
+  repliesMuted = computedFn((user?: User) => {
+    return this.replies.filter((reply) => {
+      const isMutedEvent = user?.mutedNotes?.has(reply.id)
+      const isMutedAuthor = user?.mutedAuthors?.has(reply.pubkey)
+      return isMutedEvent || isMutedAuthor
+    })
   })
 
   repliesChunk = computedFn((user?: User) => {
@@ -192,6 +210,8 @@ export class Note {
   get headImage() {
     return this.images?.[0]
   }
+
+  imeta
 
   setRepliesStatus(state: ReplyStatus) {
     this.repliesStatus = state
