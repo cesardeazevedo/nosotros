@@ -11,7 +11,6 @@ import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { useMobile } from '@/hooks/useMobile'
 import { useRootStore } from '@/hooks/useRootStore'
-import { useFeedScroll } from '@/stores/feeds/hooks/useFeedScroll'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconChevronDown, IconChevronUp } from '@tabler/icons-react'
 import { useRouter } from '@tanstack/react-router'
@@ -30,7 +29,6 @@ export const HomeRoute = observer(function HomeRoute() {
   const { auth, home: module } = useRootStore()
   const feed = module.feed
 
-  const onRangeChange = useFeedScroll(feed)
   const [expanded, setExpanded] = useState(false)
 
   useEffect(() => {
@@ -71,8 +69,7 @@ export const HomeRoute = observer(function HomeRoute() {
           <VirtualListWindow
             id={module.id + module.selected}
             feed={feed}
-            onRangeChange={onRangeChange}
-            onScrollEnd={() => feed.paginate()}
+            onScrollEnd={feed.paginate}
             render={(event) => <NostrEventRoot event={event} />}
             footer={<PostLoading rows={5} />}
           />

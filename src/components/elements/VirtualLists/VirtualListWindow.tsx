@@ -4,10 +4,12 @@ import React, { useCallback, useLayoutEffect, useMemo, useRef } from 'react'
 import { WindowVirtualizer, type CacheSnapshot, type WindowVirtualizerHandle } from 'virtua'
 import type { FeedAbstract, VirtualListProps } from './VirtualLists.types'
 
+const always = () => true
+
 export const VirtualListWindow = observer(function VirtualListWindow<T extends FeedAbstract>(
   props: VirtualListProps<T>,
 ) {
-  const { id, render, feed, divider = true, onScrollEnd, onRangeChange } = props
+  const { id, render, feed, divider = true, onScrollEnd, filter = always } = props
   const cacheKey = `window-list-cache-${id}`
 
   const ref = useRef<WindowVirtualizerHandle>(null)
@@ -45,11 +47,6 @@ export const VirtualListWindow = observer(function VirtualListWindow<T extends F
   }, [cacheKey, offset])
 
   const handleScroll = useCallback(() => {
-    const start = ref.current?.findStartIndex()
-    const end = ref.current?.findEndIndex()
-    if (start && end) {
-      onRangeChange?.(start, end)
-    }
     const scrolledTo = window.scrollY + window.innerHeight
     if (scrolledTo >= document.body.scrollHeight - 250) {
       onScrollEnd?.()
@@ -60,7 +57,7 @@ export const VirtualListWindow = observer(function VirtualListWindow<T extends F
     <>
       {props.header}
       <WindowVirtualizer ref={ref} overscan={4} cache={cache} onScroll={handleScroll}>
-        {feed.list.map((item) => (
+        {feed.list.filter(filter).map((item) => (
           <React.Fragment key={item.id}>
             {render(item)}
             {divider && <Divider />}

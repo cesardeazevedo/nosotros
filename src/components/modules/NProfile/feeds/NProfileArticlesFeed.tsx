@@ -2,7 +2,6 @@ import { NostrEventRoot } from '@/components/elements/Event/NostrEventRoot'
 import { PostLoading } from '@/components/elements/Posts/PostLoading'
 import { VirtualList } from '@/components/elements/VirtualLists/VirtualList'
 import type { FeedAbstract, VirtualListProps } from '@/components/elements/VirtualLists/VirtualLists.types'
-import { useFeedScroll } from '@/stores/feeds/hooks/useFeedScroll'
 import type { NProfileModule } from '@/stores/nprofile/nprofile.module'
 
 export type Props = {
@@ -13,15 +12,13 @@ export const NProfileArticlesFeed = function NProfileArticlesFeed(props: Props) 
   const { module, ...rest } = props
   const {
     id,
-    feeds: { articles },
+    feeds: { articles: feed },
   } = module
-  const onRangeChange = useFeedScroll(articles)
   return (
     <VirtualList
       id={id}
-      feed={articles}
-      onScrollEnd={() => articles.paginate()}
-      onRangeChange={onRangeChange}
+      feed={feed}
+      onScrollEnd={feed.paginate}
       render={(event) => <NostrEventRoot event={event} />}
       footer={<PostLoading />}
       {...rest}

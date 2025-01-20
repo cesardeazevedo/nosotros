@@ -5,8 +5,10 @@ import type { VListHandle } from 'virtua'
 import { VList } from 'virtua'
 import type { FeedAbstract, VirtualListProps } from './VirtualLists.types'
 
+const always = () => true
+
 export const VirtualListColumn = observer(function VirtualList<T extends FeedAbstract>(props: VirtualListProps<T>) {
-  const { feed, render, divider = true, onScrollEnd, onRangeChange } = props
+  const { feed, render, divider = true, onScrollEnd, filter = always } = props
 
   const ref = useRef<VListHandle>(null)
 
@@ -14,17 +16,12 @@ export const VirtualListColumn = observer(function VirtualList<T extends FeedAbs
     if (offset >= (ref.current?.scrollSize || Infinity) - 1500 - 200) {
       onScrollEnd?.()
     }
-    const start = ref.current?.findStartIndex()
-    const end = ref.current?.findEndIndex()
-    if (start && end) {
-      onRangeChange?.(start, end)
-    }
   }, [])
 
   return (
     <VList ref={ref} onScroll={handleScroll}>
       {props.header}
-      {feed.list.map((item) => (
+      {feed.list.filter(filter).map((item) => (
         <React.Fragment key={item.id}>
           {render(item)}
           {divider && <Divider />}

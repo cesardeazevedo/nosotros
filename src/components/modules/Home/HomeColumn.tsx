@@ -11,7 +11,6 @@ import { VirtualListColumn } from '@/components/elements/VirtualLists/VirtualLis
 import { Divider } from '@/components/ui/Divider/Divider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { router } from '@/Router'
-import { useFeedScroll } from '@/stores/feeds/hooks/useFeedScroll'
 import type { HomeModule } from '@/stores/home/home.module'
 import { spacing } from '@/themes/spacing.stylex'
 import { useRouteContext } from '@tanstack/react-router'
@@ -29,7 +28,6 @@ export const HomeColumn = observer(function HomeColumn(props: Props) {
   const { id } = module
   const feed = module.feed
   const context = useRouteContext({ from: '/deck' })
-  const onRangeChange = useFeedScroll(feed)
 
   useEffect(() => {
     const disposer = reaction(
@@ -54,8 +52,7 @@ export const HomeColumn = observer(function HomeColumn(props: Props) {
           <VirtualListColumn
             id={id}
             feed={feed}
-            onRangeChange={onRangeChange}
-            onScrollEnd={() => feed.paginate()}
+            onScrollEnd={feed.paginate}
             header={
               <>
                 <Editor
