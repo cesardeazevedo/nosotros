@@ -13,15 +13,15 @@ import { css } from 'react-strict-dom'
 
 type Props = {
   id: string
-  settings?: React.ReactElement
-  children: React.ReactElement | React.ReactElement[]
+  settings?: React.ReactNode
+  settingsIcon?: (props: { expand: (value: boolean) => void; expanded?: boolean }) => React.ReactNode
+  children: React.ReactNode
   renderSettings?: boolean
-  renderDelete?: boolean
   onDelete?: () => void
 }
 
 export const DeckColumnHeader = (props: Props) => {
-  const { renderDelete = true, renderSettings = true, onDelete } = props
+  const { settings, settingsIcon, renderSettings = true, onDelete } = props
   const root = useRootStore()
 
   const handleDelete = useCallback(() => {
@@ -40,35 +40,32 @@ export const DeckColumnHeader = (props: Props) => {
                 {/* </Tooltip> */}
                 {props.children}
               </Stack>
-              {renderSettings && (
-                <Tooltip cursor='arrow' text='Feed Settings'>
-                  <IconButton
-                    toggle
-                    selected={expanded}
-                    size='sm'
-                    variant='standard'
-                    onClick={() => expand(!expanded)}
-                    icon={<IconSettings size={20} strokeWidth='1.5' />}
-                    selectedIcon={<IconSettingsFilled size={20} strokeWidth='1.0' />}
-                  />
-                </Tooltip>
-              )}
+              {renderSettings &&
+                (settingsIcon?.({ expand, expanded }) || (
+                  <Tooltip cursor='arrow' text='Feed Settings'>
+                    <IconButton
+                      toggle
+                      selected={expanded}
+                      size='sm'
+                      variant='standard'
+                      onClick={() => expand(!expanded)}
+                      icon={<IconSettings size={20} strokeWidth='1.5' />}
+                      selectedIcon={<IconSettingsFilled size={20} strokeWidth='1.0' />}
+                    />
+                  </Tooltip>
+                ))}
             </Stack>
           )}>
           <>
-            {props.settings}
-            {(props.settings || renderDelete) && (
-              <>
-                <Divider />
-                <Stack sx={styles.footer} justify={props.settings ? 'space-between' : 'flex-end'} gap={1}>
-                  {renderSettings && (
-                    <Button variant='danger' onClick={onDelete || handleDelete}>
-                      Delete Column
-                    </Button>
-                  )}
-                </Stack>
-              </>
-            )}
+            {settings}
+            <Divider />
+            <Stack sx={styles.footer} justify={props.settings ? 'space-between' : 'flex-end'} gap={1}>
+              {renderSettings && (
+                <Button variant='danger' onClick={onDelete || handleDelete}>
+                  Delete Column
+                </Button>
+              )}
+            </Stack>
           </>
         </Expandable>
         <Divider />

@@ -1,3 +1,4 @@
+import { Kind } from '@/constants/kinds'
 import type { NostrClient } from '@/nostr/nostr'
 import { Duration } from 'luxon'
 import type { Instance, SnapshotIn, SnapshotOut } from 'mobx-state-tree'
@@ -26,7 +27,7 @@ export const NotificationModuleModel = t.snapshotProcessor(
         feed: {
           scope: 'notifications' as const,
           range: Duration.fromObject({ days: 10 }).as('minutes'),
-          filter: { '#p': [pubkey] },
+          filter: { kinds: [Kind.Text, Kind.Repost, Kind.Reaction, Kind.ZapReceipt], '#p': [pubkey] },
         },
       }
     },

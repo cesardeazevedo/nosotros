@@ -52,6 +52,6 @@ export class NIP57Zaps {
   }
 
   subscribe(filter: NostrFilter, options?: ClientSubOptions) {
-    return this.client.subscribe({ kinds, ...filter }, { ...options, cacheFilter: { kinds, ...options?.cacheFilter } })
+    return this.client.subscribe({ ...filter, kinds }, options)
   }
 }

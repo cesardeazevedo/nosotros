@@ -5,6 +5,8 @@ import { computedFn } from 'mobx-utils'
 import type { NostrEvent } from 'nostr-tools'
 import { nip19 } from 'nostr-tools'
 import { encodeSafe } from 'utils/nip19'
+import { listStore } from '../lists/lists.store'
+import { nip05store } from '../nip05/nip05.store'
 import { relaysStore } from '../relays/relays.store'
 import { userRelayStore } from '../userRelays/userRelay.store'
 
@@ -36,6 +38,26 @@ export class User {
     return this.displayName[0]
   }
 
+  get nip05() {
+    const nip05 = this.meta.nip05
+    const verified = nip05store.get(nip05)?.nip05
+    return verified?.startsWith('_@') ? verified.slice(2) : verified
+  }
+
+  get mutedAuthors() {
+    return listStore.muteP.get(this.pubkey)
+  }
+
+  get mutedNotes() {
+    return listStore.muteE.get(this.pubkey)
+  }
+
+  isEventMuted = computedFn((event: NostrEvent) => {
+    const isMutedEvent = this.mutedNotes?.has(event.id)
+    const isMutedAuthor = this.mutedAuthors?.has(event.pubkey)
+    return !(isMutedEvent || isMutedAuthor)
+  })
+
   get userRelays() {
     return userRelayStore.get(this.pubkey)
   }
@@ -54,6 +76,10 @@ export class User {
 
   get headRelay() {
     return this.relays[0]
+  }
+
+  get canReceiveZap() {
+    return !!this.metadata.lud06 || !!this.metadata.lud16
   }
 
   get connectedRelays() {

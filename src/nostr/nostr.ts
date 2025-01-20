@@ -24,7 +24,6 @@ import { NIP25Reactions } from './nips/nip25.reactions'
 import { NIP50Search } from './nips/nip50.search'
 import { NIP57Zaps } from './nips/nip57.zaps'
 import { NIP65RelayList } from './nips/nip65.relaylist'
-import { Notifications } from './notifications'
 import { distinctEvent } from './operators/distinctEvents'
 import * as localDB from './operators/localDB'
 import * as localRelay from './operators/localRelay'
@@ -67,7 +66,6 @@ export class NostrClient {
   mailbox = new Mailbox(this)
 
   feeds = new NostrFeeds(this)
-  notifications = new Notifications(this)
 
   localSets = new Set<string>()
   inboxSets = new Set<string>()

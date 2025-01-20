@@ -1,6 +1,6 @@
 import { isEventTag } from '@/nostr/helpers/parseTags'
+import type { NostrEventMetadata } from '@/nostr/types'
 import { makeAutoObservable } from 'mobx'
-import type { NostrEvent } from 'nostr-tools'
 import { noteStore } from '../notes/notes.store'
 
 export type NotificationType = 'reply' | 'mention' | 'reaction' | 'zap' | 'repost'
@@ -8,7 +8,7 @@ export type NotificationType = 'reply' | 'mention' | 'reaction' | 'zap' | 'repos
 export class Notification {
   constructor(
     public type: NotificationType,
-    public event: NostrEvent,
+    public event: NostrEventMetadata,
   ) {
     makeAutoObservable(this, {
       type: false,

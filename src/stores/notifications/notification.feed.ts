@@ -1,57 +1,86 @@
 import { Kind } from '@/constants/kinds'
 import type { NostrClient } from '@/nostr/nostr'
+import { subscribeNotifications } from '@/nostr/subscriptions/subscribeNotifications'
 import { metadataSymbol, type NostrEventMetadata } from '@/nostr/types'
 import { observable } from 'mobx'
-import { bufferTime, filter, identity, map, mergeMap, mergeWith, tap } from 'rxjs'
+import { t, type Instance } from 'mobx-state-tree'
+import { bufferTime, filter, finalize, identity, map, mergeMap, mergeWith, switchMap, tap } from 'rxjs'
 import { FeedStoreModel } from '../feeds/feed.store'
+import { toStream } from '../helpers/toStream'
+import { withToggleAction } from '../helpers/withToggleAction'
 import { Notification } from './notification'
 
 export const NotificationFeedModel = FeedStoreModel.named('NotificationFeedModel')
+  .props({
+    muted: t.optional(t.boolean, false),
+    mentions: t.optional(t.boolean, true),
+    replies: t.optional(t.boolean, true),
+  })
   .volatile(() => ({
     notifications: observable.map<string, Notification>(),
   }))
-  .views((self) => ({
+  .actions(withToggleAction)
+  .actions((self) => ({
+    setNotification(notification: Notification) {
+      self.notifications.set(notification.id, notification)
+    },
+
     subscribe(client: NostrClient) {
       const author = self.pagination.getValue()['#p']?.[0]
-      return client.notifications.subscribePagination(self.pagination).pipe(
-        mergeWith(self.paginateIfEmpty(20)),
+      return toStream(() => [self.filter, self.mentions, self.replies]).pipe(
+        tap(() => self.pagination.setFilter({ kinds: self.filter.kinds })),
+        switchMap(() => {
+          return subscribeNotifications(client, self.pagination).pipe(
+            mergeWith(self.paginateIfEmpty(20)),
 
-        // filter out same author notifications
-        filter((notification) => notification.pubkey !== author),
+            // filter out same author notifications
+            filter((notification) => notification.pubkey !== author),
 
-        bufferTime(700),
+            bufferTime(1200),
 
-        filter((x) => x.length > 0),
+            filter((x) => x.length > 0),
 
-        map((x) => x.sort((a, b) => (a.created_at > b.created_at ? -1 : 1))),
+            map((x) => x.sort((a, b) => (a.created_at > b.created_at ? -1 : 1))),
 
-        mergeMap(identity),
+            mergeMap(identity),
 
-        tap((notification) => self.add(notification)),
+            map((event: NostrEventMetadata) => {
+              const metadata = event[metadataSymbol]
+              switch (metadata.kind) {
+                case Kind.Article:
+                case Kind.Text: {
+                  return new Notification(metadata.isRoot ? 'mention' : 'reply', event)
+                }
+                case Kind.Reaction: {
+                  return new Notification('reaction', event)
+                }
+                case Kind.Repost: {
+                  return new Notification('repost', event)
+                }
+                case Kind.ZapReceipt: {
+                  return new Notification('zap', event)
+                }
+              }
+            }),
 
-        map((event: NostrEventMetadata) => {
-          const metadata = event[metadataSymbol]
-          switch (metadata.kind) {
-            case Kind.Article:
-            case Kind.Text: {
-              return new Notification(metadata.isRoot ? 'mention' : 'reply', event)
-            }
-            case Kind.Reaction: {
-              return new Notification('reaction', event)
-            }
-            case Kind.Repost: {
-              return new Notification('repost', event)
-            }
-            case Kind.ZapReceipt: {
-              return new Notification('zap', event)
-            }
-          }
-        }),
-        tap((notification) => {
-          if (notification) {
-            self.notifications.set(notification.id, notification)
-          }
+            filter((notification): notification is Notification => {
+              if (self.mentions === false && notification?.type === 'mention') return false
+              if (self.replies === false && notification?.type === 'reply') return false
+              return notification !== undefined
+            }),
+
+            tap((notification) => self.add(notification.event)),
+
+            tap((notification) => this.setNotification(notification)),
+
+            finalize(() => {
+              self.reset()
+              self.notifications.clear()
+            }),
+          )
         }),
       )
     },
   }))
+
+export interface NotificationFeed extends Instance<typeof NotificationFeedModel> {}

@@ -8,6 +8,6 @@ export class NIP25Reactions {
   constructor(private client: NostrClient) {}
 
   subscribe(filter: NostrFilter, options?: ClientSubOptions) {
-    return this.client.subscribe({ kinds, ...filter }, { ...options, cacheFilter: { ...options?.cacheFilter, kinds } })
+    return this.client.subscribe({ ...filter, kinds }, options)
   }
 }
