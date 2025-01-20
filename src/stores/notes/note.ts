@@ -211,8 +211,6 @@ export class Note {
     return this.images?.[0]
   }
 
-  imeta
-
   setRepliesStatus(state: ReplyStatus) {
     this.repliesStatus = state
   }

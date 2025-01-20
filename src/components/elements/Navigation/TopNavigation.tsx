@@ -38,7 +38,7 @@ export const TopNavigation = observer(function TopNavigation() {
         {/*   </Link> */}
         {/* </Tooltip> */}
         <Tooltip text='Relays' enterDelay={enterDelay}>
-          <Link tabIndex={-1} to='/relays'>
+          <Link tabIndex={-1} to='/relays' resetScroll>
             <Tab anchor='/relays' sx={styles.tab} icon={<IconServerBolt strokeWidth='1.5' size={26} />} />
           </Link>
         </Tooltip>
@@ -51,7 +51,7 @@ export const TopNavigation = observer(function TopNavigation() {
         {/*   <Tab anchor='/communities' sx={styles.tab} icon={<IconUsers strokeWidth='1.6' size={26} />} /> */}
         {/* </Tooltip> */}
         <Tooltip text='Notifications' enterDelay={enterDelay}>
-          <Link tabIndex={-1} to='/notifications'>
+          <Link tabIndex={-1} to='/notifications' resetScroll>
             <Tab
               anchor='/notifications'
               sx={styles.tab}

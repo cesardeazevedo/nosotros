@@ -58,12 +58,10 @@ export const NProfileColumn = observer(function NProfileColumn(props: Props) {
       </DeckColumnHeader>
       <PaperContainer elevation={0} shape='none'>
         <PostAwait promise={context.delay}>
-          <>
-            {selected === 'notes' && <NProfileNotesFeed header={header} module={module} />}
-            {selected === 'replies' && <NProfileRepliesFeed header={header} module={module} />}
-            {selected === 'media' && <NProfileMediaFeed header={header} module={module} />}
-            {selected === 'articles' && <NProfileArticlesFeed header={header} module={module} />}
-          </>
+          {selected === 'notes' && <NProfileNotesFeed header={header} module={module} />}
+          {selected === 'replies' && <NProfileRepliesFeed header={header} module={module} />}
+          {selected === 'media' && <NProfileMediaFeed header={header} module={module} />}
+          {selected === 'articles' && <NProfileArticlesFeed header={header} module={module} />}
         </PostAwait>
       </PaperContainer>
     </>

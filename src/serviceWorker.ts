@@ -6,6 +6,7 @@ import { CacheFirst } from 'workbox-strategies'
 
 cleanupOutdatedCaches()
 
+// @ts-ignore
 precacheAndRoute(self.__WB_MANIFEST)
 
 registerRoute(

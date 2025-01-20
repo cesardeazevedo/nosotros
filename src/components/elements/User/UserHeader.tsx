@@ -16,18 +16,40 @@ export type Props = StackProps & {
   footer?: React.ReactNode
   userAvatarProps?: Omit<UserAvatarProps, 'pubkey'>
   size?: TextProps['size']
+  renderAvatar?: boolean
   renderNIP05?: boolean
   disableLink?: boolean
+  disablePopover?: boolean
 }
 
 export const UserHeader = observer(function UserHeader(props: Props) {
-  const { pubkey, dense, disableLink, children, footer, size, userAvatarProps, renderNIP05 = true, ...rest } = props
+  const {
+    renderAvatar = true,
+    pubkey,
+    dense,
+    disableLink,
+    disablePopover,
+    children,
+    footer,
+    size,
+    userAvatarProps,
+    renderNIP05 = true,
+    ...rest
+  } = props
   return (
     <Stack horizontal gap={2} align='center' sx={styles.root} {...rest}>
-      <UserAvatar pubkey={pubkey} size={dense ? 'sm' : 'md'} disableLink={disableLink} {...userAvatarProps} />
+      {renderAvatar && (
+        <UserAvatar
+          pubkey={pubkey}
+          size={dense ? 'sm' : 'md'}
+          disableLink={disableLink}
+          disabledPopover={disablePopover}
+          {...userAvatarProps}
+        />
+      )}
       <Stack horizontal={false} gap={0}>
         <Stack horizontal gap={1} align='center' justify='flex-start'>
-          <UserName pubkey={pubkey} disableLink={disableLink} size={size} />
+          <UserName pubkey={pubkey} disableLink={disableLink} disablePopover={disablePopover} size={size} />
           {children}
         </Stack>
         {renderNIP05 && <UserNIP05 pubkey={pubkey} />}

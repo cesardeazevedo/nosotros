@@ -114,7 +114,7 @@ export const signinStore = makeAutoObservable({
 
   async submitNostrAddress(address: string) {
     const [name, url] = address.split('@')
-    const response = await firstValueFrom(rootStore.rootContext.client.dns.fetch(url))
+    const response = await firstValueFrom(rootStore.rootContext.client.dns.fetch(url, name))
     const pubkey = response.names?.[name]
     invariant(pubkey, 'Pubkey not found on remote server')
     this.submitReadonly(pubkey)

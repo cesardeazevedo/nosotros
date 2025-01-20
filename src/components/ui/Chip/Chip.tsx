@@ -252,7 +252,7 @@ const styles = css.create({
     paddingInlineEnd: spacing.padding1,
     // paddingInlineStart: chipTokens.leadingSpace,
     display: 'flex',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
     flex: 1,
     whiteSpace: 'nowrap',

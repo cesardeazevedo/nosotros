@@ -25,10 +25,10 @@ export const UserAvatar = observer(function UserAvatar(props: Props) {
     : {}
   const avatar = (
     <Avatar {...avatarProps} size={size} sx={[styles.avatar, sx]}>
-      {user?.initials || pubkey}
+      {user?.initials || pubkey || '-'}
     </Avatar>
   )
-  if (pubkey) {
+  if (user?.meta?.picture && pubkey) {
     return (
       <UserPopover pubkey={pubkey} disabled={disabledPopover}>
         <LinkProfile user={user} disableLink={disableLink}>

@@ -6,7 +6,7 @@ import { fromFetch } from 'rxjs/fetch'
 import invariant from 'tiny-invariant'
 import { NostrPublisher } from '../NostrPublish'
 import { NostrSubscription } from '../NostrSubscription'
-import { publish } from '../operators/publish'
+import { broadcast } from '../operators/broadcast'
 import { subscribe } from '../operators/subscribe'
 import { verify } from '../operators/verify'
 import type { Pool } from '../pool'
@@ -202,7 +202,7 @@ export class NIP46RemoteSigner implements Signer<NIP46RemoteSignerOptions> {
         } as UnsignedEvent
 
         const publisher = new NostrPublisher(event, { signer: this.clientSigner, relays: of([bunker.relay]) })
-        return of(publisher).pipe(publish(this.pool))
+        return of(publisher).pipe(broadcast(this.pool))
       }),
       mergeMap(() => {
         return this.events$.pipe(

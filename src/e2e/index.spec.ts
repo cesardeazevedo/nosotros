@@ -2,7 +2,7 @@
 import { test as base, expect } from '@playwright/test'
 import { Kind } from 'constants/kinds'
 import { nip19 } from 'nostr-tools'
-import { fakeNote, fakeSignature, fakeUser } from 'utils/faker'
+import { fakeNote, fakeSignature } from 'utils/faker'
 import { WebSocketServerCustom } from './helpers/websocket.server'
 
 const delay = (timeout = 500) => new Promise((r) => setTimeout(r, timeout))
@@ -92,12 +92,12 @@ test.skip('Should expect a basic note and user info', async ({ page, getRelays, 
   await expect(post).not.toBeVisible()
 
   // Send note back to the frontend
-  await relay1.send(reqId, fakeSignature(fakeNote({ content: 'Hello World' })))
+  await relay1.send(reqId, fakeSignature(fakeNote({ kind: Kind.Metadata })))
   await expect(post).toBeVisible()
   await expect(user).not.toBeVisible()
 
   // Send user back to the frontend
-  await relay1.send(reqId, fakeSignature(fakeUser(authors[0], { name: 'UserTest' })))
+  await relay1.send(reqId, fakeSignature(fakeNote({ kind: Kind.Metadata, pubkey: authors[0] })))
   await expect(user).toBeVisible()
 
   await expectSeenAt([relay1])
@@ -119,7 +119,7 @@ test.skip('Should expect a basic note and fetch the mentioned note', async ({ pa
     author: mentioned.pubkey,
     relays: [RELAY_2],
   })
-  await relay1.send(reqId, fakeSignature(fakeUser(authors[0], { name: 'UserTest' })))
+  await relay1.send(reqId, fakeSignature(fakeNote({ pubkey: authors[0] })))
   await relay1.send(reqId, fakeSignature(fakeNote({ content: `Check this nostr:${encodedNote}` })))
   const post = page.getByText('Check this')
   await expect(post).toBeVisible()

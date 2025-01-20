@@ -101,7 +101,7 @@ export const SearchUsers = observer(
             />
           </Tooltip>
         </Stack>
-        <Stack horizontal={false} gap={dense ? 0 : 1} sx={[styles.scroller, dense && styles.scroller$dense]}>
+        <Stack horizontal={false} sx={[styles.scroller, dense && styles.scroller$dense]}>
           {searchType === 'following' ? (
             <SearchFollowingUsers
               ref={searchRef}

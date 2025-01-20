@@ -4,24 +4,24 @@ import { Kind } from '@/constants/kinds'
 import { RELAY_1, RELAY_2, RELAY_3, RELAY_4, RELAY_5 } from '@/constants/testRelays'
 import { clearCache } from '@/nostr/cache'
 import { db } from '@/nostr/db'
+import { parseFollowList } from '@/nostr/helpers/parseFollowList'
 import { replay as replayMailbox } from '@/nostr/mailbox'
-import { parseNote } from '@/nostr/nips/nip01/metadata/parseNote'
-import { parseUser } from '@/nostr/nips/nip01/metadata/parseUser'
-import { replay as replayUsers } from '@/nostr/nips/nip01/nip01.users'
+import { parseNote } from '@/nostr/helpers/parseNote'
+import { parseUser } from '@/nostr/helpers/parseUser'
+import { replay as replayUsers } from '@/nostr/nips/nip01.users'
 import { replay as replayNIP02 } from '@/nostr/nips/nip02.follows'
-import { replay as replayNIP65, type UserRelayDB } from '@/nostr/nips/nip65.relaylist'
+import { replay as replayNIP65 } from '@/nostr/nips/nip65.relaylist'
 import type { NostrClientOptions } from '@/nostr/nostr'
 import { NostrClient } from '@/nostr/nostr'
 import { pool } from '@/nostr/pool'
 import { defaultNostrSettings, type NostrSettings } from '@/nostr/settings'
-import { Follows } from '@/stores/follows/follow'
 import { followsStore } from '@/stores/follows/follows.store'
 import type { Note } from '@/stores/notes/note'
 import { noteStore } from '@/stores/notes/notes.store'
 import { reactionStore } from '@/stores/reactions/reactions.store'
 import { rootStore, type RootStore } from '@/stores/root.store'
 import { userRelayStore } from '@/stores/userRelays/userRelay.store'
-import { User } from '@/stores/users/user'
+import type { User } from '@/stores/users/user'
 import { userStore } from '@/stores/users/users.store'
 import { type NostrEvent } from 'nostr-tools'
 import { test as base } from 'vitest'
@@ -45,7 +45,6 @@ interface Fixtures {
   createUser: (data: Partial<NostrEvent>) => User
   createNote: (data: Partial<NostrEvent>, client?: NostrClient) => Note
   createFollows: (pubkey: string, tags: string[]) => void
-  createUserRelay: (pubkey: string, data: UserRelayDB[]) => void
   createReaction: (data: Partial<NostrEvent>) => void
   insertRelayList: (data: Partial<NostrEvent>, client?: NostrClient) => Promise<void>
   signer: TestSigner
@@ -124,7 +123,7 @@ export const test = base.extend<Fixtures>({
         created_at: 1,
         ...data,
       })
-      userStore.add(new User(event, parseUser(event)))
+      userStore.add(event, parseUser(event))
 
       return userStore.users.get(event.pubkey) as User
     })
@@ -139,19 +138,12 @@ export const test = base.extend<Fixtures>({
   },
   createFollows: async ({ clear }, use) => {
     use((pubkey: string, followings: string[]) => {
-      const follows = new Follows(
-        fakeNote({
-          kind: Kind.Follows,
-          pubkey,
-          tags: followings.map((follow) => ['p', follow]),
-        }),
-      )
-      followsStore.add(follows)
-    })
-  },
-  createUserRelay: async ({ clear }, use) => {
-    use((pubkey: string, data: UserRelayDB[]) => {
-      userRelayStore.add(pubkey, data)
+      const event = fakeNote({
+        kind: Kind.Follows,
+        pubkey,
+        tags: followings.map((follow) => ['p', follow]),
+      })
+      followsStore.add(event, parseFollowList(event))
     })
   },
   createReaction: async ({ clear }, use) => {

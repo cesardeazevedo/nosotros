@@ -6,6 +6,7 @@ import type { UserRelayListMetadata } from './helpers/parseRelayList'
 import type { RepostMetadata } from './helpers/parseRepost'
 import type { UserMetadata } from './helpers/parseUser'
 import type { ZapReceiptMetadata } from './helpers/parseZap'
+import type { RelayDiscoveryMetadata } from './helpers/parseRelayDiscovery'
 
 export type * from './helpers/parseFollowList'
 export type * from './helpers/parseNote'
@@ -24,6 +25,7 @@ type Metadata =
   | RepostMetadata
   | UserRelayListMetadata
   | ZapReceiptMetadata
+  | RelayDiscoveryMetadata
 
 export type NostrEventUserMetadata = NostrEvent & MetadataSymbol<UserMetadata>
 export type NostrEventNote = NostrEvent & MetadataSymbol<NoteMetadata>
@@ -31,6 +33,7 @@ export type NostrEventFollow = NostrEvent & MetadataSymbol<FollowsMetadata>
 export type NostrEventRepost = NostrEvent & MetadataSymbol<RepostMetadata>
 export type NostrEventRelayList = NostrEvent & MetadataSymbol<UserRelayListMetadata>
 export type NostrEventZapReceipt = NostrEvent & MetadataSymbol<ZapReceiptMetadata>
+export type NostrEventRelayDiscovery = NostrEvent & MetadataSymbol<RelayDiscoveryMetadata>
 export type NostrEventGeneric = NostrEvent & MetadataSymbol<{ kind: Exclude<Kind, Pick<Metadata, 'kind'>['kind']> }> // generic event
 
 export type NostrEventMetadata =
@@ -40,4 +43,5 @@ export type NostrEventMetadata =
   | NostrEventRepost
   | NostrEventRelayList
   | NostrEventZapReceipt
+  | NostrEventRelayDiscovery
   | NostrEventGeneric

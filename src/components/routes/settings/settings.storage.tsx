@@ -112,7 +112,7 @@ export const SettingsStorageRoute = observer(function SettingsStorageRoute() {
                   Export database
                 </Text>
                 <Text variant='title' size='sm'>
-                  Export events of your relay into a text file
+                  Export all events in the database into a .txt file
                 </Text>
               </Stack>
               <Button disabled={!!exporting} variant='filled' onClick={() => submitExport()}>
