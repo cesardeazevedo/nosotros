@@ -51,14 +51,12 @@ function ReactionDock({ onClick }: { onClick: Props['onClick'] }) {
   return (
     <div {...css.props(styles.dock)} onMouseMove={(e) => mouseX.set(e.pageX)}>
       <ReactionIcon title='Like' reaction='🤙' {...props} />
-      <ReactionIcon title={`Let's go`} reaction='🚀' {...props} />
+      <ReactionIcon title='LFG!' reaction='🚀' {...props} />
       <ReactionIcon title='Fire' reaction='🔥' {...props} />
       <ReactionIcon title='Watching' reaction='👀' {...props} />
       <ReactionIcon title='Haha' reaction='😂' {...props} />
       <ReactionIcon title='Salute' reaction='🫡' {...props} />
-      {/* <ReactionIcon title='Hugs' reaction='🫂' {...props} /> */}
-      {/* <ReactionIcon title='Wow' reaction='😮' {...props} /> */}
-      {/* <ReactionIcon title='Sad' reaction='😭' {...props} /> */}
+      <ReactionIcon title='Hugs' reaction='🫂' {...props} />
       <ReactionIcon title='Angry' reaction='😡' {...props} />
     </div>
   )
@@ -68,7 +66,18 @@ export const ReactionPicker = memo(function ReactionPicker(props: Props) {
   const { children, onClick } = props
 
   return (
-    <TooltipRich cursor={false} placement='top-start' content={() => <ReactionDock onClick={onClick} />}>
+    <TooltipRich
+      cursor={false}
+      placement='top-start'
+      enterDelay={500}
+      content={(props) => (
+        <ReactionDock
+          onClick={(e) => {
+            props.close()
+            onClick(e)
+          }}
+        />
+      )}>
       {children}
     </TooltipRich>
   )
