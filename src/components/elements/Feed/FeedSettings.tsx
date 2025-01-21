@@ -43,13 +43,13 @@ export const FeedSettings = observer(function FeedSettings(props: Props) {
             icon={<IconShare3 {...iconProps} />}
             onClick={() => feed.toggleKind(Kind.Repost)}
           />
-          <Chip
-            label='Media'
-            variant='filter'
-            selected={feed.hasKind(Kind.Media)}
-            icon={<IconCamera {...iconProps} />}
-            onClick={() => feed.toggleKind(Kind.Media)}
-          />
+          {/* <Chip */}
+          {/*   label='Media' */}
+          {/*   variant='filter' */}
+          {/*   selected={feed.hasKind(Kind.Media)} */}
+          {/*   icon={<IconCamera {...iconProps} />} */}
+          {/*   onClick={() => feed.toggleKind(Kind.Media)} */}
+          {/* /> */}
           <Chip
             selected={feed.hasKind(Kind.Article)}
             variant='filter'

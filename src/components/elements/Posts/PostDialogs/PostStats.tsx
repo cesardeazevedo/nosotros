@@ -74,9 +74,9 @@ export const PostStats = (props: Props) => {
             <Panel defaultExpanded label='Raw Event'>
               <JsonContent value={note.event} />
             </Panel>
-            <Panel label='User Raw Event'>
-              <JsonContent value={note.user?.meta} />
-            </Panel>
+            {/* <Panel label='User Raw Event'> */}
+            {/*   <JsonContent value={note.user?.meta} /> */}
+            {/* </Panel> */}
           </Paper>
           <Stack justify='flex-end'>
             <Button onClick={onClose}>Close</Button>
