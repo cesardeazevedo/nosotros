@@ -63,7 +63,7 @@ export function parseReplies(tags: ParsedTags): RepliesMetadata {
   const rootId = repliesTags.find((x) => x[3] === 'root')?.[1]
   const parentId = repliesTags.find((x) => x[3] === 'reply')?.[1] || rootId
 
-  const isRoot = !rootId
+  const isRoot = !rootId && !parentId
   return {
     isRoot,
     rootId,

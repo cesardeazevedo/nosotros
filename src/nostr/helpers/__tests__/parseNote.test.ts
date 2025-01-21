@@ -11,105 +11,128 @@ describe('parseNote', () => {
   test('Should expect isRoot true', () => {
     const note = parse({ id: '1', tags: [] })
     expect(note.isRoot).toBe(true)
-    expect(note.parentNoteId).toBe(undefined)
-    expect(note.rootNoteId).toBe(undefined)
+    expect(note.parentId).toBe(undefined)
+    expect(note.rootId).toBe(undefined)
   })
 
   test('Should assert rootNoteId', () => {
     const note = parse({
       id: '1',
-      tags: [['e', '2']],
+      tags: [['e', '2', '', 'root']],
     })
     expect(note.isRoot).toBe(false)
-    expect(note.isRootReply).toBe(true)
-    expect(note.isReplyOfAReply).toBe(false)
-    expect(note.rootNoteId).toBe('2')
-    expect(note.parentNoteId).toBe('2')
+    expect(note.rootId).toBe('2')
+    expect(note.parentId).toBe('2')
   })
 
   test('Should expect isRoot with mention', () => {
     const note = parse({ id: '1', tags: [['e', '2', '', 'mention']] })
     expect(note.isRoot).toBe(true)
-    expect(note.isRootReply).toBe(false)
-    expect(note.isReplyOfAReply).toBe(false)
   })
 
   test('Should expect isRoot false and isRootReply true', () => {
     const note = parse({
       id: '1',
       tags: [
-        ['e', '2'],
+        ['e', '2', '', 'root'],
         ['e', '3', '', 'mention'],
       ],
     })
     expect(note.isRoot).toBe(false)
-    expect(note.isRootReply).toBe(true)
-    expect(note.rootNoteId).toBe('2')
-    expect(note.parentNoteId).toBe('2')
+    expect(note.rootId).toBe('2')
+    expect(note.parentId).toBe('2')
   })
 
   test('Should expect isRootReply true and isReplyOfAReply false', () => {
     const note = parse({
       id: '1',
       tags: [
-        ['e', '2'],
+        ['e', '2', '', 'root'],
         ['e', '3', '', 'mention'],
       ],
     })
-    expect(note.isRootReply).toBe(true)
-    expect(note.isReplyOfAReply).toBe(false)
-    expect(note.rootNoteId).toBe('2')
-    expect(note.parentNoteId).toBe('2')
+    expect(note.rootId).toBe('2')
+    expect(note.parentId).toBe('2')
   })
 
   test('Should expect isRootReply false', () => {
     const note = parse({
       id: '1',
       tags: [
-        ['e', '2'],
-        ['e', '3'],
+        ['e', '2', '', 'root'],
+        ['e', '3', '', 'reply'],
         ['e', '4', '', 'mention'],
       ],
     })
     expect(note.isRoot).toBe(false)
-    expect(note.isRootReply).toBe(false)
-    expect(note.isReplyOfAReply).toBe(true)
-    expect(note.rootNoteId).toBe('2')
-    expect(note.parentNoteId).toBe('3')
+    expect(note.rootId).toBe('2')
+    expect(note.parentId).toBe('3')
   })
 
-  test('Should expect multiple replies and match isReplyOfAReply true', () => {
+  test('Should expect multiple replies', () => {
     const note = parse({
       id: '1',
       tags: [
-        ['e', '2'],
+        ['e', '2', '', 'root'],
         ['e', '3'],
         ['e', '4'],
         ['e', '5'],
-        ['e', '6'],
+        ['e', '6', '', 'reply'],
         ['e', '7', '', 'mention'],
       ],
     })
     expect(note.isRoot).toBe(false)
-    expect(note.isRootReply).toBe(false)
-    expect(note.isReplyOfAReply).toBe(true)
-    expect(note.rootNoteId).toBe('2')
-    expect(note.parentNoteId).toBe('6')
+    expect(note.rootId).toBe('2')
+    expect(note.parentId).toBe('6')
+  })
+
+  test('Should expect a reply without root', () => {
+    const note = parse({
+      id: '1',
+      tags: [
+        ['p', '1'],
+        ['e', '2'],
+        ['e', '3', '', 'reply'],
+      ],
+    })
+    expect(note.isRoot).toBe(false)
+    expect(note.parentId).toBe('3')
   })
 
   test('Should expect mentionedNotes match with `e` mention tags', () => {
     const note = parse({
       id: '1',
       tags: [
-        ['e', '0'],
+        ['e', '0', '', 'root'],
         ['e', '2', '', 'mention'],
         ['e', '3', '', 'mention'],
         ['e', '4', '', 'mention'],
       ],
     })
     expect(note.mentionedNotes).toStrictEqual(['2', '3', '4'])
-    expect(note.rootNoteId).toBe('0')
-    expect(note.parentNoteId).toBe('0')
+    expect(note.rootId).toBe('0')
+    expect(note.parentId).toBe('0')
+  })
+
+  test('Should expect `a` tag root false', () => {
+    const note = parse({
+      id: '1',
+      tags: [['a', '30023:1:key', '', 'root']],
+    })
+    expect(note.isRoot).toBe(false)
+    expect(note.rootId).toBe('30023:1:key')
+    expect(note.parentId).toBe('30023:1:key')
+
+    const note2 = parse({
+      id: '2',
+      tags: [
+        ['e', '1', '', 'reply'],
+        ['a', '30023:1:key', '', 'root'],
+      ],
+    })
+    expect(note2.isRoot).toBe(false)
+    expect(note2.rootId).toBe('30023:1:key')
+    expect(note2.parentId).toBe('1')
   })
 
   test('Should expect mentionedNotes match with nevent', () => {
@@ -130,8 +153,8 @@ describe('parseNote', () => {
     })
     expect(note.mentionedNotes).toStrictEqual(['1', '2', event.id])
     expect(note.relayHints).toStrictEqual({ ids: { [event.id]: [RELAY_1] } })
-    expect(note.rootNoteId).toBe(undefined)
-    expect(note.parentNoteId).toBeUndefined()
+    expect(note.rootId).toBe(undefined)
+    expect(note.parentId).toBeUndefined()
   })
 
   test('Should expect mentionedNotes and mentionedAuthors from naddress', () => {
