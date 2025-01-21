@@ -2,6 +2,8 @@ import { useNoteVisibility } from '@/components/elements/Posts/hooks/useNoteVisi
 import { Divider } from '@/components/ui/Divider/Divider'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { useMobile } from '@/hooks/useMobile'
+import { subscribeNoteStats } from '@/nostr/subscriptions/subscribeNoteStats'
+import { useNostrClientContext } from '@/stores/context/nostr.context.hooks'
 import type { Note } from '@/stores/notes/note'
 import { spacing } from '@/themes/spacing.stylex'
 import { useRouter } from '@tanstack/react-router'
@@ -26,6 +28,7 @@ export const PostRoot = observer(function PostRoot(props: Props) {
   const isMobile = useMobile()
   const router = useRouter()
   const [ref] = useNoteVisibility(note)
+  const context = useNostrClientContext()
 
   const handleRepliesClick = useCallback(() => {
     if (isMobile) {
@@ -39,6 +42,12 @@ export const PostRoot = observer(function PostRoot(props: Props) {
       })
     } else {
       note.toggleReplies()
+      note.setRepliesStatus('LOADING')
+      subscribeNoteStats(context.client, note.event, {}).subscribe({
+        complete: () => {
+          note.setRepliesStatus('LOADED')
+        },
+      })
     }
   }, [router.latestLocation.pathname, isMobile, note])
 

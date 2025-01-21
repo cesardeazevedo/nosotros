@@ -20,15 +20,15 @@ export type NoteStatsOptions = {
 
 const withKind = (kind: Kind, enabled?: boolean) => (enabled !== false ? [kind] : [])
 
-export function buildFilters(event: NostrEvent, options: NoteStatsOptions) {
+export function buildFilters(event: NostrEvent, options?: NoteStatsOptions) {
   const isAddressable = isParameterizedReplaceableKind(event.kind)
   const kinds = [
-    ...withKind(Kind.Reaction, options.reactions),
-    ...withKind(Kind.Repost, options.reposts),
-    ...withKind(Kind.ZapReceipt, options.zaps),
+    ...withKind(Kind.Reaction, options?.reactions),
+    ...withKind(Kind.Repost, options?.reposts),
+    ...withKind(Kind.ZapReceipt, options?.zaps),
     // we are making an exception to fetch kind1 replies for articles
-    ...withKind(Kind.Text, options.replies && (event.kind === Kind.Text || event.kind === Kind.Article)),
-    ...withKind(Kind.Comment, options.replies && event.kind !== Kind.Text),
+    ...withKind(Kind.Text, options?.replies && (event.kind === Kind.Text || event.kind === Kind.Article)),
+    ...withKind(Kind.Comment, options?.replies && event.kind !== Kind.Text),
   ].sort()
 
   const filters = [] as NostrFilter[]
@@ -47,7 +47,7 @@ export function buildFilters(event: NostrEvent, options: NoteStatsOptions) {
 export function subscribeNoteStats(
   client: NostrClient,
   event: NostrEvent,
-  options: NoteStatsOptions,
+  options?: NoteStatsOptions,
 ): Observable<NostrEvent> {
   const filters = buildFilters(event, options)
   return from(filters).pipe(
