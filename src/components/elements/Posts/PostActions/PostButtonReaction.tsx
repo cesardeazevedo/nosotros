@@ -1,12 +1,15 @@
 import { useNoteContext } from '@/components/providers/NoteProvider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { useCurrentPubkey, useRootContext } from '@/hooks/useRootStore'
+import { publishReaction } from '@/nostr/publish/publishReaction'
+import type { Comment } from '@/stores/comment/comment'
 import type { Note } from '@/stores/notes/note'
 import { fallbackEmoji, reactionStore } from '@/stores/reactions/reactions.store'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconHeart, IconHeartFilled } from '@tabler/icons-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { observer } from 'mobx-react-lite'
+import { useCallback } from 'react'
 import { css, html } from 'react-strict-dom'
 import { ReactionPicker } from '../../Reactions/ReactionPicker'
 import { ReactionsTooltip } from '../../Reactions/ReactionsTooltip'
@@ -14,7 +17,7 @@ import { ButtonContainer } from './PostButtonContainer'
 import { iconProps } from './utils'
 
 type Props = {
-  note: Note
+  note: Note | Comment
 }
 
 // Only known emojis
@@ -39,6 +42,14 @@ export const ButtonReaction = observer(function ButtonReaction(props: Props) {
   const myReaction = fallbackEmoji(myReactions?.[note.id]?.[0])
   const color = myReaction ? emojiColors[myReaction] || colors.red7 : colors.red7
   const context = useRootContext()
+
+  const handleReact = useCallback(
+    (reaction: string) => {
+      publishReaction(context.client, note.event, reaction).subscribe()
+    },
+    [context.client, note],
+  )
+
   return (
     <>
       <ButtonContainer
@@ -49,13 +60,13 @@ export const ButtonReaction = observer(function ButtonReaction(props: Props) {
             </ReactionsTooltip>
           )
         }>
-        <ReactionPicker onClick={(reaction) => note.react(context.client, reaction)}>
+        <ReactionPicker onClick={handleReact}>
           <span>
             <AnimatePresence initial={false}>
               <IconButton
                 size={dense ? 'sm' : 'md'}
                 selected={!!myReaction}
-                onClick={() => note.react(context.client, '❤️')}
+                onClick={() => handleReact('❤️')}
                 sx={[(color && styles[`button$${color}`]) || styles.button$red]}
                 selectedIcon={
                   <motion.div

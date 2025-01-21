@@ -18,10 +18,11 @@ import { toggle } from '../helpers/toggle'
 import type { Note } from '../notes/note'
 import { toastStore } from '../ui/toast.store'
 import { userRelayStore } from '../userRelays/userRelay.store'
+import type { Comment } from '../comment/comment'
 
 type EditorStoreOptions = {
-  // Note being replied to
-  parentNote?: Note
+  kind?: Kind
+  parentNote?: Note | Comment
   onPublish?: (event: NostrEventMetadata) => void
 }
 
@@ -66,7 +67,7 @@ export class EditorStore {
   // this needs to be a computed
   get unsignedEvent() {
     return {
-      kind: Kind.Text,
+      kind: this.options.kind || Kind.Text,
       pubkey: this.context?.user?.pubkey || '',
       created_at: Math.floor(Date.now() / 1000),
       content: '',
@@ -206,7 +207,7 @@ export class EditorStore {
   get placeholder(): string {
     const me = this.context?.pubkey
     return this.parent
-      ? this.parent.metadata.isRoot
+      ? this.parent.isRoot
         ? `Comment on ${this.parent.event.pubkey === me ? 'your' : this.parent.user?.displayName || 'user'} post`
         : `Reply to ${this.parent.user?.displayName || 'user'}`
       : "What's in your mind?"

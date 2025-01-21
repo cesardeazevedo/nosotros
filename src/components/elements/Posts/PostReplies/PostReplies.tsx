@@ -2,7 +2,6 @@ import { Stack } from '@/components/ui/Stack/Stack'
 import { useMobile } from '@/hooks/useMobile'
 import { useCurrentUser } from '@/hooks/useRootStore'
 import type { Note } from '@/stores/notes/note'
-import { useNoteStats } from '@/stores/notes/note.hooks'
 import { spacing } from '@/themes/spacing.stylex'
 import { observer } from 'mobx-react-lite'
 import { useCallback } from 'react'
@@ -22,7 +21,6 @@ type Props = {
 
 export const PostReplies = observer(function PostReplies(props: Props) {
   const { note, loadingRows, renderEmpty = false } = props
-  useNoteStats(note.root || note, { replies: true })
 
   const user = useCurrentUser()
   const isMobile = useMobile()

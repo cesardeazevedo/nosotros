@@ -2,6 +2,7 @@ import { useNoteContext } from '@/components/providers/NoteProvider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { useCurrentPubkey, useGlobalSettings } from '@/hooks/useRootStore'
 import { useTheme } from '@/hooks/useTheme'
+import type { Comment } from '@/stores/comment/comment'
 import type { Note } from '@/stores/notes/note'
 import { zapStore } from '@/stores/zaps/zaps.store'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
@@ -14,7 +15,7 @@ import { ButtonContainer, type ContainerProps } from './PostButtonContainer'
 import { iconProps } from './utils'
 
 type Props = {
-  note: Note
+  note: Note | Comment
   onClick?: () => void
 }
 

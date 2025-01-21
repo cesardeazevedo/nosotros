@@ -1,4 +1,5 @@
 import { Stack } from '@/components/ui/Stack/Stack'
+import type { Comment } from '@/stores/comment/comment'
 import type { Note } from '@/stores/notes/note'
 import { Content } from 'components/elements/Content/Content'
 import { UserName } from 'components/elements/User/UserName'
@@ -12,7 +13,7 @@ import type { Props as PostContentWrapperProps } from '../PostContentWrapper'
 import { PostContentWrapper } from '../PostContentWrapper'
 
 type Props = {
-  note: Note
+  note: Note | Comment
   size?: PostContentWrapperProps['size']
 }
 
@@ -28,7 +29,7 @@ const NonBubbleNodes = [
   'codeBlock',
 ] as Node['type'][]
 
-export const ReplyUserHeader = observer(function ReplyUserHeader(props: { note: Note }) {
+export const ReplyUserHeader = observer(function ReplyUserHeader(props: { note: Props['note'] }) {
   const { note } = props
   return (
     <Stack horizontal={false}>

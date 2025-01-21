@@ -3,14 +3,15 @@ import type { NostrEvent } from 'nostr-tools'
 import type { Observable } from 'rxjs'
 import { mergeMap, of } from 'rxjs'
 import { parseArticle } from '../helpers/parseArticle'
+import { parseComment } from '../helpers/parseComment'
 import { parseFollowList } from '../helpers/parseFollowList'
 import { parseNote } from '../helpers/parseNote'
+import { parseRelayDiscovery } from '../helpers/parseRelayDiscovery'
 import { parseRelayList } from '../helpers/parseRelayList'
 import { parseRepost } from '../helpers/parseRepost'
 import { parseUser } from '../helpers/parseUser'
 import { parseZapEvent } from '../helpers/parseZap'
 import { mergeMetadata, persistMetadata } from './mapMetadata'
-import { parseRelayDiscovery } from '../helpers/parseRelayDiscovery'
 
 export function parseEventMetadata() {
   return (source$: Observable<NostrEvent>) => {
@@ -22,6 +23,9 @@ export function parseEventMetadata() {
           }
           case Kind.Text: {
             return of(event).pipe(persistMetadata(parseNote))
+          }
+          case Kind.Comment: {
+            return of(event).pipe(persistMetadata(parseComment))
           }
           case Kind.Article: {
             return of(event).pipe(persistMetadata(parseArticle))

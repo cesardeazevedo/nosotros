@@ -16,7 +16,7 @@ import { observer } from 'mobx-react-lite'
 import { useCallback, useState } from 'react'
 import { css, html } from 'react-strict-dom'
 import { Editor } from '../../Editor/Editor'
-import { usePostVisibility } from '../hooks/usePostVisibility'
+import { useNoteVisibility } from '../hooks/useNoteVisibility'
 import { PostActions } from '../PostActions/PostActions'
 import { PostRepliesMuted } from './PostRepliesMuted'
 import { PostReplyContent } from './PostReplyContent'
@@ -47,7 +47,7 @@ export const PostReply = observer(function PostReply(props: Props) {
   const isMobile = useMobile()
   const collapsedLevel = isMobile ? 4 : 4
   const [open, setOpen] = useState(level < collapsedLevel)
-  const [ref] = usePostVisibility(note, { replies: true })
+  const [ref] = useNoteVisibility(note, { replies: true })
   const user = useCurrentUser()
   const event = note.event
 

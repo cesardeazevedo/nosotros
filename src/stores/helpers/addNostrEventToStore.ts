@@ -11,6 +11,7 @@ import { userRelayStore } from '../userRelays/userRelay.store'
 import { userStore } from '../users/users.store'
 import { zapStore } from '../zaps/zaps.store'
 import { listStore } from '../lists/lists.store'
+import { commentStore } from '../comment/comment.store'
 
 export function addNostrEventToStore(event: NostrEventMetadata) {
   const metadata = event[metadataSymbol]
@@ -28,8 +29,16 @@ export function addNostrEventToStore(event: NostrEventMetadata) {
       modelStore.add(followsStore.add(event, metadata))
       break
     }
+    case Kind.Reaction: {
+      modelStore.add(reactionStore.add(event))
+      break
+    }
     case Kind.Repost: {
       modelStore.add(repostStore.add(event, metadata))
+      break
+    }
+    case Kind.Comment: {
+      modelStore.add(commentStore.add(event, metadata))
       break
     }
     case Kind.ZapReceipt: {
@@ -38,10 +47,6 @@ export function addNostrEventToStore(event: NostrEventMetadata) {
     }
     case Kind.RelayList: {
       userRelayStore.add(event, metadata)
-      break
-    }
-    case Kind.Reaction: {
-      modelStore.add(reactionStore.add(event))
       break
     }
     case Kind.RelayDiscovery: {

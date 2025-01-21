@@ -2,6 +2,7 @@ import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { SxProps } from '@/components/ui/types'
 import { useMobile } from '@/hooks/useMobile'
+import type { Comment } from '@/stores/comment/comment'
 import type { Note } from '@/stores/notes/note'
 import { observer } from 'mobx-react-lite'
 import { css } from 'react-strict-dom'
@@ -13,7 +14,7 @@ import { ButtonRepost } from './PostButtonRepost'
 import { ButtonZap } from './PostButtonZap'
 
 type Props = {
-  note: Note
+  note: Note | Comment
   onReplyClick?: () => void
   renderOptions?: boolean
   sx?: SxProps

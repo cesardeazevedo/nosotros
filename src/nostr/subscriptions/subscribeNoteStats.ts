@@ -32,8 +32,6 @@ export function buildFilters(event: NostrEvent, options: NoteStatsOptions) {
   ].sort()
 
   const filters = [] as NostrFilter[]
-  // removed since parameter for now
-  // const since = options?.lastSyncedAt ? { since: options.lastSyncedAt } : {}
 
   if (isAddressable) {
     const d = event.tags.find((x) => x[0] === 'd')?.[1]

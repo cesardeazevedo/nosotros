@@ -2,12 +2,13 @@ import type { NoteMetadata } from '@/nostr/types'
 import { dedupe } from 'core/helpers/dedupe'
 import { action, makeObservable, observable } from 'mobx'
 import type { NostrEvent } from 'nostr-tools'
+import { isParameterizedReplaceableKind } from 'nostr-tools/kinds'
 import { Note } from './note'
 
 export class NoteStore {
-  notes = observable.map<string, Note>({}, { name: 'notes', deep: false })
-  replies = observable.map<string, string[]>({}, { name: 'replies' })
-  addresses = new Map<string, string>()
+  notes = observable.map<string, Note>()
+  replies = observable.map<string, string[]>()
+  addresses = observable.map<string, string[]>()
 
   constructor() {
     makeObservable(this, { add: action, addReply: action })
@@ -16,10 +17,19 @@ export class NoteStore {
   clear() {
     this.notes.clear()
     this.replies.clear()
+    this.addresses.clear()
   }
 
   get(id?: string) {
     return this.notes.get(id || '')
+  }
+
+  getReplies(note: Note) {
+    if (isParameterizedReplaceableKind(note.event.kind) && note.d) {
+      return [...(this.replies.get(note.id) || []), ...(this.addresses.get(note.address) || [])]
+    } else {
+      return this.replies.get(note.id)
+    }
   }
 
   add(event: NostrEvent, metadata: NoteMetadata) {
@@ -27,7 +37,6 @@ export class NoteStore {
     if (!found) {
       const note = new Note(event, metadata)
       this.notes.set(note.id, note)
-      this.addAddress(note)
       if (!note.metadata.isRoot) {
         this.addReply(note)
       }
@@ -36,14 +45,15 @@ export class NoteStore {
     return found
   }
 
-  addAddress(note: Note) {
-    this.addresses.set(`${note.event.kind}:${note.event.pubkey}:${note.metadata.tags.dtags}`, note.id)
-  }
-
   addReply(note: Note) {
-    const parentId = note.metadata.parentNoteId
+    const parentId = note.metadata.parentId
     if (parentId) {
-      this.replies.set(parentId, dedupe(this.replies.get(parentId), [note.id]))
+      const isAddressable = parentId.includes(':')
+      if (isAddressable) {
+        this.addresses.set(parentId, dedupe(this.addresses.get(parentId), [note.id]))
+      } else {
+        this.replies.set(parentId, dedupe(this.replies.get(parentId), [note.id]))
+      }
     }
   }
 }

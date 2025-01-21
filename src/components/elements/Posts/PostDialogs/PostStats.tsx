@@ -4,6 +4,7 @@ import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Paper } from '@/components/ui/Paper/Paper'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
+import type { Comment } from '@/stores/comment/comment'
 import type { Note } from '@/stores/notes/note'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconChevronDown, IconChevronRight } from '@tabler/icons-react'
@@ -14,7 +15,8 @@ import { RemoveScroll } from 'react-remove-scroll'
 import { css, html } from 'react-strict-dom'
 
 type Props = {
-  note: Note
+  note: Note | Comment
+  onClose?: () => void
 }
 
 const Panel = (props: { children: React.ReactNode; label: string; value?: object; defaultExpanded?: boolean }) => {
@@ -55,7 +57,7 @@ const JsonContent = function PostUserJson(props: { value?: object }) {
 }
 
 export const PostStats = (props: Props) => {
-  const { note } = props
+  const { note, onClose } = props
   return (
     <RemoveScroll>
       <html.div style={styles.root}>
@@ -77,7 +79,7 @@ export const PostStats = (props: Props) => {
             </Panel>
           </Paper>
           <Stack justify='flex-end'>
-            <Button>Close</Button>
+            <Button onClick={onClose}>Close</Button>
           </Stack>
         </Stack>
       </html.div>

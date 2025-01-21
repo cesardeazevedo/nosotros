@@ -1,5 +1,5 @@
+import { Kind } from '@/constants/kinds'
 import { pool } from '@/nostr/pool'
-import { publishReaction } from '@/nostr/publish/publishReaction'
 import type { NoteMetadata } from '@/nostr/types'
 import { noteStore } from '@/stores/notes/notes.store'
 import { seenStore } from '@/stores/seen/seen.store'
@@ -9,11 +9,11 @@ import { computed, makeAutoObservable } from 'mobx'
 import { computedFn } from 'mobx-utils'
 import type { NostrEvent } from 'nostr-tools'
 import { nip19 } from 'nostr-tools'
-import type { NostrClient } from 'nostr/nostr'
-import { tap } from 'rxjs'
+import { isParameterizedReplaceableKind } from 'nostr-tools/kinds'
+import type { Comment } from '../comment/comment'
+import { commentStore } from '../comment/comment.store'
 import { createEditorStore } from '../editor/editor.store'
 import { repostStore } from '../reposts/reposts.store'
-import { toastStore } from '../ui/toast.store'
 import type { User } from '../users/user'
 
 type ReplyStatus = 'IDLE' | 'LOADING' | 'LOADED'
@@ -63,16 +63,20 @@ export class Note {
     return seenStore.get(this.id) || []
   }
 
+  get isRoot() {
+    return this.metadata.isRoot
+  }
+
   get headRelay() {
     return this.seenOn.filter((x) => !pool.blacklisted.has(x))?.[0]
   }
 
   get root() {
-    return noteStore.get(this.metadata.rootNoteId)
+    return noteStore.get(this.metadata.rootId)
   }
 
   get parent() {
-    return noteStore.get(this.metadata.parentNoteId)
+    return noteStore.get(this.metadata.parentId)
   }
 
   get totalReplies() {
@@ -130,6 +134,7 @@ export class Note {
 
   get editor() {
     return createEditorStore({
+      kind: this.event.kind !== Kind.Text ? Kind.Comment : Kind.Text,
       parentNote: this,
       onPublish: () => {
         this.toggleReplying(false)
@@ -145,9 +150,14 @@ export class Note {
     return this.metadata.mentionedNotes.map((id) => noteStore.get(id)).filter((note) => !!note)
   }
 
-  get replies() {
-    const data = noteStore.replies.get(this.id) || []
-    return data.map((id) => noteStore.get(id)).filter((note): note is Note => !!note)
+  get replies(): (Note | Comment)[] {
+    const replies = noteStore.getReplies(this) || []
+    // merge with NIP-22 comments, this is only used for long-form-articles
+    const comments = commentStore.getReplies(this.id) || []
+    return [
+      ...replies.map((id) => noteStore.get(id)).filter((note): note is Note => !!note),
+      ...comments.map((id) => commentStore.get(id)).filter((comment): comment is Comment => !!comment),
+    ]
   }
 
   repliesSorted = computedFn((user?: User) => {
@@ -190,19 +200,31 @@ export class Note {
   })
 
   get replyTags(): NostrEvent['tags'] {
-    if (this.metadata.isRoot) {
+    if (this.event.kind === Kind.Text) {
+      if (this.metadata.isRoot) {
+        return [
+          ['e', this.id, this.headRelay || '', 'root', this.event.pubkey],
+          ['p', this.event.pubkey, this.user?.headRelay].filter((x) => x !== undefined),
+        ]
+      }
       return [
-        ['e', this.id, this.headRelay || '', 'root', this.event.pubkey],
-        ['p', this.event.pubkey, this.user?.headRelay].filter((x) => x !== undefined),
+        ['e', this.metadata.rootId, this.root?.headRelay || '', 'root', this.root?.event.pubkey].filter(
+          (x) => x !== undefined,
+        ),
+        ['e', this.id, this.headRelay || '', 'reply', this.event.pubkey],
+        ['p', this.event.pubkey],
       ]
+    } else {
+      const tags = [
+        ['E', this.id, this.headRelay, this.pubkey],
+        ['K', this.event.kind.toString()],
+        ['P', this.pubkey],
+      ]
+      if (this.isAddressable) {
+        tags.unshift(['A', this.address, this.headRelay])
+      }
+      return tags
     }
-    return [
-      ['e', this.metadata.rootNoteId, this.root?.headRelay || '', 'root', this.root?.event.pubkey].filter(
-        (x) => x !== undefined,
-      ),
-      ['e', this.id, this.headRelay || '', 'reply', this.event.pubkey],
-      ['p', this.event.pubkey],
-    ]
   }
 
   get repliesLeft() {
@@ -259,15 +281,5 @@ export class Note {
 
   paginate(offset = PAGINATION_SIZE) {
     this.limit = Math.min(this.replies.length, this.limit + offset)
-  }
-
-  react(client: NostrClient, reaction: string) {
-    return publishReaction(client, this.event, reaction)
-      .pipe(
-        tap((event) => {
-          toastStore.enqueue(`Reaction ${event.content} published`, { duration: 3000 })
-        }),
-      )
-      .subscribe()
   }
 }

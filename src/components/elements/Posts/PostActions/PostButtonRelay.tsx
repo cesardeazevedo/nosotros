@@ -1,16 +1,17 @@
+import { useNoteContext } from '@/components/providers/NoteProvider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
+import type { Comment } from '@/stores/comment/comment'
+import type { Note } from '@/stores/notes/note'
 import { IconServerBolt } from '@tabler/icons-react'
 import { useMobile } from 'hooks/useMobile'
 import { observer } from 'mobx-react-lite'
 import { useCallback } from 'react'
-import type { Note } from '@/stores/notes/note'
 import { ButtonContainer, type ContainerProps } from './PostButtonContainer'
 import { iconProps } from './utils'
-import { useNoteContext } from '@/components/providers/NoteProvider'
 
 type Props = {
-  note: Note
+  note: Note | Comment
 }
 
 export const ButtonRelays = observer(function ButtonRelays(props: Props & ContainerProps) {

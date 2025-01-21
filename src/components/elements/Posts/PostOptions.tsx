@@ -1,3 +1,4 @@
+import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Avatar } from '@/components/ui/Avatar/Avatar'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
@@ -6,32 +7,24 @@ import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { MenuList } from '@/components/ui/MenuList/MenuList'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
+import type { Comment } from '@/stores/comment/comment'
 import type { Note } from '@/stores/notes/note'
+import { toastStore } from '@/stores/ui/toast.store'
 import { spacing } from '@/themes/spacing.stylex'
-import {
-  IconBookmark,
-  IconCopy,
-  IconDotsVertical,
-  IconExternalLink,
-  IconEyeOff,
-  IconInfoSquareRounded,
-  IconLink,
-  IconUserMinus,
-} from '@tabler/icons-react'
+import { IconCopy, IconDotsVertical, IconExternalLink, IconInfoSquareRounded, IconLink } from '@tabler/icons-react'
 import { DialogSheet } from 'components/elements/Layouts/Dialog'
 import { observer } from 'mobx-react-lite'
 import { useCallback, useState } from 'react'
 import { css, html } from 'react-strict-dom'
 import { PostStats } from './PostDialogs/PostStats'
-import { toastStore } from '@/stores/ui/toast.store'
 
 type Props = {
-  note: Note
+  note: Note | Comment
   dense?: boolean
 }
 
 type PropsOptions = {
-  note: Note
+  note: Note | Comment
   onCopyIdClick: () => void
   onCopyAuthorIdClick: () => void
   onCopyLinkClick: () => void
@@ -133,7 +126,7 @@ const PostMenuOpenIn = observer(function PostMenuOpenIn(props: PropsMenuItems) {
   )
 })
 
-const Options = observer(function (props: PropsOptions) {
+const Options = observer(function Options(props: PropsOptions) {
   return (
     <>
       <MenuItem leadingIcon={<IconInfoSquareRounded />} label='Details' onClick={props.onDetailsClick} />
@@ -141,20 +134,21 @@ const Options = observer(function (props: PropsOptions) {
       <MenuItem leadingIcon={<IconCopy />} label='Copy ID' onClick={props.onCopyIdClick} />
       <MenuItem leadingIcon={<IconCopy />} label='Copy Author ID' onClick={props.onCopyAuthorIdClick} />
       <MenuItem leadingIcon={<IconLink />} label='Copy Link' onClick={props.onCopyLinkClick} />
-      <PostMenuOpenIn nevent={props.note.nevent} />
-      <Divider />
-      <Text variant='label' size='sm' sx={styles.label}>
-        Coming Soon
-      </Text>
-      <MenuItem disabled leadingIcon={<IconBookmark />} label='Bookmark' />
-      <MenuItem disabled variant='danger' leadingIcon={<IconEyeOff />} label='Mute' />
-      <MenuItem disabled variant='danger' leadingIcon={<IconUserMinus />} label='Unfollow' />
+      {/* <PostMenuOpenIn nevent={props.note.nevent} /> */}
+      {/* <Divider /> */}
+      {/* <Text variant='label' size='sm' sx={styles.label}> */}
+      {/*   Coming Soon */}
+      {/* </Text> */}
+      {/* <MenuItem disabled leadingIcon={<IconBookmark />} label='Bookmark' /> */}
+      {/* <MenuItem disabled variant='danger' leadingIcon={<IconEyeOff />} label='Mute' /> */}
+      {/* <MenuItem disabled variant='danger' leadingIcon={<IconUserMinus />} label='Unfollow' /> */}
     </>
   )
 })
 
 export const PostOptions = observer(function PostOptions(props: Props) {
-  const { dense = false, note } = props
+  const { note } = props
+  const { dense } = useNoteContext()
   const [debugDialog, setDebugDialog] = useState(false)
   const [open, setOpen] = useState(false)
   const isMobile = isMobileDevice()
@@ -189,7 +183,7 @@ export const PostOptions = observer(function PostOptions(props: Props) {
   return (
     <>
       <DialogSheet title='Stats' open={debugDialog} onClose={handleClose} maxWidth='sm'>
-        <PostStats note={note} />
+        <PostStats note={note} onClose={handleClose} />
       </DialogSheet>
       {!isMobile && (
         <Menu
@@ -206,7 +200,7 @@ export const PostOptions = observer(function PostOptions(props: Props) {
           <Options
             note={note}
             onCopyIdClick={handleCopy(nevent)}
-            onCopyAuthorIdClick={handleCopy(note.nprofile as string | undefined)}
+            onCopyAuthorIdClick={handleCopy(note.user?.nprofile)}
             onCopyLinkClick={handleCopy(link)}
             onDetailsClick={handleDetailsDialog}
           />
@@ -225,7 +219,7 @@ export const PostOptions = observer(function PostOptions(props: Props) {
                 <Options
                   note={note}
                   onCopyIdClick={handleCopy(nevent)}
-                  onCopyAuthorIdClick={handleCopy(note.nprofile as string | undefined)}
+                  onCopyAuthorIdClick={handleCopy(note.user?.nprofile)}
                   onCopyLinkClick={handleCopy(link)}
                   onDetailsClick={handleDetailsDialog}
                 />

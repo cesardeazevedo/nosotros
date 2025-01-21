@@ -1,13 +1,16 @@
 import { makeAutoObservable, observable } from 'mobx'
 import type { NostrEvent } from 'nostr-tools'
 import { isParameterizedReplaceableKind } from 'nostr-tools/kinds'
+import type { Comment } from '../comment/comment'
 import type { Follows } from '../follows/follow'
 import type { Note } from '../notes/note'
 import type { Repost } from '../reposts/repost'
 import type { User } from '../users/user'
 import type { ZapReceipt } from '../zaps/zap.receipt.store'
 
-class ModelStore<T extends User | Note | Follows | Repost | ZapReceipt | NostrEvent> {
+export type ModelEvent = User | Note | Follows | Repost | ZapReceipt | Comment | NostrEvent
+
+class ModelStore<T extends ModelEvent> {
   data = observable.map<string, T>({}, { deep: false })
   addressable = observable.map<string, T>({}, { deep: false })
 
@@ -17,13 +20,6 @@ class ModelStore<T extends User | Note | Follows | Repost | ZapReceipt | NostrEv
 
   get(id: string | undefined) {
     return this.data.get(id || '')
-  }
-
-  getEvent(id: string | undefined): NostrEvent | undefined {
-    const item = this.data.get(id || '')
-    if (item) {
-      return 'event' in item ? item.event : item
-    }
   }
 
   getAddressable(id: string | undefined) {

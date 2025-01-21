@@ -1,5 +1,7 @@
 import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Button } from '@/components/ui/Button/Button'
+import type { Comment } from '@/stores/comment/comment'
+import type { Note } from '@/stores/notes/note'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconPlayerPlayFilled } from '@tabler/icons-react'
@@ -11,10 +13,11 @@ const REGEX_VIDEO_ID = /.*(?:youtu.be\/|v\/|u\/\w\/|shorts|embed\/|watch\?v=)([^
 
 type Props = {
   src: string
+  note?: Note | Comment
 }
 
 export const YoutubeEmbed = (props: Props) => {
-  const { src } = props
+  const { src, note } = props
   const [open, setOpen] = useState(false)
   const { dense } = useNoteContext()
 
@@ -27,7 +30,9 @@ export const YoutubeEmbed = (props: Props) => {
     <html.div style={[styles.root, dense && styles.root$dense]}>
       {embedId && (
         <html.div style={styles.content}>
-          {!open && <Image dense proxy={false} src={posterUrl} onClick={() => setOpen(true)} sx={styles.image} />}
+          {!open && (
+            <Image dense proxy={false} note={note} src={posterUrl} onClick={() => setOpen(true)} sx={styles.image} />
+          )}
           {open && (
             <html.div style={styles.iframe}>
               <iframe src={iframeSrc} width={400} height={280} />

@@ -1,4 +1,5 @@
 import { Fab } from '@/components/ui/Fab/Fab'
+import type { Comment } from '@/stores/comment/comment'
 import type { Note } from '@/stores/notes/note'
 import { palette } from '@/themes/palette.stylex'
 import { observer } from 'mobx-react-lite'
@@ -7,7 +8,7 @@ import { css, html } from 'react-strict-dom'
 import useMeasure from 'react-use-measure'
 
 export type Props = {
-  note: Note
+  note: Note | Comment
   size?: 'xs' | 'sm' | 'md'
   bubble?: boolean
   initialExpanded?: boolean

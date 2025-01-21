@@ -4,10 +4,11 @@ import { Kind } from '@/constants/kinds'
 import { RELAY_1, RELAY_2, RELAY_3, RELAY_4, RELAY_5 } from '@/constants/testRelays'
 import { clearCache } from '@/nostr/cache'
 import { db } from '@/nostr/db'
+import { parseComment } from '@/nostr/helpers/parseComment'
 import { parseFollowList } from '@/nostr/helpers/parseFollowList'
-import { replay as replayMailbox } from '@/nostr/mailbox'
 import { parseNote } from '@/nostr/helpers/parseNote'
 import { parseUser } from '@/nostr/helpers/parseUser'
+import { replay as replayMailbox } from '@/nostr/mailbox'
 import { replay as replayUsers } from '@/nostr/nips/nip01.users'
 import { replay as replayNIP02 } from '@/nostr/nips/nip02.follows'
 import { replay as replayNIP65 } from '@/nostr/nips/nip65.relaylist'
@@ -15,6 +16,8 @@ import type { NostrClientOptions } from '@/nostr/nostr'
 import { NostrClient } from '@/nostr/nostr'
 import { pool } from '@/nostr/pool'
 import { defaultNostrSettings, type NostrSettings } from '@/nostr/settings'
+import type { Comment } from '@/stores/comment/comment'
+import { commentStore } from '@/stores/comment/comment.store'
 import { followsStore } from '@/stores/follows/follows.store'
 import type { Note } from '@/stores/notes/note'
 import { noteStore } from '@/stores/notes/notes.store'
@@ -44,6 +47,7 @@ interface Fixtures {
   ) => NostrClient
   createUser: (data: Partial<NostrEvent>) => User
   createNote: (data: Partial<NostrEvent>, client?: NostrClient) => Note
+  createComment: (data: Partial<NostrEvent>, client?: NostrClient) => Comment
   createFollows: (pubkey: string, tags: string[]) => void
   createReaction: (data: Partial<NostrEvent>) => void
   insertRelayList: (data: Partial<NostrEvent>, client?: NostrClient) => Promise<void>
@@ -134,6 +138,14 @@ export const test = base.extend<Fixtures>({
       const metadata = parseNote(event)
       createUser({ pubkey: event.pubkey })
       return noteStore.add(event, metadata)
+    })
+  },
+  createComment: async ({ clear, createUser }, use) => {
+    use((data: Partial<NostrEvent>) => {
+      const event = fakeNote({ kind: Kind.Comment, ...data })
+      const metadata = parseComment(event)
+      createUser({ pubkey: event.pubkey })
+      return commentStore.add(event, metadata)
     })
   },
   createFollows: async ({ clear }, use) => {
