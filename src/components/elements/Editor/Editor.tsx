@@ -31,10 +31,11 @@ type Props = {
   renderDiscard?: boolean
   renderBubble?: boolean
   sx?: SxProps
+  onDiscard?: () => void
 }
 
 export const Editor = observer(function Editor(props: Props) {
-  const { store, initialOpen, dense = false, renderDiscard = true, renderBubble = false, sx } = props
+  const { store, initialOpen, dense = false, renderDiscard = true, renderBubble = false, sx, onDiscard } = props
 
   const context = useRootContext()
 
@@ -91,12 +92,12 @@ export const Editor = observer(function Editor(props: Props) {
               <>
                 {renderBubble && (
                   <EditorActionsPopover store={store}>
-                    <EditorSubmit dense={dense} store={store} renderDiscard={renderDiscard} />
+                    <EditorSubmit dense={dense} store={store} renderDiscard={renderDiscard} onDiscard={onDiscard} />
                   </EditorActionsPopover>
                 )}
                 {!renderBubble && (
                   <EditorToolbar dense={dense} store={store}>
-                    <EditorSubmit dense={dense} store={store} renderDiscard={renderDiscard} />
+                    <EditorSubmit dense={dense} store={store} renderDiscard={renderDiscard} onDiscard={onDiscard} />
                   </EditorToolbar>
                 )}
               </>

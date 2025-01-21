@@ -73,7 +73,7 @@ export const RepostPopover = (props: Props) => {
           />
           <LinkBase
             disabled={disableLink}
-            search={{ quoting: note.nevent }}
+            search={{ quoting: note.isAddressable ? note.naddress : note.nevent }}
             // @ts-ignore
             state={{ from: router.latestLocation.pathname }}>
             <MenuItem leadingIcon={<IconBlockquote strokeWidth='1.5' />} label='Quote' onClick={handleClose} />

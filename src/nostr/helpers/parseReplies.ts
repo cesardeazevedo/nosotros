@@ -4,10 +4,8 @@ import { isMention } from './parseTags'
 
 export type RepliesMetadata = {
   isRoot: boolean
-  isRootReply: boolean
-  isReplyOfAReply: boolean
-  rootNoteId: string | undefined
-  parentNoteId: string | undefined
+  rootId: string | undefined
+  parentId: string | undefined
   relayHints: RelayHints
 }
 
@@ -58,18 +56,18 @@ function parseRepliesHints(tags: ParsedTags) {
 // These are NIP-10 reply marks
 export function parseReplies(tags: ParsedTags): RepliesMetadata {
   const relayHints = parseRepliesHints(tags)
-  const repliesTags = tags.e?.filter((tag) => !isMention(tag)) || []
-  const isRoot = repliesTags.length === 0
-  const isRootReply = repliesTags.length === 1
-  const isReplyOfAReply = repliesTags.length > 1
-  const rootNoteId = !isRoot ? repliesTags[0][1] : undefined
-  const parentNoteId = repliesTags[repliesTags.length - 1]?.[1] || undefined
+  const repliesTags = [
+    ...(tags.e?.filter((tag) => !isMention(tag)) || []),
+    ...(tags.a?.filter((tag) => !isMention(tag)) || []),
+  ]
+  const rootId = repliesTags.find((x) => x[3] === 'root')?.[1]
+  const parentId = repliesTags.find((x) => x[3] === 'reply')?.[1] || rootId
+
+  const isRoot = !rootId
   return {
     isRoot,
-    isRootReply,
-    isReplyOfAReply,
-    rootNoteId,
-    parentNoteId,
+    rootId,
+    parentId,
     relayHints,
   }
 }

@@ -1,6 +1,7 @@
 import { mergeRelayHints } from '@/core/mergers/mergeRelayHints'
 import { ofKind } from '@/core/operators/ofKind'
 import { subscribeIdsFromQuotes } from '@/nostr/operators/subscribeIdsFromQuotes'
+import type { NostrEventComment } from '@/nostr/types'
 import { metadataSymbol, type NostrEventNote } from '@/nostr/types'
 import { Kind } from 'constants/kinds'
 import type { NostrFilter } from 'core/types'
@@ -8,7 +9,7 @@ import type { ClientSubOptions, NostrClient } from 'nostr/nostr'
 import type { Observable } from 'rxjs'
 import { EMPTY, connect, expand, filter, from, ignoreElements, merge, mergeMap, of, skip } from 'rxjs'
 
-export type Note$ = Observable<NostrEventNote>
+export type Note$ = Observable<NostrEventNote | NostrEventComment>
 
 type ThreadsOptions = {
   includeRoot?: boolean
@@ -49,15 +50,15 @@ export class NIP01Notes {
               if (depth > 1) {
                 return EMPTY
               }
-              const { parentNoteId } = event[metadataSymbol]
-              if (parentNoteId) {
-                return this.subNotesWithRelated({ kinds: [Kind.Text], ids: [parentNoteId] })
+              const { parentId } = event[metadataSymbol]
+              if (parentId) {
+                return this.subNotesWithRelated({ kinds: [Kind.Text], ids: [parentId] })
               }
               return EMPTY
             }),
             filter((x) => {
               // Only return the first parent
-              const parent = event[metadataSymbol].parentNoteId
+              const parent = event[metadataSymbol].parentId
               if (parent) {
                 return x.id === parent
               }
@@ -107,9 +108,9 @@ export class NIP01Notes {
         event$,
         event$.pipe(
           mergeMap((event) => {
-            const root = event[metadataSymbol].rootNoteId
-            if (root) {
-              return merge(this.subNotesWithRelated({ ids: [root] }), this.subReplies(root))
+            const rootId = event[metadataSymbol].rootId
+            if (rootId) {
+              return merge(this.subNotesWithRelated({ ids: [rootId] }), this.subReplies(rootId))
             }
             return EMPTY
           }),
@@ -119,7 +120,7 @@ export class NIP01Notes {
   }
 
   withRelatedAuthors() {
-    return connect((shared$: Observable<NostrEventNote>) => {
+    return connect((shared$: Note$) => {
       return merge(shared$, shared$.pipe(this.subscribeNoteAuthors(), ignoreElements()))
     })
   }

@@ -99,7 +99,19 @@ export class Note {
   }
 
   get alt() {
-    return this.metadata.tags.alt?.flat()?.[0]
+    return this.metadata.tags.alt?.flat()?.[1]
+  }
+
+  get d() {
+    return this.metadata.tags.d?.flat()?.[1]
+  }
+
+  get isAddressable() {
+    return isParameterizedReplaceableKind(this.event.kind)
+  }
+
+  get address() {
+    return `${this.event.kind}:${this.pubkey}:${this.d}`
   }
 
   get editor() {

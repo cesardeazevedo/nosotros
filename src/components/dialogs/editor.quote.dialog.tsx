@@ -14,7 +14,7 @@ export const EditorQuoteDialog = observer(function EditorQuoteDialog() {
     from: '__root__',
     // @ts-ignore
     select: (x) => x.search.quoting,
-  })
+  }) as string | undefined
   const goBack = useGoBack()
 
   const handleClose = useCallback(() => {
@@ -33,12 +33,21 @@ export const EditorQuoteDialog = observer(function EditorQuoteDialog() {
 
   useEffect(() => {
     if (quoting && store.editor) {
-      store.editor
-        .chain()
-        .insertContent({ type: 'text', text: ' ' })
-        .insertNEvent({ nevent: 'nostr:' + quoting })
-        .focus('start')
-        .run()
+      if (quoting.startsWith('nevent')) {
+        store.editor
+          .chain()
+          .insertContent({ type: 'text', text: ' ' })
+          .insertNEvent({ nevent: 'nostr:' + quoting })
+          .focus('start')
+          .run()
+      } else {
+        store.editor
+          .chain()
+          .insertContent({ type: 'text', text: ' ' })
+          .insertNAddr({ naddr: 'nostr:' + quoting })
+          .focus('start')
+          .run()
+      }
     }
   }, [quoting, store.editor])
 
@@ -53,7 +62,7 @@ export const EditorQuoteDialog = observer(function EditorQuoteDialog() {
         <>
           <RemoveScroll>
             <html.div style={styles.root}>
-              <Editor initialOpen store={store} />
+              <Editor initialOpen store={store} onDiscard={handleClose} />
             </html.div>
           </RemoveScroll>
         </>

@@ -11,16 +11,18 @@ type Props = {
   store: EditorStore
   dense?: boolean
   renderDiscard?: boolean
+  onDiscard?: () => void
 }
 
 export const EditorSubmit = (props: Props) => {
-  const { store, dense, renderDiscard } = props
+  const { store, dense, renderDiscard, onDiscard } = props
   const pubkey = useCurrentPubkey()
 
   const handleDiscard = useCallback((event: StrictClickEvent) => {
     event.stopPropagation()
     event.preventDefault()
     store.reset()
+    onDiscard?.()
   }, [])
 
   return (
