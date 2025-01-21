@@ -12,6 +12,7 @@ export type TabsContextValues = {
   disabled?: boolean
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const TabsContext = createContext<TabsContextValues | undefined>(undefined)
 
 type Props = Omit<TabsContextValues, 'onChange' | 'onTabActivated'> & {

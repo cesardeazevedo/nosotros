@@ -1,21 +1,19 @@
 import { useNoteContext } from '@/components/providers/NoteProvider'
-import { Avatar } from '@/components/ui/Avatar/Avatar'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Menu } from '@/components/ui/Menu/Menu'
 import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { MenuList } from '@/components/ui/MenuList/MenuList'
 import { Stack } from '@/components/ui/Stack/Stack'
-import { Text } from '@/components/ui/Text/Text'
 import type { Comment } from '@/stores/comment/comment'
 import type { Note } from '@/stores/notes/note'
 import { toastStore } from '@/stores/ui/toast.store'
 import { spacing } from '@/themes/spacing.stylex'
-import { IconCopy, IconDotsVertical, IconExternalLink, IconInfoSquareRounded, IconLink } from '@tabler/icons-react'
+import { IconCopy, IconDotsVertical, IconInfoSquareRounded, IconLink } from '@tabler/icons-react'
 import { DialogSheet } from 'components/elements/Layouts/Dialog'
 import { observer } from 'mobx-react-lite'
 import { useCallback, useState } from 'react'
-import { css, html } from 'react-strict-dom'
+import { css } from 'react-strict-dom'
 import { PostStats } from './PostDialogs/PostStats'
 
 type Props = {
@@ -31,100 +29,9 @@ type PropsOptions = {
   onDetailsClick: () => void
 }
 
-type PropsMenuItems = {
-  nevent?: string
-  isMobile?: boolean
-}
-
 function isMobileDevice() {
   return 'ontouchstart' in window
 }
-
-const PostMenuOpenInItems = (props: PropsMenuItems) => {
-  const { nevent, isMobile = false } = props
-  return (
-    <>
-      <MenuItem
-        href={`https://coracle.social/notes/${nevent}`}
-        target='_blank'
-        rel='noreferrer'
-        leadingIcon={<Avatar size='xs' src='/clients/coracle.png' />}
-        label='Coracle'
-        onClick={() => {}}
-      />
-      <MenuItem
-        href={`https://njump.me/${nevent}`}
-        target='_blank'
-        rel='noreferrer'
-        leadingIcon={<Avatar size='xs' src='/clients/njump.png' />}
-        label='Njump'
-      />
-      <MenuItem
-        href={`https://nostrudel.ninja/#/n/${nevent}`}
-        target='_blank'
-        rel='noreferrer'
-        leadingIcon={<Avatar size='xs' src='/clients/nostrudel.png' />}
-        label='NoStrudel'
-      />
-      <MenuItem
-        href={`https://snort.social/${nevent}`}
-        target='_blank'
-        rel='noreferrer'
-        leadingIcon={<Avatar size='xs' src='/clients/snort.svg' />}
-        label='Snort'
-      />
-      <MenuItem
-        href={`https://iris.to/${nevent}`}
-        target='_blank'
-        rel='noreferrer'
-        leadingIcon={<Avatar size='xs' src='/clients/iris.webp' />}
-        label='Iris'
-      />
-      <MenuItem
-        href={isMobile ? `primal:nostr:${nevent}` : `https://primal.net/e/${nevent}`}
-        target='_blank'
-        rel='noreferrer'
-        leadingIcon={<Avatar size='xs' src='/clients/primal.svg' />}
-        label='Primal'
-        onClick={() => {}}
-      />
-      <MenuItem
-        href={isMobile ? `damus:nostr:${nevent}` : `https://damus.io/${nevent}`}
-        target='_blank'
-        rel='noreferrer'
-        leadingIcon={<Avatar size='xs' src='/clients/damus.png' />}
-        label='Damus'
-        onClick={() => {}}
-      />
-    </>
-  )
-}
-
-const PostMenuOpenIn = observer(function PostMenuOpenIn(props: PropsMenuItems) {
-  const { nevent } = props
-  const isMobile = isMobileDevice()
-  const [open, setOpen] = useState(false)
-  return (
-    <>
-      <Divider />
-      {isMobile && (
-        <DialogSheet open={open} onClose={() => setOpen(false)} mobileAnchor='middle'>
-          <html.div style={styles.clientHeader}>
-            <Text variant='label' size='lg'>
-              Choose a nostr app
-            </Text>
-          </html.div>
-          <MenuList elevation={0} sx={styles.menuList}>
-            <PostMenuOpenInItems nevent={nevent} />
-          </MenuList>
-        </DialogSheet>
-      )}
-      <MenuItem leadingIcon={<IconExternalLink />} label='Open In' onClick={() => isMobile && setOpen(true)}>
-        {!isMobile && <PostMenuOpenInItems nevent={nevent} />}
-      </MenuItem>
-    </>
-  )
-})
 
 const Options = observer(function Options(props: PropsOptions) {
   return (

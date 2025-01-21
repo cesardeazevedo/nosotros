@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/Button/Button'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
 import { Stack } from '@/components/ui/Stack/Stack'
@@ -6,7 +5,7 @@ import { Text } from '@/components/ui/Text/Text'
 import { useCurrentUser } from '@/hooks/useRootStore'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import { IconCameraFilled, IconX } from '@tabler/icons-react'
+import { IconX } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
 import { nip19 } from 'nostr-tools'
 import { QRCodeCanvas } from 'qrcode.react'
@@ -45,12 +44,12 @@ export const QRCode = observer(function QRCode() {
           {npub}
         </Text>
         <Text>Follow me on Nostr</Text>
-        <Button
-          variant='filled'
-          onClick={dialogStore.openCamera}
-          icon={<IconCameraFilled strokeWidth='1.2' size={20} style={{ marginRight: 8 }} />}>
-          Scan QRCode
-        </Button>
+        {/* <Button */}
+        {/*   variant='filled' */}
+        {/*   onClick={dialogStore.openCamera} */}
+        {/*   icon={<IconCameraFilled strokeWidth='1.2' size={20} style={{ marginRight: 8 }} />}> */}
+        {/*   Scan QRCode */}
+        {/* </Button> */}
       </Stack>
     </html.div>
   )

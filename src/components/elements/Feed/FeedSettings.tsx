@@ -6,7 +6,7 @@ import { Kind } from '@/constants/kinds'
 import type { NotesFeedSubscription } from '@/stores/feeds/feed.notes'
 import { spacing } from '@/themes/spacing.stylex'
 import type { TablerIconsProps } from '@tabler/icons-react'
-import { IconArticle, IconCamera, IconMessage2, IconShare3 } from '@tabler/icons-react'
+import { IconArticle, IconMessage2, IconShare3 } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
 import { css, html } from 'react-strict-dom'
 

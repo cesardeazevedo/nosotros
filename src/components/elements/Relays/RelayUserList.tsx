@@ -1,17 +1,16 @@
-import { Button } from '@/components/ui/Button/Button'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { READ, UserRelay, WRITE } from '@/nostr/types'
 import { spacing } from '@/themes/spacing.stylex'
+import { Await } from '@tanstack/react-router'
 import { observer } from 'mobx-react-lite'
 import React, { useMemo } from 'react'
 import { css, html } from 'react-strict-dom'
+import { firstValueFrom, timer } from 'rxjs'
 import { RelayFriendsList } from './RelayFriendsList'
+import { RelayFriendsListLoading } from './RelayFriendsListLoading'
 import { RelayJoinButton } from './RelayJoinButton'
 import { RelayUserChip } from './RelayUserChip'
-import { Await } from '@tanstack/react-router'
-import { RelayFriendsListLoading } from './RelayFriendsListLoading'
-import { firstValueFrom, timer } from 'rxjs'
 
 type Props = {
   isEditing?: boolean
