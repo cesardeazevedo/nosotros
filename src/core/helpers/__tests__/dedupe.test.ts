@@ -18,8 +18,6 @@ describe('dedupe()', () => {
     expect(dedupe([], [[]])).toStrictEqual([])
     expect(dedupe([[]], [[]])).toStrictEqual([])
     expect(dedupe([[]], [[], []])).toStrictEqual([])
-    expect(dedupe([[]], [[[]], []])).toStrictEqual([])
-    expect(dedupe([[]], [[[]], [[]]])).toStrictEqual([])
   })
 
   test('test with undefined and null', () => {

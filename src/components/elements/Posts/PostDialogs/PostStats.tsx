@@ -1,91 +1,114 @@
-import { Box, Chip, Paper, Typography } from '@mui/material'
-import { observer } from 'mobx-react-lite'
-import ReactJsonView from 'react-json-view'
-import type Note from 'stores/models/note'
+import { Button } from '@/components/ui/Button/Button'
+import { Expandable } from '@/components/ui/Expandable/Expandable'
+import { IconButton } from '@/components/ui/IconButton/IconButton'
+import { Paper } from '@/components/ui/Paper/Paper'
+import { Stack } from '@/components/ui/Stack/Stack'
+import { Text } from '@/components/ui/Text/Text'
+import type { Comment } from '@/stores/comment/comment'
+import type { Note } from '@/stores/notes/note'
+import { spacing } from '@/themes/spacing.stylex'
+import { IconChevronDown, IconChevronRight } from '@tabler/icons-react'
+import JsonView from '@uiw/react-json-view'
+import { githubDarkTheme } from '@uiw/react-json-view/githubDark'
+import React from 'react'
+import { RemoveScroll } from 'react-remove-scroll'
+import { css, html } from 'react-strict-dom'
 
 type Props = {
-  note: Note
+  note: Note | Comment
+  onClose?: () => void
 }
 
-const PostStatsRelays = observer(function PostStatsRelays(props: Props) {
+const Panel = (props: { children: React.ReactNode; label: string; value?: object; defaultExpanded?: boolean }) => {
+  const { label, defaultExpanded, children } = props
   return (
-    <>
-      <Typography variant='h6'>Relays:</Typography>
-      <Paper
-        variant='outlined'
-        sx={{
-          p: 2,
-          mb: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'flex-start',
-          justifyContent: 'flex-start',
-          flexWrap: 'wrap',
-          maxHeight: 350,
-        }}>
-        {props.note.seenOn.map((url) => (
-          <Chip key={url} label={url} sx={{ mb: 1 }} />
-        ))}
-      </Paper>
-    </>
+    <Expandable
+      defaultExpanded={defaultExpanded}
+      trigger={({ expand, expanded }) => (
+        <>
+          <Stack gap={1} sx={styles.panel} onClick={() => expand(!expanded)}>
+            <IconButton icon={expanded ? <IconChevronDown size={20} /> : <IconChevronRight size={20} />} />
+            <Text variant='title' size='sm'>
+              {label}
+            </Text>
+          </Stack>
+        </>
+      )}>
+      {children}
+    </Expandable>
   )
-})
+}
 
-const PostJsonEvent = observer(function PostJsonEvent(props: Props) {
-  const { note } = props
+const JsonContent = function PostUserJson(props: { value?: object }) {
+  const { value } = props
   return (
-    <>
-      <Typography variant='h6'>JSON Event</Typography>
-      <Box sx={{ borderRadius: 1, overflow: 'hidden' }}>
-        <ReactJsonView
-          src={JSON.parse(JSON.stringify(note.event))}
-          style={{ maxHeight: 400, overflow: 'auto', padding: '8px' }}
-          theme='summerfruit'
+    <html.div style={styles.jsonview}>
+      {value && (
+        <JsonView
+          value={value}
+          collapsed={false}
+          style={{ overflow: 'auto', padding: 12, maxHeight: 300, ...githubDarkTheme }}
           displayDataTypes={false}
-          enableClipboard={(data) => navigator.clipboard.writeText(JSON.stringify(data.src))}
+          enableClipboard={true}
         />
-      </Box>
-    </>
-  )
-})
-
-const PostUserJson = observer(function PostUserJson(props: Props) {
-  const { note } = props
-  return (
-    <>
-      <Typography variant='h6'>User</Typography>
-      <Box sx={{ borderRadius: 1, overflow: 'hidden' }}>
-        {note.user && (
-          <ReactJsonView
-            src={JSON.parse(JSON.stringify(note.user.meta))}
-            collapsed={false}
-            style={{ maxHeight: 250, overflow: 'auto', padding: '8px' }}
-            theme='summerfruit'
-            displayDataTypes={false}
-            enableClipboard={(data) => navigator.clipboard.writeText(JSON.stringify(data.src))}
-          />
-        )}
-      </Box>
-    </>
-  )
-})
-
-function PostStats(props: Props) {
-  const { note } = props
-  return (
-    <Box sx={{ p: 2, width: '100%', height: '100%' }}>
-      <style>
-        {`
-            .variable-row {
-              white-space: nowrap;
-            }
-          `}
-      </style>
-      <PostStatsRelays note={note} />
-      <PostJsonEvent note={note} />
-      <PostUserJson note={note} />
-    </Box>
+      )}
+    </html.div>
   )
 }
 
-export default PostStats
+export const PostStats = (props: Props) => {
+  const { note, onClose } = props
+  return (
+    <RemoveScroll>
+      <html.div style={styles.root}>
+        <html.div style={styles.header}>
+          <Text variant='headline'>Note Stats</Text>
+        </html.div>
+        <Stack horizontal={false} sx={styles.content} gap={2}>
+          <Paper outlined sx={styles.paper}>
+            {/* <Panel defaultExpanded label='Relays'> */}
+            {/*   {note.seenOn.map((relay) => ( */}
+            {/*     <RelayChip relay={relay} /> */}
+            {/*   ))} */}
+            {/* </Panel> */}
+            <Panel defaultExpanded label='Raw Event'>
+              <JsonContent value={note.event} />
+            </Panel>
+            {/* <Panel label='User Raw Event'> */}
+            {/*   <JsonContent value={note.user?.meta} /> */}
+            {/* </Panel> */}
+          </Paper>
+          <Stack justify='flex-end'>
+            <Button onClick={onClose}>Close</Button>
+          </Stack>
+        </Stack>
+      </html.div>
+    </RemoveScroll>
+  )
+}
+
+const styles = css.create({
+  root: {
+    width: '100%',
+  },
+  header: {
+    paddingTop: spacing.padding4,
+    paddingInline: spacing.padding4,
+  },
+  content: {
+    paddingTop: spacing.padding2,
+    paddingInline: spacing.padding3,
+    paddingBottom: spacing.padding2,
+  },
+  jsonview: {
+    overflow: 'auto',
+    width: '100%',
+  },
+  paper: {
+    overflow: 'hidden',
+  },
+  panel: {
+    cursor: 'pointer',
+    padding: spacing.padding1,
+  },
+})

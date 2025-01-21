@@ -1,50 +1,43 @@
-import { Box, Button, IconButton, styled } from '@mui/material'
-import { IconEditCircle, IconSquareRoundedPlus } from '@tabler/icons-react'
+import { Fab } from '@/components/ui/Fab/Fab'
+import { Stack } from '@/components/ui/Stack/Stack'
+import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
+import { palette } from '@/themes/palette.stylex'
+import { spacing } from '@/themes/spacing.stylex'
 import { observer } from 'mobx-react-lite'
-import Tooltip from '../Layouts/Tooltip'
-import ProfilePopover from '../Navigation/ProfilePopover'
+import { css } from 'react-strict-dom'
+import { IconPencil } from '../Icons/IconPencil'
+import { ProfilePopover } from '../Navigation/ProfilePopover'
 
-const Container = styled(Box)(({ theme }) =>
-  theme.unstable_sx({
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: 'background.paper',
-    position: 'fixed',
-    left: 0,
-    top: 0,
-    bottom: 0,
-    maxWidth: 74,
-    minWidth: '74px!important',
-    py: 2,
-    pt: '64px!important',
-    zIndex: 100,
-  }),
-)
-
-const DeckSidebar = observer(function DeckSidebar() {
+export const DeckSidebar = observer(function DeckSidebar() {
   return (
-    <Container>
-      <Box sx={{ py: 2 }}>
-        <Tooltip arrow enterDelay={0} title='Create note' placement='right'>
-          <Button color='info' variant='contained' sx={{ borderRadius: 24, minWidth: 50, height: 50, px: 0 }}>
-            <IconEditCircle strokeWidth='1.2' size={24} />
-          </Button>
-        </Tooltip>
-      </Box>
-      <Box sx={{ pb: 2 }}>
-        <Tooltip arrow enterDelay={0} title='Add column' placement='right'>
-          <IconButton sx={{ mb: 0 }} color='info'>
-            <IconSquareRoundedPlus size={28} strokeWidth='1.5' />
-          </IconButton>
-        </Tooltip>
-        <Box sx={{ mt: 2 }}>
-          <ProfilePopover />
-        </Box>
-      </Box>
-    </Container>
+    <Stack horizontal={false} justify='space-between' align='center' sx={styles.root}>
+      <Tooltip cursor='arrow' enterDelay={0} text='Create note' placement='right'>
+        <Fab variant='primary'>
+          <IconPencil />
+        </Fab>
+      </Tooltip>
+      <Stack horizontal={false} gap={4}>
+        {/* <Tooltip cursor='arrow' enterDelay={0} text='Add column' placement='right'> */}
+        {/*   <IconButton icon={<IconSquareRoundedPlus size={28} strokeWidth='1.5' />} /> */}
+        {/* </Tooltip> */}
+        <ProfilePopover />
+      </Stack>
+    </Stack>
   )
 })
 
-export default DeckSidebar
+const styles = css.create({
+  root: {
+    position: 'absolute',
+    backgroundColor: palette.surfaceContainerLowest,
+    paddingTop: spacing.padding10,
+    paddingBottom: spacing.padding4,
+    borderRightWidth: 1,
+    borderRightColor: palette.outlineVariant,
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 74,
+    zIndex: 100,
+  },
+})

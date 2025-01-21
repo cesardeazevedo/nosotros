@@ -1,61 +1,75 @@
-import { Chip, Skeleton, Typography, styled, type TypographyProps } from '@mui/material'
+import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
+import { Stack } from '@/components/ui/Stack/Stack'
+import type { Props as TextProps } from '@/components/ui/Text/Text'
+import { Text } from '@/components/ui/Text/Text'
+import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
+import { useCurrentUser } from '@/hooks/useRootStore'
+import { userStore } from '@/stores/users/users.store'
+import { palette } from '@/themes/palette.stylex'
+import { shape } from '@/themes/shape.stylex'
+import { spacing } from '@/themes/spacing.stylex'
 import { IconUserCheck } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
-import type User from 'stores/models/user'
-import { Row } from '../Layouts/Flex'
-import Tooltip from '../Layouts/Tooltip'
-import LinkProfile from '../Links/LinkProfile'
-import UserPopover from './UserPopover'
-import { authStore } from 'stores/ui/auth.store'
+import React from 'react'
+import { css, html } from 'react-strict-dom'
+import { LinkProfile } from '../Links/LinkProfile'
+import { UserPopover } from './UserPopover'
 
-interface Props extends TypographyProps {
-  user?: User
+interface Props extends Omit<TextProps, 'children'> {
+  pubkey: string
   disableLink?: boolean
   disablePopover?: boolean
+  children?: React.ReactNode
 }
 
-const Container = styled(Typography)({
-  fontWeight: 600,
-  overflow: 'hidden',
-  whiteSpace: 'nowrap',
-  textOverflow: 'ellipsis',
-})
-
-const FollowIndicator = styled(Chip)({
-  marginLeft: 4,
-  paddingTop: 1,
-  display: 'inline-block',
-  width: 26,
-  height: 18,
-  textAlign: 'center',
-})
-
-const UserName = observer(function UserName(props: Props) {
-  const { user, children, disableLink = false, disablePopover = false, ...rest } = props
-  const { currentUser } = authStore
+export const UserName = observer(function UserName(props: Props) {
+  const { pubkey, children, disableLink = false, disablePopover = false, size = 'lg', ...rest } = props
+  const user = userStore.get(pubkey)
+  const currentUser = useCurrentUser()
   return (
-    <Row>
-      {!user && (
-        <Skeleton
-          variant='rectangular'
-          style={{ marginLeft: 14, alignSelf: 'center', width: 100, height: 14, borderRadius: 6 }}
-        />
-      )}
-      <UserPopover user={user} disabled={disablePopover}>
-        <LinkProfile user={user} disableLink={disableLink}>
-          <Container variant='subtitle1' {...rest}>
+    <Stack gap={0.5} sx={props.sx}>
+      {!user && <Skeleton variant='rectangular' sx={styles.loading} />}
+      <UserPopover pubkey={pubkey} disabled={disablePopover}>
+        <LinkProfile underline user={user} disableLink={disableLink}>
+          <Text variant='body' sx={[styles.text, rest.sx]} size={size} {...rest} element={html.div}>
             {user?.displayName}
             {children}
-          </Container>
+          </Text>
         </LinkProfile>
       </UserPopover>
-      {currentUser?.following?.followsPubkey(user?.data.id) && (
-        <Tooltip arrow title='Following'>
-          <FollowIndicator icon={<IconUserCheck size={16} strokeWidth='2' />}></FollowIndicator>
+      {currentUser?.following?.followsPubkey(user?.pubkey) && (
+        <Tooltip cursor='arrow' text='Following'>
+          <html.div style={styles.followingIndicator}>
+            <IconUserCheck size={14} strokeWidth='2.0' />
+          </html.div>
         </Tooltip>
       )}
-    </Row>
+    </Stack>
   )
 })
 
-export default UserName
+const styles = css.create({
+  container: {},
+  loading: {
+    marginLeft: 0,
+    alignSelf: 'center',
+    width: 100,
+    height: 14,
+    borderRadius: 6,
+  },
+  text: {
+    fontWeight: 600,
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+    textOverflow: 'ellipsis',
+    maxWidth: 280,
+    //lineHeight: '16px',
+  },
+  followingIndicator: {
+    backgroundColor: palette.surfaceContainerHigh,
+    opacity: 0.77,
+    paddingBlock: 2,
+    paddingInline: spacing['padding0.5'],
+    borderRadius: shape.sm,
+  },
+})

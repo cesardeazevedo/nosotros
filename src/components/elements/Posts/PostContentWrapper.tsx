@@ -1,88 +1,88 @@
-import { Fab, styled, type Theme } from '@mui/material'
-import { Kind } from 'constants/kinds'
-import React, { useState } from 'react'
+import { Fab } from '@/components/ui/Fab/Fab'
+import type { Comment } from '@/stores/comment/comment'
+import type { Note } from '@/stores/notes/note'
+import { palette } from '@/themes/palette.stylex'
+import { observer } from 'mobx-react-lite'
+import React from 'react'
+import { css, html } from 'react-strict-dom'
 import useMeasure from 'react-use-measure'
-import type Note from 'stores/models/note'
-import { BubbleContainer } from '../Content/Layout/Bubble'
-import PostError from './PostError'
 
-type Props = {
-  note: Note
+export type Props = {
+  note: Note | Comment
+  size?: 'xs' | 'sm' | 'md'
   bubble?: boolean
   initialExpanded?: boolean
   children: React.ReactNode
 }
 
-const Container = styled('div', { shouldForwardProp: (prop: string) => prop !== 'expanded' })<{ expanded: boolean }>(
-  ({ expanded }) => ({
-    position: 'relative',
-    maxHeight: expanded ? 'inherit' : MAX_HEIGHT,
-    overflow: 'hidden',
-  }),
-)
-
-const MAX_HEIGHT = 700
-
-const ExpandContainer = styled('div')({
-  position: 'absolute',
-  bottom: 0,
-  left: 0,
-  right: 0,
-  zIndex: 1000,
-  textAlign: 'center',
-  paddingBottom: 40,
-  transition: 'opacity 0.14s ease',
-})
-
-const ShadowIndicator = styled('div')(({ theme }: { theme: Theme }) => ({
-  position: 'absolute',
-  bottom: 0,
-  zIndex: 1000,
-  width: '100%',
-  height: 100,
-  background:
-    theme.palette.mode === 'light'
-      ? 'linear-gradient(0deg, rgba(0, 0, 0, 0.5), transparent)'
-      : 'linear-gradient(0deg, rgba(255, 255, 255, 0.2), transparent)',
-}))
-
-function PostContentWrapper(props: Props) {
-  const { note, bubble = false, initialExpanded = false } = props
-  const [ref, bounds] = useMeasure({ debounce: 200 })
-  const [expanded, setExpanded] = useState(initialExpanded)
-  const canExpand = bounds.height >= MAX_HEIGHT && !expanded
-  const event = note?.event
-
-  if (![Kind.Text, Kind.Article].includes(event.kind)) {
-    const ErrorContainer = bubble ? BubbleContainer : React.Fragment
-    return (
-      <ErrorContainer>
-        <PostError kind={event.kind} />
-      </ErrorContainer>
-    )
-  }
-
-  return (
-    <Container expanded={expanded}>
-      <div ref={ref} className='bounds' style={{ display: 'flex', flexDirection: 'column' }}>
-        {props.children}
-      </div>
-      {canExpand && (
-        <ExpandContainer>
-          <ShadowIndicator />
-          <Fab
-            size='large'
-            variant='extended'
-            color='info'
-            onClick={() => {
-              setExpanded(true)
-            }}>
-            View More
-          </Fab>
-        </ExpandContainer>
-      )}
-    </Container>
-  )
+const sizes = {
+  xs: 200,
+  sm: 400,
+  md: 700,
 }
 
-export default PostContentWrapper
+export const PostContentWrapper = observer(function PostContentWrapper(props: Props) {
+  const { note, initialExpanded = false, size = 'md' } = props
+  const [ref, bounds] = useMeasure({ debounce: 200 })
+  const expanded = initialExpanded || note.contentOpen
+  const maxHeight = sizes[size]
+  const canExpand = bounds.height >= maxHeight && !expanded
+
+  return (
+    <html.div style={[styles.root, styles[size], expanded && styles.root$expanded]}>
+      <html.div ref={ref} style={styles.bounds}>
+        {props.children}
+      </html.div>
+      {canExpand && (
+        <html.div style={styles.container}>
+          <html.div style={styles.shadow} />
+          <Fab variant='primary' label='View More' onClick={() => note.toggleContent(true)} />
+        </html.div>
+      )}
+    </html.div>
+  )
+})
+
+const styles = css.create({
+  root: {
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  xs: {
+    maxHeight: sizes.xs,
+  },
+  sm: {
+    maxHeight: sizes.sm,
+  },
+  md: {
+    maxHeight: sizes.md,
+  },
+  root$expanded: {
+    maxHeight: 'inherit',
+  },
+  bounds: {
+    display: 'flex',
+    flexDirection: 'column',
+    width: '100%',
+  },
+  container: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    zIndex: 1000,
+    textAlign: 'center',
+    paddingBottom: 40,
+    transition: 'opacity 0.14s ease',
+  },
+  shadow: {
+    position: 'absolute',
+    bottom: 0,
+    zIndex: 1000,
+    width: '100%',
+    height: 100,
+    opacity: 0.2,
+    pointerEvents: 'none',
+    background: `linear-gradient(0deg, ${palette.inverseSurface}, transparent)`,
+  },
+})

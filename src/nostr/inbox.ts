@@ -1,41 +1,26 @@
 import type { NostrEvent } from 'nostr-tools'
-import type { Observable } from 'rxjs'
-import { combineLatestWith, map, mergeMap, of } from 'rxjs'
-import { isAuthorTag } from './helpers/tags'
-import type { RelaySelectionConfig } from './operators/fromUserRelays'
-import { trackUsersRelays } from './operators/trackUserRelays'
+import { mergeMap, of } from 'rxjs'
+import { READ } from './helpers/parseRelayList'
+import { isAuthorTag } from './helpers/parseTags'
+import type { RelaySelectionConfig } from './helpers/selectRelays'
+import { toArrayRelay } from './mailbox'
+import type { NostrClient } from './nostr'
 
-interface InboxConfig extends RelaySelectionConfig {
-  ignoreRelays: Observable<string[]>
-}
+export class InboxTracker {
+  options: RelaySelectionConfig
 
-const defaultConfig = {
-  maxRelaysPerUser: 10,
-} as InboxConfig
+  constructor(private client: NostrClient) {
+    this.options = {
+      permission: READ,
+      ignore: client.inboxSets,
+      maxRelaysPerUser: client.settings.maxRelaysPerUserInbox,
+    }
+  }
 
-export function inbox(config: InboxConfig = defaultConfig) {
-  const options = Object.assign({}, defaultConfig, config)
-
-  return (event: NostrEvent) => {
+  subscribe(event: NostrEvent) {
     return of(event).pipe(
-      combineLatestWith(config.ignoreRelays.pipe(map((x) => new Set(x)))),
-
-      mergeMap(([event, ignoreRelays]) => {
-        const relaySelection: RelaySelectionConfig = {
-          ignore: ignoreRelays,
-          permission: 'write',
-          maxRelaysPerUser: options.maxRelaysPerUser,
-        }
-
-        const author = event.pubkey
-        const related = event.tags.filter((tag) => isAuthorTag(tag)).flatMap((tag) => tag[1])
-
-        const authors = [author, ...related]
-
-        return trackUsersRelays(authors, relaySelection).pipe(
-          map((userRelay) => userRelay.map((item) => item.relay))
-        )
-      }),
+      mergeMap((event) => event.tags.filter((tag) => isAuthorTag(tag)).flatMap((tag) => tag[1])),
+      mergeMap((pubkey) => this.client.mailbox.track(pubkey, this.options).pipe(toArrayRelay)),
     )
   }
 }

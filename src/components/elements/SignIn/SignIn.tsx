@@ -1,20 +1,17 @@
-import { Box, Divider } from '@mui/material'
-import { useMobile } from 'hooks/useMobile'
-import { OnboardMachineContext } from './SignInContext'
-import SignInHeader from './SignInHeader'
-import SignInSlides from './SignInSlides'
+import { css, html } from 'react-strict-dom'
+import { SignInSlides } from './SignInSlides'
 
-function SignIn() {
-  const isMobile = useMobile()
+export const SignIn = () => {
   return (
-    <OnboardMachineContext.Provider>
-      <Box sx={{ height: 'calc(100% - 70px)' }}>
-        <SignInHeader />
-        {!isMobile && <Divider />}
-        <SignInSlides />
-      </Box>
-    </OnboardMachineContext.Provider>
+    <html.div style={styles.root}>
+      <SignInSlides />
+    </html.div>
   )
 }
 
-export default SignIn
+const styles = css.create({
+  root: {
+    height: 'calc(100% - 70px)',
+    overflow: 'hidden',
+  },
+})

@@ -1,0 +1,4 @@
+/* stylex.css */
+@import './preflight.css' layer(priority1);
+
+@stylex stylesheet;

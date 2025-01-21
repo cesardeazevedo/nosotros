@@ -1,24 +1,40 @@
-import { IconButton, type IconButtonProps } from '@mui/material'
-import { IconMessageCircle } from '@tabler/icons-react'
-import Tooltip from 'components/elements/Layouts/Tooltip'
-import ButtonContainer, { type ContainerProps } from './PostButtonContainer'
+import { IconButton } from '@/components/ui/IconButton/IconButton'
+import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
+import { IconMessageCircle, IconMessageCircle2Filled } from '@tabler/icons-react'
+import { ButtonContainer, type ContainerProps } from './PostButtonContainer'
+import { iconProps } from './utils'
+import { useNoteContext } from '@/components/providers/NoteProvider'
 
 type Props = {
-  size?: IconButtonProps['size']
+  selected?: boolean
   onClick?: () => void
 }
 
-function ButtonReply(props: Props & ContainerProps) {
-  const { size = 'small', onClick, ...rest } = props
+export const ButtonReply = (props: Props & ContainerProps) => {
+  const { selected = false, onClick, ...rest } = props
+  const { dense } = useNoteContext()
   return (
     <ButtonContainer {...rest}>
-      <Tooltip arrow title='Comment'>
-        <IconButton size={size} onClick={onClick}>
-          <IconMessageCircle strokeWidth='1.5' />
-        </IconButton>
+      <Tooltip cursor='arrow' text='Replies'>
+        <IconButton
+          toggle={selected}
+          selected={selected}
+          size={dense ? 'sm' : 'md'}
+          onClick={onClick}
+          icon={
+            <IconMessageCircle
+              size={dense ? iconProps.size$dense : iconProps.size}
+              strokeWidth={iconProps.strokeWidth}
+            />
+          }
+          selectedIcon={
+            <IconMessageCircle2Filled
+              size={dense ? iconProps.size$dense : iconProps.size}
+              strokeWidth={iconProps.strokeWidth}
+            />
+          }
+        />
       </Tooltip>
     </ButtonContainer>
   )
 }
-
-export default ButtonReply

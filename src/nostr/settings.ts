@@ -1,19 +1,13 @@
-export type NostrSettings = {
-  nip05enabled: boolean
-  nip05staleTime: number
-  nip25enabled: boolean
-  nip57enabled: boolean
-  hintsEnabled: boolean
-  outboxEnabled: boolean
-  maxRelaysPerUser: number
-}
+export type NostrSettings = typeof defaultNostrSettings
 
-export const defaultNostrSettings: NostrSettings = {
-  nip05enabled: true,
-  nip05staleTime: 60000 * 24,
-  nip25enabled: true,
-  nip57enabled: true,
-  hintsEnabled: true,
-  outboxEnabled: true,
-  maxRelaysPerUser: 4,
+export const defaultNostrSettings = {
+  nip05: true,
+  hints: true,
+  outbox: true,
+  offline: false,
+  localDB: true,
+  localRelays: [] as string[],
+  maxRelaysPerUserInbox: 2,
+  maxRelaysPerUserOutbox: 2,
+  clientTag: true,
 }

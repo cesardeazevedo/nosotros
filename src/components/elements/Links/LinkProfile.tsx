@@ -1,31 +1,32 @@
-import type { LinkProps } from '@mui/material'
-import { type LinkOwnProps } from '@mui/material'
+import type { SxProps } from '@/components/ui/types'
+import { Link, useMatch, useRouter } from '@tanstack/react-router'
 import { observer } from 'mobx-react-lite'
-import type User from 'stores/models/user'
-import LinkRouter from './LinkRouter'
 import { forwardRef, useCallback, useContext } from 'react'
-import { deckStore } from 'stores/ui/deck.store'
-import { useMatch } from '@tanstack/react-router'
-import { DeckContext } from '../Deck/DeckList'
+import { css } from 'react-strict-dom'
+import type { User } from '@/stores/users/user'
+import { DeckContext } from '../Deck/DeckContext'
+import { useRootStore } from '@/hooks/useRootStore'
 
 interface Props {
+  sx?: SxProps
   user?: User
-  color?: LinkOwnProps['color']
-  underline?: LinkProps['underline']
+  underline?: boolean
   disableLink?: boolean
   children: React.ReactNode
 }
 
-const LinkProfile = observer(
+export const LinkProfile = observer(
   forwardRef<never, Props>(function LinkProfile(props, ref) {
-    const { user, color = 'inherit', disableLink = false, underline, children, ...rest } = props
+    const { user, disableLink = false, underline, children, ...rest } = props
     const route = useMatch({ strict: false })
+    const router = useRouter()
+    const root = useRootStore()
     const isDeck = route.id === '/deck'
     const { index } = useContext(DeckContext)
 
     const handleClickDeck = useCallback(() => {
       if (user) {
-        deckStore.addProfileColumn({ pubkey: user.data.pubkey }, index + 1)
+        root.decks.selected.addNProfile({ pubkey: user.pubkey }, (index || 0) + 1)
       }
     }, [user, index])
 
@@ -35,30 +36,32 @@ const LinkProfile = observer(
 
     if (isDeck) {
       return (
-        <LinkRouter
-          color={color as string}
-          onClick={handleClickDeck}
-          underline={underline}
-          {...rest}
-          ref={ref}>
+        <Link onClick={handleClickDeck} {...rest} ref={ref} {...css.props([underline && styles.underline, rest.sx])}>
           {children}
-        </LinkRouter>
+        </Link>
       )
     }
 
-
     return (
-      <LinkRouter
+      <Link
         to='/$nostr'
-        color={color as string}
         params={{ nostr: user?.nprofile }}
-        underline={underline}
+        // @ts-ignore
+        state={{ from: router.latestLocation.pathname }}
         {...rest}
+        {...css.props([underline && styles.underline, rest.sx])}
         ref={ref}>
         {children}
-      </LinkRouter>
+      </Link>
     )
   }),
 )
 
-export default LinkProfile
+const styles = css.create({
+  underline: {
+    textDecoration: {
+      default: 'inherit',
+      ':hover': 'underline',
+    },
+  },
+})

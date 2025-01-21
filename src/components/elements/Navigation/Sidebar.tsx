@@ -1,59 +1,78 @@
-import { Box, IconButton, SwipeableDrawer } from '@mui/material'
+import { DrawerSwipeable } from '@/components/ui/Drawer/DrawerSwipeable'
+import { IconButton } from '@/components/ui/IconButton/IconButton'
+import { listItemTokens } from '@/components/ui/ListItem/ListItem.stylex'
+import { Stack } from '@/components/ui/Stack/Stack'
+import { useCurrentUser } from '@/hooks/useRootStore'
+import { palette } from '@/themes/palette.stylex'
+import { spacing } from '@/themes/spacing.stylex'
 import { IconMenu2, IconQrcode } from '@tabler/icons-react'
 import { Observer } from 'mobx-react-lite'
 import { useState } from 'react'
-import { authStore } from 'stores/ui/auth.store'
-import ThemeButton from '../Buttons/ThemeButton'
-import UserAvatar from '../User/UserAvatar'
-import UserName from '../User/UserName'
-import Menu from './Menu'
+import { css, html } from 'react-strict-dom'
 import { dialogStore } from 'stores/ui/dialogs.store'
+import { ThemeButton } from '../Buttons/ThemeButton'
+import { UserAvatar } from '../User/UserAvatar'
+import { UserName } from '../User/UserName'
+import { Menu } from './Menu'
 
-function Sidebar() {
+export const Sidebar = () => {
   const [open, setOpen] = useState(false)
+  const user = useCurrentUser()
   return (
     <>
-      <IconButton onClick={() => setOpen(true)}>
-        <IconMenu2 />
-      </IconButton>
-      <SwipeableDrawer
-        anchor='left'
-        open={open}
-        onOpen={() => undefined}
-        onClose={() => setOpen(false)}
-        PaperProps={{
-          sx: {
-            backgroundColor: (theme) => theme.palette.common.background,
-            backgroundImage: 'none',
-          },
-        }}>
-        <Box sx={{ width: 300, p: 2 }}>
-          <ThemeButton sx={{ position: 'absolute', left: 30, bottom: 30 }} />
+      <IconButton onClick={() => setOpen(true)} icon={<IconMenu2 />} />
+      <DrawerSwipeable anchor='left' opened={open} onClose={() => setOpen(false)}>
+        <html.div style={styles.content}>
+          <ThemeButton sx={styles.themeButton} />
           <Observer>
-            {() => {
-              const { currentUser: me } = authStore
-              return (
-                <>
-                  <UserAvatar user={me} />
-                  {me && <UserName variant='h5' user={me} sx={{ mt: 2, fontWeight: 500 }} />}
-                  <IconButton
-                    size='large'
-                    sx={{ position: 'absolute', right: 20, top: 20, color: 'text.primary' }}
-                    disabled={!me}
-                    onClick={dialogStore.openQRCode}>
-                    <IconQrcode size={30} strokeWidth='2' />
-                  </IconButton>
-                </>
-              )
-            }}
+            {() => (
+              <Stack horizontal={false} sx={styles.header}>
+                {user?.pubkey && (
+                  <>
+                    <UserAvatar pubkey={user.pubkey} />
+                    <UserName variant='title' size='lg' pubkey={user.pubkey} sx={styles.userName} />
+                    <IconButton sx={styles.qrcodeButton} disabled={!user.pubkey} onClick={dialogStore.openQRCode}>
+                      <IconQrcode size={30} strokeWidth='2' />
+                    </IconButton>
+                  </>
+                )}
+              </Stack>
+            )}
           </Observer>
-        </Box>
-        <Box sx={{ mt: 0 }}>
-          <Menu onAction={() => setOpen(false)} />
-        </Box>
-      </SwipeableDrawer>
+          <html.div style={styles.wrapper}>
+            <Menu onAction={() => setOpen(false)} />
+          </html.div>
+        </html.div>
+      </DrawerSwipeable>
     </>
   )
 }
 
-export default Sidebar
+const styles = css.create({
+  content: {
+    width: 300,
+    backgroundColor: palette.surface,
+  },
+  header: {
+    padding: spacing.padding2,
+  },
+  wrapper: {
+    paddingInline: spacing.padding1,
+    [listItemTokens.containerMinHeight$sm]: 50,
+  },
+  themeButton: {
+    position: 'absolute',
+    left: 30,
+    bottom: 30,
+  },
+  qrcodeButton: {
+    position: 'absolute',
+    right: 20,
+    top: 20,
+    color: palette.primary,
+  },
+  userName: {
+    marginTop: spacing.margin2,
+    fontWeight: 500,
+  },
+})

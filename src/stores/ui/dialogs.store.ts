@@ -3,8 +3,6 @@ import { action, makeAutoObservable } from 'mobx'
 type DialogImageProps = Array<{ content: string } | false>
 
 export class DialogStore {
-  auth = false
-
   camera = false
 
   qrcode = false
@@ -17,28 +15,16 @@ export class DialogStore {
 
   constructor() {
     makeAutoObservable(this, {
-      openAuth: action.bound,
       openCamera: action.bound,
       openQRCode: action.bound,
-      openUpdateSW: action.bound,
-      closeUpdateSW: action.bound,
       pushReply: action.bound,
       pushImage: action.bound,
-      closeAuth: action.bound,
       closeCamera: action.bound,
       closeQRCode: action.bound,
       closeImage: action.bound,
       closeReply: action.bound,
       resetReply: action.bound,
     })
-  }
-
-  openAuth() {
-    this.auth = true
-  }
-
-  closeAuth() {
-    this.auth = false
   }
 
   openCamera() {
@@ -55,14 +41,6 @@ export class DialogStore {
 
   closeQRCode() {
     this.qrcode = false
-  }
-
-  openUpdateSW() {
-    this.updateSW = true
-  }
-
-  closeUpdateSW() {
-    this.updateSW = false
   }
 
   pushImage(content: string) {

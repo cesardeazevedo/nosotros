@@ -1,33 +1,20 @@
-import { Chip, Typography } from '@mui/material'
-import { Row } from 'components/elements/Layouts/Flex'
-import type { UserRelayDB } from 'db/types'
+import { Chip } from '@/components/ui/Chip/Chip'
+import type { UserRelay } from '@/nostr/helpers/parseRelayList'
 import { observer } from 'mobx-react-lite'
-import { useMemo } from 'react'
-import RelayIcon from './RelayIcon'
+import React, { useMemo } from 'react'
+import { RelayConnectedIcon } from './RelayConnectedIcon'
 
 type Props = {
-  userRelay: UserRelayDB
+  userRelay: UserRelay
+  avatar?: React.ReactNode
+  onDelete?: () => void
 }
 
-const RelayUserChip = observer(function RelayUserChip(props: Props) {
-  const { userRelay } = props
-  const { type, relay: url } = userRelay
+export const RelayUserChip = observer(function RelayUserChip(props: Props) {
+  const { avatar, userRelay, onDelete } = props
+  const { relay: url } = userRelay
   const formatted = useMemo(() => new URL(url), [url])
   return (
-    <Chip
-      icon={
-        <RelayIcon url={url} />
-      }
-      label={
-        <Row>
-          <Typography variant='subtitle1' sx={{ mr: 1 }}>
-            {formatted.hostname} ({type.toUpperCase()})
-          </Typography>
-        </Row>
-      }
-      sx={{ mb: 1, flex: 1 }}
-    />
+    <Chip icon={avatar || <RelayConnectedIcon url={url} />} label={<>{formatted.hostname}</>} onDelete={onDelete} />
   )
 })
-
-export default RelayUserChip

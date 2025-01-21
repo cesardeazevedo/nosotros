@@ -1,32 +1,34 @@
-import { Box } from '@mui/material'
-import type { BulletListNode, OrderedListNode } from 'content/types'
+import type { BulletListNode, OrderedListNode } from 'nostr-editor'
 import React from 'react'
-import type Note from 'stores/models/note'
-import Paragraph from '../Layout/Paragraph'
-import CodeBlock from './CodeBlock'
+import { html } from 'react-strict-dom'
+import { Paragraph } from '../Layout/Paragraph'
+import { CodeBlock } from './CodeBlock'
 
 type Props = {
-  note: Note
   type: 'ol' | 'ul'
   node: OrderedListNode | BulletListNode
 }
 
-function List(props: Props) {
+const Elements = {
+  ol: html.ol,
+  ul: html.ul,
+}
+
+export const List = (props: Props) => {
   const { type, node } = props
+  const Component = Elements[type]
   return (
-    <Box component={type}>
+    <Component>
       {node.content.map((item, index) => (
-        <Box component='li' key={item.type + index}>
+        <html.li key={item.type + index}>
           {item.content.map((node, index) => (
             <React.Fragment key={node.type + index}>
               {node.type === 'paragraph' && <Paragraph node={node} />}
               {node.type === 'codeBlock' && <CodeBlock node={node} />}
             </React.Fragment>
           ))}
-        </Box>
+        </html.li>
       ))}
-    </Box>
+    </Component>
   )
 }
-
-export default List

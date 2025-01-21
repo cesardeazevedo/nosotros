@@ -1,22 +1,56 @@
-import { Box, Skeleton } from '@mui/material'
-import { Row } from '../Layouts/Flex'
-import PaperContainer from '../Layouts/PaperContainer'
+import { Divider } from '@/components/ui/Divider/Divider'
+import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
+import { Stack } from '@/components/ui/Stack/Stack'
+import { spacing } from '@/themes/spacing.stylex'
+import React, { memo } from 'react'
+import { css, html } from 'react-strict-dom'
 
-function PostLoading() {
-  return (
-    <PaperContainer className='loading' sx={{ width: '100%', height: 200 }}>
-      <Row>
-        <Skeleton animation='wave' variant='circular' sx={{ width: 40, height: 40, m: 2 }} />
-        <Box>
-          <Skeleton animation='wave' variant='rectangular' sx={{ width: 140, height: 14, borderRadius: 1 }} />
-          <Skeleton animation='wave' variant='rectangular' sx={{ width: 80, height: 12, mt: 0.5, borderRadius: 1 }} />
-        </Box>
-      </Row>
-      <Box sx={{ px: 2 }}>
-        <Skeleton animation='wave' variant='rectangular' sx={{ mt: 0, width: '100%', height: 110, borderRadius: 1 }} />
-      </Box>
-    </PaperContainer>
-  )
+type Props = {
+  rows?: number
 }
 
-export default PostLoading
+export const PostLoading = memo(({ rows = 2 }: Props) => {
+  const list = [...Array(rows).keys()]
+  return list.map((key, index) => (
+    <React.Fragment key={key}>
+      <html.div key={key} style={styles.root}>
+        <Stack horizontal>
+          <Skeleton animation='wave' variant='circular' sx={styles.circular} />
+          <Stack horizontal={false}>
+            <Skeleton animation='wave' variant='rectangular' sx={styles.title} />
+            <Skeleton animation='wave' variant='rectangular' sx={styles.title2} />
+          </Stack>
+        </Stack>
+        <Skeleton animation='wave' variant='rectangular' sx={styles.content} />
+      </html.div>
+      {index !== list.length - 1 && <Divider />}
+    </React.Fragment>
+  ))
+})
+
+const styles = css.create({
+  root: {
+    width: '100%',
+    padding: spacing.padding2,
+    position: 'relative',
+  },
+  circular: {
+    width: 40,
+    height: 40,
+    marginRight: spacing.margin1,
+  },
+  title: {
+    width: 120,
+    height: 12,
+  },
+  title2: {
+    width: 80,
+    height: 12,
+    marginTop: spacing['margin0.5'],
+  },
+  content: {
+    marginTop: spacing.margin1,
+    width: '100%',
+    height: 80,
+  },
+})

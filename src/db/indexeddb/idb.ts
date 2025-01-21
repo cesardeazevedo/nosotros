@@ -1,54 +1,77 @@
-import type { NostrEvent, NostrFilter } from 'core/types'
-import type { SeenDB, Storage, UserRelayDB } from 'db/types'
+import type { DB } from 'db/types'
 import type * as idb from 'idb'
 import { IDBEventStore } from './events/idb.events'
 import { buildDB } from './idb.builder'
 import { schemas, type IndexedDBSchema } from './idb.schemas'
+import { IDBMetadata } from './metadata/idb.metadata'
+import { IDBNip05 } from './nip05/idb.nip05'
+import { IDBRelayStats } from './relayStats/idb.relayStats'
 import { IDBSeenStore } from './seen/idb.seen'
-import { IDBUserRelayStore } from './userRelays/idb.userRelays'
+import { IDBStats } from './stats/idb.stats'
 
-const DB_VERSION = 10
+const DB_VERSION = 12
 
-class IDBStorage implements Storage {
+export class IDBStorage implements DB {
   db: Promise<idb.IDBPDatabase<IndexedDBSchema>>
 
   seen: IDBSeenStore
   event: IDBEventStore
-  userRelay: IDBUserRelayStore
+  relayStats: IDBRelayStats
+  metadata: IDBMetadata
+  stats: IDBStats
+  nip05: IDBNip05
 
   constructor(name: string) {
     this.db = buildDB(name, DB_VERSION, schemas)
 
     this.seen = new IDBSeenStore(this.db)
     this.event = new IDBEventStore(this.db)
-    this.userRelay = new IDBUserRelayStore(this.db)
+    this.relayStats = new IDBRelayStats(this.db)
+    this.metadata = new IDBMetadata(this.db)
+    this.stats = new IDBStats(this.db)
+    this.nip05 = new IDBNip05(this.db)
   }
 
-  // Events
-  async *query(filters: NostrFilter | NostrFilter[]) {
-    yield* this.event.query(filters)
-  }
-  async queryEventByPubkey(kind: number, pubkey: string) {
-    return await this.event.queryEventByPubkey(kind, pubkey)
-  }
-  async insert(event: NostrEvent) {
-    return await this.event.insert(event)
+  async export() {
+    const db = await this.db
+    const tx = db.transaction('events', 'readonly')
+    const events = tx.objectStore('events')
+    let csvContent = ''
+    const writer = new WritableStream({
+      write(chunk) {
+        csvContent += chunk
+      },
+    }).getWriter()
+
+    const data = await events.getAll()
+    for (const row of data) {
+      await writer.write(JSON.stringify(row) + '\n')
+    }
+    await writer.close()
+    const blob = new Blob([csvContent], { type: 'text/txt' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'exported.txt'
+    document.body.appendChild(a)
+    a.click()
+    URL.revokeObjectURL(url)
+    a.remove()
   }
 
-  // Seen
-  async querySeen(eventId: string) {
-    return await this.seen.query(eventId)
-  }
-  async insertSeenBulk(seens: SeenDB[]) {
-    return await this.seen.insertBulk(seens)
+  async deleteMetadata() {
+    const db = await this.db
+    await db.clear('metadata')
   }
 
-  // UserRelay
-  async queryUserRelay(pubkey: string) {
-    return await this.userRelay.query(pubkey)
+  async deleteEvents() {
+    const db = await this.db
+    await db.clear('events')
   }
-  async insertUserRelayBulk(data: UserRelayDB[]) {
-    return await this.userRelay.insert(data)
+
+  async deleteTags() {
+    const db = await this.db
+    await db.clear('tags')
   }
 
   async clearDB() {
@@ -58,5 +81,3 @@ class IDBStorage implements Storage {
     }
   }
 }
-
-export default IDBStorage

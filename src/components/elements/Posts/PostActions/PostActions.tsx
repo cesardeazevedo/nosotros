@@ -1,44 +1,53 @@
-import { styled } from '@mui/material'
-import { Row } from 'components/elements/Layouts/Flex'
-import { PostButtonReply, PostButtonRepost, PostButtonZap } from 'components/elements/Posts/PostActions'
-import { Observer } from 'mobx-react-lite'
-import type Note from 'stores/models/note'
-import PostButtonReaction from './PostButtonReaction'
-import PostButtonRelays from './PostRelays'
+import { useNoteContext } from '@/components/providers/NoteProvider'
+import { Stack } from '@/components/ui/Stack/Stack'
+import type { SxProps } from '@/components/ui/types'
+import { useMobile } from '@/hooks/useMobile'
+import type { Comment } from '@/stores/comment/comment'
+import type { Note } from '@/stores/notes/note'
+import { observer } from 'mobx-react-lite'
+import { css } from 'react-strict-dom'
+import { PostOptions } from '../PostOptions'
+import { ButtonReaction } from './PostButtonReaction'
+import { ButtonRelays } from './PostButtonRelay'
+import { ButtonReply } from './PostButtonReply'
+import { ButtonRepost } from './PostButtonRepost'
+import { ButtonZap } from './PostButtonZap'
 
 type Props = {
-  note: Note
-  dense?: boolean
+  note: Note | Comment
   onReplyClick?: () => void
-  renderRelays?: boolean
-  renderRepost?: boolean
-  renderReply?: boolean
-  renderZap?: boolean
+  renderOptions?: boolean
+  sx?: SxProps
 }
 
-const shouldForwardProp = (prop: string) => prop !== 'dense'
-
-const Container = styled(Row, { shouldForwardProp })<{ dense: boolean }>(({ dense }) => ({
-  padding: dense ? 0 : 16,
-  justifyContent: dense ? 'flex-start' : 'space-between',
-}))
-
-function PostActions(props: Props) {
-  const { note, renderRepost = true, renderReply = true, renderZap = true, renderRelays = true, dense = false } = props
+export const PostActions = observer(function PostActions(props: Props) {
+  const { note, renderOptions = false, sx } = props
+  const { dense } = useNoteContext()
+  const mobile = useMobile()
 
   return (
-    <Container dense={dense}>
-      <PostButtonReaction note={note} dense={dense} />
-      {renderRepost && <PostButtonRepost dense={dense} />}
-      <Observer>
-        {() => (
-          <>{renderReply && <PostButtonReply dense={dense} value={note.totalReplies} onClick={props.onReplyClick} />}</>
-        )}
-      </Observer>
-      {renderZap && <PostButtonZap dense={dense} note={note} />}
-      {renderRelays && <PostButtonRelays dense={dense} note={note} />}
-    </Container>
+    <Stack horizontal sx={[styles.root, dense && styles.root$dense, sx]} gap={dense ? 0 : mobile ? 0 : 1}>
+      <ButtonReaction note={note} />
+      <ButtonRepost note={note} />
+      <ButtonReply
+        value={note.repliesTotal}
+        selected={note.repliesOpen || note.isReplying || false}
+        onClick={props.onReplyClick}
+      />
+      <ButtonZap note={note} />
+      <ButtonRelays note={note} />
+      {renderOptions && <PostOptions note={note} />}
+    </Stack>
   )
-}
+})
 
-export default PostActions
+const styles = css.create({
+  root: {
+    padding: 16,
+    justifyContent: 'space-between',
+  },
+  root$dense: {
+    padding: 0,
+    justifyContent: 'flex-start',
+  },
+})

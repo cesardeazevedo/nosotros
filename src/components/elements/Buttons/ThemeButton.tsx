@@ -1,27 +1,32 @@
-import { IconButton, Zoom, useColorScheme, type IconButtonProps } from '@mui/material'
+import type { Props as IconButtonProps } from '@/components/ui/IconButton/IconButton'
+import { IconButton } from '@/components/ui/IconButton/IconButton'
+import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
+import { useGlobalSettings } from '@/hooks/useRootStore'
 import { IconMoon, IconSun } from '@tabler/icons-react'
+import { observer } from 'mobx-react-lite'
 import { useCallback } from 'react'
-import Tooltip from '../Layouts/Tooltip'
 
-function ThemeButton(props: IconButtonProps) {
-  const { mode, setMode } = useColorScheme()
+export const ThemeButton = observer(function ThemeButton(props: IconButtonProps) {
+  const globalSettings = useGlobalSettings()
+  const mode = globalSettings.theme
 
   const handleClick = useCallback(() => {
-    setMode(mode === 'dark' ? 'light' : 'dark')
-  }, [mode, setMode])
+    globalSettings.set('theme', globalSettings.theme === 'dark' ? 'light' : 'dark')
+  }, [])
 
   return (
-    <Tooltip arrow title='Toggle dark / light theme' enterDelay={0}>
-      <IconButton color='inherit' onClick={handleClick} {...props} sx={{ mx: 0.5, width: 40, height: 40, ...props.sx }}>
-        <Zoom in={mode === 'light'}>
-          <IconMoon style={{ position: 'absolute' }} strokeWidth='1.5' />
-        </Zoom>
-        <Zoom in={mode !== 'light'}>
-          <IconSun style={{ position: 'absolute' }} strokeWidth='1.5' />
-        </Zoom>
-      </IconButton>
+    <Tooltip cursor='arrow' text='Toggle dark / light theme' enterDelay={0}>
+      <IconButton
+        onClick={handleClick}
+        {...props}
+        sx={props.sx}
+        icon={
+          <>
+            {mode === 'light' && <IconMoon strokeWidth='1.5' />}
+            {mode !== 'light' && <IconSun strokeWidth='1.5' />}
+          </>
+        }
+      />
     </Tooltip>
   )
-}
-
-export default ThemeButton
+})

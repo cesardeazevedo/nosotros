@@ -1,30 +1,65 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-empty-pattern */
+import { Kind } from '@/constants/kinds'
+import { RELAY_1, RELAY_2, RELAY_3, RELAY_4, RELAY_5 } from '@/constants/testRelays'
+import { clearCache } from '@/nostr/cache'
+import { db } from '@/nostr/db'
+import { parseComment } from '@/nostr/helpers/parseComment'
+import { parseFollowList } from '@/nostr/helpers/parseFollowList'
+import { parseNote } from '@/nostr/helpers/parseNote'
+import { parseUser } from '@/nostr/helpers/parseUser'
+import { replay as replayMailbox } from '@/nostr/mailbox'
+import { replay as replayUsers } from '@/nostr/nips/nip01.users'
+import { replay as replayNIP02 } from '@/nostr/nips/nip02.follows'
+import { replay as replayNIP65 } from '@/nostr/nips/nip65.relaylist'
+import type { NostrClientOptions } from '@/nostr/nostr'
+import { NostrClient } from '@/nostr/nostr'
+import { pool } from '@/nostr/pool'
+import { defaultNostrSettings, type NostrSettings } from '@/nostr/settings'
+import type { Comment } from '@/stores/comment/comment'
+import { commentStore } from '@/stores/comment/comment.store'
+import { followsStore } from '@/stores/follows/follows.store'
+import type { Note } from '@/stores/notes/note'
+import { noteStore } from '@/stores/notes/notes.store'
+import { reactionStore } from '@/stores/reactions/reactions.store'
+import { rootStore, type RootStore } from '@/stores/root.store'
+import { userRelayStore } from '@/stores/userRelays/userRelay.store'
+import type { User } from '@/stores/users/user'
+import { userStore } from '@/stores/users/users.store'
+import { type NostrEvent } from 'nostr-tools'
 import { test as base } from 'vitest'
 import WS from 'vitest-websocket-mock'
-
-const defaultRelays = [
-  'wss://relay1.com',
-  'wss://relay2.com',
-  'wss://relay3.com',
-  'wss://relay4.com',
-  'wss://relay5.com',
-]
+import { fakeNote } from './faker'
+import { RelayServer, TestSigner } from './testHelpers'
 
 interface Fixtures {
+  createMockRelay: (url: string, db: NostrEvent[]) => RelayServer
   relay: WS
   relay2: WS
   relay3: WS
   relay4: WS
   relay5: WS
+  root: RootStore
+  clear: () => void
+  login: (pubkey: string) => User
+  createClient: (
+    options?: Partial<Omit<NostrClientOptions, 'settings'> & { settings: Partial<NostrSettings> }>,
+  ) => NostrClient
+  createUser: (data: Partial<NostrEvent>) => User
+  createNote: (data: Partial<NostrEvent>, client?: NostrClient) => Note
+  createComment: (data: Partial<NostrEvent>, client?: NostrClient) => Comment
+  createFollows: (pubkey: string, tags: string[]) => void
+  createReaction: (data: Partial<NostrEvent>) => void
+  insertRelayList: (data: Partial<NostrEvent>, client?: NostrClient) => Promise<void>
+  signer: TestSigner
 }
 
-export const RELAY_1 = defaultRelays[0]
-export const RELAY_2 = defaultRelays[1]
-export const RELAY_3 = defaultRelays[2]
-export const RELAY_4 = defaultRelays[3]
-export const RELAY_5 = defaultRelays[4]
-
 export const test = base.extend<Fixtures>({
+  createMockRelay: async ({}, use) => {
+    await use((url: string, db: NostrEvent[]) => {
+      return new RelayServer(url, db)
+    })
+  },
   relay: async ({}, use) => {
     const relay = new WS(RELAY_1, { jsonProtocol: true })
     await use(relay)
@@ -49,5 +84,97 @@ export const test = base.extend<Fixtures>({
     const relay = new WS(RELAY_5, { jsonProtocol: true })
     await use(relay)
     relay.close()
+  },
+  root: async ({}, use) => {
+    await use(rootStore)
+  },
+  clear: async ({ root }, use) => {
+    clearCache()
+    pool.reset()
+    userStore.clear()
+    noteStore.clear()
+    followsStore.clear()
+    userRelayStore.clear()
+    replayMailbox.clear()
+    replayUsers.clear()
+    replayNIP02.clear()
+    replayNIP65.clear()
+    await use(() => {})
+  },
+  login: async ({ root, createUser }, use) => {
+    use((pubkey: string) => {
+      root.auth.login({ pubkey, context: { options: { pubkey }, signer: { name: 'nip07' } } })
+      return createUser({ pubkey })
+    })
+  },
+  createClient: async ({ clear }, use) => {
+    use((options) => {
+      return new NostrClient(pool, {
+        ...options,
+        settings: {
+          ...defaultNostrSettings,
+          ...options?.settings,
+        },
+      })
+    })
+  },
+  createUser: async ({ root, clear }, use) => {
+    use((data: Partial<NostrEvent>) => {
+      const event = fakeNote({
+        id: '1',
+        kind: Kind.Metadata,
+        content: '{"name": "user"}',
+        created_at: 1,
+        ...data,
+      })
+      userStore.add(event, parseUser(event))
+
+      return userStore.users.get(event.pubkey) as User
+    })
+  },
+  createNote: async ({ clear, createUser }, use) => {
+    use((data: Partial<NostrEvent>) => {
+      const event = fakeNote(data)
+      const metadata = parseNote(event)
+      createUser({ pubkey: event.pubkey })
+      return noteStore.add(event, metadata)
+    })
+  },
+  createComment: async ({ clear, createUser }, use) => {
+    use((data: Partial<NostrEvent>) => {
+      const event = fakeNote({ kind: Kind.Comment, ...data })
+      const metadata = parseComment(event)
+      createUser({ pubkey: event.pubkey })
+      return commentStore.add(event, metadata)
+    })
+  },
+  createFollows: async ({ clear }, use) => {
+    use((pubkey: string, followings: string[]) => {
+      const event = fakeNote({
+        kind: Kind.Follows,
+        pubkey,
+        tags: followings.map((follow) => ['p', follow]),
+      })
+      followsStore.add(event, parseFollowList(event))
+    })
+  },
+  createReaction: async ({ clear }, use) => {
+    use((data: Partial<NostrEvent>) => {
+      reactionStore.add(fakeNote(data))
+    })
+  },
+  insertRelayList: async ({ clear }, use) => {
+    use(async (data: Partial<NostrEvent>, client?: NostrClient) => {
+      const event = fakeNote({ kind: Kind.RelayList, ...data })
+      await db.event.insert(event)
+      if (client) {
+        client.mailbox.emit(event)
+      }
+    })
+    db.clearDB()
+  },
+  signer: async ({}, use) => {
+    const signer = new TestSigner()
+    await use(signer)
   },
 })

@@ -1,67 +1,76 @@
-import { Box, Typography } from '@mui/material'
-import { IconMessageCircle2 } from '@tabler/icons-react'
+import { Stack } from '@/components/ui/Stack/Stack'
+import { useMobile } from '@/hooks/useMobile'
+import { noteStore } from '@/stores/notes/notes.store'
+import { palette } from '@/themes/palette.stylex'
+import { spacing } from '@/themes/spacing.stylex'
 import { observer } from 'mobx-react-lite'
-import { useEffect, useMemo } from 'react'
-import { noteStore } from 'stores/nostr/notes.store'
-import PostRepliesLoading from './PostRepliesLoading'
-import { PostRepliesTree } from './PostReply'
-import PostReplyForm from './PostReplyForm'
+import { useEffect } from 'react'
+import { RemoveScroll } from 'react-remove-scroll'
+import { css, html } from 'react-strict-dom'
+import { Editor } from '../../Editor/Editor'
+import { PostReplies } from './PostReplies'
 
 type Props = {
-  noteId?: string
+  noteId: string | undefined
 }
 
-const PostRepliesDialog = observer(function PostRepliesDialog(props: Props) {
+export const PostRepliesDialog = observer(function PostRepliesDialog(props: Props) {
   const { noteId } = props
-  // Avoid underfined noteId when closing the dialog, disappearing the content
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const id = useMemo(() => noteId || '', [])
-  const note = noteStore.get(id)
-  const replies = note?.repliesSorted || []
+  const note = noteStore.get(noteId)
+  const mobile = useMobile()
 
   useEffect(() => {
-    note?.subscribeReplies()
+    note?.toggleReplies(true)
+    return () => {
+      note?.toggleReplies(false)
+    }
   }, [note])
 
   return (
-    <>
-      <Box sx={{ position: 'relative', pt: 2, pb: 1, flex: 1, overflowY: 'auto' }}>
-        <Box
-          sx={{
-            height: note?.repliesStatus === 'LOADED' && replies.length > 0 ? '100%' : 'auto',
-            ml: -3,
-            pr: 2,
-            width: '100%',
-            overflowY: 'visible',
-            position: 'relative',
-            '> div': {
-              overflowX: 'hidden',
-            },
-          }}>
-          <PostRepliesTree replies={replies} repliesOpen level={1} />
-        </Box>
-        {note && note.repliesStatus === 'LOADING' && <PostRepliesLoading contentHeight={50} />}
-        {note?.repliesStatus === 'LOADED' && replies.length === 0 && (
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              height: '100%',
-            }}>
-            <IconMessageCircle2 size={50} strokeWidth='1.0' />
-            <Typography variant='subtitle1' sx={{ fontWeight: 400, mt: 1 }}>
-              No Replies yet
-            </Typography>
-          </Box>
-        )}
-      </Box>
-      <Box sx={{ pb: 4 }}>
-        <PostReplyForm />
-      </Box>
-    </>
+    <Stack horizontal={false} sx={styles.root}>
+      <RemoveScroll>
+        <html.div style={[styles.content, mobile && styles.content$mobile]}>
+          {note && <PostReplies renderEmpty note={note} />}
+        </html.div>
+      </RemoveScroll>
+      <html.div style={[styles.footer, mobile && styles.footer$mobile]}>
+        {note && <Editor dense renderBubble store={note?.editor} renderDiscard={false} />}
+      </html.div>
+    </Stack>
   )
 })
 
-export default PostRepliesDialog
+const styles = css.create({
+  root: {
+    position: 'relative',
+    width: '100vw',
+    height: '100%',
+  },
+  content: {
+    paddingBottom: 200,
+    width: '100%',
+    height: 'calc(100vh - 100px)',
+    overflowY: 'scroll',
+  },
+  content$mobile: {
+    height: 'calc(100vh - 100px)',
+  },
+  footer: {
+    position: 'sticky',
+    bottom: 0,
+    zIndex: 1000,
+    width: '100%',
+    paddingInline: spacing.padding1,
+    backgroundColor: palette.surface,
+  },
+  footer$mobile: {
+    borderTopWidth: 1,
+    borderColor: palette.outlineVariant,
+    backgroundColor: palette.surfaceContainerLowest,
+    paddingBottom: 'env(safe-area-inset-bottom)',
+  },
+  bubble: {
+    width: '100%',
+  },
+  empty: {},
+})

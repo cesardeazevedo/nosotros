@@ -9,6 +9,11 @@ export class IDBSeenStore {
     return (await this.db).getAllFromIndex('seen', 'eventId', eventId)
   }
 
+  async countByRelay(relay: string) {
+    const db = await this.db
+    return await db.countFromIndex('seen', 'relay', relay)
+  }
+
   async insertBulk(seens: SeenDB[]) {
     const tx = (await this.db).transaction('seen', 'readwrite')
     await Promise.all(seens.map((seen) => tx.store.put(seen)))

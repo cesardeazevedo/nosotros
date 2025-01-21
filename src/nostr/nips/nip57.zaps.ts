@@ -1,71 +1,57 @@
+import { dedupe } from '@/core/helpers/dedupe'
+import { start } from '@/core/operators/start'
+import { verify } from '@/core/operators/verify'
+import type { NostrFilter } from '@/core/types'
 import { Kind } from 'constants/kinds'
-import type { SubscriptionOptions } from 'core/NostrSubscription'
-import { decode } from 'light-bolt11-decoder'
-import type { NostrEvent } from 'nostr-tools'
-import { batcher } from 'nostr/batcher'
-import type { NostrClient } from 'nostr/nostr'
-import { insertEvent } from 'nostr/operators/insertEvent'
-import { onNewEvents } from 'nostr/operators/onNewEvents'
-import { withCache } from 'nostr/operators/queryCache'
-import type { NoteDB, ZapDB } from 'nostr/types'
-import { EMPTY, map, of, tap } from 'rxjs'
-import { addEventToStore } from 'stores/operators/addEventToStore'
+import type { ClientSubOptions, NostrClient } from 'nostr/nostr'
+import type { Observable } from 'rxjs'
+import { connect, filter, from, ignoreElements, merge, mergeMap, of, tap } from 'rxjs'
+import { parseTags } from '../helpers/parseTags'
+import { distinctEvent } from '../operators/distinctEvents'
+import { parseEventMetadata } from '../operators/parseMetadata'
+import type { NostrEventZapReceipt } from '../types'
+import { metadataSymbol } from '../types'
 
-const kinds = [Kind.Zap]
-
-const BOLT11_KEYS = ['coin_network', 'amount', 'separator', 'timestamp', 'expiry', 'payment_hash', 'description']
+const kinds = [Kind.ZapReceipt]
 
 export class NIP57Zaps {
-  constructor(private client: NostrClient) { }
+  constructor(private client: NostrClient) {}
 
-  decode(event: NostrEvent) {
-    const bolt11 = event.tags.find((tag) => tag[0] === 'bolt11')?.[1]
-    if (bolt11) {
-      decode
-      const decoded = decode(bolt11)
-      const data = decoded.sections.reduce(
-        (acc, x) => {
-          if (BOLT11_KEYS.includes(x.name)) {
-            acc[x.name as keyof ZapDB['metadata']['bolt11']] = {
-              letters: x.letters,
-              value: x.value as never,
-            }
-          }
-          return acc
-        },
-        {} as ZapDB['metadata']['bolt11'],
-      )
-      return {
-        ...event,
-        metadata: {
-          bolt11: data,
-        },
-      } as ZapDB
-    }
-    return event
+  waitForReceipt(id: string, invoice: string, options?: ClientSubOptions) {
+    const sub = this.client.createSubscription({ kinds, '#e': [id] }, options)
+    return of(sub).pipe(
+      start(this.client.pool, false),
+      distinctEvent(),
+      verify(),
+      this.client.insert(),
+      parseEventMetadata(),
+      tap(this.client.options.onEvent),
+      filter((event) => {
+        // Make sure the zap receipt is the one we are looking for
+        const tags = parseTags(event.tags)
+        return tags.bolt11?.[0][1] === invoice
+      }),
+    )
   }
 
-  subFromNote(note: NoteDB, options?: SubscriptionOptions) {
-    return this.subscribe([note.id, ...note.metadata.mentionedNotes], options)
+  withRelatedAuthors() {
+    return connect((shared$: Observable<NostrEventZapReceipt>) => {
+      return merge(
+        shared$,
+        shared$.pipe(
+          mergeMap((event) => {
+            // Get zapper and receiver authors
+            const metadata = event[metadataSymbol]
+            const authors = dedupe([metadata.receiver, metadata.zapper])
+            return from(authors).pipe(mergeMap((pubkey) => this.client.users.subscribe(pubkey)))
+          }),
+          ignoreElements(),
+        ),
+      )
+    })
   }
 
-  subscribe(eventIds: string[], options?: SubscriptionOptions) {
-    if (this.client.settings.nip57enabled) {
-      const sub = this.client.subscribe({ kinds, '#e': eventIds }, options)
-      return of(sub).pipe(
-        batcher.subscribe(),
-
-        onNewEvents(sub),
-
-        map((event) => this.decode(event)),
-
-        insertEvent(),
-
-        withCache(sub.filters),
-
-        tap((event) => addEventToStore(event)),
-      )
-    }
-    return EMPTY
+  subscribe(filter: NostrFilter, options?: ClientSubOptions) {
+    return this.client.subscribe({ ...filter, kinds }, options)
   }
 }

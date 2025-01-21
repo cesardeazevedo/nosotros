@@ -1,32 +1,33 @@
-import { Chip, Typography } from '@mui/material'
-import type { Relay } from 'core/Relay'
+import { Chip } from '@/components/ui/Chip/Chip'
+import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 import { observer } from 'mobx-react-lite'
-import { useMemo } from 'react'
-import { Row } from '../Layouts/Flex'
-import RelayIcon from './RelayIcon'
+import React, { useMemo } from 'react'
+import { RelayConnectedIcon } from './RelayConnectedIcon'
 
 type Props = {
-  relay: Relay
+  url: string
+  icon?: React.ReactNode
+  onClick?: () => void
 }
 
-const RelayChip = observer(function RelayChip(props: Props) {
-  const { relay } = props
-  const formatted = useMemo(() => new URL(relay.url), [relay])
+export const RelayChip = observer(function RelayChip(props: Props) {
+  const { url, icon, onClick } = props
+  const formatted = useMemo(() => {
+    try {
+      return new URL(url)
+    } catch (error) {
+      console.log('error url', error)
+    }
+  }, [url])
   return (
-    <Chip
-      icon={
-        <RelayIcon url={relay.url} />
-      }
-      label={
-        <Row>
-          <Typography variant='subtitle1' sx={{ mr: 1 }}>
-            {formatted.hostname}
-          </Typography>
-        </Row>
-      }
-      sx={{ mb: 1, flex: 1 }}
-    />
+    formatted && (
+      <Chip
+        icon={icon || <RelayConnectedIcon url={url} />}
+        onClick={onClick}
+        label={
+          formatted?.hostname.length > 24 ? <Tooltip text={url}>{formatted?.hostname}</Tooltip> : formatted.hostname
+        }
+      />
+    )
   )
 })
-
-export default RelayChip
