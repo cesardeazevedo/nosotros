@@ -35,10 +35,8 @@ export const NEventRoute = observer(function NEventRoute() {
           </Stack>
         )}
         <PaperContainer elevation={isMobile ? 0 : 2}>
-          <PostAwait promise={module.delay} rows={1}>
-            {!event && <PostLoading rows={1} />}
-            {event && <NostrEventRoot item={event} />}
-          </PostAwait>
+          {!event && <PostLoading rows={1} />}
+          {event && <NostrEventRoot item={event} />}
         </PaperContainer>
       </CenteredContainer>
     </NostrProvider>

@@ -3,8 +3,7 @@ import { replayIds, subscribeIds } from '@/nostr/operators/subscribeIds'
 import { subscribeNoteStats } from '@/nostr/subscriptions/subscribeNoteStats'
 import type { Instance, SnapshotIn, SnapshotOut } from 'mobx-state-tree'
 import { t } from 'mobx-state-tree'
-import { firstValueFrom, mergeMap, timer } from 'rxjs'
-import { modelStore } from '../base/model.store'
+import { mergeMap } from 'rxjs'
 import { BaseModuleModel } from '../modules/module'
 
 export type NEventOptions = {
@@ -19,9 +18,6 @@ export const NEventModuleModel = BaseModuleModel.named('NEventModuleModel')
     type: t.optional(t.literal('nevent'), 'nevent'),
     options: t.frozen<NEventOptions>(),
   })
-  .volatile((self) => ({
-    delay: firstValueFrom(timer(modelStore.get(self.options.id) ? 0 : 300)),
-  }))
   .views((self) => ({
     subscribe(client: NostrClient) {
       const { id, relays } = self.options
