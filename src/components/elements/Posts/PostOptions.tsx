@@ -1,34 +1,28 @@
+import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Menu } from '@/components/ui/Menu/Menu'
 import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { MenuList } from '@/components/ui/MenuList/MenuList'
 import { Stack } from '@/components/ui/Stack/Stack'
-import { Text } from '@/components/ui/Text/Text'
+import type { Comment } from '@/stores/comment/comment'
+import type { Note } from '@/stores/notes/note'
+import { toastStore } from '@/stores/ui/toast.store'
 import { spacing } from '@/themes/spacing.stylex'
-import {
-  IconBookmark,
-  IconCopy,
-  IconDotsVertical,
-  IconEyeOff,
-  IconInfoSquareRounded,
-  IconLink,
-  IconUserMinus,
-} from '@tabler/icons-react'
-import Dialog from 'components/elements/Layouts/Dialog'
+import { IconCopy, IconDotsVertical, IconInfoSquareRounded, IconLink } from '@tabler/icons-react'
+import { DialogSheet } from 'components/elements/Layouts/Dialog'
 import { observer } from 'mobx-react-lite'
 import { useCallback, useState } from 'react'
 import { css } from 'react-strict-dom'
-import { toast } from 'sonner'
-import type Note from 'stores/models/note'
-import PostStats from './PostDialogs/PostStats'
+import { PostStats } from './PostDialogs/PostStats'
 
 type Props = {
-  note: Note
+  note: Note | Comment
   dense?: boolean
 }
 
 type PropsOptions = {
+  note: Note | Comment
   onCopyIdClick: () => void
   onCopyAuthorIdClick: () => void
   onCopyLinkClick: () => void
@@ -39,7 +33,7 @@ function isMobileDevice() {
   return 'ontouchstart' in window
 }
 
-function Options(props: PropsOptions) {
+const Options = observer(function Options(props: PropsOptions) {
   return (
     <>
       <MenuItem leadingIcon={<IconInfoSquareRounded />} label='Details' onClick={props.onDetailsClick} />
@@ -47,19 +41,21 @@ function Options(props: PropsOptions) {
       <MenuItem leadingIcon={<IconCopy />} label='Copy ID' onClick={props.onCopyIdClick} />
       <MenuItem leadingIcon={<IconCopy />} label='Copy Author ID' onClick={props.onCopyAuthorIdClick} />
       <MenuItem leadingIcon={<IconLink />} label='Copy Link' onClick={props.onCopyLinkClick} />
-      <Divider />
-      <Text variant='label' size='sm' sx={styles.label}>
-        Coming Soon
-      </Text>
-      <MenuItem disabled leadingIcon={<IconBookmark />} label='Bookmark' />
-      <MenuItem disabled variant='danger' leadingIcon={<IconEyeOff />} label='Mute' />
-      <MenuItem disabled variant='danger' leadingIcon={<IconUserMinus />} label='Unfollow' />
+      {/* <PostMenuOpenIn nevent={props.note.nevent} /> */}
+      {/* <Divider /> */}
+      {/* <Text variant='label' size='sm' sx={styles.label}> */}
+      {/*   Coming Soon */}
+      {/* </Text> */}
+      {/* <MenuItem disabled leadingIcon={<IconBookmark />} label='Bookmark' /> */}
+      {/* <MenuItem disabled variant='danger' leadingIcon={<IconEyeOff />} label='Mute' /> */}
+      {/* <MenuItem disabled variant='danger' leadingIcon={<IconUserMinus />} label='Unfollow' /> */}
     </>
   )
-}
+})
 
-const PostOptions = observer(function PostOptions(props: Props) {
-  const { dense = false, note } = props
+export const PostOptions = observer(function PostOptions(props: Props) {
+  const { note } = props
+  const { dense } = useNoteContext()
   const [debugDialog, setDebugDialog] = useState(false)
   const [open, setOpen] = useState(false)
   const isMobile = isMobileDevice()
@@ -75,13 +71,13 @@ const PostOptions = observer(function PostOptions(props: Props) {
           const type = 'text/plain'
           const blob = new Blob([value], { type })
           window.navigator.clipboard.write([new ClipboardItem({ [type]: blob })]).then(() => {
-            toast('Copied', { closeButton: false, position: 'bottom-right', style: { right: 0, width: 'fit-content' } })
+            toastStore.enqueue('Copied', { duration: 4000 })
             handleClose()
           })
         }
       }
     },
-    [handleClose],
+    [note, handleClose],
   )
 
   const handleDetailsDialog = useCallback(() => {
@@ -93,13 +89,14 @@ const PostOptions = observer(function PostOptions(props: Props) {
 
   return (
     <>
-      <Dialog title='Stats' open={debugDialog} onClose={handleClose} maxWidth='sm'>
-        <PostStats note={note} />
-      </Dialog>
+      <DialogSheet title='Stats' open={debugDialog} onClose={handleClose} maxWidth='sm'>
+        <PostStats note={note} onClose={handleClose} />
+      </DialogSheet>
       {!isMobile && (
         <Menu
           sx={styles.menu}
           placement='bottom-end'
+          surface='surfaceContainerLow'
           trigger={({ getProps }) => (
             <IconButton
               {...getProps()}
@@ -108,8 +105,9 @@ const PostOptions = observer(function PostOptions(props: Props) {
             />
           )}>
           <Options
+            note={note}
             onCopyIdClick={handleCopy(nevent)}
-            onCopyAuthorIdClick={handleCopy(note.nprofile as string | undefined)}
+            onCopyAuthorIdClick={handleCopy(note.user?.nprofile)}
             onCopyLinkClick={handleCopy(link)}
             onDetailsClick={handleDetailsDialog}
           />
@@ -122,18 +120,19 @@ const PostOptions = observer(function PostOptions(props: Props) {
             onClick={() => setOpen(true)}
             icon={<IconDotsVertical stroke='currentColor' strokeWidth='2.0' size={20} />}
           />
-          <Dialog open={open} onClose={() => setOpen(false)} mobileAnchor='middle'>
+          <DialogSheet open={open} onClose={() => setOpen(false)} mobileAnchor='middle'>
             <Stack horizontal={false}>
               <MenuList elevation={0} sx={styles.menuList}>
                 <Options
+                  note={note}
                   onCopyIdClick={handleCopy(nevent)}
-                  onCopyAuthorIdClick={handleCopy(note.nprofile as string | undefined)}
+                  onCopyAuthorIdClick={handleCopy(note.user?.nprofile)}
                   onCopyLinkClick={handleCopy(link)}
                   onDetailsClick={handleDetailsDialog}
                 />
               </MenuList>
             </Stack>
-          </Dialog>
+          </DialogSheet>
         </>
       )}
     </>
@@ -148,8 +147,11 @@ const styles = css.create({
     marginLeft: spacing.margin2,
   },
   menuList: {
+    backgroundColor: 'transparent',
     width: '100%',
   },
+  clientHeader: {
+    paddingBlock: spacing.padding1,
+    paddingInline: spacing.padding2,
+  },
 })
-
-export default PostOptions

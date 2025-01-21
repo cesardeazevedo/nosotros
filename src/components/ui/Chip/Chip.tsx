@@ -1,6 +1,7 @@
 import { elevation } from '@/themes/elevation.stylex'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
+import { spacing } from '@/themes/spacing.stylex'
 import { state } from '@/themes/state.stylex'
 import { IconCheck, IconX } from '@tabler/icons-react'
 import React, { forwardRef } from 'react'
@@ -17,23 +18,25 @@ import { focusRingTokens } from '../FocusRing/FocusRing.stylex'
 import { dataProps } from '../helpers/dataProps'
 import { mergeRefs } from '../helpers/mergeRefs'
 import { useVisualState } from '../hooks/useVisualState'
+import { CircularProgress } from '../Progress/CircularProgress'
 import { Ripple } from '../Ripple/Ripple'
 import type { SxProps } from '../types'
 import { chipTokens } from './Chip.stylex'
 
 type ChipVariants = 'assist' | 'filter' | 'input' | 'suggestion'
 
-type Props = {
+export type Props = {
   sx?: SxProps
   variant?: ChipVariants
   avatarUrl?: string
   href?: string
   icon?: React.ReactNode
   trailingIcon?: React.ReactNode
-  label: string
+  label: string | React.ReactNode
   selected?: boolean
   elevated?: boolean
   disabled?: boolean
+  loading?: boolean
   onClick?: StrictReactDOMProps['onClick']
   onDelete?: StrictReactDOMProps['onClick']
   onTrailingClick?: StrictReactDOMProps['onClick']
@@ -48,18 +51,19 @@ export const Chip = forwardRef<HTMLButtonElement, Props>(function Chip(props, re
     trailingIcon,
     selected,
     disabled = false,
+    loading = false,
     avatarUrl,
     onClick,
     onDelete,
     onTrailingClick,
   } = props
   const hasIcon = !!avatarUrl || !!icon
-  const elevated = variant !== 'input' && props.elevated
+  const elevated = variant !== 'input' && !!props.elevated
   const isInput = variant === 'input'
   const isFilter = variant === 'filter'
   const isDeletable = (isFilter || isInput) && onDelete
-  const hasLeading = selected || hasIcon
-  const hasTrailing = (isFilter || isInput) && (!!onDelete || !!onTrailingClick)
+  const hasLeading = loading || selected || hasIcon
+  const hasTrailing = trailingIcon || onDelete
   const { visualState, setRef } = useVisualState(undefined, { disabled })
   const refs = mergeRefs([setRef, ref])
 
@@ -92,16 +96,20 @@ export const Chip = forwardRef<HTMLButtonElement, Props>(function Chip(props, re
           style={[styles.action, disabled && styles.action$disabled]}>
           {hasLeading ? (
             <html.div style={styles.leading}>
-              {selected ? (
-                <IconCheck size={18} strokeWidth='2' />
+              {loading ? (
+                <CircularProgress size='xs' disabled={disabled} />
+              ) : selected ? (
+                <IconCheck size={16} strokeWidth='2.5' />
               ) : avatarUrl ? (
                 <Avatar size='sm' src={avatarUrl} sx={styles.avatar} />
               ) : icon ? (
                 icon
               ) : null}
             </html.div>
-          ) : null}
-          <html.div style={styles.label}>{label}</html.div>
+          ) : (
+            <html.div style={styles.leading} />
+          )}
+          {label && <html.div style={styles.label}>{label}</html.div>}
         </html.button>
         {hasTrailing ? (
           <ButtonBase
@@ -109,7 +117,7 @@ export const Chip = forwardRef<HTMLButtonElement, Props>(function Chip(props, re
             disabled={disabled}
             sx={[styles.action$trailing, disabled && styles.action$disabled]}
             onClick={onDelete || onTrailingClick}>
-            {isDeletable ? <IconX size={18} /> : trailingIcon}
+            {isDeletable ? <IconX size={16} /> : trailingIcon}
           </ButtonBase>
         ) : null}
       </html.div>
@@ -122,8 +130,11 @@ const styles = css.create({
     borderRadius: chipTokens.containerShape,
     display: 'inline-flex',
     height: chipTokens.containerHeight,
+    minWidth: 32,
     cursor: 'pointer',
     [focusRingTokens.shape]: chipTokens.containerShape,
+    [chipTokens.flatContainerColor]: palette.surfaceContainerLow,
+    [chipTokens.selectedFlatContainerColor]: palette.secondaryContainer,
   },
   elevation: {
     [elevationTokens.boxShadow]: chipTokens.elevation,
@@ -174,7 +185,7 @@ const styles = css.create({
   elevatedContainerSelected: {
     [chipTokens.elevation]: chipTokens.selectedElevatedContainerElevation,
     '::before': {
-      backgroundColor: palette.secondaryContainer,
+      backgroundColor: chipTokens.selectedFlatContainerColor,
     },
   },
   flatContainerSelected: {
@@ -200,7 +211,9 @@ const styles = css.create({
     flexGrow: 1,
     flexShrink: 1,
     minWidth: 0,
-    //zIndex: 1,
+    gap: spacing.padding1,
+    // paddingInlineStart: chipTokens.leadingSpace,
+    // paddingInlineEnd: chipTokens.trailingSpace,
   },
   action$interactive: {},
   action$leading: {},
@@ -209,6 +222,8 @@ const styles = css.create({
     alignItems: 'center',
     justifyContent: 'center',
     cursor: 'pointer',
+    color: chipTokens.iconColor,
+    //color: chipTokens.trailingIcon,
     textAlign: 'center',
     flexGrow: 0,
     flexShrink: 0,
@@ -222,9 +237,7 @@ const styles = css.create({
   },
   leading: {
     position: 'relative',
-    color: chipTokens.leadIconColor,
-    marginInlineEnd: chipTokens.iconLeadingSpace,
-    opacity: 1,
+    color: chipTokens.iconColor,
   },
   avatar: {
     [avatarTokens.containerSize]: '20px',
@@ -236,9 +249,15 @@ const styles = css.create({
     letterSpacing: chipTokens.labelTextLetterSpacing,
     fontWeight: chipTokens.labelTextWeight,
     color: chipTokens.labelTextColor,
+    paddingInlineEnd: spacing.padding1,
+    // paddingInlineStart: chipTokens.leadingSpace,
     display: 'flex',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
     flex: 1,
+    whiteSpace: 'nowrap',
+    maxWidth: 160,
+    overflow: 'clip',
+    textOverflow: 'ellipsis',
   },
 })

@@ -1,10 +1,10 @@
 import { elevation } from '@/themes/elevation.stylex'
 import { palette } from '@/themes/palette.stylex'
+import { spacing } from '@/themes/spacing.stylex'
+import { state } from '@/themes/state.stylex'
+import { typeScale } from '@/themes/typeScale.stylex'
 import { css } from 'react-strict-dom'
 import { buttonTokens } from '../Button/Button.stylex'
-import { typeScale } from '@/themes/typeScale.stylex'
-import { state } from '@/themes/state.stylex'
-import { spacing } from '@/themes/spacing.stylex'
 
 const vars = {
   containerShape: buttonTokens.containerShape,
@@ -12,11 +12,11 @@ const vars = {
 
   elevation: 'unset',
 
-  flatContainerColor: palette.surfaceContainerLow,
+  flatContainerColor: 'inherit',
 
-  leadingSpace: spacing.padding2,
-  trailingSpace: spacing.padding2,
-  iconLeadingSpace: spacing.padding1,
+  leadingSpace: spacing.padding1,
+  trailingSpace: spacing.padding1,
+  iconLeadingSpace: spacing['padding0.5'],
 
   elevatedContainerColor: palette.surfaceContainerLow,
   elevatedContainerElevation: elevation.shadows1,
@@ -24,9 +24,10 @@ const vars = {
   elevatedContainerElevation$hover: elevation.shadows2,
   elevatedContainerElevation$pressed: elevation.shadows1,
 
+  selectedFlatContainerColor: 'inherit',
   selectedElevatedContainerElevation: elevation.shadows1,
 
-  leadIconColor: palette.primary,
+  iconColor: palette.primary,
 
   // labelText
   labelTextColor: palette.onSurface,

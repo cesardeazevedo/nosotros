@@ -12,7 +12,7 @@ const iconProps = {
   size: 26,
 }
 
-const Camera = observer(function CameraDialog() {
+export const Camera = observer(function Camera() {
   const [flash, setFlash] = useState(false)
 
   return (
@@ -41,5 +41,3 @@ const styles = css.create({
     padding: 16,
   },
 })
-
-export default Camera

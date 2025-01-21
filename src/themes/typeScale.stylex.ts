@@ -46,8 +46,8 @@ const vars = {
   titleFont$md: typeFace.plain,
   titleFont$sm: typeFace.plain,
 
-  titleSize$lg: '22px',
-  titleSize$md: '16px',
+  titleSize$lg: '20px',
+  titleSize$md: '18px',
   titleSize$sm: '14px',
 
   titleWeight$lg: typeFace.regular,

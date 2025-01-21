@@ -2,7 +2,7 @@ import React, { forwardRef } from 'react'
 import { css, html } from 'react-strict-dom'
 import type { SxProps } from '../types'
 
-type Props = {
+export type Props = {
   as?: 'div' | 'span' | 'p' | 'header' | 'main' | 'footer' | 'section' | 'article'
   sx?: SxProps
   horizontal?: boolean
@@ -16,7 +16,7 @@ type Props = {
   children?: React.ReactNode
 }
 
-export const Stack = forwardRef<HTMLDivElement, Props>((props, ref) => {
+export const Stack = forwardRef<HTMLDivElement, Props>(function Stack(props, ref) {
   const {
     sx,
     as = 'div',
@@ -31,7 +31,6 @@ export const Stack = forwardRef<HTMLDivElement, Props>((props, ref) => {
   } = props
 
   const Root = html[as]
-  const orientation = horizontal ? 'horizontal' : 'vertical'
   const align = alignProp ?? (horizontal ? 'center' : 'stretch')
 
   return (
@@ -39,12 +38,12 @@ export const Stack = forwardRef<HTMLDivElement, Props>((props, ref) => {
       ref={ref}
       style={[
         styles.root,
-        styles[`root$${orientation}`],
+        !horizontal && styles.root$vertical,
         styles[`align$${align}`],
         styles[`justify$${justify}`],
-        styles[`gap$${gap}`],
-        styles[`flexWrap$${wrap ? 'wrap' : 'nowrap'}`],
-        styles[`flexGrow$${grow ? '1' : '0'}`],
+        gap !== undefined ? styles[`gap$${gap}`] : false,
+        !!wrap && styles[`flexWrap$${wrap ? 'wrap' : 'nowrap'}`],
+        grow && styles.flexGrow,
         sx,
       ]}
       {...other}>
@@ -59,9 +58,6 @@ const styles = css.create({
   },
   root$vertical: {
     flexDirection: 'column',
-  },
-  root$horizontal: {
-    flexDirection: 'row',
   },
   ['align$center']: { alignItems: 'center' },
   ['align$flex-start']: { alignItems: 'flex-start' },
@@ -83,6 +79,5 @@ const styles = css.create({
   ['gap$5']: { gap: '40px' },
   flexWrap$wrap: { flexWrap: 'wrap' },
   flexWrap$nowrap: { flexWrap: 'nowrap' },
-  flexGrow$0: { flexGrow: 0 },
-  flexGrow$1: { flexGrow: 1 },
+  flexGrow: { flexGrow: 1 },
 })

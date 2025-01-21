@@ -1,10 +1,11 @@
 import { Button } from '@/components/ui/Button/Button'
-import { Divider } from '@/components/ui/Divider/Divider'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Paper } from '@/components/ui/Paper/Paper'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
+import type { Comment } from '@/stores/comment/comment'
+import type { Note } from '@/stores/notes/note'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconChevronDown, IconChevronRight } from '@tabler/icons-react'
 import JsonView from '@uiw/react-json-view'
@@ -12,11 +13,10 @@ import { githubDarkTheme } from '@uiw/react-json-view/githubDark'
 import React from 'react'
 import { RemoveScroll } from 'react-remove-scroll'
 import { css, html } from 'react-strict-dom'
-import type Note from 'stores/models/note'
-import UserHeader from '../../User/UserHeader'
 
 type Props = {
-  note: Note
+  note: Note | Comment
+  onClose?: () => void
 }
 
 const Panel = (props: { children: React.ReactNode; label: string; value?: object; defaultExpanded?: boolean }) => {
@@ -25,12 +25,14 @@ const Panel = (props: { children: React.ReactNode; label: string; value?: object
     <Expandable
       defaultExpanded={defaultExpanded}
       trigger={({ expand, expanded }) => (
-        <Stack gap={1} sx={styles.panel} onClick={() => expand(!expanded)}>
-          <IconButton icon={expanded ? <IconChevronDown size={20} /> : <IconChevronRight size={20} />} />
-          <Text variant='title' size='md'>
-            {label}
-          </Text>
-        </Stack>
+        <>
+          <Stack gap={1} sx={styles.panel} onClick={() => expand(!expanded)}>
+            <IconButton icon={expanded ? <IconChevronDown size={20} /> : <IconChevronRight size={20} />} />
+            <Text variant='title' size='sm'>
+              {label}
+            </Text>
+          </Stack>
+        </>
       )}>
       {children}
     </Expandable>
@@ -54,8 +56,8 @@ const JsonContent = function PostUserJson(props: { value?: object }) {
   )
 }
 
-function PostStats(props: Props) {
-  const { note } = props
+export const PostStats = (props: Props) => {
+  const { note, onClose } = props
   return (
     <RemoveScroll>
       <html.div style={styles.root}>
@@ -72,13 +74,12 @@ function PostStats(props: Props) {
             <Panel defaultExpanded label='Raw Event'>
               <JsonContent value={note.event} />
             </Panel>
-            <Divider />
-            <Panel label='User Raw Event'>
-              <JsonContent value={note.user?.meta} />
-            </Panel>
+            {/* <Panel label='User Raw Event'> */}
+            {/*   <JsonContent value={note.user?.meta} /> */}
+            {/* </Panel> */}
           </Paper>
           <Stack justify='flex-end'>
-            <Button>Close</Button>
+            <Button onClick={onClose}>Close</Button>
           </Stack>
         </Stack>
       </html.div>
@@ -107,8 +108,7 @@ const styles = css.create({
     overflow: 'hidden',
   },
   panel: {
+    cursor: 'pointer',
     padding: spacing.padding1,
   },
 })
-
-export default PostStats

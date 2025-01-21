@@ -1,51 +1,77 @@
+import { focusRingTokens } from '@/components/ui/FocusRing/FocusRing.stylex'
 import { Tab } from '@/components/ui/Tab/Tab'
+import { tabTokens } from '@/components/ui/Tab/Tab.stylex'
 import { Tabs } from '@/components/ui/Tabs/Tabs'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
+import { useCurrentUser } from '@/hooks/useRootStore'
+import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
-import { IconBell, IconBellFilled, IconServerBolt, IconUsersGroup } from '@tabler/icons-react'
+import { IconBell, IconBellFilled, IconLayoutSidebarLeftExpand, IconServerBolt } from '@tabler/icons-react'
+import { Link, useLocation } from '@tanstack/react-router'
+import { observer } from 'mobx-react-lite'
+import { useCallback } from 'react'
 import { css } from 'react-strict-dom'
 import { IconHome } from '../Icons/IconHome'
 import { IconHomeFilled } from '../Icons/IconHomeFilled'
-import LinkRouter from '../Links/LinkRouter'
 
-const enterDelay = 0
+const enterDelay = 800
 
-export const TopNavigation = () => {
+export const TopNavigation = observer(function TopNavigation() {
+  const location = useLocation()
+  const user = useCurrentUser()
+
+  const handleClickHome = useCallback(() => {
+    window.scrollTo({ top: 0 })
+  }, [])
+
   return (
     <>
-      <Tabs anchor='home'>
+      <Tabs anchor={location.pathname}>
         <Tooltip text='Home' enterDelay={enterDelay}>
-          <LinkRouter to='/'>
-            <Tab anchor='home' sx={styles.tab} icon={<IconHome />} activeIcon={<IconHomeFilled />} />
-          </LinkRouter>
+          <Link tabIndex={-1} to='/' resetScroll onClick={handleClickHome}>
+            <Tab anchor='/' sx={styles.tab} icon={<IconHome />} activeIcon={<IconHomeFilled />} />
+          </Link>
         </Tooltip>
-        <Tooltip text='Relays' enterDelay={enterDelay}>
-          <LinkRouter to='/deck'>
-            <Tab anchor='relays' sx={styles.tab} icon={<IconServerBolt size={24} />} />
-          </LinkRouter>
-        </Tooltip>
-        {/* <Tooltip text='Deck Mode' enterDelay={enterDelay}> */}
-        {/*   <LinkRouter to='/deck'> */}
-        {/*     <Tab anchor='deck' sx={styles.tab} icon={<IconLayoutSidebarLeftExpand size={24} />} /> */}
-        {/*   </LinkRouter> */}
+        {/* <Tooltip text='Photos' enterDelay={enterDelay}> */}
+        {/*   <Link tabIndex={-1} to='/photos'> */}
+        {/*     <Tab anchor='/photos' sx={styles.tab} icon={<IconPhoto strokeWidth='1.5' size={26} />} /> */}
+        {/*   </Link> */}
         {/* </Tooltip> */}
-        <Tooltip text='Communities' enterDelay={enterDelay}>
-          <Tab anchor='communities' sx={styles.tab} icon={<IconUsersGroup />} />
+        <Tooltip text='Relays' enterDelay={enterDelay}>
+          <Link tabIndex={-1} to='/relays' resetScroll>
+            <Tab anchor='/relays' sx={styles.tab} icon={<IconServerBolt strokeWidth='1.5' size={26} />} />
+          </Link>
         </Tooltip>
+        <Tooltip text='Deck Mode' enterDelay={enterDelay}>
+          <Link tabIndex={-1} to='/deck'>
+            <Tab anchor='/deck' sx={styles.tab} icon={<IconLayoutSidebarLeftExpand strokeWidth='1.5' size={26} />} />
+          </Link>
+        </Tooltip>
+        {/* <Tooltip text='Communities' enterDelay={enterDelay}> */}
+        {/*   <Tab anchor='/communities' sx={styles.tab} icon={<IconUsers strokeWidth='1.6' size={26} />} /> */}
+        {/* </Tooltip> */}
         <Tooltip text='Notifications' enterDelay={enterDelay}>
-          <LinkRouter to='/notifications'>
-            <Tab anchor='notifications' sx={styles.tab} icon={<IconBell />} activeIcon={<IconBellFilled />} />
-          </LinkRouter>
+          <Link tabIndex={-1} to='/notifications' resetScroll>
+            <Tab
+              anchor='/notifications'
+              sx={styles.tab}
+              icon={<IconBell strokeWidth='1.6' />}
+              activeIcon={<IconBellFilled strokeWidth='1.6' size={26} />}
+              disabled={!user}
+            />
+          </Link>
         </Tooltip>
       </Tabs>
     </>
   )
-}
+})
 
 const styles = css.create({
   root: {},
   tab: {
     height: 50,
     borderRadius: shape.full,
+    [tabTokens.containerShape]: shape.full,
+    [focusRingTokens.color]: palette.secondaryContainer,
   },
 })

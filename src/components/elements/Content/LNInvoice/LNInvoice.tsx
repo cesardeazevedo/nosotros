@@ -1,22 +1,25 @@
+import { CopyIconButton } from '@/components/elements/Buttons/CopyIconButton'
+import { useNoteContext } from '@/components/providers/NoteProvider'
+import { Button } from '@/components/ui/Button/Button'
 import { Paper } from '@/components/ui/Paper/Paper'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconBolt } from '@tabler/icons-react'
-import { CopyButton } from 'components/elements/Buttons/CopyButton'
+import { Link } from '@tanstack/react-router'
 import type { decode } from 'light-bolt11-decoder'
-import { useContext, useMemo } from 'react'
+import { useMemo } from 'react'
 import { css } from 'react-strict-dom'
-import { ContentContext } from '../Content'
 
 type Props = {
   bolt11: ReturnType<typeof decode>
   lnbc: string
+  nevent?: string | undefined
 }
 
 export const LNInvoice = function LNInvoice(props: Props) {
-  const { bolt11, lnbc } = props
-  const { dense } = useContext(ContentContext)
+  const { bolt11, lnbc, nevent } = props
+  const { dense } = useNoteContext()
 
   const amount = useMemo(() => {
     return parseInt(bolt11.sections.find((x: { name: string }) => x.name === 'amount')?.value || '0') / 1000
@@ -28,19 +31,27 @@ export const LNInvoice = function LNInvoice(props: Props) {
   }, [bolt11])
 
   return (
-    <Paper outlined sx={[styles.root, dense && styles.root$dense]}>
-      <CopyButton sx={styles.copy} title='Copy invoice' text={lnbc} />
-      <Text variant='display'>
-        <Stack>
-          <IconBolt strokeWidth='1.5' size={28} />
-          Lightning Invoice
+    <>
+      <Paper outlined sx={[styles.root, dense && styles.root$dense]}>
+        <CopyIconButton sx={styles.copy} title='Copy invoice' text={lnbc} />
+        <Stack align='flex-end' justify='space-between'>
+          <Stack horizontal={false} gap={0.5}>
+            <IconBolt strokeWidth='1.8' size={28} />
+            <Text variant='headline' size='sm'>
+              Lightning Invoice
+            </Text>
+            <Text variant='headline' size={dense ? 'sm' : 'lg'} sx={styles.amount}>
+              {amount} sats
+            </Text>
+          </Stack>
+          {/* @ts-ignore */}
+          <Link search={{ invoice: lnbc, nevent }}>
+            <Button variant='filled'>Pay</Button>
+          </Link>
         </Stack>
-      </Text>
-      <Text variant='headline' size={dense ? 'sm' : 'lg'}>
-        {amount} SATS
-      </Text>
-      {expired && 'expired'}
-    </Paper>
+        {expired && 'expired'}
+      </Paper>
+    </>
   )
 }
 
@@ -57,7 +68,14 @@ const styles = css.create({
   },
   copy: {
     position: 'absolute',
-    top: 4,
-    right: 4,
+    top: 12,
+    right: 12,
+  },
+  lnbc: {
+    maxWidth: 300,
+    wordBreak: 'break-all',
+  },
+  amount: {
+    fontFamily: 'monospace',
   },
 })

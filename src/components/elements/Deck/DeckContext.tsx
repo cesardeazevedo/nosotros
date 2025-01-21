@@ -1,3 +1,3 @@
 import { createContext } from 'react'
 
-export const DeckContext = createContext({ index: 0 })
+export const DeckContext = createContext({ index: undefined } as { index: number | undefined })

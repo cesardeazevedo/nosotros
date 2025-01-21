@@ -2,7 +2,7 @@ import type { SxProps } from '@/components/ui/types'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import { CopyButton } from 'components/elements/Buttons/CopyButton'
+import { CopyIconButton } from '@/components/elements/Buttons/CopyIconButton'
 import type { CodeBlockNode } from 'nostr-editor'
 import React, { useRef } from 'react'
 import { css, html } from 'react-strict-dom'
@@ -12,7 +12,7 @@ type Props = {
   node: CodeBlockNode
 }
 
-export function CodeBlock(props: Props) {
+export const CodeBlock = (props: Props) => {
   const refPre = useRef<HTMLPreElement | null>(null)
 
   return (
@@ -21,25 +21,22 @@ export function CodeBlock(props: Props) {
         {props.node.content.map((node, index) => (
           <React.Fragment key={node.type + index}>{node.type === 'text' && node.text}</React.Fragment>
         ))}
+        <CopyIconButton text={refPre.current?.innerText} title='Copy code' sx={styles.copy} />
       </html.pre>
-      <CopyButton text={refPre.current?.innerText} title='Copy code' sx={styles.copy} />
     </html.div>
   )
 }
 
 const styles = css.create({
   root: {
-    position: 'relative',
-    marginTop: spacing.margin1,
-    marginInline: spacing.margin2,
+    padding: spacing.padding2,
     paddingRight: spacing.padding6,
-    borderRadius: shape.lg,
-    backgroundColor: palette.outlineVariant,
   },
   pre: {
-    marginBlock: spacing.margin1,
-    paddingBlock: spacing.padding1,
-    paddingInline: spacing.padding2,
+    position: 'relative',
+    padding: spacing.padding2,
+    backgroundColor: palette.outlineVariant,
+    borderRadius: shape.lg,
     overflow: 'scroll',
   },
   copy: {

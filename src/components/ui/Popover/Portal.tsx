@@ -6,7 +6,7 @@ export type IPortalProps = {
   disabled?: boolean
 }
 
-export const Portal: React.FC<IPortalProps> = (props) => {
+export const Portal: React.FC<IPortalProps> = function Portal(props) {
   const { root, children, disabled } = props
   return disabled ? children : <FloatingPortal root={root}>{children}</FloatingPortal>
 }

@@ -12,7 +12,7 @@ import { elevationTokens } from '../Elevation/Elevation.stylex'
 import { rippleTokens } from '../Ripple/Ripple.stylex'
 import { buttonTokens } from './Button.stylex'
 
-export type ButtonVariant = 'elevated' | 'filled' | 'filledTonal' | 'outlined' | 'text' | 'danger'
+type ButtonVariant = 'elevated' | 'filled' | 'filledTonal' | 'outlined' | 'text' | 'danger'
 
 export interface Props extends ButtonBaseProps {
   variant?: ButtonVariant | false
@@ -32,7 +32,7 @@ export const Button = forwardRef<HTMLButtonElement, Props>(function Button(props
       disabled={disabled}
       outlined={outlined}
       {...rest}>
-      {!!elevation && <Elevation sx={styles.elevation} />}
+      {elevation && <Elevation sx={styles.elevation} />}
       {icon && <html.div style={[styles.icon, disabled && styles.label$disabled]}>{icon}</html.div>}
       {children && <html.span style={[styles.label, disabled && styles.label$disabled]}>{children}</html.span>}
       {trailingIcon && <html.div style={[styles.icon, disabled && styles.label$disabled]}>{trailingIcon}</html.div>}
@@ -72,7 +72,7 @@ const variants = css.create({
   filledTonal: {
     [rippleTokens.color$hover]: palette.onSecondaryContainer,
     [buttonTokens.labelTextColor]: palette.onSecondaryContainer,
-    [buttonTokens.containerColor]: palette.secondaryContainer,
+    [buttonTokens.containerColor]: palette.surfaceContainer,
     [buttonTokens.containerColor$disabled]: palette.onSurface,
     [buttonTokens.containerOpacity$disabled]: state.containerOpacity$disabled,
     [buttonTokens.containerElevation]: {

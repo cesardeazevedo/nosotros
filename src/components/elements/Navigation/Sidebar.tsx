@@ -1,20 +1,23 @@
 import { DrawerSwipeable } from '@/components/ui/Drawer/DrawerSwipeable'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
+import { listItemTokens } from '@/components/ui/ListItem/ListItem.stylex'
+import { Stack } from '@/components/ui/Stack/Stack'
+import { useCurrentUser } from '@/hooks/useRootStore'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconMenu2, IconQrcode } from '@tabler/icons-react'
 import { Observer } from 'mobx-react-lite'
 import { useState } from 'react'
 import { css, html } from 'react-strict-dom'
-import { authStore } from 'stores/ui/auth.store'
 import { dialogStore } from 'stores/ui/dialogs.store'
-import ThemeButton from '../Buttons/ThemeButton'
-import UserAvatar from '../User/UserAvatar'
-import UserName from '../User/UserName'
-import Menu from './Menu'
+import { ThemeButton } from '../Buttons/ThemeButton'
+import { UserAvatar } from '../User/UserAvatar'
+import { UserName } from '../User/UserName'
+import { Menu } from './Menu'
 
-function Sidebar() {
+export const Sidebar = () => {
   const [open, setOpen] = useState(false)
+  const user = useCurrentUser()
   return (
     <>
       <IconButton onClick={() => setOpen(true)} icon={<IconMenu2 />} />
@@ -22,20 +25,23 @@ function Sidebar() {
         <html.div style={styles.content}>
           <ThemeButton sx={styles.themeButton} />
           <Observer>
-            {() => {
-              const { currentUser: me } = authStore
-              return (
-                <>
-                  {me && <UserAvatar user={me} />}
-                  {me && <UserName variant='headline' size='sm' user={me} sx={styles.userName} />}
-                  <IconButton sx={styles.qrcodeButton} disabled={!me} onClick={dialogStore.openQRCode}>
-                    <IconQrcode size={30} strokeWidth='2' />
-                  </IconButton>
-                </>
-              )
-            }}
+            {() => (
+              <Stack horizontal={false} sx={styles.header}>
+                {user?.pubkey && (
+                  <>
+                    <UserAvatar pubkey={user.pubkey} />
+                    <UserName variant='title' size='lg' pubkey={user.pubkey} sx={styles.userName} />
+                    <IconButton sx={styles.qrcodeButton} disabled={!user.pubkey} onClick={dialogStore.openQRCode}>
+                      <IconQrcode size={30} strokeWidth='2' />
+                    </IconButton>
+                  </>
+                )}
+              </Stack>
+            )}
           </Observer>
-          <Menu onAction={() => setOpen(false)} />
+          <html.div style={styles.wrapper}>
+            <Menu onAction={() => setOpen(false)} />
+          </html.div>
         </html.div>
       </DrawerSwipeable>
     </>
@@ -45,8 +51,14 @@ function Sidebar() {
 const styles = css.create({
   content: {
     width: 300,
-    padding: spacing.padding2,
     backgroundColor: palette.surface,
+  },
+  header: {
+    padding: spacing.padding2,
+  },
+  wrapper: {
+    paddingInline: spacing.padding1,
+    [listItemTokens.containerMinHeight$sm]: 50,
   },
   themeButton: {
     position: 'absolute',
@@ -64,5 +76,3 @@ const styles = css.create({
     fontWeight: 500,
   },
 })
-
-export default Sidebar

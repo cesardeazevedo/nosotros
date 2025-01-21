@@ -1,59 +1,89 @@
+import { DeckColumnHeader } from '@/components/elements/Deck/DeckColumnHeader'
+import { Editor } from '@/components/elements/Editor/Editor'
+import { NostrEventFeedItem } from '@/components/elements/Event/NostrEventFeedItem'
+import { FeedSettings } from '@/components/elements/Feed/FeedSettings'
+import { FeedTabs } from '@/components/elements/Feed/FeedTabs'
 import { IconHomeFilled } from '@/components/elements/Icons/IconHomeFilled'
-import PaperContainer from '@/components/elements/Layouts/PaperContainer'
+import { PaperContainer } from '@/components/elements/Layouts/PaperContainer'
+import { PostAwait } from '@/components/elements/Posts/PostAwait'
+import { PostLoading } from '@/components/elements/Posts/PostLoading'
+import { VirtualListColumn } from '@/components/elements/VirtualLists/VirtualListColumn'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { Stack } from '@/components/ui/Stack/Stack'
-import { Text } from '@/components/ui/Text/Text'
-import DeckColumnHeader from 'components/elements/Deck/DeckColumnHeader'
-import Post from 'components/elements/Posts/Post'
-import PostCreateForm from 'components/elements/Posts/PostCreate/PostCreateForm'
-import PostLoading from 'components/elements/Posts/PostLoading'
-import VirtualList from 'components/elements/VirtualLists/VirtualList'
-import { useModuleSubscription } from 'hooks/useFeedSubscription'
+import { router } from '@/Router'
+import type { HomeModule } from '@/stores/home/home.module'
+import { spacing } from '@/themes/spacing.stylex'
+import { useRouteContext } from '@tanstack/react-router'
+import { reaction } from 'mobx'
 import { observer } from 'mobx-react-lite'
-import type { GuestModule } from 'stores/modules/guest.module'
-import type { HomeModule } from 'stores/modules/home.module'
-import HomeSettings from './HomeSettings'
+import { useEffect } from 'react'
+import { css } from 'react-strict-dom'
 
 type Props = {
-  module: HomeModule | GuestModule
+  module: HomeModule
 }
 
-const HomeColumn = observer(function HomeColumn(props: Props) {
+export const HomeColumn = observer(function HomeColumn(props: Props) {
   const { module } = props
-  const { feed } = module
+  const { id } = module
+  const feed = module.feed
+  const context = useRouteContext({ from: '/deck' })
 
-  useModuleSubscription(feed)
+  useEffect(() => {
+    const disposer = reaction(
+      () => [module.selected],
+      () => {
+        router.invalidate()
+      },
+    )
+    return () => disposer()
+  }, [])
 
   return (
     <>
-      <DeckColumnHeader id={feed.id} name='Home Settings' settings={<HomeSettings />} renderDelete={false}>
+      <DeckColumnHeader id={id} settings={<FeedSettings feed={feed} />}>
         <Stack gap={2}>
           <IconHomeFilled />
-          <Text variant='title' size='lg'>
-            Home
-          </Text>
+          <FeedTabs module={module} />
         </Stack>
       </DeckColumnHeader>
       <PaperContainer elevation={0} shape='none'>
-        <VirtualList
-          feed={feed}
-          render={(id: string) => <Post key={id} id={id} />}
-          header={
-            <>
-              <PostCreateForm defaultOpen={false} allowLongForm />
-              <Divider />
-            </>
-          }
-          footer={
-            <>
-              <PostLoading />
-              <PostLoading />
-            </>
-          }
-        />
+        <PostAwait promise={context.delay}>
+          <VirtualListColumn
+            id={id}
+            feed={feed}
+            onScrollEnd={feed.paginate}
+            header={
+              <>
+                <Editor
+                  initialOpen={false}
+                  store={module.editor}
+                  sx={[styles.editor, module.editor.open.value && styles.editor$open]}
+                />
+                <Divider />
+              </>
+            }
+            footer={
+              <>
+                <PostLoading rows={8} />
+                <Divider />
+              </>
+            }
+            render={(event) => <NostrEventFeedItem event={event} />}
+          />
+        </PostAwait>
       </PaperContainer>
     </>
   )
 })
 
-export default HomeColumn
+const styles = css.create({
+  editor: {
+    paddingLeft: spacing.padding2,
+    paddingBlock: spacing.padding2,
+  },
+  editor$open: {
+    paddingBlock: spacing.padding1,
+    paddingTop: spacing.padding2,
+  },
+})

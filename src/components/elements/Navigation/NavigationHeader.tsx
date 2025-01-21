@@ -2,14 +2,27 @@ import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { useGoBack, useNostrRoute } from '@/hooks/useNavigations'
-import { userStore } from '@/stores/nostr/users.store'
-import { isNprofile, isNpub } from '@/utils/nip19'
 import { IconChevronLeft } from '@tabler/icons-react'
-import { observer } from 'mobx-react-lite'
-import { css } from 'react-strict-dom'
-import UserName from '../User/UserName'
-import UserAvatar from '../User/UserAvatar'
 import { useMatch } from '@tanstack/react-router'
+import { observer } from 'mobx-react-lite'
+import type { DecodeResult } from 'nostr-tools/nip19'
+import { css } from 'react-strict-dom'
+import { UserAvatar } from '../User/UserAvatar'
+import { UserName } from '../User/UserName'
+
+const getPubkey = (decoded?: DecodeResult) => {
+  switch (decoded?.type) {
+    case 'nprofile': {
+      return decoded.data.pubkey
+    }
+    case 'npub': {
+      return decoded.data
+    }
+    default: {
+      return undefined
+    }
+  }
+}
 
 export const NavigationHeader = observer(function NavigationHeader() {
   useMatch({ from: '__root__' })
@@ -21,21 +34,22 @@ export const NavigationHeader = observer(function NavigationHeader() {
   if (nostrRoute?.context && 'decoded' in nostrRoute.context) {
     context = nostrRoute.context
   }
+  const pubkey = getPubkey(context?.decoded)
   return (
     <Stack justify='flex-start' gap={2} sx={styles.root}>
       <IconButton onClick={goBack} icon={<IconChevronLeft color='currentColor' />} />
-      <Text variant='title' size='lg'>
-        {isNpub(context?.decoded) || isNprofile(context?.decoded) ? (
-          <Stack horizontal={false}>
-            <Stack gap={2}>
-              <UserAvatar size='sm' user={userStore.get(context.id)} />
-              <UserName size='lg' user={userStore.get(context.id)} />
-            </Stack>
+      {pubkey ? (
+        <Stack horizontal={false}>
+          <Stack gap={2}>
+            <UserAvatar size='sm' pubkey={pubkey} />
+            <UserName variant='title' size='lg' pubkey={pubkey} />
           </Stack>
-        ) : (
-          'Post'
-        )}
-      </Text>
+        </Stack>
+      ) : (
+        <Text variant='title' size='md'>
+          Post
+        </Text>
+      )}
     </Stack>
   )
 })
@@ -43,6 +57,5 @@ export const NavigationHeader = observer(function NavigationHeader() {
 const styles = css.create({
   root: {
     flex: 1,
-    alignSelf: 'flex-start',
   },
 })

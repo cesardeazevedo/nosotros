@@ -1,22 +1,32 @@
+import { Divider } from '@/components/ui/Divider/Divider'
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { spacing } from '@/themes/spacing.stylex'
+import React, { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 
-function PostLoading() {
-  return (
-    <html.div style={styles.root}>
-      <Stack horizontal>
-        <Skeleton animation='wave' variant='circular' sx={styles.circular} />
-        <Stack horizontal={false}>
-          <Skeleton animation='wave' variant='rectangular' sx={styles.title} />
-          <Skeleton animation='wave' variant='rectangular' sx={styles.title2} />
-        </Stack>
-      </Stack>
-      <Skeleton animation='wave' variant='rectangular' sx={styles.content} />
-    </html.div>
-  )
+type Props = {
+  rows?: number
 }
+
+export const PostLoading = memo(({ rows = 2 }: Props) => {
+  const list = [...Array(rows).keys()]
+  return list.map((key, index) => (
+    <React.Fragment key={key}>
+      <html.div key={key} style={styles.root}>
+        <Stack horizontal>
+          <Skeleton animation='wave' variant='circular' sx={styles.circular} />
+          <Stack horizontal={false}>
+            <Skeleton animation='wave' variant='rectangular' sx={styles.title} />
+            <Skeleton animation='wave' variant='rectangular' sx={styles.title2} />
+          </Stack>
+        </Stack>
+        <Skeleton animation='wave' variant='rectangular' sx={styles.content} />
+      </html.div>
+      {index !== list.length - 1 && <Divider />}
+    </React.Fragment>
+  ))
+})
 
 const styles = css.create({
   root: {
@@ -30,7 +40,7 @@ const styles = css.create({
     marginRight: spacing.margin1,
   },
   title: {
-    width: 140,
+    width: 120,
     height: 12,
   },
   title2: {
@@ -41,8 +51,6 @@ const styles = css.create({
   content: {
     marginTop: spacing.margin1,
     width: '100%',
-    height: 110,
+    height: 80,
   },
 })
-
-export default PostLoading

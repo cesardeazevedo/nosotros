@@ -1,17 +1,22 @@
 import { buttonTokens } from '@/components/ui/Button/Button.stylex'
 import { Fab } from '@/components/ui/Fab/Fab'
 import { typeScale } from '@/themes/typeScale.stylex'
+import { Link, useRouter } from '@tanstack/react-router'
 import { useMobile } from 'hooks/useMobile'
 import React from 'react'
 import { css } from 'react-strict-dom'
 import { IconPencil } from '../Icons/IconPencil'
 
-const PostFab = React.memo(function PostFab() {
+export const PostFab = React.memo(function PostFab() {
   const isMobile = useMobile()
+  const router = useRouter()
   return (
-    <Fab variant='primary' label='Create note' sx={[styles.root, isMobile && styles.root$mobile]}>
-      <IconPencil />
-    </Fab>
+    // @ts-ignore
+    <Link from={router.fullPath} search={{ compose: true }}>
+      <Fab variant='primary' label='Create note' sx={[styles.root, isMobile && styles.root$mobile]}>
+        <IconPencil />
+      </Fab>
+    </Link>
   )
 })
 
@@ -20,15 +25,13 @@ const styles = css.create({
     position: 'fixed',
     right: 40,
     bottom: 40,
-    [buttonTokens.labelTextSize]: typeScale.titleSize$md,
+    [buttonTokens.labelTextSize]: typeScale.bodySize$lg,
   },
   root$mobile: {
     margin: 'auto',
     right: 0,
     left: 0,
-    width: 160,
+    width: 120,
     bottom: 100,
   },
 })
-
-export default PostFab

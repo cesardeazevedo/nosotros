@@ -1,67 +1,59 @@
 import { Stack } from '@/components/ui/Stack/Stack'
 import { useMobile } from '@/hooks/useMobile'
+import { noteStore } from '@/stores/notes/notes.store'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { observer } from 'mobx-react-lite'
-import { useEffect, useMemo } from 'react'
+import { useEffect } from 'react'
 import { RemoveScroll } from 'react-remove-scroll'
 import { css, html } from 'react-strict-dom'
-import { noteStore } from 'stores/nostr/notes.store'
-import PostCreateForm from '../PostCreate/PostCreateForm'
-import PostReplies from './PostReplies'
+import { Editor } from '../../Editor/Editor'
+import { PostReplies } from './PostReplies'
 
 type Props = {
-  noteId?: string
+  noteId: string | undefined
 }
 
-const PostRepliesDialog = observer(function PostRepliesDialog(props: Props) {
+export const PostRepliesDialog = observer(function PostRepliesDialog(props: Props) {
   const { noteId } = props
-  const id = useMemo(() => noteId || '', [])
-  const note = noteStore.get(id)
+  const note = noteStore.get(noteId)
   const mobile = useMobile()
 
   useEffect(() => {
-    if (note) {
-      note.toggleReplies(true)
-      note.subscribeReplies()
-    }
+    note?.toggleReplies(true)
     return () => {
       note?.toggleReplies(false)
     }
   }, [note])
 
   return (
-    <Stack horizontal={false} sx={styles.root1}>
+    <Stack horizontal={false} sx={styles.root}>
       <RemoveScroll>
         <html.div style={[styles.content, mobile && styles.content$mobile]}>
-          <PostReplies renderEmpty note={note} />
+          {note && <PostReplies renderEmpty note={note} />}
         </html.div>
       </RemoveScroll>
       <html.div style={[styles.footer, mobile && styles.footer$mobile]}>
-        <PostCreateForm dense renderBubble renderDiscard={false} />
+        {note && <Editor dense renderBubble store={note?.editor} renderDiscard={false} />}
       </html.div>
     </Stack>
   )
 })
 
 const styles = css.create({
-  root1: {
-    position: 'relative',
-    height: '100%',
-    width: '100%',
-  },
   root: {
     position: 'relative',
-    paddingTop: spacing.padding2,
+    width: '100vw',
+    height: '100%',
   },
   content: {
-    paddingBottom: 250,
+    paddingBottom: 200,
     width: '100%',
-    height: '100%',
+    height: 'calc(100vh - 100px)',
     overflowY: 'scroll',
   },
   content$mobile: {
-    height: '100vh',
+    height: 'calc(100vh - 100px)',
   },
   footer: {
     position: 'sticky',
@@ -69,17 +61,16 @@ const styles = css.create({
     zIndex: 1000,
     width: '100%',
     paddingInline: spacing.padding1,
-    backgroundColor: 'transparent',
+    backgroundColor: palette.surface,
   },
   footer$mobile: {
     borderTopWidth: 1,
     borderColor: palette.outlineVariant,
     backgroundColor: palette.surfaceContainerLowest,
+    paddingBottom: 'env(safe-area-inset-bottom)',
   },
   bubble: {
     width: '100%',
   },
   empty: {},
 })
-
-export default PostRepliesDialog

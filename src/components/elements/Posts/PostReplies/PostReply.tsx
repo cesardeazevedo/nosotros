@@ -1,130 +1,125 @@
+import { NoteContext } from '@/components/providers/NoteProvider'
+import { Button } from '@/components/ui/Button/Button'
+import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { Stack } from '@/components/ui/Stack/Stack'
+import { useCurrentUser } from '@/hooks/useRootStore'
+import type { Comment } from '@/stores/comment/comment'
+import type { Note } from '@/stores/notes/note'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import { IconArrowsDiagonal } from '@tabler/icons-react'
-import { useRouter } from '@tanstack/react-router'
+import { useNavigate, useRouter } from '@tanstack/react-router'
 import { BubbleContainer } from 'components/elements/Content/Layout/Bubble'
-import UserAvatar from 'components/elements/User/UserAvatar'
-import UserName from 'components/elements/User/UserName'
-import { AnimatePresence, motion } from 'framer-motion'
+import { UserAvatar } from 'components/elements/User/UserAvatar'
+import { UserName } from 'components/elements/User/UserName'
 import { useMobile } from 'hooks/useMobile'
 import { observer } from 'mobx-react-lite'
 import { useCallback, useState } from 'react'
 import { css, html } from 'react-strict-dom'
-import type Note from 'stores/models/note'
-import { noteStore } from 'stores/nostr/notes.store'
-import { userStore } from 'stores/nostr/users.store'
-import PostActions from '../PostActions/PostActions'
-import PostCreateForm from '../PostCreate/PostCreateForm'
-import PostOptions from '../PostOptions'
-import PostReplyContent from './PostReplyContent'
+import { Editor } from '../../Editor/Editor'
+import { useNoteVisibility } from '../hooks/useNoteVisibility'
+import { PostActions } from '../PostActions/PostActions'
+import { PostRepliesMuted } from './PostRepliesMuted'
+import { PostReplyContent } from './PostReplyContent'
 
 type Props = {
-  note: Note
+  note: Note | Comment
+  nested?: boolean
   repliesOpen: boolean | null
   level?: number
 }
 
 export const PostRepliesTree = observer(function PostRepliesTree(props: {
   repliesOpen: boolean | null
-  replies: Note[]
+  replies: (Note | Comment)[]
   level: number
+  nested?: boolean
 }) {
   const { replies, ...rest } = props
-  return replies.map((note) => {
-    return note && <PostReply key={note.id} note={note} {...rest} />
-  })
+  return replies.map((note) => <PostReply key={note.id} note={note} {...rest} />)
 })
 
-const PostReply = observer(function PostReply(props: Props) {
-  const { note, level = 0, repliesOpen } = props
+const MAX_LEVEL = 7
+
+export const PostReply = observer(function PostReply(props: Props) {
+  const { note, level = 0, repliesOpen, nested = true } = props
+  const navigate = useNavigate()
   const router = useRouter()
   const isMobile = useMobile()
-  const collapsedLevel = isMobile ? 4 : 6
+  const collapsedLevel = isMobile ? 4 : 4
   const [open, setOpen] = useState(level < collapsedLevel)
-  const [replyOpen, setReplyOpen] = useState(false)
+  const [ref] = useNoteVisibility(note, { replies: true })
+  const user = useCurrentUser()
   const event = note.event
-  const user = userStore.get(event?.pubkey)
 
   const handleOpen = useCallback(() => {
     setOpen(!open)
   }, [open])
 
   const handleOpenNestedDialog = useCallback(() => {
-    if (note.meta.parentNoteId) {
-      const parent = noteStore.get(note.meta.parentNoteId)
-      if (parent) {
-        router.navigate({
-          // @ts-ignore
-          to: './replies/$nevent',
-          // @ts-ignore
-          params: { nevent: parent.nevent },
-          // @ts-ignore
-          state: { from: router.latestLocation.pathname },
-        })
-      }
-    }
+    navigate({
+      // @ts-ignore
+      // to: './replies/$nevent',
+      to: '/$nostr',
+      // @ts-ignore
+      params: { nostr: note.nevent },
+      // @ts-ignore
+      state: { from: router.latestLocation.pathname },
+    })
   }, [note, router])
 
-  // Cut off replies of replies if the section isn't open
+  // For preview
   if (repliesOpen === null && level >= 3) {
     return
   }
 
   return (
-    <html.div style={[styles.root, level > 1 && styles.root$deep]}>
+    <html.div style={[styles.root, level > 1 && styles.root$deep]} ref={ref}>
       {open && <html.span style={styles.verticalLineContainer} onClick={handleOpen} />}
       {!open && (
-        <Stack align='flex-start' gap={1} onClick={level < collapsedLevel ? handleOpen : handleOpenNestedDialog}>
-          <UserAvatar size='md' user={user} disableLink />
+        <Stack align='flex-start' gap={1} onClick={level < MAX_LEVEL ? handleOpen : handleOpenNestedDialog}>
+          <UserAvatar size='md' pubkey={event.pubkey} disableLink />
           <BubbleContainer sx={styles.expandButton}>
-            <UserName user={user} disableLink />
-            <IconArrowsDiagonal strokeWidth='2.0' size={18} />
+            <UserName pubkey={event.pubkey} disableLink />
+            <Button variant='text'>See more {note.repliesTotal + 1} Replies</Button>
           </BubbleContainer>
         </Stack>
       )}
       {open && (
         <>
-          <Stack align='flex-start'>
-            {level !== 1 && <html.div style={styles.anchor} />}
-            <UserAvatar user={user} />
-            <Stack gap={1} sx={styles.content}>
-              <PostReplyContent note={note} />
-              <PostOptions dense note={note} />
+          <NoteContext.Provider value={{ dense: true }}>
+            <Stack align='flex-start'>
+              {level !== 1 && <html.div style={styles.anchor} />}
+              <UserAvatar pubkey={event.pubkey} />
+              <Stack gap={1} sx={styles.content}>
+                <PostReplyContent note={note} />
+              </Stack>
             </Stack>
-          </Stack>
-          <html.div style={styles.actions}>
-            <PostActions dense note={note} onReplyClick={() => setReplyOpen((prev) => !prev)} />
-            <AnimatePresence mode='wait'>
-              {replyOpen && (
-                <motion.div
-                  transition={{ duration: 0.1, easings: 'easeIn' }}
-                  initial={{ minHeight: 0, height: 0, opacity: 0 }}
-                  animate={{ minHeight: 121, height: 'auto', opacity: 1 }}
-                  exit={{ minHeight: 0, height: 0, opacity: 0 }}>
-                  <PostCreateForm dense renderBubble renderDiscard={false} />
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </html.div>
-          {note.hasReplies && (
+            <html.div style={styles.actions}>
+              <Stack>
+                <PostActions renderOptions note={note} onReplyClick={() => note.toggleReplying()} />
+              </Stack>
+              <Expandable expanded={note.isReplying} trigger={() => <></>}>
+                {note.isReplying && <Editor dense initialOpen renderBubble renderDiscard={false} store={note.editor} />}
+              </Expandable>
+            </html.div>
+          </NoteContext.Provider>
+          {nested && (
             <PostRepliesTree
-              replies={
-                repliesOpen === null ? note.replies.slice(0, 1).filter((x) => x.isCurrentUserFollowing) : note.replies
-              }
+              replies={note.repliesSorted(user)}
               repliesOpen={repliesOpen}
               level={level + 1}
+              nested={nested}
             />
           )}
         </>
       )}
+      <PostRepliesMuted level={level} note={note} />
     </html.div>
   )
 })
 
 const styles = css.create({
   root: {
-    width: 'auto',
     paddingInline: spacing.padding2,
     position: 'relative',
   },
@@ -144,6 +139,7 @@ const styles = css.create({
       top: 0,
       left: 6,
       width: 2,
+      borderRadius: 4,
       height: '100%',
       pointerEvents: 'none',
       display: 'inline-block',
@@ -163,13 +159,13 @@ const styles = css.create({
     borderBottom: '2px solid',
     borderLeftColor: palette.outlineVariant,
     borderBottomColor: palette.outlineVariant,
-    borderBottomLeftRadius: 16,
+    borderBottomLeftRadius: 12,
   },
   actions: {
     padding: 0,
     paddingTop: spacing['padding0.5'],
     paddingBottom: spacing.padding2,
-    marginLeft: spacing.margin6,
+    paddingLeft: spacing.margin6,
   },
   content: {
     width: '100%',
@@ -177,8 +173,5 @@ const styles = css.create({
   },
   expandButton: {
     marginBottom: spacing.padding1,
-  },
-  createNote: {
-    padding: 0,
   },
 })

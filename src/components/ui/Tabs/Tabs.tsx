@@ -5,12 +5,14 @@ import type { TabVariant } from '../Tab/Tab'
 export type TabsContextValues = {
   id?: string
   anchor?: string
+  renderLabels?: boolean
   onTabActivated: (activeTab: HTMLElement, indicator: HTMLElement) => void
   onChange: (anchor: string | undefined) => void
   variant?: TabVariant
   disabled?: boolean
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const TabsContext = createContext<TabsContextValues | undefined>(undefined)
 
 type Props = Omit<TabsContextValues, 'onChange' | 'onTabActivated'> & {
@@ -19,8 +21,8 @@ type Props = Omit<TabsContextValues, 'onChange' | 'onTabActivated'> & {
   children: React.ReactNode
 }
 
-export function Tabs(props: Props) {
-  const { variant, disabled, onChange } = props
+export const Tabs = function Tabs(props: Props) {
+  const { variant, disabled, onChange, renderLabels = true } = props
   const reactId = useId()
   const id = props.id || reactId
 
@@ -59,8 +61,9 @@ export function Tabs(props: Props) {
   const contextValue = useMemo(() => {
     return {
       id,
-      anchor,
+      anchor: props.anchor,
       variant,
+      renderLabels,
       onTabActivated: (activeTab, indicator) => {
         if (!previousTabRef.current) {
           previousTabRef.current = activeTab
@@ -88,7 +91,7 @@ export function Tabs(props: Props) {
       },
       disabled,
     } as TabsContextValues
-  }, [id, variant, anchor, getIndicatorKeyframes, setAnchor, onChange, disabled])
+  }, [id, variant, anchor, props.anchor, renderLabels, getIndicatorKeyframes, setAnchor, onChange, disabled])
 
   const previousTabRef = useRef<HTMLElement | null>(null)
   const indicatorAnimationRef = useRef<Animation>()

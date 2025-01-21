@@ -83,11 +83,9 @@ describe('mergeFilters', () => {
       { kinds: [1], authors: ['npub1'] },
       { kinds: [6], authors: ['npub2'] },
     ])
-    expect(result).toHaveLength(3)
     expect(result).toStrictEqual([
       { kinds: [0, 10002], authors: ['npub1', 'npub2', 'npub3', 'npub4'] },
-      { kinds: [1], authors: ['npub1'] },
-      { kinds: [6], authors: ['npub2'] },
+      { kinds: [1, 6], authors: ['npub1', 'npub2'] },
     ])
   })
 
@@ -117,5 +115,33 @@ describe('mergeFilters', () => {
   test('Should merge ids without kind', () => {
     const result = mergeFilters([{ ids: ['1'] }, { ids: ['2'] }])
     expect(result).toStrictEqual([{ ids: ['1', '2'] }])
+  })
+
+  test('Should not merge follows kind', () => {
+    const result = mergeFilters([
+      { kinds: [0], authors: ['1', '2', '3'] },
+      { kinds: [10002], authors: ['1', '2', '3'] },
+      { kinds: [3], authors: ['8', '9'] },
+    ])
+    expect(result).toStrictEqual([
+      { kinds: [0, 10002], authors: ['1', '2', '3'] },
+      { kinds: [3], authors: ['8', '9'] },
+    ])
+  })
+
+  test('Should not mutate original filters', () => {
+    const filter1 = { kinds: [1], author: ['1'] }
+    const filter2 = { kinds: [6], author: ['2'] }
+    const clone1 = structuredClone(filter1)
+    const clone2 = structuredClone(filter2)
+    const result = mergeFilters([filter1, filter2])
+    expect(result).toStrictEqual([
+      {
+        kinds: [1, 6],
+        author: ['1'],
+      },
+    ])
+    expect(filter1).toStrictEqual(clone1)
+    expect(filter2).toStrictEqual(clone2)
   })
 })

@@ -3,7 +3,7 @@ import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { css } from 'react-strict-dom'
 import type { Theme } from '../types'
 
-const blackTheme = css.createTheme(palette, {
+const darkTheme = css.createTheme(palette, {
   primary: colors.gray0,
   onPrimary: colors.gray12,
   primaryContainer: colors.gray0,
@@ -11,7 +11,7 @@ const blackTheme = css.createTheme(palette, {
 
   secondary: colors.stone4,
   onSecondary: colors.gray0,
-  secondaryContainer: colors.gray9,
+  secondaryContainer: colors.gray7,
   onSecondaryContainer: colors.gray0,
 
   tertiary: '#0066e2',
@@ -24,7 +24,7 @@ const blackTheme = css.createTheme(palette, {
   errorContainer: colors.red7,
   onErrorContainer: colors.red0,
 
-  surface: colors.gray12,
+  surface: '#02040a',
   onSurface: colors.stone0,
   onSurfaceVariant: colors.stone7,
 
@@ -57,5 +57,5 @@ const blackTheme = css.createTheme(palette, {
 })
 
 export const theme: Partial<Theme> = {
-  palette: blackTheme,
+  palette: darkTheme,
 }

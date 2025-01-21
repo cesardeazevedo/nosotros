@@ -1,23 +1,26 @@
+import { useNoteContext } from '@/components/providers/NoteProvider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
-import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
-import { settingsStore } from '@/stores/ui/settings.store'
-import { IconBolt } from '@tabler/icons-react'
-import { observer } from 'mobx-react-lite'
-import type Note from 'stores/models/note'
-import { zapStore } from 'stores/nostr/zaps.store'
-import ButtonContainer, { type ContainerProps } from './PostButtonContainer'
-import { iconProps } from './utils'
+import { useCurrentPubkey, useGlobalSettings } from '@/hooks/useRootStore'
+import { useTheme } from '@/hooks/useTheme'
+import type { Comment } from '@/stores/comment/comment'
+import type { Note } from '@/stores/notes/note'
+import { zapStore } from '@/stores/zaps/zaps.store'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
-import { css } from 'react-strict-dom'
+import { IconBolt } from '@tabler/icons-react'
+import { useRouter } from '@tanstack/react-router'
+import { observer } from 'mobx-react-lite'
+import { css, html } from 'react-strict-dom'
+import { LinkBase } from '../../Links/LinkBase'
+import { ButtonContainer, type ContainerProps } from './PostButtonContainer'
+import { iconProps } from './utils'
 
 type Props = {
-  note: Note
-  dense?: boolean
+  note: Note | Comment
   onClick?: () => void
 }
 
 const themes = {
-  light: [colors.violet11, colors.violet10, colors.violet9, colors.violet8, colors.violet7, colors.violet6],
+  light: [colors.violet10, colors.violet10, colors.violet9, colors.violet8, colors.violet7, colors.violet6],
   dark: [colors.violet1, colors.violet2, colors.violet3, colors.violet4, colors.violet5, colors.violet6],
 } as const
 
@@ -39,25 +42,40 @@ function getZapColor(zapAmount: number, palette: (typeof themes)['light'] | (typ
 
 const formatter = new Intl.NumberFormat()
 
-const ButtonZap = observer(function ButtonZap(props: Props & ContainerProps) {
-  const { dense, onClick, note, ...rest } = props
-  const theme = settingsStore.theme === 'light' ? 'light' : 'dark'
+export const ButtonZap = observer(function ButtonZap(props: Props & ContainerProps) {
+  const { onClick, note, ...rest } = props
+  const { dense, disableLink } = useNoteContext()
+  const router = useRouter()
+  const pubkey = useCurrentPubkey()
+  const globalSettings = useGlobalSettings()
+  const theme = useTheme(globalSettings.theme)
+  const myZaps = zapStore.zapsByPubkey.get(pubkey || '')
+  const hasZapped = myZaps?.has(note.id) || false
   const total = zapStore.getTotal(note.id) || ''
-  const palette = themes[theme]
+  const palette = themes[theme.key as 'light' | 'dark']
+
+  const color = getZapColor(total || 0, palette)
+
   return (
-    <ButtonContainer
-      {...rest}
-      active={false}
-      sx={styles[getZapColor(total || 0, palette)]}
-      value={<>{total ? formatter.format(total) : ''}</>}>
-      <Tooltip cursor='arrow' text='Send a Zap (coming soon)'>
+    <ButtonContainer {...rest} sx={styles[color]} value={<>{total ? formatter.format(total) : ''}</>}>
+      <LinkBase
+        disabled={disableLink}
+        search={{ zap: note.nevent }}
+        // @ts-ignore
+        state={{ from: router.latestLocation.pathname }}>
         <IconButton
           size={dense ? 'sm' : 'md'}
-          onClick={onClick}
           icon={
-            <IconBolt size={dense ? iconProps.size$dense : iconProps.size} strokeWidth={iconProps.strokeWidth} />
-          }></IconButton>
-      </Tooltip>
+            <html.span style={hasZapped && styles[color]}>
+              <IconBolt
+                {...(hasZapped ? { fill: 'currentColor' } : {})}
+                size={dense ? iconProps.size$dense : iconProps.size}
+                strokeWidth={iconProps.strokeWidth}
+              />
+            </html.span>
+          }
+        />
+      </LinkBase>
     </ButtonContainer>
   )
 })
@@ -77,5 +95,3 @@ const styles = css.create({
   [colors.violet11]: { color: colors.violet11 },
   [colors.violet12]: { color: colors.violet12 },
 })
-
-export default ButtonZap

@@ -6,9 +6,9 @@ import { spacing } from '@/themes/spacing.stylex'
 import { observer } from 'mobx-react-lite'
 import { css } from 'react-strict-dom'
 import { IconPencil } from '../Icons/IconPencil'
-import ProfilePopover from '../Navigation/ProfilePopover'
+import { ProfilePopover } from '../Navigation/ProfilePopover'
 
-const DeckSidebar = observer(function DeckSidebar() {
+export const DeckSidebar = observer(function DeckSidebar() {
   return (
     <Stack horizontal={false} justify='space-between' align='center' sx={styles.root}>
       <Tooltip cursor='arrow' enterDelay={0} text='Create note' placement='right'>
@@ -41,5 +41,3 @@ const styles = css.create({
     zIndex: 100,
   },
 })
-
-export default DeckSidebar

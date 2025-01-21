@@ -1,7 +1,8 @@
+import { start } from '@/core/operators/start'
 import { NostrSubscriptionBatcher } from 'core/NostrSubscriptionBatcher'
+import { of } from 'rxjs'
 import { pool } from './pool'
-import { getOptimizedFilters } from 'stores/operators/getOptimizedFilters'
 
 export const batcher = new NostrSubscriptionBatcher({
-  subscribe: (parent) => pool.subscribe(parent, (filters) => getOptimizedFilters(filters)),
+  subscribe: (parent) => of(parent).pipe(start(pool)),
 })

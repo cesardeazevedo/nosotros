@@ -5,26 +5,27 @@ import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Paper } from '@/components/ui/Paper/Paper'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
+import { useRootStore } from '@/hooks/useRootStore'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconSettings, IconSettingsFilled } from '@tabler/icons-react'
 import React, { useCallback } from 'react'
 import { css } from 'react-strict-dom'
-import { deckStore } from 'stores/ui/deck.store'
 
 type Props = {
   id: string
-  name: string
-  settings?: React.ReactElement
-  children: React.ReactElement | React.ReactElement[]
+  settings?: React.ReactNode
+  settingsIcon?: (props: { expand: (value: boolean) => void; expanded?: boolean }) => React.ReactNode
+  children: React.ReactNode
   renderSettings?: boolean
-  renderDelete?: boolean
+  onDelete?: () => void
 }
 
-function DeckColumnHeader(props: Props) {
-  const { renderDelete = true, renderSettings = true } = props
+export const DeckColumnHeader = (props: Props) => {
+  const { settings, settingsIcon, renderSettings = true, onDelete } = props
+  const root = useRootStore()
 
   const handleDelete = useCallback(() => {
-    deckStore.removeColumn(props.id)
+    root.decks.selected.delete(props.id)
   }, [props.id])
 
   return (
@@ -39,40 +40,32 @@ function DeckColumnHeader(props: Props) {
                 {/* </Tooltip> */}
                 {props.children}
               </Stack>
-              {renderSettings && (
-                <Tooltip cursor='arrow' text='Feed Settings'>
-                  <IconButton
-                    toggle
-                    selected={expanded}
-                    size='sm'
-                    variant='standard'
-                    onClick={() => expand(!expanded)}
-                    icon={<IconSettings size={20} strokeWidth='1.5' />}
-                    selectedIcon={<IconSettingsFilled size={20} strokeWidth='1.0' />}
-                  />
-                </Tooltip>
-              )}
+              {renderSettings &&
+                (settingsIcon?.({ expand, expanded }) || (
+                  <Tooltip cursor='arrow' text='Feed Settings'>
+                    <IconButton
+                      toggle
+                      selected={expanded}
+                      size='sm'
+                      variant='standard'
+                      onClick={() => expand(!expanded)}
+                      icon={<IconSettings size={20} strokeWidth='1.5' />}
+                      selectedIcon={<IconSettingsFilled size={20} strokeWidth='1.0' />}
+                    />
+                  </Tooltip>
+                ))}
             </Stack>
           )}>
           <>
-            {props.settings}
-            {(props.settings || renderDelete) && (
-              <>
-                <Stack sx={styles.footer} justify={props.settings ? 'space-between' : 'flex-end'} gap={1}>
-                  {renderSettings && (
-                    <Button variant='danger' onClick={handleDelete}>
-                      Delete
-                    </Button>
-                  )}
-                  {props.settings && (
-                    <div>
-                      <Button>Cancel</Button>
-                      <Button variant='filled'>Apply filters</Button>
-                    </div>
-                  )}
-                </Stack>
-              </>
-            )}
+            {settings}
+            <Divider />
+            <Stack sx={styles.footer} justify={props.settings ? 'space-between' : 'flex-end'} gap={1}>
+              {renderSettings && (
+                <Button variant='danger' onClick={onDelete || handleDelete}>
+                  Delete Column
+                </Button>
+              )}
+            </Stack>
           </>
         </Expandable>
         <Divider />
@@ -87,12 +80,10 @@ const styles = css.create({
     flexGrow: 0,
   },
   header: {
-    height: 60,
+    height: 66,
     padding: spacing.padding2,
   },
   footer: {
     padding: spacing.padding1,
   },
 })
-
-export default DeckColumnHeader

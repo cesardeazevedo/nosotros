@@ -9,6 +9,7 @@ import {
   shift,
   size,
   useClick,
+  useClientPoint,
   useDelayGroup,
   useDismiss,
   useFloating,
@@ -84,6 +85,7 @@ export const PopoverBase = forwardRef<HTMLDivElement, IPopoverBaseProps>(functio
     withScrim,
     slotProps,
     preventAutoFocus = true,
+    clientPoint: clientPointProp,
     middlewares: middlewaresProp,
     additionalMiddlewares,
     additionalInteractions,
@@ -191,8 +193,22 @@ export const PopoverBase = forwardRef<HTMLDivElement, IPopoverBaseProps>(functio
     escapeKey: closeEvents.escapeKey,
   })
 
+  const clientPoint = useClientPoint(floating.context, {
+    enabled: !!clientPointProp,
+    x: clientPointProp?.x,
+    y: clientPointProp?.y,
+  })
+
   const role = useRole(floating.context, { role: roleProp })
-  const interactions = useInteractions([hover, focus, click, dismiss, role, ...(additionalInteractions ?? [])])
+  const interactions = useInteractions([
+    hover,
+    focus,
+    click,
+    dismiss,
+    role,
+    clientPoint,
+    ...(additionalInteractions ?? []),
+  ])
   const transitionStatus = useTransitionStatus(floating.context, {
     duration: {
       open: 200,

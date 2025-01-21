@@ -1,48 +1,23 @@
-import { of } from 'rxjs'
+import { Subject } from 'rxjs'
 import { webSocket, type WebSocketSubject } from 'rxjs/webSocket'
-import type { NostrSubscription } from './NostrSubscription'
-import { subscribe } from './operators/subscribe'
-import type { MessageReceived, NostrEvent } from './types'
-import { ClientToRelay } from './types'
+import type { MessageReceived } from './types'
 
 export class Relay {
   url: string
   websocket$: WebSocketSubject<MessageReceived>
 
-  connected = false
+  open$ = new Subject()
+  close$ = new Subject()
+  closing$ = new Subject()
 
   constructor(url: string) {
     this.url = url.replace(/\/$/, '')
 
     this.websocket$ = webSocket({
       url: this.url,
-      openObserver: {
-        next: () => {
-          this.setConnected(true)
-        },
-      },
-      closeObserver: {
-        next: () => {
-          this.setConnected(false)
-        },
-      },
-      closingObserver: {
-        next: () => {
-          this.setConnected(false)
-        },
-      },
+      openObserver: this.open$,
+      closeObserver: this.close$,
+      closingObserver: this.closing$,
     })
-  }
-
-  setConnected(value: boolean) {
-    this.connected = value
-  }
-
-  subscribe(sub: NostrSubscription) {
-    return of(sub).pipe(subscribe(this, sub.filters))
-  }
-
-  publish(event: NostrEvent) {
-    this.websocket$.next([ClientToRelay.EVENT, event] as never)
   }
 }

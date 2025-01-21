@@ -4,6 +4,7 @@ import { typeScale } from '@/themes/typeScale.stylex'
 import type { UserAuthoredStyles } from '@stylexjs/stylex/lib/StyleXTypes'
 import React, { useEffect, useState } from 'react'
 import { css, html } from 'react-strict-dom'
+import { Skeleton } from '../Skeleton/Skeleton'
 import type { SxProps } from '../types'
 import { avatarTokens } from './Avatar.stylex'
 
@@ -15,7 +16,7 @@ export type Props = {
   alt?: string
   src?: string
   srcSet?: string
-  size?: 'sm' | 'md' | 'lg' | 'xl'
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
   crossOrigin?: null | ('anonymous' | 'use-credentials')
   referrerPolicy?:
     | null
@@ -76,14 +77,16 @@ function useLoaded({ crossOrigin, referrerPolicy, src, srcSet }: Props) {
   return loaded
 }
 
-export function Avatar(props: Props) {
+export const Avatar = (props: Props) => {
   const { variant = 'rounded', size = 'md', alt, src, srcSet, crossOrigin, referrerPolicy, children, sx } = props
   const loaded = useLoaded({ src, srcSet, crossOrigin, referrerPolicy })
   const hasImage = !!src || !!srcSet
   const hasImageNotFailing = hasImage && loaded !== 'error'
   return (
     <html.div style={[sizes[size], styles.root, variants[variant], sx]}>
-      {hasImageNotFailing ? (
+      {!loaded ? (
+        <Skeleton variant='circular' animation='wave' sx={[sizes[size], styles.loading]} />
+      ) : hasImageNotFailing ? (
         <html.img
           style={styles.img}
           src={src}
@@ -106,6 +109,10 @@ const variants = css.create({
 } as Record<AvatarVariant, UserAuthoredStyles>)
 
 const sizes = css.create({
+  xs: {
+    [avatarTokens.containerSize]: '24px',
+    [avatarTokens.labelTextSize]: typeScale.bodySize$sm,
+  },
   sm: {
     [avatarTokens.containerSize]: '32px',
     [avatarTokens.labelTextSize]: typeScale.bodySize$sm,
@@ -135,7 +142,6 @@ const styles = css.create({
     borderRadius: avatarTokens.containerShape,
     overflow: 'hidden',
     userSelect: 'none',
-    backgroundColor: avatarTokens.containerColor,
     color: avatarTokens.labelTextColor,
     textTransform: 'uppercase',
     flexShrink: 0,
@@ -158,5 +164,9 @@ const styles = css.create({
     flexShrink: 0,
     fontSize: avatarTokens.labelTextSize,
     fontWeight: typeFace.bold,
+  },
+  loading: {
+    width: avatarTokens.containerSize,
+    height: avatarTokens.containerSize,
   },
 })

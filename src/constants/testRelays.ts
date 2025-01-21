@@ -1,0 +1,5 @@
+export const RELAY_1 = 'wss://relay1.com'
+export const RELAY_2 = 'wss://relay2.com'
+export const RELAY_3 = 'wss://relay3.com'
+export const RELAY_4 = 'wss://relay4.com'
+export const RELAY_5 = 'wss://relay5.com'

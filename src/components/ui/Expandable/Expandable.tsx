@@ -11,14 +11,14 @@ import { ExpandableContext, type IExpandableContextValue } from './Expandable.co
 
 export type ICssSizeValue = number | string
 
-export type IExpandableTriggerRenderProps = {
+type IExpandableTriggerRenderProps = {
   expand: (expanded: boolean) => void
   disabled?: boolean
   expanded?: boolean
 }
 
 type Props = Omit<IExpandableContextValue, 'expand'> & {
-  trigger: React.ReactNode | ((renderProps: IExpandableTriggerRenderProps) => React.ReactNode)
+  trigger?: React.ReactNode | ((renderProps: IExpandableTriggerRenderProps) => React.ReactNode)
   children?: React.ReactNode
   onChange?: (expanded: boolean) => void
   collapsedSize?: ICssSizeValue
@@ -54,7 +54,7 @@ export const Expandable = forwardRef<HTMLDivElement, Props>(function Expandable(
     orientation,
   })
 
-  const transitionProperty = orientation === 'horizontal' ? 'width' : 'height'
+  const transitionProperty = orientation === 'horizontal' ? 'width opacity' : 'height opacity'
   const collapsedSize: Partial<ISize<ICssSizeValue>> =
     orientation === 'horizontal' ? { width: collapsedSizeProp } : { height: collapsedSizeProp }
   const expandedSize: Partial<ISize<ICssSizeValue>> =
@@ -107,7 +107,8 @@ export const Expandable = forwardRef<HTMLDivElement, Props>(function Expandable(
               expanded && status === 'entered' && styles.content$expanded,
             ]}>
             <div {...other} aria-expanded={expanded} style={{ overflow: 'hidden' }} ref={transitionNodeHandleRef}>
-              {children}
+              {/* {status !== 'exiting' && children} */}
+              {expanded && children}
             </div>
           </html.div>
         )}
@@ -118,10 +119,10 @@ export const Expandable = forwardRef<HTMLDivElement, Props>(function Expandable(
 
 const styles = css.create({
   host: {
-    overflow: 'hidden',
+    //overflow: 'hidden',
   },
   host$expanded: {
-    overflow: 'visible',
+    //overflow: 'visible',
   },
   content: (expandedSize: Partial<ISize<ICssSizeValue>>) => ({
     overflow: 'hidden',
@@ -132,17 +133,20 @@ const styles = css.create({
     overflow: 'hidden',
   },
   animation$entering: (expandedSize: Partial<ISize<ICssSizeValue>>, transitionProperty: string) => ({
+    opacity: 1,
     width: expandedSize.width,
     height: expandedSize.height,
     transitionProperty,
-    transitionDuration: duration.long1,
+    transitionDuration: duration.short3,
     transitionTimingFunction: easing.emphasizedDecelerate,
   }),
   animation$entered: (expandedSize: Partial<ISize<ICssSizeValue>>) => ({
+    opacity: 1,
     width: expandedSize.width,
     height: expandedSize.height,
   }),
   animation$exiting: (collapsedSize: Partial<ISize<ICssSizeValue>>, transitionProperty: string) => ({
+    opacity: 0,
     width: collapsedSize.width,
     height: collapsedSize.height,
     transitionProperty,
@@ -150,14 +154,9 @@ const styles = css.create({
     transitionTimingFunction: easing.emphasizedDecelerate,
   }),
   animation$exited: (size: Partial<ISize<ICssSizeValue>>, visibility: string) => ({
+    opacity: 0,
     width: size.width,
     height: size.height,
     visibility,
-  }),
-  width: (width: number | string) => ({
-    width,
-  }),
-  height: (height: number | string) => ({
-    height,
   }),
 })

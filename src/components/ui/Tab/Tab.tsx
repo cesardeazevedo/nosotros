@@ -34,11 +34,12 @@ type Props = {
 
 export const Tab = forwardRef<HTMLButtonElement, Props>((props, ref) => {
   const { sx, anchor, activeIcon, icon, label, onClick } = props
-  const { visualState, setRef } = useVisualState()
 
   const tabsContext = useContext(TabsContext)
   const variant = props.variant ?? tabsContext?.variant ?? 'primary'
   const disabled = props.disabled ?? tabsContext?.disabled
+
+  const { visualState, setRef } = useVisualState(undefined, { disabled })
 
   const active = !disabled
     ? tabsContext
@@ -79,7 +80,7 @@ export const Tab = forwardRef<HTMLButtonElement, Props>((props, ref) => {
       aria-selected={active}
       onClick={handleClick}
       ref={refs}
-      {...dataProps(visualState)}>
+      {...(active ? dataProps(visualState) : {})}>
       <Elevation />
       <Ripple element={actionRef} visualState={visualState} />
       <FocusRing sx={styles.focusRing} element={actionRef} visualState={visualState} />
@@ -92,7 +93,7 @@ export const Tab = forwardRef<HTMLButtonElement, Props>((props, ref) => {
         {label && (
           <html.div style={styles.labelContainer}>
             <html.div style={[styles.label, active && styles.label$active, disabled && styles.label$disabled]}>
-              {label}
+              {tabsContext?.renderLabels && label}
             </html.div>
             {/* badge */}
           </html.div>
@@ -118,6 +119,7 @@ const variants = css.create({
     [tabTokens.activeStateLayerColor$pressed]: palette.primary,
     [tabTokens.activeStateLayerOpacity$pressed]: tabTokens.stateLayerOpacity$pressed,
 
+    [tabTokens.containerShape]: shape.sm,
     [tabTokens.containerHeight$withIconAndLabelText]: '64px',
 
     [tabTokens.activeIconColor]: palette.primary,
@@ -165,15 +167,17 @@ const styles = css.create({
     paddingBottom: 0,
     paddingLeft: spacing.padding2,
     paddingRight: spacing.padding2,
+    marginInline: spacing['margin0.5'],
     position: 'relative',
     WebkitTapHighlightColor: 'transparent',
     verticalAlign: 'middle',
     userSelect: 'none',
     whiteSpace: 'nowrap',
-    cursor: {
-      default: 'default',
-      ':is([data-hovered])': 'pointer',
-    },
+    //cursor: 'pointer',
+    // cursor: {
+    //   default: 'default',
+    //   ':is([data-hovered])': 'pointer',
+    // },
     borderRadius: 'inherit',
     borderStyle: 'unset',
     backgroundColor: 'unset',
@@ -202,7 +206,7 @@ const styles = css.create({
   },
   label: {
     fontFamily: tabTokens.labelTextFont,
-    //fontSize: tabTokens.labelTextSize,
+    fontSize: tabTokens.labelTextSize,
     fontWeight: tabTokens.labelTextWeight,
     lineHeight: tabTokens.labelTextLineHeight,
     letterSpacing: tabTokens.labelTextLetterSpacing,
@@ -296,6 +300,6 @@ const styles = css.create({
     },
   },
   focusRing: {
-    [focusRingTokens.shape]: shape.sm,
+    [focusRingTokens.shape]: tabTokens.containerShape,
   },
 })

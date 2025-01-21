@@ -1,47 +1,58 @@
 import { Stack } from '@/components/ui/Stack/Stack'
+import { useMobile } from '@/hooks/useMobile'
+import { useCurrentUser } from '@/hooks/useRootStore'
+import type { Note } from '@/stores/notes/note'
 import { spacing } from '@/themes/spacing.stylex'
 import { observer } from 'mobx-react-lite'
+import { useCallback } from 'react'
 import { css, html } from 'react-strict-dom'
-import type Note from 'stores/models/note'
+import { PostLoadMore } from '../PostLoadMore'
 import { PostRepliesEmpty } from './PostRepliesEmpty'
-import PostRepliesLoading from './PostRepliesLoading'
+import { PostRepliesLoading } from './PostRepliesLoading'
+import { PostRepliesMuted } from './PostRepliesMuted'
 import { PostRepliesTree } from './PostReply'
 
 type Props = {
-  note?: Note
+  note: Note
   loadingRows?: number
   renderEmpty?: boolean
+  onLoadMoreClick?: () => void
 }
 
-const PostReplies = observer(function PostReplies(props: Props) {
+export const PostReplies = observer(function PostReplies(props: Props) {
   const { note, loadingRows, renderEmpty = false } = props
 
-  const replies = note?.repliesOpen === null ? note.repliesPreview : note?.repliesSorted
+  const user = useCurrentUser()
+  const isMobile = useMobile()
 
-  const loading = note ? note.repliesStatus === 'LOADING' : true
-  const empty = note ? note?.repliesStatus === 'LOADED' && replies?.length === 0 : undefined
+  const replies = note.repliesChunk(user)
 
-  if (note?.repliesOpen === false || (!loading && empty)) {
-    return
-  }
+  const loading = note.isLoading
+  const empty = note.isEmpty
+
+  const handleLoadMore = useCallback(() => {
+    if (isMobile && props.onLoadMoreClick) {
+      return props.onLoadMoreClick()
+    }
+    note.paginate()
+  }, [])
 
   return (
     <Stack horizontal={false} sx={styles.root} justify='flex-start'>
-      <html.div style={styles.repliesWrapper}>
-        {replies && note && <PostRepliesTree replies={replies} repliesOpen={note.repliesOpen} level={1} />}
+      <html.div style={styles.root}>
+        {replies.length > 0 && note && <PostRepliesTree replies={replies} repliesOpen={note.repliesOpen} level={1} />}
+        <PostRepliesMuted level={0} note={note} />
         {empty && renderEmpty && <PostRepliesEmpty />}
         {loading && empty !== true && <PostRepliesLoading rows={loadingRows} />}
+        {note.hasRepliesLeft && <PostLoadMore note={note} onClick={handleLoadMore} />}
       </html.div>
     </Stack>
   )
 })
 
 const styles = css.create({
-  root: {},
-  repliesWrapper: {
+  root: {
     width: '100%',
-    paddingBlock: spacing.padding1,
+    paddingTop: spacing.padding1,
   },
 })
-
-export default PostReplies

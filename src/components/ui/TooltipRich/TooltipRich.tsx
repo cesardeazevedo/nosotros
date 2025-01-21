@@ -1,13 +1,18 @@
 import { FloatingDelayGroup } from '@floating-ui/react'
-import React from 'react'
+import React, { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 import type { ElevationLevel } from '../Elevation/Elevation'
 import { PopoverBase } from '../Popover/PopoverBase'
-import type { IPopoverBaseProps, IPopoverBaseTriggerRendererProps } from '../Popover/PopoverBase.types'
+import type {
+  IPopoverBaseContentRendererProps,
+  IPopoverBaseProps,
+  IPopoverBaseTriggerRendererProps,
+  IRendererPropsWithForwardedProps,
+} from '../Popover/PopoverBase.types'
 import { tooltipTokens } from '../Tooltip/Tooltip.stylex'
 
 type Props = Omit<IPopoverBaseProps, 'children' | 'contentRenderer'> & {
-  content: React.ReactNode
+  content: (props: IRendererPropsWithForwardedProps<IPopoverBaseContentRendererProps, object>) => React.ReactNode
   enterDelay?: number
   persistent?: boolean
   elevation?: ElevationLevel
@@ -16,7 +21,7 @@ type Props = Omit<IPopoverBaseProps, 'children' | 'contentRenderer'> & {
     | React.ReactNode
 }
 
-export const TooltipRich = (props: Props) => {
+export const TooltipRich = memo(function TooltipRich(props: Props) {
   const { persistent = false, enterDelay = 700, placement = 'bottom', children, content, cursor, ...other } = props
   return (
     <FloatingDelayGroup delay={enterDelay}>
@@ -24,11 +29,11 @@ export const TooltipRich = (props: Props) => {
         {...other}
         placement={placement}
         role='tooltip'
-        contentRenderer={({ renderCursor }) => {
+        contentRenderer={(props) => {
           return (
             <>
-              {renderCursor({ ...css.props(styles.cursor) })}
-              {content}
+              {props.renderCursor({ ...css.props(styles.cursor) })}
+              {content(props)}
             </>
           )
         }}
@@ -38,6 +43,7 @@ export const TooltipRich = (props: Props) => {
           click: !!persistent,
           hover: !persistent,
           focus: !persistent,
+          ...other.openEvents,
         }}
         closeEvents={{
           clickOutside: !persistent,
@@ -52,7 +58,7 @@ export const TooltipRich = (props: Props) => {
       </PopoverBase>
     </FloatingDelayGroup>
   )
-}
+})
 
 const styles = css.create({
   content: {

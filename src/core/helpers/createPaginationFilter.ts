@@ -3,7 +3,7 @@ import { DateTime } from 'luxon'
 import { createFilter } from './createFilter'
 
 // Move this function out of core package
-export function createFilterPagination(filter: NostrFilter, range = 360): NostrFilter {
+export function createFilterPagination(filter: NostrFilter, range: number): NostrFilter {
   const now = DateTime.now()
   return {
     ...createFilter(filter),

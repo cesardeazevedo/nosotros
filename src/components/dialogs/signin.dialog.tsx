@@ -1,29 +1,25 @@
-import { useMatch, useRouter } from '@tanstack/react-router'
-import Dialog from 'components/elements/Layouts/Dialog'
-import SignIn from 'components/elements/SignIn/SignIn'
+import { useMatch } from '@tanstack/react-router'
+import { DialogSheet } from 'components/elements/Layouts/Dialog'
+import { SignIn } from 'components/elements/SignIn/SignIn'
 import { useGoBack } from 'hooks/useNavigations'
 import { observer } from 'mobx-react-lite'
 import { useCallback } from 'react'
-import { dialogStore } from 'stores/ui/dialogs.store'
 
-const SignInDialog = observer(function SignInDialog() {
-  useMatch({ from: '__root__' })
-  const router = useRouter()
+export const SignInDialog = observer(function SignInDialog() {
+  const match = useMatch({
+    from: '__root__',
+    // @ts-ignore
+    select: (x) => x.search.sign_in === true,
+  })
   const goBack = useGoBack()
 
   const handleClose = useCallback(() => {
-    dialogStore.closeAuth()
     goBack()
   }, [goBack])
 
   return (
-    <Dialog
-      maxWidth='xs'
-      open={dialogStore.auth || router.latestLocation.pathname === '/sign_in'}
-      onClose={handleClose}>
+    <DialogSheet maxWidth='xs' open={match} onClose={handleClose}>
       <SignIn />
-    </Dialog>
+    </DialogSheet>
   )
 })
-
-export default SignInDialog

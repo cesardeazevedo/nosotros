@@ -1,19 +1,21 @@
-import type { BlockQuoteNode, HeadingNode, Mark, ParagraphNode, TextNode } from 'nostr-editor'
-import React, { useContext } from 'react'
-import { ContentContext } from './Content'
-import Link from './Link/Link'
-import { CodeSpan } from './Markdown/CodeSpan'
-import { NProfile } from './NProfile/NProfile'
-import Tag from './Tag/Tag'
+import { useNoteContext } from '@/components/providers/NoteProvider'
+import type { Props as TextProps } from '@/components/ui/Text/Text'
 import { Text } from '@/components/ui/Text/Text'
+import type { BlockQuoteNode, HeadingNode, Mark, ParagraphNode, TextNode } from 'nostr-editor'
+import React from 'react'
+import { ContentLink } from './Link/Link'
+import { CodeSpan } from './Markdown/CodeSpan'
+import { NEventInline } from './NEvent/NEventInline'
+import { NProfile } from './NProfile/NProfile'
+import { Tag } from './Tag/Tag'
 
-type Props = {
+type TextMarkProps = {
   node: TextNode
 }
 
-function TextMark(props: Props) {
+function TextMark(props: TextMarkProps) {
   const { text, marks = [] } = props.node
-  const { disableLink } = useContext(ContentContext)
+  const { disableLink } = useNoteContext()
   return (
     <>
       {marks.reduce(
@@ -30,29 +32,43 @@ function TextMark(props: Props) {
             case 'tag':
               return <Tag>{content}</Tag>
             case 'link':
-              return disableLink ? content : <Link href={mark.attrs.href}>{content}</Link>
+              return disableLink ? content : <ContentLink href={mark.attrs.href}>{content}</ContentLink>
             default:
               return content
           }
         },
-        <span>{text}</span>,
+        <>{text}</>,
       )}
     </>
   )
 }
 
-export function TextContent(props: { node: ParagraphNode | HeadingNode | BlockQuoteNode }) {
+export type Props = {
+  node: ParagraphNode | HeadingNode | BlockQuoteNode
+  hardBreak?: boolean
+} & Omit<TextProps, 'children'>
+
+export const TextContent = (props: Props) => {
+  const { node, hardBreak = true, ...rest } = props
+  const length = node.content?.length || 0
   return (
-    <Text size='lg'>
-      {props.node.content?.map((node, index) => (
+    <Text size='lg' {...rest}>
+      {node.content?.map((node, index) => (
         <React.Fragment key={node.type + index}>
-          {/* @ts-expect-error old schema */}
-          {(node.type === 'nprofile' || node.type === 'mention') && <NProfile pubkey={node.attrs.pubkey} />}
+          {node.type === 'nprofile' && <NProfile pubkey={node.attrs.pubkey} />}
           {node.type === 'text' && <TextMark node={node} />}
-          {node.type === 'hardBreak' && (
+          {node.type === 'nevent' && <NEventInline attrs={node.attrs} />}
+          {/*Don't render headBreaks at the beginning or end of the content*/}
+          {node.type === 'hardBreak' && index !== 0 && index !== length - 1 && (
             <>
-              <br />
-              <div style={{ marginTop: 8 }} />
+              {hardBreak ? (
+                <>
+                  <br />
+                  <div style={{ marginTop: 8 }} />
+                </>
+              ) : (
+                ' '
+              )}
             </>
           )}
         </React.Fragment>

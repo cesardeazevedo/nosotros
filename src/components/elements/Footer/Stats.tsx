@@ -1,6 +1,5 @@
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
-import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 import { useMatch } from '@tanstack/react-router'
 import { useMobile } from 'hooks/useMobile'
 import { DateTime } from 'luxon'
@@ -9,10 +8,11 @@ import { css } from 'react-strict-dom'
 import { committerDate, sha } from '~build/git'
 import { version } from '~build/package'
 import { IconGithub } from '../Icons/IconGithub'
+import { Link } from '../Links/Link'
 
 const lastUpdated = DateTime.fromJSDate(new Date(committerDate)).toLocaleString()
 
-const Stats = memo(function Stats() {
+export const Stats = memo(function Stats() {
   const isMobile = useMobile()
   const isDeck = useMatch({ from: '/deck', shouldThrow: false })
   if (isMobile || isDeck) return null
@@ -21,16 +21,15 @@ const Stats = memo(function Stats() {
       <Text size='sm' sx={styles.text}>
         v{version} ({sha.slice(0, 8)})<br /> Last update: {lastUpdated}
       </Text>
-      <Tooltip placement='bottom-start' cursor='arrow' text='See open source code' enterDelay={0}>
-        <a href='https://github.com/cesardeazevedo/nosotros' target='_blank' rel='noopeneer'>
-          <Stack align='center'>
-            <IconGithub />
-            <Text variant='label' size='sm'>
-              GITHUB
-            </Text>
-          </Stack>
-        </a>
-      </Tooltip>
+      <Link href='https://github.com/cesardeazevedo/nosotros/issues'>Submit Issue</Link>
+      <a href='https://github.com/cesardeazevedo/nosotros' target='_blank' rel='noopeneer'>
+        <Stack align='center'>
+          <IconGithub />
+          <Text variant='label' size='sm'>
+            GITHUB
+          </Text>
+        </Stack>
+      </a>
     </Stack>
   )
 })
@@ -46,5 +45,3 @@ const styles = css.create({
     fontWeight: 500,
   },
 })
-
-export default Stats

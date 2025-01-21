@@ -1,44 +1,35 @@
+import { ofKind } from '@/core/operators/ofKind'
 import { Kind } from 'constants/kinds'
-import type { SubscriptionOptions } from 'core/NostrSubscription'
-import { batcher } from 'nostr/batcher'
-import type { NostrClient } from 'nostr/nostr'
-import { insertEvent } from 'nostr/operators/insertEvent'
-import { onNewEvents } from 'nostr/operators/onNewEvents'
-import { withCache } from 'nostr/operators/queryCache'
-import { connect, ignoreElements, map, merge, mergeMap, of, tap } from 'rxjs'
-import Follows from 'stores/models/follow'
-import { followsStore } from 'stores/nostr/follows.store'
+import type { ClientSubOptions, NostrClient } from 'nostr/nostr'
+import { connect, from, ignoreElements, merge, mergeMap } from 'rxjs'
+import { ShareReplayCache } from '../replay'
+import type { NostrEventFollow } from '../types'
+import { metadataSymbol } from '../types'
+
+export const replay = new ShareReplayCache<NostrEventFollow>()
+
+const kinds = [Kind.Follows]
 
 export class NIP02Follows {
   constructor(private client: NostrClient) {}
 
-  subscribe(authors: string[] = [], options?: SubscriptionOptions) {
-    const filter = { kinds: [Kind.Follows], authors }
-    const sub = this.client.subscribe(filter, options)
-
-    return of(sub).pipe(
-      batcher.subscribe(),
-
-      onNewEvents(sub),
-
-      insertEvent(),
-
-      withCache([filter]),
-
-      map((event) => new Follows(event)),
+  subscribe = replay.wrap((pubkey: string, options?: ClientSubOptions) => {
+    return this.client.subscribe({ kinds, authors: [pubkey] }, options).pipe(
+      ofKind<NostrEventFollow>(kinds),
 
       connect((shared$) => {
         return merge(
           shared$,
           shared$.pipe(
-            // map((event) => this.parseFollowingTags(event.tags)),
-            mergeMap((data) => this.client.users.subscribe([...data.authors])),
+            mergeMap((event) =>
+              from(event[metadataSymbol].tags.get('p') || []).pipe(
+                mergeMap((pubkey) => this.client.users.subscribe(pubkey)),
+              ),
+            ),
             ignoreElements(),
           ),
         )
       }),
-
-      tap((event) => followsStore.add(event)),
     )
-  }
+  })
 }

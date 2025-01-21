@@ -1,12 +1,17 @@
-import type { Props } from './LinkRouter'
-import LinkRouter from './LinkRouter'
+import type { LinkProps } from '@tanstack/react-router'
+import { Link, useRouter } from '@tanstack/react-router'
 
-const LinkSignIn = function LinkSignIn(props: Props) {
+export const LinkSignIn = function LinkSignIn(props: LinkProps) {
+  const router = useRouter()
   return (
-    <LinkRouter {...props} to='/sign_in'>
+    <Link
+      {...props}
+      search={{ sign_in: true }}
+      // @ts-ignore
+      from={router.fullPath}
+      // @ts-ignore
+      state={{ from: router.latestLocation.pathname }}>
       {props.children}
-    </LinkRouter>
+    </Link>
   )
 }
-
-export default LinkSignIn

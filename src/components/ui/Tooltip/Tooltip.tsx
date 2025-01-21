@@ -5,7 +5,7 @@ import { PopoverBase } from '../Popover/PopoverBase'
 import type { IPopoverBaseProps, IPopoverBaseTriggerRendererProps } from '../Popover/PopoverBase.types'
 import { tooltipTokens } from './Tooltip.stylex'
 
-type Props = Omit<IPopoverBaseProps, 'children' | 'contentRenderer'> & {
+export type Props = Omit<IPopoverBaseProps, 'children' | 'contentRenderer'> & {
   text: React.ReactNode
   enterDelay?: number
   children:
@@ -13,7 +13,7 @@ type Props = Omit<IPopoverBaseProps, 'children' | 'contentRenderer'> & {
     | React.ReactNode
 }
 
-export const Tooltip = (props: Props) => {
+export const Tooltip = function Tooltip(props: Props) {
   const { enterDelay = 700, placement = 'bottom', children, text, ...other } = props
   return (
     <FloatingDelayGroup delay={enterDelay}>
@@ -33,9 +33,9 @@ export const Tooltip = (props: Props) => {
         forwardProps
         openEvents={{ hover: true, focus: true }}>
         {(renderProps) => (
-          <html.span {...renderProps.getProps()} ref={renderProps.setRef}>
+          <html.div {...renderProps.getProps()} ref={renderProps.setRef}>
             {typeof children === 'function' ? children(renderProps) : children}
-          </html.span>
+          </html.div>
         )}
       </PopoverBase>
     </FloatingDelayGroup>

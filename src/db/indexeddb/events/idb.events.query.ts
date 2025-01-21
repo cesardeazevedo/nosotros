@@ -11,7 +11,7 @@ type EventIndexes = IDBPIndex<IndexedDBSchema, Stores, 'events'>
 type TagStore = IDBPObjectStore<IndexedDBSchema, Stores, 'tags'>
 type TagIndexes = IDBPIndex<IndexedDBSchema, Stores, 'tags'>
 
-class IDBEventQuery {
+export class IDBEventQuery {
   private transaction: Transaction
   private events: EventStore
   private tags: TagStore
@@ -25,34 +25,36 @@ class IDBEventQuery {
     this.tags = this.transaction.objectStore('tags')
   }
 
-  *start() {
-    if (this.filter.since && this.filter.until && this.filter.authors) {
-      const index = this.events.index('kind_pubkey_created_at')
-      for (const kind of this.filter.kinds || [0]) {
-        for (const author of this.filter.authors) {
-          const range = IDBKeyRange.bound([kind, author, this.filter.since], [kind, author, this.filter.until])
-          yield this.iterate(index, range)
-        }
-      }
-    } else if (this.filter.authors) {
+  async *start() {
+    if (this.filter.authors) {
       for (const kind of this.filter.kinds || []) {
-        const index = this.events.index('kind_pubkey')
+        const index = this.events.index('kind_pubkey_created_at')
         for (const author of this.filter.authors) {
-          const range = IDBKeyRange.only([kind, author])
-          yield this.iterate(index, range)
+          const range = IDBKeyRange.bound(
+            [kind, author, this.filter.since || 0],
+            [kind, author, this.filter.until || Infinity],
+          )
+          yield* this.iterate(index, range)
         }
       }
     } else if (this.filter.ids) {
       for (const value of this.filter.ids) {
-        yield this.getByKey(this.events, value)
+        yield* this.getByKey(this.events, value)
       }
-    } else if (this.filter['#e'] || this.filter['#p']) {
-      const tag = this.filter['#e'] ? 'e' : 'p'
-      const index = this.tags.index('kind_tag_value')
-      for (const kind of this.filter.kinds || []) {
-        for (const value of this.filter[('#' + tag) as `#${string}`] || []) {
-          const range = IDBKeyRange.only([kind, tag, value])
-          yield this.iterateTags(index, range)
+    } else {
+      for (const [key, values = []] of Object.entries(this.filter)) {
+        if (key[0] === '#') {
+          const tag = key.slice(1)
+          const index = this.tags.index('kind_tag_value_created_at')
+          for (const kind of this.filter.kinds || []) {
+            for (const value of values as string[]) {
+              const range = IDBKeyRange.bound(
+                [kind, tag, value, this.filter.since || 0],
+                [kind, tag, value, this.filter.until || Infinity],
+              )
+              yield* this.iterateTags(index, range)
+            }
+          }
         }
       }
     }
@@ -66,7 +68,7 @@ class IDBEventQuery {
   }
 
   private async *iterate(index: EventIndexes, range: IDBKeyRange) {
-    for await (const cursor of index.iterate(range)) {
+    for await (const cursor of index.iterate(range, 'prev')) {
       if (cursor.value) {
         yield cursor.value
       }
@@ -74,10 +76,8 @@ class IDBEventQuery {
   }
 
   private async *iterateTags(index: TagIndexes, range: IDBKeyRange) {
-    for await (const cursor of index.iterate(range)) {
+    for await (const cursor of index.iterate(range, 'prev')) {
       yield* this.getByKey(this.events, cursor.value.eventId)
     }
   }
 }
-
-export default IDBEventQuery

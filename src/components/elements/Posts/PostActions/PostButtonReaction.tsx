@@ -1,19 +1,23 @@
+import { useNoteContext } from '@/components/providers/NoteProvider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
+import { useCurrentPubkey, useRootContext } from '@/hooks/useRootStore'
+import { publishReaction } from '@/nostr/publish/publishReaction'
+import type { Comment } from '@/stores/comment/comment'
+import type { Note } from '@/stores/notes/note'
+import { fallbackEmoji, reactionStore } from '@/stores/reactions/reactions.store'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconHeart, IconHeartFilled } from '@tabler/icons-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { observer } from 'mobx-react-lite'
+import { useCallback } from 'react'
 import { css, html } from 'react-strict-dom'
-import type Note from 'stores/models/note'
-import { fallbackEmoji, reactionStore } from 'stores/nostr/reactions.store'
-import ReactionPicker from '../../Reactions/ReactionPicker'
-import ReactionsTooltip from '../../Reactions/ReactionsTooltip'
-import ButtonContainer from './PostButtonContainer'
+import { ReactionPicker } from '../../Reactions/ReactionPicker'
+import { ReactionsTooltip } from '../../Reactions/ReactionsTooltip'
+import { ButtonContainer } from './PostButtonContainer'
 import { iconProps } from './utils'
 
 type Props = {
-  note: Note
-  dense?: boolean
+  note: Note | Comment
 }
 
 // Only known emojis
@@ -29,16 +33,26 @@ const emojiColors: Record<string, string> = {
   '😡': colors.orange7,
 }
 
-const PostButtonReaction = observer(function PostReactions(props: Props) {
-  const { note, dense } = props
+export const ButtonReaction = observer(function ButtonReaction(props: Props) {
+  const { note } = props
+  const { dense } = useNoteContext()
   const total = reactionStore.getTotal(note.id)
-  const myReaction = fallbackEmoji(reactionStore.myReactions.get(note.id)?.[0]) || ''
-  const color = emojiColors[myReaction] || colors.red7
+  const pubkey = useCurrentPubkey()
+  const myReactions = reactionStore.getByPubkey(pubkey)
+  const myReaction = fallbackEmoji(myReactions?.[note.id]?.[0])
+  const color = myReaction ? emojiColors[myReaction] || colors.red7 : colors.red7
+  const context = useRootContext()
+
+  const handleReact = useCallback(
+    (reaction: string) => {
+      publishReaction(context.client, note.event, reaction).subscribe()
+    },
+    [context.client, note],
+  )
+
   return (
     <>
       <ButtonContainer
-        active={!!myReaction}
-        dense={dense}
         value={
           !!total && (
             <ReactionsTooltip noteId={note.id}>
@@ -46,14 +60,13 @@ const PostButtonReaction = observer(function PostReactions(props: Props) {
             </ReactionsTooltip>
           )
         }>
-        <ReactionPicker onClick={(reaction) => note.react(reaction)}>
+        <ReactionPicker onClick={handleReact}>
           <span>
             <AnimatePresence initial={false}>
               <IconButton
                 size={dense ? 'sm' : 'md'}
                 selected={!!myReaction}
-                variant='standard'
-                onClick={() => note.react('❤️')}
+                onClick={() => handleReact('❤️')}
                 sx={[(color && styles[`button$${color}`]) || styles.button$red]}
                 selectedIcon={
                   <motion.div
@@ -69,7 +82,7 @@ const PostButtonReaction = observer(function PostReactions(props: Props) {
                         strokeWidth={iconProps.strokeWidth}
                       />
                     ) : (
-                      <html.span>{myReaction}</html.span>
+                      <html.span style={styles.myCustomReaction}>{myReaction}</html.span>
                     )}
                   </motion.div>
                 }
@@ -101,6 +114,7 @@ const styles = css.create({
   [colors.yellow7]: { color: colors.yellow7 },
   [colors.orange7]: { color: colors.orange7 },
   [colors.orange9]: { color: colors.orange9 },
+  myCustomReaction: {
+    fontSize: '130%',
+  },
 })
-
-export default PostButtonReaction

@@ -4,9 +4,9 @@ import { typeScale } from '@/themes/typeScale.stylex'
 import { useMobile } from 'hooks/useMobile'
 import { css } from 'react-strict-dom'
 import { IconNostr } from '../Icons/IconNostr'
-import LinkSignIn from '../Links/LinkSignIn'
+import { LinkSignIn } from '../Links/LinkSignIn'
 
-function SignInButtonFab() {
+export const SignInButtonFab = () => {
   const isMobile = useMobile()
   return (
     <LinkSignIn>
@@ -32,5 +32,3 @@ const styles = css.create({
     bottom: 100,
   },
 })
-
-export default SignInButtonFab

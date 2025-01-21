@@ -1,47 +1,90 @@
-import { useMatch } from '@tanstack/react-router'
-import { observer } from 'mobx-react-lite'
+import { useRootStore } from '@/hooks/useRootStore'
+import { seenStore } from '@/stores/seen/seen.store'
+import { decodeNIP19 } from '@/utils/nip19'
+import { Link, useRouter } from '@tanstack/react-router'
+import { observer, useLocalObservable } from 'mobx-react-lite'
+import { nip19 } from 'nostr-tools'
+import type { NEvent, Note } from 'nostr-tools/nip19'
 import React, { useCallback, useContext } from 'react'
-import type Note from 'stores/models/note'
-import { deckStore } from 'stores/ui/deck.store'
+import { css } from 'react-strict-dom'
 import { DeckContext } from '../Deck/DeckContext'
-import type { Props as LinkRouterProps } from './LinkRouter'
-import LinkRouter from './LinkRouter'
 
-interface Props extends LinkRouterProps {
-  note: Note
+export type Props = {
+  nevent?: NEvent | Note
   children: React.ReactNode
+  underline?: boolean
   disableLink?: boolean
 }
 
-const LinkNEvent = observer(function LinkNEvent(props: Props) {
-  const { note, disableLink, ...rest } = props
-  const route = useMatch({ strict: false })
-  const isDeck = route.id === '/deck'
+export const LinkNEvent = observer(function LinkNEvent(props: Props) {
+  const { disableLink, underline, ...rest } = props
+  const router = useRouter()
+  const root = useRootStore()
   const { index } = useContext(DeckContext)
 
-  const handleClickDeck = useCallback(() => {
-    if (note) {
-      deckStore.addNoteColumn({ noteId: note.id }, index + 1)
-    }
-  }, [note, index])
+  // Some quotes might be note1
+  const nevent = useLocalObservable(() => ({
+    get value() {
+      if (props.nevent) {
+        const decoded = decodeNIP19(props.nevent)
+        if (decoded?.type === 'note') {
+          return nip19.neventEncode({
+            id: decoded.data,
+            relays: seenStore.get(decoded.data),
+          })
+        }
+      }
+      return props.nevent
+    },
+  })).value
 
-  if (disableLink) {
+  const handleClickDeck = useCallback(() => {
+    if (nevent) {
+      const decoded = decodeNIP19(nevent)
+      switch (decoded?.type) {
+        case 'nevent': {
+          root.decks.selected.addNEvent({ options: decoded.data }, (index || 0) + 1)
+          break
+        }
+        case 'note': {
+          const options = { id: decoded.data, relays: seenStore.get(decoded.data) }
+          root.decks.selected.addNEvent({ options }, (index || 0) + 1)
+          break
+        }
+      }
+    }
+  }, [nevent, index])
+
+  if (disableLink || !nevent) {
     return props.children
   }
 
-  if (isDeck) {
+  if (index !== undefined) {
     return (
-      <LinkRouter onClick={handleClickDeck} {...rest}>
+      <Link onClick={handleClickDeck} {...rest}>
         {props.children}
-      </LinkRouter>
+      </Link>
     )
   }
 
   return (
-    <LinkRouter to='/$nostr' params={{ nostr: note.nevent }} {...rest}>
+    <Link
+      to={`/$nostr`}
+      // @ts-ignore
+      state={{ from: router.latestLocation.pathname }}
+      {...rest}
+      {...css.props([underline && styles.underline])}
+      params={{ nostr: nevent }}>
       {props.children}
-    </LinkRouter>
+    </Link>
   )
 })
 
-export default LinkNEvent
+const styles = css.create({
+  underline: {
+    textDecoration: {
+      default: 'inherit',
+      ':hover': 'underline',
+    },
+  },
+})

@@ -1,13 +1,15 @@
 import React from 'react'
-import { html, css } from 'react-strict-dom'
+import { css, html } from 'react-strict-dom'
+import type { SxProps } from '../types'
 
 type Props = {
   children?: React.ReactNode
+  sx?: SxProps
 }
 
 export const List = (props: Props) => {
-  const { children } = props
-  return <html.div style={styles.root}>{children}</html.div>
+  const { children, sx } = props
+  return <html.div style={[styles.root, sx]}>{children}</html.div>
 }
 
 const styles = css.create({

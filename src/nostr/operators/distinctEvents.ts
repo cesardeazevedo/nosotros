@@ -1,17 +1,12 @@
-import type { NostrEvent } from 'core/types'
-import type { SeenDB } from 'db/types'
 import { filter, map, pipe } from 'rxjs'
-import { seenStore } from 'stores/nostr/seen.store'
-import { insertSeen } from './insertSeen'
+import { hasEventInCache, setCache } from '../cache'
 
 export function distinctEvent() {
   return pipe(
-    filter(([relay, event]: [string, NostrEvent]) => {
-      const hasSeen = seenStore.seen.has(event.id)
-      const data = { relay, kind: event.kind, eventId: event.id } as SeenDB
-      seenStore.add(data)
-      insertSeen(data)
-      return !hasSeen
+    filter(([, event]) => {
+      const found = hasEventInCache(event)
+      if (!found) setCache(event, true)
+      return !found
     }),
     map((data) => data[1]),
   )

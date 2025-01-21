@@ -1,4 +1,4 @@
-import { useRouter } from '@tanstack/react-router'
+import { useRouter, useRouterState } from '@tanstack/react-router'
 import { useCallback } from 'react'
 
 export function useGoBack() {
@@ -11,8 +11,8 @@ export function useGoBack() {
 }
 
 export function useCurrentRoute() {
-  const router = useRouter()
-  return router.state.matches[router.state.matches.length - 1]
+  const matches = useRouterState({ select: (x) => x.matches })
+  return matches[matches.length - 1]
 }
 
 export function useNostrRoute() {

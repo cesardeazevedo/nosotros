@@ -1,16 +1,16 @@
+import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Text } from '@/components/ui/Text/Text'
 import { palette } from '@/themes/palette.stylex'
-import React, { useContext } from 'react'
+import React from 'react'
 import { css } from 'react-strict-dom'
-import { ContentContext } from '../Content'
-import Link from '../Link/Link'
+import { ContentLink } from '../Link/Link'
 
 type Props = {
   children: React.ReactNode
 }
 
-function Tag(props: Props) {
-  const { disableLink } = useContext(ContentContext)
+export const Tag = (props: Props) => {
+  const { disableLink } = useNoteContext()
   if (disableLink) {
     return (
       <Text sx={styles.root} size='lg'>
@@ -19,11 +19,11 @@ function Tag(props: Props) {
     )
   }
   return (
-    <Link href='#'>
+    <ContentLink href='#'>
       <Text sx={styles.root} size='lg'>
         {props.children}
       </Text>
-    </Link>
+    </ContentLink>
   )
 }
 
@@ -33,5 +33,3 @@ const styles = css.create({
     color: palette.tertiary,
   },
 })
-
-export default Tag

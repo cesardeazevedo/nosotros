@@ -1,36 +1,42 @@
-import { Button } from '@/components/ui/Button/Button'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
+import { useCurrentUser } from '@/hooks/useRootStore'
+import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import { IconCameraFilled, IconX } from '@tabler/icons-react'
+import { IconX } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
 import { nip19 } from 'nostr-tools'
 import { QRCodeCanvas } from 'qrcode.react'
 import { useMemo } from 'react'
 import { css, html } from 'react-strict-dom'
-import { authStore } from 'stores/ui/auth.store'
 import { dialogStore } from 'stores/ui/dialogs.store'
 import { encodeSafe } from 'utils/nip19'
-import UserAvatar from '../User/UserAvatar'
-import UserName from '../User/UserName'
+import { UserAvatar } from '../User/UserAvatar'
+import { UserName } from '../User/UserName'
+import { UserNIP05 } from '../User/UserNIP05'
 
-const QRCode = observer(function QRCodeDialog() {
-  const { pubkey, currentUser: user } = authStore
-  const npub = useMemo(() => encodeSafe(() => nip19.npubEncode(pubkey || '')), [pubkey])
+export const QRCode = observer(function QRCode() {
+  const user = useCurrentUser()
+  const npub = useMemo(() => encodeSafe(() => nip19.npubEncode(user?.pubkey || '')), [user])
   return (
     <html.div style={styles.root}>
       <IconButton sx={styles.close} onClick={dialogStore.closeQRCode} icon={<IconX />} />
       <Stack horizontal={false} gap={2} sx={styles.content}>
-        <Stack horizontal={false} gap={2} align='center' justify='center'>
-          <UserAvatar user={user} size='lg' />
-          <UserName user={user}>
-            <Text size='lg'>@{user?.displayName}</Text>
-          </UserName>
-        </Stack>
+        {user && (
+          <Stack horizontal={false} gap={2} align='center' justify='center'>
+            <UserAvatar disableLink disabledPopover pubkey={user.pubkey} size='xl' sx={styles.avatar} />
+            <Stack horizontal={false} align='center'>
+              <UserName disableLink disablePopover variant='title' size='lg' pubkey={user?.pubkey}></UserName>
+              <UserNIP05 pubkey={user?.pubkey} />
+            </Stack>
+          </Stack>
+        )}
         {npub ? (
-          <QRCodeCanvas value={npub} size={200} />
+          <html.div style={styles.qrcode}>
+            <QRCodeCanvas value={npub} size={200} />
+          </html.div>
         ) : (
           <Skeleton variant='rectangular' animation='wave' sx={styles.loading} />
         )}
@@ -38,12 +44,12 @@ const QRCode = observer(function QRCodeDialog() {
           {npub}
         </Text>
         <Text>Follow me on Nostr</Text>
-        <Button
-          variant='filled'
-          onClick={dialogStore.openCamera}
-          icon={<IconCameraFilled strokeWidth='1.2' size={20} style={{ marginRight: 8 }} />}>
-          Scan QRCode
-        </Button>
+        {/* <Button */}
+        {/*   variant='filled' */}
+        {/*   onClick={dialogStore.openCamera} */}
+        {/*   icon={<IconCameraFilled strokeWidth='1.2' size={20} style={{ marginRight: 8 }} />}> */}
+        {/*   Scan QRCode */}
+        {/* </Button> */}
       </Stack>
     </html.div>
   )
@@ -52,12 +58,22 @@ const QRCode = observer(function QRCodeDialog() {
 const styles = css.create({
   root: {
     position: 'relative',
+    paddingBottom: spacing.padding8,
+  },
+  qrcode: {
+    backgroundColor: 'white',
+    padding: spacing.padding2,
+    borderRadius: shape.md,
+  },
+  avatar: {
+    boxShadow: `0px 0px 0px 4px white`,
   },
   button: {},
   close: {
     position: 'absolute',
-    top: 0,
-    right: -24,
+    top: spacing.margin1,
+    right: spacing.margin1,
+    zIndex: 1000,
   },
   content: {
     display: 'flex',
@@ -73,10 +89,8 @@ const styles = css.create({
     height: 200,
   },
   npub: {
-    maxWidth: '70%',
+    maxWidth: '51%',
     wordBreak: 'break-all',
-    textAlign: 'center',
+    fontFamily: 'monospace',
   },
 })
-
-export default QRCode

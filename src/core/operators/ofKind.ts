@@ -6,8 +6,8 @@ import { filter } from 'rxjs'
 /**
  * filter by kind
  */
-export function ofKind(kinds: Kind[]): OperatorFunction<NostrEvent, NostrEvent> {
-  return filter((event) => {
+export function ofKind<T extends NostrEvent>(kinds: Kind[]): OperatorFunction<NostrEvent, T> {
+  return filter((event): event is T => {
     for (let i = 0; i < kinds.length; i++) {
       if (event.kind === kinds[i]) {
         return true

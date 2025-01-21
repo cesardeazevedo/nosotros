@@ -134,7 +134,7 @@ export const MenuLeaf = forwardRef<HTMLButtonElement, MenuProps>((props, ref) =>
   const getTriggerProps = (userProps?: React.ComponentPropsWithoutRef<'button'>): Record<string, unknown> =>
     interactions.getReferenceProps({
       ...userProps,
-      ...(transitionStatus.isMounted ? { visualState: { hovered: true, strategy: 'replace' } } : undefined),
+      ...(transitionStatus.isMounted ? {} : undefined),
       tabIndex: isNested ? (menuItemContext.activeIndex === item.index ? 0 : -1) : undefined,
       role: isNested ? 'menuitem' : undefined,
       ref: triggerHandleRef,
