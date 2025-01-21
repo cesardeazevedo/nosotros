@@ -18,7 +18,7 @@ export default defineConfig(({ mode }) => {
     server: {
       host: true,
       port: 8000,
-      // hmr: false,
+      hmr: false,
     },
     build: {
       sourcemap: true,
@@ -32,7 +32,7 @@ export default defineConfig(({ mode }) => {
       reporters: ['verbose'],
       environment: 'jsdom',
       exclude: ['**/node_modules/**', '**/e2e/**'],
-      setupFiles: ['fake-indexeddb/auto', join(__dirname, `/jest.setup.ts`)],
+      setupFiles: ['@vitest/web-worker', 'fake-indexeddb/auto', join(__dirname, `/jest.setup.ts`)],
       server: {
         deps: {
           inline: ['react-tweet'],
