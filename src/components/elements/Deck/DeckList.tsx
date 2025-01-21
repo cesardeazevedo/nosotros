@@ -1,36 +1,51 @@
-import FeedColumn from 'components/modules/Feed/FeedColumn'
-import HomeColumn from 'components/modules/Home/HomeColumn'
-import PostColumn from 'components/modules/Post/PostColumn'
-import UserColumn from 'components/modules/User/UserColumn'
+import { NAddressColumn } from '@/components/modules/NAddress/NAddressColumn'
+import { NEventColumn } from '@/components/modules/NEvent/NEventColumn'
+import { NotificationsColumn } from '@/components/modules/Notifications/NotificationsColumn'
+import { NProfileColumn } from '@/components/modules/NProfile/NProfileColumn'
+import { NostrProvider } from '@/components/providers/NostrProvider'
+import { useRootStore } from '@/hooks/useRootStore'
+import type { BaseModule } from '@/stores/modules/module'
+import {
+  isHomeModule,
+  isNAddressModule,
+  isNEventModule,
+  isNotificationModule,
+  isNProfileModule,
+} from '@/stores/modules/module.store'
+import { HomeColumn } from 'components/modules/Home/HomeColumn'
 import { observer } from 'mobx-react-lite'
-import React, { createContext } from 'react'
-import { FeedModule } from 'stores/modules/feed.module'
-import { GuestModule } from 'stores/modules/guest.module'
-import { HomeModule } from 'stores/modules/home.module'
-import { NoteModule } from 'stores/modules/note.module'
-import { ProfileModule } from 'stores/modules/profile.module'
-import { deckStore } from 'stores/ui/deck.store'
+import React from 'react'
+import { DeckColumn } from './DeckColumn'
+import { DeckContext } from './DeckContext'
 
-export const DeckContext = createContext({ index: 0 })
+const DeckModuleContext = function DeckModuleContext(props: { children: React.ReactNode; module: BaseModule }) {
+  const { module, children } = props
+  if (module.context) {
+    return <NostrProvider nostrContext={() => module.context!}>{children}</NostrProvider>
+  }
+  return children
+}
 
-const DeckList = observer(function DeckList() {
+export const DeckList = observer(function DeckList() {
+  const root = useRootStore()
   return (
     <>
-      {deckStore.deck.map((module, index) => {
+      {root.decks.selected.list.map((module, index) => {
+        const key = `${module.type}:${module.id}`
         return (
-          <React.Fragment key={module.id}>
+          <DeckColumn key={key}>
             <DeckContext.Provider value={{ index }}>
-              {module instanceof HomeModule && <HomeColumn module={module} />}
-              {module instanceof GuestModule && <HomeColumn module={module} />}
-              {module instanceof ProfileModule && <UserColumn module={module} />}
-              {module instanceof NoteModule && <PostColumn module={module} />}
-              {module instanceof FeedModule && <FeedColumn feed={module} />}
+              <DeckModuleContext module={module}>
+                {isHomeModule(module) && <HomeColumn module={module} />}
+                {isNProfileModule(module) && <NProfileColumn module={module} />}
+                {isNEventModule(module) && <NEventColumn module={module} />}
+                {isNAddressModule(module) && <NAddressColumn module={module} />}
+                {isNotificationModule(module) && <NotificationsColumn module={module} />}
+              </DeckModuleContext>
             </DeckContext.Provider>
-          </React.Fragment>
+          </DeckColumn>
         )
       })}
     </>
   )
 })
-
-export default DeckList

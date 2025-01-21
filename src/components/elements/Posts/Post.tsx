@@ -1,48 +1,91 @@
+import { useNoteVisibility } from '@/components/elements/Posts/hooks/useNoteVisibility'
+import { Divider } from '@/components/ui/Divider/Divider'
+import { Expandable } from '@/components/ui/Expandable/Expandable'
+import { useMobile } from '@/hooks/useMobile'
+import { subscribeNoteStats } from '@/nostr/subscriptions/subscribeNoteStats'
+import { useNostrClientContext } from '@/stores/context/nostr.context.hooks'
+import type { Note } from '@/stores/notes/note'
+import { spacing } from '@/themes/spacing.stylex'
 import { useRouter } from '@tanstack/react-router'
-import { useMobile } from 'hooks/useMobile'
 import { observer } from 'mobx-react-lite'
 import { useCallback } from 'react'
-import type Note from 'stores/models/note'
-import { noteStore } from 'stores/nostr/notes.store'
-import PaperContainer from '../Layouts/PaperContainer'
-import PostActions from './PostActions/PostActions'
-import PostContent from './PostContent'
-import PostHeader from './PostHeader'
-import PostReplies from './PostReplies/PostReplies'
+import { css, html } from 'react-strict-dom'
+import { Editor } from '../Editor/Editor'
+import { PostActions } from './PostActions/PostActions'
+import { PostBroadcaster } from './PostBroadcaster'
+import { PostContent } from './PostContent'
+import { PostHeader } from './PostHeader'
+import { PostReplies } from './PostReplies/PostReplies'
+import { PostRepliesPreview } from './PostReplies/PostRepliesPreview'
 
-export type Props = { id: string } | { note: Note }
+type Props = {
+  note: Note
+  header?: React.ReactNode
+}
 
-const Post = observer(function Post(props: Props) {
-  const note = 'id' in props ? noteStore.get(props.id) : props.note
+export const PostRoot = observer(function PostRoot(props: Props) {
+  const { note, header } = props
   const isMobile = useMobile()
   const router = useRouter()
+  const [ref] = useNoteVisibility(note)
+  const context = useNostrClientContext()
 
   const handleRepliesClick = useCallback(() => {
-    if (note) {
-      if (isMobile) {
-        router.navigate({
-          to: '/$nostr/replies',
-          params: { nostr: note.nevent },
-          // state: { from: router.latestLocation.pathname },
-        })
-      } else {
-        note.toggleReplies()
-      }
+    if (isMobile) {
+      router.navigate({
+        // @ts-ignore
+        to: './replies/$nevent',
+        // @ts-ignore
+        params: { nevent: note.nevent },
+        // @ts-ignore
+        state: { from: router.latestLocation.pathname },
+      })
+    } else {
+      note.toggleReplies()
+      note.setRepliesStatus('LOADING')
+      subscribeNoteStats(context.client, note.event, {}).subscribe({
+        complete: () => {
+          note.setRepliesStatus('LOADED')
+        },
+      })
     }
-  }, [router, isMobile, note])
+  }, [router.latestLocation.pathname, isMobile, note])
 
-  if (!note) {
-    return <></>
-  }
+  const handleLoadMore = useCallback(() => {
+    if (note?.repliesOpen) {
+      note.paginate()
+    } else {
+      handleRepliesClick()
+    }
+  }, [note])
 
   return (
-    <PaperContainer>
-      <PostHeader note={note} />
+    <html.div style={styles.root} ref={ref}>
+      {header || <PostHeader note={note} />}
       <PostContent note={note} />
       <PostActions note={note} onReplyClick={handleRepliesClick} />
-      <PostReplies note={note} onReplyClick={handleRepliesClick} />
-    </PaperContainer>
+      <Expandable expanded={note.broadcastOpen}>
+        <PostBroadcaster note={note} />
+      </Expandable>
+      {note.repliesOpen && (
+        <>
+          <Divider />
+          <html.div style={styles.editor}>
+            <Editor renderBubble initialOpen={false} store={note.editor} />
+          </html.div>
+          <PostReplies note={note} renderEmpty onLoadMoreClick={handleLoadMore} />
+        </>
+      )}
+      {note.repliesOpen === null && <PostRepliesPreview note={note} onLoadMoreClick={handleRepliesClick} />}
+    </html.div>
   )
 })
 
-export default Post
+const styles = css.create({
+  root: {
+    minHeight: 147,
+  },
+  editor: {
+    paddingInline: spacing.padding1,
+  },
+})

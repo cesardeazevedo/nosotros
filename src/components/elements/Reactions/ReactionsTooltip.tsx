@@ -1,42 +1,49 @@
-import { Typography } from '@mui/material'
-import { Observer } from 'mobx-react-lite'
+import { Stack } from '@/components/ui/Stack/Stack'
+import { Text } from '@/components/ui/Text/Text'
+import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
+import { reactionStore } from '@/stores/reactions/reactions.store'
+import { observer, Observer } from 'mobx-react-lite'
 import React from 'react'
-import { reactionStore } from 'stores/nostr/reactions.store'
-import { Row } from '../Layouts/Flex'
-import Tooltip from '../Layouts/Tooltip'
+import { UserAvatar } from '../User/UserAvatar'
 
 type Props = {
   noteId: string
   children: React.ReactElement
 }
 
-function ReactionsTooltip(props: Props) {
+const maxUsers = 5
+
+export const ReactionsTooltip = observer(function ReactionsTooltip(props: Props) {
   const { children } = props
-  const list = reactionStore.getTopReactions(props.noteId)
+  const list = reactionStore.sorted(props.noteId)
   return (
     <Tooltip
-      arrow
-      title={
+      cursor='dot'
+      placement='bottom-start'
+      text={
         <>
-          <Typography variant='subtitle2'>Reactions</Typography>
+          <Text variant='label'>Reactions</Text>
           <Observer>
             {() => (
               <>
                 {list
                   .filter(([emoji]) => !emoji.includes(':'))
                   .map(([emoji, pubkeys]) => (
-                    <Row
-                      key={emoji}
-                      sx={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'flex-start',
-                        fontSize: '1.2rem',
-                        '>span': { flex: 1 },
-                      }}>
-                      <span>{emoji}</span>
-                      <span>{pubkeys.length}</span>
-                    </Row>
+                    <Stack key={emoji} gap={1}>
+                      <Text variant='title' size='sm'>
+                        {emoji}
+                      </Text>
+                      <Stack>
+                        {pubkeys.slice(0, maxUsers).map((pubkey) => (
+                          <UserAvatar size='xs' key={pubkey} pubkey={pubkey} />
+                        ))}
+                      </Stack>
+                      {pubkeys.length > maxUsers && (
+                        <Text variant='title' size='sm'>
+                          +{pubkeys.length - maxUsers}
+                        </Text>
+                      )}
+                    </Stack>
                   ))}
               </>
             )}
@@ -46,6 +53,4 @@ function ReactionsTooltip(props: Props) {
       {children}
     </Tooltip>
   )
-}
-
-export default ReactionsTooltip
+})

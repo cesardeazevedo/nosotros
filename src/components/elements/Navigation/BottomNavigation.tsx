@@ -1,100 +1,85 @@
-import { Badge, BottomNavigationAction, Box, BottomNavigation as MuiBottomNavigation, styled } from '@mui/material'
-import { IconBell, IconHome, IconMessageCircle, IconServerBolt, IconUser } from '@tabler/icons-react'
-import { useMatch, useRouter } from '@tanstack/react-router'
-import { useNostrRoute } from 'hooks/useNavigations'
+import { Stack } from '@/components/ui/Stack/Stack'
+import { Tab } from '@/components/ui/Tab/Tab'
+import { Tabs } from '@/components/ui/Tabs/Tabs'
+import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
+import { useMobile } from '@/hooks/useMobile'
+import { useCurrentUser } from '@/hooks/useRootStore'
+import { palette } from '@/themes/palette.stylex'
+import { shape } from '@/themes/shape.stylex'
+import { spacing } from '@/themes/spacing.stylex'
+import { IconBell, IconBellFilled, IconServerBolt, IconUser } from '@tabler/icons-react'
+import { Link, useLocation } from '@tanstack/react-router'
 import { observer } from 'mobx-react-lite'
-import { useCallback } from 'react'
-import { authStore } from 'stores/ui/auth.store'
-import { HideOnScroll } from '../Header/Header'
-import LinkProfile from '../Links/LinkProfile'
-import LinkSignIn from '../Links/LinkSignIn'
+import { css, html } from 'react-strict-dom'
+import { IconHome } from '../Icons/IconHome'
+import { IconHomeFilled } from '../Icons/IconHomeFilled'
+import { SignInButtonFab } from '../SignIn/SignInButtonFab'
 
-const Container = styled(Box)(({ theme }) =>
-  theme.unstable_sx({
+export const BottomNavigation = observer(function BottomNavigation() {
+  const user = useCurrentUser()
+  const mobile = useMobile()
+  const location = useLocation()
+
+  if (!mobile) {
+    return <></>
+  }
+
+  return (
+    <>
+      <html.div style={styles.root}>
+        {!user ? <SignInButtonFab /> : null}
+        <Stack grow justify='space-evenly'>
+          <Tabs anchor={location.pathname}>
+            <Tooltip text='Home' enterDelay={0}>
+              <Link to='/' resetScroll>
+                <Tab anchor='/' sx={styles.tab} icon={<IconHome />} activeIcon={<IconHomeFilled />} />
+              </Link>
+            </Tooltip>
+            <Tooltip text='Deck Mode' enterDelay={0}>
+              <Link to='/relays'>
+                <Tab anchor='/relays' sx={styles.tab} icon={<IconServerBolt size={24} />} />
+              </Link>
+            </Tooltip>
+            <Tooltip text='Notifications' enterDelay={0}>
+              <Link to='/notifications'>
+                <Tab anchor='/notifications' sx={styles.tab} icon={<IconBell />} activeIcon={<IconBellFilled />} />
+              </Link>
+            </Tooltip>
+            {user && (
+              <Tooltip text='Profile' enterDelay={0}>
+                <Link to='/$nostr' params={{ nostr: user!.nprofile! }}>
+                  <Tab anchor={`/${user.nprofile}`} sx={styles.tab} icon={<IconUser />} activeIcon={<IconUser />} />
+                </Link>
+              </Tooltip>
+            )}
+          </Tabs>
+        </Stack>
+      </html.div>
+    </>
+  )
+})
+
+const styles = css.create({
+  root: {
     position: 'fixed',
     left: 0,
     right: 0,
     bottom: 0,
-    zIndex: 1000,
-    height: 'min(80px, calc(56px + var(--sab)))',
-    display: { md: 'none' },
-    backgroundColor: `rgba(${theme.palette.common.backgroundChannel} / 0.66)`,
+    zIndex: 400,
+    margin: 'auto',
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: spacing.padding1,
+    paddingBottom: 'calc(8px + env(safe-area-inset-bottom))',
+    backgroundColor: palette.surface,
+    //backgroundColor: `rgba(${backgroundChannel} / 0.66)`,
     backdropFilter: 'blur(4px)',
-  }),
-)
-
-const BottomNavigation = observer(function BottomNavigation() {
-  const { currentUser } = authStore
-  const router = useRouter()
-  useMatch({ from: '__root__' })
-  const nostrRoute = useNostrRoute()
-
-  // TODO: This needs better inference
-  let context
-  if (nostrRoute?.context && 'decoded' in nostrRoute.context) {
-    context = nostrRoute.context
-  }
-
-  const handleHome = useCallback(() => {
-    router.navigate({ to: '/' })
-    setTimeout(() => {
-      window.scrollTo({ top: 0, behavior: 'smooth' })
-    })
-  }, [router])
-
-  return (
-    <HideOnScroll isMobile direction='up'>
-      <Container>
-        <MuiBottomNavigation
-          showLabels={false}
-          value={context?.id === authStore.pubkey ? 'profile' : 'feed'}
-          sx={{ backgroundColor: 'transparent' }}>
-          <BottomNavigationAction
-            value='messages'
-            onClick={handleHome}
-            icon={
-              <Badge badgeContent={0} color='primary'>
-                <IconHome size={28} strokeWidth='1.5' />
-              </Badge>
-            }
-          />
-          <BottomNavigationAction
-            disabled
-            sx={{ opacity: 0.4 }}
-            value='messages'
-            icon={<IconMessageCircle size={28} strokeWidth='1.5' />}
-          />
-          <BottomNavigationAction
-            disabled
-            sx={{ opacity: 0.5 }}
-            value='relays'
-            icon={<IconServerBolt size={28} strokeWidth='1.5' />}
-          />
-          <BottomNavigationAction
-            disabled
-            sx={{ opacity: 0.5 }}
-            value='notifications'
-            icon={<IconBell size={28} strokeWidth='1.5' />}
-          />
-          {currentUser && (
-            <BottomNavigationAction
-              component={LinkProfile}
-              user={currentUser}
-              value='profile'
-              icon={<IconUser size={28} strokeWidth='1.5' />}
-            />
-          )}
-          {!currentUser && (
-            <BottomNavigationAction
-              component={LinkSignIn}
-              value='sign_in'
-              icon={<IconUser size={28} strokeWidth='1.5' />}
-            />
-          )}
-        </MuiBottomNavigation>
-      </Container>
-    </HideOnScroll>
-  )
+  },
+  tab: {
+    height: 50,
+    width: 80,
+    borderRadius: shape.full,
+  },
 })
-
-export default BottomNavigation

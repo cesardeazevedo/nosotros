@@ -1,80 +1,72 @@
-import { Box, Button, type Theme } from '@mui/material'
-import { Row } from 'components/elements/Layouts/Flex'
-import { useDelayPopover } from 'hooks/useDelayPopover'
+import { Paper } from '@/components/ui/Paper/Paper'
+import { Stack } from '@/components/ui/Stack/Stack'
+import { TooltipRich } from '@/components/ui/TooltipRich/TooltipRich'
+import { spacing } from '@/themes/spacing.stylex'
 import { useMobile } from 'hooks/useMobile'
-import { bindHover, bindPopover } from 'material-ui-popup-state'
-import HoverPopover from 'material-ui-popup-state/HoverPopover'
-import { usePopupState } from 'material-ui-popup-state/hooks'
 import { Observer } from 'mobx-react-lite'
 import React from 'react'
-import type User from 'stores/models/user'
-import { authStore } from 'stores/ui/auth.store'
-import UserAvatar from './UserAvatar'
-import UserContentAbout from './UserContentAbout'
-import UserName from './UserName'
+import { css, html } from 'react-strict-dom'
+import { UserAvatar } from './UserAvatar'
+import { UserContentAbout } from './UserContentAbout'
+import { UserName } from './UserName'
+import { UserNIP05 } from './UserNIP05'
+import { UserFollowButton } from './UserFollowButton'
 
 type Props = {
-  user?: User
+  pubkey: string
   children: React.ReactNode
   disabled?: boolean
 }
 
-function UserPopover(props: Props) {
-  const popupState = usePopupState({ variant: 'popover', popupId: 'user-popup' })
-  const open = useDelayPopover(popupState)
-
-  const me = authStore.currentUser
-
+export const UserPopover = function UserPopover(props: Props) {
   const isMobile = useMobile()
-  const { user, disabled = false } = props
+  const { pubkey, disabled = false } = props
 
   if (isMobile || disabled) {
     return props.children
   }
 
   return (
-    <>
-      <span {...bindHover(popupState)}>{props.children}</span>
-      <HoverPopover
-        {...bindPopover(popupState)}
-        slotProps={{
-          paper: {
-            sx: {
-              pointerEvents: 'auto',
-              backgroundColor: (theme) => `rgba(${(theme as Theme).palette.common.backgroundChannel} / 0.80)`,
-              backdropFilter: 'blur(4px)',
-            },
-          },
-        }}
-        TransitionProps={{ in: open }}
-        transitionDuration={{ enter: 150, exit: 100 }}
-        transformOrigin={{ horizontal: 'left', vertical: 'top' }}
-        anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}>
+    <TooltipRich
+      enterDelay={500}
+      placement='bottom-start'
+      cursor='dot'
+      content={() => (
         <Observer>
           {() => (
-            <Box sx={{ width: 340, maxHeight: 270, p: 2 }}>
-              <Row sx={{ justifyContent: 'space-between' }}>
-                <UserAvatar disabledPopover size={60} user={user} />
-                {me?.following?.followsPubkey(user?.data.pubkey) ? (
-                  <Button sx={{ minWidth: 95 }} variant='text' color='inherit'>
-                    Following
-                  </Button>
-                ) : (
-                  <Button sx={{ minWidth: 95 }} variant='contained' color='info'>
-                    Follow
-                  </Button>
-                )}
-              </Row>
-              <UserName disablePopover user={user} sx={{ mt: 1 }} />
-              <Box sx={{ lineHeight: '1.2' }}>
-                <UserContentAbout user={user} />
-              </Box>
-            </Box>
+            <Paper elevation={2} shape='lg' surface='surfaceContainerLow' sx={styles.root}>
+              <Stack justify='space-between'>
+                <UserAvatar disabledPopover size='lg' pubkey={pubkey} />
+                <UserFollowButton pubkey={pubkey} />
+              </Stack>
+              <br />
+              <Stack horizontal={false} gap={2}>
+                <Stack horizontal={false}>
+                  <UserName disablePopover pubkey={pubkey} />
+                  <UserNIP05 pubkey={pubkey} />
+                </Stack>
+                <html.span style={styles.scroller}>
+                  <UserContentAbout pubkey={pubkey} />
+                </html.span>
+              </Stack>
+            </Paper>
           )}
         </Observer>
-      </HoverPopover>
-    </>
+      )}>
+      {props.children}
+    </TooltipRich>
   )
 }
 
-export default UserPopover
+const styles = css.create({
+  root: {
+    width: 360,
+    maxHeight: 290,
+    padding: spacing.padding2,
+    pointerEvents: 'auto',
+  },
+  scroller: {
+    maxHeight: 135,
+    overflowY: 'auto',
+  },
+})

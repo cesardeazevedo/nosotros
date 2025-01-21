@@ -1,11 +1,14 @@
 /// <reference types="vitest" />
 import react from '@vitejs/plugin-react'
-import path from 'path'
 import Info from 'unplugin-info/vite'
+import type { PluginOption } from 'vite'
 import { defineConfig } from 'vite'
 // import circleDependency from 'vite-plugin-circular-dependency'
+import { join, resolve } from 'node:path'
+import { visualizer } from 'rollup-plugin-visualizer'
 import mkcert from 'vite-plugin-mkcert'
 import { VitePWA } from 'vite-plugin-pwa'
+import styleX from 'vite-plugin-stylex'
 import tsconfigPaths from 'vite-tsconfig-paths'
 
 // https://vitejs.dev/config/
@@ -15,19 +18,21 @@ export default defineConfig(({ mode }) => {
     server: {
       host: true,
       port: 8000,
+      hmr: false,
     },
     build: {
       sourcemap: true,
     },
+    define: {
+      global: {},
+    },
     test: {
       globals: true,
+      testTimeout: 10000,
       reporters: ['verbose'],
-      environment: 'happy-dom',
+      environment: 'jsdom',
       exclude: ['**/node_modules/**', '**/e2e/**'],
-      browser: {
-        name: 'chrome',
-      },
-      setupFiles: ['fake-indexeddb/auto', path.join(__dirname, `/jest.setup.ts`)],
+      setupFiles: ['@vitest/web-worker', 'fake-indexeddb/auto', join(__dirname, `/jest.setup.ts`)],
       server: {
         deps: {
           inline: ['react-tweet'],
@@ -96,6 +101,9 @@ export default defineConfig(({ mode }) => {
           scope: '/',
           theme_color: '#000',
         },
+        injectManifest: {
+          maximumFileSizeToCacheInBytes: 2500000,
+        },
         workbox: {
           globDirectory: 'public/',
           globPatterns: ['**/*.{html,js,css,png,jpg,jpeg,svg,webp}'],
@@ -104,7 +112,24 @@ export default defineConfig(({ mode }) => {
       !isTesting ? mkcert({}) : null,
       tsconfigPaths(),
       react(),
+      styleX({
+        importSources: [
+          {
+            from: 'react-strict-dom',
+            as: 'css',
+          },
+        ],
+        aliases: {
+          '@/*': [join(__dirname, './src', '*')],
+        },
+      }),
       Info(),
+      visualizer() as PluginOption,
     ],
+    resolve: {
+      alias: {
+        '@': resolve(__dirname, 'src'),
+      },
+    },
   }
 })

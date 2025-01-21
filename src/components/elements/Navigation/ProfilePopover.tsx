@@ -1,17 +1,23 @@
-import { Box, IconButton, Popover } from '@mui/material'
+import { IconButton } from '@/components/ui/IconButton/IconButton'
+import { Paper } from '@/components/ui/Paper/Paper'
+import { PopoverBase } from '@/components/ui/Popover/PopoverBase'
+import { Stack } from '@/components/ui/Stack/Stack'
+import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
+import { useCurrentPubkey, useCurrentUser } from '@/hooks/useRootStore'
+import { shape } from '@/themes/shape.stylex'
+import { spacing } from '@/themes/spacing.stylex'
 import { IconQrcode } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
 import { useCallback, useState } from 'react'
-import { authStore } from 'stores/ui/auth.store'
+import { css, html } from 'react-strict-dom'
 import { dialogStore } from 'stores/ui/dialogs.store'
-import { Row } from '../Layouts/Flex'
-import Tooltip from '../Layouts/Tooltip'
-import UserAvatar from '../User/UserAvatar'
-import UserName from '../User/UserName'
-import Menu from './Menu'
+import { UserAvatar } from '../User/UserAvatar'
+import { UserName } from '../User/UserName'
+import { Menu } from './Menu'
 
-const ProfilePopover = observer(function ProfilePopover() {
-  const { currentUser: user } = authStore
+export const ProfilePopover = observer(function ProfilePopover() {
+  const user = useCurrentUser()
+  const pubkey = useCurrentPubkey()
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null)
   const handleOpen = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     setAnchorEl(e.currentTarget)
@@ -22,38 +28,45 @@ const ProfilePopover = observer(function ProfilePopover() {
   }, [])
 
   return (
-    <Box>
-      <div onClick={handleOpen}>
-        <UserAvatar user={user} disableLink disabledPopover />
-      </div>
-      <Popover
-        open={Boolean(anchorEl)}
-        anchorEl={anchorEl}
-        transitionDuration={150}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
-        onClose={handleClose}>
-        <Box sx={{ width: 260 }}>
-          <img src={user?.meta.banner} style={{ maxHeight: 110, width: '100%', objectFit: 'cover' }} />
-          <Row sx={{ px: 2, justifyContent: 'space-between' }}>
-            <UserName variant='h6' user={user} disableLink disablePopover />
-            <Tooltip arrow placement='bottom' title='Use the QR Code to scan your npub on your mobile device'>
-              <IconButton sx={{ color: 'text.primary' }} onClick={dialogStore.openQRCode}>
-                <IconQrcode strokeWidth='1.5' />
-              </IconButton>
+    <PopoverBase
+      opened={Boolean(anchorEl)}
+      onClose={handleClose}
+      placement='bottom-end'
+      contentRenderer={() => (
+        <Paper elevation={2} shape='lg' surface='surfaceContainerLow' sx={styles.root}>
+          <html.img src={user?.meta.banner} style={styles.image} />
+          <Stack sx={styles.header} justify='space-between'>
+            {pubkey && <UserName pubkey={pubkey} disableLink disablePopover />}
+            <Tooltip cursor='arrow' placement='bottom' text='Use the QR Code to scan your npub on your mobile device'>
+              <IconButton onClick={dialogStore.openQRCode} icon={<IconQrcode strokeWidth='1.5' />} />
             </Tooltip>
-          </Row>
+          </Stack>
           <Menu dense onAction={handleClose} />
-        </Box>
-      </Popover>
-    </Box>
+        </Paper>
+      )}>
+      {({ getProps, setRef }) => (
+        <div onClick={handleOpen} {...getProps} ref={setRef}>
+          <UserAvatar pubkey={user?.pubkey} disableLink disabledPopover />
+        </div>
+      )}
+    </PopoverBase>
   )
 })
 
-export default ProfilePopover
+const styles = css.create({
+  root: {
+    width: 260,
+  },
+  header: {
+    overflow: 'hidden',
+    paddingBlock: spacing.padding1,
+    paddingInline: spacing.padding2,
+  },
+  image: {
+    height: 110,
+    width: '100%',
+    objectFit: 'cover',
+    borderTopRightRadius: shape.lg,
+    borderTopLeftRadius: shape.lg,
+  },
+})

@@ -1,19 +1,16 @@
-import { useRangeChange } from 'hooks/useRangeChange'
+import { Divider } from '@/components/ui/Divider/Divider'
 import { observer } from 'mobx-react-lite'
-import { useLayoutEffect, useMemo, useRef } from 'react'
-import type { FeedModule } from 'stores/modules/feed.module'
+import React, { useCallback, useLayoutEffect, useMemo, useRef } from 'react'
 import { WindowVirtualizer, type CacheSnapshot, type WindowVirtualizerHandle } from 'virtua'
+import type { FeedAbstract, VirtualListProps } from './VirtualLists.types'
 
-type Props = {
-  feed: FeedModule
-  render: (id: string) => React.ReactNode
-}
+const always = () => true
 
-const VirtualListWindow = observer(function VirtualListWindow(props: Props) {
-  const { render, feed } = props
-  const cacheKey = `window-list-cache-${feed.id}`
-
-  const data = feed.list
+export const VirtualListWindow = observer(function VirtualListWindow<T extends FeedAbstract>(
+  props: VirtualListProps<T>,
+) {
+  const { id, render, feed, divider = true, onScrollEnd, filter = always } = props
+  const cacheKey = `window-list-cache-${id}`
 
   const ref = useRef<WindowVirtualizerHandle>(null)
 
@@ -22,6 +19,7 @@ const VirtualListWindow = observer(function VirtualListWindow(props: Props) {
     if (!serialized) return []
     try {
       return JSON.parse(serialized) as [number, CacheSnapshot]
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
       return []
     }
@@ -35,37 +33,38 @@ const VirtualListWindow = observer(function VirtualListWindow(props: Props) {
 
     window.scrollTo(0, offset ?? 0)
 
-    const onScroll = () => {
-      const scrolledTo = window.scrollY + window.innerHeight
-      if (scrolledTo >= document.body.scrollHeight - 200) {
-        feed.paginate()
-      }
-    }
-
     const onUnload = () => {
-      sessionStorage.setItem(cacheKey, JSON.stringify([window.scrollY, handle.cache]))
+      // Don't persist scroll position after page refresh (unload)
+      sessionStorage.removeItem(cacheKey)
     }
 
-    window.addEventListener('scroll', onScroll)
     window.addEventListener('beforeunload', onUnload)
-    onScroll()
 
     return () => {
-      window.removeEventListener('scroll', onScroll)
       window.removeEventListener('beforeunload', onUnload)
       sessionStorage.setItem(cacheKey, JSON.stringify([window.scrollY, handle.cache]))
     }
-  }, [cacheKey, offset, feed])
+  }, [cacheKey, offset])
 
-  const onRangeChange = useRangeChange(feed)
+  const handleScroll = useCallback(() => {
+    const scrolledTo = window.scrollY + window.innerHeight
+    if (scrolledTo >= document.body.scrollHeight - 250) {
+      onScrollEnd?.()
+    }
+  }, [])
 
   return (
     <>
-      <WindowVirtualizer ref={ref} cache={cache} onRangeChange={(start, end) => onRangeChange([start, end])}>
-        {data.map((id) => render(id))}
+      {props.header}
+      <WindowVirtualizer ref={ref} overscan={4} cache={cache} onScroll={handleScroll}>
+        {feed.list.filter(filter).map((item) => (
+          <React.Fragment key={item.id}>
+            {render(item)}
+            {divider && <Divider />}
+          </React.Fragment>
+        ))}
       </WindowVirtualizer>
+      {props.footer}
     </>
   )
 })
-
-export default VirtualListWindow

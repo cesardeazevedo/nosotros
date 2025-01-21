@@ -1,0 +1,99 @@
+import { DEFAULT_RELAYS } from '@/constants/relays'
+import { cast, t } from 'mobx-state-tree'
+import { HomeModuleModel } from '../home/home.module'
+import { ModuleStoreModel, type ModulesInstances } from '../modules/module.store'
+import type { NAddressModuleSnapshotIn } from '../naddress/naddress.module'
+import { NAddressModuleModel } from '../naddress/naddress.module'
+import type { NEventModuleSnapshotIn } from '../nevent/nevent.module'
+import { NEventModuleModel } from '../nevent/nevent.module'
+import type { NotificationModuleSnapshotIn } from '../notifications/notification.module'
+import { NotificationModuleModel } from '../notifications/notification.module'
+import { NProfileModuleModel } from '../nprofile/nprofile.module'
+
+export const DeckModel = t
+  .model('DeckModel', {
+    id: t.identifier,
+    columns: t.array(t.string),
+    modules: ModuleStoreModel,
+  })
+  .views((self) => ({
+    get list() {
+      return self.columns.map((col) => self.modules.get(col)).filter((x) => !!x)
+    },
+  }))
+  .actions((self) => ({
+    add(module: ModulesInstances, index?: number) {
+      const id = module.id
+      self.modules.add(module)
+      self.columns.splice(index || self.columns.length, 0, id)
+      return module
+    },
+  }))
+  .actions((self) => ({
+    addHome() {
+      self.add(HomeModuleModel.create({}))
+    },
+
+    addNotification(snapshot: NotificationModuleSnapshotIn) {
+      self.add(NotificationModuleModel.create(snapshot))
+    },
+
+    addNProfile(options: { pubkey: string; relays?: string[] }, index?: number) {
+      self.add(
+        NProfileModuleModel.create({
+          options,
+          context: {
+            options: {
+              pubkey: options.pubkey,
+              relays: options.relays || DEFAULT_RELAYS,
+            },
+          },
+        }),
+        index,
+      )
+    },
+
+    addNEvent(snapshot: NEventModuleSnapshotIn, index?: number) {
+      self.add(
+        NEventModuleModel.create({
+          ...snapshot,
+          context: {
+            options: {
+              pubkey: snapshot.options.author,
+              relays: snapshot.options.relays,
+            },
+          },
+        }),
+        index,
+      )
+    },
+
+    addNAddr(snapshot: NAddressModuleSnapshotIn, index?: number) {
+      self.add(
+        NAddressModuleModel.create({
+          ...snapshot,
+          context: {
+            options: {
+              pubkey: snapshot.options.pubkey,
+              relays: snapshot.options.relays,
+            },
+          },
+        }),
+        index,
+      )
+    },
+
+    reset() {
+      self.columns.clear()
+    },
+
+    delete(id: string) {
+      self.modules.delete(id)
+      self.columns = cast(self.columns.filter((x) => x !== id))
+    },
+  }))
+
+export const DeckStoreModel = t.model('DeckStoreModel', {
+  selected: t.reference(DeckModel),
+  decks: t.map(DeckModel),
+})

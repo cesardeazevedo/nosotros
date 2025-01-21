@@ -3,12 +3,15 @@ import type { NostrFilter, RelayHints } from 'core/types'
 import { dedupe } from './dedupe'
 import { formatRelayUrl } from './formatRelayUrl'
 
-export function hintsToRelayFilters(filters: NostrFilter[], hints?: RelayHints) {
+export function hintsToRelayFilters(filters: NostrFilter[], hints?: RelayHints, relays: string[] = []) {
   const relayFilters = [] as RelayFilters[]
   for (const filter of filters) {
     if (filter.authors) {
       for (const author of filter.authors) {
-        for (const relay of dedupe(hints?.authors?.[author])) {
+        const relayAuthors = dedupe(hints?.authors?.[author])
+          .filter((x) => !relays.includes(x))
+          .slice(0, 4)
+        for (const relay of relayAuthors) {
           relayFilters.push([formatRelayUrl(relay), [{ ...filter, authors: [author] }]])
         }
       }
@@ -17,7 +20,10 @@ export function hintsToRelayFilters(filters: NostrFilter[], hints?: RelayHints) 
       for (const field of ['ids', '#e'] as const) {
         if (filter[field]) {
           for (const id of filter[field]) {
-            for (const relay of dedupe(hints?.ids?.[id])) {
+            const relayIds = dedupe(hints?.ids?.[id])
+              .filter((x) => !relays.includes(x))
+              .slice(0, 4)
+            for (const relay of relayIds) {
               relayFilters.push([formatRelayUrl(relay), [{ ...filter, [field]: [id] }]])
             }
           }

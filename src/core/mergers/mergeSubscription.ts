@@ -1,17 +1,13 @@
-import type { SubscriptionOptions } from 'core/NostrSubscription'
 import { NostrSubscription } from 'core/NostrSubscription'
 import { merge, mergeAll } from 'rxjs'
-import { mergeFilters } from './mergeFilters'
-import { mergeRelayHints } from './mergeRelayHints'
 
-export function mergeSubscriptions(subscriptions: NostrSubscription[], options?: SubscriptionOptions) {
-  const filters = mergeFilters(subscriptions.flatMap((x) => x.filters))
-  const relayHints = mergeRelayHints(subscriptions.flatMap((x) => x.relayHints || {}))
+export function mergeSubscriptions(subscriptions: NostrSubscription[]) {
+  const filters = subscriptions.flatMap((x) => x.filters)
   const relayFilters = merge(subscriptions.map((x) => x.relayFilters)).pipe(mergeAll())
+  const events = new Map(subscriptions.flatMap((sub) => [...sub.events]))
 
   return new NostrSubscription(filters, {
-    relayHints,
     relayFilters,
-    outbox: options?.outbox,
+    events,
   })
 }

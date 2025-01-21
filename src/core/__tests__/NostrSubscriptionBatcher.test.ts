@@ -1,3 +1,5 @@
+import { Kind } from '@/constants/kinds'
+import { RELAY_1, RELAY_2, RELAY_3 } from '@/constants/testRelays'
 import { subscribeSpyTo } from '@hirez_io/observer-spy'
 import type { RelayFilters } from 'core/NostrSubscription'
 import { NostrSubscription } from 'core/NostrSubscription'
@@ -5,37 +7,34 @@ import { NostrSubscriptionBatcher } from 'core/NostrSubscriptionBatcher'
 import { start } from 'core/operators/start'
 import { Pool } from 'core/pool'
 import type { NostrFilter } from 'core/types'
-import { parseUser } from 'nostr/nips/nip01/metadata/parseUser'
 import { from, of } from 'rxjs'
-import { fakeUser } from 'utils/faker'
-import { RELAY_1, RELAY_2, RELAY_3, test } from 'utils/fixtures'
+import { fakeNote } from 'utils/faker'
+import { test } from 'utils/fixtures'
 import { expectRelayReceived, relaySendEose, relaySendEvents } from 'utils/testHelpers'
 
 describe('NostrSubscriptionBatcher', () => {
-  test('Assert batched subscriptions events and their respective relays', async ({ relay, relay2, relay3 }) => {
-    const user1 = parseUser(fakeUser('1'))
-    const user2 = parseUser(fakeUser('2'))
-    const user4 = parseUser(fakeUser('4'))
-    const user5 = parseUser(fakeUser('5'))
+  test('assert batched subscriptions events and their respective relays', async ({ relay, relay2, relay3 }) => {
+    const user1 = fakeNote({ kind: Kind.Metadata, pubkey: '1' })
+    const user2 = fakeNote({ kind: Kind.Metadata, pubkey: '2' })
+    const user4 = fakeNote({ kind: Kind.Metadata, pubkey: '4' })
+    const user5 = fakeNote({ kind: Kind.Metadata, pubkey: '5' })
 
     const pool = new Pool()
+    const outbox = (filters: NostrFilter[]) => {
+      return from<RelayFilters[]>([
+        [RELAY_2, [{ ...filters[0], authors: ['4'] }]],
+        [RELAY_3, [{ ...filters[0], authors: ['5'] }]],
+      ])
+    }
     const batcher = new NostrSubscriptionBatcher({
-      outbox: (filters: NostrFilter[]) => {
-        return from<RelayFilters[]>([
-          [RELAY_2, [{ ...filters[0], authors: ['4'] }]],
-          [RELAY_3, [{ ...filters[0], authors: ['5'] }]],
-        ])
-      },
-      subscribe: (sub) => {
-        return of(sub).pipe(start(pool))
-      },
+      subscribe: (sub) => of(sub).pipe(start(pool)),
     })
 
     const relays = of([RELAY_1])
-    const sub1 = new NostrSubscription({ kinds: [0], authors: ['1'] }, { relays })
-    const sub2 = new NostrSubscription({ kinds: [0], authors: ['2'] }, { relays })
-    const sub3 = new NostrSubscription({ kinds: [0], authors: ['3'] }, { relays })
-    const sub4 = new NostrSubscription({ kinds: [0], authors: ['4', '5'] }, { relays })
+    const sub1 = new NostrSubscription({ kinds: [0], authors: ['1'] }, { relays, outbox })
+    const sub2 = new NostrSubscription({ kinds: [0], authors: ['2'] }, { relays, outbox })
+    const sub3 = new NostrSubscription({ kinds: [0], authors: ['3'] }, { relays, outbox })
+    const sub4 = new NostrSubscription({ kinds: [0], authors: ['4', '5'] }, { relays, outbox })
 
     const spy1 = subscribeSpyTo(of(sub1).pipe(batcher.subscribe()))
     const spy2 = subscribeSpyTo(of(sub2).pipe(batcher.subscribe()))
@@ -68,11 +67,11 @@ describe('NostrSubscriptionBatcher', () => {
     ])
   })
 
-  test('send an empty subscription to the batcher and completes immediately', async () => {
+  test('send invalid subscription to the batcher and completes immediately', async () => {
     const pool = new Pool()
     const batcher = new NostrSubscriptionBatcher({
       subscribe: (sub) => {
-        return pool.subscribe(sub)
+        return of(sub).pipe(start(pool))
       },
     })
 
@@ -84,5 +83,49 @@ describe('NostrSubscriptionBatcher', () => {
 
     await spy1.onComplete()
     expect(spy1.getValues()).toStrictEqual([])
+  })
+
+  test('assert subscriptions transformers', async ({ relay }) => {
+    const pool = new Pool()
+    const batcher = new NostrSubscriptionBatcher({
+      subscribe: (sub) => {
+        return of(sub).pipe(start(pool))
+      },
+    })
+
+    const cache = new Map()
+
+    const transform = (filters: NostrFilter[]) => {
+      return filters.map((filter) => {
+        return {
+          ...filter,
+          authors: filter.authors?.filter((x) => !cache.has(x)) || [],
+        }
+      })
+    }
+
+    const relays = of([RELAY_1])
+    const sub1 = new NostrSubscription({ kinds: [0], authors: ['1'] }, { relays, transform })
+    const sub2 = new NostrSubscription({ kinds: [0], authors: ['2'] }, { relays, transform })
+    const sub3 = new NostrSubscription({ kinds: [0], authors: ['3'] }, { relays, transform })
+    const sub4 = new NostrSubscription({ kinds: [0], authors: ['4', '5'] }, { relays, transform })
+
+    const spy1 = subscribeSpyTo(of(sub1).pipe(batcher.subscribe()))
+    const spy2 = subscribeSpyTo(of(sub2).pipe(batcher.subscribe()))
+    const spy3 = subscribeSpyTo(of(sub3).pipe(batcher.subscribe()))
+    const spy4 = subscribeSpyTo(of(sub4).pipe(batcher.subscribe()))
+
+    cache.set('1', true)
+    cache.set('2', true)
+    cache.set('3', true)
+    cache.set('4', true)
+
+    const parentId = await expectRelayReceived(relay, { kinds: [0], authors: ['5'] })
+    relaySendEose(relay, parentId)
+
+    await spy1.onComplete()
+    await spy2.onComplete()
+    await spy3.onComplete()
+    await spy4.onComplete()
   })
 })

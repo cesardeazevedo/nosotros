@@ -1,67 +1,96 @@
-import { AppBar, Slide, Toolbar, useScrollTrigger, type SlideProps } from '@mui/material'
+import { AppBar } from '@/components/ui/AppBar/AppBar'
+import type { Props as SlideProps } from '@/components/ui/Slide/Slide'
+import { Slide } from '@/components/ui/Slide/Slide'
+import { Stack } from '@/components/ui/Stack/Stack'
+import { useScrollTrigger } from '@/hooks/useScrollTrigger'
+import { spacing } from '@/themes/spacing.stylex'
 import { useMatch } from '@tanstack/react-router'
 import { useMobile } from 'hooks/useMobile'
-import { useCurrentRoute } from 'hooks/useNavigations'
-import type { ReactElement } from 'react'
+import { useNostrRoute } from 'hooks/useNavigations'
+import React from 'react'
+import { css, html } from 'react-strict-dom'
 import { CenteredContainer } from '../Layouts/CenteredContainer'
-import { Row } from '../Layouts/Flex'
-import Sidebar from '../Navigation/Sidebar'
-import HeaderActions from './HeaderActions'
-import HeaderCenter from './HeaderCenter'
-import HeaderLogo from './HeaderLogo'
+import { NavigationHeader } from '../Navigation/NavigationHeader'
+import { Sidebar } from '../Navigation/Sidebar'
+import { TopNavigation } from '../Navigation/TopNavigation'
+import { RelayPopoverSummary } from '../Relays/RelayPopoverSummary'
+import { SettingsPopover } from '../Settings/SettingsPopover'
+import { HeaderLogo } from './HeaderLogo'
+import { HeaderSignIn } from './HeaderSignIn'
 
-export function HideOnScroll(props: {
-  direction?: SlideProps['direction']
-  isMobile: boolean
-  children: ReactElement
-}) {
-  const { direction = 'down', isMobile, children } = props
-  const trigger = useScrollTrigger({ target: window })
+export const HideOnScroll = React.memo(
+  (props: { direction?: SlideProps['direction']; children: React.ReactElement }) => {
+    const { direction = 'down', children } = props
+    const trigger = useScrollTrigger({ target: window, threshold: 100, disableHysteresis: false })
 
-  if (!isMobile) {
-    return children
-  }
+    return (
+      <Slide appear={false} direction={direction} in={!trigger}>
+        {children}
+      </Slide>
+    )
+  },
+)
 
-  return (
-    <Slide appear={false} direction={direction} in={!trigger}>
-      {children}
-    </Slide>
-  )
-}
-
-function Header() {
+export const Header = React.memo(function Header() {
   const isMobile = useMobile()
-  const route = useCurrentRoute()
   useMatch({ from: '__root__' })
 
-  const isNostrRoute = route.routeId === '/$nostr'
+  const isNostrRoute = !!useNostrRoute()
+
+  // const HideOnScrollContainer = isMobile ? HideOnScroll : React.Fragment
 
   return (
-    <HideOnScroll isMobile={isMobile}>
-      <AppBar color='default' variant='outlined' elevation={0}>
-        <Toolbar>
-          <Row sx={{ justifyContent: 'space-between', width: '100%' }}>
-            <Row
-              sx={{
-                position: 'absolute',
-                width: isMobile ? '100%' : 'auto',
-              }}>
-              {!isNostrRoute && isMobile && <Sidebar />}
-              {isNostrRoute && isMobile ? null : <HeaderLogo />}
-            </Row>
-            <CenteredContainer maxWidth='sm' sx={{ pt: 0, mt: 0 }}>
-              <HeaderCenter />
+    <>
+      <AppBar>
+        {isMobile && (
+          <Stack align='center' justify='space-between' gap={2} sx={styles.content$mobile}>
+            {!isNostrRoute && <Sidebar />}
+            {!isNostrRoute && <HeaderLogo />}
+            {isNostrRoute && <NavigationHeader />}
+            <RelayPopoverSummary />
+          </Stack>
+        )}
+        {!isMobile && (
+          <>
+            <html.div style={styles.leading}>
+              <HeaderLogo />
+            </html.div>
+            <CenteredContainer sx={styles.content}>
+              <TopNavigation />
             </CenteredContainer>
-            {!isMobile && (
-              <Row sx={{ position: 'absolute', right: 20 }}>
-                <HeaderActions />
-              </Row>
-            )}
-          </Row>
-        </Toolbar>
+            <html.div style={styles.trailing}>
+              <Stack gap={1}>
+                <SettingsPopover />
+                <RelayPopoverSummary />
+                <HeaderSignIn />
+              </Stack>
+            </html.div>
+          </>
+        )}
       </AppBar>
-    </HideOnScroll>
+    </>
   )
-}
+})
 
-export default Header
+const styles = css.create({
+  root: {
+    position: 'relative',
+  },
+  leading: {
+    position: 'absolute',
+    left: spacing.margin3,
+  },
+  trailing: {
+    position: 'absolute',
+    right: spacing.margin3,
+  },
+  content: {
+    display: 'flex',
+    justifyContent: 'center',
+    paddingTop: 0,
+    marginTop: 0,
+  },
+  content$mobile: {
+    width: '100%',
+  },
+})

@@ -1,8 +1,17 @@
-import { forwardRef } from 'react'
-import LinkRouter from './LinkRouter'
+import type { LinkProps } from '@tanstack/react-router'
+import { Link, useRouter } from '@tanstack/react-router'
 
-const LinkSignIn = forwardRef<never, Partial<typeof LinkRouter>>(function LinkSignIn(props, ref) {
-  return <LinkRouter color='inherit' {...props} to='/sign_in' ref={ref} />
-})
-
-export default LinkSignIn
+export const LinkSignIn = function LinkSignIn(props: LinkProps) {
+  const router = useRouter()
+  return (
+    <Link
+      {...props}
+      search={{ sign_in: true }}
+      // @ts-ignore
+      from={router.fullPath}
+      // @ts-ignore
+      state={{ from: router.latestLocation.pathname }}>
+      {props.children}
+    </Link>
+  )
+}

@@ -1,49 +1,51 @@
-import type { ContentSchema } from 'content/types'
-import type { RelayHints } from 'core/types'
-import type { EventDB } from 'db/types'
-import type { UserMetaData } from 'nostr/nips/nip01/metadata/parseUser'
-import type { NostrReference } from 'nostr/nips/nip27.references'
-import type { IMetaTags } from './nips/nip92.imeta'
+import type { Kind } from '@/constants/kinds'
+import type { NostrEvent } from 'nostr-tools'
+import type { FollowsMetadata } from './helpers/parseFollowList'
+import type { NoteMetadata } from './helpers/parseNote'
+import type { UserRelayListMetadata } from './helpers/parseRelayList'
+import type { RepostMetadata } from './helpers/parseRepost'
+import type { UserMetadata } from './helpers/parseUser'
+import type { ZapReceiptMetadata } from './helpers/parseZap'
+import type { RelayDiscoveryMetadata } from './helpers/parseRelayDiscovery'
+import type { CommentMetadata } from './helpers/parseComment'
 
-export interface NoteDB extends EventDB {
-  metadata: {
-    imeta: IMetaTags
-    references: NostrReference[]
-    contentSchema: ContentSchema
-    relayHints: RelayHints
-    mentionedAuthors: string[]
-    mentionedNotes: string[]
-    isRoot: boolean
-    isRootReply: boolean
-    isReplyOfAReply: boolean
-    rootNoteId: string | undefined
-    parentNoteId: string | undefined
-  }
-}
+export type * from './helpers/parseFollowList'
+export type * from './helpers/parseNote'
+export * from './helpers/parseRelayList'
+export type * from './helpers/parseRepost'
+export type * from './helpers/parseUser'
 
-export interface UserDB extends EventDB {
-  metadata: UserMetaData
-}
+export const metadataSymbol = Symbol('metadata')
 
-export interface ZapDB extends EventDB {
-  metadata: {
-    bolt11: {
-      amount?: {
-        value: string
-        letters: string
-      }
-      separator?: {
-        letters: string
-        value: string
-      }
-      timestamp?: {
-        letters: string
-        value: number
-      }
-      payment_hash?: {
-        letters: string
-        value: string
-      }
-    }
-  }
-}
+export type MetadataSymbol<T> = { [metadataSymbol]: T }
+
+type Metadata =
+  | UserMetadata
+  | NoteMetadata
+  | FollowsMetadata
+  | RepostMetadata
+  | UserRelayListMetadata
+  | ZapReceiptMetadata
+  | RelayDiscoveryMetadata
+  | CommentMetadata
+
+export type NostrEventUserMetadata = NostrEvent & MetadataSymbol<UserMetadata>
+export type NostrEventNote = NostrEvent & MetadataSymbol<NoteMetadata>
+export type NostrEventFollow = NostrEvent & MetadataSymbol<FollowsMetadata>
+export type NostrEventRepost = NostrEvent & MetadataSymbol<RepostMetadata>
+export type NostrEventRelayList = NostrEvent & MetadataSymbol<UserRelayListMetadata>
+export type NostrEventZapReceipt = NostrEvent & MetadataSymbol<ZapReceiptMetadata>
+export type NostrEventRelayDiscovery = NostrEvent & MetadataSymbol<RelayDiscoveryMetadata>
+export type NostrEventComment = NostrEvent & MetadataSymbol<CommentMetadata>
+export type NostrEventGeneric = NostrEvent & MetadataSymbol<{ kind: Exclude<Kind, Pick<Metadata, 'kind'>['kind']> }> // generic event
+
+export type NostrEventMetadata =
+  | NostrEventUserMetadata
+  | NostrEventNote
+  | NostrEventComment
+  | NostrEventFollow
+  | NostrEventRepost
+  | NostrEventRelayList
+  | NostrEventZapReceipt
+  | NostrEventRelayDiscovery
+  | NostrEventGeneric

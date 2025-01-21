@@ -1,10 +1,10 @@
-import { Box, type Theme } from '@mui/material'
-import { Row } from 'components/elements/Layouts/Flex'
+import { TooltipRich } from '@/components/ui/TooltipRich/TooltipRich'
+import { elevation } from '@/themes/elevation.stylex'
+import { palette } from '@/themes/palette.stylex'
+import { shape } from '@/themes/shape.stylex'
 import { motion, useMotionValue, useTransform, type MotionValue } from 'framer-motion'
-import { useDelayPopover } from 'hooks/useDelayPopover'
-import HoverPopover from 'material-ui-popup-state/HoverPopover'
-import { bindHover, bindPopover, usePopupState } from 'material-ui-popup-state/hooks'
-import React, { useCallback, useRef } from 'react'
+import React, { memo, useRef } from 'react'
+import { css } from 'react-strict-dom'
 
 type Props = {
   onClick: (reaction: string) => void
@@ -33,92 +33,85 @@ function ReactionIcon(props: {
     <motion.div
       ref={ref}
       onClick={() => onClick?.(reaction)}
-      style={{ position: 'relative', scale, marginRight, rotateZ, userSelect: 'none', cursor: 'pointer' }}>
+      {...css.props(styles.reaction)}
+      style={{ scale, marginRight, rotateZ }}>
       {title && (
-        <motion.div
-          style={{
-            position: 'absolute',
-            backgroundColor: '#000',
-            color: '#fff',
-            paddingLeft: 12,
-            paddingRight: 12,
-            borderRadius: 24,
-            rotateZ: rotateZText,
-            top: -30,
-            left: -25,
-            scale: 0.28,
-            fontWeight: 600,
-            whiteSpace: 'nowrap',
-            opacity,
-          }}>
+        <motion.div {...css.props(styles.title)} style={{ rotateZ: rotateZText, opacity }}>
           {title}
         </motion.div>
       )}
-      <Box component='span'>{reaction}</Box>
+      <span>{reaction}</span>
     </motion.div>
   )
 }
 
 function ReactionDock({ onClick }: { onClick: Props['onClick'] }) {
-  const mouseX = useMotionValue(0)
+  const mouseX = useMotionValue(250)
   const props = { mouseX, onClick }
   return (
-    <Row
-      sx={{ width: 340, height: 50, fontSize: 28, justifyContent: 'center', div: { mr: 2 } }}
-      onMouseMove={(e) => mouseX.set(e.pageX)}>
+    <div {...css.props(styles.dock)} onMouseMove={(e) => mouseX.set(e.pageX)}>
       <ReactionIcon title='Like' reaction='🤙' {...props} />
-      <ReactionIcon title={`Let's go`} reaction='🚀' {...props} />
+      <ReactionIcon title='LFG!' reaction='🚀' {...props} />
       <ReactionIcon title='Fire' reaction='🔥' {...props} />
       <ReactionIcon title='Watching' reaction='👀' {...props} />
       <ReactionIcon title='Haha' reaction='😂' {...props} />
       <ReactionIcon title='Salute' reaction='🫡' {...props} />
-      {/* <ReactionIcon title='Hugs' reaction='🫂' {...props} /> */}
-      {/* <ReactionIcon title='Wow' reaction='😮' {...props} /> */}
-      {/* <ReactionIcon title='Sad' reaction='😭' {...props} /> */}
+      <ReactionIcon title='Hugs' reaction='🫂' {...props} />
       <ReactionIcon title='Angry' reaction='😡' {...props} />
-    </Row>
+    </div>
   )
 }
 
-function ReactionPicker(props: Props) {
+export const ReactionPicker = memo(function ReactionPicker(props: Props) {
   const { children, onClick } = props
-  const popupState = usePopupState({ variant: 'popover', popupId: 'reaction-popup' })
-  const open = useDelayPopover(popupState, 800)
-
-  const handleClick = useCallback(
-    (emoji: string) => {
-      popupState.setOpen(false)
-      onClick(emoji)
-    },
-    [onClick, popupState],
-  )
 
   return (
-    <>
-      <Box {...bindHover(popupState)} component='span'>
-        {children}
-      </Box>
-      <HoverPopover
-        {...bindPopover(popupState)}
-        slotProps={{
-          paper: {
-            sx: {
-              borderRadius: 10,
-              pointerEvents: 'auto',
-              overflow: 'visible',
-              backgroundColor: (theme) => `rgba(${(theme as Theme).palette.common.backgroundChannel} / 0.80)`,
-              backdropFilter: 'blur(4px)',
-            },
-          },
-        }}
-        TransitionProps={{ in: open }}
-        transitionDuration={{ enter: 200, exit: 200 }}
-        transformOrigin={{ horizontal: 'center', vertical: 'bottom' }}
-        anchorOrigin={{ horizontal: 'center', vertical: 'top' }}>
-        <ReactionDock onClick={handleClick} />
-      </HoverPopover>
-    </>
+    <TooltipRich
+      cursor={false}
+      placement='top-start'
+      enterDelay={500}
+      content={(props) => (
+        <ReactionDock
+          onClick={(e) => {
+            props.close()
+            onClick(e)
+          }}
+        />
+      )}>
+      {children}
+    </TooltipRich>
   )
-}
+})
 
-export default ReactionPicker
+const styles = css.create({
+  dock: {
+    borderRadius: shape.full,
+    width: 340,
+    height: 50,
+    fontSize: 28,
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    paddingTop: 12,
+    backgroundColor: palette.surfaceContainerLowest,
+    boxShadow: elevation.shadows4,
+  },
+  reaction: {
+    position: 'relative',
+    userSelect: 'none',
+    cursor: 'pointer',
+  },
+  title: {
+    position: 'absolute',
+    backgroundColor: '#000',
+    color: '#fff',
+    paddingLeft: 12,
+    paddingRight: 12,
+    borderRadius: 24,
+    top: -30,
+    left: -25,
+    scale: 0.28,
+    fontWeight: 600,
+    whiteSpace: 'nowrap',
+  },
+})

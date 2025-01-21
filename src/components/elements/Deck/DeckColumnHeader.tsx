@@ -1,69 +1,89 @@
-import { AccordionDetails, Box, Button, Divider, IconButton, Typography } from '@mui/material'
-import { IconGripVertical, IconSettings, IconTrashX } from '@tabler/icons-react'
-import React, { useCallback, useState } from 'react'
-import Accordion from '../Layouts/Accordion'
-import { Row } from '../Layouts/Flex'
-import Tooltip from '../Layouts/Tooltip'
-import { deckStore } from 'stores/ui/deck.store'
+import { Button } from '@/components/ui/Button/Button'
+import { Divider } from '@/components/ui/Divider/Divider'
+import { Expandable } from '@/components/ui/Expandable/Expandable'
+import { IconButton } from '@/components/ui/IconButton/IconButton'
+import { Paper } from '@/components/ui/Paper/Paper'
+import { Stack } from '@/components/ui/Stack/Stack'
+import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
+import { useRootStore } from '@/hooks/useRootStore'
+import { spacing } from '@/themes/spacing.stylex'
+import { IconSettings, IconSettingsFilled } from '@tabler/icons-react'
+import React, { useCallback } from 'react'
+import { css } from 'react-strict-dom'
 
 type Props = {
   id: string
-  name: string
-  settings?: React.ReactElement
-  children: React.ReactElement | React.ReactElement[]
+  settings?: React.ReactNode
+  settingsIcon?: (props: { expand: (value: boolean) => void; expanded?: boolean }) => React.ReactNode
+  children: React.ReactNode
+  renderSettings?: boolean
+  onDelete?: () => void
 }
 
-function DeckColumnHeader(props: Props) {
-  const [settings, setSettings] = useState(false)
+export const DeckColumnHeader = (props: Props) => {
+  const { settings, settingsIcon, renderSettings = true, onDelete } = props
+  const root = useRootStore()
 
   const handleDelete = useCallback(() => {
-    deckStore.removeColumn(props.id)
+    root.decks.selected.delete(props.id)
   }, [props.id])
 
   return (
-    <Accordion expanded={settings} variant='outlined' square disableGutters>
-      <Box sx={{ position: 'sticky', top: 0, zIndex: 1000, left: 0, right: 0, backgroundColor: 'background.paper' }}>
-        <Row sx={{ justifyContent: 'space-between', p: 2 }}>
-          <Row>
-            <Tooltip arrow title='Drag feed to a new position (coming soon)'>
-              <IconButton size='small' sx={{ mr: 1, cursor: 'grab' }}>
-                <IconGripVertical size={18} />
-              </IconButton>
-            </Tooltip>
-            {props.children}
-          </Row>
-          <Tooltip arrow title='Feed Settings'>
-            <IconButton size='small' onClick={() => setSettings(!settings)}>
-              <IconSettings size={22} strokeWidth='1.5' />
-            </IconButton>
-          </Tooltip>
-        </Row>
-        <Divider />
-      </Box>
-      <AccordionDetails sx={{ p: 0 }}>
-        <Row sx={{ px: 2, py: 1, justifyContent: 'space-between' }}>
-          <Typography variant='h6'>{props.name}</Typography>
-          <Tooltip arrow title='Delete column'>
-            <IconButton color='error' onClick={handleDelete}>
-              <IconTrashX strokeWidth='1.4' size={20} />
-            </IconButton>
-          </Tooltip>
-        </Row>
-        {props.settings}
-        {props.settings && (
+    <>
+      <Paper shape='none' surface='surfaceContainerLowest' sx={styles.paper}>
+        <Expandable
+          trigger={({ expand, expanded }) => (
+            <Stack align='center' justify='space-between' sx={styles.header}>
+              <Stack gap={1}>
+                {/* <Tooltip cursor='arrow' text='Drag feed to a new position (coming soon)'> */}
+                {/*   <IconButton size='sm' icon={<IconGripVertical size={18} />} /> */}
+                {/* </Tooltip> */}
+                {props.children}
+              </Stack>
+              {renderSettings &&
+                (settingsIcon?.({ expand, expanded }) || (
+                  <Tooltip cursor='arrow' text='Feed Settings'>
+                    <IconButton
+                      toggle
+                      selected={expanded}
+                      size='sm'
+                      variant='standard'
+                      onClick={() => expand(!expanded)}
+                      icon={<IconSettings size={20} strokeWidth='1.5' />}
+                      selectedIcon={<IconSettingsFilled size={20} strokeWidth='1.0' />}
+                    />
+                  </Tooltip>
+                ))}
+            </Stack>
+          )}>
           <>
-            <Row sx={{ p: 1, justifyContent: 'space-between' }}>
-              <Button>Reset</Button>
-              <Button variant='contained' size='small'>
-                Apply Filters
-              </Button>
-            </Row>
+            {settings}
             <Divider />
+            <Stack sx={styles.footer} justify={props.settings ? 'space-between' : 'flex-end'} gap={1}>
+              {renderSettings && (
+                <Button variant='danger' onClick={onDelete || handleDelete}>
+                  Delete Column
+                </Button>
+              )}
+            </Stack>
           </>
-        )}
-      </AccordionDetails>
-    </Accordion>
+        </Expandable>
+        <Divider />
+      </Paper>
+    </>
   )
 }
 
-export default DeckColumnHeader
+const styles = css.create({
+  paper: {
+    position: 'relative',
+    flexGrow: 0,
+  },
+  header: {
+    height: 66,
+    padding: spacing.padding2,
+  },
+  footer: {
+    padding: spacing.padding1,
+  },
+})

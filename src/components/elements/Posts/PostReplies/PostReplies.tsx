@@ -1,60 +1,58 @@
-import { Box, Button, Divider, Typography } from '@mui/material'
-import { IconMessageCircle2 } from '@tabler/icons-react'
+import { Stack } from '@/components/ui/Stack/Stack'
+import { useMobile } from '@/hooks/useMobile'
+import { useCurrentUser } from '@/hooks/useRootStore'
+import type { Note } from '@/stores/notes/note'
+import { spacing } from '@/themes/spacing.stylex'
 import { observer } from 'mobx-react-lite'
-import type Note from 'stores/models/note'
-import PostRepliesLoading from './PostRepliesLoading'
+import { useCallback } from 'react'
+import { css, html } from 'react-strict-dom'
+import { PostLoadMore } from '../PostLoadMore'
+import { PostRepliesEmpty } from './PostRepliesEmpty'
+import { PostRepliesLoading } from './PostRepliesLoading'
+import { PostRepliesMuted } from './PostRepliesMuted'
 import { PostRepliesTree } from './PostReply'
-import PostReplyForm from './PostReplyForm'
 
 type Props = {
   note: Note
-  onReplyClick: () => void
+  loadingRows?: number
+  renderEmpty?: boolean
+  onLoadMoreClick?: () => void
 }
 
-const PostReplies = observer(function PostReplies(props: Props) {
-  const { note, onReplyClick } = props
+export const PostReplies = observer(function PostReplies(props: Props) {
+  const { note, loadingRows, renderEmpty = false } = props
 
-  const replies = note.repliesOpen === null ? note.repliesPreview : note.repliesSorted
+  const user = useCurrentUser()
+  const isMobile = useMobile()
 
-  if (note.repliesOpen === false || (replies.length === 0 && note.repliesStatus === 'IDLE')) {
-    return
-  }
+  const replies = note.repliesChunk(user)
+
+  const loading = note.isLoading
+  const empty = note.isEmpty
+
+  const handleLoadMore = useCallback(() => {
+    if (isMobile && props.onLoadMoreClick) {
+      return props.onLoadMoreClick()
+    }
+    note.paginate()
+  }, [])
 
   return (
-    <>
-      <Divider />
-      <PostReplyForm />
-      <Box sx={{ ml: -3, mr: 2 }}>
-        <PostRepliesTree replies={replies} repliesOpen={note.repliesOpen} level={1} />
-      </Box>
-      {note.repliesStatus === 'LOADED' && replies.length === 0 && (
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            py: 4,
-          }}>
-          <IconMessageCircle2 size={50} strokeWidth='1.0' />
-          <Typography variant='subtitle1' sx={{ fontWeight: 400 }}>
-            No Replies yet
-          </Typography>
-        </Box>
-      )}
-      {note.repliesStatus === 'IDLE' && (
-        <Box sx={{ p: 2, py: 1 }}>
-          <Button
-            color='info'
-            onClick={onReplyClick}
-            sx={{ fontWeight: 600, cursor: 'pointer', color: 'text.primary' }}>
-            See more replies
-          </Button>
-        </Box>
-      )}
-      {note.repliesStatus === 'LOADING' && <PostRepliesLoading contentHeight={50} />}
-    </>
+    <Stack horizontal={false} sx={styles.root} justify='flex-start'>
+      <html.div style={styles.root}>
+        {replies.length > 0 && note && <PostRepliesTree replies={replies} repliesOpen={note.repliesOpen} level={1} />}
+        <PostRepliesMuted level={0} note={note} />
+        {empty && renderEmpty && <PostRepliesEmpty />}
+        {loading && empty !== true && <PostRepliesLoading rows={loadingRows} />}
+        {note.hasRepliesLeft && <PostLoadMore note={note} onClick={handleLoadMore} />}
+      </html.div>
+    </Stack>
   )
 })
 
-export default PostReplies
+const styles = css.create({
+  root: {
+    width: '100%',
+    paddingTop: spacing.padding1,
+  },
+})

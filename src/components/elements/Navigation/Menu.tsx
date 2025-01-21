@@ -1,71 +1,79 @@
-import { Divider, List, ListItemButton, ListSubheader, Typography, type TypographyProps } from '@mui/material'
-import { IconLogout, IconServerBolt, IconSettings, IconUser, IconWallet } from '@tabler/icons-react'
+import { Divider } from '@/components/ui/Divider/Divider'
+import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
+import { MenuList } from '@/components/ui/MenuList/MenuList'
+import { useCurrentUser, useRootStore } from '@/hooks/useRootStore'
+import { shape } from '@/themes/shape.stylex'
+import { IconLogout, IconSettings, IconUser } from '@tabler/icons-react'
+import { Link } from '@tanstack/react-router'
 import { observer } from 'mobx-react-lite'
-import { authStore } from 'stores/ui/auth.store'
-import { dialogStore } from 'stores/ui/dialogs.store'
-import LinkProfile from '../Links/LinkProfile'
+import { css } from 'react-strict-dom'
+import { LinkProfile } from '../Links/LinkProfile'
+import { LinkSignIn } from '../Links/LinkSignIn'
 
 type Props = {
   dense?: boolean
   onAction?: () => void
 }
 
-const Menu = observer(function Menu(props: Props) {
+export const Menu = observer(function Menu(props: Props) {
   const { dense } = props
+  const logout = useRootStore().auth.logout
+  const user = useCurrentUser()
   const iconProps = {
     size: dense ? 24 : 30,
     strokeWidth: '1.4',
   }
-  const typographyProps: TypographyProps = {
-    variant: dense ? 'body1' : 'subtitle1',
-    sx: {
-      ml: dense ? 2 : 4,
-      fontSize: dense ? '100%' : '120%',
-    },
-  }
   return (
-    <List>
-      {authStore.currentUser && (
-        <LinkProfile user={authStore.currentUser} underline='none'>
-          <ListItemButton onClick={() => props.onAction?.()}>
-            <IconUser {...iconProps} />
-            <Typography {...typographyProps}>Profile</Typography>
-          </ListItemButton>
+    <MenuList elevation={0} sx={styles.root}>
+      {user && (
+        <LinkProfile user={user} underline={false}>
+          <MenuItem
+            sx={styles.item}
+            onClick={() => props.onAction?.()}
+            leadingIcon={<IconUser {...iconProps} />}
+            label='Profile'
+          />
         </LinkProfile>
       )}
-      {!authStore.pubkey && (
-        <ListItemButton onClick={dialogStore.openAuth}>
-          <Typography {...typographyProps}>Sign In</Typography>
-        </ListItemButton>
+      {user && (
+        <Link to='/settings'>
+          <MenuItem
+            sx={styles.item}
+            leadingIcon={<IconSettings size={22} strokeWidth='1.5' />}
+            onClick={props.onAction}
+            label='Settings'
+          />
+        </Link>
       )}
-      <ListSubheader sx={{ backgroundColor: 'transparent', mt: 2, lineHeight: '12px' }}>Coming Soon</ListSubheader>
-      <ListItemButton disabled>
-        <IconWallet {...iconProps} />
-        <Typography {...typographyProps}>Wallet</Typography>
-      </ListItemButton>
-      <ListItemButton disabled>
-        <IconServerBolt {...iconProps} />
-        <Typography {...typographyProps}>Relays</Typography>
-      </ListItemButton>
-      <ListItemButton disabled>
-        <IconSettings {...iconProps} />
-        <Typography {...typographyProps}>Settings</Typography>
-      </ListItemButton>
-      {authStore.pubkey && (
+      {!user && (
+        <LinkSignIn>
+          <MenuItem label='Sign In' />
+        </LinkSignIn>
+      )}
+      {user && (
         <>
-          <Divider sx={{ my: dense ? 1 : 0 }} />
-          <ListItemButton
+          <Divider />
+          <MenuItem
             onClick={() => {
-              authStore.logout()
+              logout()
               props.onAction?.()
-            }}>
-            <IconLogout {...iconProps} />
-            <Typography {...typographyProps}>Log out</Typography>
-          </ListItemButton>
+            }}
+            leadingIcon={<IconLogout {...iconProps} />}
+            label='Log out'
+          />
         </>
       )}
-    </List>
+    </MenuList>
   )
 })
 
-export default Menu
+const styles = css.create({
+  root: {
+    width: '100%',
+    borderRadius: shape.lg,
+    backgroundColor: 'transparent',
+  },
+  item: {
+    width: '100%',
+  },
+})

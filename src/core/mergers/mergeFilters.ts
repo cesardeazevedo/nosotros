@@ -1,5 +1,7 @@
-import { dedupe, isReplaceable, pickBy } from 'core/helpers'
+import { Kind } from '@/constants/kinds'
 import type { NostrFilter } from 'core/types'
+import { isReplaceableKind } from 'nostr-tools/kinds'
+import { pickBy } from '../helpers/pickBy'
 
 export const FILTER_ARRAY_FIELDS = ['kinds', 'authors', 'ids', '#e', '#p'] as (keyof NostrFilter)[]
 
@@ -12,17 +14,24 @@ export function mergeFilters(filters: NostrFilter[]): NostrFilter[] {
       mainKey.toString() +
       paginationKeys +
       [...(filter.kinds || [])]
+        // Do not merge follows kind, this needs some work
+        .map((kind) => (kind === Kind.Follows ? kind : isReplaceableKind(kind) ? 'replaceable' : 'nonreplaceable'))
         .sort()
-        .map((kind) => (isReplaceable(kind) ? 'replaceable' : kind))
         .toString()
 
     if (!groups[key]) {
-      groups[key] = { ...filter }
+      groups[key] = structuredClone(filter)
     }
     for (const filterKey of FILTER_ARRAY_FIELDS) {
-      const value = filter[filterKey] as string[]
-      if (value) {
-        ;(groups[key][filterKey] as string[]) = dedupe(groups[key][filterKey] as string[], value)
+      const values = filter[filterKey]
+      if (values && Array.isArray(values)) {
+        for (const value of values) {
+          if (value) {
+            if ((groups[key][filterKey] as unknown[]).indexOf(value) === -1) {
+              ;(groups[key][filterKey] as unknown[]).push(value)
+            }
+          }
+        }
       }
     }
   }

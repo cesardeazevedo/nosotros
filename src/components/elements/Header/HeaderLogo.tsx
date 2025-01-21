@@ -1,31 +1,40 @@
-import { Link, Typography } from '@mui/material'
-import { Link as LinkRouter } from '@tanstack/react-router'
+import { Text } from '@/components/ui/Text/Text'
+import { Link } from '@tanstack/react-router'
 import { useMobile } from 'hooks/useMobile'
 import { useCallback } from 'react'
+import { css } from 'react-strict-dom'
 
-function HeaderLogo() {
+export const HeaderLogo = () => {
   const isMobile = useMobile()
 
+  // Apparently <Link resetScroll /> simply doesn't work
   const handleClick = useCallback(() => {
     window.scrollTo({ top: 0 })
   }, [])
 
   return (
-    <Link component={LinkRouter} to='/' onClick={handleClick} sx={{ margin: 'auto', textDecoration: 'none!important' }}>
-      <Typography
-        variant='h5'
-        fontWeight={900}
-        sx={[
-          { position: 'relative', whiteSpace: 'nowrap' },
-          isMobile && {
-            margin: 'auto',
-            right: 42,
-          },
-        ]}>
+    <Link to='/' onClick={handleClick}>
+      <Text
+        variant='headline'
+        size={isMobile ? 'sm' : 'sm'}
+        sx={[styles.root, styles.text, !!isMobile && styles.text$mobile]}>
         nosotros
-      </Typography>
+      </Text>
     </Link>
   )
 }
 
-export default HeaderLogo
+const styles = css.create({
+  root: {
+    margin: 'auto',
+    flex: 1,
+  },
+  text: {
+    position: 'relative',
+    whiteSpace: 'nowrap',
+    fontWeight: 900,
+  },
+  text$mobile: {
+    margin: 'auto',
+  },
+})

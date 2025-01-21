@@ -1,23 +1,32 @@
-import { Typography, styled } from '@mui/material'
-import type { HeadingNode } from 'content/types'
+import { useNoteContext } from '@/components/providers/NoteProvider'
+import { spacing } from '@/themes/spacing.stylex'
+import type { HeadingNode } from 'nostr-editor'
+import { css } from 'react-strict-dom'
 import { TextContent } from '../Text'
-
-const Container = styled(Typography)(({ theme }) =>
-  theme.unstable_sx({
-    mt: 2,
-    ml: 2,
-    fontWeight: 900,
-  }),
-)
 
 type Props = {
   node: HeadingNode
 }
 
-export default function Heading(props: Props) {
+export const Heading = (props: Props) => {
+  const { dense } = useNoteContext()
   return (
-    <Container variant={props.node.attrs.level === 1 ? 'h5' : 'h6'}>
-      <TextContent node={props.node} />
-    </Container>
+    <TextContent
+      node={props.node}
+      variant='headline'
+      size={props.node.attrs.level !== 1 ? 'md' : 'lg'}
+      sx={[styles.root, dense && styles.dense]}
+    />
   )
 }
+
+const styles = css.create({
+  root: {
+    marginTop: spacing.margin2,
+    marginBottom: spacing.margin1,
+    paddingLeft: spacing.padding2,
+  },
+  dense: {
+    padding: 0,
+  },
+})

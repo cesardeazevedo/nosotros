@@ -1,16 +1,13 @@
+import type { NostrEvent } from '@/core/types'
 import type { Kind } from 'constants/kinds'
-import type { EventDB, SeenDB, TagDB, UserRelayDB } from 'db/types'
+import type { MetadataDB, Nip05DB, RelayInfoDB, RelayStatsDB, SeenDB, TagDB } from 'db/types'
 import type { DBSchema } from 'idb'
 
 export interface IndexedDBSchema extends DBSchema {
   events: {
     key: string
-    value: EventDB
+    value: NostrEvent
     indexes: {
-      kind: number
-      // pubkey: string
-      created_at: number
-      kind_pubkey: [kind: Kind, pubkey: string]
       kind_pubkey_created_at: [kind: Kind, pubkey: string, created_at: number]
     }
   }
@@ -18,8 +15,12 @@ export interface IndexedDBSchema extends DBSchema {
     key: [eventId: string, tag: string, value: string]
     value: TagDB
     indexes: {
-      kind_tag_value: [kind: Kind, tag: string, value: string]
+      kind_tag_value_created_at: [kind: Kind, tag: string, value: string, created_at: number]
     }
+  }
+  metadata: {
+    key: string
+    value: MetadataDB
   }
   seen: {
     key: [eventId: string, relay: string]
@@ -29,12 +30,21 @@ export interface IndexedDBSchema extends DBSchema {
       relay: string
     }
   }
-  userRelays: {
-    key: [pubkey: string, relay: string]
-    value: UserRelayDB
-    indexes: {
+  relayInfo: {
+    key: [name: string]
+    value: RelayInfoDB
+  }
+  relayStats: {
+    key: string
+    value: RelayStatsDB
+  }
+  nip05: {
+    key: string
+    value: {
+      nip05: string
       pubkey: string
-      relay: string
+      relays: string[]
+      timestamp: number
     }
   }
 }
@@ -55,19 +65,13 @@ interface Schema<T> {
 const events = {
   name: 'events' as const,
   keyPath: 'id',
-  indexes: [
-    { keyPath: 'kind' },
-    { keyPath: 'pubkey' },
-    { keyPath: ['kind', 'pubkey'], name: 'kind_pubkey' },
-    { keyPath: ['kind', 'pubkey', 'created_at'], name: 'kind_pubkey_created_at' },
-    { keyPath: ['kind', 'created_at'], name: 'kind_created_at' },
-  ],
-} satisfies Schema<EventDB>
+  indexes: [{ keyPath: ['kind', 'pubkey', 'created_at'], name: 'kind_pubkey_created_at' }],
+} satisfies Schema<NostrEvent>
 
 const tags = {
   name: 'tags' as const,
   keyPath: ['eventId', 'tag', 'value'],
-  indexes: [{ keyPath: ['kind', 'tag', 'value'], name: 'kind_tag_value' }],
+  indexes: [{ keyPath: ['kind', 'tag', 'value', 'created_at'], name: 'kind_tag_value_created_at' }],
 } satisfies Schema<TagDB>
 
 const seen = {
@@ -76,14 +80,30 @@ const seen = {
   indexes: [{ keyPath: 'eventId' }, { keyPath: 'relay' }],
 }
 
-const userRelays = {
-  name: 'userRelays' as const,
-  keyPath: ['pubkey', 'relay'],
-  indexes: [{ keyPath: 'pubkey' }, { keyPath: 'relay' }],
-} satisfies Schema<UserRelayDB>
+const relayInfo = {
+  name: 'relayInfo' as const,
+  keyPath: 'name',
+  indexes: [],
+} satisfies Schema<RelayInfoDB>
 
-export const schemas = { events, tags, seen, userRelays }
+const relayStats = {
+  name: 'relayStats' as const,
+  keyPath: 'url',
+  indexes: [],
+} satisfies Schema<RelayStatsDB>
+
+const metadata = {
+  name: 'metadata' as const,
+  keyPath: 'id',
+  indexes: [],
+}
+
+const nip05 = {
+  name: 'nip05' as const,
+  keyPath: 'nip05',
+  indexes: [],
+} satisfies Schema<Nip05DB>
+
+export const schemas = { events, tags, seen, relayInfo, relayStats, metadata, nip05 }
 
 export type Schemas = typeof schemas
-
-export type IndexedDBIndexes = IndexedDBSchema[keyof IndexedDBSchema]['indexes']
