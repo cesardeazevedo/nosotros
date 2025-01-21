@@ -1,3 +1,4 @@
+import { Kind } from '@/constants/kinds'
 import { bufferTime } from '@/core/operators/bufferTime'
 import type { SeenDB } from '@/db/types'
 import { seenStore } from '@/stores/seen/seen.store'
@@ -22,9 +23,11 @@ export class Seen {
   }
 
   insert(relay: string, event: NostrEvent) {
-    const data = { relay, kind: event.kind, eventId: event.id } as SeenDB
-    seenStore.add(data)
-    this.insert$.next(data)
+    if ([Kind.Text, Kind.Comment, Kind.Article, Kind.Media, Kind.Highlight].includes(event.kind)) {
+      const data = { relay, kind: event.kind, eventId: event.id } as SeenDB
+      seenStore.add(data)
+      this.insert$.next(data)
+    }
   }
 
   query(event: NostrEvent) {
