@@ -51,8 +51,8 @@ export class NostrSubscription {
           return merge(
             // Apply fixed relays
             relaysToRelayFilters(this.relays, filters),
-            // Apply relay hints
-            hintsToRelayFilters(filters, this.relayHints),
+            // Apply relay hints ignoring fixed relays
+            this.relays.pipe(mergeMap((relays) => hintsToRelayFilters(filters, this.relayHints, relays))),
             // Apply outbox
             this.outbox(filters, this.relayHints),
           )

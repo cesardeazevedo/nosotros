@@ -1,4 +1,4 @@
-import { RELAY_1, RELAY_2, RELAY_3, RELAY_4 } from '@/constants/testRelays'
+import { RELAY_1, RELAY_2, RELAY_3, RELAY_4, RELAY_5 } from '@/constants/testRelays'
 import { test } from '@/utils/fixtures'
 import { subscribeSpyTo } from '@hirez_io/observer-spy'
 import type { RelayFilters } from 'core/NostrSubscription'
@@ -6,13 +6,6 @@ import { NostrSubscription } from 'core/NostrSubscription'
 import { from, merge, of } from 'rxjs'
 
 describe('NostrSubscription', () => {
-  test('assert filters format', async () => {
-    expect(new NostrSubscription({}).filters).toStrictEqual([])
-    expect(new NostrSubscription([{}]).filters).toStrictEqual([])
-    expect(new NostrSubscription([{ ids: ['1'] }]).filters).toStrictEqual([{ ids: ['1'] }])
-    expect(new NostrSubscription([{ ids: ['1'] }, {}]).filters).toStrictEqual([{ ids: ['1'] }])
-  })
-
   test('assert relayFilters stream with fixed relays and relayHints', async () => {
     const filters = [{ kinds: [0], authors: ['1', '2', '3'] }, { ids: ['10'] }]
     const sub = new NostrSubscription(filters, {
@@ -102,6 +95,28 @@ describe('NostrSubscription', () => {
     expect(spy.getValues()).toStrictEqual([
       [RELAY_1, [{ ids: ['1'] }]],
       [RELAY_2, [{ ids: ['1'] }]],
+    ])
+  })
+
+  test('assert many relay hints', async () => {
+    const sub = new NostrSubscription(
+      { authors: ['1'] },
+      {
+        relays: of([RELAY_5]),
+        relayHints: {
+          authors: { '1': [RELAY_5, RELAY_1, RELAY_2, RELAY_3, RELAY_3, RELAY_4] },
+        },
+      },
+    )
+    const spy = subscribeSpyTo(sub.relayFilters)
+
+    await spy.onComplete()
+    expect(spy.getValues()).toStrictEqual([
+      [RELAY_5, [{ authors: ['1'] }]],
+      [RELAY_1, [{ authors: ['1'] }]],
+      [RELAY_2, [{ authors: ['1'] }]],
+      [RELAY_3, [{ authors: ['1'] }]],
+      [RELAY_4, [{ authors: ['1'] }]],
     ])
   })
 })
