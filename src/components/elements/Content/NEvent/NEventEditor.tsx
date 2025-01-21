@@ -1,4 +1,5 @@
 import { useObservableNostrContext } from '@/stores/context/nostr.context.hooks'
+import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import type { NodeViewProps } from '@tiptap/react'
@@ -41,9 +42,10 @@ const styles = css.create({
   wrapper: {
     width: '100%',
     marginBlock: spacing.padding2,
-    backgroundColor: 'transparent',
     borderRadius: 2,
+    [palette.outlineVariant]: palette.outline,
   },
+  wrapper$dense: {},
   wrapper$selected: {
     opacity: 0.8,
     borderRadius: shape.lg,
