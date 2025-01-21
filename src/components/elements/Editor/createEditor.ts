@@ -19,6 +19,7 @@ import type { NProfileAttributes } from 'nostr-editor'
 import { NostrExtension } from 'nostr-editor'
 import { nip19 } from 'nostr-tools'
 import { Markdown as MarkdownExtension } from 'tiptap-markdown'
+import { NAddrEditor } from '../Content/NAddr/NAddrEditor'
 
 const addNodeView = (Component: React.ComponentType<NodeViewProps>) => ({
   addNodeView: () => ReactNodeViewRenderer(Component),
@@ -141,6 +142,7 @@ export const createEditor = (store: EditorStore) => {
               ]
             },
           },
+          naddr: addNodeView(NAddrEditor),
           nevent: addNodeView(NEventEditor),
           tweet: addNodeView(TweetEditor),
         },

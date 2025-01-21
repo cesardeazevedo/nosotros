@@ -1,10 +1,17 @@
+import { NAddressColumn } from '@/components/modules/NAddress/NAddressColumn'
 import { NEventColumn } from '@/components/modules/NEvent/NEventColumn'
 import { NotificationsColumn } from '@/components/modules/Notifications/NotificationsColumn'
 import { NProfileColumn } from '@/components/modules/NProfile/NProfileColumn'
 import { NostrProvider } from '@/components/providers/NostrProvider'
 import { useRootStore } from '@/hooks/useRootStore'
 import type { BaseModule } from '@/stores/modules/module'
-import { isHomeModule, isNEventModule, isNotificationModule, isNProfileModule } from '@/stores/modules/module.store'
+import {
+  isHomeModule,
+  isNAddressModule,
+  isNEventModule,
+  isNotificationModule,
+  isNProfileModule,
+} from '@/stores/modules/module.store'
 import { HomeColumn } from 'components/modules/Home/HomeColumn'
 import { observer } from 'mobx-react-lite'
 import React from 'react'
@@ -32,6 +39,7 @@ export const DeckList = observer(function DeckList() {
                 {isHomeModule(module) && <HomeColumn module={module} />}
                 {isNProfileModule(module) && <NProfileColumn module={module} />}
                 {isNEventModule(module) && <NEventColumn module={module} />}
+                {isNAddressModule(module) && <NAddressColumn module={module} />}
                 {isNotificationModule(module) && <NotificationsColumn module={module} />}
               </DeckModuleContext>
             </DeckContext.Provider>

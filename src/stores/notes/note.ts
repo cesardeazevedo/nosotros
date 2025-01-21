@@ -90,6 +90,20 @@ export class Note {
     )
   }
 
+  get naddress() {
+    const dtag = this.d
+    if (dtag) {
+      return encodeSafe(() =>
+        nip19.naddrEncode({
+          pubkey: this.event.pubkey,
+          kind: this.event.kind,
+          identifier: dtag,
+          relays: this.seenOn,
+        }),
+      )
+    }
+  }
+
   get nprofile() {
     return this.user?.nprofile
   }
