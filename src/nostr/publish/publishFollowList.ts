@@ -1,15 +1,27 @@
 import { Kind } from '@/constants/kinds'
-import { EMPTY, last, mergeMap } from 'rxjs'
+import { ofKind } from '@/core/operators/ofKind'
+import { start } from '@/core/operators/start'
+import { EMPTY, map, mergeMap, of, take } from 'rxjs'
 import type { NostrClient } from '../nostr'
+import { parseEventMetadata } from '../operators/parseMetadata'
+import type { NostrEventFollow } from '../types'
 import { metadataSymbol } from '../types'
 import { publish } from './publish'
+
+const kinds = [Kind.Follows]
 
 export function publishFollowList(client: NostrClient, tag: 'p', related: string) {
   if (!client.pubkey) return EMPTY
 
+  const filter = { kinds, authors: [client.pubkey] }
+  const sub = client.createSubscription(filter)
   // Always get the latest follows list (without cache) before modifying it
-  return client.follows.subscribe(client.pubkey, { queryLocal: false }).pipe(
-    last(undefined, null),
+  return of(sub).pipe(
+    start(client.pool),
+    map(([, event]) => event),
+    take(1),
+    parseEventMetadata(),
+    ofKind<NostrEventFollow>(kinds),
     mergeMap((event) => {
       if (!event) return EMPTY
 

@@ -24,7 +24,7 @@ export function publishRelayList(client: NostrClient, userRelay: UserRelay, revo
       map(([, event]) => event),
       take(1),
       parseEventMetadata(),
-      ofKind<NostrEventRelayList>([Kind.RelayList]),
+      ofKind<NostrEventRelayList>(kinds),
       mergeMap((event) => {
         if (event) {
           const relayList = event[metadataSymbol]?.relayList || []

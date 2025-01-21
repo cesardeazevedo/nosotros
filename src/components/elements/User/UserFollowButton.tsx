@@ -6,9 +6,9 @@ import { publishFollowList } from '@/nostr/publish/publishFollowList'
 import type { NostrContext } from '@/stores/context/nostr.context.store'
 import { observer } from 'mobx-react-lite'
 import { useObservableState } from 'observable-hooks'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { html } from 'react-strict-dom'
-import { catchError, last, map, mergeMap, of, startWith } from 'rxjs'
+import { catchError, map, mergeMap, of, startWith } from 'rxjs'
 
 type Props = {
   pubkey: string
@@ -25,8 +25,6 @@ export const UserFollowButton = observer(function UserFollowButton(props: Props)
       mergeMap((context) => {
         if (context.client.pubkey) {
           return publishFollowList(context.client, 'p', pubkey).pipe(
-            map(() => true),
-            last(),
             map(() => false),
             catchError(() => of(false)),
             startWith(true),
@@ -37,7 +35,7 @@ export const UserFollowButton = observer(function UserFollowButton(props: Props)
     )
   }, false)
 
-  const isFollowing = useMemo(() => currentUser?.following?.followsPubkey(pubkey), [pending])
+  const isFollowing = currentUser?.following?.followsPubkey(pubkey)
 
   return (
     <>
@@ -46,7 +44,7 @@ export const UserFollowButton = observer(function UserFollowButton(props: Props)
           <Button disabled={pending} variant={hover ? 'danger' : 'outlined'} onClick={() => onSubmit(rootContext)}>
             <Stack gap={1}>
               {pending && <CircularProgress size='xs' />}
-              {pending ? 'Unfollowing' : hover ? 'Unfollow' : 'Following'}
+              {hover ? 'Unfollow' : 'Following'}
             </Stack>
           </Button>
         </html.div>
