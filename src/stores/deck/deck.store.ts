@@ -2,12 +2,13 @@ import { DEFAULT_RELAYS } from '@/constants/relays'
 import { cast, t } from 'mobx-state-tree'
 import { HomeModuleModel } from '../home/home.module'
 import { ModuleStoreModel, type ModulesInstances } from '../modules/module.store'
+import type { NAddressModuleSnapshotIn } from '../naddress/naddress.module'
+import { NAddressModuleModel } from '../naddress/naddress.module'
 import type { NEventModuleSnapshotIn } from '../nevent/nevent.module'
 import { NEventModuleModel } from '../nevent/nevent.module'
 import type { NotificationModuleSnapshotIn } from '../notifications/notification.module'
 import { NotificationModuleModel } from '../notifications/notification.module'
 import { NProfileModuleModel } from '../nprofile/nprofile.module'
-import { WelcomeModuleModel } from '../welcome/welcome.module'
 
 export const DeckModel = t
   .model('DeckModel', {
@@ -59,6 +60,21 @@ export const DeckModel = t
           context: {
             options: {
               pubkey: snapshot.options.author,
+              relays: snapshot.options.relays,
+            },
+          },
+        }),
+        index,
+      )
+    },
+
+    addNAddr(snapshot: NAddressModuleSnapshotIn, index?: number) {
+      self.add(
+        NAddressModuleModel.create({
+          ...snapshot,
+          context: {
+            options: {
+              pubkey: snapshot.options.pubkey,
               relays: snapshot.options.relays,
             },
           },
