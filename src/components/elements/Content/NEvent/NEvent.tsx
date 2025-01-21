@@ -29,7 +29,7 @@ export const NEvent = observer(function NEvent(props: Props) {
         <LinkNEvent nevent={pointer.nevent.replace('nostr:', '') as NEventPrefix} disableLink={disableLink}>
           <NoteContext.Provider value={{ dense: true, disableLink: true }}>
             <Paper outlined sx={styles.content}>
-              <NostrEventQuote id={pointer.id} />
+              <NostrEventQuote item={item} />
             </Paper>
           </NoteContext.Provider>
         </LinkNEvent>

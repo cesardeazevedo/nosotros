@@ -1,5 +1,5 @@
 import { Editor } from '@/components/elements/Editor/Editor'
-import { NostrEventRoot } from '@/components/elements/Event/NostrEventRoot'
+import { NostrEventFeedItem } from '@/components/elements/Event/NostrEventFeedItem'
 import { FeedSettings } from '@/components/elements/Feed/FeedSettings'
 import { FeedTabs } from '@/components/elements/Feed/FeedTabs'
 import { PostAwait } from '@/components/elements/Posts/PostAwait'
@@ -70,7 +70,7 @@ export const HomeRoute = observer(function HomeRoute() {
             id={module.id + module.selected}
             feed={feed}
             onScrollEnd={feed.paginate}
-            render={(event) => <NostrEventRoot event={event} />}
+            render={(event) => <NostrEventFeedItem event={event} />}
             footer={<PostLoading rows={5} />}
           />
         </PostAwait>

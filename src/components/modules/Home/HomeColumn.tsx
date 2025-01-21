@@ -1,6 +1,6 @@
 import { DeckColumnHeader } from '@/components/elements/Deck/DeckColumnHeader'
 import { Editor } from '@/components/elements/Editor/Editor'
-import { NostrEventRoot } from '@/components/elements/Event/NostrEventRoot'
+import { NostrEventFeedItem } from '@/components/elements/Event/NostrEventFeedItem'
 import { FeedSettings } from '@/components/elements/Feed/FeedSettings'
 import { FeedTabs } from '@/components/elements/Feed/FeedTabs'
 import { IconHomeFilled } from '@/components/elements/Icons/IconHomeFilled'
@@ -69,7 +69,7 @@ export const HomeColumn = observer(function HomeColumn(props: Props) {
                 <Divider />
               </>
             }
-            render={(event) => <NostrEventRoot event={event} />}
+            render={(event) => <NostrEventFeedItem event={event} />}
           />
         </PostAwait>
       </PaperContainer>
