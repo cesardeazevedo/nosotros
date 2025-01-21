@@ -1,9 +1,8 @@
 import { PaperContainer } from '@/components/elements/Layouts/PaperContainer'
-import { PostAwait } from '@/components/elements/Posts/PostAwait'
 import { UserHeader } from '@/components/elements/User/UserHeader'
 import { Divider } from '@/components/ui/Divider/Divider'
 import type { NProfileFeeds, NProfileModule, NProfileModuleSnapshotOut } from '@/stores/nprofile/nprofile.module'
-import { useRouteContext, useRouter } from '@tanstack/react-router'
+import { useRouter } from '@tanstack/react-router'
 import { DeckColumnHeader } from 'components/elements/Deck/DeckColumnHeader'
 import { UserProfileHeader } from 'components/elements/User/UserProfileHeader'
 import { reaction } from 'mobx'
@@ -23,7 +22,6 @@ export const NProfileColumn = observer(function NProfileColumn(props: Props) {
   const { module } = props
   const { id } = module
   const router = useRouter()
-  const context = useRouteContext({ from: '/deck' })
 
   const selected = module.selected as keyof NProfileModuleSnapshotOut['feeds']
   useEffect(() => {
@@ -57,12 +55,10 @@ export const NProfileColumn = observer(function NProfileColumn(props: Props) {
         <UserHeader pubkey={module.options.pubkey} />
       </DeckColumnHeader>
       <PaperContainer elevation={0} shape='none'>
-        <PostAwait promise={context.delay}>
-          {selected === 'notes' && <NProfileNotesFeed header={header} module={module} />}
-          {selected === 'replies' && <NProfileRepliesFeed header={header} module={module} />}
-          {selected === 'media' && <NProfileMediaFeed header={header} module={module} />}
-          {selected === 'articles' && <NProfileArticlesFeed header={header} module={module} />}
-        </PostAwait>
+        {selected === 'notes' && <NProfileNotesFeed header={header} module={module} />}
+        {selected === 'replies' && <NProfileRepliesFeed header={header} module={module} />}
+        {selected === 'media' && <NProfileMediaFeed header={header} module={module} />}
+        {selected === 'articles' && <NProfileArticlesFeed header={header} module={module} />}
       </PaperContainer>
     </>
   )

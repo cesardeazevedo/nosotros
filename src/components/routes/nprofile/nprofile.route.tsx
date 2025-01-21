@@ -1,10 +1,11 @@
+import { PostAwait } from '@/components/elements/Posts/PostAwait'
 import { NProfileFeedTabs } from '@/components/modules/NProfile/NProfileFeedTabs'
 import { NostrProvider } from '@/components/providers/NostrProvider'
 import { Divider } from '@/components/ui/Divider/Divider'
 import type { NProfileModule } from '@/stores/nprofile/nprofile.module'
 import { Outlet, useLoaderData } from '@tanstack/react-router'
 import { UserProfileHeader } from 'components/elements/User/UserProfileHeader'
-import { Observer } from 'mobx-react-lite'
+import { observer, Observer } from 'mobx-react-lite'
 import { CenteredContainer } from '../../elements/Layouts/CenteredContainer'
 import { PaperContainer } from '../../elements/Layouts/PaperContainer'
 
@@ -13,21 +14,23 @@ export type Props = {
   relays?: string[]
 }
 
-export const NProfileRoute = function NProfileRoute(props: Props) {
+export const NProfileRoute = observer(function NProfileRoute(props: Props) {
   const { pubkey } = props
-  const { context } = useLoaderData({ from: '/$nostr' }) as NProfileModule
+  const module = useLoaderData({ from: '/$nostr' }) as NProfileModule
 
   return (
-    <NostrProvider nostrContext={() => context!} subFollows={false}>
+    <NostrProvider nostrContext={() => module.context!} subFollows={false}>
       <CenteredContainer>
         <PaperContainer shape='none' elevation={2}>
           <Observer>{() => <UserProfileHeader pubkey={pubkey} />}</Observer>
           <Divider />
           <NProfileFeedTabs />
           <Divider />
-          <Outlet />
+          <PostAwait promise={module.feed.delay} rows={5}>
+            <Outlet />
+          </PostAwait>
         </PaperContainer>
       </CenteredContainer>
     </NostrProvider>
   )
-}
+})

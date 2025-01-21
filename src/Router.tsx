@@ -19,10 +19,14 @@ import { NProfileRepliesFeed } from './components/modules/NProfile/feeds/NProfil
 import { deckLoader } from './components/routes/deck/deck.loader'
 import { DeckRoute } from './components/routes/deck/deck.route'
 import { homeLoader } from './components/routes/home/home.loader'
+import { naddressLoader } from './components/routes/naddress/naddress.loader'
+import { NAddressRoute } from './components/routes/naddress/naddress.route'
 import { neventLoader } from './components/routes/nevent/nevent.loader'
+import { NEventPending } from './components/routes/nevent/nevent.pending'
 import { notificationLoader } from './components/routes/notification/notification.loader'
 import { NotificationsRoute } from './components/routes/notification/notifications.route'
 import { nprofileFeedLoader, nprofileLoader } from './components/routes/nprofile/nprofile.loader'
+import { NProfilePending } from './components/routes/nprofile/nprofile.pending'
 import { RelayRoute } from './components/routes/relays.route'
 import { SettingsContentRoute } from './components/routes/settings/settings.content'
 import { SettingsDisplayRoute } from './components/routes/settings/settings.display'
@@ -80,29 +84,7 @@ export const nostrRoute = createRoute({
   parseParams: (params) => ({ nostr: params.nostr }),
   beforeLoad: (options) => {
     const decoded = decodeNIP19(options.params.nostr)
-    // Normalized all decoded that so we can easily access the id in the components
-    switch (decoded?.type) {
-      case 'npub': {
-        return { decoded, id: decoded.data }
-      }
-      case 'nprofile': {
-        const pubkey = decoded.data.pubkey
-        const relays = decoded.data.relays
-        return { decoded, id: decoded.data.pubkey, pubkey, relays }
-      }
-      case 'note': {
-        return { decoded, id: decoded.data }
-      }
-      case 'nevent': {
-        const id = decoded.data.id
-        const pubkey = decoded.data.author
-        const relays = decoded.data.relays
-        return { decoded, id, pubkey, relays }
-      }
-      default: {
-        return {}
-      }
-    }
+    return { decoded }
   },
   loader: (options) => {
     const { decoded } = options.context
@@ -119,26 +101,50 @@ export const nostrRoute = createRoute({
       case 'nevent': {
         return neventLoader(decoded.data)
       }
+      case 'naddr': {
+        return naddressLoader(decoded.data)
+      }
       default:
         return {}
     }
   },
   component: function NostrRoute() {
     const context = useRouteContext({ from: '/$nostr' })
-    const { decoded, id, relays } = context
+    const { decoded } = context
     if (decoded) {
-      switch (decoded?.type) {
+      switch (decoded.type) {
         case 'npub':
-        case 'nprofile':
-          return <NProfileRoute pubkey={id} relays={relays} />
+          return <NProfileRoute pubkey={decoded.data} />
+        case 'nprofile': {
+          return <NProfileRoute pubkey={decoded.data.pubkey} relays={decoded.data.relays} />
+        }
         case 'note':
-        case 'nevent':
+        case 'nevent': {
           return <NEventRoute />
-        default:
+        }
+        case 'naddr': {
+          return <NAddressRoute {...decoded.data} />
+        }
+        default: {
           redirect({ to: '/' })
+        }
       }
     }
     redirect({ to: '/' })
+  },
+  pendingComponent: () => {
+    const context = useRouteContext({ from: '/$nostr' })
+    switch (context.decoded?.type) {
+      case 'nevent': {
+        return <NEventPending />
+      }
+      case 'nprofile': {
+        return <NProfilePending />
+      }
+      default: {
+        return null
+      }
+    }
   },
   errorComponent: ErrorBoundary,
 })
@@ -147,8 +153,11 @@ const nprofileIndexRoute = createRoute({
   getParentRoute: () => nostrRoute,
   path: '/',
   loader: (options) => {
-    if (options.context.decoded?.type === 'nprofile') {
-      return nprofileFeedLoader(options)
+    switch (options.context.decoded?.type) {
+      case 'npub':
+      case 'nprofile': {
+        return nprofileFeedLoader(options, 'notes')
+      }
     }
   },
   component: function NProfileIndexRoute() {
@@ -160,7 +169,7 @@ const nprofileIndexRoute = createRoute({
 const nprofileRepliesRoute = createRoute({
   getParentRoute: () => nostrRoute,
   path: 'replies',
-  loader: (options) => nprofileFeedLoader(options),
+  loader: (options) => nprofileFeedLoader(options, 'replies'),
   component: function NProfileReplieRoute() {
     const module = nprofileRepliesRoute.useLoaderData()
     return <NProfileRepliesFeed window module={module} />
@@ -170,7 +179,7 @@ const nprofileRepliesRoute = createRoute({
 const nprofileMediaRoute = createRoute({
   getParentRoute: () => nostrRoute,
   path: 'media',
-  loader: (options) => nprofileFeedLoader(options),
+  loader: (options) => nprofileFeedLoader(options, 'media'),
   component: function NProfilePhotosRoute() {
     const module = nprofileMediaRoute.useLoaderData()
     return <NProfileMediaFeed window module={module} />
@@ -180,7 +189,7 @@ const nprofileMediaRoute = createRoute({
 const nprofileArticlesRoute = createRoute({
   getParentRoute: () => nostrRoute,
   path: 'articles',
-  loader: (options) => nprofileFeedLoader(options),
+  loader: (options) => nprofileFeedLoader(options, 'articles'),
   component: function NProfileArticleRoute() {
     const module = nprofileArticlesRoute.useLoaderData()
     return <NProfileArticlesFeed window module={module} />

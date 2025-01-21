@@ -5,11 +5,11 @@ import type { DurationLikeObject } from 'luxon'
 import { Duration } from 'luxon'
 import type { Instance, SnapshotIn, SnapshotOut } from 'mobx-state-tree'
 import { t } from 'mobx-state-tree'
+import { EMPTY } from 'rxjs'
 import type { NotesFeedSubscription } from '../feeds/feed.notes'
 import { NotesFeedSubscriptionModel } from '../feeds/feed.notes'
 import type { BaseModuleSnapshotIn } from '../modules/module'
 import { BaseModuleModel } from '../modules/module'
-import { EMPTY } from 'rxjs'
 
 export type NProfileOptions = {
   pubkey: string

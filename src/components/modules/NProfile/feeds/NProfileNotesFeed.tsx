@@ -1,4 +1,5 @@
-import { NostrEventRoot } from '@/components/elements/Event/NostrEventRoot'
+import { NostrEventFeedItem } from '@/components/elements/Event/NostrEventFeedItem'
+import { PostAwait } from '@/components/elements/Posts/PostAwait'
 import { PostLoading } from '@/components/elements/Posts/PostLoading'
 import { VirtualList } from '@/components/elements/VirtualLists/VirtualList'
 import type { FeedAbstract, VirtualListProps } from '@/components/elements/VirtualLists/VirtualLists.types'
@@ -12,14 +13,19 @@ export const NProfileNotesFeed = function NProfileNotesFeed(props: Props) {
   const { module, ...rest } = props
   const {
     id,
-    feeds: { notes },
+    feeds: { notes: feed },
   } = module
   return (
     <VirtualList
       id={id}
-      feed={notes}
-      onScrollEnd={() => notes.paginate()}
-      render={(event) => <NostrEventRoot event={event} />}
+      feed={feed}
+      wrapper={(children) => (
+        <PostAwait promise={feed.delay} rows={5}>
+          {children}
+        </PostAwait>
+      )}
+      onScrollEnd={feed.paginate}
+      render={(event) => <NostrEventFeedItem event={event} />}
       footer={<PostLoading />}
       {...rest}
     />

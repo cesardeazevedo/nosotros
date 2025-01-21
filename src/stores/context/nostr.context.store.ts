@@ -46,7 +46,7 @@ export const NostrContextModel = t
         pubkey ? self.client.users.subscribe(pubkey) : EMPTY,
         pubkey && subFollows !== false
           ? // Low priority subscription
-            timer(1000).pipe(mergeMap(() => self.client.follows.subscribe(pubkey)))
+            timer(300).pipe(mergeMap(() => self.client.follows.subscribe(pubkey)))
           : EMPTY,
         pubkey ? subscribeMutes(self.client, pubkey) : EMPTY,
       )

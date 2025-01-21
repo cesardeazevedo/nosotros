@@ -12,6 +12,7 @@ export type VirtualListProps<T extends FeedAbstract> = {
   onScrollEnd?: VListProps['onScrollEnd']
   render: (item: T['list'][number]) => React.ReactNode
   divider?: boolean
+  wrapper?: (children: React.ReactNode) => React.ReactNode
   header?: React.ReactNode
   footer?: React.ReactNode
 }
