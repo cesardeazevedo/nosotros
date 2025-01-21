@@ -27,7 +27,7 @@ export class Notification {
   get pubkey() {
     switch (this.type) {
       case 'zap': {
-        return this.event.tags.find((tag) => tag[0] === 'P')?.[1]
+        return this.event.tags.find((tag) => tag[0] === 'P')?.[1] || this.event.pubkey
       }
       default: {
         return this.event.pubkey

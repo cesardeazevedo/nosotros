@@ -8,5 +8,5 @@ type Props = {
 
 export const ZapReceiptRoot = (props: Props) => {
   const { zap } = props
-  return <>{zap.isProfileZap ? <ZapReceiptProfile zap={zap} /> : <ZapReceiptEvent zap={zap} />}</>
+  return <>{zap.isProfileZap ? <ZapReceiptProfile zap={zap} /> : <ZapReceiptEvent />}</>
 }
