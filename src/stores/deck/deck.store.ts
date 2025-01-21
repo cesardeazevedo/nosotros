@@ -53,7 +53,18 @@ export const DeckModel = t
     },
 
     addNEvent(snapshot: NEventModuleSnapshotIn, index?: number) {
-      self.add(NEventModuleModel.create(snapshot), index)
+      self.add(
+        NEventModuleModel.create({
+          ...snapshot,
+          context: {
+            options: {
+              pubkey: snapshot.options.author,
+              relays: snapshot.options.relays,
+            },
+          },
+        }),
+        index,
+      )
     },
 
     reset() {
