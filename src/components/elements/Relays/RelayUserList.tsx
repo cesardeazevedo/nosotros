@@ -35,7 +35,7 @@ export const RelayUserList = observer(function RelayUserList(props: Props) {
               </Await>
               <html.span style={styles.button}>
                 {isEditing && <RelayJoinButton relay={userRelay.relay} permission={permission} />}
-                {!isEditing && <Button variant='filledTonal'>Explore</Button>}
+                {/* {!isEditing && <Button variant='filledTonal'>Explore</Button>} */}
               </html.span>
             </Stack>
           </Stack>

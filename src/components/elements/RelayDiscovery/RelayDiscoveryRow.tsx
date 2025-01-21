@@ -56,9 +56,9 @@ export const RelayDiscoveryRow = (props: Props) => {
         </Stack>
       </td>
       <td {...td} align='right'>
-        <Stack gap={1} justify='flex-end'>
-          <Button variant='filledTonal'>Explore</Button>
-        </Stack>
+        {/* <Stack gap={1} justify='flex-end'> */}
+        {/*   <Button variant='filledTonal'>Explore</Button> */}
+        {/* </Stack> */}
       </td>
     </tr>
   )
