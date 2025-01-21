@@ -1,5 +1,6 @@
 import type { FollowsMetadata } from '@/nostr/helpers/parseFollowList'
 import type { NostrEvent } from 'core/types'
+import { makeAutoObservable } from 'mobx'
 
 export class Follows {
   event: NostrEvent
@@ -8,6 +9,10 @@ export class Follows {
   constructor(event: NostrEvent, metadata: FollowsMetadata) {
     this.event = event
     this.tags = metadata.tags
+    makeAutoObservable(this, {
+      event: false,
+      tags: false,
+    })
   }
 
   get id() {

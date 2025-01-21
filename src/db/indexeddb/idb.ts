@@ -4,10 +4,10 @@ import { IDBEventStore } from './events/idb.events'
 import { buildDB } from './idb.builder'
 import { schemas, type IndexedDBSchema } from './idb.schemas'
 import { IDBMetadata } from './metadata/idb.metadata'
+import { IDBNip05 } from './nip05/idb.nip05'
 import { IDBRelayStats } from './relayStats/idb.relayStats'
 import { IDBSeenStore } from './seen/idb.seen'
 import { IDBStats } from './stats/idb.stats'
-import { IDBNip05 } from './nip05/idb.nip05'
 
 const DB_VERSION = 12
 

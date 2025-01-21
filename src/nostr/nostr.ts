@@ -18,7 +18,6 @@ import { NIP01Notes } from './nips/nip01.notes'
 import { NIP01Users } from './nips/nip01.users'
 import { NIP02Follows } from './nips/nip02.follows'
 import { NIP05Dns } from './nips/nip05.dns'
-import { NIP11RelayInfo } from './nips/nip11.relayinfo'
 import { NIP18Reposts } from './nips/nip18.reposts'
 import { NIP23Articles } from './nips/nip23.articles'
 import { NIP25Reactions } from './nips/nip25.reactions'
@@ -55,7 +54,6 @@ export class NostrClient {
   users = new NIP01Users(this)
   follows = new NIP02Follows(this)
   dns = new NIP05Dns(this)
-  relayInfo = new NIP11RelayInfo()
   reposts = new NIP18Reposts(this)
   articles = new NIP23Articles(this)
   reactions = new NIP25Reactions(this)

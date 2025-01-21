@@ -5,12 +5,12 @@ import { shape } from '@/themes/shape.stylex'
 import type { UserAuthoredStyles } from '@stylexjs/stylex/lib/StyleXTypes'
 import React, { forwardRef } from 'react'
 import { css, html } from 'react-strict-dom'
+import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDOMProps'
 import type { ElevationLevel } from '../Elevation/Elevation'
 import { Elevation } from '../Elevation/Elevation'
 import type { ContainerTextColors } from '../helpers/getContainerText'
 import { getContainerTextColor } from '../helpers/getContainerText'
 import type { SxProps } from '../types'
-import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDOMProps'
 
 type PaperSurfaces = keyof Pick<
   ColorPalette,

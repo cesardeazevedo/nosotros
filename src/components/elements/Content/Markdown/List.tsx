@@ -1,12 +1,10 @@
 import type { BulletListNode, OrderedListNode } from 'nostr-editor'
 import React from 'react'
 import { html } from 'react-strict-dom'
-import type { Note } from '@/stores/notes/note'
 import { Paragraph } from '../Layout/Paragraph'
 import { CodeBlock } from './CodeBlock'
 
 type Props = {
-  note: Note
   type: 'ol' | 'ul'
   node: OrderedListNode | BulletListNode
 }

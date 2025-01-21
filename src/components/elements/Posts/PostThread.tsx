@@ -29,9 +29,9 @@ type Props = {
 
 export const PostThread = function PostThread(props: Props) {
   const { note, renderEditor = true, renderParents = true, renderReplies = true } = props
-  const route = useMatch({ from: '/$nostr', shouldThrow: false })
+  const context = useMatch({ from: '/$nostr', shouldThrow: false })?.context
   const ref = useRef<HTMLDivElement>(null)
-  const isCurrentNote = route?.context?.id === note.id
+  const isCurrentNote = context?.decoded?.type === 'nevent' ? context?.decoded.data.id === note.id : false
 
   useEffect(() => {
     if (isCurrentNote && ref.current) {
