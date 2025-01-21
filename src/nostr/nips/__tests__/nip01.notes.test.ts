@@ -12,7 +12,7 @@ describe('NIP01Notes', () => {
       id: '2',
       pubkey: '2',
       tags: [
-        ['e', '3', 'reply'],
+        ['e', '3', '', 'reply'],
         ['e', '22', '', 'mention'],
       ],
     })
@@ -35,13 +35,13 @@ describe('NIP01Notes', () => {
     const eventSpy = vi.fn()
     const client = createClient({ relays: [RELAY_1], settings: { outbox: false }, onEvent: eventSpy })
 
-    const filter = { kinds: [Kind.Text, Kind.Article], authors: ['1', '2'] }
+    const filter = { kinds: [Kind.Text], authors: ['1', '2'] }
     const spy = subscribeSpyTo(client.notes.subRelatedNotesWithParent(filter))
     await spy.onComplete()
     await relay.close()
 
     expect(relay.received).toStrictEqual([
-      ['REQ', '1', { kinds: [1, 30023], authors: ['1', '2'] }],
+      ['REQ', '1', { kinds: [1], authors: ['1', '2'] }],
       ['CLOSE', '1'],
       ['REQ', '2', { kinds: [0, 10002], authors: ['1', '2'] }, { ids: ['3'], kinds: [1] }, { ids: ['22'] }],
       ['CLOSE', '2'],

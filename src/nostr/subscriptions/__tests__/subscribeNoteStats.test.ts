@@ -19,7 +19,7 @@ test('assert buildFilters', () => {
       reactions: false,
       zaps: true,
     }),
-  ).toStrictEqual([{ kinds: [Kind.Text, Kind.ZapReceipt], '#e': ['2'], since: 10 }])
+  ).toStrictEqual([{ kinds: [Kind.Text, Kind.ZapReceipt], '#e': ['2'] }])
 
   expect(
     buildFilters(fakeNote({ kind: Kind.Article, id: '3', pubkey: '1', tags: [['d', '123']] }), {
@@ -32,9 +32,8 @@ test('assert buildFilters', () => {
     {
       kinds: [Kind.Text, Kind.Comment, Kind.Repost, Kind.Reaction, Kind.ZapReceipt, Kind.Comment],
       '#a': [`30023:1:123`],
-      since: 10,
     },
-    { kinds: [Kind.Text, Kind.Comment, Kind.Repost, Kind.Reaction, Kind.ZapReceipt], '#e': ['3'], since: 10 },
+    { kinds: [Kind.Text, Kind.Comment, Kind.Repost, Kind.Reaction, Kind.ZapReceipt], '#e': ['3'] },
   ])
 
   // We don't wanna fetch kind01 replies for Media kinds
@@ -45,5 +44,5 @@ test('assert buildFilters', () => {
       reactions: true,
       zaps: true,
     }),
-  ).toStrictEqual([{ kinds: [Kind.Comment, Kind.Repost, Kind.Reaction, Kind.ZapReceipt], '#e': ['3'], since: 10 }])
+  ).toStrictEqual([{ kinds: [Kind.Comment, Kind.Repost, Kind.Reaction, Kind.ZapReceipt], '#e': ['3'] }])
 })

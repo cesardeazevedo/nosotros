@@ -4,7 +4,7 @@ import { fakeNote } from '@/utils/faker'
 import { parseComment } from '../parseComment'
 
 describe('parseComment', () => {
-  test('assert isReplyOfReply true', () => {
+  test('assert tags', () => {
     const event = fakeNote({
       id: 'id_1_reply_2',
       kind: Kind.Comment,
@@ -29,6 +29,7 @@ describe('parseComment', () => {
         ids: { id_1_root: [RELAY_1], id_1_reply_1: [RELAY_2] },
         fallback: { id_1_reply_1: ['pubkey2'] },
       },
+      isRoot: false,
       id: 'id_1_reply_2',
       kind: 1111,
       rootKind: '1',
@@ -63,6 +64,7 @@ describe('parseComment', () => {
         ids: { id_1_root: [RELAY_1, RELAY_2] },
         fallback: { id_1_root: ['pubkey2'] },
       },
+      isRoot: false,
       id: 'id_1_reply_2',
       kind: 1111,
       // isReplyOfAReply: false,

@@ -18,7 +18,10 @@ describe('NostrFeeds', () => {
     const client = createClient({ relays: [RELAY_1], settings: { outbox: false } })
     const pagination$ = new PaginationSubject({ kinds: [Kind.Text], authors: ['1'] })
 
-    const $ = client.feeds.following(pagination$)
+    const $ = client.feeds.following(pagination$, {
+      includeParents: true,
+      includeReplies: false,
+    })
     // needs a better way to complete the pagination subject
     const spy = subscribeSpyTo(merge($.pipe(delay(2000), take(2))))
     await spy.onComplete()

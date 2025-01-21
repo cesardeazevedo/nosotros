@@ -14,9 +14,9 @@ describe('Note', () => {
   test('assert replies', ({ login, createNote, createFollows }) => {
     const user = login('1')
     const note1 = createNote({ id: '1', pubkey: user?.pubkey, tags: [] })
-    createNote({ id: '2', pubkey: '2', tags: [['e', '1']] })
-    const note3 = createNote({ id: '3', pubkey: '3', tags: [['e', '1']] })
-    const note4 = createNote({ id: '4', pubkey: '4', tags: [['e', '1']] })
+    createNote({ id: '2', pubkey: '2', tags: [['e', '1', '', 'root']] })
+    const note3 = createNote({ id: '3', pubkey: '3', tags: [['e', '1', '', 'root']] })
+    const note4 = createNote({ id: '4', pubkey: '4', tags: [['e', '1', '', 'root']] })
     // Note 2 is out of repliesPreview
     createFollows(user.pubkey, ['3', '4'])
     expect(note1.repliesPreview(user)).toStrictEqual([note3, note4])
@@ -24,11 +24,11 @@ describe('Note', () => {
 
   test('assert repliesSorted', ({ login, createNote, createFollows }) => {
     const user = login('1')
-    const rootNote = createNote({ id: 'root', pubkey: user?.pubkey, tags: [] })
+    const rootNote = createNote({ id: '0', pubkey: user?.pubkey, tags: [] })
 
-    const reply1 = createNote({ id: '1', pubkey: '2', tags: [['e', 'root']] })
-    const reply2 = createNote({ id: '2', pubkey: user.pubkey, tags: [['e', 'root']] })
-    const reply3 = createNote({ id: '3', pubkey: '3', tags: [['e', 'root']] })
+    const reply1 = createNote({ id: '1', pubkey: '2', tags: [['e', '0', '', 'root']] })
+    const reply2 = createNote({ id: '2', pubkey: user.pubkey, tags: [['e', '0', '', 'root']] })
+    const reply3 = createNote({ id: '3', pubkey: '3', tags: [['e', '0', '', 'root']] })
 
     createFollows(user.pubkey, ['3'])
 
@@ -38,12 +38,12 @@ describe('Note', () => {
 
   test('assert repleisSorted with muted events and author', ({ login, createNote, createFollows }) => {
     const user = login('1')
-    const rootNote = createNote({ id: 'root', pubkey: user?.pubkey, tags: [] })
+    const rootNote = createNote({ id: '0', pubkey: user?.pubkey, tags: [] })
 
-    const reply1 = createNote({ id: '1', pubkey: '2', tags: [['e', 'root']] })
-    const reply2 = createNote({ id: '2', pubkey: user.pubkey, tags: [['e', 'root']] })
-    const reply3 = createNote({ id: '3', pubkey: '3', tags: [['e', 'root']] })
-    const reply4 = createNote({ id: '4', pubkey: '4', tags: [['e', 'root']] })
+    const reply1 = createNote({ id: '1', pubkey: '2', tags: [['e', '0', '', 'root']] })
+    const reply2 = createNote({ id: '2', pubkey: user.pubkey, tags: [['e', '0', '', 'root']] })
+    const reply3 = createNote({ id: '3', pubkey: '3', tags: [['e', '0', '', 'root']] })
+    const reply4 = createNote({ id: '4', pubkey: '4', tags: [['e', '0', '', 'root']] })
 
     createFollows(user.pubkey, ['2'])
 
@@ -56,22 +56,21 @@ describe('Note', () => {
 
   test('assert replyTags', ({ createNote }) => {
     const note1 = createNote({ id: '1', pubkey: '1', tags: [] })
-    const note2 = createNote({ id: '2', pubkey: '2', tags: [['e', '1']] })
+    const note2 = createNote({ id: '2', pubkey: '2', tags: [['e', '1', '', 'root']] })
     const note3 = createNote({
       id: '3',
       pubkey: '3',
       tags: [
-        ['e', '1'],
-        ['e', '2'],
+        ['e', '1', '', 'root'],
+        ['e', '2', '', 'reply'],
       ],
     })
     const note4 = createNote({
       id: '4',
       pubkey: '4',
       tags: [
-        ['e', '1'],
-        ['e', '2'],
-        ['e', '3'],
+        ['e', '1', '', 'root'],
+        ['e', '3', '', 'reply'],
       ],
     })
     expect(note1.replyTags).toStrictEqual([
@@ -95,7 +94,7 @@ describe('Note', () => {
     ])
   })
 
-  test.only('assert comments with nip10 replies', ({ createNote, createComment }) => {
+  test('assert comments with nip10 replies', ({ createNote, createComment }) => {
     const note1 = createNote({ kind: Kind.Article, id: '1', pubkey: '1', tags: [] })
     const note2 = createNote({ id: '2', pubkey: '2', tags: [['e', '1', '', 'root']] })
     const comment1 = createComment({
@@ -115,7 +114,6 @@ describe('Note', () => {
         ['e', '3'],
       ],
     })
-    console.log(note1.replies)
     expect(note1.replies).toStrictEqual([note2, comment1])
     expect(comment1.replies).toStrictEqual([comment2])
   })

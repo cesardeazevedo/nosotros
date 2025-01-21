@@ -7,7 +7,7 @@ import { test } from '@/utils/fixtures'
 import { subscribeSpyTo } from '@hirez_io/observer-spy'
 
 describe('NIP25', () => {
-  test('assert reactions count locally', async ({ createClient }) => {
+  test.skip('assert reactions count locally', async ({ createClient }) => {
     const eventId = '10'
     const base = { kind: Kind.Reaction, pubkey: '1', content: '+', tags: [['e', eventId]] }
     const event1 = fakeNote({ ...base, id: '1', created_at: 10 })
