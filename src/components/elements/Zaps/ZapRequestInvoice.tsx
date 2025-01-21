@@ -96,7 +96,7 @@ export const ZapRequestInvoice = (props: Props) => {
                   </Stack>
                   <Stack>
                     <Text variant='label' size='lg' sx={styles.amount}>
-                      Amount: {amount} SATS
+                      Amount: {formatter.format(parseInt(amount) / 1000)} SATS
                     </Text>
                   </Stack>
                   {/* @ts-ignore */}
