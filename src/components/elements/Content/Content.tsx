@@ -35,7 +35,7 @@ export const Content = observer(function Content(props: Props) {
               {props.children?.(index)}
               {node.type === 'heading' && <Heading node={node} />}
               {node.type === 'paragraph' && <Paragraph node={node} />}
-              {node.type === 'image' && <Image src={node.attrs.src} />}
+              {node.type === 'image' && <Image note={note} src={node.attrs.src} />}
               {node.type === 'video' && <Video src={node.attrs.src} />}
               {node.type === 'nevent' && <NEvent pointer={node.attrs} />}
               {node.type === 'orderedList' && <List type='ol' node={node} note={note} />}
@@ -43,7 +43,7 @@ export const Content = observer(function Content(props: Props) {
               {node.type === 'codeBlock' && <CodeBlock node={node} />}
               {node.type === 'blockquote' && <BlockQuote node={node} />}
               {node.type === 'tweet' && <Tweet src={node.attrs.src} />}
-              {node.type === 'youtube' && <YoutubeEmbed src={node.attrs.src} />}
+              {node.type === 'youtube' && <YoutubeEmbed note={note} src={node.attrs.src} />}
               {node.type === 'bolt11' && (
                 <LNInvoice nevent={note.nevent} bolt11={node.attrs.bolt11} lnbc={node.attrs.lnbc} />
               )}

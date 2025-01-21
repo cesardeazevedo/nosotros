@@ -2,6 +2,8 @@ import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { SxProps } from '@/components/ui/types'
 import { useGlobalSettings } from '@/hooks/useRootStore'
+import type { Comment } from '@/stores/comment/comment'
+import type { Note } from '@/stores/notes/note'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
@@ -15,17 +17,22 @@ type Props = {
   src: string
   proxy?: boolean
   dense?: boolean
+  note?: Note | Comment
   onClick?: (event?: StrictClickEvent) => void
   sx?: SxProps
 }
 
 export const Image = memo((props: Props) => {
-  const { src, proxy = true, sx } = props
+  const { note, src, proxy = true, sx } = props
   const { dense: denseContext, disableLink } = useNoteContext()
   const [error, setError] = useState(false)
   const dense = props.dense ?? denseContext
   const globalSettings = useGlobalSettings()
   const ref = useRef<HTMLImageElement>(null)
+
+  const width = note?.metadata.imeta?.[src]?.dim?.width || 0
+  const height = note?.metadata.imeta?.[src]?.dim?.width || 0
+  const bounds = width !== 0 && height !== 0 ? { width, height } : {}
 
   const handleClick = useCallback(
     (e: StrictClickEvent) => {
@@ -51,6 +58,7 @@ export const Image = memo((props: Props) => {
       )}
       {!error && (
         <html.img
+          {...bounds}
           ref={ref}
           src={proxy ? globalSettings.getImgProxyUrl('feed_img', src) : src}
           loading='lazy'
