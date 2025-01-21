@@ -1,3 +1,4 @@
+import { DEFAULT_RELAYS } from '@/constants/relays'
 import type { BroadcastResponse } from '@/core/operators/broadcast'
 import { verifyWorker } from '@/core/operators/verifyWorker'
 import { NostrSubscription, type SubscriptionOptions } from 'core/NostrSubscription'
@@ -6,7 +7,7 @@ import type { Signer } from 'core/signers/signer'
 import type { NostrFilter } from 'core/types'
 import type { NostrEvent } from 'nostr-tools'
 import type { OperatorFunction } from 'rxjs'
-import { EMPTY, merge, mergeWith, of, pipe, tap, type Observable } from 'rxjs'
+import { defaultIfEmpty, EMPTY, merge, mergeWith, of, pipe, tap, type Observable } from 'rxjs'
 import { batcher } from './batcher'
 import { setCache } from './cache'
 import { NostrFeeds } from './feeds'
@@ -93,8 +94,12 @@ export class NostrClient {
 
     // ownership of this client
     if (this.pubkey) {
-      this.outbox$ = this.mailbox.track(this.pubkey, { permission: WRITE }).pipe(toArrayRelay)
-      this.inbox$ = this.mailbox.track(this.pubkey, { permission: READ }).pipe(toArrayRelay)
+      this.outbox$ = this.mailbox
+        .track(this.pubkey, { permission: WRITE })
+        .pipe(toArrayRelay, defaultIfEmpty(DEFAULT_RELAYS))
+      this.inbox$ = this.mailbox
+        .track(this.pubkey, { permission: READ })
+        .pipe(toArrayRelay, defaultIfEmpty(DEFAULT_RELAYS))
     } else {
       this.outbox$ = of(this.relays)
       this.inbox$ = of(this.relays)
@@ -169,7 +174,7 @@ export class NostrClient {
   createSubscription(filters: NostrFilter | NostrFilter[], options?: ClientSubOptions) {
     return new NostrSubscription(filters, {
       ...options,
-      relays: options?.relays || merge(this.inbox$, this.outbox$, of(this.relays)),
+      relays: merge(this.inbox$, this.outbox$, of(this.relays), options?.relays || EMPTY),
       relayHints: this.settings.hints ? options?.relayHints : {},
       outbox:
         this.settings.outbox && options?.outbox !== false
