@@ -3,7 +3,7 @@ import { ofKind } from '@/core/operators/ofKind'
 import { of } from 'rxjs'
 import type { NostrClient } from '../nostr'
 import type { NostrEventRelayDiscovery } from '../types'
-import { withAuthor } from './withAuthor'
+import { withRelatedAuthors } from '../subscriptions/withRelatedAuthor'
 
 const kinds = [Kind.RelayDiscovery]
 
@@ -25,5 +25,5 @@ export function subscribeRelayDiscorvery(client: NostrClient) {
         ]),
       },
     )
-    .pipe(ofKind<NostrEventRelayDiscovery>(kinds), withAuthor(client))
+    .pipe(ofKind<NostrEventRelayDiscovery>(kinds), withRelatedAuthors(client))
 }

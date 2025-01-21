@@ -4,8 +4,8 @@ import type { PaginationSubject } from '@/core/PaginationRangeSubject'
 import { connect, EMPTY, from, ignoreElements, merge, mergeMap } from 'rxjs'
 import { isEventTag } from '../helpers/parseTags'
 import type { NostrClient } from '../nostr'
-import { withRelatedAuthors } from '../operators/withAuthor'
 import type { NostrEventMetadata } from '../types'
+import { withRelatedAuthors } from './withRelatedAuthor'
 
 export function subscribeNotifications(client: NostrClient, pagination: PaginationSubject) {
   return pagination.pipe(

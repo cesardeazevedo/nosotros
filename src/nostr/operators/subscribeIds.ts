@@ -1,12 +1,13 @@
 import { Kind } from '@/constants/kinds'
 import { ofKind } from '@/core/operators/ofKind'
+import type { NostrEvent } from 'nostr-tools'
 import { connect, ignoreElements, merge, mergeMap, of } from 'rxjs'
 import type { ClientSubOptions, NostrClient } from '../nostr'
 import { ShareReplayCache } from '../replay'
-import type { NostrEventMetadata } from '../types'
+import { withRelatedAuthors } from '../subscriptions/withRelatedAuthor'
 import { type NostrEventNote, type NostrEventRepost, type NostrEventZapReceipt } from '../types'
 
-export const replayIds = new ShareReplayCache<NostrEventMetadata>()
+export const replayIds = new ShareReplayCache<NostrEvent>()
 
 export const subscribeIds = replayIds.wrap((id: string, client: NostrClient, options: ClientSubOptions) => {
   return client.subscribe({ ids: [id] }, options).pipe(
@@ -29,17 +30,7 @@ export const subscribeIds = replayIds.wrap((id: string, client: NostrClient, opt
         }
         default: {
           // generic event (always get the author)
-          return of(event).pipe(
-            connect((shared) => {
-              return merge(
-                shared,
-                shared.pipe(
-                  mergeMap(() => client.users.subscribe(event.pubkey)),
-                  ignoreElements(),
-                ),
-              )
-            }),
-          )
+          return of(event).pipe(withRelatedAuthors(client))
         }
       }
     }),
