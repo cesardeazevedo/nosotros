@@ -12,7 +12,7 @@ import { parseTags } from './parseTags'
 
 type Article = {
   kind: Kind.Article
-  lastSyncedAt: number | undefined
+  isRoot: true
   tags: ParsedTags
 }
 
@@ -32,7 +32,7 @@ export function parseArticle(event: NostrEvent): ArticleMetadata {
   return {
     id: event.id,
     kind: Kind.Article,
-    lastSyncedAt: 0,
+    isRoot: true,
     tags,
     ...content,
   }

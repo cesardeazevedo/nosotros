@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/Button/Button'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { useCurrentUser } from '@/hooks/useRootStore'
+import type { Comment } from '@/stores/comment/comment'
 import type { Note } from '@/stores/notes/note'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
@@ -15,12 +16,13 @@ import { observer } from 'mobx-react-lite'
 import { useCallback, useState } from 'react'
 import { css, html } from 'react-strict-dom'
 import { Editor } from '../../Editor/Editor'
+import { usePostVisibility } from '../hooks/usePostVisibility'
 import { PostActions } from '../PostActions/PostActions'
 import { PostRepliesMuted } from './PostRepliesMuted'
 import { PostReplyContent } from './PostReplyContent'
 
 type Props = {
-  note: Note
+  note: Note | Comment
   nested?: boolean
   repliesOpen: boolean | null
   level?: number
@@ -28,7 +30,7 @@ type Props = {
 
 export const PostRepliesTree = observer(function PostRepliesTree(props: {
   repliesOpen: boolean | null
-  replies: Note[]
+  replies: (Note | Comment)[]
   level: number
   nested?: boolean
 }) {
@@ -45,6 +47,7 @@ export const PostReply = observer(function PostReply(props: Props) {
   const isMobile = useMobile()
   const collapsedLevel = isMobile ? 4 : 4
   const [open, setOpen] = useState(level < collapsedLevel)
+  const [ref] = usePostVisibility(note, { replies: true })
   const user = useCurrentUser()
   const event = note.event
 
@@ -70,7 +73,7 @@ export const PostReply = observer(function PostReply(props: Props) {
   }
 
   return (
-    <html.div style={[styles.root, level > 1 && styles.root$deep]}>
+    <html.div style={[styles.root, level > 1 && styles.root$deep]} ref={ref}>
       {open && <html.span style={styles.verticalLineContainer} onClick={handleOpen} />}
       {!open && (
         <Stack align='flex-start' gap={1} onClick={level < MAX_LEVEL ? handleOpen : handleOpenNestedDialog}>

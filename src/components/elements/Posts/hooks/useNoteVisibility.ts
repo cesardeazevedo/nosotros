@@ -1,13 +1,13 @@
 import { useGlobalNostrSettings } from '@/hooks/useRootStore'
-import { db } from '@/nostr/db'
-import { subscribeNoteStats } from '@/nostr/stats'
+import type { NoteStatsOptions } from '@/nostr/subscriptions/subscribeNoteStats'
+import { subscribeNoteStats } from '@/nostr/subscriptions/subscribeNoteStats'
+import type { Comment } from '@/stores/comment/comment'
 import { useNostrClientContext } from '@/stores/context/nostr.context.hooks'
 import type { Note } from '@/stores/notes/note'
 import { LRUCache } from 'lru-cache'
-import { DateTime } from 'luxon'
 import { useObservable, useSubscription } from 'observable-hooks'
 import { useEffect, useRef } from 'react'
-import { filter, finalize, identity, map, mergeMap, Subject, take } from 'rxjs'
+import { filter, identity, map, mergeMap, Subject, take, tap } from 'rxjs'
 
 const cache = new LRUCache({ max: 1000 })
 
@@ -24,7 +24,7 @@ const intersection = new IntersectionObserver(
   { threshold: 0 },
 )
 
-export function usePostVisibility(note: Note) {
+export function useNoteVisibility(note: Note | Comment, options?: NoteStatsOptions) {
   const { client } = useNostrClientContext()
   const settings = useGlobalNostrSettings()
   const ref = useRef<HTMLDivElement | null>(null)
@@ -35,18 +35,13 @@ export function usePostVisibility(note: Note) {
       take(1),
       map(() => note),
       mergeMap((note) => [note, ...note.mentionNotes]),
-      filter((id) => !cache.has(id)),
+      filter((note) => !cache.has(note.id)),
+      tap((note) => cache.set(note.id, true)),
       mergeMap((note) => {
-        cache.set(note.id, true)
-        return subscribeNoteStats(note.id, client, {
+        return subscribeNoteStats(client, note.event, {
           ...settings.scroll,
-          lastSyncedAt: note.metadata.lastSyncedAt,
-        }).pipe(
-          finalize(() => {
-            const now = DateTime.now().set({ second: 0, millisecond: 0 })
-            db.metadata.insert({ ...note.metadata, lastSyncedAt: now.toSeconds() })
-          }),
-        )
+          ...options,
+        })
       }),
     )
   })

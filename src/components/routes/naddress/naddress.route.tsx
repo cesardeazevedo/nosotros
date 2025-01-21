@@ -1,5 +1,5 @@
 import { NostrEventRoot } from '@/components/elements/Event/NostrEventRoot'
-import { useNoteOpen } from '@/components/elements/Posts/hooks/usePostOpen'
+import { useNoteOpen } from '@/components/elements/Posts/hooks/useNoteOpen'
 import { PostLoading } from '@/components/elements/Posts/PostLoading'
 import { NostrProvider } from '@/components/providers/NostrProvider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'

@@ -14,7 +14,6 @@ import { parseTags } from './parseTags'
 
 type Note = {
   kind: Kind.Text | Kind.Article
-  lastSyncedAt: number | undefined
   tags: ParsedTags
 }
 
@@ -32,7 +31,6 @@ export function parseNote(event: NostrEvent): NoteMetadata {
   return {
     id: event.id,
     kind: Kind.Text,
-    lastSyncedAt: 0,
     ...content,
     ...replies,
     relayHints,

@@ -1,4 +1,6 @@
 import { NostrEventRoot } from '@/components/elements/Event/NostrEventRoot'
+import { useNoteOpen } from '@/components/elements/Posts/hooks/useNoteOpen'
+import { PostAwait } from '@/components/elements/Posts/PostAwait'
 import { PostLoading } from '@/components/elements/Posts/PostLoading'
 import { NostrProvider } from '@/components/providers/NostrProvider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
@@ -6,7 +8,6 @@ import { Stack } from '@/components/ui/Stack/Stack'
 import { useMobile } from '@/hooks/useMobile'
 import { useGoBack } from '@/hooks/useNavigations'
 import { modelStore } from '@/stores/base/model.store'
-import { useNoteOpen } from '@/stores/nevent/nevent.hooks'
 import type { NEventModule } from '@/stores/nevent/nevent.module'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconChevronLeft } from '@tabler/icons-react'
@@ -22,8 +23,8 @@ export type Props = EventPointer
 export const NEventRoute = observer(function NEventRoute() {
   const module = useLoaderData({ from: '/$nostr' }) as NEventModule
   const isMobile = useMobile()
-  const event = modelStore.getEvent(module.options.id)
-  useNoteOpen(module.options.id)
+  const event = modelStore.get(module.options.id)
+  useNoteOpen(event)
   const goBack = useGoBack()
   return (
     <NostrProvider nostrContext={() => module.context!}>
@@ -34,8 +35,10 @@ export const NEventRoute = observer(function NEventRoute() {
           </Stack>
         )}
         <PaperContainer elevation={isMobile ? 0 : 2}>
-          {!event && <PostLoading rows={1} />}
-          {event && <NostrEventRoot renderThread event={event} />}
+          <PostAwait promise={module.delay} rows={1}>
+            {!event && <PostLoading rows={1} />}
+            {event && <NostrEventRoot item={event} />}
+          </PostAwait>
         </PaperContainer>
       </CenteredContainer>
     </NostrProvider>

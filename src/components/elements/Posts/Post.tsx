@@ -1,4 +1,4 @@
-import { usePostVisibility } from '@/components/elements/Posts/hooks/usePostVisibility'
+import { useNoteVisibility } from '@/components/elements/Posts/hooks/useNoteVisibility'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { useMobile } from '@/hooks/useMobile'
@@ -25,7 +25,7 @@ export const PostRoot = observer(function PostRoot(props: Props) {
   const { note, header } = props
   const isMobile = useMobile()
   const router = useRouter()
-  const [ref] = usePostVisibility(note)
+  const [ref] = useNoteVisibility(note)
 
   const handleRepliesClick = useCallback(() => {
     if (isMobile) {

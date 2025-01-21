@@ -1,6 +1,6 @@
 import { NostrEventRoot } from '@/components/elements/Event/NostrEventRoot'
 import { PaperContainer } from '@/components/elements/Layouts/PaperContainer'
-import { useNoteOpen } from '@/components/elements/Posts/hooks/usePostOpen'
+import { useNoteOpen } from '@/components/elements/Posts/hooks/useNoteOpen'
 import { PostAwait } from '@/components/elements/Posts/PostAwait'
 import { PostLoading } from '@/components/elements/Posts/PostLoading'
 import { Divider } from '@/components/ui/Divider/Divider'
