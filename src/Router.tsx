@@ -13,7 +13,6 @@ import { RootLayout } from 'components/elements/Layouts/RootLayout'
 import { firstValueFrom, timer } from 'rxjs'
 import { decodeNIP19 } from 'utils/nip19'
 import { NProfileArticlesFeed } from './components/modules/NProfile/feeds/NProfileArticlesFeed'
-import { NProfileMediaFeed } from './components/modules/NProfile/feeds/NProfileMediaFeed'
 import { NProfileNotesFeed } from './components/modules/NProfile/feeds/NProfileNotesFeed'
 import { NProfileRepliesFeed } from './components/modules/NProfile/feeds/NProfileRepliesFeed'
 import { deckLoader } from './components/routes/deck/deck.loader'
@@ -176,16 +175,6 @@ const nprofileRepliesRoute = createRoute({
   },
 })
 
-const nprofileMediaRoute = createRoute({
-  getParentRoute: () => nostrRoute,
-  path: 'media',
-  loader: (options) => nprofileFeedLoader(options, 'media'),
-  component: function NProfilePhotosRoute() {
-    const module = nprofileMediaRoute.useLoaderData()
-    return <NProfileMediaFeed window module={module} />
-  },
-})
-
 const nprofileArticlesRoute = createRoute({
   getParentRoute: () => nostrRoute,
   path: 'articles',
@@ -248,7 +237,6 @@ export const routeTree = rootRoute.addChildren([
     // nprofile tabs
     nprofileIndexRoute,
     nprofileRepliesRoute,
-    nprofileMediaRoute,
     nprofileArticlesRoute,
   ]),
   deckRoute,

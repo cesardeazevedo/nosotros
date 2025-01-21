@@ -9,7 +9,6 @@ import { reaction } from 'mobx'
 import { observer } from 'mobx-react-lite'
 import { useCallback, useEffect } from 'react'
 import { NProfileArticlesFeed } from './feeds/NProfileArticlesFeed'
-import { NProfileMediaFeed } from './feeds/NProfileMediaFeed'
 import { NProfileNotesFeed } from './feeds/NProfileNotesFeed'
 import { NProfileRepliesFeed } from './feeds/NProfileRepliesFeed'
 import { NProfileFeedTabsState } from './NProfileFeedTabsState'
@@ -57,7 +56,6 @@ export const NProfileColumn = observer(function NProfileColumn(props: Props) {
       <PaperContainer elevation={0} shape='none'>
         {selected === 'notes' && <NProfileNotesFeed header={header} module={module} />}
         {selected === 'replies' && <NProfileRepliesFeed header={header} module={module} />}
-        {selected === 'media' && <NProfileMediaFeed header={header} module={module} />}
         {selected === 'articles' && <NProfileArticlesFeed header={header} module={module} />}
       </PaperContainer>
     </>
