@@ -25,7 +25,14 @@ export class Notification {
   }
 
   get pubkey() {
-    return this.event.pubkey
+    switch (this.type) {
+      case 'zap': {
+        return this.event.tags.find((tag) => tag[0] === 'P')?.[1]
+      }
+      default: {
+        return this.event.pubkey
+      }
+    }
   }
 
   get related() {
