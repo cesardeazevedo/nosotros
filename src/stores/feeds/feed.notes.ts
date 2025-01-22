@@ -2,7 +2,7 @@ import type { FeedOptions } from '@/nostr/feeds'
 import { type NostrClient } from '@/nostr/nostr'
 import type { Instance, SnapshotIn } from 'mobx-state-tree'
 import { t } from 'mobx-state-tree'
-import { EMPTY, finalize, mergeWith, switchMap, tap } from 'rxjs'
+import { bufferTime, EMPTY, filter, finalize, identity, map, mergeMap, mergeWith, switchMap, tap } from 'rxjs'
 import { toStream } from '../helpers/toStream'
 import { FeedStoreModel } from './feed.store'
 
@@ -48,6 +48,14 @@ export const NotesFeedSubscriptionModel = FeedStoreModel.named('NotesFeedSubscri
           return getFeedSubscription().pipe(
             // trigger pagination if the feed.notes still empty
             mergeWith(self.paginateIfEmpty()),
+
+            bufferTime(1200),
+
+            filter((x) => x.length > 0),
+
+            map((x) => x.sort((a, b) => (a.created_at > b.created_at ? -1 : 1))),
+
+            mergeMap(identity),
 
             tap((item) => self.add(item)),
             // Scope changed, reset the feed
