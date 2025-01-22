@@ -9,7 +9,7 @@ import { NostrSubscriptionModel } from '../base/base.models'
 
 export const FeedStoreModel = NostrSubscriptionModel.named('FeedStoreModel')
   .props({
-    range: t.optional(t.number, Duration.fromObject({ hours: 1 }).as('minutes')),
+    range: t.optional(t.number, Duration.fromObject({ minutes: 30 }).as('minutes')),
   })
   .volatile((self) => ({
     notes: observable.map<string, NostrEventMetadata>(),
@@ -17,10 +17,11 @@ export const FeedStoreModel = NostrSubscriptionModel.named('FeedStoreModel')
     latest: observable.map<string, NostrEventMetadata>(),
     published: observable.map<string, NostrEventMetadata>(),
     pagination: new PaginationSubject(self.filter, { range: self.range }),
+    limit: 20,
   }))
   .views((self) => ({
     get list() {
-      return [...self.published.values(), ...self.latest.values(), ...self.notes.values()]
+      return [...self.published.values(), ...self.latest.values(), ...self.notes.values()].slice(0, self.limit)
     },
   }))
   .actions((self) => ({
@@ -38,11 +39,8 @@ export const FeedStoreModel = NostrSubscriptionModel.named('FeedStoreModel')
         self.latest.set(key, value)
       })
     },
-    paginate() {
-      self.pagination.next()
-    },
     paginateIfEmpty(min = 5) {
-      return interval(2500).pipe(
+      return interval(6000).pipe(
         map(() => self.notes.size),
         takeWhile((size) => size < min),
         take(10),
@@ -52,6 +50,12 @@ export const FeedStoreModel = NostrSubscriptionModel.named('FeedStoreModel')
         }),
         ignoreElements(),
       )
+    },
+    paginate() {
+      self.limit = Math.min(self.notes.size, self.limit + 10)
+      if (self.limit >= self.notes.size) {
+        self.pagination.next()
+      }
     },
   }))
 

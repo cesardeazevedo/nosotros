@@ -1,6 +1,6 @@
 import { createEditorStore } from '@/stores/editor/editor.store'
 import { spacing } from '@/themes/spacing.stylex'
-import { useMatch } from '@tanstack/react-router'
+import { useMatch, useRouter } from '@tanstack/react-router'
 import { DialogSheet } from 'components/elements/Layouts/Dialog'
 import { useGoBack } from 'hooks/useNavigations'
 import { observer } from 'mobx-react-lite'
@@ -17,8 +17,11 @@ export const EditorDialog = observer(function EditorDialog() {
   })
   const goBack = useGoBack()
 
+  const router = useRouter()
+
   const handleClose = useCallback(() => {
-    goBack()
+    // @ts-ignore
+    router.navigate({ search: {} })
   }, [goBack])
 
   const [store] = useState(createEditorStore({ onPublish: () => handleClose() }))
@@ -34,7 +37,7 @@ export const EditorDialog = observer(function EditorDialog() {
       <>
         <RemoveScroll>
           <html.div style={styles.root}>
-            <Editor initialOpen store={store} />
+            <Editor initialOpen store={store} onDiscard={handleClose} />
           </html.div>
         </RemoveScroll>
       </>

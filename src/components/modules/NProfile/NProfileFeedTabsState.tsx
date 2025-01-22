@@ -15,10 +15,10 @@ export const NProfileFeedTabsState = (props: Props) => {
       <Tabs anchor={active} onChange={(anchor) => props.onChange(anchor)}>
         <Tab sx={styles.tab} anchor='notes' label='Notes' />
         <Tab sx={styles.tab} anchor='replies' label='Replies' />
-        <Tab sx={styles.tab} anchor='media' label='Media' />
+        {/* <Tab sx={styles.tab} anchor='media' label='Media' /> */}
         <Tab sx={styles.tab} anchor='articles' label='Articles' />
-        <Tab sx={styles.tab} anchor='reactions' label='Reactions' />
-        <Tab sx={styles.tab} anchor='zaps' label='Zaps' />
+        {/* <Tab sx={styles.tab} anchor='reactions' label='Reactions' /> */}
+        {/* <Tab sx={styles.tab} anchor='zaps' label='Zaps' /> */}
       </Tabs>
     </Stack>
   )

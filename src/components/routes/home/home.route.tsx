@@ -21,7 +21,6 @@ import { css } from 'react-strict-dom'
 import { CenteredContainer } from '../../elements/Layouts/CenteredContainer'
 import { PaperContainer } from '../../elements/Layouts/PaperContainer'
 import { PostFab } from '../../elements/Posts/PostFab'
-import { SignInButtonFab } from '../../elements/SignIn/SignInButtonFab'
 
 export const HomeRoute = observer(function HomeRoute() {
   const mobile = useMobile()
@@ -43,7 +42,7 @@ export const HomeRoute = observer(function HomeRoute() {
 
   return (
     <CenteredContainer margin>
-      {!mobile && (!auth.pubkey ? <SignInButtonFab /> : <PostFab />)}
+      {!mobile && auth.pubkey && <PostFab />}
       <PaperContainer elevation={1}>
         <FeedTabs module={module}>
           <Button variant='filledTonal' onClick={() => setExpanded((prev) => !prev)}>
@@ -65,13 +64,13 @@ export const HomeRoute = observer(function HomeRoute() {
           />
         </Stack>
         <Divider />
-        <PostAwait rows={5} promise={feed.delay}>
+        <PostAwait rows={4} promise={feed.delay}>
           <VirtualListWindow
             id={module.id + module.selected}
             feed={feed}
             onScrollEnd={feed.paginate}
             render={(event) => <NostrEventFeedItem event={event} />}
-            footer={<PostLoading rows={5} />}
+            footer={<PostLoading rows={4} />}
           />
         </PostAwait>
       </PaperContainer>

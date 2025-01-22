@@ -3,7 +3,7 @@ import { OUTBOX_RELAYS } from '@/constants/relays'
 import { formatRelayUrl } from '@/core/helpers/formatRelayUrl'
 import { ofKind } from '@/core/operators/ofKind'
 import { start } from '@/core/operators/start'
-import { EMPTY, map, merge, mergeMap, of, take } from 'rxjs'
+import { EMPTY, last, map, merge, mergeMap, of } from 'rxjs'
 import type { NostrClient } from '../nostr'
 import { parseEventMetadata } from '../operators/parseMetadata'
 import type { NostrEventRelayList, UserRelay } from '../types'
@@ -22,9 +22,9 @@ export function publishRelayList(client: NostrClient, userRelay: UserRelay, revo
     return of(sub).pipe(
       start(client.pool),
       map(([, event]) => event),
-      take(1),
       parseEventMetadata(),
       ofKind<NostrEventRelayList>(kinds),
+      last(undefined, null),
       mergeMap((event) => {
         if (event) {
           const relayList = event[metadataSymbol]?.relayList || []

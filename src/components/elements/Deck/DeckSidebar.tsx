@@ -3,18 +3,23 @@ import { Stack } from '@/components/ui/Stack/Stack'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
+import { Link, useRouter } from '@tanstack/react-router'
 import { observer } from 'mobx-react-lite'
 import { css } from 'react-strict-dom'
 import { IconPencil } from '../Icons/IconPencil'
 import { ProfilePopover } from '../Navigation/ProfilePopover'
 
 export const DeckSidebar = observer(function DeckSidebar() {
+  const router = useRouter()
   return (
     <Stack horizontal={false} justify='space-between' align='center' sx={styles.root}>
       <Tooltip cursor='arrow' enterDelay={0} text='Create note' placement='right'>
-        <Fab variant='primary'>
-          <IconPencil />
-        </Fab>
+        {/* @ts-ignore */}
+        <Link from={router.fullPath} search={{ compose: true }}>
+          <Fab variant='primary'>
+            <IconPencil />
+          </Fab>
+        </Link>
       </Tooltip>
       <Stack horizontal={false} gap={4}>
         {/* <Tooltip cursor='arrow' enterDelay={0} text='Add column' placement='right'> */}

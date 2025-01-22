@@ -2,7 +2,7 @@ import { DrawerSwipeable } from '@/components/ui/Drawer/DrawerSwipeable'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { listItemTokens } from '@/components/ui/ListItem/ListItem.stylex'
 import { Stack } from '@/components/ui/Stack/Stack'
-import { useCurrentUser } from '@/hooks/useRootStore'
+import { useCurrentPubkey } from '@/hooks/useRootStore'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconMenu2, IconQrcode } from '@tabler/icons-react'
@@ -17,7 +17,7 @@ import { Menu } from './Menu'
 
 export const Sidebar = () => {
   const [open, setOpen] = useState(false)
-  const user = useCurrentUser()
+  const pubkey = useCurrentPubkey()
   return (
     <>
       <IconButton onClick={() => setOpen(true)} icon={<IconMenu2 />} />
@@ -27,11 +27,11 @@ export const Sidebar = () => {
           <Observer>
             {() => (
               <Stack horizontal={false} sx={styles.header}>
-                {user?.pubkey && (
+                {pubkey && (
                   <>
-                    <UserAvatar pubkey={user.pubkey} />
-                    <UserName variant='title' size='lg' pubkey={user.pubkey} sx={styles.userName} />
-                    <IconButton sx={styles.qrcodeButton} disabled={!user.pubkey} onClick={dialogStore.openQRCode}>
+                    <UserAvatar pubkey={pubkey} />
+                    <UserName variant='title' size='lg' pubkey={pubkey} sx={styles.userName} />
+                    <IconButton sx={styles.qrcodeButton} disabled={!pubkey} onClick={dialogStore.openQRCode}>
                       <IconQrcode size={30} strokeWidth='2' />
                     </IconButton>
                   </>

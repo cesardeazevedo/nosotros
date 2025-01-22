@@ -39,10 +39,22 @@ describe('start', () => {
     await relay3.close()
     await relay4.close()
 
-    expect(relay1.received).toStrictEqual([['REQ', '1', { kinds: [1], authors: ['1', '2', '3'] }, { ids: ['10'] }]])
-    expect(relay2.received).toStrictEqual([['REQ', '1', { kinds: [1], authors: ['1', '2', '3'] }, { ids: ['10'] }]])
-    expect(relay3.received).toStrictEqual([['REQ', '1', { kinds: [1], authors: ['1'] }]])
-    expect(relay4.received).toStrictEqual([['REQ', '1', { ids: ['10'] }]])
+    expect(relay1.received).toStrictEqual([
+      ['REQ', '1', { kinds: [1], authors: ['1', '2', '3'] }, { ids: ['10'] }],
+      ['CLOSE', '1'],
+    ])
+    expect(relay2.received).toStrictEqual([
+      ['REQ', '1', { kinds: [1], authors: ['1', '2', '3'] }, { ids: ['10'] }],
+      ['CLOSE', '1'],
+    ])
+    expect(relay3.received).toStrictEqual([
+      ['REQ', '1', { kinds: [1], authors: ['1'] }],
+      ['CLOSE', '1'],
+    ])
+    expect(relay4.received).toStrictEqual([
+      ['REQ', '1', { ids: ['10'] }],
+      ['CLOSE', '1'],
+    ])
 
     expect(spy.getValues()).toStrictEqual([
       [RELAY_1, event1],

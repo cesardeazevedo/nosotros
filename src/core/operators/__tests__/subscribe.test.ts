@@ -24,7 +24,10 @@ describe('subscribe()', () => {
     await spy.onComplete()
     await relay.close()
 
-    expect(relay.received).toStrictEqual([['REQ', '1', { kinds: [1], authors: ['1'] }]])
+    expect(relay.received).toStrictEqual([
+      ['REQ', '1', { kinds: [1], authors: ['1'] }],
+      ['CLOSE', '1'],
+    ])
     expect(spy.getValues()).toStrictEqual([
       [RELAY_1, note1],
       [RELAY_1, note2],

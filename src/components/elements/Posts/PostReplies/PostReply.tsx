@@ -47,7 +47,7 @@ export const PostReply = observer(function PostReply(props: Props) {
   const isMobile = useMobile()
   const collapsedLevel = isMobile ? 4 : 4
   const [open, setOpen] = useState(level < collapsedLevel)
-  const [ref] = useNoteVisibility(note, { replies: true })
+  const [ref] = useNoteVisibility(note, { replies: false })
   const user = useCurrentUser()
   const event = note.event
 
