@@ -10,11 +10,11 @@ import type { Note } from '@/stores/notes/note'
 import { toastStore } from '@/stores/ui/toast.store'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconCopy, IconDotsVertical, IconInfoSquareRounded, IconLink } from '@tabler/icons-react'
+import { useNavigate } from '@tanstack/react-router'
 import { DialogSheet } from 'components/elements/Layouts/Dialog'
 import { observer } from 'mobx-react-lite'
 import { useCallback, useState } from 'react'
 import { css } from 'react-strict-dom'
-import { PostStats } from './PostDialogs/PostStats'
 
 type Props = {
   note: Note | Comment
@@ -56,13 +56,9 @@ const Options = observer(function Options(props: PropsOptions) {
 export const PostOptions = observer(function PostOptions(props: Props) {
   const { note } = props
   const { dense } = useNoteContext()
-  const [debugDialog, setDebugDialog] = useState(false)
   const [open, setOpen] = useState(false)
   const isMobile = isMobileDevice()
-
-  const handleClose = useCallback(() => {
-    setDebugDialog(false)
-  }, [])
+  const navigate = useNavigate()
 
   const handleCopy = useCallback(
     (value: string | undefined) => {
@@ -72,26 +68,24 @@ export const PostOptions = observer(function PostOptions(props: Props) {
           const blob = new Blob([value], { type })
           window.navigator.clipboard.write([new ClipboardItem({ [type]: blob })]).then(() => {
             toastStore.enqueue('Copied', { duration: 4000 })
-            handleClose()
+            setOpen(false)
           })
         }
       }
     },
-    [note, handleClose],
+    [note],
   )
 
-  const handleDetailsDialog = useCallback(() => {
-    setDebugDialog(!debugDialog)
-  }, [debugDialog])
+  const handleStatsClick = useCallback(() => {
+    // @ts-ignore
+    navigate({ search: { stats: note.id } })
+  }, [])
 
   const nevent = note.nevent
   const link = window.location.origin + '/' + nevent
 
   return (
     <>
-      <DialogSheet title='Stats' open={debugDialog} onClose={handleClose} maxWidth='sm'>
-        <PostStats note={note} onClose={handleClose} />
-      </DialogSheet>
       {!isMobile && (
         <Menu
           sx={styles.menu}
@@ -109,7 +103,7 @@ export const PostOptions = observer(function PostOptions(props: Props) {
             onCopyIdClick={handleCopy(nevent)}
             onCopyAuthorIdClick={handleCopy(note.user?.nprofile)}
             onCopyLinkClick={handleCopy(link)}
-            onDetailsClick={handleDetailsDialog}
+            onDetailsClick={handleStatsClick}
           />
         </Menu>
       )}
@@ -128,7 +122,7 @@ export const PostOptions = observer(function PostOptions(props: Props) {
                   onCopyIdClick={handleCopy(nevent)}
                   onCopyAuthorIdClick={handleCopy(note.user?.nprofile)}
                   onCopyLinkClick={handleCopy(link)}
-                  onDetailsClick={handleDetailsDialog}
+                  onDetailsClick={handleStatsClick}
                 />
               </MenuList>
             </Stack>
