@@ -1,11 +1,12 @@
 import { Kind } from '@/constants/kinds'
 import { RECOMMENDED_PUBKEYS } from '@/constants/recommended'
+import type { NostrFilter } from '@/core/types'
 import type { NostrClient } from '@/nostr/nostr'
 import { Duration } from 'luxon'
 import { autorun } from 'mobx'
 import type { Instance, SnapshotIn, SnapshotOut } from 'mobx-state-tree'
 import { t } from 'mobx-state-tree'
-import { EMPTY, shareReplay } from 'rxjs'
+import { EMPTY } from 'rxjs'
 import { createEditorStore } from '../editor/editor.store'
 import { NotesFeedSubscriptionModel } from '../feeds/feed.notes'
 import { getRootStore } from '../helpers/getRootStore'
@@ -33,12 +34,17 @@ export const HomeModuleModel = t.snapshotProcessor(
       subscribe(client: NostrClient) {
         if (!self.feed.started) {
           self.feed.started = true
-          return self.feed.subscribe(client).pipe(shareReplay(1))
+          return self.feed.subscribe(client)
         }
         return EMPTY
       },
       select(feed: HomeFeeds) {
         self.selected = feed
+      },
+      setFeed(scope: 'self' | 'following', filter: NostrFilter) {
+        self.feed.scope = scope
+        self.feed.pagination.setFilter(filter)
+        self.feed.started = false
       },
       afterCreate() {
         // Keep pubkey synced with authStore
@@ -46,10 +52,10 @@ export const HomeModuleModel = t.snapshotProcessor(
           const root = getRootStore(self)
           const pubkey = root.auth.selected?.pubkey
           if (pubkey) {
-            self.feed.pagination.setFilter({ authors: [pubkey] })
+            this.setFeed('following', { authors: [pubkey] })
           } else {
             // we eventually wanna run a algo feed relay instead of these pubkeys
-            self.feed.pagination.setFilter({ authors: [RECOMMENDED_PUBKEYS] })
+            this.setFeed('self', { authors: [RECOMMENDED_PUBKEYS] })
           }
         })
       },
@@ -59,7 +65,7 @@ export const HomeModuleModel = t.snapshotProcessor(
       const options = {
         scope: 'following' as const,
         filter: { kinds: [Kind.Text, Kind.Repost] },
-        range: Duration.fromObject({ minutes: 60 }).as('minutes'),
+        range: Duration.fromObject({ minutes: 30 }).as('minutes'),
       }
       return {
         selected: 'notes' as const,
