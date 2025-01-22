@@ -8,7 +8,7 @@ export interface SeenStore {
 }
 
 export interface EventStore {
-  query(filters: NostrFilter | NostrFilter[]): AsyncGenerator<AsyncGenerator<NostrEvent, void, unknown>>
+  query(filters: NostrFilter | NostrFilter[]): AsyncGenerator<NostrEvent, void, unknown>
   queryByPubkey(kind: number, pubkey: string): Promise<NostrEvent | undefined>
   insert(event: NostrEvent): Promise<NostrEvent | false>
 }

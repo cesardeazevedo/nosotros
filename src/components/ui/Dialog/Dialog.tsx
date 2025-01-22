@@ -49,6 +49,6 @@ const styles = css.create({
     overflow: 'auto',
     zIndex: 200,
     margin: 'auto',
-    maxHeight: 'calc(100% - 100px)',
+    maxHeight: 'calc(100% - 24px)',
   },
 })

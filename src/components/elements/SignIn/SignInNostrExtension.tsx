@@ -3,6 +3,8 @@ import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { useGoBack } from '@/hooks/useNavigations'
 import { signinStore } from '@/stores/signin/signin.store'
+import { toastStore } from '@/stores/ui/toast.store'
+import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { observer } from 'mobx-react-lite'
 import { useCallback } from 'react'
@@ -12,10 +14,17 @@ import { SignInHeader } from './SignInHeader'
 
 export const SignInNostrExtension = observer(function SignInNostrExtension() {
   const goBack = useGoBack()
+  const hasExtension = signinStore.hasExtension.current()
 
-  const handleSubmit = useCallback(() => {
-    signinStore.submitNostrExtension()
-    goBack()
+  const handleSubmit = useCallback(async () => {
+    try {
+      await signinStore.submitNostrExtension()
+      goBack()
+    } catch (err) {
+      const error = err as Error
+      toastStore.enqueue(error.message)
+      goBack()
+    }
   }, [])
 
   return (
@@ -23,17 +32,23 @@ export const SignInNostrExtension = observer(function SignInNostrExtension() {
       <SignInHeader>
         <Text variant='headline'>Sign In with Nostr Extension</Text>
       </SignInHeader>
-      <Stack horizontal={false} align='stretch' justify='space-between' sx={styles.content}>
-        <Text size='lg'>
-          {signinStore.hasExtension.current() === false && (
-            <strong>
-              Nostr extension not found.
-              <br />
-            </strong>
+      <Stack horizontal={false} align='stretch' justify='flex-start' sx={styles.content}>
+        <Stack horizontal={false} grow justify='center' align='center' gap={4}>
+          {hasExtension === false && (
+            <Stack justify='center' sx={styles.notfound}>
+              <Text variant='title' size='lg'>
+                <strong>
+                  Nostr extension not found.
+                  <br />
+                </strong>
+              </Text>
+            </Stack>
           )}
-          You can sign in by using a Nostr browser extension such as Alby, Nos2x or{' '}
-          <ContentLink href='https://github.com/nostr-protocol/nips/blob/master/07.md'>others</ContentLink>
-        </Text>
+          <Text size='lg'>
+            You can sign in by using a Nostr browser extension such as Alby, Nos2x or{' '}
+            <ContentLink href='https://nostrapps.com/#signers#all'>others</ContentLink>
+          </Text>
+        </Stack>
         <Button variant='filled' sx={styles.button} onClick={handleSubmit}>
           Sign In with Extension
         </Button>
@@ -52,5 +67,8 @@ const styles = css.create({
   },
   button: {
     height: 50,
+  },
+  notfound: {
+    color: palette.error,
   },
 })

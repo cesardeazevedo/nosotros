@@ -1,9 +1,13 @@
 import { CacheableResponsePlugin } from 'workbox-cacheable-response'
+import { clientsClaim } from 'workbox-core'
 import { ExpirationPlugin } from 'workbox-expiration'
 import { cleanupOutdatedCaches, precacheAndRoute } from 'workbox-precaching'
 import { registerRoute } from 'workbox-routing'
 import { CacheFirst } from 'workbox-strategies'
 
+// @ts-ignore
+self.skipWaiting()
+clientsClaim()
 cleanupOutdatedCaches()
 
 // @ts-ignore
@@ -15,7 +19,7 @@ registerRoute(
     cacheName: 'images',
     plugins: [
       new ExpirationPlugin({
-        maxEntries: 1000,
+        maxEntries: 10000,
         // Cache for a maximum of a week.
         maxAgeSeconds: 7 * 24 * 60 * 60,
       }),

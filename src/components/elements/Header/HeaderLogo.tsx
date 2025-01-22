@@ -36,5 +36,6 @@ const styles = css.create({
   },
   text$mobile: {
     margin: 'auto',
+    marginLeft: -32,
   },
 })

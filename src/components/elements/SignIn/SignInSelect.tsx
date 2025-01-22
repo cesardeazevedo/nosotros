@@ -45,17 +45,9 @@ export const SignInSelect = observer(function SignInSelect() {
               </Stack>
             </Card>
             <Card variant='filled' sx={styles.card} onClick={() => signinStore.goTo('NOSTR_EXTENSION')}>
-              <Stack align='center'>
+              <Stack grow justify='space-between'>
                 <CardContent>
-                  <CardTitle
-                    headline={
-                      <Stack gap={0.5}>
-                        Nostr extension
-                        {/* <Chip icon={undefined} variant='suggestion' sx={styles.chip} label='Easy' /> */}
-                      </Stack>
-                    }
-                    subhead={'Sign in using a compatible browser extension'}
-                  />
+                  <CardTitle headline={'Nostr extension'} subhead={'Sign in using a compatible browser extension'} />
                 </CardContent>
                 <CardContent>
                   <IconChevronRight />
@@ -63,24 +55,21 @@ export const SignInSelect = observer(function SignInSelect() {
               </Stack>
             </Card>
             <Card variant='filled' sx={styles.card} onClick={() => signinStore.goTo('REMOTE_SIGN')}>
-              <Stack grow align='stretch'>
-                <CardContent grow>
-                  <CardTitle
-                    headline={
-                      <Stack horizontal={false} align='flex-start' gap={0.5}>
-                        Remote signer
-                        {/* <Chip sx={styles.chip} label='Advanced' /> */}
-                      </Stack>
-                    }
-                    subhead={
-                      'Your private key is managed by a separate application that authorizes actions without direct exposure'
-                    }
-                  />
-                </CardContent>
-                <CardContent>
-                  <IconChevronRight />
-                </CardContent>
-              </Stack>
+              <CardContent grow>
+                <CardTitle
+                  headline={
+                    <Stack horizontal={false} align='flex-start' gap={0.5}>
+                      Remote signer
+                    </Stack>
+                  }
+                  subhead={
+                    'Your private key is managed by a separate application that authorizes actions without direct exposure'
+                  }
+                />
+              </CardContent>
+              <CardContent>
+                <IconChevronRight />
+              </CardContent>
             </Card>
             <Card disabled variant='filled' sx={styles.card} onClick={() => {}}>
               <CardContent>
@@ -96,10 +85,10 @@ export const SignInSelect = observer(function SignInSelect() {
             </Card>
           </Stack>
           <Divider inset>Create acount comming soon</Divider>
-          <Link href='https://nosta.me'>
+          <Link href='https://start.njump.me/'>
             <Button fullWidth variant='filled' sx={styles.button}>
               <Stack justify='center' gap={1}>
-                Create Account on nosta.me
+                Create account on njump start
                 <IconExternalLink size={16} style={{ marginRight: -16 }} />
               </Stack>
             </Button>
@@ -113,8 +102,9 @@ export const SignInSelect = observer(function SignInSelect() {
 const styles = css.create({
   card: {
     flex: 1,
+    display: 'flex',
+    alignItems: 'center',
     width: '100%',
-    height: 40,
   },
   chip: {
     [chipTokens.leadingSpace]: 0,

@@ -1,5 +1,5 @@
 import { decodeNIP19 } from '@/utils/nip19'
-import { useMatch, useRouter } from '@tanstack/react-router'
+import { useMatch } from '@tanstack/react-router'
 import { useCallback } from 'react'
 import { DialogSheet } from '../elements/Layouts/Dialog'
 import { ZapRequestInvoice } from '../elements/Zaps/ZapRequestInvoice'
@@ -16,11 +16,9 @@ export const ZapRequestInvoiceDialog = () => {
     select: (x) => x.search.nevent,
   })
 
-  const router = useRouter()
-
   const handleClose = useCallback(() => {
     // @ts-ignore
-    router.navigate({ from: router.fullPath, search: {} })
+    router.navigate({ search: {} })
   }, [])
 
   const decoded = decodeNIP19(nevent)
