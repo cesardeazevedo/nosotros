@@ -48,7 +48,7 @@ export const VirtualListWindow = observer(function VirtualListWindow<T extends F
 
   const handleScroll = useCallback(() => {
     const scrolledTo = window.scrollY + window.innerHeight
-    if (scrolledTo >= document.body.scrollHeight - 250) {
+    if (scrolledTo >= document.body.scrollHeight - 600) {
       onScrollEnd?.()
     }
   }, [])

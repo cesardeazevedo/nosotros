@@ -13,7 +13,7 @@ export const VirtualListColumn = observer(function VirtualList<T extends FeedAbs
   const ref = useRef<VListHandle>(null)
 
   const handleScroll = useCallback((offset: number) => {
-    if (offset >= (ref.current?.scrollSize || Infinity) - 1500 - 200) {
+    if (offset >= (ref.current?.scrollSize || Infinity) - 2500) {
       onScrollEnd?.()
     }
   }, [])
