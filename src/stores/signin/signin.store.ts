@@ -29,8 +29,8 @@ export const signinStore = makeAutoObservable({
   error: '',
 
   hasExtension: lazyObservable((sink) => {
-    setTimeout(() => sink(true), 2000)
-    sink(false)
+    setTimeout(() => sink('nostr' in window), 2000)
+    sink(undefined)
   }),
 
   goTo(page: Pages) {
