@@ -3,11 +3,11 @@ import { Tab } from '@/components/ui/Tab/Tab'
 import { Tabs } from '@/components/ui/Tabs/Tabs'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 import { useMobile } from '@/hooks/useMobile'
-import { useCurrentUser } from '@/hooks/useRootStore'
+import { useCurrentPubkey, useCurrentUser } from '@/hooks/useRootStore'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import { IconBell, IconBellFilled, IconServerBolt, IconUser } from '@tabler/icons-react'
+import { IconBell, IconBellFilled, IconUser } from '@tabler/icons-react'
 import { Link, useLocation } from '@tanstack/react-router'
 import { observer } from 'mobx-react-lite'
 import { css, html } from 'react-strict-dom'
@@ -17,6 +17,7 @@ import { SignInButtonFab } from '../SignIn/SignInButtonFab'
 
 export const BottomNavigation = observer(function BottomNavigation() {
   const user = useCurrentUser()
+  const pubkey = useCurrentPubkey()
   const mobile = useMobile()
   const location = useLocation()
 
@@ -27,7 +28,7 @@ export const BottomNavigation = observer(function BottomNavigation() {
   return (
     <>
       <html.div style={styles.root}>
-        {!user ? <SignInButtonFab /> : null}
+        {!pubkey ? <SignInButtonFab /> : null}
         <Stack grow justify='space-evenly'>
           <Tabs anchor={location.pathname}>
             <Tooltip text='Home' enterDelay={0}>
@@ -35,17 +36,19 @@ export const BottomNavigation = observer(function BottomNavigation() {
                 <Tab anchor='/' sx={styles.tab} icon={<IconHome />} activeIcon={<IconHomeFilled />} />
               </Link>
             </Tooltip>
-            <Tooltip text='Deck Mode' enterDelay={0}>
-              <Link to='/relays'>
-                <Tab anchor='/relays' sx={styles.tab} icon={<IconServerBolt size={24} />} />
-              </Link>
-            </Tooltip>
-            <Tooltip text='Notifications' enterDelay={0}>
-              <Link to='/notifications'>
-                <Tab anchor='/notifications' sx={styles.tab} icon={<IconBell />} activeIcon={<IconBellFilled />} />
-              </Link>
-            </Tooltip>
+            {/* <Tooltip text='Relays' enterDelay={0}> */}
+            {/*   <Link to='/relays'> */}
+            {/*     <Tab anchor='/relays' sx={styles.tab} icon={<IconServerBolt size={24} />} /> */}
+            {/*   </Link> */}
+            {/* </Tooltip> */}
             {user && (
+              <Tooltip text='Notifications' enterDelay={0}>
+                <Link to='/notifications'>
+                  <Tab anchor='/notifications' sx={styles.tab} icon={<IconBell />} activeIcon={<IconBellFilled />} />
+                </Link>
+              </Tooltip>
+            )}
+            {pubkey && user && (
               <Tooltip text='Profile' enterDelay={0}>
                 <Link to='/$nostr' params={{ nostr: user!.nprofile! }}>
                   <Tab anchor={`/${user.nprofile}`} sx={styles.tab} icon={<IconUser />} activeIcon={<IconUser />} />
