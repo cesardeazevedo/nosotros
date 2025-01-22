@@ -21,10 +21,12 @@ type Props = {
   notification: Notification
 }
 
+const formatter = new Intl.NumberFormat()
+
 export const NotificationItem = observer(function NotificationItem(props: Props) {
   const { notification } = props
   const user = useCurrentUser()
-  const { type, pubkey } = notification
+  const { type, author: pubkey } = notification
 
   const linkId = type === 'reply' || type === 'mention' ? notification.id : notification.related?.id
   const note = noteStore.get(linkId)
@@ -33,9 +35,14 @@ export const NotificationItem = observer(function NotificationItem(props: Props)
     <Stack gap={2} sx={styles.root} align='flex-start'>
       <Stack sx={styles.type} justify='flex-start' align='flex-start'>
         {type === 'zap' && (
-          <html.span style={styles.zapIcon}>
-            <IconBolt fill='currentColor' size={28} strokeWidth='1.5' />
-          </html.span>
+          <>
+            <Stack horizontal={false} align='center' sx={styles.zapIcon}>
+              <IconBolt fill='currentColor' size={28} strokeWidth='1.5' />
+              <Text size='lg' sx={styles.zapAmount}>
+                {formatter.format(parseInt(notification.zapAmount) / 1000)}
+              </Text>
+            </Stack>
+          </>
         )}
         {type === 'reaction' && (
           <>
@@ -65,7 +72,7 @@ export const NotificationItem = observer(function NotificationItem(props: Props)
               {type === 'zap' && (
                 <>
                   <Text size='md'>zapped to your note:</Text>
-                  <NotificationContent id={notification.id} />
+                  <NotificationContent id={notification.related?.id} />
                 </>
               )}
               {type === 'reaction' && (
@@ -142,5 +149,8 @@ const styles = css.create({
   },
   trailing: {
     minWidth: 60,
+  },
+  zapAmount: {
+    fontFamily: 'monospace',
   },
 })

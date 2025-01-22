@@ -1,6 +1,7 @@
 import { Kind } from '@/constants/kinds'
 import type { NostrClient } from '@/nostr/nostr'
 import { subscribeNotifications } from '@/nostr/subscriptions/subscribeNotifications'
+import type { NostrEventNote, NostrEventRepost, NostrEventZapReceipt } from '@/nostr/types'
 import { metadataSymbol, type NostrEventMetadata } from '@/nostr/types'
 import { observable } from 'mobx'
 import { t, type Instance } from 'mobx-state-tree'
@@ -31,8 +32,6 @@ export const NotificationFeedModel = FeedStoreModel.named('NotificationFeedModel
         tap(() => self.pagination.setFilter({ kinds: self.filter.kinds })),
         switchMap(() => {
           return subscribeNotifications(client, self.pagination).pipe(
-            mergeWith(self.paginateIfEmpty(20)),
-
             // filter out same author notifications
             filter((notification) => notification.pubkey !== author),
 
@@ -49,16 +48,25 @@ export const NotificationFeedModel = FeedStoreModel.named('NotificationFeedModel
               switch (metadata.kind) {
                 case Kind.Article:
                 case Kind.Text: {
-                  return new Notification(metadata.isRoot ? 'mention' : 'reply', event)
+                  return new Notification({
+                    type: metadata.isRoot ? 'mention' : 'reply',
+                    event: event as NostrEventNote,
+                  })
                 }
                 case Kind.Reaction: {
-                  return new Notification('reaction', event)
+                  return new Notification({
+                    type: 'reaction',
+                    event,
+                  })
                 }
                 case Kind.Repost: {
-                  return new Notification('repost', event)
+                  return new Notification({
+                    type: 'repost',
+                    event: event as NostrEventRepost,
+                  })
                 }
                 case Kind.ZapReceipt: {
-                  return new Notification('zap', event)
+                  return new Notification({ type: 'zap', event: event as NostrEventZapReceipt })
                 }
               }
             }),
