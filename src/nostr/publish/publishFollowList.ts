@@ -1,7 +1,7 @@
 import { Kind } from '@/constants/kinds'
 import { ofKind } from '@/core/operators/ofKind'
 import { start } from '@/core/operators/start'
-import { EMPTY, map, mergeMap, of, take } from 'rxjs'
+import { EMPTY, last, map, mergeMap, of, take } from 'rxjs'
 import type { NostrClient } from '../nostr'
 import { parseEventMetadata } from '../operators/parseMetadata'
 import type { NostrEventFollow } from '../types'
@@ -19,9 +19,9 @@ export function publishFollowList(client: NostrClient, tag: 'p', related: string
   return of(sub).pipe(
     start(client.pool),
     map(([, event]) => event),
-    take(1),
     parseEventMetadata(),
     ofKind<NostrEventFollow>(kinds),
+    last(undefined, null),
     mergeMap((event) => {
       if (!event) return EMPTY
 
