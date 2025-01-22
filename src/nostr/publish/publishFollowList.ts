@@ -1,7 +1,7 @@
 import { Kind } from '@/constants/kinds'
 import { ofKind } from '@/core/operators/ofKind'
 import { start } from '@/core/operators/start'
-import { EMPTY, last, map, mergeMap, of, take } from 'rxjs'
+import { EMPTY, last, map, mergeMap, of } from 'rxjs'
 import type { NostrClient } from '../nostr'
 import { parseEventMetadata } from '../operators/parseMetadata'
 import type { NostrEventFollow } from '../types'

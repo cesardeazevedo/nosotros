@@ -111,6 +111,6 @@ export class RelayServer extends WS {
   async close() {
     super.close()
     await this.closed
-    await new Promise<void>((resolve) => setImmediate(resolve))
+    await new Promise<void>((resolve) => setTimeout(resolve, 1000))
   }
 }

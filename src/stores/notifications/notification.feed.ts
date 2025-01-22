@@ -5,7 +5,7 @@ import type { NostrEventNote, NostrEventRepost, NostrEventZapReceipt } from '@/n
 import { metadataSymbol, type NostrEventMetadata } from '@/nostr/types'
 import { observable } from 'mobx'
 import { t, type Instance } from 'mobx-state-tree'
-import { bufferTime, filter, finalize, identity, map, mergeMap, mergeWith, switchMap, tap } from 'rxjs'
+import { bufferTime, filter, finalize, identity, map, mergeMap, switchMap, tap } from 'rxjs'
 import { FeedStoreModel } from '../feeds/feed.store'
 import { toStream } from '../helpers/toStream'
 import { withToggleAction } from '../helpers/withToggleAction'
