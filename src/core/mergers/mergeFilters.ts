@@ -5,6 +5,8 @@ import { pickBy } from '../helpers/pickBy'
 
 export const FILTER_ARRAY_FIELDS = ['kinds', 'authors', 'ids', '#e', '#p'] as (keyof NostrFilter)[]
 
+const unmergableFilters = [Kind.Follows, Kind.Mutelist]
+
 export function mergeFilters(filters: NostrFilter[]): NostrFilter[] {
   const groups: Record<string, NostrFilter> = {}
   for (const filter of filters) {
@@ -15,7 +17,9 @@ export function mergeFilters(filters: NostrFilter[]): NostrFilter[] {
       paginationKeys +
       [...(filter.kinds || [])]
         // Do not merge follows kind, this needs some work
-        .map((kind) => (kind === Kind.Follows ? kind : isReplaceableKind(kind) ? 'replaceable' : 'nonreplaceable'))
+        .map((kind) =>
+          unmergableFilters.includes(kind) ? kind : isReplaceableKind(kind) ? 'replaceable' : 'nonreplaceable',
+        )
         .sort()
         .toString()
 
