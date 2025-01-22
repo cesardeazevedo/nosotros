@@ -44,6 +44,7 @@ export const LinkProfile = observer(
 
     return (
       <Link
+        resetScroll
         to='/$nostr'
         params={{ nostr: user?.nprofile }}
         // @ts-ignore
