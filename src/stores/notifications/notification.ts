@@ -1,19 +1,45 @@
 import { isEventTag } from '@/nostr/helpers/parseTags'
-import type { NostrEventMetadata } from '@/nostr/types'
+import {
+  metadataSymbol,
+  type NostrEventMetadata,
+  type NostrEventNote,
+  type NostrEventRepost,
+  type NostrEventZapReceipt,
+} from '@/nostr/types'
 import { makeAutoObservable } from 'mobx'
 import { noteStore } from '../notes/notes.store'
 
-export type NotificationType = 'reply' | 'mention' | 'reaction' | 'zap' | 'repost'
+export type NotificationItem =
+  | {
+      type: 'reply' | 'mention'
+      event: NostrEventNote
+    }
+  | {
+      type: 'reaction'
+      event: NostrEventMetadata
+    }
+  | {
+      type: 'zap'
+      event: NostrEventZapReceipt
+    }
+  | {
+      type: 'repost'
+      event: NostrEventRepost
+    }
 
 export class Notification {
-  constructor(
-    public type: NotificationType,
-    public event: NostrEventMetadata,
-  ) {
+  constructor(public item: NotificationItem) {
     makeAutoObservable(this, {
-      type: false,
-      event: false,
+      item: false,
     })
+  }
+
+  get type() {
+    return this.item.type
+  }
+
+  get event() {
+    return this.item.event
   }
 
   get id() {
@@ -24,10 +50,10 @@ export class Notification {
     return this.event.created_at
   }
 
-  get pubkey() {
+  get author() {
     switch (this.type) {
       case 'zap': {
-        return this.event.tags.find((tag) => tag[0] === 'P')?.[1] || this.event.pubkey
+        return this.event.tags.find((tag) => tag[0] === 'p')?.[1] || this.event.pubkey
       }
       default: {
         return this.event.pubkey
@@ -40,5 +66,13 @@ export class Notification {
     if (tag) {
       return noteStore.get(tag[1])
     }
+  }
+
+  get zapAmount() {
+    const item = this.item
+    if (item.type === 'zap') {
+      return item.event[metadataSymbol].bolt11.amount?.value || '0'
+    }
+    return '0'
   }
 }

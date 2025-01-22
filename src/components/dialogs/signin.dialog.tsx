@@ -1,3 +1,4 @@
+import { signinStore } from '@/stores/signin/signin.store'
 import { useMatch } from '@tanstack/react-router'
 import { DialogSheet } from 'components/elements/Layouts/Dialog'
 import { SignIn } from 'components/elements/SignIn/SignIn'
@@ -14,6 +15,7 @@ export const SignInDialog = observer(function SignInDialog() {
   const goBack = useGoBack()
 
   const handleClose = useCallback(() => {
+    signinStore.reset()
     goBack()
   }, [goBack])
 

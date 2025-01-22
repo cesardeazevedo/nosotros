@@ -23,7 +23,10 @@ describe('localRelay', () => {
 
     await spy.onComplete()
     await relay.close()
-    expect(relay.received).toStrictEqual([['REQ', '1', { kinds: [Kind.Text], authors: ['1'] }]])
+    expect(relay.received).toStrictEqual([
+      ['REQ', '1', { kinds: [Kind.Text], authors: ['1'] }],
+      ['CLOSE', '1'],
+    ])
     expect(spy.getValues()).toStrictEqual([note1, note2])
   })
 

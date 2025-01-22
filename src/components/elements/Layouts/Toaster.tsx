@@ -23,7 +23,7 @@ export const Toaster = observer(function Toaster() {
     <html.div style={[styles.root, isMobile && styles.root$mobile]}>
       <PopoverBase
         opened={toast?.open || false}
-        placement={isMobile ? 'bottom' : 'bottom-start'}
+        placement={isMobile ? 'top' : 'bottom-start'}
         contentRenderer={
           <Paper
             elevation={2}
@@ -45,9 +45,8 @@ const styles = css.create({
     right: 20,
   },
   root$mobile: {
-    top: 'unset',
     left: 0,
-    bottom: 124,
+    top: 24,
     right: 0,
   },
   anchor: {
@@ -55,6 +54,6 @@ const styles = css.create({
   },
   paper: {
     minWidth: 200,
-    padding: spacing.padding2,
+    padding: spacing.padding4,
   },
 })

@@ -8,9 +8,9 @@ import { IDBEventQuery } from './idb.events.query'
 export class IDBEventStore {
   constructor(private db: Promise<idb.IDBPDatabase<IndexedDBSchema>>) {}
 
-  async *query(filters: NostrFilter | NostrFilter[]) {
+  async *query(filter: NostrFilter) {
     const db = await this.db
-    yield* [filters].flat(1).map((filter) => new IDBEventQuery(db, filter).start())
+    yield* new IDBEventQuery(db, filter).start()
   }
 
   async queryByPubkey(kind: Kind, pubkey: string) {
@@ -45,10 +45,14 @@ export class IDBEventStore {
 
       if (data.created_at > latestDate) {
         if (eventFound) {
-          await Promise.all([
-            events.delete(eventFound.id),
-            ...eventFound.tags.map((tag) => tags.delete([eventFound.id, tag[0], tag[1]])),
-          ])
+          try {
+            await Promise.all([
+              events.delete(eventFound.id),
+              ...eventFound.tags.map((tag) => tags.delete([eventFound.id, tag[0], tag[1]])),
+            ])
+          } catch (error) {
+            console.error(error)
+          }
         }
       } else {
         return false
@@ -68,10 +72,14 @@ export class IDBEventStore {
           if (data.created_at > latestDate) {
             const eventFound = await events.get(tagFound.eventId)
             if (eventFound) {
-              await Promise.all([
-                events.delete(tagFound.eventId),
-                ...eventFound.tags.map((tag) => tags.delete([eventFound.id, tag[0], tag[1]])),
-              ])
+              try {
+                await Promise.all([
+                  events.delete(tagFound.eventId),
+                  ...eventFound.tags.map((tag) => tags.delete([eventFound.id, tag[0], tag[1]])),
+                ])
+              } catch (error) {
+                console.error(error)
+              }
             }
           }
         }

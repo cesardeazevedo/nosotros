@@ -4,7 +4,6 @@ import { useCurrentUser } from '@/hooks/useRootStore'
 import type { Note } from '@/stores/notes/note'
 import { spacing } from '@/themes/spacing.stylex'
 import { useRouteContext } from '@tanstack/react-router'
-import { observer } from 'mobx-react-lite'
 import { css, html } from 'react-strict-dom'
 import { PostLoadMore } from '../PostLoadMore'
 import { PostRepliesTree } from './PostReply'
@@ -14,7 +13,7 @@ type Props = {
   onLoadMoreClick?: () => void
 }
 
-export const PostRepliesPreview = observer(function PostRepliesPreview(props: Props) {
+export const PostRepliesPreview = function PostRepliesPreview(props: Props) {
   const { note, onLoadMoreClick } = props
   const currentUser = useCurrentUser()
   const context = useRouteContext({ strict: false })
@@ -36,7 +35,7 @@ export const PostRepliesPreview = observer(function PostRepliesPreview(props: Pr
       </Stack>
     </>
   )
-})
+}
 
 const styles = css.create({
   root: {},

@@ -47,6 +47,7 @@ export const Header = React.memo(function Header() {
             {!isNostrRoute && <Sidebar />}
             {!isNostrRoute && <HeaderLogo />}
             {isNostrRoute && <NavigationHeader />}
+            <div />
             <RelayPopoverSummary />
           </Stack>
         )}

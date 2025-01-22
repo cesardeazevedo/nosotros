@@ -48,6 +48,7 @@ describe('NIP01Notes', () => {
       ['REQ', '3', { ids: ['4'], kinds: [1] }, { kinds: [0, 10002], authors: ['3', '10'] }, { ids: ['23'] }],
       ['CLOSE', '3'],
       ['REQ', '4', { kinds: [0, 10002], authors: ['4', '11'] }],
+      ['CLOSE', '4'],
     ])
 
     // The pipeline successfully returned all the related notes

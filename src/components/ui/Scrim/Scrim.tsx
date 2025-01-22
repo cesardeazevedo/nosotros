@@ -32,7 +32,7 @@ export const Scrim = forwardRef<HTMLDivElement, Props>(function Scrim(props, for
       {...other}
       lockScroll={false}
       ref={forwardedRef}>
-      {other.lockScroll && <RemoveScroll>{children}</RemoveScroll>}
+      {other.lockScroll && <RemoveScroll noIsolation>{children}</RemoveScroll>}
     </FloatingOverlay>
   )
 })

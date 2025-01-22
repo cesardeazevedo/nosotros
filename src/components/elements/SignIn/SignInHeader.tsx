@@ -31,6 +31,7 @@ export const SignInHeader = observer((props: Props) => {
 const styles = css.create({
   root: {
     padding: spacing.padding4,
+    paddingBottom: spacing.padding2,
   },
   back: {
     position: 'absolute',

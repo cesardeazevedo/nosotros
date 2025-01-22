@@ -11,7 +11,8 @@ export const SignIn = () => {
 
 const styles = css.create({
   root: {
-    height: 'calc(100% - 70px)',
-    overflow: 'hidden',
+    height: '100%',
+    overflowX: 'hidden',
+    overflowY: 'scroll',
   },
 })
