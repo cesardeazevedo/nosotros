@@ -1,7 +1,8 @@
-import { useNoteContext } from '@/components/providers/NoteProvider'
+import { NoteContext, useNoteContext } from '@/components/providers/NoteProvider'
 import { Paper } from '@/components/ui/Paper/Paper'
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
 import { modelStore } from '@/stores/base/model.store'
+import { duration } from '@/themes/duration.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { observer } from 'mobx-react-lite'
@@ -25,7 +26,9 @@ export const NAddr = observer(function NAddr(props: Props) {
       )}
       {item && (
         <Paper outlined sx={styles.content}>
-          <NostrEventQuote item={item} />
+          <NoteContext.Provider value={{ dense: true }}>
+            <NostrEventQuote item={item} />
+          </NoteContext.Provider>
         </Paper>
       )}
     </html.div>
@@ -44,8 +47,13 @@ const styles = css.create({
   },
   content: {
     position: 'relative',
-    background: 'transparent',
-    overflow: 'hidden',
+    transition: 'background',
+    transitionTimingFunction: 'ease',
+    transitionDuration: duration.short1,
+    backgroundColor: {
+      default: 'transparent',
+      ':hover': 'rgba(125, 125, 125, 0.04)',
+    },
   },
   skeleton: {
     paddingInline: spacing.padding2,
