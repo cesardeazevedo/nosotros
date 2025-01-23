@@ -31,7 +31,7 @@ export const RelayDiscovery = observer(function RelayDiscovery() {
   useSubscription(sub)
   return (
     <Stack horizontal gap={1} justify='space-between' align='flex-start'>
-      <PaperContainer elevation={1} sx={styles.section}>
+      <PaperContainer elevation={1}>
         <Stack horizontal={false} sx={styles.box}>
           <Stack gap={0.5} sx={styles.header} justify='space-between'>
             <Text variant='title' size='md'>
@@ -98,9 +98,6 @@ export const RelayDiscovery = observer(function RelayDiscovery() {
 })
 
 const styles = css.create({
-  section: {
-    marginTop: spacing.margin4,
-  },
   box: {},
   header: {
     padding: spacing.padding2,
