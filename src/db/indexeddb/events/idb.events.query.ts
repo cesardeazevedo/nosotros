@@ -42,8 +42,10 @@ export class IDBEventQuery {
         yield* this.getByKey(this.events, value)
       }
     } else {
+      let hasTags = false
       for (const [key, values = []] of Object.entries(this.filter)) {
         if (key[0] === '#') {
+          hasTags = true
           const tag = key.slice(1)
           const index = this.tags.index('kind_tag_value_created_at')
           for (const kind of this.filter.kinds || []) {
@@ -55,6 +57,16 @@ export class IDBEventQuery {
               yield* this.iterateTags(index, range)
             }
           }
+        }
+      }
+      if (!hasTags && this.filter.kinds) {
+        for (const kind of this.filter.kinds || []) {
+          const index = this.events.index('kind_pubkey_created_at')
+          const range = IDBKeyRange.bound(
+            [kind, '0', this.filter.since || 0],
+            [kind, 'g', this.filter.until || Infinity],
+          )
+          yield* this.iterate(index, range)
         }
       }
     }
