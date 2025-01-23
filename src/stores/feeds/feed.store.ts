@@ -40,7 +40,7 @@ export const FeedStoreModel = NostrSubscriptionModel.named('FeedStoreModel')
       })
     },
     paginateIfEmpty(min = 5) {
-      return interval(6000).pipe(
+      return interval(5000).pipe(
         map(() => self.notes.size),
         takeWhile((size) => size < min),
         take(10),
@@ -52,7 +52,7 @@ export const FeedStoreModel = NostrSubscriptionModel.named('FeedStoreModel')
       )
     },
     paginate() {
-      self.limit = Math.min(self.notes.size, self.limit + 10)
+      self.limit = Math.max(20, Math.min(self.notes.size, self.limit + 20))
       if (self.limit >= self.notes.size) {
         self.pagination.next()
       }
