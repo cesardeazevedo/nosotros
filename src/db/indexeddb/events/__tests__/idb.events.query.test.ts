@@ -142,6 +142,7 @@ describe('Test event query', () => {
     const note6 = fakeNote({ id: '6', created_at: 6, kind: 1, pubkey: 'd123' })
     const note7 = fakeNote({ id: '7', created_at: 7, kind: 1, pubkey: 'e123' })
     const note8 = fakeNote({ id: '8', created_at: 8, kind: 1, pubkey: 'f123' })
+    const note9 = fakeNote({ id: '9', created_at: 9, kind: 1, pubkey: 'g123' }) // invalid pubkey
 
     await idb.event.insert(note1)
     await idb.event.insert(note2)
@@ -151,6 +152,7 @@ describe('Test event query', () => {
     await idb.event.insert(note6)
     await idb.event.insert(note7)
     await idb.event.insert(note8)
+    await idb.event.insert(note9)
 
     const query = new IDBEventQuery(db, { kinds: [1] })
     const res = query.start()
