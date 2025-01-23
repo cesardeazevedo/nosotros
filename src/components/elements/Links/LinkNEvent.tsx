@@ -25,8 +25,9 @@ export const LinkNEvent = observer(function LinkNEvent(props: Props) {
   // Some quotes might be note1
   const nevent = useLocalObservable(() => ({
     get value() {
-      if (props.nevent) {
-        const decoded = decodeNIP19(props.nevent)
+      const { nevent } = props
+      if (nevent && nevent.startsWith('note1') && nevent.startsWith('nostr:note1')) {
+        const decoded = decodeNIP19(nevent)
         if (decoded?.type === 'note') {
           return nip19.neventEncode({
             id: decoded.data,
@@ -34,7 +35,7 @@ export const LinkNEvent = observer(function LinkNEvent(props: Props) {
           })
         }
       }
-      return props.nevent
+      return nevent
     },
   })).value
 
@@ -61,7 +62,7 @@ export const LinkNEvent = observer(function LinkNEvent(props: Props) {
 
   if (index !== undefined) {
     return (
-      <Link onClick={handleClickDeck} {...rest}>
+      <Link onClick={handleClickDeck} {...rest} {...css.props([underline && styles.underline])}>
         {props.children}
       </Link>
     )
