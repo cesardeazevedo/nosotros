@@ -16,6 +16,7 @@ import { UserHeaderDate } from '../User/UserHeaderDate'
 import { UserName } from '../User/UserName'
 import { NotificationContent } from './NotificationContent'
 import { NotificationMedia } from './NotificationMedia'
+import { LinkProfile } from '../Links/LinkProfile'
 
 type Props = {
   notification: Notification
@@ -26,7 +27,7 @@ const formatter = new Intl.NumberFormat()
 export const NotificationItem = observer(function NotificationItem(props: Props) {
   const { notification } = props
   const user = useCurrentUser()
-  const { type, author: pubkey } = notification
+  const { type, user: notificationUser, author: pubkey } = notification
 
   const linkId = type === 'reply' || type === 'mention' ? notification.id : notification.related?.id
   const note = noteStore.get(linkId)
@@ -65,7 +66,9 @@ export const NotificationItem = observer(function NotificationItem(props: Props)
       </Stack>
       <Stack gap={2} justify='flex-start' align='flex-start' grow>
         <NoteContext.Provider value={{ disableLink: true, dense: true }}>
-          <UserAvatar disableLink pubkey={pubkey} />
+          <LinkProfile user={notificationUser}>
+            <UserAvatar disableLink pubkey={pubkey} />
+          </LinkProfile>
           <LinkNEvent nevent={note?.nevent}>
             <Stack sx={styles.content} wrap grow>
               <UserName disableLink pubkey={pubkey} sx={styles.username} />{' '}
@@ -102,7 +105,7 @@ export const NotificationItem = observer(function NotificationItem(props: Props)
                   <NotificationContent id={notification.related?.id} />
                 </>
               )}
-              <UserHeaderDate date={notification.event.created_at} />
+              <UserHeaderDate style='long' date={notification.event.created_at} />
             </Stack>
           </LinkNEvent>
         </NoteContext.Provider>
