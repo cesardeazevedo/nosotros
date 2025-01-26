@@ -9,8 +9,9 @@ export const RootLayout = () => {
   return (
     <>
       <Dialogs />
-      <Header />
-      <Outlet />
+      <Header>
+        <Outlet />
+      </Header>
       <BottomNavigation />
       <Toaster />
       <Stats />
