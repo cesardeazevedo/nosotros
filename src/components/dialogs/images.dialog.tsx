@@ -1,21 +1,16 @@
 import { shape } from '@/themes/shape.stylex'
 import { IconX } from '@tabler/icons-react'
-import { DialogSheet } from 'components/elements/Layouts/Dialog'
 import { observer } from 'mobx-react-lite'
 import { css, html } from 'react-strict-dom'
 import { dialogStore } from 'stores/ui/dialogs.store'
 import { IconButton } from '../ui/IconButton/IconButton'
+import { Dialog } from '../ui/Dialog/Dialog'
 
 export const ImagesDialog = observer(function ImagesDialog() {
   return (
     <>
       {dialogStore.images.map((dialog, index) => (
-        <DialogSheet
-          surface={false}
-          key={index}
-          sx={styles.root}
-          open={Boolean(dialog)}
-          onClose={dialogStore.closeImage}>
+        <Dialog key={index} sx={styles.root} open={Boolean(dialog)} onClose={dialogStore.closeImage}>
           {typeof dialog === 'object' && (
             <html.div style={styles.wrapper}>
               <IconButton
@@ -27,7 +22,7 @@ export const ImagesDialog = observer(function ImagesDialog() {
               <html.img src={dialog.content} style={styles.img} />
             </html.div>
           )}
-        </DialogSheet>
+        </Dialog>
       ))}
     </>
   )
