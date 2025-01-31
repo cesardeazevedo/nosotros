@@ -1,16 +1,16 @@
+import { DeckContext } from '@/components/elements/Deck/DeckContext'
 import { NostrEventRoot } from '@/components/elements/Event/NostrEventRoot'
 import { PaperContainer } from '@/components/elements/Layouts/PaperContainer'
-import { useNoteOpen } from '@/components/elements/Posts/hooks/useNoteOpen'
 import { PostAwait } from '@/components/elements/Posts/PostAwait'
 import { PostLoading } from '@/components/elements/Posts/PostLoading'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { Text } from '@/components/ui/Text/Text'
-import { modelStore } from '@/stores/base/model.store'
+import { useNoteStoreFromId } from '@/hooks/useNoteStore'
 import type { NEventModule } from '@/stores/nevent/nevent.module'
 import { spacing } from '@/themes/spacing.stylex'
-import { useRouteContext } from '@tanstack/react-router'
 import { DeckColumnHeader } from 'components/elements/Deck/DeckColumnHeader'
 import { observer } from 'mobx-react-lite'
+import { useContext } from 'react'
 import { css } from 'react-strict-dom'
 
 type Props = {
@@ -20,9 +20,8 @@ type Props = {
 export const NEventColumn = observer(function NEventColumn(props: Props) {
   const { module } = props
 
-  const context = useRouteContext({ from: '/deck' })
-  const event = modelStore.get(module.options.id)
-  useNoteOpen(event)
+  const context = useContext(DeckContext)
+  const note = useNoteStoreFromId(module.options.id)
 
   return (
     <>
@@ -33,8 +32,8 @@ export const NEventColumn = observer(function NEventColumn(props: Props) {
       </DeckColumnHeader>
       <PaperContainer elevation={0} shape='none' sx={styles.container}>
         <PostAwait rows={1} promise={context.delay}>
-          {!event && <PostLoading rows={1} />}
-          {event && <NostrEventRoot item={event} />}
+          {!note && <PostLoading rows={1} />}
+          {note && <NostrEventRoot open event={note.event.event} />}
         </PostAwait>
         <Divider />
       </PaperContainer>
