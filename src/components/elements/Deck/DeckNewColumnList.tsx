@@ -4,6 +4,7 @@ import { ListItem } from '@/components/ui/ListItem/ListItem'
 import { listItemTokens } from '@/components/ui/ListItem/ListItem.stylex'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
+import { RECOMMENDED_PUBKEYS } from '@/constants/recommended'
 import { useCurrentPubkey, useRootStore } from '@/hooks/useRootStore'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconBellFilled, IconChevronLeft, IconUser } from '@tabler/icons-react'
@@ -35,12 +36,12 @@ export const DeckNewColumnList = function DeckNewColumnList(props: Props) {
   }, [])
 
   const handleAddHome = useCallback(() => {
-    deck.addHome()
+    deck.addHome({ authors: pubkey ? [pubkey] : RECOMMENDED_PUBKEYS })
     props.onClose?.()
   }, [pubkey])
 
   const handleAddProfile = useCallback((item: { pubkey: string }) => {
-    deck.addNProfile({ pubkey: item.pubkey })
+    deck.addNProfile({ options: { pubkey: item.pubkey } })
     props.onClose?.()
   }, [])
 

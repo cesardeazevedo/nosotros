@@ -36,6 +36,18 @@ export const NEventModuleModel = BaseModuleModel.named('NEventModuleModel')
     },
   }))
 
+export function createNEventModule(snapshot: Pick<NEventModuleSnapshotIn, 'id' | 'options'>) {
+  return NEventModuleModel.create({
+    ...snapshot,
+    context: {
+      options: {
+        pubkey: snapshot.options.author,
+        relays: snapshot.options.relays,
+      },
+    },
+  })
+}
+
 export interface NEventModule extends Instance<typeof NEventModuleModel> {}
 export interface NEventModuleSnapshotIn extends SnapshotIn<typeof NEventModuleModel> {}
 export interface NEventModuleSnapshotOut extends SnapshotOut<typeof NEventModuleModel> {}

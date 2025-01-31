@@ -1,22 +1,22 @@
 import { DeckColumnHeader } from '@/components/elements/Deck/DeckColumnHeader'
+import { DeckContext } from '@/components/elements/Deck/DeckContext'
 import { Editor } from '@/components/elements/Editor/Editor'
 import { NostrEventFeedItem } from '@/components/elements/Event/NostrEventFeedItem'
 import { FeedSettings } from '@/components/elements/Feed/FeedSettings'
 import { FeedTabs } from '@/components/elements/Feed/FeedTabs'
 import { IconHomeFilled } from '@/components/elements/Icons/IconHomeFilled'
 import { PaperContainer } from '@/components/elements/Layouts/PaperContainer'
+import { List } from '@/components/elements/List/List'
 import { PostAwait } from '@/components/elements/Posts/PostAwait'
 import { PostLoading } from '@/components/elements/Posts/PostLoading'
-import { VirtualListColumn } from '@/components/elements/VirtualLists/VirtualListColumn'
+import { UserAvatar } from '@/components/elements/User/UserAvatar'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { Stack } from '@/components/ui/Stack/Stack'
-import { router } from '@/Router'
+import { useFeedSubscription } from '@/hooks/useFeedSubscription'
 import type { HomeModule } from '@/stores/home/home.module'
 import { spacing } from '@/themes/spacing.stylex'
-import { useRouteContext } from '@tanstack/react-router'
-import { reaction } from 'mobx'
 import { observer } from 'mobx-react-lite'
-import { useEffect } from 'react'
+import { useContext } from 'react'
 import { css } from 'react-strict-dom'
 
 type Props = {
@@ -27,30 +27,23 @@ export const HomeColumn = observer(function HomeColumn(props: Props) {
   const { module } = props
   const { id } = module
   const feed = module.feed
-  const context = useRouteContext({ from: '/deck' })
+  const context = useContext(DeckContext)
 
-  useEffect(() => {
-    const disposer = reaction(
-      () => [module.selected],
-      () => {
-        router.invalidate()
-      },
-    )
-    return () => disposer()
-  }, [])
+  useFeedSubscription(feed, module.contextWithFallback.client)
 
   return (
     <>
       <DeckColumnHeader id={id} settings={<FeedSettings feed={feed} />}>
         <Stack gap={2}>
-          <IconHomeFilled />
+          <IconHomeFilled size={26} />
+          <UserAvatar size='sm' pubkey={module.feed.filter.authors?.[0]} />
           <FeedTabs module={module} />
         </Stack>
       </DeckColumnHeader>
       <PaperContainer elevation={0} shape='none'>
         <PostAwait promise={context.delay}>
-          <VirtualListColumn
-            id={id}
+          <List
+            column
             feed={feed}
             onScrollEnd={feed.paginate}
             header={

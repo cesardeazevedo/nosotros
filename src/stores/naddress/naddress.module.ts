@@ -1,10 +1,8 @@
 import type { ClientSubOptions, NostrClient } from '@/nostr/nostr'
 import { replayIds } from '@/nostr/operators/subscribeIds'
 import { subscribeIdsFromQuotes } from '@/nostr/operators/subscribeIdsFromQuotes'
-import { subscribeNoteStats } from '@/nostr/subscriptions/subscribeNoteStats'
 import type { Instance, SnapshotIn, SnapshotOut } from 'mobx-state-tree'
 import { t } from 'mobx-state-tree'
-import { mergeMap } from 'rxjs'
 import { BaseModuleModel } from '../modules/module'
 
 export type NAddressOptions = {
@@ -28,18 +26,21 @@ export const NAddressModuleModel = BaseModuleModel.named('NAddressModuleModel')
     subscribe(client: NostrClient) {
       const options = {} as ClientSubOptions
       replayIds.invalidate(this.address)
-      return subscribeIdsFromQuotes(this.address, client, options).pipe(
-        mergeMap((event) => {
-          return subscribeNoteStats(client, event, {
-            zaps: true,
-            reposts: true,
-            replies: true,
-            reactions: true,
-          })
-        }),
-      )
+      return subscribeIdsFromQuotes(this.address, client, options)
     },
   }))
+
+export function createNAddressModule(snapshot: Pick<NAddressModuleSnapshotIn, 'id' | 'options'>) {
+  return NAddressModuleModel.create({
+    ...snapshot,
+    context: {
+      options: {
+        pubkey: snapshot.options.pubkey,
+        relays: snapshot.options.relays,
+      },
+    },
+  })
+}
 
 export interface NAddressModule extends Instance<typeof NAddressModuleModel> {}
 export interface NAddressModuleSnapshotIn extends SnapshotIn<typeof NAddressModuleModel> {}

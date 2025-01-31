@@ -1,21 +1,12 @@
 import type { Instance } from 'mobx-state-tree'
 import { t } from 'mobx-state-tree'
-import type { HomeModule, HomeModuleSnapshotOut } from '../home/home.module'
+import type { HomeModule } from '../home/home.module'
 import { HomeModuleModel } from '../home/home.module'
-import { NAddressModuleModel, type NAddressModule, type NAddressModuleSnapshotOut } from '../naddress/naddress.module'
-import { NEventModuleModel, type NEventModule, type NEventModuleSnapshotOut } from '../nevent/nevent.module'
-import type { NotificationModule, NotificationModuleSnapshotOut } from '../notifications/notification.module'
+import { NAddressModuleModel, type NAddressModule } from '../naddress/naddress.module'
+import { NEventModuleModel, type NEventModule } from '../nevent/nevent.module'
+import type { NotificationModule } from '../notifications/notification.module'
 import { NotificationModuleModel } from '../notifications/notification.module'
-import { NProfileModuleModel, type NProfileModule, type NProfileModuleSnapshotOut } from '../nprofile/nprofile.module'
-import type { WelcomeModuleSnapshotOut } from '../welcome/welcome.module'
-
-export type ModulesSnapshotOuts =
-  | HomeModuleSnapshotOut
-  | WelcomeModuleSnapshotOut
-  | NotificationModuleSnapshotOut
-  | NProfileModuleSnapshotOut
-  | NEventModuleSnapshotOut
-  | NAddressModuleSnapshotOut
+import { NProfileModuleModel, type NProfileModule } from '../nprofile/nprofile.module'
 
 export type ModulesInstances = HomeModule | NotificationModule | NProfileModule | NEventModule | NAddressModule
 
@@ -38,13 +29,16 @@ export const ModuleStoreModel = t
     modules: t.map(Modules),
   })
   .actions((self) => ({
-    add(module: ModulesInstances) {
-      if (!self.modules.get(module.id)) {
+    add<T extends ModulesInstances>(module: T): T {
+      const found = self.modules.get(module.id) as T
+      if (!found) {
         self.modules.set(module.id, module)
+        return module
       }
+      return found
     },
-    get(id: string) {
-      return self.modules.get(id)
+    get<T extends ModulesInstances>(id: string): T | undefined {
+      return self.modules.get(id) as T | undefined
     },
     delete(id: string) {
       self.modules.delete(id)

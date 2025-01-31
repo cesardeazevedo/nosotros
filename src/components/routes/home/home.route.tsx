@@ -2,21 +2,21 @@ import { Editor } from '@/components/elements/Editor/Editor'
 import { NostrEventFeedItem } from '@/components/elements/Event/NostrEventFeedItem'
 import { FeedSettings } from '@/components/elements/Feed/FeedSettings'
 import { FeedTabs } from '@/components/elements/Feed/FeedTabs'
-import { PostAwait } from '@/components/elements/Posts/PostAwait'
+import { List } from '@/components/elements/List/List'
 import { PostLoading } from '@/components/elements/Posts/PostLoading'
-import { VirtualListWindow } from '@/components/elements/VirtualLists/VirtualListWindow'
+import { ContentProvider } from '@/components/providers/ContentProvider'
 import { Button } from '@/components/ui/Button/Button'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { Stack } from '@/components/ui/Stack/Stack'
+import { useFeedSubscription } from '@/hooks/useFeedSubscription'
+import { useHomeModule } from '@/hooks/useHomeModule'
 import { useMobile } from '@/hooks/useMobile'
-import { useRootStore } from '@/hooks/useRootStore'
+import { useCurrentPubkey } from '@/hooks/useRootStore'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconChevronDown, IconChevronUp } from '@tabler/icons-react'
-import { useRouter } from '@tanstack/react-router'
-import { reaction } from 'mobx'
 import { observer } from 'mobx-react-lite'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { css } from 'react-strict-dom'
 import { CenteredContainer } from '../../elements/Layouts/CenteredContainer'
 import { PaperContainer } from '../../elements/Layouts/PaperContainer'
@@ -24,26 +24,19 @@ import { PostFab } from '../../elements/Posts/PostFab'
 
 export const HomeRoute = observer(function HomeRoute() {
   const mobile = useMobile()
-  const router = useRouter()
-  const { auth, home: module } = useRootStore()
-  const feed = module.feed
+  const module = useHomeModule()
+  const pubkey = useCurrentPubkey()
+
+  const feed = module?.feed
 
   const [expanded, setExpanded] = useState(false)
 
-  useEffect(() => {
-    const disposer = reaction(
-      () => [auth.pubkey, module.selected],
-      () => {
-        router.invalidate()
-      },
-    )
-    return () => disposer()
-  }, [])
+  useFeedSubscription(module.feed, module.contextWithFallback.client)
 
   return (
     <CenteredContainer margin>
-      {!mobile && auth.pubkey && <PostFab />}
-      <PaperContainer elevation={1}>
+      {!mobile && pubkey && <PostFab />}
+      <PaperContainer>
         <FeedTabs module={module}>
           <Button variant='filledTonal' onClick={() => setExpanded((prev) => !prev)}>
             <Stack gap={0.5}>
@@ -64,15 +57,14 @@ export const HomeRoute = observer(function HomeRoute() {
           />
         </Stack>
         <Divider />
-        <PostAwait rows={4} promise={feed.delay}>
-          <VirtualListWindow
-            id={module.id + module.selected}
+        <ContentProvider value={{ blured: feed.blured }}>
+          <List
             feed={feed}
             onScrollEnd={feed.paginate}
             render={(event) => <NostrEventFeedItem event={event} />}
             footer={<PostLoading rows={4} />}
           />
-        </PostAwait>
+        </ContentProvider>
       </PaperContainer>
     </CenteredContainer>
   )

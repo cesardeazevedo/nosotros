@@ -1,16 +1,8 @@
-import { NAddressModuleModel } from '@/stores/naddress/naddress.module'
+import { createNAddressModule } from '@/stores/naddress/naddress.module'
 import type { Props } from './naddress.route'
 
 export function naddressLoader(props: Props) {
-  const module = NAddressModuleModel.create({
-    options: props,
-    context: {
-      options: {
-        pubkey: props.pubkey,
-        relays: props.relays,
-      },
-    },
-  })
+  const module = createNAddressModule({ options: props })
   module.subscribe(module.context!.client).subscribe()
   return module
 }

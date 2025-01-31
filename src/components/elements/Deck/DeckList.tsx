@@ -15,6 +15,7 @@ import {
 import { HomeColumn } from 'components/modules/Home/HomeColumn'
 import { observer } from 'mobx-react-lite'
 import React from 'react'
+import { firstValueFrom, timer } from 'rxjs'
 import { DeckColumn } from './DeckColumn'
 import { DeckContext } from './DeckContext'
 
@@ -26,6 +27,8 @@ const DeckModuleContext = function DeckModuleContext(props: { children: React.Re
   return children
 }
 
+const delay = firstValueFrom(timer(800))
+
 export const DeckList = observer(function DeckList() {
   const root = useRootStore()
   return (
@@ -34,7 +37,7 @@ export const DeckList = observer(function DeckList() {
         const key = `${module.type}:${module.id}`
         return (
           <DeckColumn key={key}>
-            <DeckContext.Provider value={{ index }}>
+            <DeckContext.Provider value={{ index, delay }}>
               <DeckModuleContext module={module}>
                 {isHomeModule(module) && <HomeColumn module={module} />}
                 {isNProfileModule(module) && <NProfileColumn module={module} />}
