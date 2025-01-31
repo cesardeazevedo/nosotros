@@ -42,7 +42,7 @@ export class NIP01Notes {
   }
 
   subscribeParent() {
-    return (source$: Note$) => {
+    return (source$: Note$): Note$ => {
       return source$.pipe(
         mergeMap((event) => {
           return of(event).pipe(
@@ -55,6 +55,7 @@ export class NIP01Notes {
                 return subscribeIdsFromQuotes(parentId, this.client, { relayHints }).pipe(
                   // People are using NIP-10 replies to a bunch of crap
                   ofKind<NostrEventNote | NostrEventComment>([Kind.Text, Kind.Comment, Kind.Article]),
+                  this.withRelatedNotes(),
                 )
               }
               return EMPTY
@@ -92,6 +93,7 @@ export class NIP01Notes {
                     const relayHints = mergeRelayHints([metadata.relayHints, { fallback: { [id]: [event.pubkey] } }])
                     return subscribeIdsFromQuotes(id, this.client, { relayHints }).pipe(
                       ofKind<NostrEventNote>([Kind.Text]),
+                      this.subscribeParent(),
                     )
                   }),
                 )
