@@ -190,7 +190,7 @@ export class NostrClient {
 
       tap(([relay, event]) => this.seen.insert(relay, event)),
 
-      distinctEvent(),
+      distinctEvent(sub),
 
       verifyWorker(),
 

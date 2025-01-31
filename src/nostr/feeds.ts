@@ -1,9 +1,12 @@
 import { Kind } from '@/constants/kinds'
+import type { PaginationLimitSubject } from '@/core/PaginationLimitSubject'
 import type { PaginationSubject } from '@/core/PaginationRangeSubject'
 import type { NostrFilter } from '@/core/types'
 import { EMPTY, filter, from, mergeMap } from 'rxjs'
 import type { ClientSubOptions, NostrClient } from './nostr'
 import { metadataSymbol } from './types'
+
+type Pagination = PaginationSubject | PaginationLimitSubject
 
 export type FeedOptions = ClientSubOptions & {
   includeParents?: boolean
@@ -22,15 +25,20 @@ export class NostrFeeds {
               options?.includeParents === false
                 ? this.client.notes.subNotesWithRelated.bind(this.client.notes)
                 : this.client.notes.subRelatedNotesWithParent.bind(this.client.notes)
-            return sub(filters, options).pipe(
+            return sub({ ...filters, kinds: [Kind.Text] }, options).pipe(
               filter((note) => {
-                return options?.includeReplies === false ? note[metadataSymbol].isRoot : !note[metadataSymbol].isRoot
+                const isRoot = note[metadataSymbol].isRoot
+                if (options?.includeReplies === false && !isRoot) return false
+                if (options?.includeReplies === true && isRoot) return false
+                return true
               }),
             )
           }
           case Kind.Article: {
             return options?.includeReplies !== false
-              ? this.client.articles.subscribe(filters, options).pipe(this.client.notes.withRelatedNotes(options))
+              ? this.client.articles
+                  .subscribe({ ...filters, kinds: [Kind.Article] }, options)
+                  .pipe(this.client.notes.withRelatedNotes(options))
               : EMPTY
           }
           case Kind.Repost: {
@@ -44,22 +52,17 @@ export class NostrFeeds {
     )
   }
 
-  self(filter$: PaginationSubject, options?: FeedOptions) {
+  self(filter$: Pagination, options?: FeedOptions) {
     return filter$.pipe(mergeMap((filter) => this.subscribe(filter, options)))
   }
 
-  following(pagination$: PaginationSubject, options?: FeedOptions) {
+  following(pagination$: Pagination, options?: FeedOptions) {
     const currentAuthor = pagination$.authors[0]
     return this.client.follows.subscribe(currentAuthor, options).pipe(
-      // Set the filter authors with the `follows` list
       mergeMap((event) => {
-        const metadata = event[metadataSymbol]
-        const authors = [...(metadata.tags.get('p') || [])]
-        return pagination$.setFilter({
-          authors: [currentAuthor, ...authors],
-        })
+        const authors = [currentAuthor, ...(event[metadataSymbol].tags.get('p') || [])]
+        return pagination$.setFilter({ authors })
       }),
-      // Start notes subscription
       mergeMap((filter) => this.subscribe(filter, options)),
     )
   }
