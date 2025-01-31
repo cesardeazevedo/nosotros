@@ -1,3 +1,4 @@
+import { useContentContext } from '@/components/providers/ContentProvider'
 import { useRootStore } from '@/hooks/useRootStore'
 import { seenStore } from '@/stores/seen/seen.store'
 import { decodeNIP19 } from '@/utils/nip19'
@@ -13,20 +14,21 @@ export type Props = {
   nevent?: NEvent | Note
   children: React.ReactNode
   underline?: boolean
-  disableLink?: boolean
 }
 
 export const LinkNEvent = observer(function LinkNEvent(props: Props) {
-  const { disableLink, underline, ...rest } = props
+  const { underline, ...rest } = props
   const router = useRouter()
   const root = useRootStore()
   const { index } = useContext(DeckContext)
+  const { disableLink } = useContentContext()
+  const isDeck = index !== undefined
 
   // Some quotes might be note1
   const nevent = useLocalObservable(() => ({
     get value() {
       const { nevent } = props
-      if (nevent && nevent.startsWith('note1') && nevent.startsWith('nostr:note1')) {
+      if (nevent && (nevent.startsWith('note1') || nevent.startsWith('nostr:note1'))) {
         const decoded = decodeNIP19(nevent)
         if (decoded?.type === 'note') {
           return nip19.neventEncode({
@@ -60,16 +62,17 @@ export const LinkNEvent = observer(function LinkNEvent(props: Props) {
     return props.children
   }
 
-  if (index !== undefined) {
+  if (isDeck) {
     return (
-      <Link onClick={handleClickDeck} {...rest} {...css.props([underline && styles.underline])}>
+      <a onClick={handleClickDeck} {...rest} {...css.props([styles.cursor, underline && styles.underline])}>
         {props.children}
-      </Link>
+      </a>
     )
   }
 
   return (
     <Link
+      resetScroll
       to={`/$nostr`}
       state={{ from: router.latestLocation.pathname } as never}
       {...rest}
@@ -81,6 +84,9 @@ export const LinkNEvent = observer(function LinkNEvent(props: Props) {
 })
 
 const styles = css.create({
+  cursor: {
+    cursor: 'pointer',
+  },
   underline: {
     textDecoration: {
       default: 'inherit',

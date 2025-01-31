@@ -11,15 +11,15 @@ import { LinkNEvent } from '../Links/LinkNEvent'
 type Props = {
   nevent?: NEvent
   date: number
-  disableLink?: boolean
   sx?: SxProps
+  style?: Intl.RelativeTimeFormatStyle
 }
 
 export const UserHeaderDate = observer(function UserHeaderDate(props: Props) {
-  const { nevent, date, disableLink, sx } = props
-  const [shortDate, fullDate] = useRelativeDate(date)
+  const { nevent, date, sx, style } = props
+  const [shortDate, fullDate] = useRelativeDate(date, style)
   return (
-    <LinkNEvent underline nevent={nevent} disableLink={disableLink}>
+    <LinkNEvent underline nevent={nevent}>
       <Tooltip text={fullDate}>
         <Text size='sm' sx={[styles.root, sx]}>
           {shortDate}

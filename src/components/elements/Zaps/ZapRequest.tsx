@@ -1,17 +1,18 @@
+import { ContentProvider } from '@/components/providers/ContentProvider'
 import { Button } from '@/components/ui/Button/Button'
 import { Chip } from '@/components/ui/Chip/Chip'
 import { CircularProgress } from '@/components/ui/Progress/CircularProgress'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { TextField } from '@/components/ui/TextField/TextField'
+import { useNoteStoreFromId } from '@/hooks/useNoteStore'
 import { useCurrentUser, useRootContext } from '@/hooks/useRootStore'
-import { noteStore } from '@/stores/notes/notes.store'
 import { toastStore } from '@/stores/ui/toast.store'
 import type { User } from '@/stores/users/user'
 import { createZapRequestStore } from '@/stores/zaps/zap.request.store'
 import { spacing } from '@/themes/spacing.stylex'
 import { bech32, utf8 } from '@scure/base'
-import { IconBolt, IconAlertCircleFilled } from '@tabler/icons-react'
+import { IconAlertCircleFilled, IconBolt } from '@tabler/icons-react'
 import { useNavigate, useRouter } from '@tanstack/react-router'
 import { observer } from 'mobx-react-lite'
 import { nip19 } from 'nostr-tools'
@@ -39,7 +40,7 @@ export const ZapRequest = observer(function ZapRequest(props: Props) {
   const currentUser = useCurrentUser()
   const navigate = useNavigate()
   const router = useRouter()
-  const note = noteStore.get(id)
+  const note = useNoteStoreFromId(id)
   const zapEnabled = note?.user ? note.user.canReceiveZap : true
 
   const [pending, onSubmit] = useObservableState<boolean, User | undefined>((input$) => {
@@ -88,7 +89,6 @@ export const ZapRequest = observer(function ZapRequest(props: Props) {
               tap((response) => {
                 navigate({
                   search: {
-                    // @ts-ignore
                     invoice: response.pr,
                     nevent: nip19.neventEncode({
                       id,
@@ -96,9 +96,8 @@ export const ZapRequest = observer(function ZapRequest(props: Props) {
                       relays,
                     }),
                   },
-                  // @ts-ignore
-                  from: router.fullPath,
-                  state: { from: router.latestLocation.pathname },
+                  to: '.',
+                  state: { from: router.latestLocation.pathname } as never,
                 })
               }),
             )
@@ -120,13 +119,15 @@ export const ZapRequest = observer(function ZapRequest(props: Props) {
     <Stack horizontal={false} align='center' justify='center' sx={styles.root}>
       <Stack horizontal={false} align='center' gap={2}>
         <IconBolt size={38} fill='currentColor' strokeOpacity='0' />
-        <UserAvatar disableLink disabledPopover pubkey={note?.user?.pubkey} size='xl' sx={styles.avatar} />
-        <Stack gap={0.5}>
-          <Text variant='title' size='lg' sx={styles.title}>
-            Zap{' '}
-          </Text>{' '}
-          {note?.user && <UserName disableLink size='lg' variant='title' pubkey={note.user.pubkey} />}
-        </Stack>
+        <ContentProvider value={{ disableLink: true, disablePopover: true }}>
+          <UserAvatar pubkey={note?.user?.pubkey} size='xl' sx={styles.avatar} />
+          <Stack gap={0.5}>
+            <Text variant='title' size='lg' sx={styles.title}>
+              Zap{' '}
+            </Text>{' '}
+            {note?.user && <UserName size='lg' variant='title' pubkey={note.user.pubkey} />}
+          </Stack>
+        </ContentProvider>
         {/* {note && ( */}
         {/*   <html.div style={styles.note}> */}
         {/*     <PostReplyContent note={note} size='xs' /> */}

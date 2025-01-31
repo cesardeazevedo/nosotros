@@ -10,7 +10,7 @@ export const EditorHeader = observer(function EditorHeader() {
   return (
     <>
       {pubkey ? (
-        <UserName disableLink disablePopover pubkey={pubkey} />
+        <UserName pubkey={pubkey} />
       ) : (
         <LinkSignIn>
           <Stack gap={1}>

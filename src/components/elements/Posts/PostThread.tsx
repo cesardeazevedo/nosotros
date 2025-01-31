@@ -1,8 +1,11 @@
-import { NoteContext } from '@/components/providers/NoteProvider'
+import { ContentProvider } from '@/components/providers/ContentProvider'
+import { NoteProvider } from '@/components/providers/NoteProvider'
 import { Button } from '@/components/ui/Button/Button'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { Stack } from '@/components/ui/Stack/Stack'
-import type { Note } from '@/stores/notes/note'
+import { useNoteStore } from '@/hooks/useNoteStore'
+import type { NostrEventComment } from '@/nostr/types'
+import { type NostrEventNote } from '@/nostr/types'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconDotsVertical } from '@tabler/icons-react'
@@ -21,21 +24,22 @@ import { PostReplies } from './PostReplies/PostReplies'
 import { PostReplyContent } from './PostReplies/PostReplyContent'
 
 type Props = {
-  note: Note
+  event: NostrEventNote | NostrEventComment
+  open?: boolean
   renderParents?: boolean
   renderReplies?: boolean
   renderEditor?: boolean
 }
 
 export const PostThread = function PostThread(props: Props) {
-  const { note, renderEditor = true, renderParents = true, renderReplies = true } = props
+  const { event, renderEditor = true, renderParents = true, renderReplies = true, open } = props
+  const note = useNoteStore(event, open)
   const context = useMatch({ from: '/$nostr', shouldThrow: false })?.context
   const ref = useRef<HTMLDivElement>(null)
   const isCurrentNote = context?.decoded?.type === 'nevent' ? context?.decoded.data.id === note.id : false
 
   useEffect(() => {
     if (isCurrentNote && ref.current) {
-      // This needs to be better
       setTimeout(() => {
         ref.current?.scrollIntoView({ behavior: 'instant', block: 'start' })
       }, 100)
@@ -45,96 +49,97 @@ export const PostThread = function PostThread(props: Props) {
   if (!note.metadata.isRoot) {
     // replies parents
     return (
-      <Observer>
-        {() => (
-          <>
-            {renderParents && (
-              <>
-                {note.parent ? (
-                  <PostThread renderEditor={renderEditor} note={note.parent} />
-                ) : (
-                  // Some events are missing in the middle
-                  <>
-                    {note.root && <PostThread note={note.root} />}
-                    <Stack sx={styles.fullthread} gap={2}>
-                      <IconDotsVertical />
-                      <LinkNEvent nevent={note.root?.nevent || note.nevent}>
-                        <Button variant='filledTonal'>See full thread</Button>
-                      </LinkNEvent>
+      <NoteProvider value={{ note }}>
+        <Observer>
+          {() => (
+            <>
+              {renderParents && (
+                <>
+                  {note.parent ? (
+                    <PostThread renderEditor={renderEditor} event={note.parent.event} />
+                  ) : (
+                    // Some events are missing in the middle
+                    <>
+                      {note.root && <PostThread event={note.root.event} />}
+                      <Stack sx={styles.fullthread} gap={2}>
+                        <IconDotsVertical />
+                        <LinkNEvent nevent={note.root?.nevent || note.event.nevent}>
+                          <Button variant='filledTonal'>See full thread</Button>
+                        </LinkNEvent>
+                      </Stack>
+                    </>
+                  )}
+                </>
+              )}
+              <ContentProvider value={{ dense: true }}>
+                <html.div style={styles.reply} ref={ref}>
+                  {isCurrentNote && <html.div style={styles.current}></html.div>}
+                  <Stack align='flex-start' gap={1} sx={styles.content}>
+                    <html.div style={styles.thread} />
+                    <UserAvatar pubkey={note.event.pubkey} />
+                    <Stack gap={1}>
+                      <Stack horizontal={false}>
+                        <PostReplyContent />
+                        <html.div style={styles.root$actions}>
+                          <PostActions renderOptions onReplyClick={() => note.toggleReplies()} />
+                        </html.div>
+                      </Stack>
                     </Stack>
-                  </>
+                  </Stack>
+                </html.div>
+                {renderEditor && isCurrentNote && note.repliesOpen && (
+                  <Stack sx={styles.divider} gap={2}>
+                    <html.div>
+                      <IconDotsVertical strokeWidth='1.8' size={24} />
+                    </html.div>
+                    <WaveDivider />
+                  </Stack>
                 )}
-              </>
-            )}
-            <html.div style={styles.reply} ref={ref}>
-              {isCurrentNote && <html.div style={styles.current}></html.div>}
-              <Stack align='flex-start' gap={1} sx={styles.content}>
-                <html.div style={styles.thread} />
-                <UserAvatar pubkey={note.event.pubkey} />
-                <Stack gap={1}>
-                  <NoteContext.Provider value={{ dense: true }}>
-                    <Stack horizontal={false}>
-                      <PostReplyContent note={note} />
-                      <html.div style={styles.root$actions}>
-                        <PostActions renderOptions note={note} onReplyClick={() => note.toggleReplies()} />
-                      </html.div>
-                    </Stack>
-                  </NoteContext.Provider>
-                </Stack>
-              </Stack>
-            </html.div>
-            {renderEditor && isCurrentNote && note.repliesOpen && (
-              <Stack sx={styles.divider}>
-                <IconDotsVertical />
-                <WaveDivider />
-              </Stack>
-            )}
-            {renderEditor && (
-              <html.div style={styles.editor}>
-                <Expandable expanded={note.repliesOpen || false} trigger={() => <></>}>
-                  <Editor renderBubble initialOpen store={note.editor} />
-                </Expandable>
-              </html.div>
-            )}
-            {renderReplies && isCurrentNote && note.repliesOpen && (
-              <PostReplies note={note} onLoadMoreClick={() => note.toggleReplies()} />
-            )}
-          </>
-        )}
-      </Observer>
+                {renderEditor && (
+                  <html.div style={styles.editor}>
+                    <Expandable expanded={note.repliesOpen || false} trigger={() => <></>}>
+                      <Editor renderBubble initialOpen store={note.editor} />
+                    </Expandable>
+                  </html.div>
+                )}
+              </ContentProvider>
+              {renderReplies && isCurrentNote && note.repliesOpen && (
+                <PostReplies onLoadMoreClick={() => note.toggleReplies()} />
+              )}
+            </>
+          )}
+        </Observer>
+      </NoteProvider>
     )
   }
 
   // root post
   return (
-    <Observer>
-      {() => (
-        <Stack gap={2} align='flex-start' sx={styles.root}>
-          <html.div style={styles.thread} />
-          <Stack horizontal={false} grow>
-            <PostHeader note={note} renderOptions={false} />
-            <Stack horizontal={false} sx={styles.rootWrapper}>
-              <NoteContext.Provider value={{ dense: true }}>
-                <PostContent note={note} />
-                <PostActions
-                  note={note}
-                  renderOptions
-                  onReplyClick={() => note.toggleReplies()}
-                  sx={styles.root$actions}
-                />
-              </NoteContext.Provider>
+    <NoteProvider value={{ note }}>
+      <ContentProvider value={{ dense: true }}>
+        <Observer>
+          {() => (
+            <Stack gap={2} align='flex-start' sx={styles.root}>
+              <html.div style={styles.thread} />
+              <Stack horizontal={false} grow>
+                <PostHeader renderOptions={false} />
+                <Stack horizontal={false} sx={styles.rootWrapper}>
+                  <PostContent />
+                  <PostActions renderOptions onReplyClick={() => note.toggleReplies()} sx={styles.root$actions} />
+                </Stack>
+                {renderEditor && (
+                  <html.div style={styles.editor}>
+                    <Expandable expanded={note.repliesOpen || false} trigger={() => <></>}>
+                      <Editor renderBubble initialOpen store={note.editor} />
+                    </Expandable>
+                  </html.div>
+                )}
+              </Stack>
             </Stack>
-            {renderEditor && (
-              <html.div style={styles.editor}>
-                <Expandable expanded={note.repliesOpen || false} trigger={() => <></>}>
-                  <Editor renderBubble initialOpen store={note.editor} />
-                </Expandable>
-              </html.div>
-            )}
-          </Stack>
-        </Stack>
-      )}
-    </Observer>
+          )}
+        </Observer>
+      </ContentProvider>
+    </NoteProvider>
   )
 }
 
@@ -191,7 +196,7 @@ const styles = css.create({
   divider: {
     paddingTop: spacing.padding2,
     paddingBottom: spacing.padding1,
-    paddingLeft: spacing.padding3,
+    paddingLeft: 24,
     color: palette.outlineVariant,
   },
   fullthread: {

@@ -16,7 +16,7 @@ export const ImageEditor = (props: NodeViewProps) => {
       draggable={props.node.type.spec.draggable}
       {...css.props([styles.root, props.selected && styles.root$selected])}>
       <DeleteButton onClick={() => props.deleteNode()} />
-      <Image dense src={src} proxy={false} />
+      <Image src={src} proxy={false} />
       {!isUploaded && <AltButton value={alt} onChange={(alt) => props.updateAttributes({ alt })} />}
       <UploadButton node={props} />
     </NodeViewWrapper>

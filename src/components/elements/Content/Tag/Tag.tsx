@@ -1,4 +1,4 @@
-import { useNoteContext } from '@/components/providers/NoteProvider'
+import { useContentContext } from '@/components/providers/ContentProvider'
 import { Text } from '@/components/ui/Text/Text'
 import { palette } from '@/themes/palette.stylex'
 import React from 'react'
@@ -10,7 +10,7 @@ type Props = {
 }
 
 export const Tag = (props: Props) => {
-  const { disableLink } = useNoteContext()
+  const { disableLink } = useContentContext()
   if (disableLink) {
     return (
       <Text sx={styles.root} size='lg'>

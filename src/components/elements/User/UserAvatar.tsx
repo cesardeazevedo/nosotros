@@ -12,12 +12,10 @@ export type Props = {
   pubkey?: string
   sx?: SxProps
   size?: AvatarProps['size']
-  disableLink?: boolean
-  disabledPopover?: boolean
 }
 
 export const UserAvatar = observer(function UserAvatar(props: Props) {
-  const { sx, pubkey, size = 'md', disableLink = false, disabledPopover = false } = props
+  const { sx, pubkey, size = 'md' } = props
   const globalSettings = useGlobalSettings()
   const user = userStore.get(pubkey)
   const avatarProps = user?.meta?.picture
@@ -30,10 +28,8 @@ export const UserAvatar = observer(function UserAvatar(props: Props) {
   )
   if (user?.meta?.picture && pubkey) {
     return (
-      <UserPopover pubkey={pubkey} disabled={disabledPopover}>
-        <LinkProfile user={user} disableLink={disableLink}>
-          {avatar}
-        </LinkProfile>
+      <UserPopover pubkey={pubkey}>
+        <LinkProfile user={user}>{avatar}</LinkProfile>
       </UserPopover>
     )
   }

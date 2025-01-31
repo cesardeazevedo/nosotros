@@ -1,22 +1,17 @@
+import { useContentContext } from '@/components/providers/ContentProvider'
 import { useNoteContext } from '@/components/providers/NoteProvider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
-import type { Comment } from '@/stores/comment/comment'
-import type { Note } from '@/stores/notes/note'
 import { IconServerBolt } from '@tabler/icons-react'
 import { useMobile } from 'hooks/useMobile'
 import { observer } from 'mobx-react-lite'
 import { useCallback } from 'react'
-import { ButtonContainer, type ContainerProps } from './PostButtonContainer'
+import { ButtonContainer } from './PostButtonContainer'
 import { iconProps } from './utils'
 
-type Props = {
-  note: Note | Comment
-}
-
-export const ButtonRelays = observer(function ButtonRelays(props: Props & ContainerProps) {
-  const { note } = props
-  const { dense } = useNoteContext()
+export const ButtonRelays = observer(function ButtonRelays() {
+  const { dense } = useContentContext()
+  const { note } = useNoteContext()
   const isMobile = useMobile()
 
   const handleClick = useCallback(() => {
@@ -28,8 +23,10 @@ export const ButtonRelays = observer(function ButtonRelays(props: Props & Contai
       cursor='arrow'
       key={isMobile.toString()}
       enterDelay={0}
-      text={<div>Seen on {note.seenOn?.map((relay) => <div key={relay}>{relay.replace('wss://', '')}</div>)}</div>}>
-      <ButtonContainer value={note.seenOn?.length || 0} aria-label='Seen on relays'>
+      text={
+        <div>Seen on {note.event.seenOn?.map((relay) => <div key={relay}>{relay.replace('wss://', '')}</div>)}</div>
+      }>
+      <ButtonContainer value={note.event.seenOn?.length || 0} aria-label='Seen on relays'>
         <IconButton
           toggle={note.broadcastOpen}
           size={dense ? 'sm' : 'md'}

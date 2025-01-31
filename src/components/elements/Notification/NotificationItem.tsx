@@ -1,22 +1,23 @@
-import { NoteContext } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
+import { useMobile } from '@/hooks/useMobile'
+import { useNoteStoreFromId } from '@/hooks/useNoteStore'
 import { useCurrentUser } from '@/hooks/useRootStore'
-import { noteStore } from '@/stores/notes/notes.store'
 import type { Notification } from '@/stores/notifications/notification'
 import { fallbackEmoji } from '@/stores/reactions/reactions.store'
+import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconAt, IconBolt, IconHeartFilled, IconMessage, IconShare3 } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
 import { css, html } from 'react-strict-dom'
 import { LinkNEvent } from '../Links/LinkNEvent'
+import { LinkProfile } from '../Links/LinkProfile'
 import { UserAvatar } from '../User/UserAvatar'
 import { UserHeaderDate } from '../User/UserHeaderDate'
 import { UserName } from '../User/UserName'
 import { NotificationContent } from './NotificationContent'
 import { NotificationMedia } from './NotificationMedia'
-import { LinkProfile } from '../Links/LinkProfile'
 
 type Props = {
   notification: Notification
@@ -29,8 +30,9 @@ export const NotificationItem = observer(function NotificationItem(props: Props)
   const user = useCurrentUser()
   const { type, user: notificationUser, author: pubkey } = notification
 
-  const linkId = type === 'reply' || type === 'mention' ? notification.id : notification.related?.id
-  const note = noteStore.get(linkId)
+  const mobile = useMobile()
+  const linkId = type === 'reply' || type === 'mention' ? notification.id : notification.related
+  const note = useNoteStoreFromId(linkId)
 
   return (
     <Stack gap={2} sx={styles.root} align='flex-start'>
@@ -65,54 +67,50 @@ export const NotificationItem = observer(function NotificationItem(props: Props)
         {type === 'repost' && <IconShare3 fill='currentColor' size={28} strokeWidth='1.5' />}
       </Stack>
       <Stack gap={2} justify='flex-start' align='flex-start' grow>
-        <NoteContext.Provider value={{ disableLink: true, dense: true }}>
-          <LinkProfile user={notificationUser}>
-            <UserAvatar disableLink pubkey={pubkey} />
-          </LinkProfile>
-          <LinkNEvent nevent={note?.nevent}>
-            <Stack sx={styles.content} wrap grow>
-              <UserName disableLink pubkey={pubkey} sx={styles.username} />{' '}
-              {type === 'zap' && (
-                <>
-                  <Text size='md'>zapped to your note:</Text>
-                  <NotificationContent id={notification.related?.id} />
-                </>
-              )}
-              {type === 'reaction' && (
-                <>
-                  <Text size='md'>reacted to your note:</Text> <NotificationContent id={notification.related?.id} />
-                </>
-              )}
-              {type === 'reply' && (
-                <>
-                  <Text size='md'>
-                    replied to {note?.event.pubkey === user?.pubkey ? 'your note' : 'a note you were mentioned'}
-                    {': '}
-                  </Text>{' '}
-                  <NotificationContent id={notification.id} />
-                </>
-              )}
-              {type === 'mention' && (
-                <>
-                  <Text size='md'>mentioned you in a note:</Text> <NotificationContent id={notification.id} />
-                </>
-              )}
-              {type === 'repost' && (
-                <>
-                  <Text size='md'>
-                    reposted {note?.event.pubkey === user?.pubkey ? 'your note' : 'a note you were mentioned'}
-                  </Text>{' '}
-                  <NotificationContent id={notification.related?.id} />
-                </>
-              )}
-              <UserHeaderDate style='long' date={notification.event.created_at} />
-            </Stack>
-          </LinkNEvent>
-        </NoteContext.Provider>
+        <LinkProfile user={notificationUser}>
+          <UserAvatar pubkey={pubkey} />
+        </LinkProfile>
+        <LinkNEvent nevent={note?.event.nevent}>
+          <Stack sx={styles.content} wrap grow>
+            <UserName pubkey={pubkey} sx={styles.username} />{' '}
+            {type === 'zap' && (
+              <>
+                <Text size='md'>zapped to your note:</Text>
+                <NotificationContent id={notification.related} />
+              </>
+            )}
+            {type === 'reaction' && (
+              <>
+                <Text size='md'>reacted to your note:</Text> <NotificationContent id={notification.related} />
+              </>
+            )}
+            {type === 'reply' && (
+              <>
+                <Text size='md'>
+                  replied to {note?.event.pubkey === user?.pubkey ? 'your note' : 'a note you were mentioned'}
+                  {': '}
+                </Text>{' '}
+                <NotificationContent id={notification.id} />
+              </>
+            )}
+            {type === 'mention' && (
+              <>
+                <Text size='md'>mentioned you in a note:</Text> <NotificationContent id={notification.id} />
+              </>
+            )}
+            {type === 'repost' && (
+              <>
+                <Text size='md'>
+                  reposted {note?.event.pubkey === user?.pubkey ? 'your note' : 'a note you were mentioned'}
+                </Text>{' '}
+                <NotificationContent id={notification.related} />
+              </>
+            )}
+            <UserHeaderDate style='long' date={notification.event.created_at} />
+          </Stack>
+        </LinkNEvent>
       </Stack>
-      <html.div style={styles.trailing}>
-        <NotificationMedia id={linkId} />
-      </html.div>
+      {!mobile && <html.div style={styles.trailing}>{note && <NotificationMedia note={note} />}</html.div>}
     </Stack>
   )
 })
@@ -122,6 +120,8 @@ const styles = css.create({
     paddingBlock: spacing.padding1,
     paddingInline: spacing.padding3,
     minHeight: 50,
+    borderBottom: '1px solid',
+    borderColor: palette.outlineVariant,
   },
   type: {
     paddingTop: spacing['padding0.5'],

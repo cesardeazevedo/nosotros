@@ -1,3 +1,4 @@
+import { ContentProvider, useContentContext } from '@/components/providers/ContentProvider'
 import { Paper } from '@/components/ui/Paper/Paper'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { TooltipRich } from '@/components/ui/TooltipRich/TooltipRich'
@@ -8,9 +9,9 @@ import React from 'react'
 import { css, html } from 'react-strict-dom'
 import { UserAvatar } from './UserAvatar'
 import { UserContentAbout } from './UserContentAbout'
+import { UserFollowButton } from './UserFollowButton'
 import { UserName } from './UserName'
 import { UserNIP05 } from './UserNIP05'
-import { UserFollowButton } from './UserFollowButton'
 
 type Props = {
   pubkey: string
@@ -20,9 +21,10 @@ type Props = {
 
 export const UserPopover = function UserPopover(props: Props) {
   const isMobile = useMobile()
-  const { pubkey, disabled = false } = props
+  const { pubkey } = props
+  const { disablePopover } = useContentContext()
 
-  if (isMobile || disabled) {
+  if (isMobile || disablePopover) {
     return props.children
   }
 
@@ -34,22 +36,24 @@ export const UserPopover = function UserPopover(props: Props) {
       content={() => (
         <Observer>
           {() => (
-            <Paper elevation={2} shape='lg' surface='surfaceContainerLow' sx={styles.root}>
-              <Stack justify='space-between'>
-                <UserAvatar disabledPopover size='lg' pubkey={pubkey} />
-                <UserFollowButton pubkey={pubkey} />
-              </Stack>
-              <br />
-              <Stack horizontal={false} gap={2}>
-                <Stack horizontal={false}>
-                  <UserName disablePopover pubkey={pubkey} />
-                  <UserNIP05 pubkey={pubkey} />
+            <ContentProvider value={{ disablePopover: true }}>
+              <Paper elevation={2} shape='lg' surface='surfaceContainerLow' sx={styles.root}>
+                <Stack justify='space-between'>
+                  <UserAvatar size='lg' pubkey={pubkey} />
+                  <UserFollowButton pubkey={pubkey} />
                 </Stack>
-                <html.span style={styles.scroller}>
-                  <UserContentAbout pubkey={pubkey} />
-                </html.span>
-              </Stack>
-            </Paper>
+                <br />
+                <Stack horizontal={false} gap={2}>
+                  <Stack horizontal={false}>
+                    <UserName pubkey={pubkey} />
+                    <UserNIP05 pubkey={pubkey} />
+                  </Stack>
+                  <html.span style={styles.scroller}>
+                    <UserContentAbout pubkey={pubkey} />
+                  </html.span>
+                </Stack>
+              </Paper>
+            </ContentProvider>
           )}
         </Observer>
       )}>

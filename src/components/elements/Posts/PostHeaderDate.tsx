@@ -10,17 +10,16 @@ import { LinkNEvent } from '../Links/LinkNEvent'
 
 type Props = {
   date: number
-  disableLink?: boolean
   nevent?: NEvent
   sx?: SxProps
   dateStyle?: StringUnitLength
 }
 
 export const PostHeaderDate = function PostHeaderDate(props: Props) {
-  const { date, nevent, disableLink, sx, dateStyle } = props
+  const { date, nevent, sx, dateStyle } = props
   const [shortDate, fullDate] = useRelativeDate(date, dateStyle)
   return (
-    <LinkNEvent underline nevent={nevent} disableLink={disableLink}>
+    <LinkNEvent underline nevent={nevent}>
       <Tooltip text={fullDate}>
         <Text size='sm' sx={[styles.root, sx]}>
           {shortDate}

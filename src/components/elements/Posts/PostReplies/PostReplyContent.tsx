@@ -1,6 +1,5 @@
+import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
-import type { Comment } from '@/stores/comment/comment'
-import type { Note } from '@/stores/notes/note'
 import { Content } from 'components/elements/Content/Content'
 import { UserName } from 'components/elements/User/UserName'
 import { observer } from 'mobx-react-lite'
@@ -13,7 +12,6 @@ import type { Props as PostContentWrapperProps } from '../PostContentWrapper'
 import { PostContentWrapper } from '../PostContentWrapper'
 
 type Props = {
-  note: Note | Comment
   size?: PostContentWrapperProps['size']
 }
 
@@ -22,20 +20,19 @@ const NonBubbleNodes = [
   'video',
   'youtube',
   'nevent',
-  'bolt11',
   'naddr',
   'bolt11',
   'tweet',
   'codeBlock',
 ] as Node['type'][]
 
-export const ReplyUserHeader = observer(function ReplyUserHeader(props: { note: Props['note'] }) {
-  const { note } = props
+export const ReplyUserHeader = observer(function ReplyUserHeader() {
+  const { note } = useNoteContext()
   return (
     <Stack horizontal={false}>
       <Stack gap={1} align='center'>
         <UserName pubkey={note.event.pubkey} />
-        <UserHeaderDate nevent={note.nevent} date={note.event.created_at} />
+        <UserHeaderDate nevent={note.event.nevent} date={note.event.event.created_at} />
       </Stack>
       <UserNIP05 pubkey={note.event.pubkey} />
     </Stack>
@@ -43,13 +40,12 @@ export const ReplyUserHeader = observer(function ReplyUserHeader(props: { note: 
 })
 
 export const PostReplyContent = observer(function PostReplyContent(props: Props) {
-  const { note, size } = props
+  const { size } = props
   return (
-    <PostContentWrapper bubble note={note} size={size}>
+    <PostContentWrapper bubble size={size}>
       <Content
         bubble
-        note={note}
-        children={(index) => index === 0 && <ReplyUserHeader note={note} />}
+        children={(index) => index === 0 && <ReplyUserHeader />}
         wrapper={(node) => (NonBubbleNodes.includes(node.type) ? React.Fragment : BubbleContainer)}
       />
     </PostContentWrapper>
