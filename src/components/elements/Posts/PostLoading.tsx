@@ -2,8 +2,9 @@ import { Divider } from '@/components/ui/Divider/Divider'
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { spacing } from '@/themes/spacing.stylex'
-import React, { memo } from 'react'
+import React, { memo, useContext } from 'react'
 import { css, html } from 'react-strict-dom'
+import { DeckContext } from '../Deck/DeckContext'
 
 type Props = {
   rows?: number
@@ -11,6 +12,8 @@ type Props = {
 
 export const PostLoading = memo(({ rows = 2 }: Props) => {
   const list = [...Array(rows).keys()]
+  const renderDivider = useContext(DeckContext).index !== undefined
+
   return list.map((key, index) => (
     <React.Fragment key={key}>
       <html.div key={key} style={styles.root}>
@@ -23,7 +26,7 @@ export const PostLoading = memo(({ rows = 2 }: Props) => {
         </Stack>
         <Skeleton animation='wave' variant='rectangular' sx={styles.content} />
       </html.div>
-      {index !== list.length - 1 && <Divider />}
+      {(index !== list.length - 1 || renderDivider) && <Divider />}
     </React.Fragment>
   ))
 })
