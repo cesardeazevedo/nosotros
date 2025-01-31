@@ -32,7 +32,7 @@ export class PaginationSubject extends BehaviorSubject<NostrFilter> {
     super(createFilterPagination(initialValue, range))
 
     this.range = range
-    this.debounceTime = options?.debounceTime || 1200
+    this.debounceTime = options?.debounceTime || 1500
     this.skipUntil = options?.skipUntil || 1000
     this.initialValue = initialValue
 
