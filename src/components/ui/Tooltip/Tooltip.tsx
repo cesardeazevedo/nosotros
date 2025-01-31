@@ -2,43 +2,46 @@ import { FloatingDelayGroup } from '@floating-ui/react'
 import React from 'react'
 import { css, html } from 'react-strict-dom'
 import { PopoverBase } from '../Popover/PopoverBase'
-import type { IPopoverBaseProps, IPopoverBaseTriggerRendererProps } from '../Popover/PopoverBase.types'
+import type { IPopoverBaseProps } from '../Popover/PopoverBase.types'
+import { PopoverHoverRender } from '../Popover/PopoverHoverRender'
 import { tooltipTokens } from './Tooltip.stylex'
 
 export type Props = Omit<IPopoverBaseProps, 'children' | 'contentRenderer'> & {
   text: React.ReactNode
   enterDelay?: number
-  children:
-    | ((props: Omit<IPopoverBaseTriggerRendererProps, 'setRef' | 'getProps'>) => React.ReactNode)
-    | React.ReactNode
+  keepMounted?: boolean
+  children: React.ReactNode
 }
 
 export const Tooltip = function Tooltip(props: Props) {
-  const { enterDelay = 700, placement = 'bottom', children, text, ...other } = props
+  const { enterDelay = 700, placement = 'bottom', children, text, keepMounted, ...other } = props
   return (
-    <FloatingDelayGroup delay={enterDelay}>
-      <PopoverBase
-        cursor='arrow'
-        {...other}
-        placement={placement}
-        role='tooltip'
-        contentRenderer={({ renderCursor }) => {
-          return (
-            <html.div style={styles.content}>
-              {renderCursor({ ...css.props(styles.cursor) })}
-              <html.span style={styles.text}>{text}</html.span>
+    <PopoverHoverRender content={children}>
+      <FloatingDelayGroup delay={enterDelay}>
+        <PopoverBase
+          cursor='arrow'
+          {...other}
+          placement={placement}
+          preventAutoFocus
+          role='tooltip'
+          contentRenderer={({ renderCursor }) => {
+            return (
+              <html.div style={styles.content}>
+                {renderCursor({ ...css.props(styles.cursor) })}
+                <html.span style={styles.text}>{text}</html.span>
+              </html.div>
+            )
+          }}
+          forwardProps
+          openEvents={{ hover: true, focus: true }}>
+          {({ getProps, setRef, close }) => (
+            <html.div {...getProps()} ref={setRef} onMouseLeave={!keepMounted ? close : undefined}>
+              {children}
             </html.div>
-          )
-        }}
-        forwardProps
-        openEvents={{ hover: true, focus: true }}>
-        {(renderProps) => (
-          <html.div {...renderProps.getProps()} ref={renderProps.setRef}>
-            {typeof children === 'function' ? children(renderProps) : children}
-          </html.div>
-        )}
-      </PopoverBase>
-    </FloatingDelayGroup>
+          )}
+        </PopoverBase>
+      </FloatingDelayGroup>
+    </PopoverHoverRender>
   )
 }
 
