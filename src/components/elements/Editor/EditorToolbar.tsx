@@ -7,24 +7,27 @@ import { EditorButtonAddMedia } from './Toolbar/EditorButtonAddMedia'
 import { EditorButtonBroadcast } from './Toolbar/EditorButtonBroadcast'
 import { EditorButtonMentions } from './Toolbar/EditorButtonMentions'
 import { EditorButtonSettings } from './Toolbar/EditorButtonSettings'
+import { EditorButtonZapSplits } from './Toolbar/EditorButtonZapSplit'
+import { useContentContext } from '@/components/providers/ContentProvider'
 
 type Props = {
-  dense?: boolean
   children?: ReactNode
   store: EditorStore
 }
 
 export const EditorToolbar = observer(function EditorToolbar(props: Props) {
-  const { store, dense, children } = props
+  const { store, children } = props
+  const { dense } = useContentContext()
 
   return (
     <Stack horizontal justify='space-between' sx={[styles.root, dense && styles.root$dense]}>
       <Stack gap={0.5}>
-        <EditorButtonAddMedia dense={dense} store={store} />
-        <EditorButtonBroadcast dense={dense} store={store} />
-        <EditorButtonMentions dense={dense} store={store} />
+        <EditorButtonAddMedia store={store} />
+        <EditorButtonBroadcast store={store} />
+        <EditorButtonMentions store={store} />
+        <EditorButtonZapSplits store={store} />
         {/* <EditorButtonPow dense={dense} store={store} /> */}
-        <EditorButtonSettings dense={dense} store={store} />
+        <EditorButtonSettings store={store} />
       </Stack>
       {children}
     </Stack>

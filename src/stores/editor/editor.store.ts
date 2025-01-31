@@ -8,7 +8,7 @@ import type { NostrClient } from '@/nostr/nostr'
 import { publish } from '@/nostr/publish/publish'
 import type { NostrEventMetadata } from '@/nostr/types'
 import type { Editor } from '@tiptap/core'
-import { action, computed, makeAutoObservable } from 'mobx'
+import { action, computed, makeAutoObservable, reaction } from 'mobx'
 import type { FileUploadStorage, NostrStorage } from 'nostr-editor'
 import type { EventTemplate, NostrEvent, UnsignedEvent } from 'nostr-tools'
 import { createElement } from 'react'
@@ -18,15 +18,15 @@ import { toggle } from '../helpers/toggle'
 import type { Note } from '../notes/note'
 import { toastStore } from '../ui/toast.store'
 import { userRelayStore } from '../userRelays/userRelay.store'
-import type { Comment } from '../comment/comment'
+import { userStore } from '../users/users.store'
 
 type EditorStoreOptions = {
   kind?: Kind
-  parentNote?: Note | Comment
+  parentNote?: Note
   onPublish?: (event: NostrEventMetadata) => void
 }
 
-type Sections = 'broadcast' | 'mentions' | 'pow' | 'settings'
+type Sections = 'broadcast' | 'mentions' | 'pow' | 'settings' | 'zaps'
 
 export class EditorStore {
   context: NostrContext | undefined = undefined
@@ -46,6 +46,10 @@ export class EditorStore {
   includedRelays = new Set<string>()
   excludedRelays = new Set<string>()
   excludedMentions = new Set<string>()
+  excludedMentionsZaps = new Set<string>()
+
+  zapSplitsEnabled = false
+  zapSplits: Map<string, number> = new Map()
 
   submit$: Subscription | undefined = undefined
   editor: Editor | undefined = undefined
@@ -57,11 +61,22 @@ export class EditorStore {
       myInboxRelays: computed.struct,
       otherInboxRelays: computed.struct,
       allRelays: computed.struct,
+      mentions: computed.struct,
       sign: action.bound,
       onUpdate: action.bound,
       onSubmit: action.bound,
       selectFiles: action.bound,
+      updateZapSplit: action.bound,
     })
+
+    reaction(
+      () => this.mentions,
+      () => {
+        this.mentionsZaps.forEach((pubkey) => {
+          this.updateZapSplit(pubkey, Math.floor(100 / this.mentions.length))
+        })
+      },
+    )
   }
 
   // this needs to be a computed
@@ -80,6 +95,9 @@ export class EditorStore {
       this.section = false
     } else {
       this.section = action
+    }
+    if (action === 'zaps') {
+      this.zapSplitsEnabled = true
     }
   }
 
@@ -105,6 +123,14 @@ export class EditorStore {
     this.powDifficulty = value
   }
 
+  reset() {
+    this.clearContent()
+    this.resetBroadcaster()
+    this.resetZapSplits()
+    this.open.toggle(false)
+    this.section = false
+  }
+
   resetSignedEvent() {
     this.signedEvent = undefined
   }
@@ -115,16 +141,19 @@ export class EditorStore {
     this.broadcastDirt.toggle(false)
   }
 
+  resetZapSplits() {
+    this.openSection('zaps')
+    this.zapSplitsEnabled = false
+    this.zapSplits.clear()
+    this.excludedMentionsZaps.clear()
+  }
+
+  getZapSplit(pubkey: string): number {
+    return this.zapSplits.get(pubkey) || 0
+  }
+
   get client(): NostrClient | undefined {
     return this.context?.client
-  }
-
-  get clientTag() {
-    return this.clientEnabled.value ? [CLIENT_TAG] : []
-  }
-
-  get nsfwTag() {
-    return this.nsfwEnabled.value ? [['content-warning', '']] : []
   }
 
   get storage() {
@@ -139,12 +168,30 @@ export class EditorStore {
     return this.event.tags
   }
 
-  get parent() {
-    return this.options.parentNote
+  get clientTag() {
+    return this.clientEnabled.value ? [CLIENT_TAG] : []
+  }
+
+  get nsfwTag() {
+    return this.nsfwEnabled.value ? [['content-warning', '']] : []
   }
 
   get replyTags() {
     return this.parent?.replyTags || []
+  }
+
+  get zapTags() {
+    if (this.zapSplitsEnabled) {
+      return this.zapSplitsList.map(([pubkey, amount]) => {
+        const user = userStore.get(pubkey)
+        return ['zap', pubkey, user?.headRelay || '', (amount / 100).toString()]
+      })
+    }
+    return []
+  }
+
+  get parent() {
+    return this.options.parentNote
   }
 
   editorTags() {
@@ -153,12 +200,16 @@ export class EditorStore {
     return tags.filter((tag) => (isAuthorTag(tag) ? !this.excludedMentions.has(tag[1]) : true))
   }
 
+  get isEmpty() {
+    return this.event.content === ''
+  }
+
   get event() {
     return {
       ...(this.signedEvent || this.unsignedEvent),
       content: this.content,
       created_at: Math.floor(Date.now() / 1000),
-      tags: [...this.replyTags, ...this.editorTags(), ...this.clientTag, ...this.nsfwTag],
+      tags: [...this.replyTags, ...this.editorTags(), ...this.clientTag, ...this.nsfwTag, ...this.zapTags],
     } as UnsignedEvent
   }
 
@@ -175,6 +226,43 @@ export class EditorStore {
       })
     }
     return []
+  }
+
+  get totalZaps() {
+    return this.zapSplits.values().reduce((acc, x) => acc + x, 0)
+  }
+
+  updateZapSplit(pubkey: string, percentage: number) {
+    this.zapSplits.set(pubkey, percentage)
+
+    const others = this.mentionsZaps
+      .filter((p) => p !== pubkey)
+      .sort((a, b) => ((this.zapSplits.get(a) || 0) > (this.zapSplits.get(b) || 0) ? 1 : -1))
+
+    const total = this.totalZaps
+
+    if (this.totalZaps > 100) {
+      others.forEach((other) => {
+        const otherValue = this.zapSplits.get(other) || 0
+        const remaining = total - 100
+        this.zapSplits.set(other, Math.max(0, otherValue - remaining))
+      })
+    }
+    if (this.totalZaps < 99) {
+      others.forEach((other) => {
+        const otherValue = this.zapSplits.get(other) || 0
+        const remaining = Math.abs(100 - this.totalZaps)
+        this.zapSplits.set(other, otherValue + remaining)
+      })
+    }
+  }
+
+  get zapSplitsList() {
+    return [...this.zapSplits.entries()]
+  }
+
+  get mentionsZaps() {
+    return this.mentions.filter((x) => !this.excludedMentionsZaps.has(x))
   }
 
   get mentions(): string[] {
@@ -253,6 +341,11 @@ export class EditorStore {
     this.excludedMentions.add(pubkey)
   }
 
+  excludeMentionZap(pubkey: string) {
+    this.excludedMentionsZaps.add(pubkey)
+    this.zapSplits.delete(pubkey)
+  }
+
   async sign(event?: EventTemplate) {
     const signed = await this.client?.signer?.sign(event || this.rawEvent)
     if (signed) {
@@ -260,13 +353,6 @@ export class EditorStore {
       return this.signedEvent
     }
     return Promise.reject('Signing rejected')
-  }
-
-  reset() {
-    this.clearContent()
-    this.resetBroadcaster()
-    this.open.toggle(false)
-    this.section = false
   }
 
   onSubmit() {
