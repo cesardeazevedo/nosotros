@@ -4,13 +4,7 @@ import { Link, useRouter } from '@tanstack/react-router'
 export const LinkSignIn = function LinkSignIn(props: LinkProps) {
   const router = useRouter()
   return (
-    <Link
-      {...props}
-      search={{ sign_in: true }}
-      // @ts-ignore
-      from={router.fullPath}
-      // @ts-ignore
-      state={{ from: router.latestLocation.pathname }}>
+    <Link {...props} to='.' search={{ sign_in: true }} state={{ from: router.latestLocation.pathname } as never}>
       {props.children}
     </Link>
   )

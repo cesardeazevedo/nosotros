@@ -12,6 +12,7 @@ import { ErrorBoundary } from 'ErrorBoundary'
 import { RootLayout } from 'components/elements/Layouts/RootLayout'
 import { firstValueFrom, timer } from 'rxjs'
 import { decodeNIP19 } from 'utils/nip19'
+import { z } from 'zod'
 import { NProfileArticlesFeed } from './components/modules/NProfile/feeds/NProfileArticlesFeed'
 import { NProfileNotesFeed } from './components/modules/NProfile/feeds/NProfileNotesFeed'
 import { NProfileRepliesFeed } from './components/modules/NProfile/feeds/NProfileRepliesFeed'
@@ -37,6 +38,16 @@ import { rootStore } from './stores/root.store'
 const rootRoute = createRootRouteWithContext()({
   component: RootLayout,
   errorComponent: ErrorBoundary,
+  validateSearch: z.object({
+    zap: z.string().optional(),
+    stats: z.string().optional(),
+    nevent: z.string().optional(),
+    invoice: z.string().optional(),
+    sign_in: z.boolean().optional(),
+    compose: z.boolean().optional(),
+    quoting: z.string().optional(),
+    replying: z.string().optional(),
+  }),
 })
 
 export const homeRoute = createRoute({

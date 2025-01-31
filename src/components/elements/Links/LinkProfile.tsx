@@ -47,8 +47,7 @@ export const LinkProfile = observer(
         resetScroll
         to='/$nostr'
         params={{ nostr: user?.nprofile }}
-        // @ts-ignore
-        state={{ from: router.latestLocation.pathname }}
+        state={{ from: router.latestLocation.pathname } as never}
         {...rest}
         {...css.props([underline && styles.underline, rest.sx])}
         ref={ref}>

@@ -1,33 +1,27 @@
+import { useNoteStoreFromId } from '@/hooks/useNoteStore'
+import { useMatch, useNavigate } from '@tanstack/react-router'
 import { observer } from 'mobx-react-lite'
+import { useCallback } from 'react'
 import { DialogSheet } from '../elements/Layouts/Dialog'
 import { PostStats } from '../elements/Posts/PostDialogs/PostStats'
-import { useMatch } from '@tanstack/react-router'
-import { useCallback } from 'react'
-import { useGoBack } from '@/hooks/useNavigations'
-import { modelStore } from '@/stores/base/model.store'
-import type { Comment } from '@/stores/comment/comment'
-import type { Note } from '@/stores/notes/note'
 
 export const NoteStatsDialog = observer(function NoteStatsDialog() {
   const id = useMatch({
     from: '__root__',
-    select: (x) => {
-      // @ts-ignore
-      return x.search.stats
-    },
+    select: (x) => x.search?.stats,
   })
 
-  const goBack = useGoBack()
+  const navigate = useNavigate()
 
   const handleClose = useCallback(() => {
-    goBack()
+    navigate({ to: '.', search: ({ stats, ...rest } = {}) => rest })
   }, [])
 
-  const note = modelStore.get(id)
+  const note = useNoteStoreFromId(id)
 
   return (
     <DialogSheet title='Stats' open={!!id} onClose={handleClose} maxWidth='sm'>
-      {note && <PostStats note={note as Note | Comment} onClose={handleClose} />}
+      {note && <PostStats note={note} onClose={handleClose} />}
     </DialogSheet>
   )
 })

@@ -1,8 +1,7 @@
 import { createEditorStore } from '@/stores/editor/editor.store'
 import { spacing } from '@/themes/spacing.stylex'
-import { useMatch } from '@tanstack/react-router'
+import { useMatch, useNavigate } from '@tanstack/react-router'
 import { DialogSheet } from 'components/elements/Layouts/Dialog'
-import { useGoBack } from 'hooks/useNavigations'
 import { observer } from 'mobx-react-lite'
 import { useCallback, useEffect, useMemo } from 'react'
 import { RemoveScroll } from 'react-remove-scroll'
@@ -12,21 +11,18 @@ import { Editor } from '../elements/Editor/Editor'
 export const EditorQuoteDialog = observer(function EditorQuoteDialog() {
   const quoting = useMatch({
     from: '__root__',
-    // @ts-ignore
     select: (x) => x.search.quoting,
-  }) as string | undefined
-  const goBack = useGoBack()
+  })
+  const navigate = useNavigate()
 
   const handleClose = useCallback(() => {
-    goBack()
-  }, [goBack])
+    navigate({ to: '.', search: ({ quoting, ...rest }) => rest })
+  }, [])
 
   const store = useMemo(
     () =>
       createEditorStore({
-        onPublish: () => {
-          handleClose()
-        },
+        onPublish: () => handleClose(),
       }),
     [quoting],
   )

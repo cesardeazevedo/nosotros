@@ -71,8 +71,7 @@ export const LinkNEvent = observer(function LinkNEvent(props: Props) {
   return (
     <Link
       to={`/$nostr`}
-      // @ts-ignore
-      state={{ from: router.latestLocation.pathname }}
+      state={{ from: router.latestLocation.pathname } as never}
       {...rest}
       {...css.props([underline && styles.underline])}
       params={{ nostr: nevent }}>
