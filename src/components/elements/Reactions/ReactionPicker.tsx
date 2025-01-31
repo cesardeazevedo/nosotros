@@ -11,13 +11,23 @@ type Props = {
   children: React.ReactNode
 }
 
+const reactions = {
+  like: { title: 'Like', reaction: '🤙' },
+  lfg: { title: 'LFG!', reaction: '🚀' },
+  fire: { title: 'Fire', reaction: '🔥' },
+  watching: { title: 'Watching', reaction: '👀' },
+  haha: { title: 'Haha', reaction: '😂' },
+  salute: { title: 'Salute', reaction: '🫡' },
+  hugs: { title: 'Hugs', reaction: '🫂' },
+  angry: { title: 'Angry', reaction: '😡' },
+} as const
+
 function ReactionIcon(props: {
-  title?: string
-  reaction: string
+  reaction: keyof typeof reactions
   mouseX: MotionValue<number>
   onClick?: (emoji: string) => void
 }) {
-  const { reaction, title, mouseX, onClick } = props
+  const { mouseX, onClick } = props
   const ref = useRef<HTMLDivElement | null>(null)
   const distance = useTransform(mouseX, (value: number) => {
     const bounds = ref.current?.getBoundingClientRect() ?? { x: 0, width: 0 }
@@ -28,6 +38,8 @@ function ReactionIcon(props: {
   const rotateZ = useTransform(distance, [-100, 0, 100], [0, -8, 0])
   const rotateZText = useTransform(distance, [-100, 0, 100], [0, 16, 0])
   const opacity = useTransform(distance, [-50, 0, 50], [0, 1, 0])
+
+  const { title, reaction } = reactions[props.reaction]
 
   return (
     <motion.div
@@ -50,14 +62,14 @@ function ReactionDock({ onClick }: { onClick: Props['onClick'] }) {
   const props = { mouseX, onClick }
   return (
     <div {...css.props(styles.dock)} onMouseMove={(e) => mouseX.set(e.pageX)}>
-      <ReactionIcon title='Like' reaction='🤙' {...props} />
-      <ReactionIcon title='LFG!' reaction='🚀' {...props} />
-      <ReactionIcon title='Fire' reaction='🔥' {...props} />
-      <ReactionIcon title='Watching' reaction='👀' {...props} />
-      <ReactionIcon title='Haha' reaction='😂' {...props} />
-      <ReactionIcon title='Salute' reaction='🫡' {...props} />
-      <ReactionIcon title='Hugs' reaction='🫂' {...props} />
-      <ReactionIcon title='Angry' reaction='😡' {...props} />
+      <ReactionIcon reaction='like' {...props} />
+      <ReactionIcon reaction='lfg' {...props} />
+      <ReactionIcon reaction='fire' {...props} />
+      <ReactionIcon reaction='watching' {...props} />
+      <ReactionIcon reaction='haha' {...props} />
+      <ReactionIcon reaction='salute' {...props} />
+      <ReactionIcon reaction='hugs' {...props} />
+      <ReactionIcon reaction='angry' {...props} />
     </div>
   )
 }
@@ -67,6 +79,7 @@ export const ReactionPicker = memo(function ReactionPicker(props: Props) {
 
   return (
     <TooltipRich
+      keepMounted
       cursor={false}
       placement='top-start'
       enterDelay={500}
