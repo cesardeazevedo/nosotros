@@ -3,10 +3,11 @@ import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { MenuList } from '@/components/ui/MenuList/MenuList'
 import { useCurrentPubkey, useCurrentUser, useRootStore } from '@/hooks/useRootStore'
 import { shape } from '@/themes/shape.stylex'
-import { IconLogout, IconSettings, IconUser } from '@tabler/icons-react'
+import { IconLogout, IconSettingsFilled, IconUserFilled } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
 import { observer } from 'mobx-react-lite'
 import { css } from 'react-strict-dom'
+import { IconNostr } from '../Icons/IconNostr'
 import { LinkProfile } from '../Links/LinkProfile'
 import { LinkSignIn } from '../Links/LinkSignIn'
 
@@ -21,7 +22,7 @@ export const Menu = observer(function Menu(props: Props) {
   const user = useCurrentUser()
   const pubkey = useCurrentPubkey()
   const iconProps = {
-    size: dense ? 24 : 30,
+    size: dense ? 24 : 28,
     strokeWidth: '1.4',
   }
   return (
@@ -31,26 +32,24 @@ export const Menu = observer(function Menu(props: Props) {
           <MenuItem
             sx={styles.item}
             onClick={() => props.onAction?.()}
-            leadingIcon={<IconUser {...iconProps} />}
+            leadingIcon={<IconUserFilled {...iconProps} />}
             label='Profile'
           />
         </LinkProfile>
       )}
-      {user && (
-        <Link to='/settings'>
-          <MenuItem
-            sx={styles.item}
-            leadingIcon={<IconSettings size={22} strokeWidth='1.5' />}
-            onClick={props.onAction}
-            label='Settings'
-          />
-        </Link>
-      )}
       {!pubkey && (
         <LinkSignIn>
-          <MenuItem label='Sign In' />
+          <MenuItem leadingIcon={<IconNostr />} label='Join Nostr' />
         </LinkSignIn>
       )}
+      <Link to='/settings'>
+        <MenuItem
+          sx={styles.item}
+          leadingIcon={<IconSettingsFilled {...iconProps} />}
+          onClick={props.onAction}
+          label='Settings'
+        />
+      </Link>
       {pubkey && (
         <>
           <Divider />

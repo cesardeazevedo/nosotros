@@ -37,11 +37,13 @@ export const NEvent = observer(function NEvent(props: Props) {
 const styles = css.create({
   root: {
     width: '100%',
-    paddingBlock: spacing.margin1,
+    paddingBlock: spacing.padding1,
     paddingInline: spacing.padding2,
   },
   root$dense: {
     paddingInline: 0,
+    paddingTop: spacing.padding1,
+    paddingBottom: 0,
     maxWidth: 'calc(100vw - 90px)',
   },
   content: {

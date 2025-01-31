@@ -8,6 +8,7 @@ import { spacing } from '@/themes/spacing.stylex'
 import { useMatch } from '@tanstack/react-router'
 import { useMobile } from 'hooks/useMobile'
 import { useNostrRoute } from 'hooks/useNavigations'
+import { observer } from 'mobx-react-lite'
 import React from 'react'
 import { css, html } from 'react-strict-dom'
 import { CenteredContainer } from '../Layouts/CenteredContainer'
@@ -37,7 +38,7 @@ type Props = {
   children: React.ReactNode
 }
 
-export const Header = React.memo(function Header(props: Props) {
+export const Header = observer(function Header(props: Props) {
   const isMobile = useMobile()
   useMatch({ from: '__root__' })
 

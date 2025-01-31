@@ -54,6 +54,6 @@ const styles = css.create({
   },
   paper: {
     minWidth: 200,
-    padding: spacing.padding4,
+    padding: spacing.padding2,
   },
 })

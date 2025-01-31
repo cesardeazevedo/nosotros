@@ -50,13 +50,14 @@ export const RelayMailboxList = observer(function RelayMailboxList(props: Props)
     }
   }, [input])
 
+  const total = relays?.length
+
   return (
     <PaperContainer elevation={1} sx={styles.section}>
       <Stack horizontal={false}>
         <Stack gap={0.5} sx={styles.header} justify='space-between'>
           <Text variant='title' size='md'>
-            {label} Relays
-            <html.span style={styles.total}>{relays?.length ? `(${relays.length || ''})` : '0'}</html.span>
+            {label} Relays {total !== 0 && <html.span style={styles.total}>{`(${total})`}</html.span>}
           </Text>
         </Stack>
         <Divider />

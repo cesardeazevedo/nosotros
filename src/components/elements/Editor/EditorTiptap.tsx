@@ -1,4 +1,3 @@
-import { NoteContext } from '@/components/providers/NoteProvider'
 import { type EditorStore } from '@/stores/editor/editor.store'
 import { spacing } from '@/themes/spacing.stylex'
 import { EditorContent as TiptapEditorContent } from '@tiptap/react'
@@ -17,37 +16,18 @@ export const EditorTiptap = observer(function EditorTiptap(props: Props) {
   const { dense, store } = props
   const id = useId()
 
-  const editor = useMemo(() => store.editor || createEditor(store), [store.editor])
+  const editor = useMemo(() => store.editor || createEditor(store), [])
 
   useEffect(() => {
     store.setEditor(editor)
   }, [store, editor])
 
   return (
-    <>
-      <style>
-        {`
-          .tiptap p.is-editor-empty:first-child::before {
-            color: #adb5bd;
-            content: attr(data-placeholder);
-            float: left;
-            height: 0;
-            max-width: 100%;
-            pointer-events: none;
-          }
-          .ProseMirror-gapcursor::after {
-            border: 2px solid currentColor;
-          }
-      `}
-      </style>
-      <NoteContext.Provider value={{ dense: true, disableLink: true }}>
-        <TiptapEditorContent
-          id={id}
-          editor={editor}
-          {...css.props([styles.root, dense && styles.root$dense, !store.open && styles.root$disabled])}
-        />
-      </NoteContext.Provider>
-    </>
+    <TiptapEditorContent
+      id={id}
+      editor={editor}
+      {...css.props([styles.root, dense && styles.root$dense, !store.open && styles.root$disabled])}
+    />
   )
 })
 

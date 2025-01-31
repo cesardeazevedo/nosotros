@@ -26,8 +26,9 @@ const styles = css.create({
     marginBottom: 0,
   },
   margin: {
+    paddingBottom: 100,
     marginTop: {
-      default: 98,
+      default: 100,
       [MOBILE]: 0,
     },
   },

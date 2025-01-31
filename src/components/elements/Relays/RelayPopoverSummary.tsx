@@ -3,7 +3,7 @@ import { Divider } from '@/components/ui/Divider/Divider'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Paper } from '@/components/ui/Paper/Paper'
-import { PopoverBase } from '@/components/ui/Popover/PopoverBase'
+import { Popover } from '@/components/ui/Popover/Popover'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { useCurrentUser } from '@/hooks/useRootStore'
@@ -17,29 +17,16 @@ import {
   IconMailSearch,
 } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
-import { useCallback, useState } from 'react'
 import { css, html } from 'react-strict-dom'
-import { RelaySelectPopover } from './RelaySelectPopover'
 import { RelayIconButton } from './RelayIconButton'
+import { RelaySelectPopover } from './RelaySelectPopover'
 import { RelayUserChipList } from './RelayUserChipList'
 
 export const RelayPopoverSummary = observer(function RelayPopoverSummary() {
-  const [open, setOpen] = useState(false)
-
-  const handleOpen = useCallback(() => {
-    setOpen((prev) => !prev)
-  }, [])
-
-  const handleClose = useCallback(() => {
-    setOpen(false)
-  }, [])
-
   const user = useCurrentUser()
 
   return (
-    <PopoverBase
-      opened={open}
-      onClose={handleClose}
+    <Popover
       placement='bottom-end'
       contentRenderer={() => (
         <Paper elevation={2} surface='surfaceContainerLow' sx={styles.root}>
@@ -134,14 +121,12 @@ export const RelayPopoverSummary = observer(function RelayPopoverSummary() {
           )}
         </Paper>
       )}>
-      {({ getProps, setRef }) =>
-        user && (
-          <html.span ref={setRef} {...getProps()}>
-            <RelayIconButton onClick={handleOpen} />
-          </html.span>
-        )
-      }
-    </PopoverBase>
+      {({ getProps, setRef, open }) => (
+        <html.span ref={setRef} {...getProps()}>
+          <RelayIconButton onClick={open} />
+        </html.span>
+      )}
+    </Popover>
   )
 })
 

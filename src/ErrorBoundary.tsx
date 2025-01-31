@@ -19,7 +19,7 @@ export const ErrorBoundary = () => {
   }, [])
 
   return (
-    <CenteredContainer>
+    <CenteredContainer margin>
       <PaperContainer sx={styles.root} elevation={2}>
         <Text variant='headline' size='lg' sx={styles.title}>
           Error

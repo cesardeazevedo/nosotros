@@ -16,6 +16,7 @@ export const Popover = memo(function Popover(props: Props) {
 
   return (
     <PopoverHoverRender
+      open={open}
       content={children({
         opened: open,
         setRef: null,
@@ -25,7 +26,9 @@ export const Popover = memo(function Popover(props: Props) {
       } as IPopoverBaseTriggerRendererProps)}>
       <PopoverBase {...rest} opened={open} onClose={handleClose}>
         {(props) => (
-          <>{typeof children === 'function' ? children({ ...props, open: () => setOpen(true) }) : children}</>
+          <>
+            {typeof children === 'function' ? children({ ...props, open: handleOpen, close: handleClose }) : children}
+          </>
         )}
       </PopoverBase>
     </PopoverHoverRender>

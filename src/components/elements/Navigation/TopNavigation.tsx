@@ -28,7 +28,7 @@ export const TopNavigation = observer(function TopNavigation() {
     <>
       <Tabs anchor={location.pathname}>
         <Tooltip text='Home' enterDelay={enterDelay}>
-          <Link tabIndex={-1} to='/' resetScroll onClick={handleClickHome}>
+          <Link tabIndex={-1} to='/' onClick={handleClickHome}>
             <Tab anchor='/' sx={styles.tab} icon={<IconHome />} activeIcon={<IconHomeFilled />} />
           </Link>
         </Tooltip>

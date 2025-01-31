@@ -10,14 +10,14 @@ type Props = PaperProps & {
 }
 
 export const PaperContainer = forwardRef<HTMLDivElement, Props>((props, ref) => {
-  const { elevation = 0, children, ...rest } = props
+  const { elevation, children, ...rest } = props
   const mobile = useMobile()
   return (
     <Paper
       surface='surfaceContainerLowest'
       shape={mobile ? 'none' : 'lg'}
       {...rest}
-      elevation={elevation ?? (mobile ? 0 : 3)}
+      elevation={elevation ?? (mobile ? 0 : 1)}
       sx={[styles.root, rest.sx]}
       ref={ref}>
       {children}

@@ -1,8 +1,8 @@
 import { Chip } from '@/components/ui/Chip/Chip'
 import { chipTokens } from '@/components/ui/Chip/Chip.stylex'
-import { Menu } from '@/components/ui/Menu/Menu'
 import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
-import { Text } from '@/components/ui/Text/Text'
+import { MenuList } from '@/components/ui/MenuList/MenuList'
+import { Popover } from '@/components/ui/Popover/Popover'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
@@ -24,8 +24,24 @@ export const UploadButton = (props: Props) => {
   const url = useMemo(() => new URL(uploadUrl), [uploadUrl])
   return (
     <html.div style={styles.root}>
-      <Menu
-        trigger={({ getProps }) => (
+      <Popover
+        placement='bottom'
+        contentRenderer={({ close }) => (
+          <MenuList>
+            {nip96urls.map((url) => (
+              <MenuItem
+                interactive
+                key={url}
+                label={url}
+                onClick={() => {
+                  props.node.updateAttributes({ uploadUrl: 'https://' + url })
+                  close()
+                }}
+              />
+            ))}
+          </MenuList>
+        )}>
+        {({ getProps, setRef, open }) => (
           <Chip
             elevated
             variant='filter'
@@ -34,6 +50,7 @@ export const UploadButton = (props: Props) => {
             sx={styles.chip}
             label={uploading || uploaded ? '' : url.hostname}
             icon={<IconChevronDown color='currentColor' size={18} strokeWidth='2' />}
+            onClick={open}
             trailingIcon={
               uploadError && (
                 <Tooltip enterDelay={0} text={uploadError}>
@@ -41,23 +58,11 @@ export const UploadButton = (props: Props) => {
                 </Tooltip>
               )
             }
+            ref={setRef}
             {...getProps()}
           />
-        )}>
-        <html.div style={styles.description}>
-          <Text variant='label' size='md'>
-            File Storage Servers
-          </Text>
-        </html.div>
-        {nip96urls.map((url) => (
-          <MenuItem
-            interactive
-            key={url}
-            label={url}
-            onClick={() => props.node.updateAttributes({ uploadUrl: 'https://' + url })}
-          />
-        ))}
-      </Menu>
+        )}
+      </Popover>
     </html.div>
   )
 }

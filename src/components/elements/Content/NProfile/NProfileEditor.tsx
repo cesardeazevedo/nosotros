@@ -27,5 +27,6 @@ const styles = css.create({
   text: {
     cursor: 'pointer',
     color: palette.tertiary,
+    fontWeight: 600,
   },
 })

@@ -1,6 +1,6 @@
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
-import type { Repost } from '@/stores/reposts/repost'
+import type { NostrEventRepost } from '@/nostr/types'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconArrowForward } from '@tabler/icons-react'
@@ -11,33 +11,32 @@ import { UserHeader } from '../User/UserHeader'
 import { UserHeaderDate } from '../User/UserHeaderDate'
 
 type Props = {
-  repost: Repost
+  event: NostrEventRepost
 }
 
 export const RepostHeader = (props: Props) => {
-  const { repost } = props
-  const { note } = repost
+  const { event } = props
   return (
     <Stack horizontal justify='space-between' sx={styles.root}>
       <Stack horizontal={false} sx={styles.content}>
         <UserHeader
           dense
           renderNIP05={false}
-          pubkey={repost.event.pubkey}
+          pubkey={event.pubkey}
           gap={2}
           sx={styles.top}
           align='flex-start'
           size='sm'>
-          <UserHeaderDate date={repost.event.created_at} />
+          <UserHeaderDate date={event.created_at} />
         </UserHeader>
-        <PostUserHeader dense note={note} align='center' sx={styles.bottom} userAvatarProps={{ sx: styles.avatar }} />
+        <PostUserHeader dense align='center' sx={styles.bottom} userAvatarProps={{ sx: styles.avatar }} />
         <Tooltip placement='bottom' text='Reposted'>
           <html.span style={styles.icon}>
             <IconArrowForward size={20} strokeWidth='1.8' />
           </html.span>
         </Tooltip>
       </Stack>
-      <PostOptions note={note} />
+      <PostOptions />
     </Stack>
   )
 }

@@ -43,8 +43,7 @@ const styles = css.create({
     marginBottom: spacing.margin1,
     borderRadius: shape.lg,
     width: 'fit-content',
-    maxHeight: 400,
-    maxWidth: 'calc(100% - 32px)',
+    maxHeight: 350,
     backgroundColor: '#000',
   },
   root$dense: {

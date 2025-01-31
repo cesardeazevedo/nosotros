@@ -1,3 +1,4 @@
+import { ContentProvider } from '@/components/providers/ContentProvider'
 import { useObservableNostrContext } from '@/stores/context/nostr.context.hooks'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
@@ -32,7 +33,9 @@ export const NEventEditor = (props: NodeViewProps) => {
       style={{ position: 'relative', height: 'fit-content', width: 'auto' }}>
       <DeleteButton onClick={() => props.deleteNode()} />
       <html.div style={[styles.wrapper, props.selected && styles.wrapper$selected]}>
-        <NEvent pointer={attrs} />
+        <ContentProvider value={{ dense: true }}>
+          <NEvent pointer={attrs} />
+        </ContentProvider>
       </html.div>
     </NodeViewWrapper>
   )
