@@ -1,8 +1,8 @@
-import { fakeNote } from '@/utils/faker'
+import { fakeEvent } from '@/utils/faker'
 import { parseRelayListToTags, parseRelayList, READ, WRITE, addPermission, revokePermission } from '../parseRelayList'
 
 test('parseRelayList()', () => {
-  const event = fakeNote({
+  const event = fakeEvent({
     id: '1',
     kind: 10002,
     pubkey: '1',
@@ -48,7 +48,7 @@ test('parseRelayList()', () => {
 })
 
 test('addPermission() revokePermission()', () => {
-  const event = fakeNote({
+  const event = fakeEvent({
     id: '1',
     kind: 10002,
     pubkey: '1',

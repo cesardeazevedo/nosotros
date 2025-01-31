@@ -1,14 +1,14 @@
 import { RELAY_1 } from '@/constants/testRelays'
 import { subscribeSpyTo } from '@hirez_io/observer-spy'
 import { Kind } from 'constants/kinds'
-import { fakeNote } from 'utils/faker'
+import { fakeEvent } from 'utils/faker'
 import { test } from 'utils/fixtures'
 import { vi } from 'vitest'
 
 describe('NIP01Notes', () => {
   test('assert parent event and quotes', async ({ createMockRelay, createClient }) => {
-    const event1 = fakeNote({ id: '1', pubkey: '1', tags: [] })
-    const event2 = fakeNote({
+    const event1 = fakeEvent({ id: '1', pubkey: '1', tags: [] })
+    const event2 = fakeEvent({
       id: '2',
       pubkey: '2',
       tags: [
@@ -16,7 +16,7 @@ describe('NIP01Notes', () => {
         ['e', '22', '', 'mention'],
       ],
     })
-    const event3 = fakeNote({
+    const event3 = fakeEvent({
       id: '3',
       pubkey: '3',
       tags: [
@@ -24,11 +24,11 @@ describe('NIP01Notes', () => {
         ['e', '23', '', 'mention'],
       ],
     })
-    const event4 = fakeNote({ id: '4', pubkey: '4', tags: [['e', '5', '', 'reply']] })
-    const event5 = fakeNote({ id: '5', pubkey: '5', tags: [['e', '6', '', 'reply']] })
-    const event6 = fakeNote({ id: '6', pubkey: '6', tags: [['e', '7', '', 'reply']] })
-    const event7 = fakeNote({ id: '22', pubkey: '10' })
-    const event8 = fakeNote({ id: '23', pubkey: '11' })
+    const event4 = fakeEvent({ id: '4', pubkey: '4', tags: [['e', '5', '', 'reply']] })
+    const event5 = fakeEvent({ id: '5', pubkey: '5', tags: [['e', '6', '', 'reply']] })
+    const event6 = fakeEvent({ id: '6', pubkey: '6', tags: [['e', '7', '', 'reply']] })
+    const event7 = fakeEvent({ id: '22', pubkey: '10' })
+    const event8 = fakeEvent({ id: '23', pubkey: '11' })
 
     const relay = createMockRelay(RELAY_1, [event1, event2, event3, event4, event5, event6, event7, event8])
 
@@ -43,9 +43,9 @@ describe('NIP01Notes', () => {
     expect(relay.received).toStrictEqual([
       ['REQ', '1', { kinds: [1], authors: ['1', '2'] }],
       ['CLOSE', '1'],
-      ['REQ', '2', { kinds: [0, 10002], authors: ['1', '2'] }, { ids: ['3'], kinds: [1] }, { ids: ['22'] }],
+      ['REQ', '2', { kinds: [0, 10002], authors: ['1', '2'] }, { ids: ['3', '22'] }],
       ['CLOSE', '2'],
-      ['REQ', '3', { ids: ['4'], kinds: [1] }, { kinds: [0, 10002], authors: ['3', '10'] }, { ids: ['23'] }],
+      ['REQ', '3', { ids: ['4', '23'] }, { kinds: [0, 10002], authors: ['3', '10'] }],
       ['CLOSE', '3'],
       ['REQ', '4', { kinds: [0, 10002], authors: ['4', '11'] }],
       ['CLOSE', '4'],

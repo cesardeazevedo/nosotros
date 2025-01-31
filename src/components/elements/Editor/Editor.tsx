@@ -1,4 +1,5 @@
 import { EditorTiptap } from '@/components/elements/Editor/EditorTiptap'
+import { ContentProvider, useContentContext } from '@/components/providers/ContentProvider'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
 import type { Props as StackProps } from '@/components/ui/Stack/Stack'
@@ -23,9 +24,9 @@ import { EditorSettings } from './EditorSettings'
 import { EditorSubmit } from './EditorSubmit'
 import { EditorToolbar } from './EditorToolbar'
 import { EditorActionsPopover } from './EditorToolbarPopover'
+import { EditorZapSplits } from './EditorZapSplit'
 
 type Props = {
-  dense?: boolean
   store: EditorStore
   initialOpen?: boolean
   renderDiscard?: boolean
@@ -35,8 +36,9 @@ type Props = {
 }
 
 export const Editor = observer(function Editor(props: Props) {
-  const { store, initialOpen, dense = false, renderDiscard = true, renderBubble = false, sx, onDiscard } = props
+  const { store, initialOpen, renderDiscard = true, renderBubble = false, sx, onDiscard } = props
 
+  const { dense } = useContentContext()
   const context = useRootContext()
 
   useEffect(() => {
@@ -60,50 +62,52 @@ export const Editor = observer(function Editor(props: Props) {
         justify='space-between'
         gap={renderBubble ? 1 : 2}
         onClick={() => store.setOpen()}
-        sx={[styles.root, dense && styles.root$dense, store.open && styles.root$open, sx]}>
-        <UserAvatar disabledPopover disableLink size='md' pubkey={context.user?.pubkey} />
-        <Container {...ContainerProps}>
-          <Stack horizontal={false} grow>
-            <Stack sx={[styles.content, dense && styles.content$dense]} gap={2} align='flex-start'>
-              <Stack horizontal={false} sx={styles.wrapper}>
-                <Stack justify='space-between' sx={styles.header}>
-                  {store.open.value && !dense && (
-                    <motion.div
-                      key='username'
-                      initial={{ translateY: -6, opacity: 0 }}
-                      animate={{ translateY: 2, opacity: 1 }}
-                      exit={{ translateY: -6, opacity: 0 }}>
-                      <EditorHeader />
-                    </motion.div>
+        sx={[styles.root, store.open && styles.root$open, sx]}>
+        <ContentProvider value={{ dense, disablePopover: true, disableLink: true }}>
+          <UserAvatar size='md' pubkey={context.user?.pubkey} />
+          <Container {...ContainerProps}>
+            <Stack horizontal={false} grow>
+              <Stack sx={[styles.content, dense && styles.content$dense]} gap={2} align='flex-start'>
+                <Stack horizontal={false} sx={styles.wrapper}>
+                  <Stack justify='space-between' sx={styles.header}>
+                    {store.open.value && !dense && (
+                      <motion.div
+                        key='username'
+                        initial={{ translateY: -6, opacity: 0 }}
+                        animate={{ translateY: 2, opacity: 1 }}
+                        exit={{ translateY: -6, opacity: 0 }}>
+                        <EditorHeader />
+                      </motion.div>
+                    )}
+                  </Stack>
+                  {store.open.value ? (
+                    <EditorTiptap key='editor' dense={dense} store={store} placeholder={store.placeholder} />
+                  ) : (
+                    <Stack sx={styles.placeholder}>
+                      <Text size='lg' variant='body' sx={styles.placeholder$label}>
+                        {store.placeholder}
+                      </Text>
+                    </Stack>
                   )}
                 </Stack>
-                {store.open.value ? (
-                  <EditorTiptap key='editor' dense={dense} store={store} placeholder={store.placeholder} />
-                ) : (
-                  <Stack sx={styles.placeholder}>
-                    <Text size='lg' variant='body' sx={styles.placeholder$label}>
-                      {store.placeholder}
-                    </Text>
-                  </Stack>
-                )}
               </Stack>
+              {store.open.value && (
+                <>
+                  {renderBubble && (
+                    <EditorActionsPopover store={store}>
+                      <EditorSubmit store={store} renderDiscard={renderDiscard} onDiscard={onDiscard} />
+                    </EditorActionsPopover>
+                  )}
+                  {!renderBubble && (
+                    <EditorToolbar store={store}>
+                      <EditorSubmit store={store} renderDiscard={renderDiscard} onDiscard={onDiscard} />
+                    </EditorToolbar>
+                  )}
+                </>
+              )}
             </Stack>
-            {store.open.value && (
-              <>
-                {renderBubble && (
-                  <EditorActionsPopover store={store}>
-                    <EditorSubmit dense={dense} store={store} renderDiscard={renderDiscard} onDiscard={onDiscard} />
-                  </EditorActionsPopover>
-                )}
-                {!renderBubble && (
-                  <EditorToolbar dense={dense} store={store}>
-                    <EditorSubmit dense={dense} store={store} renderDiscard={renderDiscard} onDiscard={onDiscard} />
-                  </EditorToolbar>
-                )}
-              </>
-            )}
-          </Stack>
-        </Container>
+          </Container>
+        </ContentProvider>
       </Stack>
       {!renderBubble && (
         <>
@@ -118,6 +122,10 @@ export const Editor = observer(function Editor(props: Props) {
           <Expandable expanded={store.section === 'settings'}>
             <Divider />
             <EditorSettings key='json' store={store} />
+          </Expandable>
+          <Expandable expanded={store.section === 'zaps'}>
+            <Divider />
+            <EditorZapSplits key='json' store={store} />
           </Expandable>
           {/* eslint-disable-next-line no-constant-binary-expression */}
           {false && (
@@ -138,7 +146,6 @@ const styles = css.create({
     width: '100%',
     padding: spacing.padding1,
   },
-  root$dense: {},
   root$open: {
     cursor: 'inherit',
   },

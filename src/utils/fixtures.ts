@@ -14,12 +14,14 @@ import { replay as replayNIP02 } from '@/nostr/nips/nip02.follows'
 import { replay as replayNIP65 } from '@/nostr/nips/nip65.relaylist'
 import type { NostrClientOptions } from '@/nostr/nostr'
 import { NostrClient } from '@/nostr/nostr'
+import { mergeMetadata } from '@/nostr/operators/mapMetadata'
 import { pool } from '@/nostr/pool'
 import { defaultNostrSettings, type NostrSettings } from '@/nostr/settings'
-import type { Comment } from '@/stores/comment/comment'
-import { commentStore } from '@/stores/comment/comment.store'
+import type { NostrEventComment } from '@/nostr/types'
+import { metadataSymbol, type NostrEventNote } from '@/nostr/types'
+import { eventStore } from '@/stores/events/event.store'
 import { followsStore } from '@/stores/follows/follows.store'
-import type { Note } from '@/stores/notes/note'
+import { Note } from '@/stores/notes/note'
 import { noteStore } from '@/stores/notes/notes.store'
 import { reactionStore } from '@/stores/reactions/reactions.store'
 import { rootStore, type RootStore } from '@/stores/root.store'
@@ -29,7 +31,7 @@ import { userStore } from '@/stores/users/users.store'
 import { type NostrEvent } from 'nostr-tools'
 import { test as base } from 'vitest'
 import WS from 'vitest-websocket-mock'
-import { fakeNote } from './faker'
+import { fakeComment, fakeEvent, fakeNote } from './faker'
 import { RelayServer, TestSigner } from './testHelpers'
 
 interface Fixtures {
@@ -47,7 +49,7 @@ interface Fixtures {
   ) => NostrClient
   createUser: (data: Partial<NostrEvent>) => User
   createNote: (data: Partial<NostrEvent>, client?: NostrClient) => Note
-  createComment: (data: Partial<NostrEvent>, client?: NostrClient) => Comment
+  createComment: (data: Partial<NostrEvent>, client?: NostrClient) => Note
   createFollows: (pubkey: string, tags: string[]) => void
   createReaction: (data: Partial<NostrEvent>) => void
   insertRelayList: (data: Partial<NostrEvent>, client?: NostrClient) => Promise<void>
@@ -120,7 +122,7 @@ export const test = base.extend<Fixtures>({
   },
   createUser: async ({ root, clear }, use) => {
     use((data: Partial<NostrEvent>) => {
-      const event = fakeNote({
+      const event = fakeEvent({
         id: '1',
         kind: Kind.Metadata,
         content: '{"name": "user"}',
@@ -135,22 +137,25 @@ export const test = base.extend<Fixtures>({
   createNote: async ({ clear, createUser }, use) => {
     use((data: Partial<NostrEvent>) => {
       const event = fakeNote(data)
-      const metadata = parseNote(event)
+      eventStore.add(event)
+      noteStore.add(event as NostrEventNote)
       createUser({ pubkey: event.pubkey })
-      return noteStore.add(event, metadata)
+      return new Note(event)
     })
   },
   createComment: async ({ clear, createUser }, use) => {
     use((data: Partial<NostrEvent>) => {
-      const event = fakeNote({ kind: Kind.Comment, ...data })
-      const metadata = parseComment(event)
+      const event = fakeComment({ kind: Kind.Comment, ...data })
+      eventStore.add(event)
+      noteStore.add(event)
       createUser({ pubkey: event.pubkey })
-      return commentStore.add(event, metadata)
+      return new Note(event)
+      // return commentStore.add(event, metadata)
     })
   },
   createFollows: async ({ clear }, use) => {
     use((pubkey: string, followings: string[]) => {
-      const event = fakeNote({
+      const event = fakeEvent({
         kind: Kind.Follows,
         pubkey,
         tags: followings.map((follow) => ['p', follow]),
@@ -160,12 +165,12 @@ export const test = base.extend<Fixtures>({
   },
   createReaction: async ({ clear }, use) => {
     use((data: Partial<NostrEvent>) => {
-      reactionStore.add(fakeNote(data))
+      reactionStore.add(fakeEvent(data))
     })
   },
   insertRelayList: async ({ clear }, use) => {
     use(async (data: Partial<NostrEvent>, client?: NostrClient) => {
-      const event = fakeNote({ kind: Kind.RelayList, ...data })
+      const event = fakeEvent({ kind: Kind.RelayList, ...data })
       await db.event.insert(event)
       if (client) {
         client.mailbox.emit(event)
