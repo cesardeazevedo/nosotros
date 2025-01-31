@@ -1,8 +1,10 @@
 import { css } from 'react-strict-dom'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
+import { useCurrentPubkey } from '@/hooks/useRootStore'
 
 export const RelayDiscoveryTableHeader = () => {
+  const pubkey = useCurrentPubkey()
   const root = css.props(styles.root)
   const td = css.props(styles.cell)
   return (
@@ -11,9 +13,11 @@ export const RelayDiscoveryTableHeader = () => {
         <th {...td} align='left'>
           Relay
         </th>
-        <th {...td} align='right'>
-          People
-        </th>
+        {pubkey && (
+          <th {...td} align='right'>
+            People
+          </th>
+        )}
         <th {...td} align='left'>
           Latency (ms)
         </th>

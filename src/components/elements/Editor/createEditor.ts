@@ -44,7 +44,6 @@ export const createEditor = (store: EditorStore) => {
   ) as AnyExtension[]
 
   return new Editor({
-    autofocus: true,
     extensions: [
       ...extensions,
       Placeholder.configure({ placeholder: store.placeholder }),

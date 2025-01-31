@@ -1,7 +1,9 @@
+import { ContentProvider } from '@/components/providers/ContentProvider'
 import { Button } from '@/components/ui/Button/Button'
 import { Divider } from '@/components/ui/Divider/Divider'
-import { Menu } from '@/components/ui/Menu/Menu'
 import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
+import { MenuList } from '@/components/ui/MenuList/MenuList'
+import { Popover } from '@/components/ui/Popover/Popover'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { useRootContext } from '@/hooks/useRootStore'
@@ -38,33 +40,36 @@ export const RelayDiscovery = observer(function RelayDiscovery() {
               Relay Discovery
             </Text>
             <div>
-              <Menu
-                trigger={({ getProps }) => (
-                  <Button variant='filledTonal' sx={styles.monitor} {...getProps()}>
-                    <Stack gap={1}>
-                      <IconChevronDown size={18} />
-                      <UserHeader
-                        disableLink
-                        disablePopover
-                        size='md'
-                        pubkey={relayDiscoveryStore.selected}
-                        renderAvatar={false}
-                      />
-                    </Stack>
-                  </Button>
-                )}>
-                <Stack horizontal={false} gap={0.5}>
-                  {relayDiscoveryStore.listMonitors.map((monitor) => (
-                    <MenuItem
-                      key={monitor}
-                      label={<UserName size='md' disablePopover disableLink pubkey={monitor} />}
-                      supportingText={<UserNIP05 pubkey={monitor} />}
-                      onClick={() => relayDiscoveryStore.select(monitor)}
-                      sx={styles.menuItem}
-                    />
-                  ))}
-                </Stack>
-              </Menu>
+              <ContentProvider value={{ disablePopover: true, disableLink: true }}>
+                <Popover
+                  contentRenderer={({ close }) => (
+                    <MenuList surface='surfaceContainerLowest'>
+                      <Stack horizontal={false} gap={0.5}>
+                        {relayDiscoveryStore.listMonitors.map((monitor) => (
+                          <MenuItem
+                            key={monitor}
+                            label={<UserName size='md' pubkey={monitor} />}
+                            supportingText={<UserNIP05 pubkey={monitor} />}
+                            onClick={() => {
+                              relayDiscoveryStore.select(monitor)
+                              close()
+                            }}
+                            sx={styles.menuItem}
+                          />
+                        ))}
+                      </Stack>
+                    </MenuList>
+                  )}>
+                  {({ getProps, setRef, open }) => (
+                    <Button variant='filledTonal' sx={styles.monitor} ref={setRef} {...getProps()} onClick={open}>
+                      <Stack gap={1}>
+                        <IconChevronDown size={18} />
+                        <UserHeader size='md' pubkey={relayDiscoveryStore.selected} renderAvatar={false} />
+                      </Stack>
+                    </Button>
+                  )}
+                </Popover>
+              </ContentProvider>
             </div>
           </Stack>
           <Divider />

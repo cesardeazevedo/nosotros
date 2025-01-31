@@ -7,7 +7,6 @@ import {
   type NostrEventZapReceipt,
 } from '@/nostr/types'
 import { makeAutoObservable } from 'mobx'
-import { noteStore } from '../notes/notes.store'
 import { userStore } from '../users/users.store'
 
 export type NotificationItem =
@@ -67,10 +66,7 @@ export class Notification {
   }
 
   get related() {
-    const tag = this.event.tags.findLast(isEventTag)
-    if (tag) {
-      return noteStore.get(tag[1])
-    }
+    return this.event.tags.findLast(isEventTag)?.[1]
   }
 
   get zapAmount() {
