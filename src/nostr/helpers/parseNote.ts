@@ -25,7 +25,7 @@ export const editor = new Editor({
 
 export function parseNote(event: NostrEvent): NoteMetadata {
   const tags = parseTags(event.tags)
-  const content = parseContent(editor, event, tags)
+  const content = parseContent(event, tags)
   const replies = parseReplies(tags)
   const relayHints = mergeRelayHints([content.relayHints, replies.relayHints])
   return {

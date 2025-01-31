@@ -1,5 +1,4 @@
 import { parseContent } from '../parseContent'
-import { editor } from '../parseNote'
 import { parseTags } from '../parseTags'
 
 test('getMentionedAuthors', () => {
@@ -16,7 +15,7 @@ test('getMentionedAuthors', () => {
     ],
   }
   const tags = parseTags(event.tags)
-  const { mentionedAuthors } = parseContent(editor, event, tags)
+  const { mentionedAuthors } = parseContent(event, tags)
   expect(mentionedAuthors).toStrictEqual([
     '2',
     '3',
