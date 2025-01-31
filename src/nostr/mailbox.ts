@@ -37,7 +37,7 @@ export class Mailbox {
         this.updates$.pipe(
           filter((x) => x[0] === pubkey),
           map(([, event]) => parseRelayList(event).relayList),
-          takeUntil(timer(config?.timeout || 4000)),
+          takeUntil(timer(config?.timeout || 2000)),
         ),
       ),
       take(1),
