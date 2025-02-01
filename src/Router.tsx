@@ -5,35 +5,35 @@ import {
   createRootRouteWithContext,
   createRoute,
   createRouter,
-  redirect,
+  useNavigate,
   useRouteContext,
+  useSearch,
 } from '@tanstack/react-router'
 import { ErrorBoundary } from 'ErrorBoundary'
 import { RootLayout } from 'components/elements/Layouts/RootLayout'
-import { firstValueFrom, timer } from 'rxjs'
+import { useEffect } from 'react'
 import { decodeNIP19 } from 'utils/nip19'
 import { z } from 'zod'
 import { NProfileArticlesFeed } from './components/modules/NProfile/feeds/NProfileArticlesFeed'
 import { NProfileNotesFeed } from './components/modules/NProfile/feeds/NProfileNotesFeed'
 import { NProfileRepliesFeed } from './components/modules/NProfile/feeds/NProfileRepliesFeed'
-import { deckLoader } from './components/routes/deck/deck.loader'
 import { DeckRoute } from './components/routes/deck/deck.route'
-import { homeLoader } from './components/routes/home/home.loader'
+import { EditorRoute } from './components/routes/editor/editor.route'
 import { naddressLoader } from './components/routes/naddress/naddress.loader'
 import { NAddressRoute } from './components/routes/naddress/naddress.route'
 import { neventLoader } from './components/routes/nevent/nevent.loader'
 import { NEventPending } from './components/routes/nevent/nevent.pending'
-import { notificationLoader } from './components/routes/notification/notification.loader'
 import { NotificationsRoute } from './components/routes/notification/notifications.route'
 import { nprofileFeedLoader, nprofileLoader } from './components/routes/nprofile/nprofile.loader'
 import { NProfilePending } from './components/routes/nprofile/nprofile.pending'
+import { RelayFeedRoute } from './components/routes/relay/relay.feed.route'
 import { RelayRoute } from './components/routes/relays.route'
 import { SettingsContentRoute } from './components/routes/settings/settings.content'
 import { SettingsDisplayRoute } from './components/routes/settings/settings.display'
 import { SettingsNetworkRoute } from './components/routes/settings/settings.network'
 import { SettingsRoute } from './components/routes/settings/settings.route'
 import { SettingsStorageRoute } from './components/routes/settings/settings.storage'
-import { rootStore } from './stores/root.store'
+import { useCurrentPubkey } from './hooks/useRootStore'
 
 const rootRoute = createRootRouteWithContext()({
   component: RootLayout,
@@ -53,38 +53,41 @@ const rootRoute = createRootRouteWithContext()({
 export const homeRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
-  staleTime: 500000,
-  loader: () => homeLoader(),
-  component: () => <HomeRoute />,
-  pendingComponent: () => <HomeRoute />,
+  validateSearch: z.object({ relay: z.union([z.string(), z.array(z.string()).optional()]) }),
+  component: () => {
+    const { relay } = useSearch({ from: homeRoute.id })
+    if (relay) {
+      return <RelayFeedRoute />
+    }
+    return <HomeRoute />
+  },
 })
 
 export const deckRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/deck',
-  staleTime: 500000,
-  beforeLoad: (options) => {
-    const context = options.matches[options.matches.length - 1].context as { delay?: Promise<0> }
-    return { delay: context.delay || firstValueFrom(timer(1000)) }
-  },
-  loader: () => deckLoader(),
   component: () => <DeckRoute />,
-  pendingComponent: () => <DeckRoute />,
 })
 
 export const notificationsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/notifications',
-  staleTime: 500000,
-  beforeLoad: () => {
-    const { pubkey } = rootStore.auth
-    if (!pubkey) {
-      throw redirect({ to: '/', search: { sign_in: true } })
-    }
-    return { pubkey }
+  component: function NotificationRoute() {
+    const pubkey = useCurrentPubkey()
+    const navigate = useNavigate()
+    useEffect(() => {
+      if (!pubkey) {
+        navigate({ to: '/', search: { sign_in: true }, replace: true })
+      }
+    }, [])
+    return pubkey && <NotificationsRoute pubkey={pubkey} />
   },
-  loader: (options) => notificationLoader({ pubkey: options.context.pubkey }),
-  component: () => <NotificationsRoute />,
+})
+
+export const composeRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/compose',
+  component: () => <EditorRoute />,
 })
 
 export const nostrRoute = createRoute({
@@ -96,6 +99,7 @@ export const nostrRoute = createRoute({
     const decoded = decodeNIP19(options.params.nostr)
     return { decoded }
   },
+  // We need to get rid of these loaders as soon tanstack router fix their super annoying delay issues
   loader: (options) => {
     const { decoded } = options.context
     switch (decoded?.type) {
@@ -136,11 +140,10 @@ export const nostrRoute = createRoute({
           return <NAddressRoute {...decoded.data} />
         }
         default: {
-          redirect({ to: '/' })
+          return null
         }
       }
     }
-    redirect({ to: '/' })
   },
   pendingComponent: () => {
     const context = useRouteContext({ from: '/$nostr' })
@@ -172,7 +175,7 @@ const nprofileIndexRoute = createRoute({
   },
   component: function NProfileIndexRoute() {
     const module = nprofileIndexRoute.useLoaderData()
-    return module && <NProfileNotesFeed window module={module} />
+    return module && <NProfileNotesFeed module={module} />
   },
 })
 
@@ -182,7 +185,7 @@ const nprofileRepliesRoute = createRoute({
   loader: (options) => nprofileFeedLoader(options, 'replies'),
   component: function NProfileReplieRoute() {
     const module = nprofileRepliesRoute.useLoaderData()
-    return <NProfileRepliesFeed window module={module} />
+    return <NProfileRepliesFeed module={module} />
   },
 })
 
@@ -192,17 +195,8 @@ const nprofileArticlesRoute = createRoute({
   loader: (options) => nprofileFeedLoader(options, 'articles'),
   component: function NProfileArticleRoute() {
     const module = nprofileArticlesRoute.useLoaderData()
-    return <NProfileArticlesFeed window module={module} />
+    return <NProfileArticlesFeed module={module} />
   },
-})
-
-export const replyRoute = createRoute({
-  getParentRoute: () => homeRoute,
-  path: '/replies/$nevent',
-})
-export const replyRoute2 = createRoute({
-  getParentRoute: () => nostrRoute,
-  path: '/replies/$nevent',
 })
 
 const relaysRoute = createRoute({
@@ -242,16 +236,11 @@ const settingsStorageRoute = createRoute({
 })
 
 export const routeTree = rootRoute.addChildren([
-  homeRoute.addChildren([replyRoute]),
-  nostrRoute.addChildren([
-    replyRoute2,
-    // nprofile tabs
-    nprofileIndexRoute,
-    nprofileRepliesRoute,
-    nprofileArticlesRoute,
-  ]),
+  homeRoute,
+  nostrRoute.addChildren([nprofileIndexRoute, nprofileRepliesRoute, nprofileArticlesRoute]),
   deckRoute,
   notificationsRoute,
+  composeRoute,
   relaysRoute,
   settingsRoute.addChildren([settingsDisplayRoute, settingsNetworkRoute, settingsContentRoute, settingsStorageRoute]),
 ])
