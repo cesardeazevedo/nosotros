@@ -1,12 +1,13 @@
-import type { Instance } from 'mobx-state-tree'
 import { cast, t } from 'mobx-state-tree'
-import type { FeedScope } from '../feeds/feed.notes'
-import { createHome } from '../home/home.module'
+import { createHome } from '../modules/home.module'
+import { createMediaModule } from '../modules/media.module'
 import { ModuleStoreModel, type ModulesInstances } from '../modules/module.store'
-import { createNAddressModule } from '../naddress/naddress.module'
-import { createNEventModule } from '../nevent/nevent.module'
-import { createNotificationModule } from '../notifications/notification.module'
+import { createNAddressModule } from '../modules/naddress.module'
+import { createNEventModule } from '../modules/nevent.module'
+import { createNotificationModule } from '../modules/notification.module'
+import { createTagModule } from '../modules/tag.module'
 import { createNprofileModule } from '../nprofile/nprofile.module'
+import { createRelayFeedModule } from '../relays/relay.feed.module'
 
 export const DeckModel = t
   .model('DeckModel', {
@@ -20,15 +21,22 @@ export const DeckModel = t
     },
   }))
   .actions((self) => ({
-    add(module: ModulesInstances, index?: number) {
+    add(module: ModulesInstances, index?: number, replace?: boolean) {
       const id = module.id
-      self.modules.add(module)
-      self.columns.splice(index || self.columns.length, 0, id)
-      return module
+      if (replace && typeof index === 'number') {
+        const oldId = self.columns[index]
+        self.modules.delete(oldId)
+        self.modules.add(module)
+        self.columns.splice(index - 1, 1, id)
+      } else {
+        self.modules.add(module)
+        self.columns.splice(index || self.columns.length, 0, id)
+        return module
+      }
     },
   }))
   .actions((self) => ({
-    addHome(snapshot: { id?: string; scope?: Instance<typeof FeedScope>; authors: string[] }) {
+    addHome(snapshot: Parameters<typeof createHome>[0]) {
       self.add(createHome(snapshot))
     },
 
@@ -40,12 +48,24 @@ export const DeckModel = t
       self.add(createNprofileModule(options), index)
     },
 
-    addNEvent(snapshot: Parameters<typeof createNEventModule>[0], index?: number) {
-      self.add(createNEventModule(snapshot), index)
+    addNEvent(snapshot: Parameters<typeof createNEventModule>[0], index?: number, replace?: boolean) {
+      self.add(createNEventModule(snapshot), index, replace)
     },
 
     addNAddr(snapshot: Parameters<typeof createNAddressModule>[0], index?: number) {
       self.add(createNAddressModule(snapshot), index)
+    },
+
+    addMedia(snapshot: Parameters<typeof createMediaModule>[0], index?: number) {
+      self.add(createMediaModule(snapshot), index)
+    },
+
+    addTag(tags: string[], index?: number) {
+      self.add(createTagModule(tags), index)
+    },
+
+    addRelayFeed(relays: string[], index?: number) {
+      self.add(createRelayFeedModule(relays), index)
     },
 
     reset() {

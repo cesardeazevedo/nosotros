@@ -14,10 +14,11 @@ export type Props = {
   nevent?: NEvent | Note
   children: React.ReactNode
   underline?: boolean
+  replaceOnDeck?: boolean
 }
 
 export const LinkNEvent = observer(function LinkNEvent(props: Props) {
-  const { underline, ...rest } = props
+  const { underline, replaceOnDeck = false, ...rest } = props
   const router = useRouter()
   const root = useRootStore()
   const { index } = useContext(DeckContext)
@@ -44,16 +45,8 @@ export const LinkNEvent = observer(function LinkNEvent(props: Props) {
   const handleClickDeck = useCallback(() => {
     if (nevent) {
       const decoded = decodeNIP19(nevent)
-      switch (decoded?.type) {
-        case 'nevent': {
-          root.decks.selected.addNEvent({ options: decoded.data }, (index || 0) + 1)
-          break
-        }
-        case 'note': {
-          const options = { id: decoded.data, relays: seenStore.get(decoded.data) }
-          root.decks.selected.addNEvent({ options }, (index || 0) + 1)
-          break
-        }
+      if (decoded?.type === 'nevent') {
+        root.decks.selected.addNEvent({ options: decoded.data }, (index || 0) + 1, replaceOnDeck)
       }
     }
   }, [nevent, index])

@@ -5,7 +5,9 @@ import { useRelativeDate } from '@/hooks/useRelativeDate'
 import { palette } from '@/themes/palette.stylex'
 import type { StringUnitLength } from 'luxon'
 import type { NEvent } from 'nostr-tools/nip19'
+import { useContext } from 'react'
 import { css } from 'react-strict-dom'
+import { DeckContext } from '../Deck/DeckContext'
 import { LinkNEvent } from '../Links/LinkNEvent'
 
 type Props = {
@@ -18,13 +20,23 @@ type Props = {
 export const PostHeaderDate = function PostHeaderDate(props: Props) {
   const { date, nevent, sx, dateStyle } = props
   const [shortDate, fullDate] = useRelativeDate(date, dateStyle)
+  const column = useContext(DeckContext)
+  const replaceOnDeck = column.module?.type === 'nevent' || column.module?.type === 'naddress'
+  const content = (
+    <Tooltip text={fullDate}>
+      <Text size='sm' sx={[styles.root, sx]}>
+        {shortDate}
+      </Text>
+    </Tooltip>
+  )
+
+  if (!nevent) {
+    return content
+  }
+
   return (
-    <LinkNEvent underline nevent={nevent}>
-      <Tooltip text={fullDate}>
-        <Text size='sm' sx={[styles.root, sx]}>
-          {shortDate}
-        </Text>
-      </Tooltip>
+    <LinkNEvent underline nevent={nevent} replaceOnDeck={replaceOnDeck}>
+      {content}
     </LinkNEvent>
   )
 }
