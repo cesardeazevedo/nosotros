@@ -6,13 +6,15 @@ import { Stack } from '@/components/ui/Stack/Stack'
 import { useNoteStore } from '@/hooks/useNoteStore'
 import type { NostrEventComment } from '@/nostr/types'
 import { type NostrEventNote } from '@/nostr/types'
+import type { NEventModule } from '@/stores/modules/nevent.module'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconDotsVertical } from '@tabler/icons-react'
 import { useMatch } from '@tanstack/react-router'
 import { Observer } from 'mobx-react-lite'
-import { useEffect, useRef } from 'react'
+import { useContext, useEffect, useRef } from 'react'
 import { css, html } from 'react-strict-dom'
+import { DeckContext } from '../Deck/DeckContext'
 import { Editor } from '../Editor/Editor'
 import { WaveDivider } from '../Layouts/WaveDivider'
 import { LinkNEvent } from '../Links/LinkNEvent'
@@ -35,8 +37,10 @@ export const PostThread = function PostThread(props: Props) {
   const { event, renderEditor = true, renderParents = true, renderReplies = true, open } = props
   const note = useNoteStore(event, open)
   const context = useMatch({ from: '/$nostr', shouldThrow: false })?.context
+  const module = useContext(DeckContext).module as NEventModule
   const ref = useRef<HTMLDivElement>(null)
-  const isCurrentNote = context?.decoded?.type === 'nevent' ? context?.decoded.data.id === note.id : false
+  const isCurrentNote =
+    context?.decoded?.type === 'nevent' ? context?.decoded.data.id === note.id : module.options.id === note.id
 
   useEffect(() => {
     if (isCurrentNote && ref.current) {
@@ -171,7 +175,6 @@ const styles = css.create({
     top: 0,
     bottom: 0,
     width: 3,
-    //height: '100%',
     backgroundColor: palette.tertiary,
   },
   thread: {
@@ -207,7 +210,6 @@ const styles = css.create({
   },
   editor: {
     position: 'relative',
-    paddingLeft: spacing.padding1,
-    paddingRight: spacing.padding4,
+    paddingRight: spacing.padding2,
   },
 })
