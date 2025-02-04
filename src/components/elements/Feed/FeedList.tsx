@@ -20,7 +20,7 @@ export type Props = {
   footer?: React.ReactNode
 }
 
-export const List = observer(function List(props: Props) {
+export const FeedList = observer(function FeedList(props: Props) {
   const { feed, render, divider = true, onScrollEnd, filter = always, column } = props
   const ref = useRef<HTMLDivElement>(null)
 
@@ -56,12 +56,12 @@ export const List = observer(function List(props: Props) {
         {divider && <Divider />}
       </React.Fragment>
     ))
-  }, [feed.list])
+  }, [feed.list, divider])
 
   if (column) {
     return (
       <>
-        <html.div style={styles.root} ref={ref} onScroll={handleScrollColumn}>
+        <html.div style={styles.column} ref={ref} onScroll={handleScrollColumn}>
           {props.header}
           {props.wrapper ? props.wrapper(<>{content}</>) : content}
           {props.footer}
@@ -79,7 +79,7 @@ export const List = observer(function List(props: Props) {
 })
 
 const styles = css.create({
-  root: {
+  column: {
     position: 'relative',
     height: '91vh',
     overflow: 'scroll',
