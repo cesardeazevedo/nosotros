@@ -11,7 +11,7 @@ import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconChevronLeft, IconCircleCheck } from '@tabler/icons-react'
-import { Link } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router'
 import { AnimatePresence, motion, MotionConfig } from 'framer-motion'
 import { decode } from 'light-bolt11-decoder'
 import { DateTime } from 'luxon'
@@ -42,6 +42,7 @@ export const ZapRequestInvoice = (props: Props) => {
   const context = useRootContext()
   const copyButtonRef = useRef<CopyButtonRef | null>(null)
   const goBack = useGoBack()
+  const navigate = useNavigate()
 
   const bolt11 = useMemo(() => parseBolt11(decode(invoice)), [invoice])
 
@@ -98,12 +99,12 @@ export const ZapRequestInvoice = (props: Props) => {
                       Amount: {formatter.format(parseInt(amount) / 1000)} SATS
                     </Text>
                   </Stack>
-                  {/* @ts-ignore */}
-                  <Link to='.' search={({ nevent, invoice, ...rest }) => rest}>
-                    <Button fullWidth variant='filledTonal'>
-                      Close
-                    </Button>
-                  </Link>
+                  <Button
+                    fullWidth
+                    variant='filledTonal'
+                    onClick={() => navigate({ to: '.', search: ({ nevent, invoice, ...rest }) => rest })}>
+                    Close
+                  </Button>
                 </Stack>
               </motion.div>
             )}
