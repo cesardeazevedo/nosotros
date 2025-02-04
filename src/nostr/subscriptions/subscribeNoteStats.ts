@@ -41,6 +41,9 @@ export function buildFilters(event: NostrEvent, options?: NoteStatsOptions) {
     }
   }
   filters.push({ kinds, '#e': [event.id] })
+  if (event.kind !== Kind.Text && options?.replies) {
+    filters.push({ kinds: [Kind.Comment], '#E': [event.id] })
+  }
   return filters
 }
 
