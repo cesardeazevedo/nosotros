@@ -105,6 +105,10 @@ export function welshmanToProseMirror(welshmanSchema: Parsed[], blockNodesOption
           currentParagraph.content.push({ type: 'text', text: node.value })
           break
         }
+        case ParsedType.Code: {
+          currentParagraph.content.push({ type: 'text', text: node.value, marks: [{ type: 'code' }] })
+          break
+        }
         case ParsedType.Newline: {
           if (node.raw === '\n\n') {
             currentParagraph.content.push({ type: 'hardBreak' })

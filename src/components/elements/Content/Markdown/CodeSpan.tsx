@@ -12,8 +12,9 @@ export const CodeSpan = (props: Props) => <html.span style={[styles.root, props.
 
 const styles = css.create({
   root: {
-    padding: '.1em .4em .22em',
+    padding: '.1em .3em .1em',
+    marginInline: 2,
     borderRadius: 6,
-    backgroundColor: palette.surfaceContainerHigh,
+    backgroundColor: palette.surfaceContainer,
   },
 })
