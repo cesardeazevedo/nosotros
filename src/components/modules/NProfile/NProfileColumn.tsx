@@ -1,5 +1,4 @@
 import { DeckContext } from '@/components/elements/Deck/DeckContext'
-import { PaperContainer } from '@/components/elements/Layouts/PaperContainer'
 import { UserHeader } from '@/components/elements/User/UserHeader'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { useFeedSubscription } from '@/hooks/useFeedSubscription'
@@ -9,6 +8,7 @@ import { UserProfileHeader } from 'components/elements/User/UserProfileHeader'
 import { observer } from 'mobx-react-lite'
 import { useCallback, useContext } from 'react'
 import { NProfileArticlesFeed } from './feeds/NProfileArticlesFeed'
+import { NProfileMediaFeed } from './feeds/NProfileMediaFeed'
 import { NProfileNotesFeed } from './feeds/NProfileNotesFeed'
 import { NProfileRepliesFeed } from './feeds/NProfileRepliesFeed'
 import { NProfileFeedTabsState } from './NProfileFeedTabsState'
@@ -46,13 +46,10 @@ export const NProfileColumn = observer(function NProfileColumn(props: Props) {
       <DeckColumnHeader id={id}>
         <UserHeader pubkey={module.options.pubkey} />
       </DeckColumnHeader>
-      <PaperContainer elevation={0} shape='none'>
-        {selected === 'notes' && <NProfileNotesFeed column delay={context.delay} header={header} module={module} />}
-        {selected === 'replies' && <NProfileRepliesFeed column delay={context.delay} header={header} module={module} />}
-        {selected === 'articles' && (
-          <NProfileArticlesFeed column delay={context.delay} header={header} module={module} />
-        )}
-      </PaperContainer>
+      {selected === 'notes' && <NProfileNotesFeed column delay={context.delay} header={header} module={module} />}
+      {selected === 'replies' && <NProfileRepliesFeed column delay={context.delay} header={header} module={module} />}
+      {selected === 'media' && <NProfileMediaFeed column delay={context.delay} header={header} module={module} />}
+      {selected === 'articles' && <NProfileArticlesFeed column delay={context.delay} header={header} module={module} />}
     </>
   )
 })
