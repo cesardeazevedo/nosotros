@@ -1,14 +1,13 @@
-import { DEFAULT_RELAYS } from '@/constants/relays'
 import { cast, t } from 'mobx-state-tree'
-import { HomeModuleModel } from '../home/home.module'
+import { createHome } from '../modules/home.module'
+import { createMediaModule } from '../modules/media.module'
 import { ModuleStoreModel, type ModulesInstances } from '../modules/module.store'
-import type { NAddressModuleSnapshotIn } from '../naddress/naddress.module'
-import { NAddressModuleModel } from '../naddress/naddress.module'
-import type { NEventModuleSnapshotIn } from '../nevent/nevent.module'
-import { NEventModuleModel } from '../nevent/nevent.module'
-import type { NotificationModuleSnapshotIn } from '../notifications/notification.module'
-import { NotificationModuleModel } from '../notifications/notification.module'
-import { NProfileModuleModel } from '../nprofile/nprofile.module'
+import { createNAddressModule } from '../modules/naddress.module'
+import { createNEventModule } from '../modules/nevent.module'
+import { createNotificationModule } from '../modules/notification.module'
+import { createTagModule } from '../modules/tag.module'
+import { createNprofileModule } from '../nprofile/nprofile.module'
+import { createRelayFeedModule } from '../relays/relay.feed.module'
 
 export const DeckModel = t
   .model('DeckModel', {
@@ -22,65 +21,51 @@ export const DeckModel = t
     },
   }))
   .actions((self) => ({
-    add(module: ModulesInstances, index?: number) {
+    add(module: ModulesInstances, index?: number, replace?: boolean) {
       const id = module.id
-      self.modules.add(module)
-      self.columns.splice(index || self.columns.length, 0, id)
-      return module
+      if (replace && typeof index === 'number') {
+        const oldId = self.columns[index]
+        self.modules.delete(oldId)
+        self.modules.add(module)
+        self.columns.splice(index - 1, 1, id)
+      } else {
+        self.modules.add(module)
+        self.columns.splice(index || self.columns.length, 0, id)
+        return module
+      }
     },
   }))
   .actions((self) => ({
-    addHome() {
-      self.add(HomeModuleModel.create({}))
+    addHome(snapshot: Parameters<typeof createHome>[0]) {
+      self.add(createHome(snapshot))
     },
 
-    addNotification(snapshot: NotificationModuleSnapshotIn) {
-      self.add(NotificationModuleModel.create(snapshot))
+    addNotification(snapshot: Parameters<typeof createNotificationModule>[0]) {
+      self.add(createNotificationModule(snapshot))
     },
 
-    addNProfile(options: { pubkey: string; relays?: string[] }, index?: number) {
-      self.add(
-        NProfileModuleModel.create({
-          options,
-          context: {
-            options: {
-              pubkey: options.pubkey,
-              relays: options.relays || DEFAULT_RELAYS,
-            },
-          },
-        }),
-        index,
-      )
+    addNProfile(options: Parameters<typeof createNprofileModule>[0], index?: number) {
+      self.add(createNprofileModule(options), index)
     },
 
-    addNEvent(snapshot: NEventModuleSnapshotIn, index?: number) {
-      self.add(
-        NEventModuleModel.create({
-          ...snapshot,
-          context: {
-            options: {
-              pubkey: snapshot.options.author,
-              relays: snapshot.options.relays,
-            },
-          },
-        }),
-        index,
-      )
+    addNEvent(snapshot: Parameters<typeof createNEventModule>[0], index?: number, replace?: boolean) {
+      self.add(createNEventModule(snapshot), index, replace)
     },
 
-    addNAddr(snapshot: NAddressModuleSnapshotIn, index?: number) {
-      self.add(
-        NAddressModuleModel.create({
-          ...snapshot,
-          context: {
-            options: {
-              pubkey: snapshot.options.pubkey,
-              relays: snapshot.options.relays,
-            },
-          },
-        }),
-        index,
-      )
+    addNAddr(snapshot: Parameters<typeof createNAddressModule>[0], index?: number) {
+      self.add(createNAddressModule(snapshot), index)
+    },
+
+    addMedia(snapshot: Parameters<typeof createMediaModule>[0], index?: number) {
+      self.add(createMediaModule(snapshot), index)
+    },
+
+    addTag(tags: string[], index?: number) {
+      self.add(createTagModule(tags), index)
+    },
+
+    addRelayFeed(relays: string[], index?: number) {
+      self.add(createRelayFeedModule(relays), index)
     },
 
     reset() {

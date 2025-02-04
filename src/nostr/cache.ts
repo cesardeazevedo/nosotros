@@ -25,7 +25,7 @@ export function setCache(event: NostrEvent, prune?: boolean) {
 export function hasEventInCache(event: NostrEvent) {
   if (isReplaceableKind(event.kind)) {
     const found = cacheReplaceable.get(`${event.kind}:${event.pubkey}`)
-    return (found?.created_at || 0) >= event.created_at
+    return !!found && (found?.created_at || 0) <= event.created_at
   }
   return cache.has(event.id)
 }

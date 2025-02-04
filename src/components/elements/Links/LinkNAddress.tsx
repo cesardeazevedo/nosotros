@@ -1,3 +1,4 @@
+import { useContentContext } from '@/components/providers/ContentProvider'
 import { useRootStore } from '@/hooks/useRootStore'
 import { decodeNIP19 } from '@/utils/nip19'
 import { Link, useRouter } from '@tanstack/react-router'
@@ -11,14 +12,14 @@ export type Props = {
   naddress: NAddr | undefined
   children: React.ReactNode
   underline?: boolean
-  disableLink?: boolean
 }
 
 export const LinkNAddress = observer(function LinkNAddress(props: Props) {
-  const { naddress, disableLink, underline, ...rest } = props
+  const { naddress, underline, ...rest } = props
   const router = useRouter()
   const root = useRootStore()
   const { index } = useContext(DeckContext)
+  const { disableLink } = useContentContext()
 
   const handleClickDeck = useCallback(() => {
     if (naddress) {
@@ -35,17 +36,16 @@ export const LinkNAddress = observer(function LinkNAddress(props: Props) {
 
   if (index !== undefined) {
     return (
-      <Link onClick={handleClickDeck} {...rest}>
+      <a onClick={handleClickDeck} {...rest} {...css.props([styles.cursor, underline && styles.underline])}>
         {props.children}
-      </Link>
+      </a>
     )
   }
 
   return (
     <Link
       to={`/$nostr`}
-      // @ts-ignore
-      state={{ from: router.latestLocation.pathname }}
+      state={{ from: router.latestLocation.pathname } as never}
       {...rest}
       {...css.props([underline && styles.underline])}
       params={{ nostr: naddress }}>
@@ -55,6 +55,9 @@ export const LinkNAddress = observer(function LinkNAddress(props: Props) {
 })
 
 const styles = css.create({
+  cursor: {
+    cursor: 'pointer',
+  },
   underline: {
     textDecoration: {
       default: 'inherit',

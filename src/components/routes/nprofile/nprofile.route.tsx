@@ -1,4 +1,3 @@
-import { PostAwait } from '@/components/elements/Posts/PostAwait'
 import { NProfileFeedTabs } from '@/components/modules/NProfile/NProfileFeedTabs'
 import { NostrProvider } from '@/components/providers/NostrProvider'
 import { Divider } from '@/components/ui/Divider/Divider'
@@ -21,14 +20,12 @@ export const NProfileRoute = observer(function NProfileRoute(props: Props) {
   return (
     <NostrProvider nostrContext={() => module.context!} subFollows={false}>
       <CenteredContainer>
-        <PaperContainer shape='none' elevation={2}>
+        <PaperContainer>
           <Observer>{() => <UserProfileHeader pubkey={pubkey} />}</Observer>
           <Divider />
           <NProfileFeedTabs />
           <Divider />
-          <PostAwait promise={module.feed.delay} rows={5}>
-            <Outlet />
-          </PostAwait>
+          <Outlet />
         </PaperContainer>
       </CenteredContainer>
     </NostrProvider>

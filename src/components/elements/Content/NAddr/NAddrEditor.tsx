@@ -23,7 +23,7 @@ export const NAddrEditor = (props: NodeViewProps) => {
   return (
     <NodeViewWrapper
       as='div'
-      data-naddr={attrs.naddr}
+      data-naddr={attrs.bech32}
       data-drag-handle=''
       draggable={props.node.type.spec.draggable}
       style={{ position: 'relative', height: 'fit-content', width: 'auto' }}>

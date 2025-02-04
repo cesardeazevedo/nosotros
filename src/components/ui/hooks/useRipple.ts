@@ -23,14 +23,14 @@ export const EASING = {
 } as const
 
 export type IUseRippleProps = {
-  for?: React.RefObject<HTMLElement>
+  for?: React.RefObject<HTMLElement | null>
   visualState?: IVisualState
   disabled?: boolean
 }
 
 export type IUseRippleResult = {
   setHostRef: (host: HTMLDivElement | null) => void
-  surfaceRef: React.RefObject<HTMLDivElement>
+  surfaceRef: React.RefObject<HTMLDivElement | null>
   pressed: boolean
 }
 
@@ -106,14 +106,14 @@ export const useRipple = ({ visualState, for: forElementRef, disabled }: IUseRip
   const [pressed, setPressed] = useState(false)
   const [hostRef, setHostRef] = useState<HTMLDivElement | null>()
 
-  const rippleStartEventRef = useRef<PointerEvent>()
+  const rippleStartEventRef = useRef<PointerEvent>(null)
   const stateRef = useRef<IState>(IState.Inactive)
   const initialSizeRef = useRef(0)
   const rippleScaleRef = useRef(1)
   const rippleSizeRef = useRef(0)
   const surfaceRef = useRef<HTMLDivElement>(null)
   const checkBoundsAfterContextMenuRef = useRef(false)
-  const growAnimationRef = useRef<Animation>()
+  const growAnimationRef = useRef<Animation>(null)
 
   const getControl = useCallback(() => forElementRef?.current ?? hostRef?.parentElement, [forElementRef, hostRef])
 
@@ -376,7 +376,9 @@ export const useRipple = ({ visualState, for: forElementRef, disabled }: IUseRip
 
       if (stateRef.current === IState.TouchDelay) {
         stateRef.current = IState.WaitingForClick
-        startPressAnimation(event, rippleStartEventRef.current)
+        if (rippleStartEventRef.current) {
+          startPressAnimation(event, rippleStartEventRef.current)
+        }
 
         return
       }

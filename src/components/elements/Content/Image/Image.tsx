@@ -1,34 +1,38 @@
+import { useContentContext } from '@/components/providers/ContentProvider'
 import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { SxProps } from '@/components/ui/types'
 import { useGlobalSettings } from '@/hooks/useRootStore'
-import type { Comment } from '@/stores/comment/comment'
-import type { Note } from '@/stores/notes/note'
+import { mediaStore } from '@/stores/media/media.store'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconPhotoOff } from '@tabler/icons-react'
-import { memo, useCallback, useRef, useState } from 'react'
+import { observer } from 'mobx-react-lite'
+import { useCallback, useRef } from 'react'
 import { css, html } from 'react-strict-dom'
 import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDOMProps'
 import { dialogStore } from 'stores/ui/dialogs.store'
+import { BlurContainer } from '../../Layouts/BlurContainer'
 
 type Props = {
   src: string
   proxy?: boolean
   dense?: boolean
-  note?: Note | Comment
+  draggable?: boolean
   onClick?: (event?: StrictClickEvent) => void
   sx?: SxProps
 }
 
-export const Image = memo((props: Props) => {
-  const { note, src, proxy = true, sx } = props
-  const { dense: denseContext, disableLink } = useNoteContext()
-  const [error, setError] = useState(false)
-  const dense = props.dense ?? denseContext
+export const Image = observer(function Image(props: Props) {
+  const { dense: denseProp, src, proxy = true, sx, onClick, ...rest } = props
+  const { dense: denseContext, disableLink } = useContentContext()
+  const { note } = useNoteContext()
+  const dense = denseProp ?? denseContext
   const globalSettings = useGlobalSettings()
   const ref = useRef<HTMLImageElement>(null)
+
+  const hasError = mediaStore.hasError(src)
 
   const width = note?.metadata.imeta?.[src]?.dim?.width || 0
   const height = note?.metadata.imeta?.[src]?.dim?.width || 0
@@ -38,35 +42,40 @@ export const Image = memo((props: Props) => {
     (e: StrictClickEvent) => {
       e.preventDefault()
       e.stopPropagation()
-      if (!disableLink && !error) {
-        return props.onClick ? props.onClick() : dialogStore.pushImage(src)
+      if (!hasError) {
+        return onClick ? onClick() : dialogStore.pushImage(src)
       }
     },
-    [src, disableLink, error],
+    [src, disableLink, hasError],
   )
 
   const handleError = useCallback(() => {
-    setError(true)
+    mediaStore.addError(src)
   }, [])
 
   return (
-    <html.div style={[styles.root, dense && styles.root$dense]} onClick={handleClick}>
-      {error && (
-        <Stack sx={styles.fallback} align='center' justify='center'>
-          <IconPhotoOff size={44} strokeWidth='0.8' />
-        </Stack>
+    <BlurContainer>
+      {({ blurStyles }) => (
+        <html.div style={[styles.root, dense && styles.root$dense]} onClick={handleClick}>
+          {hasError && (
+            <Stack sx={styles.fallback} align='center' justify='center'>
+              <IconPhotoOff size={44} strokeWidth='0.8' />
+            </Stack>
+          )}
+          {!hasError && (
+            <html.img
+              {...bounds}
+              ref={ref}
+              src={proxy ? globalSettings.getImgProxyUrl('feed_img', src) : src}
+              // loading='lazy'
+              onError={handleError}
+              style={[styles.img, dense && styles.img$dense, blurStyles, sx]}
+              {...rest}
+            />
+          )}
+        </html.div>
       )}
-      {!error && (
-        <html.img
-          {...bounds}
-          ref={ref}
-          src={proxy ? globalSettings.getImgProxyUrl('feed_img', src) : src}
-          loading='lazy'
-          onError={handleError}
-          style={[styles.img, dense && styles.img$dense, sx]}
-        />
-      )}
-    </html.div>
+    </BlurContainer>
   )
 })
 
@@ -78,11 +87,10 @@ const styles = css.create({
     justifyContent: 'flex-start',
     alignItems: 'center',
     position: 'relative',
-    paddingInline: spacing.padding2,
+    paddingLeft: spacing.padding2,
     width: 'fit-content',
     height: 'fit-content',
-    marginTop: spacing.margin1,
-    marginBottom: spacing.margin1,
+    paddingBlock: spacing.padding1,
   },
   root$dense: {
     paddingInline: 0,
@@ -97,12 +105,12 @@ const styles = css.create({
       default: 400,
       [MOBILE]: 'calc(100vw - 90px)',
     },
-    maxHeight: 440,
+    maxHeight: 420,
     borderRadius: shape.lg,
+    padding: 0,
   },
   img$dense: {
     maxHeight: 400,
-    marginTop: 6,
     maxWidth: {
       default: 360,
       [MOBILE]: '100%',

@@ -20,7 +20,7 @@ export const AppBar = forwardRef<HTMLDivElement, Props>((props, ref) => {
 
 const styles = css.create({
   root: {
-    position: 'sticky',
+    position: 'fixed',
     top: 0,
     insetInline: 0,
     height: 64,

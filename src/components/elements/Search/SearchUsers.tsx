@@ -129,7 +129,7 @@ const styles = css.create({
   root: {
     height: '100%',
     minWidth: 220,
-    paddingBlock: spacing.padding1,
+    paddingBlock: spacing['padding0.5'],
   },
   scroller: {
     height: '100%',

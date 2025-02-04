@@ -1,11 +1,10 @@
 import type { MessageReceived } from 'core/types'
 import { RelayToClient } from 'core/types'
-import { tap } from 'rxjs'
+import { distinct, filter, pipe } from 'rxjs'
 
-export function onAuth(callback: (challenge: string) => void) {
-  return tap((event: MessageReceived) => {
-    if (event[0].toLowerCase() === RelayToClient.AUTH) {
-      callback(event[1])
-    }
-  })
+export function onAuth() {
+  return pipe(
+    filter((msg: MessageReceived) => msg[0].toLowerCase() === RelayToClient.AUTH),
+    distinct((msg) => msg[1]),
+  )
 }

@@ -25,6 +25,7 @@ export function subscribeRelayStats(relay: Relay) {
                   break
                 }
                 case RelayToClient.AUTH: {
+                  relaysStore.addAuth(relay.url, msg[1])
                   relayStore.increment('auths')
                   break
                 }

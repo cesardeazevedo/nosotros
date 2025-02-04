@@ -1,24 +1,11 @@
 import type { NProfileFeeds, NProfileModule } from '@/stores/nprofile/nprofile.module'
-import { NProfileModuleModel } from '@/stores/nprofile/nprofile.module'
+import { createNprofileModule } from '@/stores/nprofile/nprofile.module'
 import type { AnyRoute, AnyRouteMatch } from '@tanstack/react-router'
 import type { Props } from './nprofile.route'
 
-export function nprofileLoader(props: Props) {
-  const id = 'nprofile_' + props.pubkey
-  const module = NProfileModuleModel.create({
-    id,
-    options: {
-      pubkey: props.pubkey,
-      relays: props.relays,
-    },
-    context: {
-      options: {
-        pubkey: props.pubkey,
-      },
-    },
-  })
-
-  return module
+export function nprofileLoader(options: Props) {
+  const id = 'nprofile_' + options.pubkey
+  return createNprofileModule({ id, options })
 }
 
 export async function nprofileFeedLoader(

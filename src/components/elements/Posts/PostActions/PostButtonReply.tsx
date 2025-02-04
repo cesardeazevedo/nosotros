@@ -1,9 +1,9 @@
+import { useContentContext } from '@/components/providers/ContentProvider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 import { IconMessageCircle, IconMessageCircle2Filled } from '@tabler/icons-react'
 import { ButtonContainer, type ContainerProps } from './PostButtonContainer'
 import { iconProps } from './utils'
-import { useNoteContext } from '@/components/providers/NoteProvider'
 
 type Props = {
   selected?: boolean
@@ -12,7 +12,7 @@ type Props = {
 
 export const ButtonReply = (props: Props & ContainerProps) => {
   const { selected = false, onClick, ...rest } = props
-  const { dense } = useNoteContext()
+  const { dense } = useContentContext()
   return (
     <ButtonContainer {...rest}>
       <Tooltip cursor='arrow' text='Replies'>

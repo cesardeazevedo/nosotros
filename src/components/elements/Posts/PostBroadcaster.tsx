@@ -1,21 +1,16 @@
+import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
-import type { Note } from '@/stores/notes/note'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconCheck } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
 import { css } from 'react-strict-dom'
 import { RelayChip } from '../Relays/RelayChip'
-import { RelaySelectPopover } from '../Relays/RelaySelectPopover'
 
-type Props = {
-  note: Note
-}
-
-export const PostBroadcaster = observer(function PostBroadcaster(props: Props) {
-  const { note } = props
-  const seens = note.seenOn
+export const PostBroadcaster = observer(function PostBroadcaster() {
+  const { note } = useNoteContext()
+  const seens = note.event.seenOn
 
   return (
     <Stack horizontal={false}>
@@ -27,7 +22,6 @@ export const PostBroadcaster = observer(function PostBroadcaster(props: Props) {
           </Text>
           <Stack horizontal wrap gap={0.5}>
             {seens?.map((url) => <RelayChip key={url} url={url} icon={<IconCheck size={18} />} />)}
-            <RelaySelectPopover onSubmit={() => {}} />
           </Stack>
         </Stack>
       </Stack>

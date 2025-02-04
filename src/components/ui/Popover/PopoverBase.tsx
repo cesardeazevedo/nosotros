@@ -234,6 +234,7 @@ export const PopoverBase = forwardRef<HTMLDivElement, IPopoverBaseProps>(functio
           placement: floating.placement,
           getProps: interactions.getReferenceProps,
           setRef: floating.refs.setReference,
+          open: () => setOpened(true),
           close: () => setOpened(false),
         })
       : children

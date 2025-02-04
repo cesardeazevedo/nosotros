@@ -59,7 +59,6 @@ export const SignInSlides = observer(function SignInSlides() {
 const styles = css.create({
   root: {
     position: 'relative',
-    height: '100%',
   },
   wrapper: {
     position: 'relative',

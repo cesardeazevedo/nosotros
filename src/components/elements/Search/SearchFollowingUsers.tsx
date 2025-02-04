@@ -1,7 +1,7 @@
+import { ContentProvider } from '@/components/providers/ContentProvider'
 import { ListItem } from '@/components/ui/ListItem/ListItem'
-import { useCurrentUser } from '@/hooks/useRootStore'
+import { useFollowingUsers } from '@/hooks/useFollowingUsers'
 import type { User } from '@/stores/users/user'
-import { userStore } from '@/stores/users/users.store'
 import { observer } from 'mobx-react-lite'
 import { forwardRef, useImperativeHandle, useMemo } from 'react'
 import { css } from 'react-strict-dom'
@@ -22,11 +22,7 @@ type SearchRef = {
 export const SearchFollowingUsers = observer(
   forwardRef<SearchRef, Props>(function SearchFollowingUsers(props, ref) {
     const { query, limit = 10, onSelect } = props
-    const user = useCurrentUser()
-
-    const usersData = useMemo(() => {
-      return [...(user?.following?.tags.get('p') || [])].map((author) => userStore.get(author)).filter((x) => !!x)
-    }, [])
+    const usersData = useFollowingUsers()
 
     const users = useMemo(() => {
       let result = usersData as User[]
@@ -39,7 +35,7 @@ export const SearchFollowingUsers = observer(
     useImperativeHandle(ref, () => ({ users }))
 
     return (
-      <>
+      <ContentProvider value={{ disableLink: true }}>
         {users?.map((user, index) => (
           <ListItem
             interactive
@@ -48,10 +44,10 @@ export const SearchFollowingUsers = observer(
             selected={props.selectedIndex === index}
             onClick={() => onSelect(user.pubkey)}
             leadingIcon={<UserAvatar size='sm' pubkey={user.pubkey} />}>
-            <UserName pubkey={user.pubkey} disableLink />
+            <UserName pubkey={user.pubkey} />
           </ListItem>
         ))}
-      </>
+      </ContentProvider>
     )
   }),
 )

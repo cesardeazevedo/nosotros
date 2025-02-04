@@ -43,7 +43,8 @@ export type IPopoverBaseContentRendererProps = {
 export type IPopoverBaseTriggerRendererProps = {
   opened: boolean
   placement: Placement
-  close: (event?: React.MouseEvent) => void
+  open: () => void
+  close: () => void
 
   /**
    * A callback to set the trigger element.

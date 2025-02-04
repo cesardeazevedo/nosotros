@@ -21,7 +21,7 @@ export const SettingsRoute = memo(() => {
           </Text>
         </Stack>
       )}
-      <PaperContainer elevation={isMobile ? 0 : 2}>
+      <PaperContainer>
         <SettingsTabs />
         <Divider />
         <Stack>

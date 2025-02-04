@@ -1,4 +1,4 @@
-import { useNoteContext } from '@/components/providers/NoteProvider'
+import { useContentContext } from '@/components/providers/ContentProvider'
 import type { Props as TextProps } from '@/components/ui/Text/Text'
 import { Text } from '@/components/ui/Text/Text'
 import type { BlockQuoteNode, HeadingNode, Mark, ParagraphNode, TextNode } from 'nostr-editor'
@@ -15,7 +15,7 @@ type TextMarkProps = {
 
 function TextMark(props: TextMarkProps) {
   const { text, marks = [] } = props.node
-  const { disableLink } = useNoteContext()
+  const { disableLink } = useContentContext()
   return (
     <>
       {marks.reduce(
@@ -59,18 +59,7 @@ export const TextContent = (props: Props) => {
           {node.type === 'text' && <TextMark node={node} />}
           {node.type === 'nevent' && <NEventInline attrs={node.attrs} />}
           {/*Don't render headBreaks at the beginning or end of the content*/}
-          {node.type === 'hardBreak' && index !== 0 && index !== length - 1 && (
-            <>
-              {hardBreak ? (
-                <>
-                  <br />
-                  <div style={{ marginTop: 8 }} />
-                </>
-              ) : (
-                ' '
-              )}
-            </>
-          )}
+          {node.type === 'hardBreak' && index !== 0 && index !== length - 1 && <>{hardBreak ? <br /> : ' '}</>}
         </React.Fragment>
       ))}
     </Text>

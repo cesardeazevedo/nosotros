@@ -1,6 +1,6 @@
 import type { RelayFilters } from '@/core/NostrSubscription'
 import type { NostrFilter, RelayHints } from '@/core/types'
-import { filter, from, identity, map, merge, mergeMap, takeUntil, timer } from 'rxjs'
+import { delay, filter, from, identity, map, merge, mergeMap, takeUntil, timer } from 'rxjs'
 import { WRITE } from './helpers/parseRelayList'
 import type { RelaySelectionConfig } from './helpers/selectRelays'
 import type { NostrClient } from './nostr'
@@ -39,6 +39,7 @@ export class OutboxTracker {
 
   subscribe(filters: NostrFilter[], hints?: RelayHints) {
     return from(filters).pipe(
+      delay(1500),
       mergeMap((filter) => {
         // Track relays based on pubkey hints
         const ids$ = this.trackIds(filter, hints)

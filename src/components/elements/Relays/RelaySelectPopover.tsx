@@ -25,7 +25,7 @@ export const RelaySelectPopover = (props: Props) => {
   const [query, setQuery] = useState('')
   const [error, setError] = useState('')
 
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
     setError('')
     setQuery(e.target.value)
   }, [])

@@ -16,7 +16,7 @@ const vars = {
   selectedContainerOpacity: 'unset',
 
   containerOpacity: '1',
-  containerShape: shape.md,
+  containerShape: shape.xl,
   containerMinHeight$sm: '36px',
   containerMinHeight$md: '48px',
 

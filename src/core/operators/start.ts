@@ -10,7 +10,7 @@ import { subscribe } from './subscribe'
 export function start(pool: Pool, closeOnEose = true): OperatorFunction<NostrSubscription, [string, NostrEvent]> {
   return mergeMap((sub) => {
     return sub.relayFilters.pipe(
-      bufferTime(700),
+      bufferTime(500),
 
       mergeMap((relayFilters) => mergeRelayFilters(relayFilters)),
 

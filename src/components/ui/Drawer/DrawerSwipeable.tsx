@@ -70,9 +70,9 @@ export const DrawerSwipeable = (props: Props) => {
   } = props
   const { opened = false, anchor = 'bottom' } = rest
 
-  const floatingRef = useRef<HTMLDivElement>()
-  const scrimRef = useRef<HTMLDivElement>()
-  const swipeAreaRef = useRef<HTMLDivElement>()
+  const floatingRef = useRef<HTMLDivElement>(null)
+  const scrimRef = useRef<HTMLDivElement>(null)
+  const swipeAreaRef = useRef<HTMLDivElement>(null)
   const touchDetected = useRef(false)
 
   const [maybeSwiping, setMaybeSwiping] = useState(false)
@@ -80,7 +80,7 @@ export const DrawerSwipeable = (props: Props) => {
 
   const disableSwipeToOpen = iOS
 
-  const calculatedDurationRef = useRef<number | null>()
+  const calculatedDurationRef = useRef<number>(null)
 
   useLayoutEffect(() => {
     calculatedDurationRef.current = null
@@ -415,7 +415,7 @@ export const DrawerSwipeable = (props: Props) => {
       doc.addEventListener('touchmove', handleBodyTouchMove, { passive: !opened })
       doc.addEventListener('touchend', handleBodyTouchEnd)
     } else {
-      floatingRef.current = undefined
+      floatingRef.current = null
     }
   }, [])
 

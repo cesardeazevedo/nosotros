@@ -1,3 +1,4 @@
+import { useContentContext } from '@/components/providers/ContentProvider'
 import type { Props as IconButtonProps } from '@/components/ui/IconButton/IconButton'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
@@ -8,12 +9,12 @@ import { forwardRef } from 'react'
 
 type Props = IconButtonProps & {
   store: EditorStore
-  dense?: boolean
 }
 
 export const EditorButtonSettings = observer(
   forwardRef<HTMLButtonElement, Props>(function EditorButtonSettings(props: Props, ref) {
-    const { store, dense, ...rest } = props
+    const { store, ...rest } = props
+    const { dense } = useContentContext()
     return (
       <Tooltip cursor='arrow' text='Settings' enterDelay={200}>
         <IconButton

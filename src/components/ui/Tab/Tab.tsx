@@ -47,7 +47,7 @@ export const Tab = forwardRef<HTMLButtonElement, Props>((props, ref) => {
       : props.active || false
     : false
 
-  const actionRef = useRef<HTMLButtonElement>(null)
+  const actionRef = useRef<HTMLButtonElement | null>(null)
   const indicatorRef = useRef<HTMLDivElement>(null)
   const refs = mergeRefs([ref, setRef, actionRef])
 

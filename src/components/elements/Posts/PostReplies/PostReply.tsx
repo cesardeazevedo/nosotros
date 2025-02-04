@@ -1,10 +1,12 @@
-import { NoteContext } from '@/components/providers/NoteProvider'
+import { ContentProvider, useContentContext } from '@/components/providers/ContentProvider'
+import { NoteProvider } from '@/components/providers/NoteProvider'
 import { Button } from '@/components/ui/Button/Button'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { Stack } from '@/components/ui/Stack/Stack'
+import { useNoteStore } from '@/hooks/useNoteStore'
 import { useCurrentUser } from '@/hooks/useRootStore'
-import type { Comment } from '@/stores/comment/comment'
-import type { Note } from '@/stores/notes/note'
+import type { NostrEventComment, NostrEventNote } from '@/nostr/types'
+import type { Event } from '@/stores/events/event'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { useNavigate, useRouter } from '@tanstack/react-router'
@@ -22,7 +24,7 @@ import { PostRepliesMuted } from './PostRepliesMuted'
 import { PostReplyContent } from './PostReplyContent'
 
 type Props = {
-  note: Note | Comment
+  event: NostrEventNote | NostrEventComment
   nested?: boolean
   repliesOpen: boolean | null
   level?: number
@@ -30,26 +32,25 @@ type Props = {
 
 export const PostRepliesTree = observer(function PostRepliesTree(props: {
   repliesOpen: boolean | null
-  replies: (Note | Comment)[]
+  replies: Event[]
   level: number
   nested?: boolean
 }) {
   const { replies, ...rest } = props
-  return replies.map((note) => <PostReply key={note.id} note={note} {...rest} />)
+  return replies.map((event) => <PostReply key={event.id} event={event.event} {...rest} />)
 })
 
-const MAX_LEVEL = 7
-
 export const PostReply = observer(function PostReply(props: Props) {
-  const { note, level = 0, repliesOpen, nested = true } = props
+  const { event, level = 0, repliesOpen, nested = true } = props
+  const note = useNoteStore(event)
   const navigate = useNavigate()
   const router = useRouter()
   const isMobile = useMobile()
-  const collapsedLevel = isMobile ? 4 : 4
+  const collapsedLevel = isMobile ? 5 : 6
   const [open, setOpen] = useState(level < collapsedLevel)
-  const [ref] = useNoteVisibility(note, { replies: false })
+  const [ref] = useNoteVisibility(event, { replies: false })
   const user = useCurrentUser()
-  const event = note.event
+  const { blured } = useContentContext()
 
   const handleOpen = useCallback(() => {
     setOpen(!open)
@@ -57,13 +58,9 @@ export const PostReply = observer(function PostReply(props: Props) {
 
   const handleOpenNestedDialog = useCallback(() => {
     navigate({
-      // @ts-ignore
-      // to: './replies/$nevent',
       to: '/$nostr',
-      // @ts-ignore
-      params: { nostr: note.nevent },
-      // @ts-ignore
-      state: { from: router.latestLocation.pathname },
+      params: { nostr: note.event.nevent as string },
+      state: { from: router.latestLocation.pathname } as never,
     })
   }, [note, router])
 
@@ -73,48 +70,50 @@ export const PostReply = observer(function PostReply(props: Props) {
   }
 
   return (
-    <html.div style={[styles.root, level > 1 && styles.root$deep]} ref={ref}>
-      {open && <html.span style={styles.verticalLineContainer} onClick={handleOpen} />}
-      {!open && (
-        <Stack align='flex-start' gap={1} onClick={level < MAX_LEVEL ? handleOpen : handleOpenNestedDialog}>
-          <UserAvatar size='md' pubkey={event.pubkey} disableLink />
-          <BubbleContainer sx={styles.expandButton}>
-            <UserName pubkey={event.pubkey} disableLink />
-            <Button variant='text'>See more {note.repliesTotal + 1} Replies</Button>
-          </BubbleContainer>
-        </Stack>
-      )}
-      {open && (
-        <>
-          <NoteContext.Provider value={{ dense: true }}>
-            <Stack align='flex-start'>
-              {level !== 1 && <html.div style={styles.anchor} />}
-              <UserAvatar pubkey={event.pubkey} />
-              <Stack gap={1} sx={styles.content}>
-                <PostReplyContent note={note} />
+    <NoteProvider value={{ note }}>
+      <ContentProvider value={{ blured, dense: true }}>
+        <html.div style={[styles.root, level > 1 && styles.root$deep]} ref={ref}>
+          {open && <html.span style={styles.verticalLineContainer} onClick={handleOpen} />}
+          {!open && (
+            <ContentProvider value={{ blured, dense: true, disableLink: true }}>
+              <Stack align='flex-start' gap={1} onClick={level < collapsedLevel ? handleOpen : handleOpenNestedDialog}>
+                <UserAvatar size='md' pubkey={event.pubkey} />
+                <BubbleContainer sx={styles.expandButton}>
+                  <UserName pubkey={event.pubkey} />
+                  <Button variant='text'>See more {note.repliesTotal + 1} Replies</Button>
+                </BubbleContainer>
               </Stack>
-            </Stack>
-            <html.div style={styles.actions}>
-              <Stack>
-                <PostActions renderOptions note={note} onReplyClick={() => note.toggleReplying()} />
-              </Stack>
-              <Expandable expanded={note.isReplying} trigger={() => <></>}>
-                {note.isReplying && <Editor dense initialOpen renderBubble renderDiscard={false} store={note.editor} />}
-              </Expandable>
-            </html.div>
-          </NoteContext.Provider>
-          {nested && (
-            <PostRepliesTree
-              replies={note.repliesSorted(user)}
-              repliesOpen={repliesOpen}
-              level={level + 1}
-              nested={nested}
-            />
+            </ContentProvider>
           )}
-        </>
-      )}
-      <PostRepliesMuted level={level} note={note} />
-    </html.div>
+          {open && (
+            <>
+              <Stack align='flex-start' gap={1}>
+                {level !== 1 && <html.div style={styles.anchor} />}
+                <UserAvatar pubkey={event.pubkey} />
+                <PostReplyContent />
+              </Stack>
+              <html.div style={styles.actions}>
+                <Stack>
+                  <PostActions renderOptions renderRelays={false} onReplyClick={() => note.toggleReplying()} />
+                </Stack>
+                <Expandable expanded={note.isReplying} trigger={() => <></>}>
+                  {note.isReplying && <Editor initialOpen renderBubble renderDiscard={false} store={note.editor} />}
+                </Expandable>
+              </html.div>
+              {nested && (
+                <PostRepliesTree
+                  replies={note.repliesSorted(user)}
+                  repliesOpen={repliesOpen}
+                  level={level + 1}
+                  nested={nested}
+                />
+              )}
+            </>
+          )}
+          <PostRepliesMuted level={level} />
+        </html.div>
+      </ContentProvider>
+    </NoteProvider>
   )
 })
 
@@ -166,10 +165,6 @@ const styles = css.create({
     paddingTop: spacing['padding0.5'],
     paddingBottom: spacing.padding2,
     paddingLeft: spacing.margin6,
-  },
-  content: {
-    width: '100%',
-    marginInline: spacing.margin1,
   },
   expandButton: {
     marginBottom: spacing.padding1,

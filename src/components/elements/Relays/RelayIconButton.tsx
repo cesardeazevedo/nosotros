@@ -1,7 +1,6 @@
 import { Chip } from '@/components/ui/Chip/Chip'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 import { useCurrentUser } from '@/hooks/useRootStore'
-import { relaysStore } from '@/stores/relays/relays.store'
 import { shape } from '@/themes/shape.stylex'
 import { IconServerBolt } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
@@ -23,15 +22,6 @@ export const RelayIconButton = observer(function RelayIconButton(props: Props) {
             icon={<IconServerBolt strokeWidth='1.5' />}
             sx={styles.chip}
             label={`${user.connectedRelays.length || 0} / ${user.userRelays?.length || 0}`}
-          />
-        )}
-        {!user && (
-          // Since the user isn't logged, just show the connected relays from the pool.
-          <Chip
-            sx={styles.chip}
-            onClick={props.onClick}
-            icon={<IconServerBolt strokeWidth='1.5' />}
-            label={`${relaysStore.connected.length} / ${relaysStore.list.length}`}
           />
         )}
       </span>

@@ -1,5 +1,5 @@
 import { RELAY_1, RELAY_2 } from '@/constants/testRelays'
-import { fakeNote } from '@/utils/faker'
+import { fakeEvent } from '@/utils/faker'
 import { test } from '@/utils/fixtures'
 import { subscribeSpyTo } from '@hirez_io/observer-spy'
 import { NostrPublisher } from 'core/NostrPublish'
@@ -7,7 +7,7 @@ import { of } from 'rxjs'
 
 describe('NostrPublish', () => {
   test('assert relayEvent stream with main event', async ({ signer }) => {
-    const event = fakeNote({ id: '1' })
+    const event = fakeEvent({ id: '1' })
 
     const publisher = new NostrPublisher(event, {
       relays: of([RELAY_1, RELAY_2]),
@@ -25,8 +25,8 @@ describe('NostrPublish', () => {
   })
 
   test('assert relayEvent stream with included events', async () => {
-    const event1 = fakeNote({ id: '1' })
-    const event2 = fakeNote({ id: '2' })
+    const event1 = fakeEvent({ id: '1' })
+    const event2 = fakeEvent({ id: '2' })
 
     const publisher = new NostrPublisher(undefined, {
       relays: of([RELAY_1, RELAY_2]),

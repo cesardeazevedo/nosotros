@@ -11,7 +11,7 @@ import { focusRingTokens } from './FocusRing.stylex'
 type Props = {
   sx?: SxProps
   visualState?: IVisualState
-  element?: React.RefObject<HTMLElement>
+  element?: React.RefObject<HTMLElement | null>
   inward?: boolean
 }
 

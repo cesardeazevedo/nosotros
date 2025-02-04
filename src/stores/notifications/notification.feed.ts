@@ -6,12 +6,14 @@ import { metadataSymbol, type NostrEventMetadata } from '@/nostr/types'
 import { observable } from 'mobx'
 import { t, type Instance } from 'mobx-state-tree'
 import { bufferTime, filter, finalize, identity, map, mergeMap, switchMap, tap } from 'rxjs'
-import { FeedStoreModel } from '../feeds/feed.store'
+import { NotesFeedSubscriptionModel } from '../feeds/feed.notes'
+import { FeedPaginationLimit } from '../feeds/feed.pagination.limit'
 import { toStream } from '../helpers/toStream'
 import { withToggleAction } from '../helpers/withToggleAction'
 import { Notification } from './notification'
 
-export const NotificationFeedModel = FeedStoreModel.named('NotificationFeedModel')
+export const NotificationFeedModel = NotesFeedSubscriptionModel(FeedPaginationLimit)
+  .named('NotificationFeedModel')
   .props({
     muted: t.optional(t.boolean, false),
     mentions: t.optional(t.boolean, true),
@@ -20,8 +22,9 @@ export const NotificationFeedModel = FeedStoreModel.named('NotificationFeedModel
   .volatile(() => ({
     notifications: observable.map<string, Notification>(),
   }))
-  .actions(withToggleAction)
   .actions((self) => ({
+    ...withToggleAction(self),
+
     setNotification(notification: Notification) {
       self.notifications.set(notification.id, notification)
     },
@@ -78,12 +81,12 @@ export const NotificationFeedModel = FeedStoreModel.named('NotificationFeedModel
             }),
 
             tap((notification) => self.add(notification.event)),
-
             tap((notification) => this.setNotification(notification)),
 
             finalize(() => {
               self.reset()
               self.notifications.clear()
+              self.pagination.reset()
             }),
           )
         }),
@@ -91,4 +94,4 @@ export const NotificationFeedModel = FeedStoreModel.named('NotificationFeedModel
     },
   }))
 
-export interface NotificationFeed extends Instance<typeof NotificationFeedModel> {}
+export type NotificationFeed = Instance<typeof NotificationFeedModel>

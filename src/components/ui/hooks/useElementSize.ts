@@ -7,7 +7,7 @@ export type ISize<TSize = number> = {
 }
 
 export type IUseElementSizeProps = {
-  ref: React.RefObject<HTMLElement>
+  ref: React.RefObject<HTMLElement | null>
   observe?: boolean
   orientation?: IOrientation
 }
@@ -48,7 +48,9 @@ export const useElementSize = (props: IUseElementSizeProps): ISize | undefined =
         const size = getElementSize(element, orientation)
         setSize(size)
       })
-      resizeObserver.observe(elementRef.current)
+      if (elementRef.current) {
+        resizeObserver.observe(elementRef.current)
+      }
 
       return () => resizeObserver.disconnect()
     }

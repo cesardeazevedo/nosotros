@@ -1,13 +1,14 @@
+import { FeedList } from '@/components/elements/Feed/FeedList'
 import { NotificationItem } from '@/components/elements/Notification/NotificationItem'
 import { NotificationLoading } from '@/components/elements/Notification/NotificationLoading'
 import { NotificationSettings } from '@/components/elements/Notification/NotificationSettings'
-import { VirtualListWindow } from '@/components/elements/VirtualLists/VirtualListWindow'
+import { useNotificationModule } from '@/components/modules/Notifications/useNotificationModule'
 import { Button } from '@/components/ui/Button/Button'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
+import { useFeedSubscription } from '@/hooks/useFeedSubscription'
 import { useCurrentUser } from '@/hooks/useRootStore'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconChevronDown, IconChevronUp } from '@tabler/icons-react'
-import { useLoaderData } from '@tanstack/react-router'
 import { observer } from 'mobx-react-lite'
 import { useState } from 'react'
 import { css } from 'react-strict-dom'
@@ -17,13 +18,19 @@ import { Divider } from '../../ui/Divider/Divider'
 import { Stack } from '../../ui/Stack/Stack'
 import { Text } from '../../ui/Text/Text'
 
-export const NotificationsRoute = observer(function NotificationRoute() {
-  const { id, feed } = useLoaderData({ from: '/notifications' })
+type Props = {
+  pubkey: string
+}
+
+export const NotificationsRoute = observer(function NotificationRoute(props: Props) {
+  const module = useNotificationModule(props.pubkey)
   const [expanded, setExpanded] = useState(false)
+  const feed = module.feed
+  useFeedSubscription(feed, module.contextWithFallback.client)
   const user = useCurrentUser()
   return (
     <CenteredContainer margin>
-      <PaperContainer elevation={1}>
+      <PaperContainer>
         <Stack gap={1} horizontal sx={styles.header} justify='space-between'>
           <Text variant='headline' size='sm'>
             Notifications
@@ -40,8 +47,7 @@ export const NotificationsRoute = observer(function NotificationRoute() {
         </Expandable>
         <Divider />
         <Stack horizontal={false}>
-          <VirtualListWindow
-            id={id}
+          <FeedList
             feed={feed}
             onScrollEnd={() => feed.paginate()}
             filter={(event) => (!feed.muted ? user?.isEventMuted(event) || false : true)}

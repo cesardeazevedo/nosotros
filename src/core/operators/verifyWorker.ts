@@ -1,18 +1,31 @@
+import { hasEventInCache, setCache } from '@/nostr/cache'
 import type { NostrEvent } from 'nostr-tools'
-import { filter, fromEvent, map, mergeMap, pipe, take, takeUntil, tap } from 'rxjs'
+import { filter, from, fromEvent, map, mergeMap, of, shareReplay, take, takeUntil } from 'rxjs'
 
-const worker = new Worker(new URL('../workers/verify.worker.ts', import.meta.url), { type: 'module' })
-const workerMessage = fromEvent<boolean>(worker, 'message').pipe(takeUntil(fromEvent(worker, 'error')))
+const workers = [
+  new Worker(new URL('../workers/verify.worker.ts', import.meta.url), { type: 'module' }),
+  new Worker(new URL('../workers/verify.worker.ts', import.meta.url), { type: 'module' }),
+]
+
+const workerMessage = from(workers).pipe(
+  mergeMap((worker) => fromEvent<MessageEvent<boolean>>(worker, 'message').pipe(takeUntil(fromEvent(worker, 'error')))),
+  shareReplay(1),
+)
+
+let counter = 0
+const getWorker = () => workers[counter++ % workers.length]
 
 export function verifyWorker() {
-  return pipe(
-    tap((event: NostrEvent) => worker.postMessage(event)),
-    mergeMap((event: NostrEvent) => {
+  return mergeMap((event: NostrEvent) => {
+    if (!hasEventInCache(event)) {
+      setCache(event, true)
+      getWorker().postMessage(event)
       return workerMessage.pipe(
-        filter((verified) => verified),
+        filter((event) => event.data),
         take(1),
         map(() => event),
       )
-    }),
-  )
+    }
+    return of(event)
+  })
 }

@@ -1,12 +1,12 @@
 import { Kind } from '@/constants/kinds'
-import { fakeNote } from 'utils/faker'
+import { fakeEvent } from 'utils/faker'
 import { test } from 'utils/fixtures'
 import { ReactionStore } from '../reactions.store'
 
 describe('ReactionStore', () => {
   test('add()', () => {
     const store = new ReactionStore()
-    let reaction = fakeNote({
+    let reaction = fakeEvent({
       kind: Kind.Reaction,
       content: 'like',
       pubkey: '1',
@@ -23,7 +23,7 @@ describe('ReactionStore', () => {
     expect(store.getByNoteId('1')).toEqual({ like: ['1'] })
     expect(store.getByPubkey('1')).toEqual({ ['1']: ['like'] })
 
-    reaction = fakeNote({
+    reaction = fakeEvent({
       kind: Kind.Reaction,
       content: 'like',
       pubkey: '2',
@@ -35,7 +35,7 @@ describe('ReactionStore', () => {
     store.add(reaction)
     expect(store.getByNoteId('1')).toEqual({ like: ['1', '2'] })
 
-    reaction = fakeNote({
+    reaction = fakeEvent({
       kind: Kind.Reaction,
       pubkey: '2',
       content: 'like',
@@ -51,7 +51,7 @@ describe('ReactionStore', () => {
       ['2', { like: ['2'] }],
     ])
 
-    reaction = fakeNote({
+    reaction = fakeEvent({
       kind: Kind.Reaction,
       content: 'heart',
       pubkey: '1',
@@ -95,7 +95,7 @@ describe('ReactionStore', () => {
         ],
       },
     ]
-    reactions.forEach((reaction) => store.add(fakeNote(reaction)))
+    reactions.forEach((reaction) => store.add(fakeEvent(reaction)))
     expect(store.sorted('1')).toStrictEqual([
       ['thumbs', ['1', '2']],
       ['heart', ['1']],
@@ -162,7 +162,7 @@ describe('ReactionStore', () => {
         ],
       },
     ]
-    reactions.forEach((reaction) => store.add(fakeNote({ kind: Kind.Reaction, ...reaction })))
+    reactions.forEach((reaction) => store.add(fakeEvent({ kind: Kind.Reaction, ...reaction })))
     expect(store.reactionsByPubkey.get('1')).toStrictEqual({
       1: ['thumbs', 'heart', 'cry'],
     })

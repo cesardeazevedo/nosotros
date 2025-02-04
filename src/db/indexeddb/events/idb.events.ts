@@ -28,6 +28,34 @@ export class IDBEventStore {
     return await db.countFromIndex('tags', 'kind_tag_value_created_at', key)
   }
 
+  async insertBatch(data: NostrEvent[]) {
+    const db = await this.db
+    const tx = db.transaction(['events', 'tags'], 'readwrite')
+    const events = tx.objectStore('events')
+    const tags = tx.objectStore('tags')
+    const operations = data
+      .map((event) => [
+        events.put(event),
+        ...event.tags
+          .filter((tags) => tags.length > 1 && tags[0].length === 1)
+          .map((tag, index) => {
+            return tags.put({
+              index,
+              kind: event.kind,
+              eventId: event.id,
+              pubkey: event.pubkey,
+              created_at: event.created_at,
+              tag: tag[0],
+              value: tag[1],
+              extras: tag.slice(2),
+            })
+          }),
+      ])
+      .flat()
+    await Promise.all(operations)
+    await tx.done
+  }
+
   async insert(data: NostrEvent) {
     const db = await this.db
     const tx = db.transaction(['events', 'tags'], 'readwrite')

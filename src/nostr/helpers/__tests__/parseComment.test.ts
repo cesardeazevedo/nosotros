@@ -1,11 +1,11 @@
 import { Kind } from '@/constants/kinds'
 import { RELAY_1, RELAY_2 } from '@/constants/testRelays'
-import { fakeNote } from '@/utils/faker'
+import { fakeEvent } from '@/utils/faker'
 import { parseComment } from '../parseComment'
 
 describe('parseComment', () => {
   test('assert tags', () => {
-    const event = fakeNote({
+    const event = fakeEvent({
       id: 'id_1_reply_2',
       kind: Kind.Comment,
       pubkey: 'pubkey3',
@@ -19,7 +19,7 @@ describe('parseComment', () => {
       ],
     })
 
-    const { contentSchema, ...rest } = parseComment(event)
+    const { contentSchema, tags, ...rest } = parseComment(event)
     expect(rest).toStrictEqual({
       imeta: {},
       mentionedNotes: [],
@@ -40,7 +40,7 @@ describe('parseComment', () => {
   })
 
   test('assert isReplyOfReply', () => {
-    const event = fakeNote({
+    const event = fakeEvent({
       id: 'id_1_reply_2',
       kind: Kind.Comment,
       pubkey: 'pubkey3',
@@ -54,7 +54,7 @@ describe('parseComment', () => {
       ],
     })
 
-    const { contentSchema, ...rest } = parseComment(event)
+    const { contentSchema, tags, ...rest } = parseComment(event)
     expect(rest).toStrictEqual({
       imeta: {},
       mentionedNotes: [],

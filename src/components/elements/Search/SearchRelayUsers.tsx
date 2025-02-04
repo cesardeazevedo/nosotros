@@ -1,3 +1,4 @@
+import { ContentProvider } from '@/components/providers/ContentProvider'
 import { ListItem } from '@/components/ui/ListItem/ListItem'
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
 import { useCurrentUser } from '@/hooks/useRootStore'
@@ -48,7 +49,7 @@ export const SearchRelayUsers = observer(
     useImperativeHandle(ref, () => ({ users }))
 
     return (
-      <>
+      <ContentProvider value={{ disableLink: true }}>
         {users.map((user, index) => (
           <ListItem
             interactive
@@ -58,7 +59,7 @@ export const SearchRelayUsers = observer(
             key={user.pubkey}
             supportingText={user.meta.nip05}
             leadingIcon={<UserAvatar size='sm' pubkey={user.pubkey} />}>
-            <UserName pubkey={user.pubkey} disableLink />
+            <UserName pubkey={user.pubkey} />
           </ListItem>
         ))}
         {!users.length && (
@@ -66,7 +67,7 @@ export const SearchRelayUsers = observer(
             <Skeleton sx={styles.skeleton} />
           </html.div>
         )}
-      </>
+      </ContentProvider>
     )
   }),
 )

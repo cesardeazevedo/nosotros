@@ -1,20 +1,16 @@
+import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Chip } from '@/components/ui/Chip/Chip'
 import { chipTokens } from '@/components/ui/Chip/Chip.stylex'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
-import type { Note } from '@/stores/notes/note'
 import { typeScale } from '@/themes/typeScale.stylex'
 import { css } from 'react-strict-dom'
 
-type Props = {
-  note: Note
-}
-
-export const PostPow = (props: Props) => {
-  const { note } = props
+export const PostPow = () => {
+  const { note } = useNoteContext()
   return (
-    note.pow && (
+    note.event.pow && (
       <Tooltip cursor='arrow' text={'This note was created with proof of work'}>
-        <Chip sx={styles.chip} variant='assist' label={`PoW-${note.pow[2]}`} />
+        <Chip sx={styles.chip} variant='assist' label={`PoW-${note.event.pow[2]}`} />
       </Tooltip>
     )
   )
