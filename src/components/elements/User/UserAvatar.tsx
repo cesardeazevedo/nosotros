@@ -20,16 +20,16 @@ export const UserAvatar = observer(function UserAvatar(props: Props) {
   const user = userStore.get(pubkey)
   const avatarProps = user?.meta?.picture
     ? { src: globalSettings.getImgProxyUrl('user_avatar', user.meta.picture) }
-    : {}
+    : { src: '/user.jpg' }
   const avatar = (
     <Avatar {...avatarProps} size={size} sx={[styles.avatar, sx]}>
-      {user?.initials || pubkey || '-'}
+      {user?.initials || pubkey || ''}
     </Avatar>
   )
   if (user?.meta?.picture && pubkey) {
     return (
       <UserPopover pubkey={pubkey}>
-        <LinkProfile user={user}>{avatar}</LinkProfile>
+        <LinkProfile pubkey={pubkey}>{avatar}</LinkProfile>
       </UserPopover>
     )
   }
