@@ -236,6 +236,16 @@ export class Note {
     return this.images?.[0]
   }
 
+  get imetaList() {
+    const imageExts = ['jpeg', 'jpg', 'png', 'gif', 'webp']
+    const videoExts = ['mp4', 'webm', 'ogg']
+    return Object.entries(this.metadata.imeta).map(([src, data]) => {
+      // Some imeta tags are missing mimetypes
+      const ext = data.m?.split('/')[1] || new URL(src).pathname.split('.')?.toReversed()?.[0] || ''
+      return [imageExts.includes(ext) ? 'image' : videoExts.includes(ext) ? 'video' : 'image', src, data] as const
+    })
+  }
+
   setRepliesStatus(state: ReplyStatus) {
     this.repliesStatus = state
   }

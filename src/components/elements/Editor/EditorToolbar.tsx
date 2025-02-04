@@ -13,16 +13,17 @@ import { useContentContext } from '@/components/providers/ContentProvider'
 type Props = {
   children?: ReactNode
   store: EditorStore
+  renderAddMedia?: boolean
 }
 
 export const EditorToolbar = observer(function EditorToolbar(props: Props) {
-  const { store, children } = props
+  const { store, children, renderAddMedia = true } = props
   const { dense } = useContentContext()
 
   return (
     <Stack horizontal justify='space-between' sx={[styles.root, dense && styles.root$dense]}>
       <Stack gap={0.5}>
-        <EditorButtonAddMedia store={store} />
+        {renderAddMedia && <EditorButtonAddMedia store={store} />}
         <EditorButtonBroadcast store={store} />
         <EditorButtonMentions store={store} />
         <EditorButtonZapSplits store={store} />

@@ -38,7 +38,7 @@ export function parseArticle(event: NostrEvent): ArticleMetadata {
   const contentSchema = editor.getJSON() as ContentSchema
   const nprofiles = extension.getNprofiles()
   const nevents = extension.getNevents()
-  const naddress = extension.getNaddress()
+  const naddress = extension.getNaddrs()
   const mentionedNotes = getMentionedNotes(tags, nevents, naddress)
   const mentionedAuthors = getMentionedAuthors(tags, nprofiles, nevents, naddress)
   const relayHints = getHintsFromNIP19(nevents, nprofiles, naddress)

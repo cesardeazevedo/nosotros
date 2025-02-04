@@ -19,15 +19,16 @@ type Props = {
   src: string
   proxy?: boolean
   dense?: boolean
+  draggable?: boolean
   onClick?: (event?: StrictClickEvent) => void
   sx?: SxProps
 }
 
 export const Image = observer(function Image(props: Props) {
-  const { src, proxy = true, sx } = props
+  const { dense: denseProp, src, proxy = true, sx, onClick, ...rest } = props
   const { dense: denseContext, disableLink } = useContentContext()
   const { note } = useNoteContext()
-  const dense = props.dense ?? denseContext
+  const dense = denseProp ?? denseContext
   const globalSettings = useGlobalSettings()
   const ref = useRef<HTMLImageElement>(null)
 
@@ -42,7 +43,7 @@ export const Image = observer(function Image(props: Props) {
       e.preventDefault()
       e.stopPropagation()
       if (!hasError) {
-        return props.onClick ? props.onClick() : dialogStore.pushImage(src)
+        return onClick ? onClick() : dialogStore.pushImage(src)
       }
     },
     [src, disableLink, hasError],
@@ -69,6 +70,7 @@ export const Image = observer(function Image(props: Props) {
               // loading='lazy'
               onError={handleError}
               style={[styles.img, dense && styles.img$dense, blurStyles, sx]}
+              {...rest}
             />
           )}
         </html.div>
@@ -85,11 +87,10 @@ const styles = css.create({
     justifyContent: 'flex-start',
     alignItems: 'center',
     position: 'relative',
-    paddingInline: spacing.padding2,
+    paddingLeft: spacing.padding2,
     width: 'fit-content',
     height: 'fit-content',
-    marginTop: spacing.margin1,
-    marginBottom: spacing.margin1,
+    paddingBlock: spacing.padding1,
   },
   root$dense: {
     paddingInline: 0,
@@ -104,12 +105,12 @@ const styles = css.create({
       default: 400,
       [MOBILE]: 'calc(100vw - 90px)',
     },
-    maxHeight: 440,
+    maxHeight: 420,
     borderRadius: shape.lg,
+    padding: 0,
   },
   img$dense: {
     maxHeight: 400,
-    marginTop: 6,
     maxWidth: {
       default: 360,
       [MOBILE]: '100%',

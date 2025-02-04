@@ -8,17 +8,23 @@ import { useCallback } from 'react'
 import { css } from 'react-strict-dom'
 import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDOMProps'
 import { LinkSignIn } from '../Links/LinkSignIn'
+import { cancel$ } from './utils/countDown'
 
 type Props = {
   store: EditorStore
   renderDiscard?: boolean
+  onSubmit: () => void
   onDiscard?: () => void
+  disabled?: boolean
+  state: number | string | boolean
 }
 
 export const EditorSubmit = observer(function EditorSubmit(props: Props) {
-  const { store, renderDiscard, onDiscard } = props
+  const { store, state, disabled, renderDiscard, onSubmit, onDiscard } = props
   const { dense } = useContentContext()
   const pubkey = useCurrentPubkey()
+
+  const isCountDown = typeof state === 'number'
 
   const handleDiscard = useCallback((event: StrictClickEvent) => {
     event.stopPropagation()
@@ -43,11 +49,11 @@ export const EditorSubmit = observer(function EditorSubmit(props: Props) {
       )}
       {pubkey && (
         <Button
-          disabled={store.isEmpty || store.isUploading.value}
+          disabled={disabled}
           sx={[dense && styles.button$dense]}
           variant='filled'
-          onClick={store.onSubmit}>
-          Post
+          onClick={() => (isCountDown ? cancel$.next() : onSubmit())}>
+          {isCountDown ? (state === 0 ? 'Posting' : `Posting in ${state} (cancel)`) : 'Post'}
         </Button>
       )}
     </Stack>

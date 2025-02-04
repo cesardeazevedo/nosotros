@@ -8,7 +8,7 @@ import { NodeViewWrapper } from '@tiptap/react'
 import type { NEventAttributes } from 'nostr-editor'
 import { useSubscription } from 'observable-hooks'
 import { css, html } from 'react-strict-dom'
-import { merge } from 'rxjs'
+import { EMPTY, merge } from 'rxjs'
 import { DeleteButton } from '../Buttons/DeleteButton'
 import { NEvent } from './NEvent'
 
@@ -18,16 +18,16 @@ export const NEventEditor = (props: NodeViewProps) => {
     return merge(
       context.client.notes.subNotesWithRelated(
         { ids: [attrs.id] },
-        { relayHints: { fallback: { [attrs.id]: [attrs.author] } } },
+        { relayHints: { fallback: attrs.author ? { [attrs.id]: [attrs.author] } : {} } },
       ),
-      context.client.users.subscribe(attrs.author),
+      attrs.author ? context.client.users.subscribe(attrs.author) : EMPTY,
     )
   })
   useSubscription(sub)
   return (
     <NodeViewWrapper
       as='div'
-      data-nevent={attrs.nevent}
+      data-nevent={attrs.bech32}
       data-drag-handle=''
       draggable={props.node.type.spec.draggable}
       style={{ position: 'relative', height: 'fit-content', width: 'auto' }}>

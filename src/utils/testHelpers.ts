@@ -57,7 +57,7 @@ export async function expectRelayPublish(server: WS, event: NostrEvent): Promise
 export class TestSigner implements Signer {
   name = 'test_signer'
 
-  sign(event: UnsignedEvent): Promise<NostrEvent | false> {
+  sign(event: UnsignedEvent): Promise<NostrEvent> {
     return Promise.resolve(event as NostrEvent)
   }
 

@@ -7,19 +7,18 @@ import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconChevronDown, IconFileAlert } from '@tabler/icons-react'
-import type { NodeViewProps } from '@tiptap/core'
 import type { ImageAttributes, VideoAttributes } from 'nostr-editor'
 import { useMemo } from 'react'
 import { css, html } from 'react-strict-dom'
 
-type Props = {
-  node: NodeViewProps
+type Props = (ImageAttributes | VideoAttributes) & {
+  onUpdate: (attrs: Partial<ImageAttributes | VideoAttributes>) => void
 }
 
 const nip96urls = ['nostr.build', 'nostrcheck.me', 'nostrage.com']
 
 export const UploadButton = (props: Props) => {
-  const { sha256, uploading, uploadUrl, uploadError } = props.node.node.attrs as ImageAttributes | VideoAttributes
+  const { sha256, uploading, uploadUrl, uploadError } = props
   const uploaded = !!sha256
   const url = useMemo(() => new URL(uploadUrl), [uploadUrl])
   return (
@@ -34,7 +33,7 @@ export const UploadButton = (props: Props) => {
                 key={url}
                 label={url}
                 onClick={() => {
-                  props.node.updateAttributes({ uploadUrl: 'https://' + url })
+                  props.onUpdate({ uploadUrl: 'https://' + url })
                   close()
                 }}
               />
@@ -71,10 +70,10 @@ const styles = css.create({
   root: {
     position: 'absolute',
     right: 8,
-    bottom: 6,
+    bottom: 8,
   },
   description: {
-    paddingInline: spacing.padding2,
+    paddingInline: spacing.padding1,
   },
   chip: {
     [chipTokens.flatContainerColor]: 'rgba(0, 0, 0, 0.8)',

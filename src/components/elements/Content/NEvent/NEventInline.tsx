@@ -14,7 +14,7 @@ type Props = Omit<LinkNEventProps, 'children'> & {
 // TODO nevent tooltip
 export const NEventInline = (props: Props) => {
   const { attrs, ...rest } = props
-  const nevent = attrs.nevent as NEvent
+  const nevent = ('nevent' in attrs ? attrs.nevent : attrs.bech32) as NEvent
   const label = nevent.replace('nostr:', '')
   return (
     <LinkNEvent nevent={nevent} {...rest}>

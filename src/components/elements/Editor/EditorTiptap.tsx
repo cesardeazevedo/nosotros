@@ -1,26 +1,34 @@
+import { useRootContext } from '@/hooks/useRootStore'
 import { type EditorStore } from '@/stores/editor/editor.store'
 import { spacing } from '@/themes/spacing.stylex'
 import { EditorContent as TiptapEditorContent } from '@tiptap/react'
 import { observer } from 'mobx-react-lite'
 import { useEffect, useId, useMemo } from 'react'
 import { css } from 'react-strict-dom'
-import { createEditor } from './createEditor'
+import { createEditor } from './utils/createEditor'
+import { createEditorKind20 } from './utils/createEditorKind20'
 
 type Props = {
   dense?: boolean
   placeholder?: string
+  kind20?: boolean
   store: EditorStore
 }
 
 export const EditorTiptap = observer(function EditorTiptap(props: Props) {
-  const { dense, store } = props
+  const { dense, store, kind20 = false } = props
   const id = useId()
 
-  const editor = useMemo(() => store.editor || createEditor(store), [])
+  const context = useRootContext()
+  const editor = useMemo(() => store.editor || (kind20 ? createEditorKind20(store) : createEditor(store)), [])
 
   useEffect(() => {
     store.setEditor(editor)
   }, [store, editor])
+
+  useEffect(() => {
+    store.setContext(context)
+  }, [context])
 
   return (
     <TiptapEditorContent

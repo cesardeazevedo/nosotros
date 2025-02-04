@@ -12,7 +12,7 @@ import { action, computed, makeAutoObservable, reaction } from 'mobx'
 import type { FileUploadStorage, NostrStorage } from 'nostr-editor'
 import type { EventTemplate, NostrEvent, UnsignedEvent } from 'nostr-tools'
 import { createElement } from 'react'
-import { catchError, EMPTY, from, mergeMap, of, tap, type Subscription } from 'rxjs'
+import { catchError, EMPTY, of, tap, throwError } from 'rxjs'
 import type { NostrContext } from '../context/nostr.context.store'
 import { toggle } from '../helpers/toggle'
 import type { Note } from '../notes/note'
@@ -51,7 +51,6 @@ export class EditorStore {
   zapSplitsEnabled = false
   zapSplits: Map<string, number> = new Map()
 
-  submit$: Subscription | undefined = undefined
   editor: Editor | undefined = undefined
 
   constructor(public options: EditorStoreOptions) {
@@ -64,7 +63,7 @@ export class EditorStore {
       mentions: computed.struct,
       sign: action.bound,
       onUpdate: action.bound,
-      onSubmit: action.bound,
+      submit: action.bound,
       selectFiles: action.bound,
       updateZapSplit: action.bound,
     })
@@ -98,6 +97,9 @@ export class EditorStore {
     }
     if (action === 'zaps') {
       this.zapSplitsEnabled = true
+      if (this.section === false && this.zapSplits.size === 0) {
+        this.zapSplitsEnabled = false
+      }
     }
   }
 
@@ -157,11 +159,11 @@ export class EditorStore {
   }
 
   get storage() {
-    return this.editor?.storage.nostr as NostrStorage
+    return this.editor?.storage?.nostr as NostrStorage | undefined
   }
 
   get uploader() {
-    return this.editor?.storage.fileUpload!.uploader as FileUploadStorage['uploader']
+    return this.editor?.storage?.fileUpload?.uploader as FileUploadStorage['uploader'] | undefined
   }
 
   get tags() {
@@ -213,7 +215,7 @@ export class EditorStore {
     } as UnsignedEvent
   }
 
-  get rawEvent() {
+  get rawEvent(): UnsignedEvent {
     return JSON.parse(JSON.stringify(this.event))
   }
 
@@ -346,52 +348,44 @@ export class EditorStore {
     this.zapSplits.delete(pubkey)
   }
 
-  async sign(event?: EventTemplate) {
-    const signed = await this.client?.signer?.sign(event || this.rawEvent)
-    if (signed) {
-      this.signedEvent = signed
-      return this.signedEvent
+  async sign(event: EventTemplate) {
+    const { signer, pubkey } = this.client || {}
+    if (signer && pubkey) {
+      try {
+        return await signer.sign({ ...event, pubkey })
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (error) {
+        return Promise.reject('Signing rejected')
+      }
     }
-    return Promise.reject('Signing rejected')
+    return Promise.reject('Missing signer')
   }
 
-  onSubmit() {
+  submit(event: EventTemplate) {
     const client = this.client
     const uploader = this.uploader
     if (!client || !uploader) {
-      return
+      return throwError(() => 'Missing signer')
     }
-
-    if (this.submit$) {
-      this.submit$.unsubscribe()
-    }
-
-    this.submit$ = from(uploader.start())
-      .pipe(
-        mergeMap(() => {
-          return publish(client, this.rawEvent, {
-            relays: of(this.allRelays.map((x) => x.relay)),
-          })
-        }),
-        tap(() => this.reset()),
-        tap((event) => {
-          const component = createElement(ToastEventPublished, {
-            event,
-            eventLabel: this.title,
-          })
-          toastStore.enqueue(component, { duration: 10000 })
-        }),
-        catchError((error) => {
-          console.dir(error)
-          this.isUploading.toggle(false)
-          return EMPTY
-        }),
-      )
-      .subscribe({
-        next: (event) => {
-          this.options.onPublish?.(event)
-        },
-      })
+    return publish(client, event, {
+      relays: of(this.allRelays.map((x) => x.relay)),
+    }).pipe(
+      tap(() => this.reset()),
+      tap((event) => {
+        const component = createElement(ToastEventPublished, {
+          event,
+          eventLabel: this.title,
+        })
+        toastStore.enqueue(component, { duration: 10000 })
+        this.options.onPublish?.(event)
+      }),
+      catchError((error) => {
+        console.dir(error)
+        this.isUploading.toggle(false)
+        toastStore.enqueue(error.message, { duration: 10000 })
+        return EMPTY
+      }),
+    )
   }
 }
 

@@ -4,6 +4,7 @@ import { palette } from '@/themes/palette.stylex'
 import { LinkProfile } from 'components/elements/Links/LinkProfile'
 import { UserPopover } from 'components/elements/User/UserPopover'
 import { observer } from 'mobx-react-lite'
+import { nip19 } from 'nostr-tools'
 import { css } from 'react-strict-dom'
 
 export type Props = {
@@ -13,16 +14,15 @@ export type Props = {
 export const NProfile = observer(function NProfile(props: Props) {
   const { pubkey } = props
   const user = userStore.get(pubkey)
+  const name = user?.displayName || nip19.npubEncode(pubkey).slice(0, 10)
   return (
     <>
       {!user && <Skeleton sx={styles.loading} animation='wave' variant='rectangular' />}
-      {user && (
-        <UserPopover pubkey={pubkey}>
-          <LinkProfile underline user={user} sx={styles.link}>
-            @{user.displayName}
-          </LinkProfile>
-        </UserPopover>
-      )}
+      <UserPopover pubkey={pubkey}>
+        <LinkProfile underline pubkey={pubkey} sx={styles.link}>
+          @{name}
+        </LinkProfile>
+      </UserPopover>
     </>
   )
 })

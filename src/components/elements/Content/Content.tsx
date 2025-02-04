@@ -16,25 +16,26 @@ import { Video } from './Video/Video'
 import { YoutubeEmbed } from './Youtube/YoutubeEmbed'
 
 type Props = {
-  bubble?: boolean
   wrapper?: (node: Node) => React.ElementType
   children?: (index: number) => React.ReactNode
+  renderMedia?: boolean
 }
 
 export const Content = observer(function Content(props: Props) {
+  const { wrapper, children, renderMedia = true } = props
   const { note } = useNoteContext()
   return (
     <>
       {note.metadata.contentSchema?.content.map((node, index) => {
-        const Wrapper = props.wrapper?.(node) || React.Fragment
+        const Wrapper = wrapper?.(node) || React.Fragment
         return (
           <Wrapper key={node.type + index}>
             <>
-              {props.children?.(index)}
+              {children?.(index)}
               {node.type === 'heading' && <Heading node={node} />}
               {node.type === 'paragraph' && <Paragraph node={node} />}
-              {node.type === 'image' && <Image src={node.attrs.src} />}
-              {node.type === 'video' && <Video src={node.attrs.src} />}
+              {renderMedia && node.type === 'image' && <Image src={node.attrs.src} />}
+              {renderMedia && node.type === 'video' && <Video src={node.attrs.src} />}
               {node.type === 'nevent' && <NEvent pointer={node.attrs} />}
               {node.type === 'naddr' && <NAddr pointer={node.attrs} />}
               {node.type === 'orderedList' && <List type='ol' node={node} />}

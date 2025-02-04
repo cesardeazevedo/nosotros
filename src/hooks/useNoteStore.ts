@@ -1,9 +1,9 @@
-import type { NostrEventComment, NostrEventNote } from '@/nostr/types'
+import type { NostrEventComment, NostrEventMedia, NostrEventNote } from '@/nostr/types'
 import { eventStore } from '@/stores/events/event.store'
 import { Note } from '@/stores/notes/note'
 import { useMemo } from 'react'
 
-export function useNoteStore(event: NostrEventNote | NostrEventComment, open?: boolean) {
+export function useNoteStore(event: NostrEventNote | NostrEventComment | NostrEventMedia, open?: boolean) {
   return useMemo(() => new Note(event, open), [event])
 }
 

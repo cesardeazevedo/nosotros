@@ -1,30 +1,26 @@
 import { EditorTiptap } from '@/components/elements/Editor/EditorTiptap'
-import { ContentProvider, useContentContext } from '@/components/providers/ContentProvider'
-import { Divider } from '@/components/ui/Divider/Divider'
-import { Expandable } from '@/components/ui/Expandable/Expandable'
+import { useContentContext } from '@/components/providers/ContentProvider'
 import type { Props as StackProps } from '@/components/ui/Stack/Stack'
 import { Stack } from '@/components/ui/Stack/Stack'
-import { Text } from '@/components/ui/Text/Text'
 import type { SxProps } from '@/components/ui/types'
-import { useRootContext } from '@/hooks/useRootStore'
+import { useCurrentPubkey } from '@/hooks/useRootStore'
 import type { EditorStore } from '@/stores/editor/editor.store'
 import { spacing } from '@/themes/spacing.stylex'
-import { typeFace } from '@/themes/typeFace.stylex'
 import { UserAvatar } from 'components/elements/User/UserAvatar'
-import { motion } from 'framer-motion'
 import { observer } from 'mobx-react-lite'
+import { useObservableState } from 'observable-hooks'
 import { useEffect } from 'react'
 import { css } from 'react-strict-dom'
+import { concat, concatMap, defer, endWith, from, map, startWith, takeUntil } from 'rxjs'
 import { BubbleContainer } from '../Content/Layout/Bubble'
-import { EditorBroadcaster } from './EditorBroadcaster'
+import { EditorContainer } from './EditorContainer'
+import { EditorExpandables } from './EditorExpandables'
 import { EditorHeader } from './EditorHeader'
-import { EditorMentions } from './EditorMentions'
-import { EditorPow } from './EditorPow'
-import { EditorSettings } from './EditorSettings'
+import { EditorPlaceholder } from './EditorPlaceholder'
 import { EditorSubmit } from './EditorSubmit'
 import { EditorToolbar } from './EditorToolbar'
 import { EditorActionsPopover } from './EditorToolbarPopover'
-import { EditorZapSplits } from './EditorZapSplit'
+import { cancel$, countDown$ } from './utils/countDown'
 
 type Props = {
   store: EditorStore
@@ -37,121 +33,71 @@ type Props = {
 
 export const Editor = observer(function Editor(props: Props) {
   const { store, initialOpen, renderDiscard = true, renderBubble = false, sx, onDiscard } = props
-
   const { dense } = useContentContext()
-  const context = useRootContext()
-
-  useEffect(() => {
-    store.setContext(context)
-  }, [context])
+  const pubkey = useCurrentPubkey()
 
   useEffect(() => {
     store.open.toggle(initialOpen)
   }, [])
+
+  const [submitState, submit] = useObservableState<string | number | boolean, void>((input$) => {
+    return input$.pipe(
+      concatMap(() => {
+        const upload$ = defer(() =>
+          from(store.submit(store.rawEvent)).pipe(
+            map(() => false),
+            startWith(0),
+          ),
+        )
+        return concat(countDown$, upload$).pipe(takeUntil(cancel$), endWith(false))
+      }),
+    )
+  }, false)
 
   const Container = renderBubble ? BubbleContainer : Stack
   const ContainerProps = renderBubble
     ? { sx: styles.bubble }
     : ({ horizontal: false, align: 'stretch', justify: 'center', grow: true } as StackProps)
 
+  const EditorActions = renderBubble ? EditorActionsPopover : EditorToolbar
+
   return (
     <>
-      <Stack
-        horizontal
-        align='flex-start'
-        justify='space-between'
-        gap={renderBubble ? 1 : 2}
-        onClick={() => store.setOpen()}
-        sx={[styles.root, store.open && styles.root$open, sx]}>
-        <ContentProvider value={{ dense, disablePopover: true, disableLink: true }}>
-          <UserAvatar size='md' pubkey={context.user?.pubkey} />
-          <Container {...ContainerProps}>
-            <Stack horizontal={false} grow>
-              <Stack sx={[styles.content, dense && styles.content$dense]} gap={2} align='flex-start'>
-                <Stack horizontal={false} sx={styles.wrapper}>
-                  <Stack justify='space-between' sx={styles.header}>
-                    {store.open.value && !dense && (
-                      <motion.div
-                        key='username'
-                        initial={{ translateY: -6, opacity: 0 }}
-                        animate={{ translateY: 2, opacity: 1 }}
-                        exit={{ translateY: -6, opacity: 0 }}>
-                        <EditorHeader />
-                      </motion.div>
-                    )}
-                  </Stack>
-                  {store.open.value ? (
-                    <EditorTiptap key='editor' dense={dense} store={store} placeholder={store.placeholder} />
-                  ) : (
-                    <Stack sx={styles.placeholder}>
-                      <Text size='lg' variant='body' sx={styles.placeholder$label}>
-                        {store.placeholder}
-                      </Text>
-                    </Stack>
-                  )}
-                </Stack>
+      <EditorContainer store={store} renderBubble={renderBubble} sx={sx}>
+        <UserAvatar size='md' pubkey={pubkey} />
+        <Container {...ContainerProps}>
+          <Stack horizontal={false} grow>
+            <Stack sx={[styles.content, dense && styles.content$dense]} gap={2} align='flex-start'>
+              <Stack horizontal={false} sx={styles.wrapper}>
+                <EditorHeader store={store} />
+                {store.open.value ? (
+                  <EditorTiptap key='editor' dense={dense} store={store} placeholder={store.placeholder} />
+                ) : (
+                  <EditorPlaceholder store={store} />
+                )}
               </Stack>
-              {store.open.value && (
-                <>
-                  {renderBubble && (
-                    <EditorActionsPopover store={store}>
-                      <EditorSubmit store={store} renderDiscard={renderDiscard} onDiscard={onDiscard} />
-                    </EditorActionsPopover>
-                  )}
-                  {!renderBubble && (
-                    <EditorToolbar store={store}>
-                      <EditorSubmit store={store} renderDiscard={renderDiscard} onDiscard={onDiscard} />
-                    </EditorToolbar>
-                  )}
-                </>
-              )}
             </Stack>
-          </Container>
-        </ContentProvider>
-      </Stack>
-      {!renderBubble && (
-        <>
-          <Expandable expanded={store.section === 'broadcast'}>
-            <Divider />
-            <EditorBroadcaster store={store} />
-          </Expandable>
-          <Expandable expanded={store.section === 'mentions'}>
-            <Divider />
-            <EditorMentions key='mentions' store={store} />
-          </Expandable>
-          <Expandable expanded={store.section === 'settings'}>
-            <Divider />
-            <EditorSettings key='json' store={store} />
-          </Expandable>
-          <Expandable expanded={store.section === 'zaps'}>
-            <Divider />
-            <EditorZapSplits key='json' store={store} />
-          </Expandable>
-          {/* eslint-disable-next-line no-constant-binary-expression */}
-          {false && (
-            <Expandable expanded={store.section === 'pow'}>
-              <Divider />
-              <EditorPow key='pow' editor={store} />
-            </Expandable>
-          )}
-        </>
-      )}
+            {store.open.value && (
+              <EditorActions store={store}>
+                <EditorSubmit
+                  store={store}
+                  state={submitState}
+                  disabled={store.isEmpty || store.isUploading.value}
+                  renderDiscard={renderDiscard}
+                  onSubmit={() => submit()}
+                  onDiscard={onDiscard}
+                />
+              </EditorActions>
+            )}
+          </Stack>
+        </Container>
+      </EditorContainer>
+      {!renderBubble && <EditorExpandables store={store} />}
     </>
   )
 })
 
 const styles = css.create({
-  root: {
-    cursor: 'pointer',
-    width: '100%',
-    padding: spacing.padding1,
-  },
-  root$open: {
-    cursor: 'inherit',
-  },
-  header: {
-    width: '100%',
-  },
   content: {
     flex: 1,
     width: '100%',
@@ -166,14 +112,5 @@ const styles = css.create({
   },
   bubble: {
     width: '100%',
-  },
-  placeholder: {
-    cursor: 'pointer',
-    userSelect: 'none',
-    minHeight: 40,
-    opacity: 0.6,
-  },
-  placeholder$label: {
-    fontWeight: typeFace.medium,
   },
 })
