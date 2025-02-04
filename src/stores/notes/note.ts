@@ -1,5 +1,5 @@
 import { Kind } from '@/constants/kinds'
-import type { NostrEventComment, NostrEventNote } from '@/nostr/types'
+import type { NostrEventComment, NostrEventMedia, NostrEventNote } from '@/nostr/types'
 import { metadataSymbol } from '@/nostr/types'
 import { noteStore } from '@/stores/notes/notes.store'
 import { computed, makeAutoObservable } from 'mobx'
@@ -34,7 +34,7 @@ export class Note {
   limit = PAGINATION_SIZE
 
   constructor(
-    public eventNote: NostrEventNote | NostrEventComment,
+    public eventNote: NostrEventNote | NostrEventComment | NostrEventMedia,
     open?: boolean,
   ) {
     makeAutoObservable(this, {
@@ -144,6 +144,7 @@ export class Note {
   get replyTags(): NostrEvent['tags'] {
     switch (this.eventNote.kind) {
       case Kind.Text: {
+        // NIP-10 reply tags
         if (this.metadata.isRoot) {
           return compact([
             ['e', this.id, this.event.headRelay || '', 'root', this.event.pubkey],
@@ -158,7 +159,8 @@ export class Note {
           ['p', this.event.pubkey, this.user?.headRelay],
         ])
       }
-      case Kind.Comment: {
+      default: {
+        // NIP-22 comments tags
         const root = this.root
         const tags = [] as NostrEvent['tags']
         if (root) {
@@ -172,6 +174,14 @@ export class Note {
           if (root.isAddressable) {
             tags.unshift(['A', root.address, root.headRelay || '', root.pubkey])
           }
+        } else {
+          tags.push(
+            ...[
+              ['E', this.id, this.event.headRelay || '', this.event.pubkey],
+              ['K', this.event.event.kind.toString()],
+              ['P', this.event.pubkey, this.user?.headRelay || ''],
+            ],
+          )
         }
         tags.push(
           ...[
@@ -181,20 +191,6 @@ export class Note {
           ],
         )
         return compact(tags)
-      }
-      case Kind.Article: {
-        const tags = [
-          ['E', this.id, this.event.headRelay, this.event.pubkey],
-          ['K', this.eventNote.kind.toString()],
-          ['P', this.eventNote.pubkey],
-        ]
-        if (this.event.isAddressable) {
-          tags.unshift(['A', this.event.address, this.event.headRelay])
-        }
-        return compact(tags)
-      }
-      default: {
-        return []
       }
     }
   }
