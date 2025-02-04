@@ -1,14 +1,10 @@
 import { ContentProvider } from '@/components/providers/ContentProvider'
 import { ListItem } from '@/components/ui/ListItem/ListItem'
-import { useCurrentUser } from '@/hooks/useRootStore'
-import { useObservableNostrContext } from '@/stores/context/nostr.context.hooks'
+import { useFollowingUsers } from '@/hooks/useFollowingUsers'
 import type { User } from '@/stores/users/user'
-import { userStore } from '@/stores/users/users.store'
 import { observer } from 'mobx-react-lite'
-import { useObservableState } from 'observable-hooks'
 import { forwardRef, useImperativeHandle, useMemo } from 'react'
 import { css } from 'react-strict-dom'
-import { filter, from, map, mergeMap, toArray } from 'rxjs'
 import { UserAvatar } from '../User/UserAvatar'
 import { UserName } from '../User/UserName'
 
@@ -26,18 +22,7 @@ type SearchRef = {
 export const SearchFollowingUsers = observer(
   forwardRef<SearchRef, Props>(function SearchFollowingUsers(props, ref) {
     const { query, limit = 10, onSelect } = props
-    const user = useCurrentUser()
-
-    // Get all following users
-    const sub = useObservableNostrContext((context) => {
-      return from(user?.following?.tags.get('p') || []).pipe(
-        mergeMap((pubkey) => context.client.users.subscribe(pubkey)),
-        map((event) => userStore.get(event.pubkey)),
-        filter((x) => !!x),
-        toArray(),
-      )
-    })
-    const [usersData] = useObservableState(() => sub, [])
+    const usersData = useFollowingUsers()
 
     const users = useMemo(() => {
       let result = usersData as User[]
