@@ -4,7 +4,7 @@ import { PaginationSubject } from '@/core/PaginationRangeSubject'
 import { fakeEvent, fakeNote } from '@/utils/faker'
 import { test } from '@/utils/fixtures'
 import { subscribeSpyTo } from '@hirez_io/observer-spy'
-import { delay, merge, take } from 'rxjs'
+import { merge, take, takeUntil, timer } from 'rxjs'
 
 describe('NostrFeeds', () => {
   test('assert includeReplies', async ({ createMockRelay, createClient }) => {
@@ -48,11 +48,11 @@ describe('NostrFeeds', () => {
     const pagination$ = new PaginationSubject({ kinds: [Kind.Text], authors: ['1'] })
     const $ = client.feeds.self(pagination$, { includeParents: true, includeReplies: true })
 
-    const spy = subscribeSpyTo($.pipe(take(2)))
+    const spy = subscribeSpyTo($.pipe(takeUntil(timer(5000))))
     await spy.onComplete()
     await relay.close()
     expect(spy.getValues()).toStrictEqual([note3, note1])
-  }, 35000)
+  })
 
   test('assert following', async ({ createMockRelay, createClient }) => {
     const note1 = fakeEvent({ id: '1', pubkey: '2', content: 'note' })
@@ -70,7 +70,7 @@ describe('NostrFeeds', () => {
       includeReplies: false,
     })
     // needs a better way to complete the pagination subject
-    const spy = subscribeSpyTo(merge($.pipe(delay(2000), take(2))))
+    const spy = subscribeSpyTo(merge($.pipe(takeUntil(timer(5000)))))
     await spy.onComplete()
     await relay.close()
 
