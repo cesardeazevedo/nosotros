@@ -2,6 +2,7 @@ import { Kind } from '@/constants/kinds'
 import { ofKind } from '@/core/operators/ofKind'
 import { start } from '@/core/operators/start'
 import { EMPTY, last, map, mergeMap, of } from 'rxjs'
+import { cacheReplaceablePrune } from '../cache'
 import type { NostrClient } from '../nostr'
 import { parseEventMetadata } from '../operators/parseMetadata'
 import type { NostrEventFollow } from '../types'
@@ -14,8 +15,8 @@ export function publishFollowList(client: NostrClient, tag: 'p', related: string
   if (!client.pubkey) return EMPTY
 
   const filter = { kinds, authors: [client.pubkey] }
-  const sub = client.createSubscription(filter)
-  // Always get the latest follows list (without cache) before modifying it
+  cacheReplaceablePrune.delete(`${Kind.Follows}:${client.pubkey}`)
+  const sub = client.createSubscription(filter, { queryLocal: false })
   return of(sub).pipe(
     start(client.pool),
     map(([, event]) => event),

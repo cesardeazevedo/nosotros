@@ -4,6 +4,7 @@ import { formatRelayUrl } from '@/core/helpers/formatRelayUrl'
 import { ofKind } from '@/core/operators/ofKind'
 import { start } from '@/core/operators/start'
 import { EMPTY, last, map, merge, mergeMap, of } from 'rxjs'
+import { cacheReplaceablePrune } from '../cache'
 import type { NostrClient } from '../nostr'
 import { parseEventMetadata } from '../operators/parseMetadata'
 import type { NostrEventRelayList, UserRelay } from '../types'
@@ -17,6 +18,7 @@ export function publishRelayList(client: NostrClient, userRelay: UserRelay, revo
   if (pubkey) {
     const filter = { kinds, authors: [pubkey] }
     const options = { relays: of(OUTBOX_RELAYS) }
+    cacheReplaceablePrune.delete(`${Kind.RelayList}:${client.pubkey}`)
     const sub = client.createSubscription(filter, options)
 
     return of(sub).pipe(
