@@ -156,7 +156,22 @@ export const ZapRequest = observer(function ZapRequest(props: Props) {
           <Chip selected={store.custom.value} variant='filter' label='Custom' onClick={() => store.custom.toggle()} />
         </Stack>
         {store.custom.value && (
-          <TextField type='number' shrink label='Custom amount' placeholder='21000' sx={styles.custom} />
+          <TextField
+            type='number'
+            shrink
+            min={1}
+            step={1}
+            label='Custom amount'
+            placeholder='21000'
+            sx={styles.custom}
+            onChange={(e) => store.setAmount(parseInt(e.target.value))}
+            onKeyDown={(e) => {
+              if (e.key === '.') {
+                // @ts-ignore
+                e.preventDefault()
+              }
+            }}
+          />
         )}
         <TextField
           fullWidth
