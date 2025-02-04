@@ -32,6 +32,28 @@ describe('NostrFeeds', () => {
     expect(spy.getValues()).toStrictEqual([note2, note3])
   })
 
+  test('assert includeReplies with includeParents', async ({ createMockRelay, createClient }) => {
+    const note1 = fakeNote({ id: '1', pubkey: '2', content: 'note' })
+    const note2 = fakeNote({ id: '2', pubkey: '1', content: 'note', tags: [['e', '1', '', 'root']] })
+    const note3 = fakeNote({
+      id: '3',
+      pubkey: '1',
+      content: 'note',
+      tags: [],
+    })
+
+    const relay = createMockRelay(RELAY_1, [note1, note2, note3])
+
+    const client = createClient({ relays: [RELAY_1], settings: { outbox: false } })
+    const pagination$ = new PaginationSubject({ kinds: [Kind.Text], authors: ['1'] })
+    const $ = client.feeds.self(pagination$, { includeParents: true, includeReplies: true })
+
+    const spy = subscribeSpyTo($.pipe(take(2)))
+    await spy.onComplete()
+    await relay.close()
+    expect(spy.getValues()).toStrictEqual([note3, note1])
+  }, 35000)
+
   test('assert following', async ({ createMockRelay, createClient }) => {
     const note1 = fakeEvent({ id: '1', pubkey: '2', content: 'note' })
     const note2 = fakeEvent({ id: '2', pubkey: '2', content: 'note', tags: [['e', '3', '', 'root']] })
@@ -40,7 +62,7 @@ describe('NostrFeeds', () => {
 
     const relay = createMockRelay(RELAY_1, [follows, note1, note2, note3])
 
-    const client = createClient({ relays: [RELAY_1], settings: { outbox: true } })
+    const client = createClient({ relays: [RELAY_1], settings: { outbox: false } })
     const pagination$ = new PaginationSubject({ kinds: [Kind.Text], authors: ['1'] })
 
     const $ = client.feeds.following(pagination$, {

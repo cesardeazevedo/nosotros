@@ -45,6 +45,7 @@ export function addNostrEventToStore(event: NostrEventMetadata) {
       break
     }
     case Kind.ZapReceipt: {
+      eventStore.add(event as NostrEventNote)
       zapStore.add(event, metadata)
       break
     }

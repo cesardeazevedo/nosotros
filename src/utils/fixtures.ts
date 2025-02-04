@@ -92,6 +92,7 @@ export const test = base.extend<Fixtures>({
     pool.reset()
     replayIds.clear()
     userStore.clear()
+    eventStore.clear()
     noteStore.clear()
     followsStore.clear()
     userRelayStore.clear()

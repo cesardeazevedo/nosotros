@@ -13,7 +13,7 @@ export function query(filters: NostrFilter[]) {
         if (filter.limit) {
           return from(query).pipe(take(filter.limit))
         }
-        return from(query).pipe()
+        return from(query)
       }),
     )
   }

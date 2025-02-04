@@ -5,6 +5,7 @@ import type { NostrFilter } from '@/core/types'
 import { EMPTY, filter, from, mergeMap } from 'rxjs'
 import type { ClientSubOptions, NostrClient } from './nostr'
 import { metadataSymbol } from './types'
+import { subscribeMedia } from './subscriptions/subscribeMedia'
 
 type Pagination = PaginationSubject | PaginationLimitSubject
 
@@ -29,7 +30,7 @@ export class NostrFeeds {
               filter((note) => {
                 const isRoot = note[metadataSymbol].isRoot
                 if (options?.includeReplies === false && !isRoot) return false
-                if (options?.includeReplies === true && isRoot) return false
+                if (options?.includeReplies === true && !options?.includeParents && isRoot) return false
                 return true
               }),
             )
@@ -40,6 +41,9 @@ export class NostrFeeds {
                   .subscribe({ ...filters, kinds: [Kind.Article] }, options)
                   .pipe(this.client.notes.withRelatedNotes(options))
               : EMPTY
+          }
+          case Kind.Media: {
+            return subscribeMedia(this.client, { ...filters, kinds: [Kind.Media] }, options)
           }
           case Kind.Repost: {
             return this.client.reposts.subscribeWithRepostedEvent(filters, options)

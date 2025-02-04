@@ -1,7 +1,7 @@
 import { useGlobalNostrSettings } from '@/hooks/useRootStore'
 import type { NoteStatsOptions } from '@/nostr/subscriptions/subscribeNoteStats'
 import { subscribeNoteStats } from '@/nostr/subscriptions/subscribeNoteStats'
-import type { NostrEventComment, NostrEventNote } from '@/nostr/types'
+import type { NostrEventComment, NostrEventMedia, NostrEventNote } from '@/nostr/types'
 import { metadataSymbol } from '@/nostr/types'
 import { useNostrClientContext } from '@/stores/context/nostr.context.hooks'
 import { eventStore } from '@/stores/events/event.store'
@@ -26,7 +26,10 @@ const intersection = new IntersectionObserver(
   { threshold: 0 },
 )
 
-export function useNoteVisibility(event: NostrEventNote | NostrEventComment, options?: NoteStatsOptions) {
+export function useNoteVisibility(
+  event: NostrEventNote | NostrEventComment | NostrEventMedia,
+  options?: NoteStatsOptions,
+) {
   const context = useNostrClientContext()
   const settings = useGlobalNostrSettings()
   const ref = useRef<HTMLDivElement | null>(null)

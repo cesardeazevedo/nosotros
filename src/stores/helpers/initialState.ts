@@ -28,16 +28,6 @@ export const initialState: RootStoreSnapshotIn = {
     },
   },
   defaultContext: {
-    settings: {
-      ...defaultNostrSettings,
-      localDB: false,
-      scroll: {
-        reposts: true,
-        reactions: true,
-        zaps: true,
-        replies: true,
-      },
-    },
     options: {
       relays: DEFAULT_RELAYS,
     },

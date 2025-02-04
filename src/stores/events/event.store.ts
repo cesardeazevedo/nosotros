@@ -11,6 +11,11 @@ class EventStore {
     makeAutoObservable(this)
   }
 
+  clear() {
+    this.events.clear()
+    this.addressable.clear()
+  }
+
   get(id: string | undefined) {
     return this.events.get(id || '')
   }
@@ -20,16 +25,20 @@ class EventStore {
   }
 
   add(nostrEvent: NostrEventNote | NostrEventComment) {
-    const event = new Event(nostrEvent)
-    this.events.set(nostrEvent.id, event)
-    if (isParameterizedReplaceableKind(nostrEvent.kind)) {
-      const d = nostrEvent[metadataSymbol].tags.d?.[0][1]
-      if (d) {
-        const id = `${nostrEvent.kind}:${nostrEvent.pubkey}:${d}`
-        this.addressable.set(id, event)
+    const found = this.get(nostrEvent.id)
+    if (!found) {
+      const event = new Event(nostrEvent)
+      this.events.set(nostrEvent.id, event)
+      if (isParameterizedReplaceableKind(nostrEvent.kind)) {
+        const d = nostrEvent[metadataSymbol].tags.d?.[0][1]
+        if (d) {
+          const id = `${nostrEvent.kind}:${nostrEvent.pubkey}:${d}`
+          this.addressable.set(id, event)
+        }
       }
+      return event
     }
-    return event
+    return found
   }
 }
 

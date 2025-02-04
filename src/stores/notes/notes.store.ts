@@ -15,6 +15,7 @@ export class NoteStore {
 
   clear() {
     this.replies.clear()
+    this.addresses.clear()
   }
 
   getReplies(event: Event) {
