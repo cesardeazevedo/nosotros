@@ -5,7 +5,6 @@ import { useNoteStoreFromId } from '@/hooks/useNoteStore'
 import { useCurrentUser } from '@/hooks/useRootStore'
 import type { Notification } from '@/stores/notifications/notification'
 import { fallbackEmoji } from '@/stores/reactions/reactions.store'
-import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconAt, IconBolt, IconHeartFilled, IconMessage, IconShare3 } from '@tabler/icons-react'
@@ -13,8 +12,8 @@ import { observer } from 'mobx-react-lite'
 import { css, html } from 'react-strict-dom'
 import { LinkNEvent } from '../Links/LinkNEvent'
 import { LinkProfile } from '../Links/LinkProfile'
+import { PostHeaderDate } from '../Posts/PostHeaderDate'
 import { UserAvatar } from '../User/UserAvatar'
-import { UserHeaderDate } from '../User/UserHeaderDate'
 import { UserName } from '../User/UserName'
 import { NotificationContent } from './NotificationContent'
 import { NotificationMedia } from './NotificationMedia'
@@ -28,7 +27,7 @@ const formatter = new Intl.NumberFormat()
 export const NotificationItem = observer(function NotificationItem(props: Props) {
   const { notification } = props
   const user = useCurrentUser()
-  const { type, user: notificationUser, author: pubkey } = notification
+  const { type, author: pubkey } = notification
 
   const mobile = useMobile()
   const linkId = type === 'reply' || type === 'mention' ? notification.id : notification.related
@@ -67,7 +66,7 @@ export const NotificationItem = observer(function NotificationItem(props: Props)
         {type === 'repost' && <IconShare3 fill='currentColor' size={28} strokeWidth='1.5' />}
       </Stack>
       <Stack gap={2} justify='flex-start' align='flex-start' grow>
-        <LinkProfile user={notificationUser}>
+        <LinkProfile pubkey={pubkey}>
           <UserAvatar pubkey={pubkey} />
         </LinkProfile>
         <LinkNEvent nevent={note?.event.nevent}>
@@ -106,11 +105,13 @@ export const NotificationItem = observer(function NotificationItem(props: Props)
                 <NotificationContent id={notification.related} />
               </>
             )}
-            <UserHeaderDate style='long' date={notification.event.created_at} />
+            <PostHeaderDate dateStyle='long' date={notification.event.created_at} />
           </Stack>
         </LinkNEvent>
       </Stack>
-      {!mobile && <html.div style={styles.trailing}>{note && <NotificationMedia note={note} />}</html.div>}
+      {!mobile && note?.headImage && (
+        <html.div style={styles.trailing}>{note && <NotificationMedia note={note} />}</html.div>
+      )}
     </Stack>
   )
 })
@@ -120,8 +121,6 @@ const styles = css.create({
     paddingBlock: spacing.padding1,
     paddingInline: spacing.padding3,
     minHeight: 50,
-    borderBottom: '1px solid',
-    borderColor: palette.outlineVariant,
   },
   type: {
     paddingTop: spacing['padding0.5'],
@@ -143,8 +142,9 @@ const styles = css.create({
     fontSize: '150%',
   },
   content: {
-    display: 'inline',
-    maxWidth: 400,
+    display: 'inline-block',
+    flex: 1,
+    flexGrow: 1,
   },
   username: {
     display: 'inline-flex',
