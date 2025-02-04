@@ -1,11 +1,15 @@
 import { PaginationSubject } from '@/core/PaginationRangeSubject'
 import { Duration } from 'luxon'
+import { t } from 'mobx-state-tree'
 import { ignoreElements, interval, map, take, takeWhile, tap } from 'rxjs'
 import { FeedStoreModel } from './feed.store'
 
 export const FeedPaginationRange = FeedStoreModel.named('FeedPaginationRange')
+  .props({
+    range: t.optional(t.number, Duration.fromObject({ hours: 4 }).as('minutes')),
+  })
   .volatile((self) => ({
-    pagination: new PaginationSubject(self.filter, { range: Duration.fromObject({ hours: 4 }).as('minutes') }),
+    pagination: new PaginationSubject(self.filter, { range: self.range }),
   }))
   .actions((self) => ({
     paginateIfEmpty(min = 5) {

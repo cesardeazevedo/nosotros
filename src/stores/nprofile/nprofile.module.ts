@@ -1,11 +1,12 @@
 import { Kind } from '@/constants/kinds'
 import type { SubscriptionOptions } from '@/core/NostrSubscription'
 import type { NostrClient } from '@/nostr/nostr'
+import { Duration } from 'luxon'
 import type { Instance, SnapshotIn, SnapshotOut } from 'mobx-state-tree'
 import { t } from 'mobx-state-tree'
 import { EMPTY } from 'rxjs'
 import { NotesFeedSubscriptionModel } from '../feeds/feed.notes'
-import { FeedPaginationLimit } from '../feeds/feed.pagination.limit'
+import { FeedPaginationRange } from '../feeds/feed.pagination.range'
 import { BaseModuleModel } from '../modules/module'
 
 export type NProfileOptions = {
@@ -13,7 +14,7 @@ export type NProfileOptions = {
   relays?: string[]
 }
 
-const NProfileFeed = NotesFeedSubscriptionModel(FeedPaginationLimit)
+const NProfileFeed = NotesFeedSubscriptionModel(FeedPaginationRange)
 
 const NProfileFeedsModel = t.model('NProfileFeeds', {
   notes: NProfileFeed,
@@ -65,6 +66,7 @@ export function createNprofileModule(snapshot: Pick<NProfileModuleSnapshotIn, 'i
     feeds: {
       notes: {
         ...props,
+        range: Duration.fromObject({ days: 7 }).as('minutes'),
         filter: { kinds: [Kind.Text, Kind.Repost], authors: [pubkey] },
         options: {
           includeParents: false,
@@ -73,6 +75,7 @@ export function createNprofileModule(snapshot: Pick<NProfileModuleSnapshotIn, 'i
       },
       replies: {
         ...props,
+        range: Duration.fromObject({ days: 7 }).as('minutes'),
         filter: { kinds: [Kind.Text], authors: [pubkey] },
         options: {
           includeParents: false,
@@ -81,20 +84,24 @@ export function createNprofileModule(snapshot: Pick<NProfileModuleSnapshotIn, 'i
       },
       media: {
         ...props,
+        range: Duration.fromObject({ days: 30 }).as('minutes'),
         filter: { kinds: [Kind.Media], authors: [pubkey] },
       },
       articles: {
         ...props,
+        range: Duration.fromObject({ days: 360 }).as('minutes'),
         filter: { kinds: [Kind.Article], authors: [pubkey] },
       },
       bookmarks: {
         ...props,
         limit: 10,
+        range: Duration.fromObject({ days: 30 }).as('minutes'),
         filter: { kinds: [Kind.BookmarkList], authors: [pubkey] },
       },
       reactions: {
         ...props,
         limit: 10,
+        range: Duration.fromObject({ days: 7 }).as('minutes'),
         filter: { kinds: [Kind.Reaction], authors: [pubkey] },
       },
     },
