@@ -4,28 +4,24 @@ import type { MetadataDB } from '@/db/types'
 import type { NostrEvent } from 'core/types'
 import type { ContentMetadata } from './parseContent'
 import { parseContent } from './parseContent'
-import type { RepliesMetadata } from './parseReplies'
-import { parseReplies } from './parseReplies'
 import type { ParsedTags } from './parseTags'
 import { parseTags } from './parseTags'
 
-type Note = {
-  kind: Kind.Text | Kind.Article
+type Media = {
+  kind: Kind.Media
   tags: ParsedTags
 }
 
-export type NoteMetadata = MetadataDB & ContentMetadata & RepliesMetadata & Note
+export type MediaMetadata = MetadataDB & ContentMetadata & Media
 
-export function parseNote(event: NostrEvent): NoteMetadata {
+export function parseMedia(event: NostrEvent): MediaMetadata {
   const tags = parseTags(event.tags)
   const content = parseContent(event, tags)
-  const replies = parseReplies(tags)
-  const relayHints = mergeRelayHints([content.relayHints, replies.relayHints])
+  const relayHints = mergeRelayHints([content.relayHints])
   return {
     id: event.id,
-    kind: Kind.Text,
+    kind: Kind.Media,
     ...content,
-    ...replies,
     relayHints,
     tags,
   }

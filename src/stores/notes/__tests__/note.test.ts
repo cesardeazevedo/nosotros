@@ -1,5 +1,6 @@
 import { Kind } from '@/constants/kinds'
 import { listStore } from '@/stores/lists/lists.store'
+import { seenStore } from '@/stores/seen/seen.store'
 import { test } from '@/utils/fixtures'
 
 describe('Note', () => {
@@ -107,6 +108,24 @@ describe('Note', () => {
       ['e', '1', '', 'root', '1'],
       ['e', '4', '', 'reply', '4'],
       ['p', '4'],
+    ])
+  })
+
+  test('assert replyTags for a media note', ({ createNote }) => {
+    const root = createNote({
+      id: 'root_1',
+      pubkey: 'pubkey_1',
+      kind: Kind.Media,
+      tags: [['d', '123']],
+    })
+    seenStore.add({ kind: Kind.Media, eventId: 'root_1', relay: 'wss://relay1.com' })
+    expect(root.replyTags).toStrictEqual([
+      ['E', 'root_1', 'wss://relay1.com', 'pubkey_1'],
+      ['K', '20'],
+      ['P', 'pubkey_1'],
+      ['e', 'root_1', 'wss://relay1.com', 'pubkey_1'],
+      ['k', '20'],
+      ['p', 'pubkey_1'],
     ])
   })
 

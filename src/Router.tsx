@@ -19,6 +19,7 @@ import { NProfileNotesFeed } from './components/modules/NProfile/feeds/NProfileN
 import { NProfileRepliesFeed } from './components/modules/NProfile/feeds/NProfileRepliesFeed'
 import { DeckRoute } from './components/routes/deck/deck.route'
 import { EditorRoute } from './components/routes/editor/editor.route'
+import { MediaRoute } from './components/routes/media/media.route'
 import { naddressLoader } from './components/routes/naddress/naddress.loader'
 import { NAddressRoute } from './components/routes/naddress/naddress.route'
 import { neventLoader } from './components/routes/nevent/nevent.loader'
@@ -34,6 +35,7 @@ import { SettingsNetworkRoute } from './components/routes/settings/settings.netw
 import { SettingsRoute } from './components/routes/settings/settings.route'
 import { SettingsStorageRoute } from './components/routes/settings/settings.storage'
 import { useCurrentPubkey } from './hooks/useRootStore'
+import { NProfileMediaFeed } from './components/modules/NProfile/feeds/NProfileMediaFeed'
 
 const rootRoute = createRootRouteWithContext()({
   component: RootLayout,
@@ -82,6 +84,12 @@ export const notificationsRoute = createRoute({
     }, [])
     return pubkey && <NotificationsRoute pubkey={pubkey} />
   },
+})
+
+export const mediaRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/media',
+  component: () => <MediaRoute />,
 })
 
 export const composeRoute = createRoute({
@@ -189,6 +197,16 @@ const nprofileRepliesRoute = createRoute({
   },
 })
 
+const nprofileMediaRoute = createRoute({
+  getParentRoute: () => nostrRoute,
+  path: 'media',
+  loader: (options) => nprofileFeedLoader(options, 'media'),
+  component: function NProfileMediaRoute() {
+    const module = nprofileMediaRoute.useLoaderData()
+    return <NProfileMediaFeed module={module} />
+  },
+})
+
 const nprofileArticlesRoute = createRoute({
   getParentRoute: () => nostrRoute,
   path: 'articles',
@@ -237,9 +255,10 @@ const settingsStorageRoute = createRoute({
 
 export const routeTree = rootRoute.addChildren([
   homeRoute,
-  nostrRoute.addChildren([nprofileIndexRoute, nprofileRepliesRoute, nprofileArticlesRoute]),
+  nostrRoute.addChildren([nprofileIndexRoute, nprofileRepliesRoute, nprofileMediaRoute, nprofileArticlesRoute]),
   deckRoute,
   notificationsRoute,
+  mediaRoute,
   composeRoute,
   relaysRoute,
   settingsRoute.addChildren([settingsDisplayRoute, settingsNetworkRoute, settingsContentRoute, settingsStorageRoute]),
