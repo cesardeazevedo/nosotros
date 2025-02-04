@@ -6,7 +6,7 @@ import { Stack } from '@/components/ui/Stack/Stack'
 import { useMobile } from '@/hooks/useMobile'
 import { useGoBack } from '@/hooks/useNavigations'
 import { useNoteStoreFromId } from '@/hooks/useNoteStore'
-import type { NEventModule } from '@/stores/nevent/nevent.module'
+import type { NEventModule } from '@/stores/modules/nevent.module'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconChevronLeft } from '@tabler/icons-react'
 import { useLoaderData } from '@tanstack/react-router'
@@ -31,7 +31,7 @@ export const NEventRoute = observer(function NEventRoute() {
             <IconButton onClick={goBack} icon={<IconChevronLeft />} />
           </Stack>
         )}
-        <PaperContainer elevation={isMobile ? 0 : 2}>
+        <PaperContainer>
           {!note && <PostLoading rows={1} />}
           {note && <NostrEventRoot open event={note.event.event} />}
         </PaperContainer>

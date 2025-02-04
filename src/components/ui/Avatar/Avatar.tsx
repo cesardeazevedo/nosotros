@@ -13,7 +13,6 @@ type AvatarVariant = 'rounded' | 'squared'
 export type Props = {
   sx?: SxProps
   variant?: AvatarVariant
-  alt?: string
   src?: string
   srcSet?: string
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
@@ -39,6 +38,7 @@ function useLoaded({ crossOrigin, referrerPolicy, src, srcSet }: Props) {
 
   useEffect(() => {
     if (!src && !srcSet) {
+      setLoaded(false)
       return undefined
     }
 
@@ -78,13 +78,13 @@ function useLoaded({ crossOrigin, referrerPolicy, src, srcSet }: Props) {
 }
 
 export const Avatar = (props: Props) => {
-  const { variant = 'rounded', size = 'md', alt, src, srcSet, crossOrigin, referrerPolicy, children, sx } = props
+  const { variant = 'rounded', size = 'md', src, srcSet, crossOrigin, referrerPolicy, children, sx } = props
   const loaded = useLoaded({ src, srcSet, crossOrigin, referrerPolicy })
   const hasImage = !!src || !!srcSet
   const hasImageNotFailing = hasImage && loaded !== 'error'
   return (
     <html.div style={[sizes[size], styles.root, variants[variant], sx]}>
-      {!loaded ? (
+      {!loaded && src ? (
         <Skeleton variant='circular' animation='wave' sx={[sizes[size], styles.loading]} />
       ) : hasImageNotFailing ? (
         <html.img
@@ -96,8 +96,6 @@ export const Avatar = (props: Props) => {
         />
       ) : children ? (
         <html.div style={styles.content}>{children}</html.div>
-      ) : hasImage && !!alt ? (
-        <html.div style={styles.content}>{alt[0]}</html.div>
       ) : null}
     </html.div>
   )
@@ -156,14 +154,16 @@ const styles = css.create({
     textIndent: 10000,
   },
   content: {
-    width: '70%',
-    height: '70%',
+    width: '100%',
+    height: '100%',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
     fontSize: avatarTokens.labelTextSize,
     fontWeight: typeFace.bold,
+    backgroundColor: 'white',
+    color: 'black',
   },
   loading: {
     width: avatarTokens.containerSize,

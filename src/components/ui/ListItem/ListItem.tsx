@@ -123,7 +123,7 @@ export const ListItem = forwardRef<HTMLElement, Props>((props, ref) => {
 const variants = css.create({
   standard: {
     [listItemTokens.containerColor]: 'transparent',
-    [listItemTokens.selectedContainerColor]: palette.surfaceContainerHighest,
+    [listItemTokens.selectedContainerColor]: palette.surfaceContainer,
     [listItemTokens.selectedContainerOpacity]: '1',
     [listItemTokens.textColor]: palette.onSurface,
   },
@@ -206,7 +206,7 @@ const styles = css.create({
     textOverflow: 'ellipsis',
     fontFamily: typeScale.bodyFont$lg,
     fontSize: typeScale.bodySize$lg,
-    fontWeight: typeScale.bodyWeight$lg,
+    fontWeight: typeScale.titleWeight$md,
     lineHeight: typeScale.bodyLineHeight$lg,
     letterSpacing: typeScale.bodyLetterSpacing$lg,
   },

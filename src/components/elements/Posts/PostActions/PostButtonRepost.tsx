@@ -1,7 +1,6 @@
 import { useContentContext } from '@/components/providers/ContentProvider'
 import { useNoteContext } from '@/components/providers/NoteProvider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
-import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 import { useCurrentPubkey } from '@/hooks/useRootStore'
 import { repostStore } from '@/stores/reposts/reposts.store'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'

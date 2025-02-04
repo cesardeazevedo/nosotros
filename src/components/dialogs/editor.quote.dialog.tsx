@@ -33,14 +33,14 @@ export const EditorQuoteDialog = observer(function EditorQuoteDialog() {
         store.editor
           .chain()
           .insertContent({ type: 'text', text: ' ' })
-          .insertNEvent({ nevent: 'nostr:' + quoting })
+          .insertNEvent({ bech32: 'nostr:' + quoting })
           .focus('start')
           .run()
       } else {
         store.editor
           .chain()
           .insertContent({ type: 'text', text: ' ' })
-          .insertNAddr({ naddr: 'nostr:' + quoting })
+          .insertNAddr({ bech32: 'nostr:' + quoting })
           .focus('start')
           .run()
       }

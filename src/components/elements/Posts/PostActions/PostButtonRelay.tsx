@@ -6,6 +6,7 @@ import { IconServerBolt } from '@tabler/icons-react'
 import { useMobile } from 'hooks/useMobile'
 import { observer } from 'mobx-react-lite'
 import { useCallback } from 'react'
+import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDOMProps'
 import { ButtonContainer } from './PostButtonContainer'
 import { iconProps } from './utils'
 
@@ -14,9 +15,14 @@ export const ButtonRelays = observer(function ButtonRelays() {
   const { note } = useNoteContext()
   const isMobile = useMobile()
 
-  const handleClick = useCallback(() => {
-    note.toggleBroadcast()
-  }, [isMobile])
+  const handleClick = useCallback(
+    (e: StrictClickEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      note.toggleBroadcast()
+    },
+    [isMobile],
+  )
 
   return (
     <Tooltip

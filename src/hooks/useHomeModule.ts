@@ -1,6 +1,6 @@
 import { RECOMMENDED_PUBKEYS } from '@/constants/recommended'
 import { useRootStore } from '@/hooks/useRootStore'
-import { createHome } from '@/stores/home/home.module'
+import { createHome } from '@/stores/modules/home.module'
 
 export function useHomeModule() {
   const { auth, persistedModules } = useRootStore()

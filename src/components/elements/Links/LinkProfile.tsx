@@ -1,23 +1,24 @@
 import { useContentContext } from '@/components/providers/ContentProvider'
 import type { SxProps } from '@/components/ui/types'
 import { useRootStore } from '@/hooks/useRootStore'
-import type { User } from '@/stores/users/user'
+import { userStore } from '@/stores/users/users.store'
 import { Link, useMatch, useRouter } from '@tanstack/react-router'
 import { observer } from 'mobx-react-lite'
+import { nip19 } from 'nostr-tools'
 import { forwardRef, useCallback, useContext } from 'react'
 import { css } from 'react-strict-dom'
 import { DeckContext } from '../Deck/DeckContext'
 
 interface Props {
   sx?: SxProps
-  user?: User
+  pubkey: string
   underline?: boolean
   children: React.ReactNode
 }
 
 export const LinkProfile = observer(
   forwardRef<never, Props>(function LinkProfile(props, ref) {
-    const { user, underline, children, sx, ...rest } = props
+    const { pubkey, underline, children, sx, ...rest } = props
     const route = useMatch({ strict: false })
     const router = useRouter()
     const root = useRootStore()
@@ -25,13 +26,13 @@ export const LinkProfile = observer(
     const { index } = useContext(DeckContext)
     const { disableLink } = useContentContext()
 
-    const handleClickDeck = useCallback(() => {
-      if (user) {
-        root.decks.selected.addNProfile({ options: { pubkey: user.pubkey } }, (index || 0) + 1)
-      }
-    }, [user, index])
+    const nprofile = userStore.get(pubkey)?.nprofile || nip19.nprofileEncode({ pubkey })
 
-    if (disableLink || !user?.nprofile) {
+    const handleClickDeck = useCallback(() => {
+      root.decks.selected.addNProfile({ options: { pubkey } }, (index || 0) + 1)
+    }, [index])
+
+    if (disableLink || !nprofile) {
       return children
     }
 
@@ -51,7 +52,7 @@ export const LinkProfile = observer(
       <Link
         resetScroll
         to='/$nostr'
-        params={{ nostr: user?.nprofile }}
+        params={{ nostr: nprofile }}
         state={{ from: router.latestLocation.pathname } as never}
         {...rest}
         {...css.props([underline && styles.underline, sx])}

@@ -63,7 +63,11 @@ export const ButtonReaction = observer(function ButtonReaction() {
             <IconButton
               size={dense ? 'sm' : 'md'}
               selected={!!myReaction}
-              onClick={() => handleReact('❤️')}
+              onClick={(e) => {
+                e.stopPropagation()
+                e.preventDefault()
+                handleReact('❤️')
+              }}
               sx={[(color && styles[`button$${color}`]) || styles.button$red]}
               selectedIcon={
                 <motion.div

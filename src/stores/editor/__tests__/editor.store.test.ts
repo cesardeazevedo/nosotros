@@ -1,4 +1,4 @@
-import { createEditor } from '@/components/elements/Editor/createEditor'
+import { createEditor } from '@/components/elements/Editor/utils/createEditor'
 import { EditorStore } from '../editor.store'
 
 describe('EditorStore', () => {
@@ -6,10 +6,10 @@ describe('EditorStore', () => {
     const store = new EditorStore({})
     const editor = createEditor(store)
     editor.commands.insertNProfile({
-      nprofile: 'nprofile1qqsy583gx72tyjfrl34t6umk54pywzz9c5y4s3zdf7956lth8yt7ycsf4hjc4',
+      bech32: 'nprofile1qqsy583gx72tyjfrl34t6umk54pywzz9c5y4s3zdf7956lth8yt7ycsf4hjc4',
     })
     editor.commands.insertNProfile({
-      nprofile: 'nprofile1qqsvvcpmpuwvlmrztkwq3d6nunmhf6hh688jw6fzxyjmtl2d5u5qr8sduyukt',
+      bech32: 'nprofile1qqsvvcpmpuwvlmrztkwq3d6nunmhf6hh688jw6fzxyjmtl2d5u5qr8sduyukt',
     })
     store.setEditor(editor)
 
@@ -23,7 +23,7 @@ describe('EditorStore', () => {
     ])
 
     editor.commands.insertNProfile({
-      nprofile: 'nprofile1qqsxlc5rulsatjyay2f3k979ngh5qwq3meg2mutyu4zev9e0fp6glgs92ag38',
+      bech32: 'nprofile1qqsxlc5rulsatjyay2f3k979ngh5qwq3meg2mutyu4zev9e0fp6glgs92ag38',
     })
 
     expect(store.zapSplitsList).toStrictEqual([

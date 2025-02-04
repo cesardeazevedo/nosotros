@@ -1,17 +1,15 @@
 import { DeckContext } from '@/components/elements/Deck/DeckContext'
 import { NostrEventRoot } from '@/components/elements/Event/NostrEventRoot'
-import { PaperContainer } from '@/components/elements/Layouts/PaperContainer'
 import { PostAwait } from '@/components/elements/Posts/PostAwait'
 import { PostLoading } from '@/components/elements/Posts/PostLoading'
+import { naddressLoader } from '@/components/routes/naddress/naddress.loader'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { Text } from '@/components/ui/Text/Text'
 import { useNoteStoreFromAddress } from '@/hooks/useNoteStore'
-import type { NAddressModule } from '@/stores/naddress/naddress.module'
-import { spacing } from '@/themes/spacing.stylex'
+import type { NAddressModule } from '@/stores/modules/naddress.module'
 import { DeckColumnHeader } from 'components/elements/Deck/DeckColumnHeader'
 import { observer } from 'mobx-react-lite'
-import { useContext } from 'react'
-import { css } from 'react-strict-dom'
+import { useContext, useEffect } from 'react'
 
 type Props = {
   module: NAddressModule
@@ -19,6 +17,10 @@ type Props = {
 
 export const NAddressColumn = observer(function NAddressColumn(props: Props) {
   const { module } = props
+
+  useEffect(() => {
+    naddressLoader(module.options)
+  }, [])
 
   const context = useContext(DeckContext)
   const note = useNoteStoreFromAddress(module.address)
@@ -30,20 +32,11 @@ export const NAddressColumn = observer(function NAddressColumn(props: Props) {
           Post
         </Text>
       </DeckColumnHeader>
-      <PaperContainer elevation={0} shape='none' sx={styles.container}>
-        <PostAwait rows={1} promise={context.delay}>
-          {!note && <PostLoading rows={1} />}
-          {note && <NostrEventRoot open event={note.event.event} />}
-        </PostAwait>
-        <Divider />
-      </PaperContainer>
+      <PostAwait rows={1} promise={context.delay}>
+        {!note && <PostLoading rows={1} />}
+        {note && <NostrEventRoot open event={note.event.event} />}
+      </PostAwait>
+      <Divider />
     </>
   )
-})
-
-const styles = css.create({
-  container: {
-    overflowY: 'auto',
-    paddingBottom: spacing.padding6,
-  },
 })

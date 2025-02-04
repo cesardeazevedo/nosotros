@@ -27,7 +27,7 @@ export const UserName = observer(function UserName(props: Props) {
     <Stack gap={0.5} sx={props.sx}>
       {!user && <Skeleton variant='rectangular' sx={styles.loading} />}
       <UserPopover pubkey={pubkey}>
-        <LinkProfile underline user={user}>
+        <LinkProfile underline pubkey={pubkey}>
           <Text variant='body' sx={[styles.text, rest.sx]} size={size} {...rest} element={html.div}>
             {user?.displayName}
           </Text>
@@ -44,7 +44,6 @@ export const UserName = observer(function UserName(props: Props) {
 })
 
 const styles = css.create({
-  container: {},
   loading: {
     marginLeft: 0,
     alignSelf: 'center',

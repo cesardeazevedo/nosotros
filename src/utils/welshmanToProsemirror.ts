@@ -73,7 +73,7 @@ export function welshmanToProseMirror(welshmanSchema: Parsed[], blockNodesOption
         case ParsedType.Event: {
           const attrs = {
             ...node.value,
-            nevent: node.raw,
+            bech32: node.raw,
           } as NEventAttributes
           result.content.push({ type: 'nevent', attrs })
           nevents.push(attrs)
@@ -82,8 +82,8 @@ export function welshmanToProseMirror(welshmanSchema: Parsed[], blockNodesOption
         case ParsedType.Address: {
           const attrs = {
             ...node.value,
-            naddr: node.raw,
-          }
+            bech32: node.raw,
+          } as NAddrAttributes
           result.content.push({ type: 'naddr', attrs })
           naddresses.push(attrs)
           break
@@ -118,7 +118,7 @@ export function welshmanToProseMirror(welshmanSchema: Parsed[], blockNodesOption
           const attrs = {
             ...node.value,
             relays: node.value.relays || [],
-            nprofile: node.raw,
+            bech32: node.raw,
           } as NProfileAttributes
           nprofiles.push(attrs)
           currentParagraph.content.push({ type: 'nprofile', attrs })

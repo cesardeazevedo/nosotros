@@ -1,4 +1,4 @@
-import { List } from '@/components/elements/List/List'
+import { FeedList } from '@/components/elements/Feed/FeedList'
 import { NotificationItem } from '@/components/elements/Notification/NotificationItem'
 import { NotificationLoading } from '@/components/elements/Notification/NotificationLoading'
 import { NotificationSettings } from '@/components/elements/Notification/NotificationSettings'
@@ -30,7 +30,7 @@ export const NotificationsRoute = observer(function NotificationRoute(props: Pro
   const user = useCurrentUser()
   return (
     <CenteredContainer margin>
-      <PaperContainer elevation={1}>
+      <PaperContainer>
         <Stack gap={1} horizontal sx={styles.header} justify='space-between'>
           <Text variant='headline' size='sm'>
             Notifications
@@ -47,7 +47,7 @@ export const NotificationsRoute = observer(function NotificationRoute(props: Pro
         </Expandable>
         <Divider />
         <Stack horizontal={false}>
-          <List
+          <FeedList
             feed={feed}
             onScrollEnd={() => feed.paginate()}
             filter={(event) => (!feed.muted ? user?.isEventMuted(event) || false : true)}

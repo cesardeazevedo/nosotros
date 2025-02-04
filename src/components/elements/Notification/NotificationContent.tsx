@@ -23,7 +23,7 @@ export const NotificationContent = observer(function NotificationContent(props: 
           {node.type === 'image' && <></>}
           {node.type === 'video' && node.attrs.src}
           {node.type === 'nevent' && <NEventInline attrs={node.attrs} />}
-          {node.type === 'naddr' && node.attrs.naddr.slice(0, 10)}
+          {node.type === 'naddr' && node.attrs.bech32.slice(0, 10)}
           {node.type === 'tweet' && node.attrs.src}
           {node.type === 'youtube' && node.attrs.src}
           {node.type === 'bolt11' && node.attrs.lnbc.slice(0, 10)}

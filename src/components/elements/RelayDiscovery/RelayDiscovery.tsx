@@ -33,7 +33,7 @@ export const RelayDiscovery = observer(function RelayDiscovery() {
   useSubscription(sub)
   return (
     <Stack horizontal gap={1} justify='space-between' align='flex-start'>
-      <PaperContainer elevation={1}>
+      <PaperContainer>
         <Stack horizontal={false} sx={styles.box}>
           <Stack gap={0.5} sx={styles.header} justify='space-between'>
             <Text variant='title' size='md'>
@@ -64,7 +64,9 @@ export const RelayDiscovery = observer(function RelayDiscovery() {
                     <Button variant='filledTonal' sx={styles.monitor} ref={setRef} {...getProps()} onClick={open}>
                       <Stack gap={1}>
                         <IconChevronDown size={18} />
-                        <UserHeader size='md' pubkey={relayDiscoveryStore.selected} renderAvatar={false} />
+                        {relayDiscoveryStore.selected && (
+                          <UserHeader size='md' pubkey={relayDiscoveryStore.selected} renderAvatar={false} />
+                        )}
                       </Stack>
                     </Button>
                   )}

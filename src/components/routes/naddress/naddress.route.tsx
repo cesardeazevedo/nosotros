@@ -6,7 +6,7 @@ import { Stack } from '@/components/ui/Stack/Stack'
 import { useMobile } from '@/hooks/useMobile'
 import { useGoBack } from '@/hooks/useNavigations'
 import { useNoteStoreFromAddress } from '@/hooks/useNoteStore'
-import type { NAddressModule } from '@/stores/naddress/naddress.module'
+import type { NAddressModule } from '@/stores/modules/naddress.module'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconChevronLeft } from '@tabler/icons-react'
 import { useLoaderData } from '@tanstack/react-router'
@@ -31,7 +31,7 @@ export const NAddressRoute = observer(function NAddressRoute() {
             <IconButton onClick={goBack} icon={<IconChevronLeft />} />
           </Stack>
         )}
-        <PaperContainer elevation={isMobile ? 0 : 2}>
+        <PaperContainer>
           {!note && <PostLoading rows={1} />}
           {note && <NostrEventRoot event={note.event.event} open />}
         </PaperContainer>

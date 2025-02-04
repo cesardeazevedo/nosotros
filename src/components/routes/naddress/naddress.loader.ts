@@ -1,4 +1,4 @@
-import { createNAddressModule } from '@/stores/naddress/naddress.module'
+import { createNAddressModule } from '@/stores/modules/naddress.module'
 import type { Props } from './naddress.route'
 
 export function naddressLoader(props: Props) {

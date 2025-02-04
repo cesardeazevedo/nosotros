@@ -10,7 +10,7 @@ type Props = {
   sx?: SxProps
   visualState: IVisualState
   disabled?: boolean
-  element?: React.RefObject<HTMLElement>
+  element?: React.RefObject<HTMLElement | null>
 }
 
 export const Ripple = forwardRef<HTMLDivElement, Props>((props, ref) => {

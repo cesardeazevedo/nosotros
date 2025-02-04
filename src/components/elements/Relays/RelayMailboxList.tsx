@@ -53,7 +53,7 @@ export const RelayMailboxList = observer(function RelayMailboxList(props: Props)
   const total = relays?.length
 
   return (
-    <PaperContainer elevation={1} sx={styles.section}>
+    <PaperContainer>
       <Stack horizontal={false}>
         <Stack gap={0.5} sx={styles.header} justify='space-between'>
           <Text variant='title' size='md'>

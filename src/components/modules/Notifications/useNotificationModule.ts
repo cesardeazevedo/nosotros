@@ -1,5 +1,5 @@
 import { useRootStore } from '@/hooks/useRootStore'
-import { createNotificationModule } from '@/stores/notifications/notification.module'
+import { createNotificationModule } from '@/stores/modules/notification.module'
 
 export function useNotificationModule(pubkey: string) {
   const { persistedModules } = useRootStore()

@@ -1,13 +1,28 @@
 import { DEFAULT_RELAYS } from '@/constants/relays'
 import type { BroadcastResponse } from '@/core/operators/broadcast'
+import { onAuth } from '@/core/operators/onAuth'
 import { verifyWorker } from '@/core/operators/verifyWorker'
 import { NostrSubscription, type SubscriptionOptions } from 'core/NostrSubscription'
 import type { Pool } from 'core/pool'
 import type { Signer } from 'core/signers/signer'
 import type { NostrFilter } from 'core/types'
 import type { NostrEvent } from 'nostr-tools'
+import { identity } from 'observable-hooks'
 import type { OperatorFunction } from 'rxjs'
-import { defaultIfEmpty, EMPTY, merge, mergeWith, of, pipe, tap, type Observable } from 'rxjs'
+import {
+  defaultIfEmpty,
+  distinct,
+  EMPTY,
+  filter,
+  map,
+  merge,
+  mergeMap,
+  mergeWith,
+  of,
+  pipe,
+  tap,
+  type Observable,
+} from 'rxjs'
 import { batcher } from './batcher'
 import { setCache } from './cache'
 import { NostrFeeds } from './feeds'
@@ -40,6 +55,7 @@ export type NostrClientOptions = {
   signer?: Signer
   settings?: NostrSettings
   onEvent?: (event: NostrEventMetadata) => void
+  onAuth?: (relay: string, challenge: string) => Observable<unknown>
   onPublish?: (response: BroadcastResponse) => void
 }
 
@@ -109,7 +125,20 @@ export class NostrClient {
 
   initialize() {
     this.initializeLocalRelays()
-    return merge(this.initializeInboxRelays(), this.initializeOutboxRelays())
+    return merge(this.initializeInboxRelays(), this.initializeOutboxRelays()).pipe(
+      // Handle auth
+      mergeMap(identity),
+      map((relay) => this.pool.get(relay)),
+      filter((relay) => !!relay),
+      mergeMap((relay) => {
+        return relay.websocket$.pipe(
+          onAuth(),
+          map((msg) => [relay.url, msg] as const),
+        )
+      }),
+      distinct(([msg]) => msg[1]),
+      mergeMap(([relay, msg]) => this.options.onAuth?.(relay, msg[1]) || EMPTY),
+    )
   }
 
   private initializeLocalRelays() {

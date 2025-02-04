@@ -67,7 +67,7 @@ const styles = css.create({
     paddingInline: spacing.padding2,
   },
   root$dense: {
-    paddingInline: 0,
+    // paddingInline: 0,
   },
   content: {
     paddingTop: spacing.padding1,

@@ -1,6 +1,6 @@
 import { NostrEventFeedItem } from '@/components/elements/Event/NostrEventFeedItem'
-import type { Props as ListProps } from '@/components/elements/List/List'
-import { List } from '@/components/elements/List/List'
+import type { Props as ListProps } from '@/components/elements/Feed/FeedList'
+import { FeedList } from '@/components/elements/Feed/FeedList'
 import { PostAwait } from '@/components/elements/Posts/PostAwait'
 import { PostLoading } from '@/components/elements/Posts/PostLoading'
 import { ContentProvider } from '@/components/providers/ContentProvider'
@@ -16,7 +16,7 @@ export const NProfileNotesFeed = function NProfileNotesFeed(props: Props) {
   const feed = module.feeds.notes
   return (
     <ContentProvider value={{ blured: feed.blured }}>
-      <List
+      <FeedList
         feed={feed}
         wrapper={(children) => (
           <PostAwait promise={props.delay || feed.delay} rows={4}>

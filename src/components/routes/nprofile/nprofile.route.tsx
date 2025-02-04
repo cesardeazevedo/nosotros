@@ -20,7 +20,7 @@ export const NProfileRoute = observer(function NProfileRoute(props: Props) {
   return (
     <NostrProvider nostrContext={() => module.context!} subFollows={false}>
       <CenteredContainer>
-        <PaperContainer shape='none' elevation={2}>
+        <PaperContainer>
           <Observer>{() => <UserProfileHeader pubkey={pubkey} />}</Observer>
           <Divider />
           <NProfileFeedTabs />

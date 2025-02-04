@@ -4,9 +4,7 @@ import { Kind } from '@/constants/kinds'
 import { RELAY_1, RELAY_2, RELAY_3, RELAY_4, RELAY_5 } from '@/constants/testRelays'
 import { clearCache } from '@/nostr/cache'
 import { db } from '@/nostr/db'
-import { parseComment } from '@/nostr/helpers/parseComment'
 import { parseFollowList } from '@/nostr/helpers/parseFollowList'
-import { parseNote } from '@/nostr/helpers/parseNote'
 import { parseUser } from '@/nostr/helpers/parseUser'
 import { replay as replayMailbox } from '@/nostr/mailbox'
 import { replay as replayUsers } from '@/nostr/nips/nip01.users'
@@ -14,11 +12,10 @@ import { replay as replayNIP02 } from '@/nostr/nips/nip02.follows'
 import { replay as replayNIP65 } from '@/nostr/nips/nip65.relaylist'
 import type { NostrClientOptions } from '@/nostr/nostr'
 import { NostrClient } from '@/nostr/nostr'
-import { mergeMetadata } from '@/nostr/operators/mapMetadata'
+import { replayIds } from '@/nostr/operators/subscribeIds'
 import { pool } from '@/nostr/pool'
 import { defaultNostrSettings, type NostrSettings } from '@/nostr/settings'
-import type { NostrEventComment } from '@/nostr/types'
-import { metadataSymbol, type NostrEventNote } from '@/nostr/types'
+import { type NostrEventNote } from '@/nostr/types'
 import { eventStore } from '@/stores/events/event.store'
 import { followsStore } from '@/stores/follows/follows.store'
 import { Note } from '@/stores/notes/note'
@@ -93,6 +90,7 @@ export const test = base.extend<Fixtures>({
   clear: async ({ root }, use) => {
     clearCache()
     pool.reset()
+    replayIds.clear()
     userStore.clear()
     noteStore.clear()
     followsStore.clear()

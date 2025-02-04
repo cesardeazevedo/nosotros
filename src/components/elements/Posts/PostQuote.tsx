@@ -1,6 +1,7 @@
 import { ContentProvider, useContentContext } from '@/components/providers/ContentProvider'
 import { NoteProvider } from '@/components/providers/NoteProvider'
 import { useNoteStore } from '@/hooks/useNoteStore'
+import type { NostrEventComment, NostrEventMedia } from '@/nostr/types'
 import { type NostrEventNote } from '@/nostr/types'
 import { spacing } from '@/themes/spacing.stylex'
 import { observer } from 'mobx-react-lite'
@@ -12,7 +13,7 @@ import { PostContent } from './PostContent'
 import { PostUserHeader } from './PostUserHeader'
 
 type Props = {
-  event: NostrEventNote
+  event: NostrEventNote | NostrEventComment | NostrEventMedia
   header?: React.ReactNode
 }
 

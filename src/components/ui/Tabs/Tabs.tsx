@@ -58,7 +58,7 @@ export const Tabs = function Tabs(props: Props) {
     ]
   }, [])
 
-  const indicatorAnimationRef = useRef<Animation>()
+  const indicatorAnimationRef = useRef<Animation>(null)
   const previousTabRef = useRef<HTMLElement | null>(null)
 
   const contextValue = useMemo(() => {

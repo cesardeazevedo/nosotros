@@ -1,3 +1,4 @@
+import { Avatar } from '@/components/ui/Avatar/Avatar'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
@@ -23,15 +24,24 @@ export const ZapReceiptProfile = observer(function ZapReceiptProfile(props: Prop
   return (
     <html.div style={styles.root}>
       <Stack justify='space-between' align='center' gap={1}>
-        <UserHeader
-          pubkey={zap.zapper!}
-          footer={
-            <Tooltip text={fullDate}>
-              <Text variant='body' size='sm' sx={styles.date}>
-                {shortDate}
-              </Text>
-            </Tooltip>
-          }></UserHeader>
+        {zap.zapper && (
+          <UserHeader
+            pubkey={zap.zapper}
+            footer={
+              <Tooltip text={fullDate}>
+                <Text variant='body' size='sm' sx={styles.date}>
+                  {shortDate}
+                </Text>
+              </Tooltip>
+            }
+          />
+        )}
+        {!zap.zapper && (
+          <Stack justify='flex-start' gap={2}>
+            <Avatar>?</Avatar>
+            <Text size='lg'>Anonoymous</Text>
+          </Stack>
+        )}
         <Stack horizontal={false} gap={0.5}>
           <Stack sx={styles.icon} gap={1} align='center' justify='center'>
             <IconBolt size={22} fill='currentColor' strokeOpacity='0' />

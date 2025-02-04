@@ -1,7 +1,7 @@
 import { Divider } from '@/components/ui/Divider/Divider'
 import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { MenuList } from '@/components/ui/MenuList/MenuList'
-import { useCurrentPubkey, useCurrentUser, useRootStore } from '@/hooks/useRootStore'
+import { useCurrentPubkey, useRootStore } from '@/hooks/useRootStore'
 import { shape } from '@/themes/shape.stylex'
 import { IconLogout, IconSettingsFilled, IconUserFilled } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
@@ -19,7 +19,6 @@ type Props = {
 export const Menu = observer(function Menu(props: Props) {
   const { dense } = props
   const logout = useRootStore().auth.logout
-  const user = useCurrentUser()
   const pubkey = useCurrentPubkey()
   const iconProps = {
     size: dense ? 24 : 28,
@@ -27,8 +26,8 @@ export const Menu = observer(function Menu(props: Props) {
   }
   return (
     <MenuList elevation={0} sx={styles.root}>
-      {user && (
-        <LinkProfile user={user} underline={false}>
+      {pubkey && (
+        <LinkProfile pubkey={pubkey} underline={false}>
           <MenuItem
             sx={styles.item}
             onClick={() => props.onAction?.()}

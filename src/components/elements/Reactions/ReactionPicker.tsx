@@ -44,7 +44,11 @@ function ReactionIcon(props: {
   return (
     <motion.div
       ref={ref}
-      onClick={() => onClick?.(reaction)}
+      onClick={(e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        onClick?.(reaction)
+      }}
       {...css.props(styles.reaction)}
       style={{ scale, marginRight, rotateZ }}>
       {title && (

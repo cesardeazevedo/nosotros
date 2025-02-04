@@ -9,7 +9,6 @@ import { EditorReplyDialog } from '../dialogs/editor.reply.dialog'
 import { NoteStatsDialog } from '../dialogs/notestats.dialog'
 import { ZapDialog } from '../dialogs/zap.dialog'
 import { ZapRequestInvoiceDialog } from '../dialogs/zapinvoice.dialog'
-import { SignUpResponseDialog } from '../dialogs/signup.response.dialog'
 
 export const Dialogs = React.memo(function Dialogs() {
   return (
@@ -18,7 +17,6 @@ export const Dialogs = React.memo(function Dialogs() {
       <CameraDialog />
       <ImagesDialog />
       <QRCodeDialog />
-      <SignUpResponseDialog />
       <ZapDialog />
       <ZapRequestInvoiceDialog />
       <EditorDialog />

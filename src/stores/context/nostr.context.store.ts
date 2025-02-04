@@ -6,8 +6,8 @@ import type { Instance, SnapshotIn } from 'mobx-state-tree'
 import { t } from 'mobx-state-tree'
 import { EMPTY, merge, mergeMap, timer } from 'rxjs'
 import { addNostrEventToStore } from '../helpers/addNostrEventToStore'
-import { getRootStore } from '../helpers/getRootStore'
 import { publishStore } from '../publish/publish.store'
+import { rootStore } from '../root.store'
 import { SignersModel } from '../signers/signers'
 import { userStore } from '../users/users.store'
 import { NostrSettingsModel } from './nostr.settings.store'
@@ -27,7 +27,6 @@ export const NostrContextModel = t
     },
   }))
   .volatile((self): { client: NostrClient } => {
-    const rootStore = getRootStore(self)
     return {
       client: new NostrClient(pool, {
         ...self.options,
