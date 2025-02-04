@@ -7,13 +7,14 @@ import { typeScale } from '@/themes/typeScale.stylex'
 import type { ChangeEvent } from 'react'
 import { forwardRef, useCallback, useRef, useState } from 'react'
 import { css, html } from 'react-strict-dom'
+import type { StrictReactDOMInputProps } from 'react-strict-dom/dist/types/StrictReactDOMInputProps'
 import { dataProps } from '../helpers/dataProps'
 import { mergeRefs } from '../helpers/mergeRefs'
 import { useVisualState } from '../hooks/useVisualState'
 import type { SxProps } from '../types'
 import { textFieldTokens } from './TextField.stylex'
 
-type Props = {
+type Props = StrictReactDOMInputProps & {
   sx?: SxProps
   size?: 'sm' | 'md'
   type?: 'text' | 'number' | 'text' | 'date' | 'email' | 'password'
@@ -55,6 +56,7 @@ export const TextField = forwardRef<HTMLInputElement, Props>((props, ref) => {
     onBlur,
     onChange,
     onFocus,
+    ...rest
   } = props
   const visualStateRef = useRef<HTMLElement>(null)
   const { visualState, setRef } = useVisualState(undefined, { retainFocusAfterClick: true })
@@ -119,6 +121,7 @@ export const TextField = forwardRef<HTMLInputElement, Props>((props, ref) => {
             data-shrink={shrink}
             aria-invalid={!!error}
             aria-label={label}
+            {...rest}
           />
         )}
         {trailing && <html.div style={styles.trailing}>{trailing}</html.div>}

@@ -12,7 +12,6 @@ export const createZapRequestStore = () => {
 
     setAmount(amount: number) {
       this.amount = amount
-      this.custom.toggle(false)
     },
 
     setComment(comment: string) {
