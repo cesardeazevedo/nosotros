@@ -49,7 +49,6 @@ export function createHome(snapshot: { id?: string; scope?: Instance<typeof Feed
       options: {
         includeParents: true,
         includeReplies: false,
-        outbox: false,
       },
     },
     replies: {
@@ -58,7 +57,6 @@ export function createHome(snapshot: { id?: string; scope?: Instance<typeof Feed
       options: {
         includeParents: false,
         includeReplies: true,
-        outbox: false,
       },
     },
   })

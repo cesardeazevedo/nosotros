@@ -2,8 +2,8 @@ import { Kind } from '@/constants/kinds'
 import type { NostrClient } from '@/nostr/nostr'
 import type { Instance, SnapshotIn, SnapshotOut } from 'mobx-state-tree'
 import { t } from 'mobx-state-tree'
-import { BaseModuleModel } from '../modules/module'
-import { NotificationFeedModel } from './notification.feed'
+import { BaseModuleModel } from './module'
+import { NotificationFeedModel } from '../notifications/notification.feed'
 
 export const NotificationModuleModel = BaseModuleModel.named('NotificationModuleModel')
   .props({
