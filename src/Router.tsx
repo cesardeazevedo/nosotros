@@ -268,6 +268,7 @@ export const router = createRouter({
   routeTree,
   defaultPreload: false,
   defaultPendingMinMs: 0,
+  scrollRestoration: true,
 })
 
 declare module '@tanstack/react-router' {
