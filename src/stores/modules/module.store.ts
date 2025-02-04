@@ -1,29 +1,35 @@
 import type { Instance } from 'mobx-state-tree'
 import { t } from 'mobx-state-tree'
-import type { HomeModule, HomeModuleSnapshotOut } from '../home/home.module'
-import { HomeModuleModel } from '../home/home.module'
-import { NAddressModuleModel, type NAddressModule, type NAddressModuleSnapshotOut } from '../naddress/naddress.module'
-import { NEventModuleModel, type NEventModule, type NEventModuleSnapshotOut } from '../nevent/nevent.module'
-import type { NotificationModule, NotificationModuleSnapshotOut } from '../notifications/notification.module'
-import { NotificationModuleModel } from '../notifications/notification.module'
-import { NProfileModuleModel, type NProfileModule, type NProfileModuleSnapshotOut } from '../nprofile/nprofile.module'
-import type { WelcomeModuleSnapshotOut } from '../welcome/welcome.module'
+import { NProfileModuleModel, type NProfileModule } from '../nprofile/nprofile.module'
+import { RelayFeedModuleModel, type RelayFeedModule } from '../relays/relay.feed.module'
+import type { HomeModule } from './home.module'
+import { HomeModuleModel } from './home.module'
+import { MediaModuleModel, type MediaModule } from './media.module'
+import { NAddressModuleModel, type NAddressModule } from './naddress.module'
+import { NEventModuleModel, type NEventModule } from './nevent.module'
+import type { NotificationModule } from './notification.module'
+import { NotificationModuleModel } from './notification.module'
+import type { TagModule } from './tag.module'
+import { TagModuleModel } from './tag.module'
 
-export type ModulesSnapshotOuts =
-  | HomeModuleSnapshotOut
-  | WelcomeModuleSnapshotOut
-  | NotificationModuleSnapshotOut
-  | NProfileModuleSnapshotOut
-  | NEventModuleSnapshotOut
-  | NAddressModuleSnapshotOut
-
-export type ModulesInstances = HomeModule | NotificationModule | NProfileModule | NEventModule | NAddressModule
+export type ModulesInstances =
+  | HomeModule
+  | NotificationModule
+  | NProfileModule
+  | NEventModule
+  | NAddressModule
+  | TagModule
+  | RelayFeedModule
+  | MediaModule
 
 export const isHomeModule = (m: ModulesInstances): m is HomeModule => m.type === 'home'
 export const isNProfileModule = (m: ModulesInstances): m is NProfileModule => m.type === 'nprofile'
 export const isNEventModule = (m: ModulesInstances): m is NEventModule => m.type === 'nevent'
 export const isNAddressModule = (m: ModulesInstances): m is NAddressModule => m.type === 'naddress'
 export const isNotificationModule = (m: ModulesInstances): m is NotificationModule => m.type === 'notification'
+export const isRelayFeedModule = (m: ModulesInstances): m is RelayFeedModule => m.type === 'relayfeed'
+export const isTagModule = (m: ModulesInstances): m is TagModule => m.type === 'tag'
+export const isMediaModule = (m: ModulesInstances): m is MediaModule => m.type === 'media'
 
 export const Modules = t.union(
   HomeModuleModel,
@@ -31,6 +37,9 @@ export const Modules = t.union(
   NProfileModuleModel,
   NEventModuleModel,
   NAddressModuleModel,
+  RelayFeedModuleModel,
+  MediaModuleModel,
+  TagModuleModel,
 )
 
 export const ModuleStoreModel = t
@@ -38,13 +47,16 @@ export const ModuleStoreModel = t
     modules: t.map(Modules),
   })
   .actions((self) => ({
-    add(module: ModulesInstances) {
-      if (!self.modules.get(module.id)) {
+    add<T extends ModulesInstances>(module: T): T {
+      const found = self.modules.get(module.id) as T
+      if (!found) {
         self.modules.set(module.id, module)
+        return module
       }
+      return found
     },
-    get(id: string) {
-      return self.modules.get(id)
+    get<T extends ModulesInstances>(id: string): T | undefined {
+      return self.modules.get(id) as T | undefined
     },
     delete(id: string) {
       self.modules.delete(id)

@@ -19,7 +19,7 @@ export const NEventPending = () => {
           <IconButton onClick={goBack} icon={<IconChevronLeft />} />
         </Stack>
       )}
-      <PaperContainer elevation={isMobile ? 0 : 2}>
+      <PaperContainer>
         <PostLoading rows={1} />
       </PaperContainer>
     </CenteredContainer>

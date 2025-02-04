@@ -16,7 +16,7 @@ export function parseId(id: string): NostrFilter {
 }
 
 // Sligly different than subscribeIds but avoids circular references
-export const subscribeIdsFromQuotes = replayIds.wrap((id: string, client: NostrClient, options: ClientSubOptions) => {
+export const subscribeIdsFromQuotes = replayIds.wrap((id: string, client: NostrClient, options?: ClientSubOptions) => {
   const filter = parseId(id)
   return client.subscribe(filter, options).pipe(
     mergeMap((event) => {

@@ -1,8 +1,8 @@
+import { shape } from '@/themes/shape.stylex'
+import { useRef } from 'react'
 import { css, html } from 'react-strict-dom'
 import type { SxProps } from '../types'
-import { useRef } from 'react'
 import { skeletonTokens } from './Skeleton.stylex'
-import { shape } from '@/themes/shape.stylex'
 
 type IRange = {
   min: number
@@ -30,13 +30,14 @@ export const Skeleton = (props: Props) => {
     children,
     loaded,
     variant = 'rectangular',
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     animation: animationProp = 'pulse',
     length: lengthProp,
     hasError,
     ...other
   } = props
 
-  const animation = hasError ? undefined : animationProp
+  //const animation = hasError ? undefined : animationProp
   const lengthRef = useRef(typeof lengthProp === 'object' ? random(lengthProp) : lengthProp)
 
   if (loaded) {
@@ -56,11 +57,11 @@ export const Skeleton = (props: Props) => {
         styles.root,
         hasError && styles.root$error,
         styles[`root$${variant}`],
-        !!animation && styles[`animation$${animation}`],
+        //!!animation && styles[`animation$${animation}`],
         sx,
       ]}
       {...other}>
-      <html.div style={styles.hidden}>{children}</html.div>
+      {children && <html.div style={styles.hidden}>{children}</html.div>}
     </html.div>
   )
 }

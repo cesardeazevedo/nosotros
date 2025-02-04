@@ -22,8 +22,8 @@ export const ThemeButton = observer(function ThemeButton(props: IconButtonProps)
         sx={props.sx}
         icon={
           <>
-            {mode === 'light' && <IconMoon strokeWidth='1.5' />}
-            {mode !== 'light' && <IconSun strokeWidth='1.5' />}
+            {mode === 'light' && <IconMoon strokeWidth='2.5' />}
+            {mode !== 'light' && <IconSun strokeWidth='2.5' />}
           </>
         }
       />

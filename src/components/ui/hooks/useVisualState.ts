@@ -25,7 +25,7 @@ export const useVisualState = (visualState?: IVisualState, options?: IVisualStat
   const [hovered, setHovered] = useState(false)
   const [focused, setFocused] = useState(false)
   const [pressed, setPressed] = useState(false)
-  const focusFromRef = useRef<'mouse'>()
+  const focusFromRef = useRef<'mouse'>(undefined)
 
   const handleMouseEnter = useCallback(() => setHovered(true), [])
   const handleMouseLeave = useCallback(() => {

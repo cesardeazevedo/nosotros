@@ -22,9 +22,9 @@ export const NProfileFeedTabs = () => {
         <Link to='/$nostr/replies' params={{ nostr: params.nostr }}>
           <Tab sx={styles.tab} anchor='/$nostr/replies' label='Replies' />
         </Link>
-        {/* <Link to='/$nostr/media' params={{ nostr: params.nostr }}> */}
-        {/*   <Tab sx={styles.tab} anchor='/$nostr/media' label='Photos' /> */}
-        {/* </Link> */}
+        <Link to='/$nostr/media' params={{ nostr: params.nostr }}>
+          <Tab sx={styles.tab} anchor='/$nostr/media' label='Media' />
+        </Link>
         <Link to='/$nostr/articles' params={{ nostr: params.nostr }}>
           <Tab sx={styles.tab} anchor='/$nostr/articles' label='Articles' />
         </Link>

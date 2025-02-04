@@ -1,22 +1,45 @@
-import type { NodeViewProps } from '@tiptap/core'
-import { NodeViewWrapper } from '@tiptap/react'
+import { ContentProvider } from '@/components/providers/ContentProvider'
+import type { SxProps } from '@/components/ui/types'
+import { shape } from '@/themes/shape.stylex'
 import type { VideoAttributes } from 'nostr-editor'
+import { useMemo } from 'react'
+import { css } from 'react-strict-dom'
 import { AltButton } from '../Buttons/AltButton'
 import { DeleteButton } from '../Buttons/DeleteButton'
-import { Video } from './Video'
+import { UploadButton } from '../Buttons/UploadButton'
 
-export const VideoEditor = (props: NodeViewProps) => {
-  const attrs = props.node.attrs as VideoAttributes
-  const isUploaded = !attrs.src.startsWith('blob://http')
+type Props = VideoAttributes & {
+  onUpdate: (attrs: Partial<VideoAttributes>) => void
+  onDelete: () => void
+  sx?: SxProps
+}
+
+export const VideoEditor = (props: Props) => {
+  const { src, sx } = props
+  const isUploaded = !src.startsWith('blob://http')
+  const extension = useMemo(() => new URL(src).pathname.split('.').pop(), [src])
   return (
-    <NodeViewWrapper
-      as='div'
-      data-drag-handle=''
-      draggable={props.node.type.spec.draggable}
-      style={{ width: 'fit-content', height: 'fit-content', position: 'relative', opacity: props.selected ? 0.8 : 1 }}>
-      <DeleteButton onClick={() => props.deleteNode()} />
-      <Video {...attrs} autoPlay muted loop preload='none' controls={false} />
-      {!isUploaded && <AltButton value={attrs.alt} onChange={(alt) => props.updateAttributes({ alt })} />}
-    </NodeViewWrapper>
+    <>
+      <DeleteButton onClick={() => props.onDelete()} />
+      <ContentProvider value={{ dense: true }}>
+        <video {...css.props([styles.root, sx])} loop muted autoPlay preload='autor' controls={false} src={src}>
+          <source src={src} type={`video/${extension === 'mov' ? 'mp4' : extension}`} />
+        </video>
+      </ContentProvider>
+      {!isUploaded && <AltButton value={props.alt} onChange={(alt) => props.onUpdate({ alt })} />}
+      <UploadButton {...props} />
+    </>
   )
 }
+
+const styles = css.create({
+  root: {
+    objectFit: 'contain',
+    width: 'auto',
+    height: 'auto',
+    userSelect: 'none',
+    cursor: 'pointer',
+    maxHeight: 350,
+    borderRadius: shape.lg,
+  },
+})

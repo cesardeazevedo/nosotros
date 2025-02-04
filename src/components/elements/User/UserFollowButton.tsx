@@ -37,6 +37,11 @@ export const UserFollowButton = observer(function UserFollowButton(props: Props)
 
   const isFollowing = currentUser?.following?.followsPubkey(pubkey)
 
+  if (currentUser?.pubkey === pubkey) {
+    // don't show the follow button for the same logged person
+    return
+  }
+
   return (
     <>
       {isFollowing ? (

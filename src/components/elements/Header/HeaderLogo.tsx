@@ -1,11 +1,15 @@
 import { Text } from '@/components/ui/Text/Text'
+import type { SxProps } from '@/components/ui/types'
 import { Link } from '@tanstack/react-router'
-import { useMobile } from 'hooks/useMobile'
 import { useCallback } from 'react'
 import { css } from 'react-strict-dom'
 
-export const HeaderLogo = () => {
-  const isMobile = useMobile()
+type Props = {
+  sx?: SxProps
+}
+
+export const HeaderLogo = (props: Props) => {
+  const { sx } = props
 
   // Apparently <Link resetScroll /> simply doesn't work
   const handleClick = useCallback(() => {
@@ -14,10 +18,7 @@ export const HeaderLogo = () => {
 
   return (
     <Link to='/' onClick={handleClick}>
-      <Text
-        variant='headline'
-        size={isMobile ? 'sm' : 'sm'}
-        sx={[styles.root, styles.text, !!isMobile && styles.text$mobile]}>
+      <Text variant='headline' size='sm' sx={[styles.root, sx]}>
         nosotros
       </Text>
     </Link>
@@ -28,14 +29,10 @@ const styles = css.create({
   root: {
     margin: 'auto',
     flex: 1,
-  },
-  text: {
     position: 'relative',
     whiteSpace: 'nowrap',
     fontWeight: 900,
-  },
-  text$mobile: {
-    margin: 'auto',
-    marginLeft: -32,
+    display: 'inline',
+    lineHeight: '18px',
   },
 })

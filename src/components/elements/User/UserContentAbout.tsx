@@ -17,7 +17,7 @@ export const UserContentAbout = (props: Props) => {
       {schema?.content?.map((node, index) => (
         <React.Fragment key={node.type + index}>
           {node.type === 'paragraph' && <TextContent node={node} />}
-          {node.type === 'nevent' && <Text size='lg'>{node.attrs.nevent}</Text>}
+          {node.type === 'nevent' && <Text size='lg'>{node.attrs.bech32}</Text>}
         </React.Fragment>
       ))}
     </>

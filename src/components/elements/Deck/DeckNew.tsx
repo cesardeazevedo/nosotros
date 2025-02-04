@@ -11,7 +11,7 @@ export const DeckNew = () => {
   return (
     <>
       {open && <DeckNewColumnList onClose={() => setOpen(false)} />}
-      <DeckColumn sx={styles.noborder}>
+      <DeckColumn paper={false} sx={styles.noborder}>
         <Stack horizontal={false} align='center' justify='center' sx={styles.root} gap={4}>
           <Stack horizontal={false} align='center' gap={4}>
             <Button

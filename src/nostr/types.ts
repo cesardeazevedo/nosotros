@@ -8,6 +8,7 @@ import type { UserMetadata } from './helpers/parseUser'
 import type { ZapReceiptMetadata } from './helpers/parseZap'
 import type { RelayDiscoveryMetadata } from './helpers/parseRelayDiscovery'
 import type { CommentMetadata } from './helpers/parseComment'
+import type { MediaMetadata } from './helpers/parseMedia'
 
 export type * from './helpers/parseFollowList'
 export type * from './helpers/parseNote'
@@ -28,6 +29,7 @@ type Metadata =
   | ZapReceiptMetadata
   | RelayDiscoveryMetadata
   | CommentMetadata
+  | MediaMetadata
 
 export type NostrEventUserMetadata = NostrEvent & MetadataSymbol<UserMetadata>
 export type NostrEventNote = NostrEvent & MetadataSymbol<NoteMetadata>
@@ -37,12 +39,14 @@ export type NostrEventRelayList = NostrEvent & MetadataSymbol<UserRelayListMetad
 export type NostrEventZapReceipt = NostrEvent & MetadataSymbol<ZapReceiptMetadata>
 export type NostrEventRelayDiscovery = NostrEvent & MetadataSymbol<RelayDiscoveryMetadata>
 export type NostrEventComment = NostrEvent & MetadataSymbol<CommentMetadata>
+export type NostrEventMedia = NostrEvent & MetadataSymbol<MediaMetadata>
 export type NostrEventGeneric = NostrEvent & MetadataSymbol<{ kind: Exclude<Kind, Pick<Metadata, 'kind'>['kind']> }> // generic event
 
 export type NostrEventMetadata =
   | NostrEventUserMetadata
   | NostrEventNote
   | NostrEventComment
+  | NostrEventMedia
   | NostrEventFollow
   | NostrEventRepost
   | NostrEventRelayList

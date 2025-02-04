@@ -1,5 +1,4 @@
 import type { SxProps } from '@/components/ui/types'
-import { spacing } from '@/themes/spacing.stylex'
 import React from 'react'
 import { css, html } from 'react-strict-dom'
 
@@ -27,9 +26,9 @@ const styles = css.create({
     marginBottom: 0,
   },
   margin: {
-    paddingBottom: spacing.padding9,
+    paddingBottom: 100,
     marginTop: {
-      default: spacing.margin4,
+      default: 100,
       [MOBILE]: 0,
     },
   },

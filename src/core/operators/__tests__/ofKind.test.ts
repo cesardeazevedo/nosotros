@@ -1,14 +1,14 @@
 import { subscribeSpyTo } from '@hirez_io/observer-spy'
 import { of } from 'rxjs'
-import { fakeNote } from 'utils/faker'
+import { fakeEvent } from 'utils/faker'
 import { ofKind } from '../ofKind'
 
 test('ofKind', () => {
-  const kind0 = fakeNote({ kind: 0 })
-  const kind1 = fakeNote({ kind: 1 })
-  const kind2 = fakeNote({ kind: 2 })
-  const kind3 = fakeNote({ kind: 3 })
-  const kind4 = fakeNote({ kind: 4 })
+  const kind0 = fakeEvent({ kind: 0 })
+  const kind1 = fakeEvent({ kind: 1 })
+  const kind2 = fakeEvent({ kind: 2 })
+  const kind3 = fakeEvent({ kind: 3 })
+  const kind4 = fakeEvent({ kind: 4 })
   const source = of(kind0, kind1, kind2, kind3, kind4)
 
   const kind0$ = source.pipe(ofKind([0]))

@@ -21,7 +21,7 @@ export class NIP57Zaps {
     const sub = this.client.createSubscription({ kinds, '#e': [id] }, options)
     return of(sub).pipe(
       start(this.client.pool, false),
-      distinctEvent(),
+      distinctEvent(sub),
       verify(),
       this.client.insert(),
       parseEventMetadata(),

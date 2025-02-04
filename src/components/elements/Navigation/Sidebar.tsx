@@ -11,6 +11,7 @@ import { useState } from 'react'
 import { css, html } from 'react-strict-dom'
 import { dialogStore } from 'stores/ui/dialogs.store'
 import { ThemeButton } from '../Buttons/ThemeButton'
+import { Stats } from '../Footer/Stats'
 import { UserAvatar } from '../User/UserAvatar'
 import { UserName } from '../User/UserName'
 import { Menu } from './Menu'
@@ -23,17 +24,21 @@ export const Sidebar = () => {
       <IconButton onClick={() => setOpen(true)} icon={<IconMenu2 />} />
       <DrawerSwipeable anchor='left' opened={open} onClose={() => setOpen(false)}>
         <html.div style={styles.content}>
-          <ThemeButton sx={styles.themeButton} />
           <Observer>
             {() => (
               <Stack horizontal={false} sx={styles.header}>
                 {pubkey && (
                   <>
-                    <UserAvatar pubkey={pubkey} />
+                    <Stack justify='space-between'>
+                      <UserAvatar pubkey={pubkey} />
+                      <Stack gap={1}>
+                        <ThemeButton />
+                        <IconButton disabled={!pubkey} onClick={dialogStore.openQRCode}>
+                          <IconQrcode size={30} strokeWidth='2' />
+                        </IconButton>
+                      </Stack>
+                    </Stack>
                     <UserName variant='title' size='lg' pubkey={pubkey} sx={styles.userName} />
-                    <IconButton sx={styles.qrcodeButton} disabled={!pubkey} onClick={dialogStore.openQRCode}>
-                      <IconQrcode size={30} strokeWidth='2' />
-                    </IconButton>
                   </>
                 )}
               </Stack>
@@ -42,6 +47,7 @@ export const Sidebar = () => {
           <html.div style={styles.wrapper}>
             <Menu onAction={() => setOpen(false)} />
           </html.div>
+          <Stats />
         </html.div>
       </DrawerSwipeable>
     </>
@@ -60,11 +66,6 @@ const styles = css.create({
     paddingInline: spacing.padding1,
     [listItemTokens.containerMinHeight$sm]: 50,
   },
-  themeButton: {
-    position: 'absolute',
-    left: 30,
-    bottom: 30,
-  },
   qrcodeButton: {
     position: 'absolute',
     right: 20,
@@ -72,7 +73,7 @@ const styles = css.create({
     color: palette.primary,
   },
   userName: {
-    marginTop: spacing.margin2,
+    marginTop: spacing.margin1,
     fontWeight: 500,
   },
 })

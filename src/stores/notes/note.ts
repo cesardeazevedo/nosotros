@@ -1,22 +1,26 @@
 import { Kind } from '@/constants/kinds'
-import { pool } from '@/nostr/pool'
-import type { NoteMetadata } from '@/nostr/types'
+import type { NostrEventComment, NostrEventMedia, NostrEventNote } from '@/nostr/types'
+import { metadataSymbol } from '@/nostr/types'
 import { noteStore } from '@/stores/notes/notes.store'
-import { seenStore } from '@/stores/seen/seen.store'
-import { userStore } from '@/stores/users/users.store'
-import { encodeSafe } from '@/utils/nip19'
 import { computed, makeAutoObservable } from 'mobx'
 import { computedFn } from 'mobx-utils'
 import type { NostrEvent } from 'nostr-tools'
-import { nip19 } from 'nostr-tools'
-import { isParameterizedReplaceableKind } from 'nostr-tools/kinds'
-import type { Comment } from '../comment/comment'
-import { commentStore } from '../comment/comment.store'
 import { createEditorStore } from '../editor/editor.store'
+import type { Event } from '../events/event'
+import { eventStore } from '../events/event.store'
 import { repostStore } from '../reposts/reposts.store'
 import type { User } from '../users/user'
 
 type ReplyStatus = 'IDLE' | 'LOADING' | 'LOADED'
+
+// removes undefined and empty strings from last items in tags
+const compact = (x: Array<Array<string | undefined>>): string[][] => {
+  return x.map((y) => {
+    const filtered = y.filter((z): z is string => z !== undefined)
+    const lastNonEmptyIndex = filtered.findLastIndex((z) => z !== '')
+    return filtered.slice(0, lastNonEmptyIndex + 1)
+  })
+}
 
 const PAGINATION_SIZE = 5
 
@@ -30,111 +34,59 @@ export class Note {
   limit = PAGINATION_SIZE
 
   constructor(
-    public event: NostrEvent,
-    public metadata: NoteMetadata,
+    public eventNote: NostrEventNote | NostrEventComment | NostrEventMedia,
+    open?: boolean,
   ) {
     makeAutoObservable(this, {
-      id: false,
       event: false,
-      metadata: false,
-      seenOn: computed.struct,
       replies: computed.struct,
       replyTags: computed.struct,
-      pow: computed.struct,
       images: computed.struct,
       headImage: computed.struct,
       editor: computed({ keepAlive: true }),
     })
+
+    if (open) {
+      this.toggleReplies(true)
+      this.toggleContent(true)
+    }
+  }
+
+  get event(): Event {
+    return eventStore.get(this.eventNote.id)!
+  }
+
+  get metadata() {
+    return this.event.event[metadataSymbol]
   }
 
   get id() {
-    return this.event.id
-  }
-
-  get pubkey() {
-    return this.event.pubkey
+    return this.eventNote.id
   }
 
   get user() {
-    return userStore.get(this.event.pubkey)
-  }
-
-  get seenOn() {
-    return seenStore.get(this.id) || []
+    return this.event.user
   }
 
   get isRoot() {
     return this.metadata.isRoot
   }
 
-  get headRelay() {
-    return this.seenOn.filter((x) => !pool.blacklisted.has(x))?.[0]
-  }
-
   get root() {
-    return noteStore.get(this.metadata.rootId)
+    return eventStore.get(this.metadata.rootId)
   }
 
   get parent() {
-    return noteStore.get(this.metadata.parentId)
+    return eventStore.get(this.metadata.parentId)
   }
 
   get totalReplies() {
     return this.replies.length
   }
 
-  get nevent() {
-    return encodeSafe(() =>
-      nip19.neventEncode({
-        id: this.id,
-        author: this.event.pubkey,
-        kind: this.event.kind,
-        relays: this.seenOn,
-      }),
-    )
-  }
-
-  get naddress() {
-    const dtag = this.d
-    if (dtag) {
-      return encodeSafe(() =>
-        nip19.naddrEncode({
-          pubkey: this.event.pubkey,
-          kind: this.event.kind,
-          identifier: dtag,
-          relays: this.seenOn,
-        }),
-      )
-    }
-  }
-
-  get nprofile() {
-    return this.user?.nprofile
-  }
-
-  get pow() {
-    return this.metadata.tags.nonce?.flat()
-  }
-
-  get alt() {
-    return this.metadata.tags.alt?.flat()?.[1]
-  }
-
-  get d() {
-    return this.metadata.tags.d?.flat()?.[1]
-  }
-
-  get isAddressable() {
-    return isParameterizedReplaceableKind(this.event.kind)
-  }
-
-  get address() {
-    return `${this.event.kind}:${this.pubkey}:${this.d}`
-  }
-
   get editor() {
     return createEditorStore({
-      kind: this.event.kind !== Kind.Text ? Kind.Comment : Kind.Text,
+      kind: this.eventNote.kind !== Kind.Text ? Kind.Comment : Kind.Text,
       parentNote: this,
       onPublish: () => {
         this.toggleReplying(false)
@@ -142,22 +94,12 @@ export class Note {
     })
   }
 
-  isFollowing(user?: User) {
-    return user?.following?.followsPubkey(this.event.pubkey) || false
-  }
-
   get mentionNotes() {
-    return this.metadata.mentionedNotes.map((id) => noteStore.get(id)).filter((note) => !!note)
+    return this.metadata.mentionedNotes.map((id) => eventStore.get(id)?.event).filter((event) => !!event)
   }
 
-  get replies(): (Note | Comment)[] {
-    const replies = noteStore.getReplies(this) || []
-    // merge with NIP-22 comments, this is only used for long-form-articles
-    const comments = commentStore.getReplies(this.id) || []
-    return [
-      ...replies.map((id) => noteStore.get(id)).filter((note): note is Note => !!note),
-      ...comments.map((id) => commentStore.get(id)).filter((comment): comment is Comment => !!comment),
-    ]
+  get replies() {
+    return noteStore.getReplies(this.event) || []
   }
 
   repliesSorted = computedFn((user?: User) => {
@@ -169,9 +111,9 @@ export class Note {
           const isMutedAuthor = user?.mutedAuthors?.has(reply.pubkey)
           return !isMutedEvent && !isMutedAuthor
         })
-        .sort((a) => (a.isFollowing(user) ? -1 : 1))
+        .sort((a) => (user?.following?.followsPubkey(a.pubkey) ? -1 : 1))
         // always put the current user at the top
-        .sort((a) => (a.event.pubkey === user?.pubkey ? -1 : 1))
+        .sort((a) => (a.pubkey === user?.pubkey ? -1 : 1))
     )
   })
 
@@ -188,42 +130,68 @@ export class Note {
   })
 
   repliesPreview = computedFn((user?: User) => {
-    return this.replies.filter((note) => note.isFollowing(user)).slice(0, 2)
+    return this.replies.filter((event) => user?.following?.followsPubkey(event.pubkey)).slice(0, 2)
   })
 
   // Get preview replies from a single user
   getRepliesPreviewUser = computedFn((user?: User, pubkey?: string) => {
     if (pubkey) {
-      return this.replies.filter((note) => note.event.pubkey === pubkey).slice(0, 2)
+      return this.replies.filter((event) => event.pubkey === pubkey).slice(0, 2)
     }
     return this.repliesPreview(user)
   })
 
   get replyTags(): NostrEvent['tags'] {
-    if (this.event.kind === Kind.Text) {
-      if (this.metadata.isRoot) {
-        return [
-          ['e', this.id, this.headRelay || '', 'root', this.event.pubkey],
-          ['p', this.event.pubkey, this.user?.headRelay].filter((x) => x !== undefined),
-        ]
+    switch (this.eventNote.kind) {
+      case Kind.Text: {
+        // NIP-10 reply tags
+        if (this.metadata.isRoot) {
+          return compact([
+            ['e', this.id, this.event.headRelay || '', 'root', this.event.pubkey],
+            ['p', this.event.pubkey, this.user?.headRelay || ''],
+          ])
+        }
+        return compact([
+          ['e', this.metadata.rootId, this.root?.headRelay || '', 'root', this.root?.pubkey].filter(
+            (x) => x !== undefined,
+          ),
+          ['e', this.id, this.event.headRelay || '', 'reply', this.event.pubkey],
+          ['p', this.event.pubkey, this.user?.headRelay],
+        ])
       }
-      return [
-        ['e', this.metadata.rootId, this.root?.headRelay || '', 'root', this.root?.event.pubkey].filter(
-          (x) => x !== undefined,
-        ),
-        ['e', this.id, this.headRelay || '', 'reply', this.event.pubkey],
-        ['p', this.event.pubkey],
-      ]
-    } else {
-      const tags = [
-        ['E', this.id, this.headRelay, this.pubkey],
-        ['K', this.event.kind.toString()],
-        ['P', this.pubkey],
-      ]
-      if (this.isAddressable) {
-        tags.unshift(['A', this.address, this.headRelay])
+      default: {
+        // NIP-22 comments tags
+        const root = this.root
+        const tags = [] as NostrEvent['tags']
+        if (root) {
+          tags.push(
+            ...[
+              ['E', root.id, root.headRelay || '', root.pubkey],
+              ['K', root.event.kind.toString()],
+              ['P', root.pubkey, root.user?.headRelay || ''],
+            ],
+          )
+          if (root.isAddressable) {
+            tags.unshift(['A', root.address, root.headRelay || '', root.pubkey])
+          }
+        } else {
+          tags.push(
+            ...[
+              ['E', this.id, this.event.headRelay || '', this.event.pubkey],
+              ['K', this.event.event.kind.toString()],
+              ['P', this.event.pubkey, this.user?.headRelay || ''],
+            ],
+          )
+        }
+        tags.push(
+          ...[
+            ['e', this.id, this.event.headRelay || '', this.eventNote.pubkey],
+            ['k', this.eventNote.kind.toString()],
+            ['p', this.event.pubkey],
+          ],
+        )
+        return compact(tags)
       }
-      return tags
     }
   }
 
@@ -231,8 +199,13 @@ export class Note {
     return Math.max(0, this.replies.length - this.limit)
   }
 
+  private getRepliesTotal(event: Event): number {
+    const replies = noteStore.getReplies(event)
+    return replies.reduce((total, reply) => total + 1 + this.getRepliesTotal(reply), 0)
+  }
+
   get repliesTotal(): number {
-    return this.replies.reduce((total, reply) => total + 1 + reply.repliesTotal, 0)
+    return this.getRepliesTotal(this.event)
   }
 
   get repostTotal() {
@@ -257,6 +230,16 @@ export class Note {
 
   get headImage() {
     return this.images?.[0]
+  }
+
+  get imetaList() {
+    const imageExts = ['jpeg', 'jpg', 'png', 'gif', 'webp']
+    const videoExts = ['mp4', 'webm', 'ogg']
+    return Object.entries(this.metadata.imeta).map(([src, data]) => {
+      // Some imeta tags are missing mimetypes
+      const ext = data.m?.split('/')[1] || new URL(src).pathname.split('.')?.toReversed()?.[0] || ''
+      return [imageExts.includes(ext) ? 'image' : videoExts.includes(ext) ? 'video' : 'image', src, data] as const
+    })
   }
 
   setRepliesStatus(state: ReplyStatus) {

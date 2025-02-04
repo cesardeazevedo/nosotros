@@ -20,6 +20,18 @@
   --sixui-content: '';
 }
 
+.tiptap p.is-editor-empty:first-child::before {
+  color: #adb5bd;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  max-width: 100%;
+  pointer-events: none;
+}
+.ProseMirror-gapcursor::after {
+  border: 2px solid currentColor;
+}
+
 /*
 1. Use a consistent sensible line-height in all browsers.
 2. Prevent adjustments of font size after orientation changes in iOS.

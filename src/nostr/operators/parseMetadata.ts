@@ -5,6 +5,7 @@ import { mergeMap, of } from 'rxjs'
 import { parseArticle } from '../helpers/parseArticle'
 import { parseComment } from '../helpers/parseComment'
 import { parseFollowList } from '../helpers/parseFollowList'
+import { parseMedia } from '../helpers/parseMedia'
 import { parseNote } from '../helpers/parseNote'
 import { parseRelayDiscovery } from '../helpers/parseRelayDiscovery'
 import { parseRelayList } from '../helpers/parseRelayList'
@@ -35,6 +36,9 @@ export function parseEventMetadata() {
           }
           case Kind.Repost: {
             return of(event).pipe(mergeMetadata(parseRepost))
+          }
+          case Kind.Media: {
+            return of(event).pipe(mergeMetadata(parseMedia))
           }
           case Kind.RelayList: {
             return of(event).pipe(mergeMetadata(parseRelayList))

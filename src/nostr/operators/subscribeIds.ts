@@ -2,6 +2,7 @@ import { Kind } from '@/constants/kinds'
 import { ofKind } from '@/core/operators/ofKind'
 import type { NostrEvent } from 'nostr-tools'
 import { connect, ignoreElements, merge, mergeMap, of } from 'rxjs'
+import { parseId } from '../helpers/parseId'
 import type { ClientSubOptions, NostrClient } from '../nostr'
 import { ShareReplayCache } from '../replay'
 import { withRelatedAuthors } from '../subscriptions/withRelatedAuthor'
@@ -9,8 +10,8 @@ import { type NostrEventNote, type NostrEventRepost, type NostrEventZapReceipt }
 
 export const replayIds = new ShareReplayCache<NostrEvent>()
 
-export const subscribeIds = replayIds.wrap((id: string, client: NostrClient, options: ClientSubOptions) => {
-  return client.subscribe({ ids: [id] }, options).pipe(
+export const subscribeIds = replayIds.wrap((id: string, client: NostrClient, options?: ClientSubOptions) => {
+  return client.subscribe(parseId(id), options).pipe(
     mergeMap((event) => {
       // Attach related pipelines based on kind
       switch (event.kind) {

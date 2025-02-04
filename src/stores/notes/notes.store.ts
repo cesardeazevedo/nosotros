@@ -1,58 +1,39 @@
-import type { NoteMetadata } from '@/nostr/types'
+import type { NostrEventComment, NostrEventNote } from '@/nostr/types'
+import { metadataSymbol } from '@/nostr/types'
 import { dedupe } from 'core/helpers/dedupe'
-import { action, makeObservable, observable } from 'mobx'
-import type { NostrEvent } from 'nostr-tools'
-import { isParameterizedReplaceableKind } from 'nostr-tools/kinds'
-import { Note } from './note'
+import { makeAutoObservable } from 'mobx'
+import type { Event } from '../events/event'
+import { eventStore } from '../events/event.store'
 
 export class NoteStore {
-  notes = observable.map<string, Note>()
-  replies = observable.map<string, string[]>()
-  addresses = observable.map<string, string[]>()
+  replies = new Map<string, string[]>()
+  addresses = new Map<string, string[]>()
 
   constructor() {
-    makeObservable(this, { add: action, addReply: action })
+    makeAutoObservable(this)
   }
 
   clear() {
-    this.notes.clear()
     this.replies.clear()
     this.addresses.clear()
   }
 
-  get(id?: string) {
-    return this.notes.get(id || '')
+  getReplies(event: Event) {
+    const replies = this.replies.get(event.id) || []
+    const repliesAddressable = event.isAddressable ? this.addresses.get(event.address || '') || [] : []
+    return [...replies, ...repliesAddressable].map((x) => eventStore.get(x)).filter((x) => !!x)
   }
 
-  getReplies(note: Note) {
-    if (isParameterizedReplaceableKind(note.event.kind) && note.d) {
-      return [...(this.replies.get(note.id) || []), ...(this.addresses.get(note.address) || [])]
-    } else {
-      return this.replies.get(note.id)
-    }
-  }
-
-  add(event: NostrEvent, metadata: NoteMetadata) {
-    const found = this.notes.get(event.id)
-    if (!found) {
-      const note = new Note(event, metadata)
-      this.notes.set(note.id, note)
-      if (!note.metadata.isRoot) {
-        this.addReply(note)
-      }
-      return note
-    }
-    return found
-  }
-
-  addReply(note: Note) {
-    const parentId = note.metadata.parentId
+  // Add NIP-10 replies or NIP-22 comments
+  add(event: NostrEventNote | NostrEventComment) {
+    const metadata = event[metadataSymbol]
+    const parentId = metadata.parentId
     if (parentId) {
       const isAddressable = parentId.includes(':')
       if (isAddressable) {
-        this.addresses.set(parentId, dedupe(this.addresses.get(parentId), [note.id]))
+        this.addresses.set(parentId, dedupe(this.addresses.get(parentId), [event.id]))
       } else {
-        this.replies.set(parentId, dedupe(this.replies.get(parentId), [note.id]))
+        this.replies.set(parentId, dedupe(this.replies.get(parentId), [event.id]))
       }
     }
   }

@@ -18,7 +18,7 @@ export const NostrEventUnsupported = (props: Props) => {
       <Paper sx={styles.paper} surface='surfaceContainer'>
         <Stack horizontal={false} gap={1} align='center' justify='center'>
           <IconAlertCircleFilled size={28} strokeWidth='1.0' />
-          <Text size='lg'>Can't display content of event (kind:{event.kind})</Text>
+          <Text size='lg'>Can't display event (kind:{event.kind})</Text>
           {alt && (
             <Text size='lg' sx={styles.alt}>
               Description: {alt}

@@ -1,5 +1,7 @@
+import { focusRingTokens } from '@/components/ui/FocusRing/FocusRing.stylex'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Tab } from '@/components/ui/Tab/Tab'
+import { tabTokens } from '@/components/ui/Tab/Tab.stylex'
 import { Tabs } from '@/components/ui/Tabs/Tabs'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 import { useMobile } from '@/hooks/useMobile'
@@ -13,6 +15,8 @@ import { observer } from 'mobx-react-lite'
 import { css, html } from 'react-strict-dom'
 import { IconHome } from '../Icons/IconHome'
 import { IconHomeFilled } from '../Icons/IconHomeFilled'
+import { IconPencil } from '../Icons/IconPencil'
+import { LinkSignIn } from '../Links/LinkSignIn'
 import { SignInButtonFab } from '../SignIn/SignInButtonFab'
 
 export const BottomNavigation = observer(function BottomNavigation() {
@@ -41,19 +45,23 @@ export const BottomNavigation = observer(function BottomNavigation() {
             {/*     <Tab anchor='/relays' sx={styles.tab} icon={<IconServerBolt size={24} />} /> */}
             {/*   </Link> */}
             {/* </Tooltip> */}
+            <Link to='/compose'>
+              <Tab anchor='/compose' sx={styles.tab} icon={<IconPencil />} activeIcon={<IconPencil />} />
+            </Link>
             {user && (
-              <Tooltip text='Notifications' enterDelay={0}>
-                <Link to='/notifications'>
-                  <Tab anchor='/notifications' sx={styles.tab} icon={<IconBell />} activeIcon={<IconBellFilled />} />
-                </Link>
-              </Tooltip>
+              <Link to='/notifications'>
+                <Tab anchor='/notifications' sx={styles.tab} icon={<IconBell />} activeIcon={<IconBellFilled />} />
+              </Link>
             )}
-            {pubkey && user && (
-              <Tooltip text='Profile' enterDelay={0}>
-                <Link to='/$nostr' params={{ nostr: user!.nprofile! }}>
-                  <Tab anchor={`/${user.nprofile}`} sx={styles.tab} icon={<IconUser />} activeIcon={<IconUser />} />
-                </Link>
-              </Tooltip>
+            {user && (
+              <Link to='/$nostr' params={{ nostr: user!.nprofile! }}>
+                <Tab anchor={`/${user.nprofile}`} sx={styles.tab} icon={<IconUser />} activeIcon={<IconUser />} />
+              </Link>
+            )}
+            {!pubkey && (
+              <LinkSignIn>
+                <Tab anchor={`/signin_in`} sx={styles.tab} icon={<IconUser />} activeIcon={<IconUser />} />
+              </LinkSignIn>
             )}
           </Tabs>
         </Stack>
@@ -76,13 +84,13 @@ const styles = css.create({
     alignItems: 'center',
     paddingTop: spacing.padding1,
     paddingBottom: 'calc(8px + env(safe-area-inset-bottom))',
-    backgroundColor: palette.surface,
-    //backgroundColor: `rgba(${backgroundChannel} / 0.66)`,
-    backdropFilter: 'blur(4px)',
+    backgroundColor: palette.surfaceContainerLowest,
   },
   tab: {
     height: 50,
     width: 80,
     borderRadius: shape.full,
+    [tabTokens.containerShape]: shape.full,
+    [focusRingTokens.color]: palette.secondaryContainer,
   },
 })

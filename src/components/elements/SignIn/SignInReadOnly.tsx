@@ -1,3 +1,4 @@
+import { ContentProvider } from '@/components/providers/ContentProvider'
 import { Button } from '@/components/ui/Button/Button'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
@@ -44,10 +45,12 @@ const UserPreview = observer(function UserPreview(props: { control: Control<Form
     return
   }
   return (
-    <Stack horizontal={false} gap={2} justify='flex-end' align='center'>
-      {!user ? <Skeleton variant='circular' sx={styles.loading} /> : <UserAvatar pubkey={user.pubkey} size='lg' />}
-      {user && <UserName disableLink disablePopover variant='title' size='lg' pubkey={user.pubkey} />}
-    </Stack>
+    <ContentProvider value={{ disableLink: true, disablePopover: true }}>
+      <Stack horizontal={false} gap={2} justify='flex-end' align='center'>
+        {!user ? <Skeleton variant='circular' sx={styles.loading} /> : <UserAvatar pubkey={user.pubkey} size='lg' />}
+        {user && <UserName variant='title' size='lg' pubkey={user.pubkey} />}
+      </Stack>
+    </ContentProvider>
   )
 })
 

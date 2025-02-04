@@ -1,4 +1,4 @@
-import { useNoteContext } from '@/components/providers/NoteProvider'
+import { useContentContext } from '@/components/providers/ContentProvider'
 import { spacing } from '@/themes/spacing.stylex'
 import type { ParagraphNode } from 'nostr-editor'
 import { css, html } from 'react-strict-dom'
@@ -10,7 +10,7 @@ type Props = {
 
 export const Paragraph = (props: Props) => {
   const { node } = props
-  const { dense } = useNoteContext()
+  const { dense } = useContentContext()
   return (
     <html.div style={[styles.container, dense && styles.container$dense]}>
       <TextContent node={node} />

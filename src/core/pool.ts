@@ -1,6 +1,5 @@
 import { LRUCache } from 'lru-cache'
 import { formatRelayUrl } from './helpers/formatRelayUrl'
-import { onAuth } from './operators/onAuth'
 import { Relay } from './Relay'
 
 type Options = {
@@ -23,22 +22,16 @@ export class Pool {
     this.relays.set(url, relay)
 
     // Stablish WebSocket connection
-    relay.websocket$
-      .pipe(
-        onAuth((challenge) => this.options?.auth?.(relay, challenge)),
-        // TODO
-        // retry({ count: 3, delay: 3000 })
-      )
-      .subscribe({
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        error: (error: Event) => {
-          this.delete(url)
-          this.blacklist(url)
-        },
-        complete: () => {
-          this.delete(url)
-        },
-      })
+    relay.websocket$.subscribe({
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      error: (error: Event) => {
+        this.delete(url)
+        this.blacklist(url)
+      },
+      complete: () => {
+        this.delete(url)
+      },
+    })
 
     return relay
   }

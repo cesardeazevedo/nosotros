@@ -1,16 +1,17 @@
-import { forwardRef, useCallback, useRef, useState } from 'react'
-import { css, html } from 'react-strict-dom'
-import { dataProps } from '../helpers/dataProps'
-import { mergeRefs } from '../helpers/mergeRefs'
-import { useVisualState } from '../hooks/useVisualState'
-import type { SxProps } from '../types'
+import { duration } from '@/themes/duration.stylex'
+import { easing } from '@/themes/easing.stylex'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import { duration } from '@/themes/duration.stylex'
-import { easing } from '@/themes/easing.stylex'
+import { forwardRef, useCallback, useRef } from 'react'
+import { css, html } from 'react-strict-dom'
 import { FocusRing } from '../FocusRing/FocusRing'
 import { Tooltip } from '../Tooltip/Tooltip'
+import { dataProps } from '../helpers/dataProps'
+import { mergeRefs } from '../helpers/mergeRefs'
+import { useControlledValue } from '../hooks/useControlledValue'
+import { useVisualState } from '../hooks/useVisualState'
+import type { SxProps } from '../types'
 
 type Props = {
   sx?: SxProps
@@ -28,7 +29,12 @@ type Props = {
 export const Slider = forwardRef<HTMLElement, Props>((props, ref) => {
   const { id, sx, disabled = false, min = 0, max = 100, step = 1, onChange } = props
   const { visualState, setRef } = useVisualState(undefined, { retainFocusAfterClick: false })
-  const [value, setValue] = useState(props.value ?? props.defaultValue ?? min)
+  const [value, setValue] = useControlledValue<number>({
+    default: props.defaultValue ?? min,
+    controlled: props.value,
+    name: 'value',
+    onValueChange: onChange,
+  })
 
   const actionRef = useRef<HTMLInputElement>(null)
   const refs = mergeRefs([ref, setRef, actionRef])
@@ -37,7 +43,6 @@ export const Slider = forwardRef<HTMLElement, Props>((props, ref) => {
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const newValue = parseFloat(e.target.value)
       setValue(newValue)
-      onChange?.(newValue)
     },
     [onChange],
   )

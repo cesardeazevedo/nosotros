@@ -1,5 +1,5 @@
 import { RELAY_1, RELAY_2, RELAY_3 } from '@/constants/testRelays'
-import { fakeNote } from '@/utils/faker'
+import { fakeEvent } from '@/utils/faker'
 import { subscribeSpyTo } from '@hirez_io/observer-spy'
 import { Kind } from 'constants/kinds'
 import { NostrPublisher } from 'core/NostrPublish'
@@ -12,7 +12,7 @@ import { broadcast } from '../broadcast'
 describe('publish', () => {
   test('assert relays responses', async ({ relay, relay2, relay3, signer }) => {
     const pool = new Pool()
-    const event = fakeNote({
+    const event = fakeEvent({
       id: '1',
       kind: Kind.Text,
       pubkey: '1',
@@ -49,12 +49,12 @@ describe('publish', () => {
 
   test('assert related events being published', async ({ relay, signer }) => {
     const pool = new Pool()
-    const note = fakeNote({
+    const note = fakeEvent({
       id: '1',
       pubkey: '1',
     })
 
-    const reaction = fakeNote({
+    const reaction = fakeEvent({
       id: '2',
       kind: Kind.Reaction,
       content: '+',

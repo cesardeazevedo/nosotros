@@ -1,9 +1,8 @@
-import { noteStore } from '@/stores/notes/notes.store'
+import { useNoteStoreFromId } from '@/hooks/useNoteStore'
 import { spacing } from '@/themes/spacing.stylex'
 import { decodeNIP19 } from '@/utils/nip19'
-import { useMatch } from '@tanstack/react-router'
+import { useMatch, useNavigate } from '@tanstack/react-router'
 import { DialogSheet } from 'components/elements/Layouts/Dialog'
-import { useGoBack } from 'hooks/useNavigations'
 import { observer } from 'mobx-react-lite'
 import { useCallback } from 'react'
 import { RemoveScroll } from 'react-remove-scroll'
@@ -13,20 +12,19 @@ import { PostThread } from '../elements/Posts/PostThread'
 import { Divider } from '../ui/Divider/Divider'
 
 export const EditorReplyDialog = observer(function EditorReplyDialog() {
-  const goBack = useGoBack()
+  const navigate = useNavigate()
   const replying = useMatch({
     from: '__root__',
-    // @ts-ignore
     select: (x) => x.search.replying,
   })
 
   const handleClose = useCallback(() => {
-    goBack()
-  }, [goBack])
+    navigate({ to: '.', search: ({ replying, ...rest }) => rest })
+  }, [])
 
-  const decoded = decodeNIP19(replying)
+  const decoded = decodeNIP19(replying || '')
   const id = decoded?.type === 'nevent' ? decoded?.data.id : undefined
-  const note = noteStore.get(id)
+  const note = useNoteStoreFromId(id)
 
   return (
     <DialogSheet maxWidth='sm' sx={styles.dialog} surface='surfaceContainerLow' open={!!replying} onClose={handleClose}>
@@ -34,7 +32,9 @@ export const EditorReplyDialog = observer(function EditorReplyDialog() {
         <>
           <RemoveScroll>
             <html.div style={styles.root}>
-              {note && <PostThread renderReplies={false} renderParents={false} renderEditor={false} note={note} />}
+              {note && (
+                <PostThread event={note.event.event} renderReplies={false} renderParents={false} renderEditor={false} />
+              )}
             </html.div>
           </RemoveScroll>
           <Divider />

@@ -1,24 +1,39 @@
+import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { useCurrentUser } from '@/hooks/useRootStore'
-import type { Note } from '@/stores/notes/note'
 import { spacing } from '@/themes/spacing.stylex'
 import { useRouteContext } from '@tanstack/react-router'
+import type { DecodeResult } from 'nostr-tools/nip19'
 import { css, html } from 'react-strict-dom'
 import { PostLoadMore } from '../PostLoadMore'
 import { PostRepliesTree } from './PostReply'
 
 type Props = {
-  note: Note
   onLoadMoreClick?: () => void
 }
 
+function getPubkey(decoded: DecodeResult | undefined) {
+  switch (decoded?.type) {
+    case 'npub': {
+      return decoded.data
+    }
+    case 'nprofile': {
+      return decoded.data.pubkey
+    }
+    default: {
+      return undefined
+    }
+  }
+}
+
 export const PostRepliesPreview = function PostRepliesPreview(props: Props) {
-  const { note, onLoadMoreClick } = props
+  const { onLoadMoreClick } = props
+  const { note } = useNoteContext()
   const currentUser = useCurrentUser()
   const context = useRouteContext({ strict: false })
 
-  const replies = note.getRepliesPreviewUser(currentUser, context.pubkey)
+  const replies = note.getRepliesPreviewUser(currentUser, getPubkey(context.decoded))
 
   if (note.repliesOpen !== null || replies.length === 0) {
     return null

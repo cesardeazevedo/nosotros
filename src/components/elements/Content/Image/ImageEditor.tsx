@@ -1,36 +1,38 @@
-import type { NodeViewProps } from '@tiptap/react'
-import { NodeViewWrapper } from '@tiptap/react'
+import type { SxProps } from '@/components/ui/types'
+import { shape } from '@/themes/shape.stylex'
 import type { ImageAttributes } from 'nostr-editor'
-import { css } from 'react-strict-dom'
+import { css, html } from 'react-strict-dom'
 import { AltButton } from '../Buttons/AltButton'
 import { DeleteButton } from '../Buttons/DeleteButton'
 import { UploadButton } from '../Buttons/UploadButton'
-import { Image } from './Image'
 
-export const ImageEditor = (props: NodeViewProps) => {
-  const { src, alt } = props.node.attrs as ImageAttributes
+type Props = ImageAttributes & {
+  onUpdate: (attrs: Partial<ImageAttributes>) => void
+  onDelete: () => void
+  sx?: SxProps
+}
+
+export const ImageEditor = (props: Props) => {
+  const { src, alt, sx } = props
   const isUploaded = !src.startsWith('blob://http')
   return (
-    <NodeViewWrapper
-      data-drag-handle=''
-      draggable={props.node.type.spec.draggable}
-      {...css.props([styles.root, props.selected && styles.root$selected])}>
-      <DeleteButton onClick={() => props.deleteNode()} />
-      <Image dense src={src} proxy={false} />
-      {!isUploaded && <AltButton value={alt} onChange={(alt) => props.updateAttributes({ alt })} />}
-      <UploadButton node={props} />
-    </NodeViewWrapper>
+    <>
+      <DeleteButton onClick={() => props.onDelete()} />
+      <html.img src={src} style={[styles.img, sx]} />
+      {!isUploaded && <AltButton value={alt} onChange={(alt) => props.onUpdate({ alt })} />}
+      <UploadButton {...props} onUpdate={props.onUpdate} />
+    </>
   )
 }
 
 const styles = css.create({
-  root: {
-    width: 'fit-content',
-    height: 'fit-content',
-    position: 'relative',
-    opacity: 1,
-  },
-  root$selected: {
-    opacity: 0.9,
+  img: {
+    objectFit: 'contain',
+    width: 'auto',
+    height: 'auto',
+    userSelect: 'none',
+    cursor: 'pointer',
+    maxHeight: 350,
+    borderRadius: shape.lg,
   },
 })

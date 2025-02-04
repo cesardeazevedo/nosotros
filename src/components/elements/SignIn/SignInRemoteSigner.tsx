@@ -10,7 +10,7 @@ import { typeScale } from '@/themes/typeScale.stylex'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconCircleCheck } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
-import { useCallback } from 'react'
+import { useActionState } from 'react'
 import { css } from 'react-strict-dom'
 import { Link } from '../Links/Link'
 import { SignInHeader } from './SignInHeader'
@@ -18,65 +18,68 @@ import { SignInHeader } from './SignInHeader'
 export const SignInRemoteSigner = observer(function SignInRemoteSigner() {
   const goBack = useGoBack()
 
-  const handleSubmit = useCallback(async () => {
-    await signinStore.submitBunker()
-    setTimeout(() => {
+  const [, submit, isPending] = useActionState(async (_: unknown, formData: FormData) => {
+    const bunkerUrl = formData.get('bunkerUrl')
+    if (bunkerUrl) {
+      await signinStore.submitBunker(bunkerUrl.toString())
       goBack()
-    }, 700)
+    }
+    return null
   }, [])
 
   return (
-    <Stack horizontal={false} align='center' justify='flex-start' sx={styles.root}>
-      <SignInHeader>
-        <Text variant='headline'>Sign In with a Remote Signer</Text>
-      </SignInHeader>
-      <Stack grow horizontal={false} sx={styles.content} gap={4} justify='space-between'>
-        <Stack grow horizontal={false} gap={4} justify='space-between'>
-          <Text size='lg'>
-            This method involves a 2-way communication between the client and a remote signer (also known as "bunker"),
-            this is the <b>recommended</b> way to keep your nsec secure and outside the client, while allowing you to
-            sign notes.
-            <Link href='https://github.com/nostr-protocol/nips/blob/master/46.md'>read more</Link>
-          </Text>
-          <Stack grow horizontal={false} gap={2}>
-            <TextField
-              shrink
-              multiline
-              rows={5}
-              label='Bunker URL'
-              placeholder='bunker://'
-              sx={styles.textarea}
-              defaultValue={signinStore.bunkerUrl}
-              onChange={(e) => signinStore.setBunker(e.target.value)}
-            />
-            {signinStore.error && (
-              <Paper surface='errorContainer' sx={styles.response}>
-                <Text variant='body' size='lg'>
-                  {signinStore.error}
-                </Text>
-              </Paper>
-            )}
-            {signinStore.response && (
-              <Paper surface='surfaceContainer' sx={styles.response}>
-                <Stack align='center' justify='center' gap={1}>
-                  <IconCircleCheck size={18} {...css.props(styles.iconSuccess)} />
+    <form action={submit}>
+      <Stack horizontal={false} align='center' justify='flex-start' sx={styles.root}>
+        <SignInHeader>
+          <Text variant='headline'>Sign In with a Remote Signer</Text>
+        </SignInHeader>
+        <Stack grow horizontal={false} sx={styles.content} gap={4} justify='space-between'>
+          <Stack grow horizontal={false} gap={4} justify='space-between'>
+            <Text size='lg'>
+              This method involves a 2-way communication between the client and a remote signer (also known as
+              "bunker"), this is the <b>recommended</b> way to keep your nsec secure and outside the client, while
+              allowing you to sign notes.
+              <Link href='https://github.com/nostr-protocol/nips/blob/master/46.md'>read more</Link>
+            </Text>
+            <Stack grow horizontal={false} gap={2}>
+              <TextField
+                shrink
+                multiline
+                rows={5}
+                name='bunkerUrl'
+                label='Bunker URL'
+                placeholder='bunker://'
+                sx={styles.textarea}
+              />
+              {signinStore.error && (
+                <Paper surface='errorContainer' sx={styles.response}>
                   <Text variant='body' size='lg'>
-                    {signinStore.response}
+                    {signinStore.error}
                   </Text>
-                </Stack>
-              </Paper>
-            )}
+                </Paper>
+              )}
+              {signinStore.response && (
+                <Paper surface='surfaceContainer' sx={styles.response}>
+                  <Stack align='center' justify='center' gap={1}>
+                    <IconCircleCheck size={18} {...css.props(styles.iconSuccess)} />
+                    <Text variant='body' size='lg'>
+                      {signinStore.response}
+                    </Text>
+                  </Stack>
+                </Paper>
+              )}
+            </Stack>
           </Stack>
+          {/* <Divider>OR</Divider> */}
+          {/* <Button variant='outlined' sx={styles.button} onClick={() => signinStore.goTo('REMOTE_SIGN_NOSTR_CONNECT')}> */}
+          {/*   Get NostrConnect URL */}
+          {/* </Button> */}
+          <Button type='submit' variant='filled' sx={styles.button} disabled={isPending}>
+            Connect
+          </Button>
         </Stack>
-        {/* <Divider>OR</Divider> */}
-        {/* <Button variant='outlined' sx={styles.button} onClick={() => signinStore.goTo('REMOTE_SIGN_NOSTR_CONNECT')}> */}
-        {/*   Get NostrConnect URL */}
-        {/* </Button> */}
-        <Button variant='filled' sx={styles.button} disabled={!signinStore.bunkerUrl} onClick={handleSubmit}>
-          Connect
-        </Button>
       </Stack>
-    </Stack>
+    </form>
   )
 })
 

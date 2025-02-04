@@ -5,7 +5,7 @@ import { Text } from '@/components/ui/Text/Text'
 import { Kind } from '@/constants/kinds'
 import type { NotificationFeed } from '@/stores/notifications/notification.feed'
 import { spacing } from '@/themes/spacing.stylex'
-import type { TablerIconsProps } from '@tabler/icons-react'
+import type { IconProps } from '@tabler/icons-react'
 import { IconAt, IconBolt, IconHeart, IconMessage, IconShare3, IconVolumeOff } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
 import { css, html } from 'react-strict-dom'
@@ -14,7 +14,7 @@ type Props = {
   feed: NotificationFeed
 }
 
-const iconProps: TablerIconsProps = {
+const iconProps: IconProps = {
   size: 18,
   strokeWidth: '1.5',
 }

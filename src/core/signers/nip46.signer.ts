@@ -90,7 +90,7 @@ function fetchNIP05(nip05: string) {
   )
 }
 
-function parseBunkerUrl(input: string) {
+export function parseBunkerUrl(input: string) {
   const match = input.match(BUNKER_REGEX)
   invariant(match, 'Error on parsing bunkerUrl')
   const pubkey = match[1]
@@ -236,7 +236,7 @@ export class NIP46RemoteSigner implements Signer<NIP46RemoteSignerOptions> {
     return firstValueFrom(this.bunker$.pipe(mergeMap((bunker) => this.send('get_public_key', [], bunker))))
   }
 
-  async sign(event: UnsignedEvent): Promise<NostrEvent | false> {
+  async sign(event: UnsignedEvent): Promise<NostrEvent> {
     return firstValueFrom(
       this.bunker$.pipe(
         mergeMap((bunker) => this.send('sign_event', [JSON.stringify(event)], bunker)),

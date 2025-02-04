@@ -1,7 +1,5 @@
-import { useNoteContext } from '@/components/providers/NoteProvider'
+import { useContentContext } from '@/components/providers/ContentProvider'
 import { Button } from '@/components/ui/Button/Button'
-import type { Comment } from '@/stores/comment/comment'
-import type { Note } from '@/stores/notes/note'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconPlayerPlayFilled } from '@tabler/icons-react'
@@ -13,13 +11,12 @@ const REGEX_VIDEO_ID = /.*(?:youtu.be\/|v\/|u\/\w\/|shorts|embed\/|watch\?v=)([^
 
 type Props = {
   src: string
-  note?: Note | Comment
 }
 
 export const YoutubeEmbed = (props: Props) => {
-  const { src, note } = props
+  const { src } = props
   const [open, setOpen] = useState(false)
-  const { dense } = useNoteContext()
+  const { dense } = useContentContext()
 
   const embedId = useMemo(() => src.match(REGEX_VIDEO_ID)?.[1].replace('/', ''), [src])
 
@@ -30,14 +27,8 @@ export const YoutubeEmbed = (props: Props) => {
     <html.div style={[styles.root, dense && styles.root$dense]}>
       {embedId && (
         <html.div style={styles.content}>
-          {!open && (
-            <Image dense proxy={false} note={note} src={posterUrl} onClick={() => setOpen(true)} sx={styles.image} />
-          )}
-          {open && (
-            <html.div style={styles.iframe}>
-              <iframe src={iframeSrc} width={400} height={280} />
-            </html.div>
-          )}
+          {!open && <Image dense proxy={false} src={posterUrl} onClick={() => setOpen(true)} />}
+          {open && <iframe {...css.props(styles.iframe)} src={iframeSrc} width={400} height={280} />}
           {!open && (
             <Button sx={styles.button} onClick={() => setOpen(true)}>
               <IconPlayerPlayFilled fill='red' />
@@ -62,14 +53,9 @@ const styles = css.create({
     overflow: 'hidden',
     width: 'fit-content',
   },
-  image: {
-    minWidth: 400,
-    minHeight: 280,
-  },
   iframe: {
-    marginInline: spacing.padding2,
     border: 'none',
-    marginTop: 24,
+    marginTop: spacing.margin2,
     borderRadius: shape.lg,
     overflow: 'hidden',
   },

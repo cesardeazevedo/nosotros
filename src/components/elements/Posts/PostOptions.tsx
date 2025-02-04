@@ -1,36 +1,23 @@
+import { useContentContext } from '@/components/providers/ContentProvider'
 import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
-import { Menu } from '@/components/ui/Menu/Menu'
 import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { MenuList } from '@/components/ui/MenuList/MenuList'
-import { Stack } from '@/components/ui/Stack/Stack'
-import type { Comment } from '@/stores/comment/comment'
-import type { Note } from '@/stores/notes/note'
+import { Popover } from '@/components/ui/Popover/Popover'
 import { toastStore } from '@/stores/ui/toast.store'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconCopy, IconDotsVertical, IconInfoSquareRounded, IconLink } from '@tabler/icons-react'
-import { DialogSheet } from 'components/elements/Layouts/Dialog'
+import { useNavigate } from '@tanstack/react-router'
 import { observer } from 'mobx-react-lite'
-import { useCallback, useState } from 'react'
+import { useCallback } from 'react'
 import { css } from 'react-strict-dom'
-import { PostStats } from './PostDialogs/PostStats'
-
-type Props = {
-  note: Note | Comment
-  dense?: boolean
-}
 
 type PropsOptions = {
-  note: Note | Comment
   onCopyIdClick: () => void
   onCopyAuthorIdClick: () => void
   onCopyLinkClick: () => void
   onDetailsClick: () => void
-}
-
-function isMobileDevice() {
-  return 'ontouchstart' in window
 }
 
 const Options = observer(function Options(props: PropsOptions) {
@@ -53,16 +40,10 @@ const Options = observer(function Options(props: PropsOptions) {
   )
 })
 
-export const PostOptions = observer(function PostOptions(props: Props) {
-  const { note } = props
-  const { dense } = useNoteContext()
-  const [debugDialog, setDebugDialog] = useState(false)
-  const [open, setOpen] = useState(false)
-  const isMobile = isMobileDevice()
-
-  const handleClose = useCallback(() => {
-    setDebugDialog(false)
-  }, [])
+export const PostOptions = observer(function PostOptions() {
+  const { dense } = useContentContext()
+  const { note } = useNoteContext()
+  const navigate = useNavigate()
 
   const handleCopy = useCallback(
     (value: string | undefined) => {
@@ -72,70 +53,50 @@ export const PostOptions = observer(function PostOptions(props: Props) {
           const blob = new Blob([value], { type })
           window.navigator.clipboard.write([new ClipboardItem({ [type]: blob })]).then(() => {
             toastStore.enqueue('Copied', { duration: 4000 })
-            handleClose()
           })
         }
       }
     },
-    [note, handleClose],
+    [note],
   )
 
-  const handleDetailsDialog = useCallback(() => {
-    setDebugDialog(!debugDialog)
-  }, [debugDialog])
+  const handleStatsClick = useCallback(() => {
+    navigate({ to: '.', search: ({ ...rest }) => ({ ...rest, stats: note.id }) })
+  }, [])
 
-  const nevent = note.nevent
+  const nevent = note?.event.nevent
   const link = window.location.origin + '/' + nevent
 
   return (
-    <>
-      <DialogSheet title='Stats' open={debugDialog} onClose={handleClose} maxWidth='sm'>
-        <PostStats note={note} onClose={handleClose} />
-      </DialogSheet>
-      {!isMobile && (
-        <Menu
-          sx={styles.menu}
-          placement='bottom-end'
-          surface='surfaceContainerLow'
-          trigger={({ getProps }) => (
-            <IconButton
-              {...getProps()}
-              size={dense ? 'sm' : 'md'}
-              icon={<IconDotsVertical stroke='currentColor' strokeWidth='2.0' size={dense ? 18 : 20} />}
-            />
-          )}>
+    <Popover
+      sx={styles.menu}
+      placement='bottom-end'
+      contentRenderer={(props) => (
+        <MenuList surface='surfaceContainerLow'>
           <Options
-            note={note}
             onCopyIdClick={handleCopy(nevent)}
-            onCopyAuthorIdClick={handleCopy(note.user?.nprofile)}
+            onCopyAuthorIdClick={handleCopy(note?.user?.nprofile)}
             onCopyLinkClick={handleCopy(link)}
-            onDetailsClick={handleDetailsDialog}
+            onDetailsClick={() => {
+              handleStatsClick()
+              props.close()
+            }}
           />
-        </Menu>
+        </MenuList>
+      )}>
+      {({ getProps, setRef, open }) => (
+        <IconButton
+          {...getProps()}
+          ref={setRef}
+          onClick={(e) => {
+            open()
+            e.preventDefault()
+          }}
+          size={dense ? 'sm' : 'md'}
+          icon={<IconDotsVertical stroke='currentColor' strokeWidth='2.0' size={dense ? 18 : 20} />}
+        />
       )}
-      {isMobile && (
-        <>
-          <IconButton
-            size={dense ? 'sm' : 'md'}
-            onClick={() => setOpen(true)}
-            icon={<IconDotsVertical stroke='currentColor' strokeWidth='2.0' size={20} />}
-          />
-          <DialogSheet open={open} onClose={() => setOpen(false)} mobileAnchor='middle'>
-            <Stack horizontal={false}>
-              <MenuList elevation={0} sx={styles.menuList}>
-                <Options
-                  note={note}
-                  onCopyIdClick={handleCopy(nevent)}
-                  onCopyAuthorIdClick={handleCopy(note.user?.nprofile)}
-                  onCopyLinkClick={handleCopy(link)}
-                  onDetailsClick={handleDetailsDialog}
-                />
-              </MenuList>
-            </Stack>
-          </DialogSheet>
-        </>
-      )}
-    </>
+    </Popover>
   )
 })
 

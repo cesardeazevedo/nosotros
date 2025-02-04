@@ -4,19 +4,41 @@ import { Card } from '@/components/ui/Card/Card'
 import { CardContent } from '@/components/ui/Card/CardContent'
 import { CardTitle } from '@/components/ui/Card/CardTitle'
 import { chipTokens } from '@/components/ui/Chip/Chip.stylex'
-import { Divider } from '@/components/ui/Divider/Divider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { signinStore } from '@/stores/signin/signin.store'
 import { spacing } from '@/themes/spacing.stylex'
 import { typeScale } from '@/themes/typeScale.stylex'
 import { IconChevronRight, IconExternalLink, IconEye } from '@tabler/icons-react'
+import { useNavigate } from '@tanstack/react-router'
 import { observer } from 'mobx-react-lite'
+import { NstartModal } from 'nstart-modal'
 import { css } from 'react-strict-dom'
-import { Link } from '../Links/Link'
 import { SignInHeader } from './SignInHeader'
 
 export const SignInSelect = observer(function SignInSelect() {
+  const navigate = useNavigate()
+
+  const handleSignUpClick = () => {
+    const wizard = new NstartModal({
+      baseUrl: 'https://start.njump.me',
+      an: 'Nosotros', // appName
+      afb: true, // skipBunker
+      asb: false, // skipBunker
+      aan: true, // avoidNsec
+      aac: false, // avoidNcryptsec
+      arr: ['wss://nos.lol', 'wss://nostr.mom', 'wss://relay.damus.io'],
+      awr: ['wss://nos.lol', 'wss://nostr.mom', 'wss://relay.damus.io'],
+      onComplete: async (result) => {
+        if (result.nostrLogin.startsWith('bunker://')) {
+          await signinStore.submitBunker(result.nostrLogin)
+        }
+        navigate({ to: '/', search: {}, replace: true })
+      },
+    })
+    wizard.open()
+  }
+
   return (
     <>
       <Stack horizontal={false} align='center' justify='flex-start' sx={styles.root}>
@@ -84,15 +106,12 @@ export const SignInSelect = observer(function SignInSelect() {
               </CardContent>
             </Card>
           </Stack>
-          <Divider inset>Create acount comming soon</Divider>
-          <Link href='https://start.njump.me/'>
-            <Button fullWidth variant='filled' sx={styles.button}>
-              <Stack justify='center' gap={1}>
-                Create account on njump start
-                <IconExternalLink size={16} style={{ marginRight: -16 }} />
-              </Stack>
-            </Button>
-          </Link>
+          <Button fullWidth variant='filled' sx={styles.button} onClick={handleSignUpClick}>
+            <Stack justify='center' gap={1}>
+              Create account on njump start
+              <IconExternalLink size={16} style={{ marginRight: -16 }} />
+            </Stack>
+          </Button>
         </Stack>
       </Stack>
     </>
@@ -121,6 +140,6 @@ const styles = css.create({
     paddingTop: spacing['padding0.5'],
   },
   button: {
-    height: 50,
+    height: 60,
   },
 })

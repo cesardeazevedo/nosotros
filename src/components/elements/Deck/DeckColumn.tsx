@@ -7,11 +7,12 @@ type Props = {
   size?: 'sm' | 'md' | 'lg'
   children: React.ReactNode
   sx?: SxProps
+  paper?: boolean
 }
 
 export const DeckColumn = (props: Props) => {
-  const { size = 'md', children, sx } = props
-  return <html.div style={[styles.root, sizes[size], sx]}>{children}</html.div>
+  const { size = 'md', children, paper = true, sx } = props
+  return <html.div style={[styles.root, sizes[size], paper && styles.paper, sx]}>{children}</html.div>
 }
 
 const sizes = css.create({
@@ -20,8 +21,8 @@ const sizes = css.create({
     maxWidth: 390,
   },
   md: {
-    minWidth: 550,
-    maxWidth: 550,
+    minWidth: 600,
+    maxWidth: 600,
   },
   lg: {
     minWidth: 700,
@@ -38,6 +39,9 @@ const styles = css.create({
     height: '100%',
     position: 'relative',
     borderColor: palette.outlineVariant,
-    overflowX: 'hidden',
+    overflow: 'hidden',
+  },
+  paper: {
+    backgroundColor: palette.surfaceContainerLowest,
   },
 })

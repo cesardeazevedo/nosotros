@@ -24,7 +24,6 @@ export const signinStore = makeAutoObservable({
   page: 'SELECT' as Pages,
   prevPage: 'SELECT' as Pages,
   submitting: false,
-  bunkerUrl: '',
   response: '',
   error: '',
 
@@ -41,10 +40,6 @@ export const signinStore = makeAutoObservable({
   back() {
     this.prevPage = this.page
     this.page = 'SELECT'
-  },
-
-  setBunker(bunker: string) {
-    this.bunkerUrl = bunker.trim()
   },
 
   setReponse(msg: string) {
@@ -69,7 +64,6 @@ export const signinStore = makeAutoObservable({
   reset() {
     this.page = 'SELECT'
     this.prevPage = 'SELECT'
-    this.bunkerUrl = ''
     this.error = ''
     this.response = ''
   },
@@ -121,8 +115,8 @@ export const signinStore = makeAutoObservable({
     return pubkey
   },
 
-  async submitBunker() {
-    invariant(this.bunkerUrl, 'Bunker not set')
+  async submitBunker(bunkerUrl: string) {
+    invariant(bunkerUrl, 'Bunker not set')
 
     const signer = SignerNIP46.create({
       name: 'nip46',
@@ -131,14 +125,14 @@ export const signinStore = makeAutoObservable({
         description: APP_DESCRIPTION,
         method: {
           method: 'bunkerurl',
-          bunkerUrl: this.bunkerUrl,
+          bunkerUrl,
         },
       },
     })
 
     try {
-      const [bunker, res] = await signer.signer.connect()
-      const { pubkey } = bunker
+      const [, res] = await signer.signer.connect()
+      const [, { result: pubkey }] = await signer.signer.getPublicKey()
       auth.login({
         pubkey,
         context: {
@@ -155,6 +149,7 @@ export const signinStore = makeAutoObservable({
         },
       })
       this.setReponse('Authorized')
+      this.reset()
       return res
     } catch (res) {
       const error = res as Error

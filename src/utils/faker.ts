@@ -1,3 +1,7 @@
+import { parseComment } from '@/nostr/helpers/parseComment'
+import { parseNote } from '@/nostr/helpers/parseNote'
+import type { NostrEventComment, NostrEventNote } from '@/nostr/types'
+import { metadataSymbol } from '@/nostr/types'
 import { Kind } from 'constants/kinds'
 import type { NostrEvent } from 'nostr-tools'
 import { finalizeEvent, generateSecretKey } from 'nostr-tools'
@@ -6,7 +10,7 @@ export function fakeImageUrl(width: number, height?: number) {
   return `https://dummyimage.com/${width}x${height || width}/000/fff.jpg`
 }
 
-export function fakeNote(data?: Partial<NostrEvent>): NostrEvent {
+export function fakeEvent(data?: Partial<NostrEvent>): NostrEvent {
   return {
     kind: data?.kind ?? Kind.Text,
     id: data?.id || Math.random().toString().slice(2),
@@ -18,6 +22,22 @@ export function fakeNote(data?: Partial<NostrEvent>): NostrEvent {
   }
 }
 
+export function fakeNote(data?: Partial<NostrEvent>): NostrEventNote {
+  const event = fakeEvent(data)
+  return {
+    ...event,
+    [metadataSymbol]: parseNote(event),
+  }
+}
+
+export function fakeComment(data?: Partial<NostrEvent>): NostrEventComment {
+  const event = fakeEvent(data)
+  return {
+    ...event,
+    [metadataSymbol]: parseComment(event),
+  }
+}
+
 export function fakeSignature(wrappedEvent: NostrEvent) {
-  return finalizeEvent(fakeNote(wrappedEvent), generateSecretKey())
+  return finalizeEvent(fakeEvent(wrappedEvent), generateSecretKey())
 }

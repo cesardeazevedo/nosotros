@@ -4,15 +4,15 @@ import { subscribeSpyTo } from '@hirez_io/observer-spy'
 import { NostrSubscription } from 'core/NostrSubscription'
 import { Pool } from 'core/pool'
 import { of } from 'rxjs'
-import { fakeNote } from 'utils/faker'
+import { fakeEvent } from 'utils/faker'
 import { start } from '../start'
 
 describe('start', () => {
   test('assert fixed relays and relayHints', async ({ createMockRelay }) => {
-    const event1 = fakeNote({ id: '1', pubkey: '1' })
-    const event2 = fakeNote({ id: '2', pubkey: '2' })
-    const event3 = fakeNote({ id: '3', pubkey: '3' })
-    const event4 = fakeNote({ id: '10', pubkey: '4' })
+    const event1 = fakeEvent({ id: '1', pubkey: '1' })
+    const event2 = fakeEvent({ id: '2', pubkey: '2' })
+    const event3 = fakeEvent({ id: '3', pubkey: '3' })
+    const event4 = fakeEvent({ id: '10', pubkey: '4' })
     const events = [event1, event2, event3, event4]
 
     const relay1 = createMockRelay(RELAY_1, events)

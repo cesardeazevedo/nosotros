@@ -1,33 +1,33 @@
 import { NostrEventFeedItem } from '@/components/elements/Event/NostrEventFeedItem'
+import type { Props as ListProps } from '@/components/elements/Feed/FeedList'
+import { FeedList } from '@/components/elements/Feed/FeedList'
 import { PostAwait } from '@/components/elements/Posts/PostAwait'
 import { PostLoading } from '@/components/elements/Posts/PostLoading'
-import { VirtualList } from '@/components/elements/VirtualLists/VirtualList'
-import type { FeedAbstract, VirtualListProps } from '@/components/elements/VirtualLists/VirtualLists.types'
+import { ContentProvider } from '@/components/providers/ContentProvider'
 import type { NProfileModule } from '@/stores/nprofile/nprofile.module'
 
 export type Props = {
   module: NProfileModule
-} & Pick<VirtualListProps<FeedAbstract>, 'window' | 'header'>
+  delay?: Promise<0>
+} & Pick<ListProps, 'column' | 'header'>
 
 export const NProfileNotesFeed = function NProfileNotesFeed(props: Props) {
   const { module, ...rest } = props
-  const {
-    id,
-    feeds: { notes: feed },
-  } = module
+  const feed = module.feeds.notes
   return (
-    <VirtualList
-      id={id}
-      feed={feed}
-      wrapper={(children) => (
-        <PostAwait promise={feed.delay} rows={5}>
-          {children}
-        </PostAwait>
-      )}
-      onScrollEnd={feed.paginate}
-      render={(event) => <NostrEventFeedItem event={event} />}
-      footer={<PostLoading />}
-      {...rest}
-    />
+    <ContentProvider value={{ blured: feed.blured }}>
+      <FeedList
+        feed={feed}
+        wrapper={(children) => (
+          <PostAwait promise={props.delay || feed.delay} rows={4}>
+            {children}
+          </PostAwait>
+        )}
+        onScrollEnd={feed.paginate}
+        render={(event) => <NostrEventFeedItem event={event} />}
+        footer={<PostLoading rows={4} />}
+        {...rest}
+      />
+    </ContentProvider>
   )
 }

@@ -8,16 +8,16 @@ import { start } from 'core/operators/start'
 import { Pool } from 'core/pool'
 import type { NostrFilter } from 'core/types'
 import { from, of } from 'rxjs'
-import { fakeNote } from 'utils/faker'
+import { fakeEvent } from 'utils/faker'
 import { test } from 'utils/fixtures'
 import { expectRelayReceived, relaySendEose, relaySendEvents } from 'utils/testHelpers'
 
 describe('NostrSubscriptionBatcher', () => {
   test('assert batched subscriptions events and their respective relays', async ({ relay, relay2, relay3 }) => {
-    const user1 = fakeNote({ kind: Kind.Metadata, pubkey: '1' })
-    const user2 = fakeNote({ kind: Kind.Metadata, pubkey: '2' })
-    const user4 = fakeNote({ kind: Kind.Metadata, pubkey: '4' })
-    const user5 = fakeNote({ kind: Kind.Metadata, pubkey: '5' })
+    const user1 = fakeEvent({ kind: Kind.Metadata, pubkey: '1' })
+    const user2 = fakeEvent({ kind: Kind.Metadata, pubkey: '2' })
+    const user4 = fakeEvent({ kind: Kind.Metadata, pubkey: '4' })
+    const user5 = fakeEvent({ kind: Kind.Metadata, pubkey: '5' })
 
     const pool = new Pool()
     const outbox = (filters: NostrFilter[]) => {

@@ -22,7 +22,7 @@ class RelayDiscoveryStore {
     return this.selectedMonitor || this.firstMonitor
   }
 
-  get firstMonitor() {
+  get firstMonitor(): string | undefined {
     return this.listMonitors[0]
   }
 
@@ -67,8 +67,8 @@ class RelayDiscoveryStore {
     }
   }
 
-  getByMonitor(monitor: string) {
-    return this.byMonitor.get(monitor)
+  getByMonitor(monitor: string | undefined) {
+    return this.byMonitor.get(monitor || '')
   }
 
   add(event: NostrEventRelayDiscovery) {

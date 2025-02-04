@@ -1,3 +1,4 @@
+import { ContentProvider } from '@/components/providers/ContentProvider'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
@@ -35,7 +36,9 @@ export const UserProfileHeader = observer(function UserProfileHeader(props: Prop
       </html.div>
       <Divider />
       <Stack horizontal={false} gap={1} sx={styles.content}>
-        <UserAvatar sx={styles.avatar} pubkey={pubkey} size='xl' disableLink disabledPopover />
+        <ContentProvider value={{ disableLink: true, disablePopover: true }}>
+          <UserAvatar sx={styles.avatar} pubkey={pubkey} size='xl' />
+        </ContentProvider>
         <Stack horizontal={false}>
           <Text variant='headline' size='sm'>
             {user?.displayName}

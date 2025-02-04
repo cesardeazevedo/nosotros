@@ -4,15 +4,17 @@ import type { NostrFilter } from '@/core/types'
 import type { Instance, SnapshotIn } from 'mobx-state-tree'
 import { t } from 'mobx-state-tree'
 import { firstValueFrom, timer } from 'rxjs'
+import { withToggleAction } from '../helpers/withToggleAction'
 
 export const NostrSubscriptionModel = t
-  .model('FeedBaseModel', {
+  .model('NostrSubscriptionModel', {
+    blured: false,
     filter: t.frozen<NostrFilter>(),
     subOptions: t.optional(t.frozen<SubscriptionOptions>(), {}),
   })
   .volatile((self) => ({
     started: false,
-    delay: firstValueFrom(timer(1000)),
+    delay: firstValueFrom(timer(0)),
     initialFilter: self.filter,
   }))
   .views((self) => ({
@@ -20,12 +22,16 @@ export const NostrSubscriptionModel = t
       return self.filter.kinds?.includes(kind)
     },
   }))
+  .actions(withToggleAction)
   .actions((self) => ({
-    resetFilter() {
+    setFilter(filter: NostrFilter) {
       self.filter = {
         ...self.filter,
-        kinds: self.initialFilter.kinds,
+        ...filter,
       }
+    },
+    resetFilter() {
+      this.setFilter({ kinds: self.initialFilter.kinds })
     },
     toggleKind(kind: Kind) {
       const has = self.hasKind(kind)

@@ -1,38 +1,34 @@
-import { NoteContext, useNoteContext } from '@/components/providers/NoteProvider'
+import { ContentProvider, useContentContext } from '@/components/providers/ContentProvider'
 import { Paper } from '@/components/ui/Paper/Paper'
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
-import { modelStore } from '@/stores/base/model.store'
+import { eventStore } from '@/stores/events/event.store'
 import { duration } from '@/themes/duration.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { observer } from 'mobx-react-lite'
 import type { NEventAttributes } from 'nostr-editor'
-import type { NEvent as NEventPrefix } from 'nostr-tools/nip19'
 import { css, html } from 'react-strict-dom'
 import { NostrEventQuote } from '../../Event/NostrEventQuote'
-import { LinkNEvent } from '../../Links/LinkNEvent'
 
 type Props = {
   pointer: NEventAttributes
 }
 
 export const NEvent = observer(function NEvent(props: Props) {
-  const { dense, disableLink } = useNoteContext()
   const { pointer } = props
-  const item = modelStore.get(pointer.id)
+  const { dense, disableLink } = useContentContext()
+  const event = eventStore.get(pointer.id)
   return (
     <html.div style={[styles.root, dense && styles.root$dense]}>
-      {!item && (
+      {!event && (
         <Skeleton variant='rectangular' animation='wave' sx={[styles.skeleton, dense && styles.skeleton$dense]} />
       )}
-      {item && (
-        <LinkNEvent nevent={pointer.nevent.replace('nostr:', '') as NEventPrefix} disableLink={disableLink}>
-          <NoteContext.Provider value={{ dense: true, disableLink: true }}>
-            <Paper outlined sx={styles.content}>
-              <NostrEventQuote item={item} />
-            </Paper>
-          </NoteContext.Provider>
-        </LinkNEvent>
+      {event && (
+        <ContentProvider value={{ dense: true, disableLink }}>
+          <Paper outlined sx={styles.content}>
+            <NostrEventQuote event={event.event} />
+          </Paper>
+        </ContentProvider>
       )}
     </html.div>
   )
@@ -41,11 +37,13 @@ export const NEvent = observer(function NEvent(props: Props) {
 const styles = css.create({
   root: {
     width: '100%',
-    paddingBlock: spacing.margin1,
+    paddingBlock: spacing.padding1,
     paddingInline: spacing.padding2,
   },
   root$dense: {
     paddingInline: 0,
+    paddingTop: spacing.padding1,
+    paddingBottom: 0,
     maxWidth: 'calc(100vw - 90px)',
   },
   content: {

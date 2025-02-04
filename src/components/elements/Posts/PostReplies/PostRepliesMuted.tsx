@@ -1,8 +1,7 @@
+import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Button } from '@/components/ui/Button/Button'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { useCurrentUser } from '@/hooks/useRootStore'
-import type { Comment } from '@/stores/comment/comment'
-import type { Note } from '@/stores/notes/note'
 import { spacing } from '@/themes/spacing.stylex'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconVolumeOff } from '@tabler/icons-react'
@@ -13,11 +12,11 @@ import { PostRepliesTree } from './PostReply'
 
 type Props = {
   level: number
-  note: Note | Comment
 }
 
 export const PostRepliesMuted = observer(function PostRepliesMuted(props: Props) {
-  const { note, level } = props
+  const { level } = props
+  const { note } = useNoteContext()
   const user = useCurrentUser()
   const [openMuted, setOpenMuted] = useState(false)
   const replies = note.repliesMuted(user)

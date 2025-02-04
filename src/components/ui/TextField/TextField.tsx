@@ -17,6 +17,7 @@ type Props = {
   sx?: SxProps
   size?: 'sm' | 'md'
   type?: 'text' | 'number' | 'text' | 'date' | 'email' | 'password'
+  name?: string
   error?: boolean
   autoComplete?: boolean
   autoFocus?: boolean
@@ -31,7 +32,7 @@ type Props = {
   defaultValue?: string
   onBlur?: () => void
   onFocus?: () => void
-  onChange?: (e: ChangeEvent<HTMLInputElement>) => void
+  onChange?: (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void
   placeholder?: string
   leading?: React.ReactNode
   trailing?: React.ReactNode
@@ -40,6 +41,7 @@ type Props = {
 export const TextField = forwardRef<HTMLInputElement, Props>((props, ref) => {
   const {
     sx,
+    name,
     size = 'md',
     type: inputType = 'text',
     defaultValue,
@@ -65,7 +67,7 @@ export const TextField = forwardRef<HTMLInputElement, Props>((props, ref) => {
     return false
   })
 
-  const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+  const handleChange = useCallback((e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { value } = e.target
     setFilled(!!value && value !== '')
     onChange?.(e)
@@ -86,15 +88,15 @@ export const TextField = forwardRef<HTMLInputElement, Props>((props, ref) => {
           </html.div>
         )}
         {props.multiline && (
-          <html.textarea
+          <textarea
             rows={props.rows}
             ref={refs}
-            style={[styles.input, styles.textarea]}
+            name={name}
+            {...css.props([styles.input, styles.textarea])}
             onChange={handleChange}
             onBlur={onBlur}
             onFocus={onFocus}
             placeholder={placeholder}
-            // value={value}
             defaultValue={defaultValue}
             {...dataProps(visualState)}
             data-shrink

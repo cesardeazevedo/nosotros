@@ -1,6 +1,5 @@
+import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Fab } from '@/components/ui/Fab/Fab'
-import type { Comment } from '@/stores/comment/comment'
-import type { Note } from '@/stores/notes/note'
 import { palette } from '@/themes/palette.stylex'
 import { observer } from 'mobx-react-lite'
 import React from 'react'
@@ -8,7 +7,6 @@ import { css, html } from 'react-strict-dom'
 import useMeasure from 'react-use-measure'
 
 export type Props = {
-  note: Note | Comment
   size?: 'xs' | 'sm' | 'md'
   bubble?: boolean
   initialExpanded?: boolean
@@ -22,17 +20,16 @@ const sizes = {
 }
 
 export const PostContentWrapper = observer(function PostContentWrapper(props: Props) {
-  const { note, initialExpanded = false, size = 'md' } = props
-  const [ref, bounds] = useMeasure({ debounce: 200 })
+  const { initialExpanded = false, size = 'md' } = props
+  const { note } = useNoteContext()
+  const [ref, bounds] = useMeasure({ debounce: 100 })
   const expanded = initialExpanded || note.contentOpen
   const maxHeight = sizes[size]
   const canExpand = bounds.height >= maxHeight && !expanded
 
   return (
     <html.div style={[styles.root, styles[size], expanded && styles.root$expanded]}>
-      <html.div ref={ref} style={styles.bounds}>
-        {props.children}
-      </html.div>
+      <html.div ref={ref}>{props.children}</html.div>
       {canExpand && (
         <html.div style={styles.container}>
           <html.div style={styles.shadow} />
@@ -59,11 +56,6 @@ const styles = css.create({
   },
   root$expanded: {
     maxHeight: 'inherit',
-  },
-  bounds: {
-    display: 'flex',
-    flexDirection: 'column',
-    width: '100%',
   },
   container: {
     position: 'absolute',

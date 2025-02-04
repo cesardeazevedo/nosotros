@@ -5,6 +5,7 @@ export type NostrFilter = Filter
 
 export enum ClientToRelay {
   REQ = 'REQ',
+  AUTH = 'AUTH',
   EVENT = 'EVENT',
   CLOSE = 'CLOSE',
   NEG_OPEN = 'NEG-OPEN',
