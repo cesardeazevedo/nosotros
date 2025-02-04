@@ -5,6 +5,9 @@ import { useEffect } from 'react'
 export function useFeedSubscription(feed: NotesFeedSubscription, client: NostrClient) {
   // We usually use observable-hooks but in this case we don't want to unsubscribe on unmount
   useEffect(() => {
-    feed.subscribe(client).subscribe()
-  }, [feed])
+    if (!feed.started) {
+      feed.toggle('started', true)
+      feed.subscribe(client).subscribe()
+    }
+  }, [])
 }

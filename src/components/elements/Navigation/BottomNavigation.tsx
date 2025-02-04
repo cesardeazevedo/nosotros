@@ -76,7 +76,7 @@ const styles = css.create({
     left: 0,
     right: 0,
     bottom: 0,
-    zIndex: 400,
+    zIndex: 200,
     margin: 'auto',
     display: 'flex',
     flexDirection: 'row',
