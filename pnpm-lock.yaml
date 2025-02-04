@@ -29,8 +29,8 @@ importers:
         specifier: ^3.29.0
         version: 3.29.0(react@19.0.0)
       '@tanstack/react-router':
-        specifier: 1.97.23
-        version: 1.97.23(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+        specifier: ^1.99.0
+        version: 1.99.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       '@tiptap/core':
         specifier: ^2.11.0
         version: 2.11.0(@tiptap/pm@2.11.0)
@@ -2257,14 +2257,14 @@ packages:
     resolution:
       { integrity: sha512-VWNINymdmhay3MDvWVREmRwuWLSrX3YiInKvs5L4AHRF4bAfJabLlEReE0BW/XFsBt22ff8/C8Eam/LXlF97mA== }
 
-  '@tanstack/history@1.97.8':
+  '@tanstack/history@1.99.0':
     resolution:
-      { integrity: sha512-+0R1Xe2lRLeK4htiLRCv0fyxDnrCQbK/ltrJ9rofUwMdh/jQ5+tjGBPzOlyUQzTZg7Rzv8NzVzQWuyxjQYga2g== }
+      { integrity: sha512-MQS1Lg8D+1vpasEJKf4zs1sxhxbXcoejmVCZDbo0bq2wq+xVK+kRixj5Pae2kb2APzdXYga4u236GBbgCKTcnQ== }
     engines: { node: '>=12' }
 
-  '@tanstack/react-router@1.97.23':
+  '@tanstack/react-router@1.99.0':
     resolution:
-      { integrity: sha512-5SuJlGZfzadY0iIJa6TbXQexIvVRL6VbSo8rxzxPDBSQPXZAbgJRKAmcGUwRcLoOzDJGZa+eWi1FR9YuKNtTNA== }
+      { integrity: sha512-MwKQxckJMdxpYwpZsItM1SCodcAKu1bqWha2s2d5/Iy1F/9XzqT8gZXpZW5fvC7+21YOuwMxvJmwbSPkpVeWRw== }
     engines: { node: '>=12' }
     peerDependencies:
       react: '>=18.0.0 || >=19.0.0'
@@ -2277,14 +2277,10 @@ packages:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
-  '@tanstack/router-core@1.97.21':
+  '@tanstack/router-core@1.99.0':
     resolution:
-      { integrity: sha512-xfejDR7rxfGsM5OIMFyQVsaBkO1Ha/Sb7Y0wuh0W2WAgYuVzTO1ynNRot8Eo8G9D6aPgyzHEjV26iHxCVKjbBA== }
+      { integrity: sha512-/9HMagUilxdjHNfgZaRSjyMvuJ+BL8/IXLTN9NtbXOJZvB2q4Vu0GIWZJfwMiz9czXqdQ/NxtPxeG/b+YTnUOg== }
     engines: { node: '>=12' }
-
-  '@tanstack/store@0.6.0':
-    resolution:
-      { integrity: sha512-+m2OBglsjXcLmmKOX6/9v8BDOCtyxhMmZLsRUDswOOSdIIR9mvv6i0XNKsmTh3AlYU8c1mRcodC8/Vyf+69VlQ== }
 
   '@tanstack/store@0.7.0':
     resolution:
@@ -10171,13 +10167,13 @@ snapshots:
 
   '@tabler/icons@3.29.0': {}
 
-  '@tanstack/history@1.97.8': {}
+  '@tanstack/history@1.99.0': {}
 
-  '@tanstack/react-router@1.97.23(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
+  '@tanstack/react-router@1.99.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
     dependencies:
-      '@tanstack/history': 1.97.8
+      '@tanstack/history': 1.99.0
       '@tanstack/react-store': 0.7.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      '@tanstack/router-core': 1.97.21
+      '@tanstack/router-core': 1.99.0
       jsesc: 3.1.0
       react: 19.0.0
       react-dom: 19.0.0(react@19.0.0)
@@ -10191,12 +10187,10 @@ snapshots:
       react-dom: 19.0.0(react@19.0.0)
       use-sync-external-store: 1.4.0(react@19.0.0)
 
-  '@tanstack/router-core@1.97.21':
+  '@tanstack/router-core@1.99.0':
     dependencies:
-      '@tanstack/history': 1.97.8
-      '@tanstack/store': 0.6.0
-
-  '@tanstack/store@0.6.0': {}
+      '@tanstack/history': 1.99.0
+      '@tanstack/store': 0.7.0
 
   '@tanstack/store@0.7.0': {}
 
