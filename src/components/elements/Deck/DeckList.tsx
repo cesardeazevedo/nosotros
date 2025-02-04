@@ -1,16 +1,22 @@
+import { MediaColumn } from '@/components/modules/Media/MediaColumn'
 import { NAddressColumn } from '@/components/modules/NAddress/NAddressColumn'
 import { NEventColumn } from '@/components/modules/NEvent/NEventColumn'
 import { NotificationsColumn } from '@/components/modules/Notifications/NotificationsColumn'
 import { NProfileColumn } from '@/components/modules/NProfile/NProfileColumn'
+import { RelayFeedColumn } from '@/components/modules/RelayFeed/RelayFeedColumn'
+import { TagsColumn } from '@/components/modules/Tag/TagColumn'
 import { NostrProvider } from '@/components/providers/NostrProvider'
 import { useRootStore } from '@/hooks/useRootStore'
 import type { BaseModule } from '@/stores/modules/module'
 import {
   isHomeModule,
+  isMediaModule,
   isNAddressModule,
   isNEventModule,
   isNotificationModule,
   isNProfileModule,
+  isRelayFeedModule,
+  isTagModule,
 } from '@/stores/modules/module.store'
 import { HomeColumn } from 'components/modules/Home/HomeColumn'
 import { observer } from 'mobx-react-lite'
@@ -19,9 +25,13 @@ import { firstValueFrom, timer } from 'rxjs'
 import { DeckColumn } from './DeckColumn'
 import { DeckContext } from './DeckContext'
 
-const DeckModuleContext = function DeckModuleContext(props: { children: React.ReactNode; module: BaseModule }) {
-  const { module, children } = props
-  if (module.context) {
+const DeckModuleContext = function DeckModuleContext(props: {
+  children: React.ReactNode
+  module: BaseModule
+  enabled?: boolean
+}) {
+  const { module, children, enabled } = props
+  if (module.context && enabled !== false) {
     return <NostrProvider nostrContext={() => module.context!}>{children}</NostrProvider>
   }
   return children
@@ -37,13 +47,16 @@ export const DeckList = observer(function DeckList() {
         const key = `${module.type}:${module.id}`
         return (
           <DeckColumn key={key}>
-            <DeckContext.Provider value={{ index, delay }}>
-              <DeckModuleContext module={module}>
+            <DeckContext.Provider value={{ module, index, delay }}>
+              <DeckModuleContext module={module} enabled={!isRelayFeedModule(module)}>
                 {isHomeModule(module) && <HomeColumn module={module} />}
                 {isNProfileModule(module) && <NProfileColumn module={module} />}
                 {isNEventModule(module) && <NEventColumn module={module} />}
                 {isNAddressModule(module) && <NAddressColumn module={module} />}
                 {isNotificationModule(module) && <NotificationsColumn module={module} />}
+                {isMediaModule(module) && <MediaColumn module={module} />}
+                {isRelayFeedModule(module) && <RelayFeedColumn module={module} />}
+                {isTagModule(module) && <TagsColumn module={module} />}
               </DeckModuleContext>
             </DeckContext.Provider>
           </DeckColumn>

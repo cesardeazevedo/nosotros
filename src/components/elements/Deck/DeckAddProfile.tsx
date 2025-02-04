@@ -56,17 +56,17 @@ export const DeckAddProfile = (props: Props) => {
 
 const styles = css.create({
   header: {
-    paddingInline: spacing.padding1,
+    padding: spacing.padding1,
   },
   search: {
     paddingInline: spacing.padding2,
     backgroundColor: palette.surfaceContainerHigh,
-    borderRadius: shape.full,
+    borderRadius: shape.lg,
     fontSize: typeScale.bodySize$lg,
   },
   input: {
     border: 'none',
-    paddingBlock: spacing.padding1,
+    paddingBlock: spacing.padding2,
     width: '100%',
     height: '100%',
   },
