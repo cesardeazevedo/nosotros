@@ -16,12 +16,13 @@ export const PostContent = observer(function PostContent(props: Props) {
   return (
     <PostContentWrapper initialExpanded={initialExpanded}>
       {note.metadata.isRoot === false && <PostReplyingHeader />}
-      {note.event.event.kind === Kind.Text && <Content />}
-      {note.event.event.kind === Kind.Media && (
+      {note.event.event.kind === Kind.Media ? (
         <>
           <MediaList />
           <Content renderMedia={false} />
         </>
+      ) : (
+        <Content />
       )}
     </PostContentWrapper>
   )
