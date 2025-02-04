@@ -1,5 +1,11 @@
 import { Kind } from '@/constants/kinds'
-import type { NostrEventMetadata, NostrEventNote, NostrEventRepost, NostrEventZapReceipt } from '@/nostr/types'
+import type {
+  NostrEventMedia,
+  NostrEventMetadata,
+  NostrEventNote,
+  NostrEventRepost,
+  NostrEventZapReceipt,
+} from '@/nostr/types'
 import { metadataSymbol } from '@/nostr/types'
 import { observer } from 'mobx-react-lite'
 import { PostRoot } from '../Posts/Post'
@@ -16,6 +22,7 @@ type Props = {
 export const NostrEventRoot = observer(function NostrEventRoot(props: Props) {
   const { event, open } = props
   switch (event[metadataSymbol].kind) {
+    case Kind.Comment:
     case Kind.Text: {
       return event[metadataSymbol].isRoot ? (
         <PostRoot event={event as NostrEventNote} open={open} />
@@ -28,6 +35,9 @@ export const NostrEventRoot = observer(function NostrEventRoot(props: Props) {
     }
     case Kind.Repost: {
       return <RepostRoot event={event as NostrEventRepost} />
+    }
+    case Kind.Media: {
+      return <PostRoot open={open} event={event as NostrEventMedia} />
     }
     case Kind.ZapReceipt: {
       return <ZapReceiptRoot event={event as NostrEventZapReceipt} />

@@ -6,7 +6,7 @@ import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { useMobile } from '@/hooks/useMobile'
 import { useNoteStore } from '@/hooks/useNoteStore'
 import { subscribeNoteStats } from '@/nostr/subscriptions/subscribeNoteStats'
-import type { NostrEventComment, NostrEventNote } from '@/nostr/types'
+import type { NostrEventComment, NostrEventMedia, NostrEventNote } from '@/nostr/types'
 import { useNostrClientContext } from '@/stores/context/nostr.context.hooks'
 import { spacing } from '@/themes/spacing.stylex'
 import { useRouter } from '@tanstack/react-router'
@@ -24,7 +24,7 @@ import { PostRepliesPreview } from './PostReplies/PostRepliesPreview'
 
 type Props = {
   open?: boolean
-  event: NostrEventNote | NostrEventComment
+  event: NostrEventNote | NostrEventComment | NostrEventMedia
   header?: React.ReactNode
 }
 

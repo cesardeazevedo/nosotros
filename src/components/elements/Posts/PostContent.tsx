@@ -1,6 +1,8 @@
 import { useNoteContext } from '@/components/providers/NoteProvider'
+import { Kind } from '@/constants/kinds'
 import { observer } from 'mobx-react-lite'
 import { Content } from '../Content/Content'
+import { MediaList } from '../Media/MediaList'
 import { PostContentWrapper } from './PostContentWrapper'
 import { PostReplyingHeader } from './PostReplyingHeader'
 
@@ -14,7 +16,13 @@ export const PostContent = observer(function PostContent(props: Props) {
   return (
     <PostContentWrapper initialExpanded={initialExpanded}>
       {note.metadata.isRoot === false && <PostReplyingHeader />}
-      <Content />
+      {note.event.event.kind === Kind.Text && <Content />}
+      {note.event.event.kind === Kind.Media && (
+        <>
+          <MediaList />
+          <Content renderMedia={false} />
+        </>
+      )}
     </PostContentWrapper>
   )
 })

@@ -1,5 +1,11 @@
 import { Kind } from '@/constants/kinds'
-import type { NostrEventMetadata, NostrEventNote, NostrEventRepost, NostrEventZapReceipt } from '@/nostr/types'
+import type {
+  NostrEventMedia,
+  NostrEventMetadata,
+  NostrEventNote,
+  NostrEventRepost,
+  NostrEventZapReceipt,
+} from '@/nostr/types'
 import { metadataSymbol } from '@/nostr/types'
 import { observer } from 'mobx-react-lite'
 import { ArticleRoot } from '../Articles/ArticleRoot'
@@ -23,6 +29,9 @@ export const NostrEventFeedItem = observer(function NostrEventFeedItem(props: Pr
     }
     case Kind.Repost: {
       return <RepostRoot event={event as NostrEventRepost} />
+    }
+    case Kind.Media: {
+      return <PostRoot event={event as NostrEventMedia} />
     }
     case Kind.ZapReceipt: {
       return <ZapReceiptRoot event={event as NostrEventZapReceipt} />

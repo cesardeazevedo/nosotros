@@ -1,5 +1,11 @@
 import { Kind } from '@/constants/kinds'
-import type { NostrEventComment, NostrEventNote, NostrEventRepost, NostrEventZapReceipt } from '@/nostr/types'
+import type {
+  NostrEventComment,
+  NostrEventMedia,
+  NostrEventNote,
+  NostrEventRepost,
+  NostrEventZapReceipt,
+} from '@/nostr/types'
 import { metadataSymbol } from '@/nostr/types'
 import { observer } from 'mobx-react-lite'
 import { ArticleRoot } from '../Articles/ArticleRoot'
@@ -8,7 +14,7 @@ import { ZapReceiptRoot } from '../Zaps/ZapReceipt'
 import { NostrEventUnsupported } from './NostrEventUnsupported'
 
 type Props = {
-  event: NostrEventNote | NostrEventComment | NostrEventZapReceipt | NostrEventRepost
+  event: NostrEventNote | NostrEventComment | NostrEventZapReceipt | NostrEventRepost | NostrEventMedia
 }
 
 export const NostrEventQuote = observer(function NostrEventQuote(props: Props) {
@@ -19,6 +25,12 @@ export const NostrEventQuote = observer(function NostrEventQuote(props: Props) {
     }
     case Kind.Text: {
       return <PostQuote event={event as NostrEventNote} />
+    }
+    case Kind.Comment: {
+      return <PostQuote event={event as NostrEventComment} />
+    }
+    case Kind.Media: {
+      return <PostQuote event={event as NostrEventMedia} />
     }
     case Kind.ZapReceipt: {
       // Ideally we would render a specific component for quotes, but zap root is fine here
