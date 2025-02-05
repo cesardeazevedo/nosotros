@@ -4,7 +4,6 @@ import { Tab } from '@/components/ui/Tab/Tab'
 import { Tabs } from '@/components/ui/Tabs/Tabs'
 import { useMobile } from '@/hooks/useMobile'
 import { shape } from '@/themes/shape.stylex'
-import { spacing } from '@/themes/spacing.stylex'
 import { IconBrush, IconDatabase, IconHeart, IconServerBolt } from '@tabler/icons-react'
 import { Link, useLocation } from '@tanstack/react-router'
 import { css } from 'react-strict-dom'
@@ -38,7 +37,6 @@ export const SettingsTabs = () => {
 const styles = css.create({
   tabs: {
     overflowX: 'auto',
-    paddingInline: spacing.padding1,
     [rippleTokens.height]: 46,
   },
   tab: {

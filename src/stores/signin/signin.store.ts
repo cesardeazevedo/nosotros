@@ -92,6 +92,7 @@ export const signinStore = makeAutoObservable({
         },
       },
     })
+    this.reset()
   },
 
   submitReadonly(pubkey: string) {
@@ -104,6 +105,7 @@ export const signinStore = makeAutoObservable({
         },
       },
     })
+    this.reset()
   },
 
   async submitNostrAddress(address: string) {

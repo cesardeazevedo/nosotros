@@ -370,13 +370,13 @@ export class EditorStore {
     return publish(client, event, {
       relays: of(this.allRelays.map((x) => x.relay)),
     }).pipe(
-      tap(() => this.reset()),
       tap((event) => {
         const component = createElement(ToastEventPublished, {
           event,
           eventLabel: this.title,
         })
         toastStore.enqueue(component, { duration: 10000 })
+        this.reset()
         this.options.onPublish?.(event)
       }),
       catchError((error) => {

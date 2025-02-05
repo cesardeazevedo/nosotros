@@ -56,6 +56,7 @@ export const TextField = forwardRef<HTMLInputElement, Props>((props, ref) => {
     onBlur,
     onChange,
     onFocus,
+    shrink: shrinkProp,
     ...rest
   } = props
   const visualStateRef = useRef<HTMLElement>(null)
@@ -75,7 +76,7 @@ export const TextField = forwardRef<HTMLInputElement, Props>((props, ref) => {
     onChange?.(e)
   }, [])
 
-  const shrink = props.shrink || visualState.focused || filled
+  const shrink = shrinkProp || visualState.focused || filled
 
   return (
     <html.div
