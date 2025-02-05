@@ -1,6 +1,7 @@
 import { useContentContext } from '@/components/providers/ContentProvider'
 import { useNoteContext } from '@/components/providers/NoteProvider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
+import { useMobile } from '@/hooks/useMobile'
 import { useCurrentPubkey, useRootContext } from '@/hooks/useRootStore'
 import { publishReaction } from '@/nostr/publish/publishReaction'
 import { fallbackEmoji, reactionStore } from '@/stores/reactions/reactions.store'
@@ -9,7 +10,7 @@ import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconHeart, IconHeartFilled } from '@tabler/icons-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { observer } from 'mobx-react-lite'
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import { css, html } from 'react-strict-dom'
 import { ReactionPicker } from '../../Reactions/ReactionPicker'
 import { ReactionsTooltip } from '../../Reactions/ReactionsTooltip'
@@ -32,12 +33,14 @@ const emojiColors: Record<string, string> = {
 export const ButtonReaction = observer(function ButtonReaction() {
   const { note } = useNoteContext()
   const { dense } = useContentContext()
+  const [mobileOpen, setMobileOpen] = useState(false)
   const total = reactionStore.getTotal(note.id)
   const pubkey = useCurrentPubkey()
   const myReactions = reactionStore.getByPubkey(pubkey)
   const myReaction = fallbackEmoji(myReactions?.[note.id]?.[0])
   const color = myReaction ? emojiColors[myReaction] || colors.red7 : colors.red7
   const context = useRootContext()
+  const mobile = useMobile()
 
   const handleReact = useCallback(
     (reaction: string) => {
@@ -58,7 +61,7 @@ export const ButtonReaction = observer(function ButtonReaction() {
             </ReactionsTooltip>
           )
         }>
-        <ReactionPicker onClick={handleReact}>
+        <ReactionPicker mobileOpen={mobileOpen} onClick={handleReact} onClose={() => setMobileOpen(false)}>
           <AnimatePresence initial={false}>
             <IconButton
               size={dense ? 'sm' : 'md'}
@@ -66,7 +69,12 @@ export const ButtonReaction = observer(function ButtonReaction() {
               onClick={(e) => {
                 e.stopPropagation()
                 e.preventDefault()
-                handleReact('❤️')
+                if (mobile && !mobileOpen) {
+                  setMobileOpen(true)
+                } else {
+                  handleReact('❤️')
+                  setMobileOpen(false)
+                }
               }}
               sx={[(color && styles[`button$${color}`]) || styles.button$red]}
               selectedIcon={

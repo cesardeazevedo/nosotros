@@ -13,6 +13,7 @@ import type { Pool } from '../pool'
 import { type NostrFilter } from '../types'
 import { NIP01Signer } from './nip01.signer'
 import type { Signer } from './signer'
+import { Relay } from '../Relay'
 
 export const BUNKER_REGEX = /^bunker:\/\/([0-9a-f]{64})\??([?/\w:.=&%-]*)$/
 
@@ -178,9 +179,10 @@ export class NIP46RemoteSigner implements Signer<NIP46RemoteSignerOptions> {
     }
 
     const sub = new NostrSubscription(subFilter)
+    const relay = new Relay(bunker.relay)
 
     return of(sub).pipe(
-      subscribe(this.pool.get(bunker.relay)!, undefined, false),
+      subscribe(relay, undefined, false),
 
       mergeMap(async ([, event]) => {
         const res = JSON.parse(await this.clientSigner.decrypt(bunker.pubkey, event.content))

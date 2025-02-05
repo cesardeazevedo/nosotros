@@ -9,5 +9,5 @@ export function useFeedSubscription(feed: NotesFeedSubscription, client: NostrCl
       feed.toggle('started', true)
       feed.subscribe(client).subscribe()
     }
-  }, [])
+  }, [feed])
 }

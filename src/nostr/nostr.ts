@@ -63,6 +63,7 @@ export type ClientSubOptions = Omit<SubscriptionOptions, 'outbox'> & {
   queryLocal?: boolean
   cacheFilter?: NostrFilter
   outbox?: boolean
+  prune?: boolean
 }
 
 export class NostrClient {
@@ -207,7 +208,7 @@ export class NostrClient {
         this.settings.outbox && options?.outbox !== false
           ? this.outboxTracker.subscribe.bind(this.outboxTracker)
           : () => EMPTY,
-      transform: pruneFilters,
+      transform: options?.prune === false ? undefined : pruneFilters,
     })
   }
 

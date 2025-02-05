@@ -62,7 +62,7 @@ export class NostrFeeds {
 
   following(pagination$: Pagination, options?: FeedOptions) {
     const currentAuthor = pagination$.authors[0]
-    return this.client.follows.subscribe(currentAuthor, options).pipe(
+    return this.client.follows.subscribe(currentAuthor, { ...options, prune: false }).pipe(
       mergeMap((event) => {
         const authors = [currentAuthor, ...(event[metadataSymbol].tags.get('p') || [])]
         return pagination$.setFilter({ authors })
