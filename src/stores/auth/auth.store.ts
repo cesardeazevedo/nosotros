@@ -3,6 +3,7 @@ import invariant from 'tiny-invariant'
 import { userStore } from '../users/users.store'
 import type { Account, AccountSnapshotIn } from './account.store'
 import { AccountModel } from './account.store'
+import { getRootStore } from '../helpers/getRootStore'
 
 export const AuthStoreModel = t
   .model('AuthStoreModel', {
@@ -50,5 +51,7 @@ export const AuthStoreModel = t
       invariant(self.pubkey, 'Pubkey not present during logout')
       self.delete(self.pubkey)
       self.selected = undefined
+      const root = getRootStore(self)
+      root.persistedModules.clear()
     },
   }))

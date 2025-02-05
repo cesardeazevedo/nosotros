@@ -61,6 +61,9 @@ export const ModuleStoreModel = t
     delete(id: string) {
       self.modules.delete(id)
     },
+    clear() {
+      self.modules.clear()
+    },
   }))
 
 export interface ModulesStore extends Instance<typeof ModuleStoreModel> {}
