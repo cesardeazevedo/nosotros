@@ -10,7 +10,7 @@ import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
-import { IconChevronLeft, IconCircleCheck } from '@tabler/icons-react'
+import { IconChevronLeft, IconCircleCheck, IconWallet } from '@tabler/icons-react'
 import { useNavigate } from '@tanstack/react-router'
 import { AnimatePresence, motion, MotionConfig } from 'framer-motion'
 import { decode } from 'light-bolt11-decoder'
@@ -141,7 +141,14 @@ export const ZapRequestInvoice = (props: Props) => {
                     value={invoice.toUpperCase()}
                   />
                 </html.div>
-                <CopyButton fullWidth text={invoice} title='Copy Invoice' ref={copyButtonRef} />
+                <Stack horizontal={false} gap={1}>
+                  <CopyButton fullWidth text={invoice} title='Copy Invoice' ref={copyButtonRef} />
+                  <a href={`lightning:${invoice}`}>
+                    <Button fullWidth variant='filled' sx={styles.button} icon={<IconWallet strokeWidth='1.5' />}>
+                      Open Wallet
+                    </Button>
+                  </a>
+                </Stack>
               </motion.div>
             )}
           </AnimatePresence>
@@ -180,6 +187,7 @@ const styles = css.create({
     padding: spacing.padding1,
   },
   button: {
+    display: 'flex',
     height: 55,
   },
   expired: {
