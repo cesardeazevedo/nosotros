@@ -1,4 +1,6 @@
+import { PopoverBase } from '@/components/ui/Popover/PopoverBase'
 import { TooltipRich } from '@/components/ui/TooltipRich/TooltipRich'
+import { useMobile } from '@/hooks/useMobile'
 import { elevation } from '@/themes/elevation.stylex'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
@@ -7,6 +9,8 @@ import React, { memo, useRef } from 'react'
 import { css } from 'react-strict-dom'
 
 type Props = {
+  mobileOpen: boolean
+  onClose?: () => void
   onClick: (reaction: string) => void
   children: React.ReactNode
 }
@@ -79,7 +83,34 @@ function ReactionDock({ onClick }: { onClick: Props['onClick'] }) {
 }
 
 export const ReactionPicker = memo(function ReactionPicker(props: Props) {
-  const { children, onClick } = props
+  const { mobileOpen, children, onClick, onClose } = props
+  const mobile = useMobile()
+
+  if (mobile && mobileOpen) {
+    return (
+      <PopoverBase
+        opened
+        cursor={false}
+        placement='top-start'
+        role='tooltip'
+        forwardProps
+        onClose={() => onClose?.()}
+        contentRenderer={(content) => (
+          <ReactionDock
+            onClick={(e) => {
+              content.close()
+              onClick(e)
+            }}
+          />
+        )}>
+        {(content) => (
+          <span {...content.getProps()} ref={content.setRef}>
+            {children}
+          </span>
+        )}
+      </PopoverBase>
+    )
+  }
 
   return (
     <TooltipRich
