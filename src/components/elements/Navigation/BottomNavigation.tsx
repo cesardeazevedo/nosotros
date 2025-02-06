@@ -9,13 +9,12 @@ import { useCurrentPubkey, useCurrentUser } from '@/hooks/useRootStore'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import { IconBell, IconBellFilled, IconUser } from '@tabler/icons-react'
+import { IconBell, IconBellFilled, IconPhoto, IconUser } from '@tabler/icons-react'
 import { Link, useLocation } from '@tanstack/react-router'
 import { observer } from 'mobx-react-lite'
 import { css, html } from 'react-strict-dom'
 import { IconHome } from '../Icons/IconHome'
 import { IconHomeFilled } from '../Icons/IconHomeFilled'
-import { IconPencil } from '../Icons/IconPencil'
 import { LinkSignIn } from '../Links/LinkSignIn'
 import { SignInButtonFab } from '../SignIn/SignInButtonFab'
 
@@ -33,20 +32,15 @@ export const BottomNavigation = observer(function BottomNavigation() {
     <>
       <html.div style={styles.root}>
         {!pubkey ? <SignInButtonFab /> : null}
-        <Stack grow justify='space-evenly'>
+        <Stack grow justify='space-around'>
           <Tabs anchor={location.pathname}>
             <Tooltip text='Home' enterDelay={0}>
               <Link to='/' resetScroll>
                 <Tab anchor='/' sx={styles.tab} icon={<IconHome />} activeIcon={<IconHomeFilled />} />
               </Link>
             </Tooltip>
-            {/* <Tooltip text='Relays' enterDelay={0}> */}
-            {/*   <Link to='/relays'> */}
-            {/*     <Tab anchor='/relays' sx={styles.tab} icon={<IconServerBolt size={24} />} /> */}
-            {/*   </Link> */}
-            {/* </Tooltip> */}
-            <Link to='/compose'>
-              <Tab anchor='/compose' sx={styles.tab} icon={<IconPencil />} activeIcon={<IconPencil />} />
+            <Link to='/media'>
+              <Tab anchor='/media' sx={styles.tab} icon={<IconPhoto />} activeIcon={<IconPhoto />} />
             </Link>
             {user && (
               <Link to='/notifications'>
@@ -88,7 +82,7 @@ const styles = css.create({
   },
   tab: {
     height: 50,
-    width: 80,
+    width: 70,
     borderRadius: shape.full,
     [tabTokens.containerShape]: shape.full,
     [focusRingTokens.color]: palette.secondaryContainer,

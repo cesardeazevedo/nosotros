@@ -3,7 +3,7 @@ import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { MenuList } from '@/components/ui/MenuList/MenuList'
 import { useCurrentPubkey, useRootStore } from '@/hooks/useRootStore'
 import { shape } from '@/themes/shape.stylex'
-import { IconLogout, IconSettingsFilled, IconUserFilled } from '@tabler/icons-react'
+import { IconLogout, IconPhoto, IconServerBolt, IconSettingsFilled, IconUserFilled } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
 import { observer } from 'mobx-react-lite'
 import { css } from 'react-strict-dom'
@@ -40,6 +40,16 @@ export const Menu = observer(function Menu(props: Props) {
         <LinkSignIn>
           <MenuItem leadingIcon={<IconNostr />} label='Join Nostr' />
         </LinkSignIn>
+      )}
+      {pubkey && (
+        <Link to='/media'>
+          <MenuItem onClick={() => props.onAction?.()} leadingIcon={<IconPhoto />} label='Media' />
+        </Link>
+      )}
+      {pubkey && (
+        <Link to='/relays'>
+          <MenuItem onClick={() => props.onAction?.()} leadingIcon={<IconServerBolt />} label='Relays' />
+        </Link>
       )}
       <Link to='/settings'>
         <MenuItem
