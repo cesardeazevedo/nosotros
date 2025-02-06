@@ -64,7 +64,6 @@ export const TopNavigation = observer(function TopNavigation() {
 })
 
 const styles = css.create({
-  root: {},
   tab: {
     height: 50,
     borderRadius: shape.full,
