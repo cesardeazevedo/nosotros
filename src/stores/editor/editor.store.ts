@@ -363,8 +363,7 @@ export class EditorStore {
 
   submit(event: EventTemplate) {
     const client = this.client
-    const uploader = this.uploader
-    if (!client || !uploader) {
+    if (!client) {
       return throwError(() => 'Missing signer')
     }
     return publish(client, event, {
