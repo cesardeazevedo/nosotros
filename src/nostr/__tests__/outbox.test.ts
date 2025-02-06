@@ -2,7 +2,7 @@ import { test } from '@/utils/fixtures'
 import { subscribeSpyTo } from '@hirez_io/observer-spy'
 
 describe('OutboxTracker', async () => {
-  test('assert ids + relayHints fallback', async ({ createClient, insertRelayList }) => {
+  test('assert idHints', async ({ createClient, insertRelayList }) => {
     await insertRelayList({
       pubkey: 'p1',
       tags: [
@@ -25,7 +25,7 @@ describe('OutboxTracker', async () => {
         },
       ],
       {
-        fallback: {
+        idHints: {
           '1': ['p1'],
           '2': ['p2'],
           '3': ['p3'],

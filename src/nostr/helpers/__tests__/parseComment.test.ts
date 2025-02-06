@@ -27,7 +27,7 @@ describe('parseComment', () => {
       relayHints: {
         authors: { pubkey1: [RELAY_1] },
         ids: { id_1_root: [RELAY_1], id_1_reply_1: [RELAY_2] },
-        fallback: { id_1_reply_1: ['pubkey2'] },
+        idHints: { id_1_reply_1: ['pubkey2'] },
       },
       isRoot: false,
       id: 'id_1_reply_2',
@@ -62,7 +62,7 @@ describe('parseComment', () => {
       relayHints: {
         authors: { pubkey1: [RELAY_1] },
         ids: { id_1_root: [RELAY_1, RELAY_2] },
-        fallback: { id_1_root: ['pubkey2'] },
+        idHints: { id_1_root: ['pubkey2'] },
       },
       isRoot: false,
       id: 'id_1_reply_2',

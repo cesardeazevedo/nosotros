@@ -90,7 +90,7 @@ export class NIP01Notes {
               if (ids.length) {
                 return from(ids).pipe(
                   mergeMap((id) => {
-                    const relayHints = mergeRelayHints([metadata.relayHints, { fallback: { [id]: [event.pubkey] } }])
+                    const relayHints = mergeRelayHints([metadata.relayHints, { idHints: { [id]: [event.pubkey] } }])
                     return subscribeIdsFromQuotes(id, this.client, { relayHints }).pipe(
                       ofKind<NostrEventNote>([Kind.Text]),
                       this.subscribeParent(),

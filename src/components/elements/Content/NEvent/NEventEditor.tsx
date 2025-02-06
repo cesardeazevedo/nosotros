@@ -18,7 +18,7 @@ export const NEventEditor = (props: NodeViewProps) => {
     return merge(
       context.client.notes.subNotesWithRelated(
         { ids: [attrs.id] },
-        { relayHints: { fallback: attrs.author ? { [attrs.id]: [attrs.author] } : {} } },
+        { relayHints: { idHints: attrs.author ? { [attrs.id]: [attrs.author] } : {} } },
       ),
       attrs.author ? context.client.users.subscribe(attrs.author) : EMPTY,
     )

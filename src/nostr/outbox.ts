@@ -25,7 +25,7 @@ export class OutboxTracker {
   }
 
   private trackIds(filter: NostrFilter, hints?: RelayHints) {
-    return from(Object.entries(hints?.fallback || {})).pipe(
+    return from(Object.entries(hints?.idHints || {})).pipe(
       mergeMap(([id, pubkeys]) => {
         return from(pubkeys).pipe(
           mergeMap((pubkey) => this.client.mailbox.track(pubkey, this.options)),

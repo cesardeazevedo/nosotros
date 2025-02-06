@@ -241,7 +241,7 @@ describe('parseNote', () => {
     expect(note.relayHints).toStrictEqual({
       authors: { '1': [RELAY_2], [event1.pubkey]: [RELAY_2] },
       ids: { '1': [RELAY_2], [event1.id]: [RELAY_2, RELAY_3] },
-      fallback: {
+      idHints: {
         '1': ['p1', 'p2'],
         '2': ['p3'],
       },
