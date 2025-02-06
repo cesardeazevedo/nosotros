@@ -1,6 +1,8 @@
+import { focusRingTokens } from '@/components/ui/FocusRing/FocusRing.stylex'
 import { rippleTokens } from '@/components/ui/Ripple/Ripple.stylex'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Tab } from '@/components/ui/Tab/Tab'
+import { tabTokens } from '@/components/ui/Tab/Tab.stylex'
 import { Tabs } from '@/components/ui/Tabs/Tabs'
 import { useMobile } from '@/hooks/useMobile'
 import { shape } from '@/themes/shape.stylex'
@@ -38,6 +40,7 @@ const styles = css.create({
   tabs: {
     overflowX: 'auto',
     [rippleTokens.height]: 46,
+    [tabTokens.containerShape]: shape.full,
   },
   tab: {
     borderRadius: shape.full,

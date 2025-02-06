@@ -1,4 +1,5 @@
-import { useCallback, useRef, useState } from 'react'
+import type { Ref } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 export type IVisualState = {
   hovered?: boolean
@@ -10,7 +11,7 @@ export type IVisualState = {
 
 export type IUseVisualStateResult = {
   visualState: IVisualState
-  setRef: (element: Element | null) => void
+  setRef: Ref<Element>
 }
 
 export type IVisualStateOptions = {
@@ -18,20 +19,19 @@ export type IVisualStateOptions = {
   disabled?: boolean
 }
 
-// Used to handle overlapping surfaces.
-let activeTarget: EventTarget | null = null
-
 export const useVisualState = (visualState?: IVisualState, options?: IVisualStateOptions): IUseVisualStateResult => {
   const [hovered, setHovered] = useState(false)
   const [focused, setFocused] = useState(false)
   const [pressed, setPressed] = useState(false)
   const focusFromRef = useRef<'mouse'>(undefined)
 
-  const handleMouseEnter = useCallback(() => setHovered(true), [])
+  const handleMouseEnter = useCallback(() => {
+    setHovered(true)
+  }, [])
+
   const handleMouseLeave = useCallback(() => {
     setHovered(false)
     setPressed(false)
-    activeTarget = null
   }, [])
 
   const handleFocus = useCallback(() => {
@@ -45,64 +45,43 @@ export const useVisualState = (visualState?: IVisualState, options?: IVisualStat
 
   const handleMouseDown = useCallback((event: MouseEvent | Event) => {
     focusFromRef.current = 'mouse'
-    const pressed = !activeTarget && (event as MouseEvent).button === 0
+    const pressed = (event as MouseEvent).button === 0
     setPressed(pressed)
-    activeTarget = event.target
   }, [])
 
   const handleMouseUp = useCallback(() => {
     setPressed(false)
-    activeTarget = null
   }, [])
 
   const handleKeyDown = useCallback((event: KeyboardEvent | Event) => {
-    const pressed = !activeTarget && (event as KeyboardEvent).key === ' '
+    const pressed = (event as KeyboardEvent).key === ' '
     setPressed(pressed)
-    activeTarget = event.target
   }, [])
 
   const handleKeyUp = useCallback(() => {
     setPressed(false)
-    activeTarget = null
   }, [])
 
-  const setRef = useCallback(
-    (element: Element | null) => {
-      if (element && !options?.disabled && visualState?.strategy !== 'replace') {
-        element.addEventListener('mouseenter', handleMouseEnter)
-        element.addEventListener('mouseleave', handleMouseLeave)
-        element.addEventListener('focus', handleFocus)
-        element.addEventListener('blur', handleBlur)
-        element.addEventListener('mousedown', handleMouseDown)
-        element.addEventListener('mouseup', handleMouseUp)
-        element.addEventListener('keydown', handleKeyDown)
-        element.addEventListener('keyup', handleKeyUp)
+  const elementRef = useRef<Element | null>(null)
 
-        return () => {
-          element.removeEventListener('mouseenter', handleMouseEnter)
-          element.removeEventListener('mouseleave', handleMouseLeave)
-          element.removeEventListener('focus', handleFocus)
-          element.removeEventListener('blur', handleBlur)
-          element.removeEventListener('mousedown', handleMouseDown)
-          element.removeEventListener('mouseup', handleMouseUp)
-          element.removeEventListener('keydown', handleKeyDown)
-          element.removeEventListener('keyup', handleKeyUp)
-        }
-      }
-    },
-    [
-      options?.disabled,
-      visualState?.strategy,
-      handleMouseEnter,
-      handleMouseLeave,
-      handleFocus,
-      handleBlur,
-      handleMouseDown,
-      handleMouseUp,
-      handleKeyDown,
-      handleKeyUp,
-    ],
-  )
+  useEffect(() => {
+    const element = elementRef.current
+    if (!element || options?.disabled || visualState?.strategy === 'replace') return
+    const controller = new AbortController()
+    const signal = { signal: controller.signal }
+    element.addEventListener('pointerenter', handleMouseEnter, signal)
+    element.addEventListener('pointerleave', handleMouseLeave, signal)
+    element.addEventListener('pointerdown', handleMouseDown, signal)
+    element.addEventListener('pointerup', handleMouseUp, signal)
+    element.addEventListener('focus', handleFocus, signal)
+    element.addEventListener('blur', handleBlur, signal)
+    element.addEventListener('keydown', handleKeyDown, signal)
+    element.addEventListener('keyup', handleKeyUp, signal)
+
+    return () => {
+      controller.abort()
+    }
+  }, [])
 
   const newVisualState = visualState || { pressed, focused, hovered, dragged: false }
 
@@ -113,7 +92,7 @@ export const useVisualState = (visualState?: IVisualState, options?: IVisualStat
         hovered: false,
         pressed: false,
       },
-      setRef,
+      setRef: elementRef,
     }
   }
 
@@ -127,7 +106,7 @@ export const useVisualState = (visualState?: IVisualState, options?: IVisualStat
           : focusFromRef.current !== 'mouse'
         : false,
     },
-    setRef,
+    setRef: elementRef,
   }
 
   return result
