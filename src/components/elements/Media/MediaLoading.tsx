@@ -20,11 +20,13 @@ export const PostMediaLoading = memo(({ rows = 2 }: Props) => {
 
 const styles = css.create({
   root: {
-    marginBottom: 4,
+    marginTop: 4,
   },
   item: {
-    width: 196,
-    height: 196,
+    width: '100%',
+    height: '100%',
     borderRadius: 0,
+    flex: '1 1 calc(33.33% - 20px)',
+    aspectRatio: '1 / 1',
   },
 })
