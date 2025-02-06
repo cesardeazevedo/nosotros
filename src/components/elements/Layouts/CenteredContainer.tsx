@@ -24,6 +24,7 @@ const styles = css.create({
     },
     padding: 0,
     marginBottom: 0,
+    overflowX: 'hidden',
   },
   margin: {
     paddingBottom: 100,
