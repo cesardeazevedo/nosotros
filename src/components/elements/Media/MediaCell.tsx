@@ -1,6 +1,7 @@
 import { ContentProvider } from '@/components/providers/ContentProvider'
 import { NoteProvider } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
+import { useMobile } from '@/hooks/useMobile'
 import { useNoteStore } from '@/hooks/useNoteStore'
 import { useGlobalSettings } from '@/hooks/useRootStore'
 import type { NostrEventMedia } from '@/nostr/types'
@@ -16,13 +17,14 @@ export const MediaCell = observer(function MediaCell(props: { event: NostrEventM
   const { event } = props
   const note = useNoteStore(event)
   const globalSettings = useGlobalSettings()
+  const mobile = useMobile()
   return (
     <>
       <NoteProvider value={{ note }}>
         <ContentProvider value={{ dense: true }}>
           {note.imetaList.slice(0, 1).map(([type, src]) => {
             return (
-              <html.div key={src} style={styles.root}>
+              <html.div key={src} style={styles.item}>
                 <html.div style={styles.header}>
                   {note.imetaList.length > 1 && <IconSquaresFilled size={18} style={{ transform: 'scale(-1)' }} />}
                 </html.div>
@@ -36,7 +38,7 @@ export const MediaCell = observer(function MediaCell(props: { event: NostrEventM
                     onClick={() => dialogStore.pushImage(src)}
                     onError={() => mediaStore.addError(src)}
                     src={globalSettings.getImgProxyUrl('feed_img', src)}
-                    style={styles.media}
+                    style={[styles.media, mobile && styles.media$mobile]}
                   />
                 )}
                 {type === 'video' && (
@@ -44,7 +46,7 @@ export const MediaCell = observer(function MediaCell(props: { event: NostrEventM
                     onClick={() => dialogStore.pushImage(src)}
                     onError={() => mediaStore.addError(src)}
                     src={globalSettings.getImgProxyUrl('feed_img', src)}
-                    {...css.props(styles.media)}
+                    {...css.props([styles.media, mobile && styles.media$mobile])}
                   />
                 )}
               </html.div>
@@ -57,7 +59,9 @@ export const MediaCell = observer(function MediaCell(props: { event: NostrEventM
 })
 
 const styles = css.create({
-  root: {
+  item: {
+    flex: '1 1 calc(33.33% - 20px)',
+    aspectRatio: '1 / 1',
     position: 'relative',
   },
   avatar: {
@@ -65,11 +69,12 @@ const styles = css.create({
   },
   media: {
     cursor: 'pointer',
-    width: 196,
-    height: 196,
+    width: '100%',
+    height: '100%',
     objectFit: 'cover',
     position: 'relative',
   },
+  media$mobile: {},
   header: {
     position: 'absolute',
     top: 8,

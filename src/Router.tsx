@@ -269,6 +269,7 @@ export const router = createRouter({
   defaultPreload: false,
   defaultPendingMinMs: 0,
   scrollRestoration: true,
+  getScrollRestorationKey: (location) => location.pathname,
 })
 
 declare module '@tanstack/react-router' {

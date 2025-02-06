@@ -30,6 +30,12 @@ export const PostLink = observer(function postList(props: Props) {
     (e: StrictClickEvent) => {
       e.preventDefault()
       e.stopPropagation()
+      const element = 'target' in e ? (e.target as HTMLElement) : null
+      const isLink = element?.closest('a')
+      const isButton = element?.closest('button')
+      if (isButton || isLink) {
+        return
+      }
       if (!mobile) {
         note.toggleContent(true)
         note.toggleReplies(true)

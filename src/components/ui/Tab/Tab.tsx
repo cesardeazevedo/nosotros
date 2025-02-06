@@ -82,7 +82,7 @@ export const Tab = forwardRef<HTMLButtonElement, Props>((props, ref) => {
       ref={refs}
       {...(active ? dataProps(visualState) : {})}>
       <Elevation />
-      <Ripple element={actionRef} visualState={visualState} />
+      <Ripple element={actionRef} visualState={active ? visualState : {}} />
       <FocusRing sx={styles.focusRing} element={actionRef} visualState={visualState} />
       <html.div style={[styles.content, stacked && styles.content$stacked]}>
         {hasIcon && (
@@ -180,7 +180,6 @@ const styles = css.create({
     // },
     borderRadius: 'inherit',
     borderStyle: 'unset',
-    backgroundColor: 'unset',
     textDecoration: 'none',
     paddingBlock: 0,
     [tabStateTokens.stateLayerColor$hover]: tabTokens.stateLayerColor$hover,
@@ -229,17 +228,6 @@ const styles = css.create({
   label$disabled: {
     color: tabTokens.labelTextColor$disabled,
     opacity: tabTokens.labelTextOpacity$disabled,
-  },
-  background: {
-    backgroundColor: tabTokens.containerColor,
-    inset: 0,
-    position: 'absolute',
-    zIndex: -1,
-    borderRadius: 'inherit',
-  },
-  background$disabled: {
-    backgroundColor: tabTokens.containerColor$disabled,
-    opacity: tabTokens.containerOpacity$disabled,
   },
   content: {
     position: 'relative',
