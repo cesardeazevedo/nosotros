@@ -1,4 +1,4 @@
-import { subscribeIdsFromQuotes } from '@/nostr/operators/subscribeIdsFromQuotes'
+import { subscribeIdsFromQuotes } from '@/nostr/subscriptions/subscribeIdsFromQuotes'
 import { subscribeUser } from '@/nostr/subscriptions/subscribeUser'
 import { useObservableNostrContext } from '@/stores/context/nostr.context.hooks'
 import { palette } from '@/themes/palette.stylex'

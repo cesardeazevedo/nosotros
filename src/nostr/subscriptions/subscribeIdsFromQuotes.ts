@@ -3,11 +3,11 @@ import { ofKind } from '@/core/operators/ofKind'
 import { connect, EMPTY, ignoreElements, merge, mergeMap, of } from 'rxjs'
 import { parseId } from '../helpers/parseId'
 import type { ClientSubOptions, NostrClient } from '../nostr'
-import { withAuthorsFromNote } from '../subscriptions/subscribeNoteAuthors'
-import { subscribeUser } from '../subscriptions/subscribeUser'
-import { withZapAuthor } from '../subscriptions/subscribeZaps'
-import type { NostrEventNote, NostrEventZapReceipt } from '../types'
 import { replayIds } from './subscribeIds'
+import { withAuthorsFromNote } from './subscribeNoteAuthors'
+import { subscribeUser } from './subscribeUser'
+import { withZapAuthor } from './subscribeZaps'
+import type { NostrEventNote, NostrEventZapReceipt } from '../types'
 
 // Sligly different than subscribeIds but avoids circular references
 export const subscribeIdsFromQuotes = replayIds.wrap((id: string, client: NostrClient, options?: ClientSubOptions) => {

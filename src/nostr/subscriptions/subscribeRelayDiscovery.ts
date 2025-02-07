@@ -2,8 +2,8 @@ import { Kind } from '@/constants/kinds'
 import { ofKind } from '@/core/operators/ofKind'
 import { of } from 'rxjs'
 import type { NostrClient } from '../nostr'
-import { withRelatedAuthors } from '../subscriptions/withRelatedAuthor'
 import type { NostrEventRelayDiscovery } from '../types'
+import { withRelatedAuthors } from './withRelatedAuthor'
 
 const kinds = [Kind.RelayDiscovery]
 

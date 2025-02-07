@@ -1,6 +1,6 @@
 import type { ClientSubOptions, NostrClient } from '@/nostr/nostr'
-import { replayIds } from '@/nostr/operators/subscribeIds'
-import { subscribeIdsFromQuotes } from '@/nostr/operators/subscribeIdsFromQuotes'
+import { replayIds } from '@/nostr/subscriptions/subscribeIds'
+import { subscribeIdsFromQuotes } from '@/nostr/subscriptions/subscribeIdsFromQuotes'
 import type { Instance, SnapshotIn, SnapshotOut } from 'mobx-state-tree'
 import { t } from 'mobx-state-tree'
 import { BaseModuleModel } from '../modules/module'

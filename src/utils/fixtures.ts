@@ -9,7 +9,7 @@ import { parseUser } from '@/nostr/helpers/parseUser'
 import { replay as replayMailbox } from '@/nostr/mailbox'
 import type { NostrClientOptions } from '@/nostr/nostr'
 import { NostrClient } from '@/nostr/nostr'
-import { replayIds } from '@/nostr/operators/subscribeIds'
+// import { replayIds } from '@/nostr/subscriptions/subscribeIds'
 import { pool } from '@/nostr/pool'
 import { defaultNostrSettings, type NostrSettings } from '@/nostr/settings'
 import { replay as replayNIP02 } from '@/nostr/subscriptions/subscribeFollows'
@@ -90,7 +90,7 @@ export const test = base.extend<Fixtures>({
   clear: async ({ root }, use) => {
     clearCache()
     pool.reset()
-    replayIds.clear()
+    //replayIds.clear()
     userStore.clear()
     eventStore.clear()
     noteStore.clear()
