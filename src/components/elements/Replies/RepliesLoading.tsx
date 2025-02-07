@@ -9,7 +9,7 @@ type Props = {
   rows?: number
 }
 
-export const PostRepliesLoading = React.memo((props: Props) => {
+export const RepliesLoading = React.memo((props: Props) => {
   const { rows = 1 } = props
   return (
     <>

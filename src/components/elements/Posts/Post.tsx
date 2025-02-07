@@ -14,13 +14,13 @@ import { observer } from 'mobx-react-lite'
 import { useCallback } from 'react'
 import { css, html } from 'react-strict-dom'
 import { Editor } from '../Editor/Editor'
+import { Replies } from '../Replies/Replies'
+import { RepliesPreview } from '../Replies/RepliesPreview'
 import { PostActions } from './PostActions/PostActions'
 import { PostBroadcaster } from './PostBroadcaster'
 import { PostContent } from './PostContent'
 import { PostHeader } from './PostHeader'
 import { PostLink } from './PostLink'
-import { PostReplies } from './PostReplies/PostReplies'
-import { PostRepliesPreview } from './PostReplies/PostRepliesPreview'
 
 type Props = {
   open?: boolean
@@ -72,10 +72,10 @@ export const PostRoot = observer(function PostRoot(props: Props) {
             <html.div style={styles.editor}>
               <Editor renderBubble initialOpen={false} store={note.editor} />
             </html.div>
-            <PostReplies onLoadMoreClick={handleLoadMore} />
+            <Replies onLoadMoreClick={handleLoadMore} />
           </>
         )}
-        {note.repliesOpen === null && <PostRepliesPreview onLoadMoreClick={handleRepliesClick} />}
+        {note.repliesOpen === null && <RepliesPreview onLoadMoreClick={handleRepliesClick} />}
       </html.article>
     </NoteProvider>
   )

@@ -6,8 +6,8 @@ import { spacing } from '@/themes/spacing.stylex'
 import { useRouteContext } from '@tanstack/react-router'
 import type { DecodeResult } from 'nostr-tools/nip19'
 import { css, html } from 'react-strict-dom'
-import { PostLoadMore } from '../PostLoadMore'
-import { PostRepliesTree } from './PostReply'
+import { PostLoadMore } from '../Posts/PostLoadMore'
+import { RepliesTree } from './RepliesTree'
 
 type Props = {
   onLoadMoreClick?: () => void
@@ -27,7 +27,7 @@ function getPubkey(decoded: DecodeResult | undefined) {
   }
 }
 
-export const PostRepliesPreview = function PostRepliesPreview(props: Props) {
+export const RepliesPreview = function RepliesPreview(props: Props) {
   const { onLoadMoreClick } = props
   const { note } = useNoteContext()
   const currentUser = useCurrentUser()
@@ -44,7 +44,7 @@ export const PostRepliesPreview = function PostRepliesPreview(props: Props) {
       <Divider />
       <Stack horizontal={false} sx={styles.root} justify='flex-start'>
         <html.div style={styles.repliesWrapper}>
-          {replies && <PostRepliesTree nested={false} replies={replies} repliesOpen={note.repliesOpen} level={1} />}
+          {replies && <RepliesTree nested={false} replies={replies} repliesOpen={note.repliesOpen} level={1} />}
           <PostLoadMore note={note} onClick={onLoadMoreClick} disabled={false} />
         </html.div>
       </Stack>

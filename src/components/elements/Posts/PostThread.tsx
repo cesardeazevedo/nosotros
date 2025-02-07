@@ -22,8 +22,8 @@ import { UserAvatar } from '../User/UserAvatar'
 import { PostActions } from './PostActions/PostActions'
 import { PostContent } from './PostContent'
 import { PostHeader } from './PostHeader'
-import { PostReplies } from './PostReplies/PostReplies'
-import { PostReplyContent } from './PostReplies/PostReplyContent'
+import { Replies } from '../Replies/Replies'
+import { ReplyContent } from '../Replies/ReplyContent'
 
 type Props = {
   event: NostrEventNote | NostrEventComment
@@ -83,7 +83,7 @@ export const PostThread = function PostThread(props: Props) {
                     <UserAvatar pubkey={note.event.pubkey} />
                     <Stack gap={1}>
                       <Stack horizontal={false}>
-                        <PostReplyContent />
+                        <ReplyContent />
                         <html.div style={styles.root$actions}>
                           <PostActions renderOptions onReplyClick={() => note.toggleReplies()} />
                         </html.div>
@@ -108,7 +108,7 @@ export const PostThread = function PostThread(props: Props) {
                 )}
               </ContentProvider>
               {renderReplies && isCurrentNote && note.repliesOpen && (
-                <PostReplies onLoadMoreClick={() => note.toggleReplies()} />
+                <Replies onLoadMoreClick={() => note.toggleReplies()} />
               )}
             </>
           )}

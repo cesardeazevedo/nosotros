@@ -8,13 +8,13 @@ import { IconVolumeOff } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
 import { useState } from 'react'
 import { css } from 'react-strict-dom'
-import { PostRepliesTree } from './PostReply'
+import { RepliesTree } from './RepliesTree'
 
 type Props = {
   level: number
 }
 
-export const PostRepliesMuted = observer(function PostRepliesMuted(props: Props) {
+export const RepliesMuted = observer(function RepliesMuted(props: Props) {
   const { level } = props
   const { note } = useNoteContext()
   const user = useCurrentUser()
@@ -31,7 +31,7 @@ export const PostRepliesMuted = observer(function PostRepliesMuted(props: Props)
         </Button>
       )}
       {openMuted && (
-        <PostRepliesTree
+        <RepliesTree
           replies={replies}
           repliesOpen //={repliesOpen}
           level={level + 1}

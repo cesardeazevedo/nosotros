@@ -6,7 +6,6 @@ import { Stack } from '@/components/ui/Stack/Stack'
 import { useNoteStore } from '@/hooks/useNoteStore'
 import { useCurrentUser } from '@/hooks/useRootStore'
 import type { NostrEventComment, NostrEventNote } from '@/nostr/types'
-import type { Event } from '@/stores/events/event'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { useNavigate, useRouter } from '@tanstack/react-router'
@@ -17,11 +16,12 @@ import { useMobile } from 'hooks/useMobile'
 import { observer } from 'mobx-react-lite'
 import { useCallback, useState } from 'react'
 import { css, html } from 'react-strict-dom'
-import { Editor } from '../../Editor/Editor'
-import { useNoteVisibility } from '../hooks/useNoteVisibility'
-import { PostActions } from '../PostActions/PostActions'
-import { PostRepliesMuted } from './PostRepliesMuted'
-import { PostReplyContent } from './PostReplyContent'
+import { Editor } from '../Editor/Editor'
+import { useNoteVisibility } from '../Posts/hooks/useNoteVisibility'
+import { PostActions } from '../Posts/PostActions/PostActions'
+import { RepliesMuted } from './RepliesMuted'
+import { RepliesTree } from './RepliesTree'
+import { ReplyContent } from './ReplyContent'
 
 type Props = {
   event: NostrEventNote | NostrEventComment
@@ -30,17 +30,7 @@ type Props = {
   level?: number
 }
 
-export const PostRepliesTree = observer(function PostRepliesTree(props: {
-  repliesOpen: boolean | null
-  replies: Event[]
-  level: number
-  nested?: boolean
-}) {
-  const { replies, ...rest } = props
-  return replies.map((event) => <PostReply key={event.id} event={event.event} {...rest} />)
-})
-
-export const PostReply = observer(function PostReply(props: Props) {
+export const Reply = observer(function Reply(props: Props) {
   const { event, level = 0, repliesOpen, nested = true } = props
   const note = useNoteStore(event)
   const navigate = useNavigate()
@@ -90,7 +80,7 @@ export const PostReply = observer(function PostReply(props: Props) {
               <Stack align='flex-start' gap={1}>
                 {level !== 1 && <html.div style={styles.anchor} />}
                 <UserAvatar pubkey={event.pubkey} />
-                <PostReplyContent />
+                <ReplyContent />
               </Stack>
               <html.div style={styles.actions}>
                 <Stack>
@@ -101,7 +91,7 @@ export const PostReply = observer(function PostReply(props: Props) {
                 </Expandable>
               </html.div>
               {nested && (
-                <PostRepliesTree
+                <RepliesTree
                   replies={note.repliesSorted(user)}
                   repliesOpen={repliesOpen}
                   level={level + 1}
@@ -110,7 +100,7 @@ export const PostReply = observer(function PostReply(props: Props) {
               )}
             </>
           )}
-          <PostRepliesMuted level={level} />
+          <RepliesMuted level={level} />
         </html.div>
       </ContentProvider>
     </NoteProvider>

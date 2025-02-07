@@ -5,11 +5,11 @@ import { UserName } from 'components/elements/User/UserName'
 import { observer } from 'mobx-react-lite'
 import type { Node } from 'nostr-editor'
 import React from 'react'
-import { BubbleContainer } from '../../Content/Layout/Bubble'
-import { UserNIP05 } from '../../User/UserNIP05'
-import type { Props as PostContentWrapperProps } from '../PostContentWrapper'
-import { PostContentWrapper } from '../PostContentWrapper'
-import { PostHeaderDate } from '../PostHeaderDate'
+import { BubbleContainer } from '../Content/Layout/Bubble'
+import type { Props as PostContentWrapperProps } from '../Posts/PostContentWrapper'
+import { PostContentWrapper } from '../Posts/PostContentWrapper'
+import { PostHeaderDate } from '../Posts/PostHeaderDate'
+import { UserNIP05 } from '../User/UserNIP05'
 
 type Props = {
   size?: PostContentWrapperProps['size']
@@ -39,7 +39,7 @@ export const ReplyUserHeader = observer(function ReplyUserHeader() {
   )
 })
 
-export const PostReplyContent = observer(function PostReplyContent(props: Props) {
+export const ReplyContent = observer(function ReplyContent(props: Props) {
   const { size } = props
   return (
     <PostContentWrapper bubble size={size}>
