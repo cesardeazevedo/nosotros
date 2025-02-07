@@ -25,7 +25,7 @@ export function publish(
   const pub = new NostrPublisher(event, {
     ...options,
     signer: client.signer,
-    relays: options.relays || client.inbox$,
+    relays: options.relays || client.outbox$,
     inbox: !options.relays ? client.inboxTracker.subscribe.bind(client.inboxTracker) : () => EMPTY,
   })
 

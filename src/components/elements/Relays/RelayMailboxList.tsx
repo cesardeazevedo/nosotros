@@ -3,8 +3,8 @@ import { Divider } from '@/components/ui/Divider/Divider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { formatRelayUrl } from '@/core/helpers/formatRelayUrl'
-import type { WRITE } from '@/nostr/types'
-import { READ } from '@/nostr/types'
+import type { READ } from '@/nostr/types'
+import { WRITE } from '@/nostr/types'
 import type { User } from '@/stores/users/user'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
@@ -27,8 +27,12 @@ type Props = {
 
 export const RelayMailboxList = observer(function RelayMailboxList(props: Props) {
   const { user, permission, isEditing } = props
-  const label = permission === READ ? 'Outbox' : 'Inbox'
-  const relays = (permission === READ ? user?.outboxRelays : user?.inboxRelays) || []
+  const label = permission === WRITE ? 'Outbox' : 'Inbox'
+  const description =
+    permission === WRITE
+      ? 'These are the relays you are writing notes to'
+      : 'These are the relays where others will reply or tag you'
+  const relays = (permission === WRITE ? user?.outboxRelays : user?.inboxRelays) || []
 
   const [input, setInput] = useState('')
   const [pending, onSubmit] = usePublishRelayList()
@@ -55,9 +59,12 @@ export const RelayMailboxList = observer(function RelayMailboxList(props: Props)
   return (
     <PaperContainer>
       <Stack horizontal={false}>
-        <Stack gap={0.5} sx={styles.header} justify='space-between'>
+        <Stack horizontal={false} gap={0.5} sx={styles.header} justify='space-between'>
           <Text variant='title' size='md'>
             {label} Relays {total !== 0 && <html.span style={styles.total}>{`(${total})`}</html.span>}
+          </Text>
+          <Text variant='body' size='md'>
+            {description}
           </Text>
         </Stack>
         <Divider />
@@ -99,6 +106,7 @@ const styles = css.create({
   },
   header: {
     padding: spacing.padding2,
+    paddingBlock: spacing.padding1,
   },
   total: {
     opacity: 0.5,

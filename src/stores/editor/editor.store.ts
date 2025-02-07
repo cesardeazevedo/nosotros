@@ -57,7 +57,7 @@ export class EditorStore {
     makeAutoObservable(this, {
       event: computed.struct,
       rawEvent: computed.struct,
-      myInboxRelays: computed.struct,
+      myOutboxRelays: computed.struct,
       otherInboxRelays: computed.struct,
       allRelays: computed.struct,
       mentions: computed.struct,
@@ -219,7 +219,7 @@ export class EditorStore {
     return JSON.parse(JSON.stringify(this.event))
   }
 
-  get myInboxRelays() {
+  get myOutboxRelays() {
     if (this.context?.user) {
       return userRelayStore.select(this.context.user.pubkey, {
         permission: WRITE,
@@ -287,7 +287,7 @@ export class EditorStore {
   }
 
   get allRelays() {
-    return [...this.myInboxRelays, ...this.otherInboxRelays]
+    return [...this.myOutboxRelays, ...this.otherInboxRelays]
   }
 
   get title() {
