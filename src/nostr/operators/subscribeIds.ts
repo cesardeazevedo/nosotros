@@ -5,6 +5,8 @@ import { connect, ignoreElements, merge, mergeMap, of } from 'rxjs'
 import { parseId } from '../helpers/parseId'
 import type { ClientSubOptions, NostrClient } from '../nostr'
 import { ShareReplayCache } from '../replay'
+import { withRepostedEvent } from '../subscriptions/subscribeReposts'
+import { withZapAuthor } from '../subscriptions/subscribeZaps'
 import { withRelatedAuthors } from '../subscriptions/withRelatedAuthor'
 import { type NostrEventNote, type NostrEventRepost, type NostrEventZapReceipt } from '../types'
 
@@ -24,10 +26,10 @@ export const subscribeIds = replayIds.wrap((id: string, client: NostrClient, opt
           )
         }
         case Kind.Repost: {
-          return of(event).pipe(ofKind<NostrEventRepost>([Kind.Repost]), client.reposts.withRelatedEvent())
+          return of(event).pipe(ofKind<NostrEventRepost>([Kind.Repost]), withRepostedEvent(client))
         }
         case Kind.ZapReceipt: {
-          return of(event).pipe(ofKind<NostrEventZapReceipt>([Kind.ZapReceipt]), client.zaps.withRelatedAuthors())
+          return of(event).pipe(ofKind<NostrEventZapReceipt>([Kind.ZapReceipt]), withZapAuthor(client))
         }
         default: {
           // generic event (always get the author)

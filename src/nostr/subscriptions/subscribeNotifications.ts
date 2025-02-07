@@ -7,7 +7,10 @@ import { isEventTag } from '../helpers/parseTags'
 import type { NostrClient } from '../nostr'
 import { subscribeIdsFromQuotes } from '../operators/subscribeIdsFromQuotes'
 import { type NostrEventMetadata } from '../types'
+import { subscribeReactions } from './subscribeReactions'
+import { subscribeReposts } from './subscribeReposts'
 import { subscribeUser } from './subscribeUser'
+import { subscribeZaps } from './subscribeZaps'
 import { withRelatedAuthors } from './withRelatedAuthor'
 
 export function subscribeNotifications(client: NostrClient, pagination: PaginationLimitSubject | PaginationSubject) {
@@ -20,7 +23,7 @@ export function subscribeNotifications(client: NostrClient, pagination: Paginati
               return client.notes.subscribe(filter).pipe(withRelatedAuthors(client))
             }
             case Kind.Reaction: {
-              return client.reactions.subscribe(filter).pipe(
+              return subscribeReactions(filter, client).pipe(
                 connect((shared$) => {
                   return merge(
                     shared$,
@@ -41,10 +44,10 @@ export function subscribeNotifications(client: NostrClient, pagination: Paginati
               )
             }
             case Kind.Repost: {
-              return client.reposts.subscribeWithRepostedEvent(filter)
+              return subscribeReposts(filter, client)
             }
             case Kind.ZapReceipt: {
-              return client.zaps.subscribe(filter).pipe(
+              return subscribeZaps(filter, client).pipe(
                 withRelatedAuthors(client),
                 ofKind<NostrEventMetadata>([Kind.ZapReceipt]), // cast
               )

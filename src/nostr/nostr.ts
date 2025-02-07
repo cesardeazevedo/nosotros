@@ -29,14 +29,8 @@ import { NostrFeeds } from './feeds'
 import { READ, WRITE } from './helpers/parseRelayList'
 import { InboxTracker } from './inbox'
 import { Mailbox, toArrayRelay } from './mailbox'
+import { Nip05 } from './nip05'
 import { NIP01Notes } from './nips/nip01.notes'
-import { NIP05Dns } from './nips/nip05.dns'
-import { NIP18Reposts } from './nips/nip18.reposts'
-import { NIP23Articles } from './nips/nip23.articles'
-import { NIP25Reactions } from './nips/nip25.reactions'
-import { NIP50Search } from './nips/nip50.search'
-import { NIP57Zaps } from './nips/nip57.zaps'
-import { NIP65RelayList } from './nips/nip65.relaylist'
 import { distinctEvent } from './operators/distinctEvents'
 import * as localDB from './operators/localDB'
 import * as localRelay from './operators/localRelay'
@@ -66,16 +60,10 @@ export type ClientSubOptions = Omit<SubscriptionOptions, 'outbox'> & {
 
 export class NostrClient {
   notes = new NIP01Notes(this)
-  dns = new NIP05Dns(this)
-  reposts = new NIP18Reposts(this)
-  articles = new NIP23Articles(this)
-  reactions = new NIP25Reactions(this)
-  search = new NIP50Search(this)
-  zaps = new NIP57Zaps(this)
-  relayList = new NIP65RelayList(this)
 
   seen = new Seen()
   mailbox = new Mailbox(this)
+  nip05 = new Nip05(this)
 
   feeds = new NostrFeeds(this)
 

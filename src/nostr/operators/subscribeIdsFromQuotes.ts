@@ -4,6 +4,7 @@ import { connect, EMPTY, ignoreElements, merge, mergeMap, of } from 'rxjs'
 import { parseId } from '../helpers/parseId'
 import type { ClientSubOptions, NostrClient } from '../nostr'
 import { subscribeUser } from '../subscriptions/subscribeUser'
+import { withZapAuthor } from '../subscriptions/subscribeZaps'
 import type { NostrEventNote, NostrEventZapReceipt } from '../types'
 import { replayIds } from './subscribeIds'
 
@@ -22,7 +23,7 @@ export const subscribeIdsFromQuotes = replayIds.wrap((id: string, client: NostrC
           return EMPTY
         }
         case Kind.ZapReceipt: {
-          return of(event).pipe(ofKind<NostrEventZapReceipt>([Kind.ZapReceipt]), client.zaps.withRelatedAuthors())
+          return of(event).pipe(ofKind<NostrEventZapReceipt>([Kind.ZapReceipt]), withZapAuthor(client))
         }
         default: {
           // generic event (always get the author)

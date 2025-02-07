@@ -2,6 +2,7 @@ import { ContentProvider } from '@/components/providers/ContentProvider'
 import { ListItem } from '@/components/ui/ListItem/ListItem'
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
 import { useCurrentUser } from '@/hooks/useRootStore'
+import { subscribeSearch } from '@/nostr/subscriptions/subscribeSearch'
 import { useNostrClientContext } from '@/stores/context/nostr.context.hooks'
 import type { NostrContext } from '@/stores/context/nostr.context.store'
 import type { User } from '@/stores/users/user'
@@ -40,7 +41,7 @@ export const SearchRelayUsers = observer(
         query$.pipe(
           withLatestFrom(context$),
           throttleTime(1000, undefined, { trailing: true }),
-          mergeMap(([query, context]) => context.client.search.subscribe(query, limit)),
+          mergeMap(([query, context]) => subscribeSearch(query, limit, context.client)),
           map((results) => results.sort((_, b) => (user?.following?.followsPubkey(b.pubkey) ? 1 : -1))),
           map((events) => events.map((x) => userStore.get(x.pubkey)).filter((x) => !!x)),
         ),

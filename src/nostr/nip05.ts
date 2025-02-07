@@ -3,14 +3,14 @@ import { bufferTime } from 'core/operators/bufferTime'
 import type { NostrClient } from 'nostr/nostr'
 import { EMPTY, Subject, catchError, concatMap, distinct, filter, from, identity, map, mergeMap, tap } from 'rxjs'
 import { fromFetch } from 'rxjs/fetch'
-import { db } from '../db'
+import { db } from './db'
 
 type NIP05Response = {
   names?: Record<string, string>
   relays?: Record<string, string[]>
 }
 
-export class NIP05Dns {
+export class Nip05 {
   blacklist: Map<string, boolean>
   queueNIP05: Subject<string>
 

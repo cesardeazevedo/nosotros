@@ -1,8 +1,8 @@
 import { APP_DESCRIPTION, APP_NAME } from '@/constants/app'
-import { getNostrExtensionPublicKey } from '@/nostr/nips/nip07.extensions'
 import { bytesToHex } from '@noble/hashes/utils'
 import { makeAutoObservable } from 'mobx'
 import { lazyObservable } from 'mobx-utils'
+import type { NostrEvent, UnsignedEvent } from 'nostr-tools'
 import { firstValueFrom } from 'rxjs'
 import invariant from 'tiny-invariant'
 import { rootStore } from '../root.store'
@@ -19,6 +19,24 @@ const PAGES = {
 type Pages = keyof typeof PAGES
 
 const auth = rootStore.auth
+
+type NostrExtension = {
+  getPublicKey(): Promise<string>
+  signEvent(event: UnsignedEvent): Promise<NostrEvent>
+}
+
+export function getNostrExtension() {
+  if ('nostr' in window) {
+    return window.nostr as NostrExtension
+  }
+}
+
+export async function getNostrExtensionPublicKey() {
+  const nostr = getNostrExtension()
+  if (nostr) {
+    return await nostr.getPublicKey()
+  }
+}
 
 export const signinStore = makeAutoObservable({
   page: 'SELECT' as Pages,
@@ -110,7 +128,7 @@ export const signinStore = makeAutoObservable({
 
   async submitNostrAddress(address: string) {
     const [name, url] = address.split('@')
-    const response = await firstValueFrom(rootStore.rootContext.client.dns.fetch(url, name))
+    const response = await firstValueFrom(rootStore.rootContext.client.nip05.fetch(url, name))
     const pubkey = response.names?.[name]
     invariant(pubkey, 'Pubkey not found on remote server')
     this.submitReadonly(pubkey)

@@ -6,6 +6,7 @@ import { Text } from '@/components/ui/Text/Text'
 import { useGoBack } from '@/hooks/useNavigations'
 import { useRootContext } from '@/hooks/useRootStore'
 import { parseBolt11 } from '@/nostr/helpers/parseZap'
+import { waitForZapReceipt } from '@/nostr/subscriptions/waitForZapReceipt'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
@@ -63,7 +64,7 @@ export const ZapRequestInvoice = (props: Props) => {
 
   const [paid] = useObservableState<boolean>(() => {
     const options = event.relays ? { relays: of(event.relays) } : undefined
-    return context.client.zaps.waitForReceipt(event.id, invoice, options).pipe(
+    return waitForZapReceipt(event.id, invoice, context.client, options).pipe(
       first(),
       map(() => true),
     )
