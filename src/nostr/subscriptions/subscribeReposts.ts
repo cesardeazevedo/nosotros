@@ -5,6 +5,7 @@ import { EMPTY, filter, ignoreElements, map, merge, mergeMap } from 'rxjs'
 import type { ClientSubOptions, NostrClient } from '../nostr'
 import { metadataSymbol, type NostrEventRepost } from '../types'
 import { subscribeUser } from './subscribeUser'
+import { subscribeNotesWithRelated } from './subscribeNotes'
 
 const kinds = [Kind.Repost]
 
@@ -18,7 +19,7 @@ export function withRepostedEvent(client: NostrClient) {
         // get repost author
         subscribeUser(event.pubkey, client).pipe(ignoreElements()),
         // get inner note
-        client.notes.subNotesWithRelated({ ids: [id] }, { relayHints }).pipe(
+        subscribeNotesWithRelated({ ids: [id] }, client, { relayHints }).pipe(
           filter((event) => event.id === id),
           map(() => event),
         ),

@@ -4,8 +4,9 @@ import { Kind } from 'constants/kinds'
 import { fakeEvent } from 'utils/faker'
 import { test } from 'utils/fixtures'
 import { vi } from 'vitest'
+import { subscribeNotesWithParent } from '../subscribeNotes'
 
-describe('NIP01Notes', () => {
+describe('subscribeNotes', () => {
   test('assert parent event and quotes', async ({ createMockRelay, createClient }) => {
     const event1 = fakeEvent({ id: '1', pubkey: '1', tags: [] })
     const event2 = fakeEvent({
@@ -36,7 +37,7 @@ describe('NIP01Notes', () => {
     const client = createClient({ relays: [RELAY_1], settings: { outbox: false }, onEvent: eventSpy })
 
     const filter = { kinds: [Kind.Text], authors: ['1', '2'] }
-    const spy = subscribeSpyTo(client.notes.subRelatedNotesWithParent(filter))
+    const spy = subscribeSpyTo(subscribeNotesWithParent(filter, client))
     await spy.onComplete()
     await relay.close()
 

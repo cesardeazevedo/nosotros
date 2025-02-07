@@ -30,7 +30,6 @@ import { READ, WRITE } from './helpers/parseRelayList'
 import { InboxTracker } from './inbox'
 import { Mailbox, toArrayRelay } from './mailbox'
 import { Nip05 } from './nip05'
-import { NIP01Notes } from './nips/nip01.notes'
 import { distinctEvent } from './operators/distinctEvents'
 import * as localDB from './operators/localDB'
 import * as localRelay from './operators/localRelay'
@@ -59,8 +58,6 @@ export type ClientSubOptions = Omit<SubscriptionOptions, 'outbox'> & {
 }
 
 export class NostrClient {
-  notes = new NIP01Notes(this)
-
   seen = new Seen()
   mailbox = new Mailbox(this)
   nip05 = new Nip05(this)

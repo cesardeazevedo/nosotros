@@ -7,6 +7,7 @@ import { isEventTag } from '../helpers/parseTags'
 import type { NostrClient } from '../nostr'
 import { subscribeIdsFromQuotes } from '../operators/subscribeIdsFromQuotes'
 import { type NostrEventMetadata } from '../types'
+import { subscribeNotes } from './subscribeNotes'
 import { subscribeReactions } from './subscribeReactions'
 import { subscribeReposts } from './subscribeReposts'
 import { subscribeUser } from './subscribeUser'
@@ -20,7 +21,7 @@ export function subscribeNotifications(client: NostrClient, pagination: Paginati
         mergeMap((kind) => {
           switch (kind) {
             case Kind.Text: {
-              return client.notes.subscribe(filter).pipe(withRelatedAuthors(client))
+              return subscribeNotes(filter, client).pipe(withRelatedAuthors(client))
             }
             case Kind.Reaction: {
               return subscribeReactions(filter, client).pipe(

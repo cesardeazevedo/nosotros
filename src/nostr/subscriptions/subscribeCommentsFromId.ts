@@ -4,6 +4,7 @@ import type { NostrFilter } from '@/core/types'
 import type { ClientSubOptions, NostrClient } from '../nostr'
 import { ShareReplayCache } from '../replay'
 import type { NostrEventComment, NostrEventNote } from '../types'
+import { withRelatedNotes } from './withRelatedNotes'
 
 const replay = new ShareReplayCache<NostrEventNote | NostrEventComment>()
 
@@ -13,6 +14,6 @@ export const subscribeCommentsFromId = replay.wrap(
   (_id: string, filter: NostrFilter, client: NostrClient, options?: ClientSubOptions) => {
     return client
       .subscribe({ ...filter, kinds }, options)
-      .pipe(ofKind<NostrEventComment>(kinds), client.notes.withRelatedNotes(options))
+      .pipe(ofKind<NostrEventComment>(kinds), withRelatedNotes(client, options))
   },
 )

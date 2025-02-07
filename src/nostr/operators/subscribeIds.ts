@@ -6,8 +6,10 @@ import { parseId } from '../helpers/parseId'
 import type { ClientSubOptions, NostrClient } from '../nostr'
 import { ShareReplayCache } from '../replay'
 import { withRepostedEvent } from '../subscriptions/subscribeReposts'
+import { subscribeThreads } from '../subscriptions/subscribeThreads'
 import { withZapAuthor } from '../subscriptions/subscribeZaps'
 import { withRelatedAuthors } from '../subscriptions/withRelatedAuthor'
+import { withRelatedNotes } from '../subscriptions/withRelatedNotes'
 import { type NostrEventNote, type NostrEventRepost, type NostrEventZapReceipt } from '../types'
 
 export const replayIds = new ShareReplayCache<NostrEvent>()
@@ -21,8 +23,8 @@ export const subscribeIds = replayIds.wrap((id: string, client: NostrClient, opt
         case Kind.Article: {
           return of(event).pipe(
             ofKind<NostrEventNote>([Kind.Text, Kind.Article]),
-            client.notes.withRelatedNotes(),
-            connect((shared$) => merge(shared$, shared$.pipe(client.notes.withThreads(), ignoreElements()))),
+            withRelatedNotes(client),
+            connect((shared$) => merge(shared$, shared$.pipe(subscribeThreads(client), ignoreElements()))),
           )
         }
         case Kind.Repost: {

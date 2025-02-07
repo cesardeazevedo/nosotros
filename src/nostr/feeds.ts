@@ -7,7 +7,9 @@ import type { ClientSubOptions, NostrClient } from './nostr'
 import { subscribeArticles } from './subscriptions/subscribeArticles'
 import { subscribeFollows } from './subscriptions/subscribeFollows'
 import { subscribeMedia } from './subscriptions/subscribeMedia'
+import { subscribeNotesWithParent, subscribeNotesWithRelated } from './subscriptions/subscribeNotes'
 import { subscribeReposts } from './subscriptions/subscribeReposts'
+import { withRelatedNotes } from './subscriptions/withRelatedNotes'
 import { metadataSymbol } from './types'
 
 type Pagination = PaginationSubject | PaginationLimitSubject
@@ -25,11 +27,8 @@ export class NostrFeeds {
       mergeMap((kind) => {
         switch (kind) {
           case Kind.Text: {
-            const sub =
-              options?.includeParents === false
-                ? this.client.notes.subNotesWithRelated.bind(this.client.notes)
-                : this.client.notes.subRelatedNotesWithParent.bind(this.client.notes)
-            return sub({ ...filters, kinds: [Kind.Text] }, options).pipe(
+            const sub = options?.includeParents === false ? subscribeNotesWithRelated : subscribeNotesWithParent
+            return sub({ ...filters, kinds: [Kind.Text] }, this.client, options).pipe(
               filter((note) => {
                 const isRoot = note[metadataSymbol].isRoot
                 if (options?.includeReplies === false && !isRoot) return false
@@ -40,7 +39,7 @@ export class NostrFeeds {
           }
           case Kind.Article: {
             return options?.includeReplies !== false
-              ? subscribeArticles(filters, this.client, options).pipe(this.client.notes.withRelatedNotes(options))
+              ? subscribeArticles(filters, this.client, options).pipe(withRelatedNotes(this.client, options))
               : EMPTY
           }
           case Kind.Media: {
