@@ -84,19 +84,19 @@ describe('Mailbox Tracker', () => {
     const $ = from(['1', '2', '3', '4', '5']).pipe(mergeMap((x) => client.mailbox.track(x, { timeout: 1000 })))
     const spy = subscribeSpyTo($)
 
-    await insertRelayList({ id: '1', pubkey: '1', tags: [['r', 'relay1']] }, client)
-    await insertRelayList({ id: '2', pubkey: '2', tags: [['r', 'relay2']] }, client)
-    await insertRelayList({ id: '3', pubkey: '3', tags: [['r', 'relay3']] }, client)
-    await insertRelayList({ id: '4', pubkey: '4', tags: [['r', 'relay4']] }, client)
+    await insertRelayList({ id: '1', pubkey: '1', tags: [['r', RELAY_1]] }, client)
+    await insertRelayList({ id: '2', pubkey: '2', tags: [['r', RELAY_2]] }, client)
+    await insertRelayList({ id: '3', pubkey: '3', tags: [['r', RELAY_3]] }, client)
+    await insertRelayList({ id: '4', pubkey: '4', tags: [['r', RELAY_4]] }, client)
     // user 5 relay is missing, let the timeout close the stream
 
     await spy.onComplete()
 
     expect(spy.getValues()).toStrictEqual([
-      [{ pubkey: '1', relay: 'relay1', permission: READ | WRITE }],
-      [{ pubkey: '2', relay: 'relay2', permission: READ | WRITE }],
-      [{ pubkey: '3', relay: 'relay3', permission: READ | WRITE }],
-      [{ pubkey: '4', relay: 'relay4', permission: READ | WRITE }],
+      [{ pubkey: '1', relay: RELAY_1, permission: READ | WRITE }],
+      [{ pubkey: '2', relay: RELAY_2, permission: READ | WRITE }],
+      [{ pubkey: '3', relay: RELAY_3, permission: READ | WRITE }],
+      [{ pubkey: '4', relay: RELAY_4, permission: READ | WRITE }],
     ])
   })
 

@@ -1,4 +1,4 @@
-import { RELAY_1, RELAY_2 } from '@/constants/testRelays'
+import { RELAY_1, RELAY_2, RELAY_3, RELAY_4, RELAY_5 } from '@/constants/testRelays'
 import { fakeEvent } from '@/utils/faker'
 import { test } from '@/utils/fixtures'
 import { subscribeSpyTo } from '@hirez_io/observer-spy'
@@ -11,21 +11,21 @@ describe('NostrClient', () => {
     await insertRelayList({
       pubkey,
       tags: [
-        ['r', 'relay1'],
-        ['r', 'relay2'],
-        ['r', 'relay3', 'read'],
-        ['r', 'relay4', 'write'],
-        ['r', 'relay5'],
+        ['r', RELAY_1],
+        ['r', RELAY_2],
+        ['r', RELAY_3, 'read'],
+        ['r', RELAY_4, 'write'],
+        ['r', RELAY_5],
       ],
     })
     const client = createClient({ pubkey })
     const outboxSpy = subscribeSpyTo(client.outbox$)
     await outboxSpy.onComplete()
-    expect(outboxSpy.getValues()).toStrictEqual([['relay1', 'relay2', 'relay4', 'relay5']])
+    expect(outboxSpy.getValues()).toStrictEqual([[RELAY_1, RELAY_2, RELAY_4, RELAY_5]])
 
     const inboxSpy = subscribeSpyTo(client.inbox$)
     await inboxSpy.onComplete()
-    expect(inboxSpy.getValues()).toStrictEqual([['relay1', 'relay2', 'relay3', 'relay5']])
+    expect(inboxSpy.getValues()).toStrictEqual([[RELAY_1, RELAY_2, RELAY_3, RELAY_5]])
   })
 
   test('assert events from server and cache', async ({ createMockRelay, createClient }) => {
