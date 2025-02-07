@@ -1,6 +1,6 @@
 import { Pool } from 'core/pool'
 import { Relay } from 'core/Relay'
-import { subscribeRelayStats } from './stats'
+import { subscribeRelayStats } from './subscriptions/subscribeRelayStats'
 
 export const pool = new Pool({
   blacklist: [],

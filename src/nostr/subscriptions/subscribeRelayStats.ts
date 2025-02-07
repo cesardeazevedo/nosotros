@@ -2,7 +2,7 @@ import type { Relay } from '@/core/Relay'
 import { RelayToClient } from '@/core/types'
 import { relaysStore } from '@/stores/relays/relays.store'
 import { catchError, EMPTY, map, merge, mergeMap, of, takeUntil, tap } from 'rxjs'
-import { db } from './db'
+import { db } from '../db'
 
 export function subscribeRelayStats(relay: Relay) {
   of(relay.url)
