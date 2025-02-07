@@ -51,6 +51,9 @@ export class Pool {
 
   get(url: string): Relay | undefined {
     url = formatRelayUrl(url)
+    if (!url.startsWith('wss://')) {
+      return
+    }
     if (this.blacklisted.has(url)) {
       return
     }
