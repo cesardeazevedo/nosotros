@@ -1,5 +1,7 @@
-import type { FeedOptions } from '@/nostr/feeds'
 import { type NostrClient } from '@/nostr/nostr'
+import type { FeedOptions } from '@/nostr/subscriptions/subscribeFeed'
+import { subscribeFeedFollowing } from '@/nostr/subscriptions/subscribeFeedFollowing'
+import { subscribeFeedSelf } from '@/nostr/subscriptions/subscribeFeedSelf'
 import type { Instance, SnapshotIn } from 'mobx-state-tree'
 import { t } from 'mobx-state-tree'
 import { bufferTime, EMPTY, filter, finalize, map, mergeWith, switchMap, tap } from 'rxjs'
@@ -32,10 +34,10 @@ export const NotesFeedSubscriptionModel = (feed: FeedPaginations) =>
           const { scope, pagination, options } = self
           switch (scope) {
             case 'self': {
-              return client.feeds.self(pagination, options)
+              return subscribeFeedSelf(pagination, client, options)
             }
             case 'following': {
-              return client.feeds.following(pagination, options)
+              return subscribeFeedFollowing(pagination, client, options)
             }
             case 'followingSet':
             case 'followers':

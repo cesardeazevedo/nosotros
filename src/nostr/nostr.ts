@@ -25,7 +25,6 @@ import {
 } from 'rxjs'
 import { batcher } from './batcher'
 import { setCache } from './cache'
-import { NostrFeeds } from './feeds'
 import { READ, WRITE } from './helpers/parseRelayList'
 import { InboxTracker } from './inbox'
 import { Mailbox, toArrayRelay } from './mailbox'
@@ -61,8 +60,6 @@ export class NostrClient {
   seen = new Seen()
   mailbox = new Mailbox(this)
   nip05 = new Nip05(this)
-
-  feeds = new NostrFeeds(this)
 
   localSets = new Set<string>()
   inboxSets = new Set<string>()
