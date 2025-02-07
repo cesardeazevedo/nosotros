@@ -4,8 +4,9 @@ import type { PaginationSubject } from '@/core/PaginationRangeSubject'
 import type { NostrFilter } from '@/core/types'
 import { EMPTY, filter, from, mergeMap } from 'rxjs'
 import type { ClientSubOptions, NostrClient } from './nostr'
-import { metadataSymbol } from './types'
+import { subscribeFollows } from './subscriptions/subscribeFollows'
 import { subscribeMedia } from './subscriptions/subscribeMedia'
+import { metadataSymbol } from './types'
 
 type Pagination = PaginationSubject | PaginationLimitSubject
 
@@ -62,7 +63,7 @@ export class NostrFeeds {
 
   following(pagination$: Pagination, options?: FeedOptions) {
     const currentAuthor = pagination$.authors[0]
-    return this.client.follows.subscribe(currentAuthor, { ...options, prune: false }).pipe(
+    return subscribeFollows(currentAuthor, this.client, { ...options, prune: false }).pipe(
       mergeMap((event) => {
         const authors = [currentAuthor, ...(event[metadataSymbol].tags.get('p') || [])]
         return pagination$.setFilter({ authors })

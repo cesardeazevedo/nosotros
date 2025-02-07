@@ -30,8 +30,6 @@ import { READ, WRITE } from './helpers/parseRelayList'
 import { InboxTracker } from './inbox'
 import { Mailbox, toArrayRelay } from './mailbox'
 import { NIP01Notes } from './nips/nip01.notes'
-import { NIP01Users } from './nips/nip01.users'
-import { NIP02Follows } from './nips/nip02.follows'
 import { NIP05Dns } from './nips/nip05.dns'
 import { NIP18Reposts } from './nips/nip18.reposts'
 import { NIP23Articles } from './nips/nip23.articles'
@@ -68,7 +66,6 @@ export type ClientSubOptions = Omit<SubscriptionOptions, 'outbox'> & {
 
 export class NostrClient {
   notes = new NIP01Notes(this)
-  follows = new NIP02Follows(this)
   dns = new NIP05Dns(this)
   reposts = new NIP18Reposts(this)
   articles = new NIP23Articles(this)
