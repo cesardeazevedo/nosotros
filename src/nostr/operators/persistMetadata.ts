@@ -1,10 +1,8 @@
 import type { MetadataDB } from '@/db/types'
 import type { NostrEvent } from 'nostr-tools'
-import type { OperatorFunction } from 'rxjs'
-import { from, map, mergeMap } from 'rxjs'
+import { type OperatorFunction, from, map, mergeMap } from 'rxjs'
 import { db } from '../db'
-import type { MetadataSymbol } from '../types'
-import { metadataSymbol } from '../types'
+import { type MetadataSymbol, metadataSymbol } from '../types'
 
 export function persistMetadata<T extends MetadataDB>(
   parser: (event: NostrEvent) => T,
@@ -20,12 +18,5 @@ export function persistMetadata<T extends MetadataDB>(
         return { ...event, [metadataSymbol]: newMetadata }
       }),
     )
-  })
-}
-
-export function mergeMetadata<T>(parser: (event: NostrEvent) => T) {
-  return map((event: NostrEvent) => {
-    const newMetadata = parser(event)
-    return { ...event, [metadataSymbol]: newMetadata }
   })
 }

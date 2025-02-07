@@ -6,7 +6,8 @@ import { start } from '@/core/operators/start'
 import { EMPTY, last, map, merge, mergeMap, of } from 'rxjs'
 import { cacheReplaceablePrune } from '../cache'
 import type { NostrClient } from '../nostr'
-import { parseEventMetadata } from '../operators/parseMetadata'
+import { parseEventMetadata } from '../operators/parseEventMetadata'
+import { createSubscription } from '../subscriptions/createSubscription'
 import type { NostrEventRelayList, UserRelay } from '../types'
 import { addPermission, metadataSymbol, parseRelayListToTags, revokePermission } from '../types'
 import { publish } from './publish'
@@ -19,7 +20,7 @@ export function publishRelayList(client: NostrClient, userRelay: UserRelay, revo
     const filter = { kinds, authors: [pubkey] }
     const options = { relays: of(OUTBOX_RELAYS) }
     cacheReplaceablePrune.delete(`${Kind.RelayList}:${client.pubkey}`)
-    const sub = client.createSubscription(filter, options)
+    const sub = createSubscription(filter, client, options)
 
     return of(sub).pipe(
       start(client.pool),

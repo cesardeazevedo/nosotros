@@ -5,17 +5,19 @@ import { filter, of, tap } from 'rxjs'
 import { parseTags } from '../helpers/parseTags'
 import type { ClientSubOptions, NostrClient } from '../nostr'
 import { distinctEvent } from '../operators/distinctEvents'
-import { parseEventMetadata } from '../operators/parseMetadata'
+import { insert } from '../operators/insert'
+import { parseEventMetadata } from '../operators/parseEventMetadata'
+import { createSubscription } from './createSubscription'
 
 const kinds = [Kind.ZapReceipt]
 
 export function waitForZapReceipt(id: string, invoice: string, client: NostrClient, options?: ClientSubOptions) {
-  const sub = client.createSubscription({ kinds, '#e': [id] }, options)
+  const sub = createSubscription({ kinds, '#e': [id] }, client, options)
   return of(sub).pipe(
     start(client.pool, false),
     distinctEvent(sub),
     verify(),
-    client.insert(),
+    insert(client),
     parseEventMetadata(),
     tap(client.options.onEvent),
     filter((event) => {

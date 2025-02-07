@@ -5,17 +5,18 @@ import { connect, ignoreElements, merge, mergeMap, of } from 'rxjs'
 import { parseId } from '../helpers/parseId'
 import type { ClientSubOptions, NostrClient } from '../nostr'
 import { ShareReplayCache } from '../replay'
+import { type NostrEventNote, type NostrEventRepost, type NostrEventZapReceipt } from '../types'
+import { subscribe } from './subscribe'
 import { withRepostedEvent } from './subscribeReposts'
 import { subscribeThreads } from './subscribeThreads'
 import { withZapAuthor } from './subscribeZaps'
 import { withRelatedAuthors } from './withRelatedAuthor'
 import { withRelatedNotes } from './withRelatedNotes'
-import { type NostrEventNote, type NostrEventRepost, type NostrEventZapReceipt } from '../types'
 
 export const replayIds = new ShareReplayCache<NostrEvent>()
 
 export const subscribeIds = replayIds.wrap((id: string, client: NostrClient, options?: ClientSubOptions) => {
-  return client.subscribe(parseId(id), options).pipe(
+  return subscribe(parseId(id), client, options).pipe(
     mergeMap((event) => {
       // Attach related pipelines based on kind
       switch (event.kind) {

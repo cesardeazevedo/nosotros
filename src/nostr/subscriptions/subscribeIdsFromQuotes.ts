@@ -3,16 +3,17 @@ import { ofKind } from '@/core/operators/ofKind'
 import { connect, EMPTY, ignoreElements, merge, mergeMap, of } from 'rxjs'
 import { parseId } from '../helpers/parseId'
 import type { ClientSubOptions, NostrClient } from '../nostr'
+import type { NostrEventNote, NostrEventZapReceipt } from '../types'
+import { subscribe } from './subscribe'
 import { replayIds } from './subscribeIds'
 import { withAuthorsFromNote } from './subscribeNoteAuthors'
 import { subscribeUser } from './subscribeUser'
 import { withZapAuthor } from './subscribeZaps'
-import type { NostrEventNote, NostrEventZapReceipt } from '../types'
 
 // Sligly different than subscribeIds but avoids circular references
 export const subscribeIdsFromQuotes = replayIds.wrap((id: string, client: NostrClient, options?: ClientSubOptions) => {
   const filter = parseId(id)
-  return client.subscribe(filter, options).pipe(
+  return subscribe(filter, client, options).pipe(
     mergeMap((event) => {
       switch (event.kind) {
         case Kind.Text:

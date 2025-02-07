@@ -4,8 +4,9 @@ import type { NostrFilter } from '@/core/types'
 import { EMPTY, filter, ignoreElements, map, merge, mergeMap } from 'rxjs'
 import type { ClientSubOptions, NostrClient } from '../nostr'
 import { metadataSymbol, type NostrEventRepost } from '../types'
-import { subscribeUser } from './subscribeUser'
+import { subscribe } from './subscribe'
 import { subscribeNotesWithRelated } from './subscribeNotes'
+import { subscribeUser } from './subscribeUser'
 
 const kinds = [Kind.Repost]
 
@@ -30,7 +31,7 @@ export function withRepostedEvent(client: NostrClient) {
 }
 
 export function subscribeReposts(filter: NostrFilter, client: NostrClient, options?: ClientSubOptions) {
-  return client.subscribe({ ...filter, kinds }, options).pipe(
+  return subscribe({ ...filter, kinds }, client, options).pipe(
     ofKind<NostrEventRepost>([Kind.Repost]),
     // Only return reposts after getting the actual reposted event
     withRepostedEvent(client),

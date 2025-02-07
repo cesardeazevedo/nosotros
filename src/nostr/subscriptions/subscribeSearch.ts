@@ -5,7 +5,7 @@ import { addNostrEventToStore } from '@/stores/helpers/addNostrEventToStore'
 import { map, of, tap, toArray } from 'rxjs'
 import { parseUser } from '../helpers/parseUser'
 import type { NostrClient } from '../nostr'
-import { mergeMetadata } from '../operators/mapMetadata'
+import { parseMetadata } from '../operators/parseMetadata'
 
 export function subscribeSearch(query: string, limit = 10, client: NostrClient) {
   const filter = {
@@ -20,7 +20,7 @@ export function subscribeSearch(query: string, limit = 10, client: NostrClient) 
     start(client.pool),
     map(([, event]) => event),
 
-    mergeMetadata(parseUser),
+    parseMetadata(parseUser),
     tap(addNostrEventToStore),
 
     toArray(),

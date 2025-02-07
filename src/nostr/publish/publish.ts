@@ -4,7 +4,8 @@ import { broadcast } from '@/core/operators/broadcast'
 import type { EventTemplate } from 'nostr-tools'
 import { connect, EMPTY, ignoreElements, merge, mergeMap, of, shareReplay, tap, throwError } from 'rxjs'
 import type { NostrClient } from '../nostr'
-import { parseEventMetadata } from '../operators/parseMetadata'
+import { parseEventMetadata } from '../operators/parseEventMetadata'
+import { insert } from '../operators/insert'
 
 export function publish(
   client: NostrClient,
@@ -39,7 +40,7 @@ export function publish(
         ),
         shared$.pipe(
           mergeMap((x) => x.signedEvent),
-          client.insert(),
+          insert(client),
           parseEventMetadata(),
           tap(client.options.onEvent),
         ),

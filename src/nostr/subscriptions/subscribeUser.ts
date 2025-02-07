@@ -5,6 +5,7 @@ import { connect, ignoreElements, merge, mergeMap, of, tap } from 'rxjs'
 import type { ClientSubOptions, NostrClient } from '../nostr'
 import { ShareReplayCache } from '../replay'
 import { metadataSymbol, type NostrEventUserMetadata } from '../types'
+import { subscribe } from './subscribe'
 import { subscribeRelayList } from './subscribeRelayList'
 
 const kinds = [Kind.Metadata]
@@ -16,7 +17,7 @@ export const subscribeUser = (pubkey: string, client: NostrClient, options?: Cli
 
   const filter = { kinds, authors: [pubkey] }
   const subOptions = { ...options, relays: of(OUTBOX_RELAYS) }
-  const stream$ = client.subscribe(filter, subOptions).pipe(
+  const stream$ = subscribe(filter, client, subOptions).pipe(
     ofKind<NostrEventUserMetadata>(kinds),
     connect((shared) => {
       return merge(

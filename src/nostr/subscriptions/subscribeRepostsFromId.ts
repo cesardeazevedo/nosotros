@@ -4,6 +4,7 @@ import type { NostrFilter } from '@/core/types'
 import type { ClientSubOptions, NostrClient } from '../nostr'
 import { ShareReplayCache } from '../replay'
 import type { NostrEventRepost } from '../types'
+import { subscribe } from './subscribe'
 
 const replay = new ShareReplayCache<NostrEventRepost>()
 
@@ -11,6 +12,6 @@ const kinds = [Kind.Repost]
 
 export const subscribeRepostsFromId = replay.wrap(
   (_id: string, filter: NostrFilter, client: NostrClient, options?: ClientSubOptions) => {
-    return client.subscribe({ ...filter, kinds }, options).pipe(ofKind<NostrEventRepost>(kinds))
+    return subscribe({ ...filter, kinds }, client, options).pipe(ofKind<NostrEventRepost>(kinds))
   },
 )

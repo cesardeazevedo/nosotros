@@ -6,6 +6,7 @@ import type { Observable } from 'rxjs'
 import { connect, from, ignoreElements, merge, mergeMap } from 'rxjs'
 import type { ClientSubOptions, NostrClient } from '../nostr'
 import { metadataSymbol, type NostrEventZapReceipt } from '../types'
+import { subscribe } from './subscribe'
 import { subscribeUser } from './subscribeUser'
 
 const kinds = [Kind.ZapReceipt]
@@ -28,5 +29,5 @@ export function withZapAuthor(client: NostrClient) {
 }
 
 export function subscribeZaps(filter: NostrFilter, client: NostrClient, options?: ClientSubOptions) {
-  return client.subscribe({ ...filter, kinds }, options).pipe(ofKind<NostrEventZapReceipt>(kinds))
+  return subscribe({ ...filter, kinds }, client, options).pipe(ofKind<NostrEventZapReceipt>(kinds))
 }

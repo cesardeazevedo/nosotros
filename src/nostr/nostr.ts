@@ -1,40 +1,17 @@
 import { DEFAULT_RELAYS } from '@/constants/relays'
 import type { BroadcastResponse } from '@/core/operators/broadcast'
 import { onAuth } from '@/core/operators/onAuth'
-import { verifyWorker } from '@/core/operators/verifyWorker'
-import { NostrSubscription, type SubscriptionOptions } from 'core/NostrSubscription'
+import { type SubscriptionOptions } from 'core/NostrSubscription'
 import type { Pool } from 'core/pool'
 import type { Signer } from 'core/signers/signer'
 import type { NostrFilter } from 'core/types'
-import type { NostrEvent } from 'nostr-tools'
 import { identity } from 'observable-hooks'
-import type { OperatorFunction } from 'rxjs'
-import {
-  defaultIfEmpty,
-  distinct,
-  EMPTY,
-  filter,
-  map,
-  merge,
-  mergeMap,
-  mergeWith,
-  of,
-  pipe,
-  tap,
-  type Observable,
-} from 'rxjs'
-import { batcher } from './batcher'
-import { setCache } from './cache'
+import { defaultIfEmpty, distinct, EMPTY, filter, map, merge, mergeMap, of, tap, type Observable } from 'rxjs'
 import { READ, WRITE } from './helpers/parseRelayList'
 import { InboxTracker } from './inbox'
 import { Mailbox, toArrayRelay } from './mailbox'
 import { Nip05 } from './nip05'
-import { distinctEvent } from './operators/distinctEvents'
-import * as localDB from './operators/localDB'
-import * as localRelay from './operators/localRelay'
-import { parseEventMetadata } from './operators/parseMetadata'
 import { OutboxTracker } from './outbox'
-import { pruneFilters } from './prune'
 import { Seen } from './seen'
 import { defaultNostrSettings, type NostrSettings } from './settings'
 import type { NostrEventMetadata } from './types'
@@ -145,70 +122,6 @@ export class NostrClient {
           this.outboxSets.add(url)
         })
       }),
-    )
-  }
-
-  // Query locally, IndexedDB or local relays
-  query(sub: NostrSubscription, options?: ClientSubOptions) {
-    const filters = options?.cacheFilter ? [options.cacheFilter] : sub.filters
-    if (filters.length > 0 && options?.queryLocal !== false) {
-      const localDB$ = this.settings.localDB ? localDB.query(filters) : EMPTY
-      const localRelays$ = localRelay.query(this.pool, Array.from(this.localSets), sub, filters)
-      return merge(localDB$, localRelays$).pipe(
-        tap((event) => {
-          sub.add(event)
-          this.seen.query(event)
-          setCache(event)
-        }),
-      )
-    }
-    return EMPTY
-  }
-
-  // Insert locally, IndexedDB or local relays
-  insert(options?: ClientSubOptions): OperatorFunction<NostrEvent, NostrEvent> {
-    const localRelays = Array.from(this.localSets)
-    if (options?.queryLocal !== false) {
-      return pipe(
-        this.settings.localDB ? localDB.insertEvent() : mergeWith(EMPTY),
-        localRelays.length > 0 ? localRelay.insertEvent(this.pool, localRelays) : mergeWith(EMPTY),
-      )
-    }
-    return mergeWith(EMPTY)
-  }
-
-  createSubscription(filters: NostrFilter | NostrFilter[], options?: ClientSubOptions) {
-    return new NostrSubscription(filters, {
-      ...options,
-      relays: merge(this.inbox$, this.outbox$, of(this.relays), options?.relays || EMPTY),
-      relayHints: this.settings.hints ? options?.relayHints : {},
-      outbox:
-        this.settings.outbox && options?.outbox !== false
-          ? this.outboxTracker.subscribe.bind(this.outboxTracker)
-          : () => EMPTY,
-      transform: options?.prune === false ? undefined : pruneFilters,
-    })
-  }
-
-  subscribe(filters: NostrFilter | NostrFilter[], options?: ClientSubOptions) {
-    const sub = this.createSubscription(filters, options)
-
-    return of(sub).pipe(
-      batcher.subscribe(),
-
-      tap(([relay, event]) => this.seen.insert(relay, event)),
-
-      distinctEvent(sub),
-
-      verifyWorker(),
-
-      this.insert(options),
-
-      mergeWith(this.query(sub, options)),
-
-      parseEventMetadata(),
-
-      tap(this.options.onEvent),
     )
   }
 }

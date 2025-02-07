@@ -4,7 +4,8 @@ import { start } from '@/core/operators/start'
 import { EMPTY, last, map, mergeMap, of } from 'rxjs'
 import { cacheReplaceablePrune } from '../cache'
 import type { NostrClient } from '../nostr'
-import { parseEventMetadata } from '../operators/parseMetadata'
+import { parseEventMetadata } from '../operators/parseEventMetadata'
+import { createSubscription } from '../subscriptions/createSubscription'
 import type { NostrEventFollow } from '../types'
 import { metadataSymbol } from '../types'
 import { publish } from './publish'
@@ -16,7 +17,7 @@ export function publishFollowList(client: NostrClient, tag: 'p', related: string
 
   const filter = { kinds, authors: [client.pubkey] }
   cacheReplaceablePrune.delete(`${Kind.Follows}:${client.pubkey}`)
-  const sub = client.createSubscription(filter, { queryLocal: false })
+  const sub = createSubscription(filter, client, { queryLocal: false })
   return of(sub).pipe(
     start(client.pool),
     map(([, event]) => event),

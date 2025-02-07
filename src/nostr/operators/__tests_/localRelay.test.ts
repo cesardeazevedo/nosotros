@@ -7,7 +7,8 @@ import { test } from '@/utils/fixtures'
 import { expectRelayPublish, relaySendOK } from '@/utils/testHelpers'
 import { subscribeSpyTo } from '@hirez_io/observer-spy'
 import { from } from 'rxjs'
-import { insertEvent, query } from '../localRelay'
+import { insertLocalRelay } from '../insertLocalRelay'
+import { queryLocalRelay } from '../queryLocalRelay'
 
 describe('localRelay', () => {
   test('query()', async ({ createMockRelay }) => {
@@ -17,7 +18,7 @@ describe('localRelay', () => {
 
     const sub = new NostrSubscription({ kinds: [Kind.Text], authors: ['1'] })
     const pool = new Pool()
-    const $ = query(pool, [RELAY_1], sub)
+    const $ = queryLocalRelay(pool, [RELAY_1], sub)
 
     const spy = subscribeSpyTo($)
 
@@ -37,7 +38,7 @@ describe('localRelay', () => {
     const note4 = fakeEvent({ kind: 0, id: '4', pubkey: '1', created_at: 15 })
 
     const pool = new Pool()
-    const $ = from([note1, note2, note3, note4]).pipe(insertEvent(pool, [RELAY_1]))
+    const $ = from([note1, note2, note3, note4]).pipe(insertLocalRelay(pool, [RELAY_1]))
 
     const spy = subscribeSpyTo($)
     await expectRelayPublish(relay, note1)

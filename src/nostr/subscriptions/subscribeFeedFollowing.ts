@@ -3,7 +3,7 @@ import type { PaginationSubject } from '@/core/PaginationRangeSubject'
 import { mergeMap } from 'rxjs'
 import type { NostrClient } from '../nostr'
 import { metadataSymbol } from '../types'
-import type { FeedOptions  } from './subscribeFeed'
+import type { FeedOptions } from './subscribeFeed'
 import { subscribeFeed } from './subscribeFeed'
 import { subscribeFollows } from './subscribeFollows'
 

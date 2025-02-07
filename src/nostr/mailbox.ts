@@ -7,9 +7,10 @@ import { parseRelayList } from './helpers/parseRelayList'
 import type { RelaySelectionConfig } from './helpers/selectRelays'
 import { selectRelays } from './helpers/selectRelays'
 import type { NostrClient } from './nostr'
-import { mergeMetadata } from './operators/mapMetadata'
+import { parseMetadata } from './operators/parseMetadata'
 import { ShareReplayCache } from './replay'
 import { metadataSymbol } from './types'
+import { query } from './operators/query'
 
 export const toArrayRelay = pipe(map((data: UserRelay[]) => data.map((x) => x.relay)))
 
@@ -23,8 +24,8 @@ export class Mailbox {
 
   private subscribe = replay.wrap((pubkey: string) => {
     const sub = new NostrSubscription({ kinds: [Kind.RelayList], authors: [pubkey] })
-    return from(this.client.query(sub)).pipe(
-      mergeMetadata(parseRelayList),
+    return from(query(this.client, sub)).pipe(
+      parseMetadata(parseRelayList),
       tap((x) => this.client.options.onEvent?.(x)),
       map((x) => x[metadataSymbol].relayList),
       filter((x) => x.length > 0),
