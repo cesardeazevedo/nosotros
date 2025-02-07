@@ -16,9 +16,9 @@ import { useCurrentPubkey } from '@/hooks/useRootStore'
 import { IconChevronDown, IconChevronUp } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
 import { useState } from 'react'
+import { PostFabButton } from '../../elements/Buttons/PostFabButton'
 import { CenteredContainer } from '../../elements/Layouts/CenteredContainer'
 import { PaperContainer } from '../../elements/Layouts/PaperContainer'
-import { PostFab } from '../../elements/Posts/PostFab'
 
 export const HomeRoute = observer(function HomeRoute() {
   const mobile = useMobile()
@@ -33,7 +33,7 @@ export const HomeRoute = observer(function HomeRoute() {
 
   return (
     <CenteredContainer margin>
-      {!mobile && pubkey && <PostFab />}
+      {!mobile && pubkey && <PostFabButton />}
       <PaperContainer>
         <FeedTabs module={module}>
           <Button variant='filledTonal' onClick={() => setExpanded((prev) => !prev)}>

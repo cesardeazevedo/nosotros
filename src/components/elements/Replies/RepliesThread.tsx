@@ -18,12 +18,12 @@ import { DeckContext } from '../Deck/DeckContext'
 import { Editor } from '../Editor/Editor'
 import { WaveDivider } from '../Layouts/WaveDivider'
 import { LinkNEvent } from '../Links/LinkNEvent'
+import { PostActions } from '../Posts/PostActions/PostActions'
+import { PostContent } from '../Posts/PostContent'
+import { PostHeader } from '../Posts/PostHeader'
 import { UserAvatar } from '../User/UserAvatar'
-import { PostActions } from './PostActions/PostActions'
-import { PostContent } from './PostContent'
-import { PostHeader } from './PostHeader'
-import { Replies } from '../Replies/Replies'
-import { ReplyContent } from '../Replies/ReplyContent'
+import { Replies } from './Replies'
+import { ReplyContent } from './ReplyContent'
 
 type Props = {
   event: NostrEventNote | NostrEventComment
@@ -33,7 +33,7 @@ type Props = {
   renderEditor?: boolean
 }
 
-export const PostThread = function PostThread(props: Props) {
+export const RepliesThread = function RepliesThread(props: Props) {
   const { event, renderEditor = true, renderParents = true, renderReplies = true, open } = props
   const note = useNoteStore(event, open)
   const context = useMatch({ from: '/$nostr', shouldThrow: false })?.context
@@ -60,11 +60,11 @@ export const PostThread = function PostThread(props: Props) {
               {renderParents && (
                 <>
                   {note.parent ? (
-                    <PostThread renderEditor={renderEditor} event={note.parent.event} />
+                    <RepliesThread renderEditor={renderEditor} event={note.parent.event} />
                   ) : (
                     // Some events are missing in the middle
                     <>
-                      {note.root && <PostThread event={note.root.event} />}
+                      {note.root && <RepliesThread event={note.root.event} />}
                       <Stack sx={styles.fullthread} gap={2}>
                         <IconDotsVertical />
                         <LinkNEvent nevent={note.root?.nevent || note.event.nevent}>

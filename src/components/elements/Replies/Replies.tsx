@@ -6,7 +6,7 @@ import { spacing } from '@/themes/spacing.stylex'
 import { observer } from 'mobx-react-lite'
 import { useCallback } from 'react'
 import { css, html } from 'react-strict-dom'
-import { PostLoadMore } from '../Posts/PostLoadMore'
+import { RepliesLoadMore } from './RepliesLoadMore'
 import { RepliesMuted } from './RepliesMuted'
 import { RepliesTree } from './RepliesTree'
 
@@ -33,7 +33,7 @@ export const Replies = observer(function Replies(props: Props) {
       <html.div style={styles.root}>
         {replies.length > 0 && note && <RepliesTree replies={replies} repliesOpen={note.repliesOpen} level={1} />}
         <RepliesMuted level={0} />
-        <PostLoadMore note={note} onClick={handleLoadMore} />
+        <RepliesLoadMore note={note} onClick={handleLoadMore} />
       </html.div>
     </Stack>
   )

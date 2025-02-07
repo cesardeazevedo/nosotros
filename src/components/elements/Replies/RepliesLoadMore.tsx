@@ -14,7 +14,7 @@ type Props = {
   onClick?: () => void
 }
 
-export const PostLoadMore = observer(function PostLoadMore(props: Props) {
+export const RepliesLoadMore = observer(function RepliesLoadMore(props: Props) {
   const { note, onClick, disabled } = props
   const loading = note.isLoading
   const noRepliesLeft = !loading && !!note.repliesOpen && note.repliesLeft === 0

@@ -6,7 +6,7 @@ import { spacing } from '@/themes/spacing.stylex'
 import { useRouteContext } from '@tanstack/react-router'
 import type { DecodeResult } from 'nostr-tools/nip19'
 import { css, html } from 'react-strict-dom'
-import { PostLoadMore } from '../Posts/PostLoadMore'
+import { RepliesLoadMore } from './RepliesLoadMore'
 import { RepliesTree } from './RepliesTree'
 
 type Props = {
@@ -45,7 +45,7 @@ export const RepliesPreview = function RepliesPreview(props: Props) {
       <Stack horizontal={false} sx={styles.root} justify='flex-start'>
         <html.div style={styles.repliesWrapper}>
           {replies && <RepliesTree nested={false} replies={replies} repliesOpen={note.repliesOpen} level={1} />}
-          <PostLoadMore note={note} onClick={onLoadMoreClick} disabled={false} />
+          <RepliesLoadMore note={note} onClick={onLoadMoreClick} disabled={false} />
         </html.div>
       </Stack>
     </>

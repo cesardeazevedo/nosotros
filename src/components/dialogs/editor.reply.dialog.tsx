@@ -8,7 +8,7 @@ import { useCallback } from 'react'
 import { RemoveScroll } from 'react-remove-scroll'
 import { css, html } from 'react-strict-dom'
 import { Editor } from '../elements/Editor/Editor'
-import { PostThread } from '../elements/Posts/PostThread'
+import { RepliesThread } from '../elements/Replies/RepliesThread'
 import { Divider } from '../ui/Divider/Divider'
 
 export const EditorReplyDialog = observer(function EditorReplyDialog() {
@@ -33,7 +33,12 @@ export const EditorReplyDialog = observer(function EditorReplyDialog() {
           <RemoveScroll>
             <html.div style={styles.root}>
               {note && (
-                <PostThread event={note.event.event} renderReplies={false} renderParents={false} renderEditor={false} />
+                <RepliesThread
+                  event={note.event.event}
+                  renderReplies={false}
+                  renderParents={false}
+                  renderEditor={false}
+                />
               )}
             </html.div>
           </RemoveScroll>

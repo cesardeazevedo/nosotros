@@ -7,7 +7,7 @@ import React from 'react'
 import { css } from 'react-strict-dom'
 import { IconPencil } from '../Icons/IconPencil'
 
-export const PostFab = React.memo(function PostFab() {
+export const PostFabButton = React.memo(function PostFabButton() {
   const isMobile = useMobile()
   return (
     <Link to='.' search={{ compose: true }}>

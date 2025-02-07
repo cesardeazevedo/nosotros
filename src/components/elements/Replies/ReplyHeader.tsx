@@ -9,7 +9,7 @@ import { observer } from 'mobx-react-lite'
 import { css } from 'react-strict-dom'
 import { LinkNEvent } from '../Links/LinkNEvent'
 
-export const PostReplyingHeader = observer(function PostReplyingHeader() {
+export const ReplyHeader = observer(function ReplyHeader() {
   const { dense } = useContentContext()
   const { note } = useNoteContext()
   return (
