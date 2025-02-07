@@ -1,5 +1,5 @@
-import { verifyWorker } from '@/core/operators/verifyWorker'
 import type { NostrFilter } from '@/core/types'
+import { verifyWorker } from '@/nostr/operators/verifyWorker'
 import { mergeWith, of, tap } from 'rxjs'
 import { batcher } from '../batcher'
 import type { ClientSubOptions, NostrClient } from '../nostr'
