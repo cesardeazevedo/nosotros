@@ -68,7 +68,6 @@ export type ClientSubOptions = Omit<SubscriptionOptions, 'outbox'> & {
 
 export class NostrClient {
   notes = new NIP01Notes(this)
-  users = new NIP01Users(this)
   follows = new NIP02Follows(this)
   dns = new NIP05Dns(this)
   reposts = new NIP18Reposts(this)

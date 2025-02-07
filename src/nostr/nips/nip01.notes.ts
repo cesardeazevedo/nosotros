@@ -8,6 +8,7 @@ import type { NostrFilter } from 'core/types'
 import type { ClientSubOptions, NostrClient } from 'nostr/nostr'
 import type { Observable } from 'rxjs'
 import { EMPTY, connect, expand, filter, from, ignoreElements, merge, mergeMap, of, skip } from 'rxjs'
+import { subscribeUser } from '../subscriptions/subscribeUser'
 
 export type Note$ = Observable<NostrEventNote | NostrEventComment>
 
@@ -35,7 +36,7 @@ export class NIP01Notes {
           const metadata = event[metadataSymbol]
           const authors = [event.pubkey, ...(metadata.mentionedAuthors || [])]
           const relayHints = metadata.relayHints
-          return from(authors).pipe(mergeMap((pubkey) => this.client.users.subscribe(pubkey, { relayHints })))
+          return from(authors).pipe(mergeMap((pubkey) => subscribeUser(pubkey, this.client, { relayHints })))
         }),
       )
     }

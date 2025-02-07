@@ -1,4 +1,5 @@
 import { subscribeIdsFromQuotes } from '@/nostr/operators/subscribeIdsFromQuotes'
+import { subscribeUser } from '@/nostr/subscriptions/subscribeUser'
 import { useObservableNostrContext } from '@/stores/context/nostr.context.hooks'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
@@ -17,7 +18,7 @@ export const NAddrEditor = (props: NodeViewProps) => {
   const address = `${attrs.kind}:${attrs.pubkey}:${attrs.identifier}`
   const sub = useObservableNostrContext((context) => {
     const hints = { relayHints: { ids: { [address]: attrs.relays || [] } } }
-    return merge(subscribeIdsFromQuotes(address, context.client, hints), context.client.users.subscribe(attrs.pubkey))
+    return merge(subscribeIdsFromQuotes(address, context.client, hints), subscribeUser(attrs.pubkey, context.client))
   })
   useSubscription(sub)
   return (

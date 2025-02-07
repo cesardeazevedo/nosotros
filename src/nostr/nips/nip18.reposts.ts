@@ -3,6 +3,7 @@ import { ofKind } from '@/core/operators/ofKind'
 import type { NostrFilter } from '@/core/types'
 import { EMPTY, filter, ignoreElements, map, merge, mergeMap } from 'rxjs'
 import type { ClientSubOptions, NostrClient } from '../nostr'
+import { subscribeUser } from '../subscriptions/subscribeUser'
 import { metadataSymbol, type NostrEventRepost } from '../types'
 
 const kinds = [Kind.Repost]
@@ -18,7 +19,7 @@ export class NIP18Reposts {
       if (id) {
         return merge(
           // get repost author
-          this.client.users.subscribe(event.pubkey).pipe(ignoreElements()),
+          subscribeUser(event.pubkey, this.client).pipe(ignoreElements()),
           // get inner note
           this.client.notes.subNotesWithRelated({ ids: [id] }, { relayHints }).pipe(
             filter((event) => event.id === id),

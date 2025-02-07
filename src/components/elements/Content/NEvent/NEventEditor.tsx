@@ -1,4 +1,5 @@
 import { ContentProvider } from '@/components/providers/ContentProvider'
+import { subscribeUser } from '@/nostr/subscriptions/subscribeUser'
 import { useObservableNostrContext } from '@/stores/context/nostr.context.hooks'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
@@ -20,7 +21,7 @@ export const NEventEditor = (props: NodeViewProps) => {
         { ids: [attrs.id] },
         { relayHints: { idHints: attrs.author ? { [attrs.id]: [attrs.author] } : {} } },
       ),
-      attrs.author ? context.client.users.subscribe(attrs.author) : EMPTY,
+      attrs.author ? subscribeUser(attrs.author, context.client) : EMPTY,
     )
   })
   useSubscription(sub)

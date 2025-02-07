@@ -7,6 +7,7 @@ import { isEventTag } from '../helpers/parseTags'
 import type { NostrClient } from '../nostr'
 import { subscribeIdsFromQuotes } from '../operators/subscribeIdsFromQuotes'
 import { type NostrEventMetadata } from '../types'
+import { subscribeUser } from './subscribeUser'
 import { withRelatedAuthors } from './withRelatedAuthor'
 
 export function subscribeNotifications(client: NostrClient, pagination: PaginationLimitSubject | PaginationSubject) {
@@ -30,7 +31,7 @@ export function subscribeNotifications(client: NostrClient, pagination: Paginati
                           // get reacted note
                           from(ids).pipe(mergeMap((id) => subscribeIdsFromQuotes(id, client))),
                           // get author of reaction
-                          client.users.subscribe(event.pubkey),
+                          subscribeUser(event.pubkey, client),
                         )
                       }),
                       ignoreElements(),

@@ -9,6 +9,7 @@ import { connect, filter, from, ignoreElements, merge, mergeMap, of, tap } from 
 import { parseTags } from '../helpers/parseTags'
 import { distinctEvent } from '../operators/distinctEvents'
 import { parseEventMetadata } from '../operators/parseMetadata'
+import { subscribeUser } from '../subscriptions/subscribeUser'
 import type { NostrEventZapReceipt } from '../types'
 import { metadataSymbol } from '../types'
 
@@ -43,7 +44,7 @@ export class NIP57Zaps {
             // Get zapper and receiver authors
             const metadata = event[metadataSymbol]
             const authors = dedupe([metadata.receiver, metadata.zapper])
-            return from(authors).pipe(mergeMap((pubkey) => this.client.users.subscribe(pubkey)))
+            return from(authors).pipe(mergeMap((pubkey) => subscribeUser(pubkey, this.client)))
           }),
           ignoreElements(),
         ),

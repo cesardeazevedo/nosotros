@@ -6,6 +6,7 @@ import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { TextField } from '@/components/ui/TextField/TextField'
 import { useGoBack } from '@/hooks/useNavigations'
+import { subscribeUser } from '@/nostr/subscriptions/subscribeUser'
 import { useObservableNostrContext } from '@/stores/context/nostr.context.hooks'
 import { signinStore } from '@/stores/signin/signin.store'
 import { spacing } from '@/themes/spacing.stylex'
@@ -36,7 +37,7 @@ const UserPreview = observer(function UserPreview(props: { control: Control<Form
     return input$.pipe(
       filter((x) => !!x),
       debounceTime(250),
-      switchMap((value) => context.client.users.subscribe(value)),
+      switchMap((value) => subscribeUser(value, context.client)),
     )
   })
   const user = useObservableState(sub)
