@@ -15,11 +15,13 @@ type ReplyStatus = 'IDLE' | 'LOADING' | 'LOADED'
 
 // removes undefined and empty strings from last items in tags
 const compact = (x: Array<Array<string | undefined>>): string[][] => {
-  return x.map((y) => {
-    const filtered = y.filter((z): z is string => z !== undefined)
-    const lastNonEmptyIndex = filtered.findLastIndex((z) => z !== '')
-    return filtered.slice(0, lastNonEmptyIndex + 1)
-  })
+  return x
+    .filter((x) => x.length > 1)
+    .map((y) => {
+      const filtered = y.filter((z): z is string => z !== undefined)
+      const lastNonEmptyIndex = filtered.findLastIndex((z) => z !== '')
+      return filtered.slice(0, lastNonEmptyIndex + 1)
+    })
 }
 
 const PAGINATION_SIZE = 5
@@ -151,13 +153,14 @@ export class Note {
             ['p', this.event.pubkey, this.user?.headRelay || ''],
           ])
         }
-        return compact([
-          ['e', this.metadata.rootId, this.root?.headRelay || '', 'root', this.root?.pubkey].filter(
-            (x) => x !== undefined,
-          ),
+        const tags = [
+          this.metadata.rootId
+            ? ['e', this.metadata.rootId, this.root?.headRelay || '', 'root', this.root?.pubkey]
+            : [],
           ['e', this.id, this.event.headRelay || '', 'reply', this.event.pubkey],
           ['p', this.event.pubkey, this.user?.headRelay],
-        ])
+        ]
+        return compact(tags)
       }
       default: {
         // NIP-22 comments tags

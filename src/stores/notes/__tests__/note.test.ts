@@ -111,6 +111,18 @@ describe('Note', () => {
     ])
   })
 
+  test('assert replyTags with missing root', ({ createNote }) => {
+    const note = createNote({
+      id: '2',
+      pubkey: '2',
+      tags: [['e', '1', '', 'reply']],
+    })
+    expect(note.replyTags).toStrictEqual([
+      ['e', '2', '', 'reply', '2'],
+      ['p', '2'],
+    ])
+  })
+
   test('assert replyTags for a media note', ({ createNote }) => {
     const root = createNote({
       id: 'root_1',
