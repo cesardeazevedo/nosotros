@@ -15,7 +15,7 @@ export function fakeEvent(data?: Partial<NostrEvent>): NostrEvent {
     kind: data?.kind ?? Kind.Text,
     id: data?.id || Math.random().toString().slice(2),
     content: data?.content || 'Hello World',
-    created_at: data?.created_at ?? Date.now() / 1000 - 1000,
+    created_at: data?.created_at ?? Math.floor(Date.now() / 1000 - 1000),
     pubkey: data?.pubkey || '1',
     tags: data?.tags || [],
     sig: '',

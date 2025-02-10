@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-empty-pattern */
 import { Kind } from '@/constants/kinds'
-import { RELAY_1, RELAY_2, RELAY_3, RELAY_4, RELAY_5 } from '@/constants/testRelays'
 import { clearCache } from '@/nostr/cache'
 import { db } from '@/nostr/db'
 import { parseFollowList } from '@/nostr/helpers/parseFollowList'
@@ -27,17 +26,11 @@ import type { User } from '@/stores/users/user'
 import { userStore } from '@/stores/users/users.store'
 import { type NostrEvent } from 'nostr-tools'
 import { test as base } from 'vitest'
-import WS from 'vitest-websocket-mock'
 import { fakeComment, fakeEvent, fakeNote } from './faker'
 import { RelayServer, TestSigner } from './testHelpers'
 
 interface Fixtures {
   createMockRelay: (url: string, db: NostrEvent[]) => RelayServer
-  relay: WS
-  relay2: WS
-  relay3: WS
-  relay4: WS
-  relay5: WS
   root: RootStore
   clear: () => void
   login: (pubkey: string) => User
@@ -58,31 +51,6 @@ export const test = base.extend<Fixtures>({
     await use((url: string, db: NostrEvent[]) => {
       return new RelayServer(url, db)
     })
-  },
-  relay: async ({}, use) => {
-    const relay = new WS(RELAY_1, { jsonProtocol: true })
-    await use(relay)
-    relay.close()
-  },
-  relay2: async ({}, use) => {
-    const relay = new WS(RELAY_2, { jsonProtocol: true })
-    await use(relay)
-    relay.close()
-  },
-  relay3: async ({}, use) => {
-    const relay = new WS(RELAY_3, { jsonProtocol: true })
-    await use(relay)
-    relay.close()
-  },
-  relay4: async ({}, use) => {
-    const relay = new WS(RELAY_4, { jsonProtocol: true })
-    await use(relay)
-    relay.close()
-  },
-  relay5: async ({}, use) => {
-    const relay = new WS(RELAY_5, { jsonProtocol: true })
-    await use(relay)
-    relay.close()
   },
   root: async ({}, use) => {
     await use(rootStore)
