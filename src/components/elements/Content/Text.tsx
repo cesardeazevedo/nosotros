@@ -30,7 +30,7 @@ function TextMark(props: TextMarkProps) {
             case 'code':
               return <CodeSpan>{content}</CodeSpan>
             case 'tag':
-              return <Tag>{content}</Tag>
+              return <Tag tag={mark.attrs.tag}>{content}</Tag>
             case 'link':
               return disableLink ? content : <ContentLink href={mark.attrs.href}>{content}</ContentLink>
             default:
