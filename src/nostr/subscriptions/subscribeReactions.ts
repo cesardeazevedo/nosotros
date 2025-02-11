@@ -1,10 +1,10 @@
 import { Kind } from '@/constants/kinds'
 import type { NostrFilter } from '@/core/types'
-import type { ClientSubOptions, NostrClient } from '../nostr'
+import type { NostrContext } from '../context'
 import { subscribe } from './subscribe'
 
 const kinds = [Kind.Reaction]
 
-export function subscribeReactions(filter: NostrFilter, client: NostrClient, options?: ClientSubOptions) {
-  return subscribe({ ...filter, kinds }, client, options)
+export function subscribeReactions(filter: NostrFilter, ctx: NostrContext) {
+  return subscribe({ ...filter, kinds }, ctx)
 }

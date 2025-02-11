@@ -2,11 +2,11 @@ import { RELAY_1, RELAY_2, RELAY_3, RELAY_4 } from '@/constants/testRelays'
 import { test } from '@/utils/fixtures'
 import { subscribeSpyTo } from '@hirez_io/observer-spy'
 import { from, mergeMap } from 'rxjs'
-import { READ, WRITE } from '../helpers/parseRelayList'
-import { Mailbox, toArrayRelay } from '../mailbox'
+import { READ, WRITE } from '../../helpers/parseRelayList'
+import { toArrayRelay, trackMailbox } from '../trackMailbox'
 
-describe('Mailbox Tracker', () => {
-  test('assert user relays', async ({ createClient, insertRelayList }) => {
+describe('trackMailboxes', () => {
+  test('assert user relays', async ({ createContext, insertRelayList }) => {
     await insertRelayList({
       pubkey: '1',
       tags: [
@@ -23,9 +23,9 @@ describe('Mailbox Tracker', () => {
       ],
     })
 
-    const client = createClient()
-    const user1$ = client.mailbox.track('1').pipe(toArrayRelay)
-    const user2$ = client.mailbox.track('2').pipe(toArrayRelay)
+    const ctx = createContext()
+    const user1$ = trackMailbox('1', {}, ctx).pipe(toArrayRelay)
+    const user2$ = trackMailbox('2', {}, ctx).pipe(toArrayRelay)
 
     const spy1 = subscribeSpyTo(user1$)
     const spy2 = subscribeSpyTo(user2$)
@@ -36,7 +36,7 @@ describe('Mailbox Tracker', () => {
     expect(spy2.getValues()).toStrictEqual([[RELAY_1, RELAY_2]])
   })
 
-  test('assert user read relays', async ({ createClient, insertRelayList }) => {
+  test('assert user read relays', async ({ createContext, insertRelayList }) => {
     await insertRelayList({
       pubkey: '1',
       tags: [
@@ -47,8 +47,8 @@ describe('Mailbox Tracker', () => {
       ],
     })
 
-    const client = createClient()
-    const $ = client.mailbox.track('1', { permission: READ }).pipe(toArrayRelay)
+    const ctx = createContext()
+    const $ = trackMailbox('1', { permission: READ }, ctx).pipe(toArrayRelay)
 
     const spy = subscribeSpyTo($)
 
@@ -57,7 +57,7 @@ describe('Mailbox Tracker', () => {
     expect(spy.getValues()).toStrictEqual([[RELAY_1, RELAY_2, RELAY_4]])
   })
 
-  test('assert user write relays', async ({ createClient, insertRelayList }) => {
+  test('assert user write relays', async ({ createContext, insertRelayList }) => {
     await insertRelayList({
       pubkey: '1',
       tags: [
@@ -68,9 +68,8 @@ describe('Mailbox Tracker', () => {
       ],
     })
 
-    const client = createClient()
-    const mailbox = new Mailbox(client)
-    const $ = mailbox.track('1', { permission: WRITE }).pipe(toArrayRelay)
+    const ctx = createContext()
+    const $ = trackMailbox('1', { permission: WRITE }, ctx).pipe(toArrayRelay)
 
     const spy = subscribeSpyTo($)
 
@@ -79,15 +78,15 @@ describe('Mailbox Tracker', () => {
     expect(spy.getValues()).toStrictEqual([[RELAY_2, RELAY_3, RELAY_4]])
   })
 
-  test('assert multiple users relays on the fly', async ({ createClient, insertRelayList }) => {
-    const client = createClient({ relays: [RELAY_1] })
-    const $ = from(['1', '2', '3', '4', '5']).pipe(mergeMap((x) => client.mailbox.track(x, { timeout: 1000 })))
+  test('assert multiple users relays on the fly', async ({ createContext, insertRelayList }) => {
+    const ctx = createContext({ relays: [RELAY_1] })
+    const $ = from(['1', '2', '3', '4', '5']).pipe(mergeMap((x) => trackMailbox(x, { timeout: 1000 }, ctx)))
     const spy = subscribeSpyTo($)
 
-    await insertRelayList({ id: '1', pubkey: '1', tags: [['r', RELAY_1]] }, client)
-    await insertRelayList({ id: '2', pubkey: '2', tags: [['r', RELAY_2]] }, client)
-    await insertRelayList({ id: '3', pubkey: '3', tags: [['r', RELAY_3]] }, client)
-    await insertRelayList({ id: '4', pubkey: '4', tags: [['r', RELAY_4]] }, client)
+    await insertRelayList({ id: '1', pubkey: '1', tags: [['r', RELAY_1]] })
+    await insertRelayList({ id: '2', pubkey: '2', tags: [['r', RELAY_2]] })
+    await insertRelayList({ id: '3', pubkey: '3', tags: [['r', RELAY_3]] })
+    await insertRelayList({ id: '4', pubkey: '4', tags: [['r', RELAY_4]] })
     // user 5 relay is missing, let the timeout close the stream
 
     await spy.onComplete()
@@ -100,7 +99,7 @@ describe('Mailbox Tracker', () => {
     ])
   })
 
-  test('assert cache stream', async ({ createClient, insertRelayList }) => {
+  test('assert cache stream', async ({ createContext, insertRelayList }) => {
     await insertRelayList({
       pubkey: '1',
       tags: [
@@ -117,8 +116,8 @@ describe('Mailbox Tracker', () => {
         ['r', RELAY_3],
       ],
     })
-    const client = createClient()
-    const $1 = from(['1', '2', '3']).pipe(mergeMap((x) => client.mailbox.track(x, { permission: READ, timeout: 1 })))
+    const ctx = createContext()
+    const $1 = from(['1', '2', '3']).pipe(mergeMap((x) => trackMailbox(x, { permission: READ, timeout: 1 }, ctx)))
     const spy1 = subscribeSpyTo($1)
     await spy1.onComplete()
     expect(spy1.getValues()).toStrictEqual([
@@ -132,7 +131,7 @@ describe('Mailbox Tracker', () => {
       ],
     ])
     // We should make sure the selectRelays result doesn't get cached
-    const $2 = from(['1', '2', '3']).pipe(mergeMap((x) => client.mailbox.track(x, { permission: WRITE, timeout: 1 })))
+    const $2 = from(['1', '2', '3']).pipe(mergeMap((x) => trackMailbox(x, { permission: WRITE, timeout: 1 }, ctx)))
     const spy2 = subscribeSpyTo($2)
     await spy2.onComplete()
     expect(spy2.getValues()).toStrictEqual([

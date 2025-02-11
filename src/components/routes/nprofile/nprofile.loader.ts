@@ -19,6 +19,6 @@ export async function nprofileFeedLoader(
   const parent = await options.parentMatchPromise
   const module = parent.loaderData as NProfileModule
   module.select(selected)
-  module.subscribe(module.context!.client).subscribe()
+  module.subscribe(module.contextWithFallback.context).subscribe()
   return module
 }

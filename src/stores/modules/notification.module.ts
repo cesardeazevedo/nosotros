@@ -1,5 +1,5 @@
 import { Kind } from '@/constants/kinds'
-import type { NostrClient } from '@/nostr/nostr'
+import type { NostrContext } from '@/nostr/context'
 import type { Instance, SnapshotIn, SnapshotOut } from 'mobx-state-tree'
 import { t } from 'mobx-state-tree'
 import { BaseModuleModel } from './module'
@@ -12,8 +12,8 @@ export const NotificationModuleModel = BaseModuleModel.named('NotificationModule
     feed: NotificationFeedModel,
   })
   .actions((self) => ({
-    subscribe(client: NostrClient) {
-      return self.feed.subscribe(client)
+    subscribe(ctx: NostrContext) {
+      return self.feed.subscribe(ctx)
     },
   }))
 
@@ -21,9 +21,7 @@ export function createNotificationModule(snapshot: Pick<NotificationModuleSnapsh
   return NotificationModuleModel.create({
     ...snapshot,
     context: {
-      options: {
-        pubkey: snapshot.pubkey,
-      },
+      pubkey: snapshot.pubkey,
     },
     feed: {
       scope: 'self' as const,

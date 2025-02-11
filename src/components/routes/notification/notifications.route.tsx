@@ -26,7 +26,7 @@ export const NotificationsRoute = observer(function NotificationRoute(props: Pro
   const module = useNotificationModule(props.pubkey)
   const [expanded, setExpanded] = useState(false)
   const feed = module.feed
-  useFeedSubscription(feed, module.contextWithFallback.client)
+  useFeedSubscription(feed, module.contextWithFallback.context)
   const user = useCurrentUser()
   return (
     <CenteredContainer margin>

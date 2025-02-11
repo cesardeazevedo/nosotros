@@ -39,16 +39,16 @@ export const ButtonReaction = observer(function ButtonReaction() {
   const myReactions = reactionStore.getByPubkey(pubkey)
   const myReaction = fallbackEmoji(myReactions?.[note.id]?.[0])
   const color = myReaction ? emojiColors[myReaction] || colors.red7 : colors.red7
-  const context = useRootContext()
+  const { context } = useRootContext()
   const mobile = useMobile()
 
   const handleReact = useCallback(
     (reaction: string) => {
-      publishReaction(context.client, note.event.event, reaction).subscribe({
+      publishReaction(context, note.event.event, reaction).subscribe({
         error: (error) => toastStore.enqueue(error.message),
       })
     },
-    [context.client, note],
+    [context, note],
   )
 
   return (

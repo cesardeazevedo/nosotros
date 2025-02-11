@@ -3,23 +3,24 @@ import { start } from '@/core/operators/start'
 import { verify } from '@/core/operators/verify'
 import { filter, of, tap } from 'rxjs'
 import { parseTags } from '../helpers/parseTags'
-import type { ClientSubOptions, NostrClient } from '../nostr'
+import type { NostrContext } from '../context'
 import { distinctEvent } from '../operators/distinctEvents'
 import { insert } from '../operators/insert'
 import { parseEventMetadata } from '../operators/parseEventMetadata'
+import { pool } from '../pool'
 import { createSubscription } from './createSubscription'
 
 const kinds = [Kind.ZapReceipt]
 
-export function waitForZapReceipt(id: string, invoice: string, client: NostrClient, options?: ClientSubOptions) {
-  const sub = createSubscription({ kinds, '#e': [id] }, client, options)
+export function waitForZapReceipt(id: string, invoice: string, ctx: NostrContext) {
+  const sub = createSubscription({ kinds, '#e': [id] }, ctx)
   return of(sub).pipe(
-    start(client.pool, false),
+    start(pool, false),
     distinctEvent(sub),
     verify(),
-    insert(client),
+    insert(ctx),
     parseEventMetadata(),
-    tap(client.options.onEvent),
+    tap(ctx.onEvent),
     filter((event) => {
       // Make sure the zap receipt is the one we are looking for
       const tags = parseTags(event.tags)

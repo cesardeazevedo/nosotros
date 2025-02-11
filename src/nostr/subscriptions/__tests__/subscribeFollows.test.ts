@@ -5,7 +5,7 @@ import { test } from '@/utils/fixtures'
 import { subscribeSpyTo } from '@hirez_io/observer-spy'
 import { subscribeFollows } from '../subscribeFollows'
 
-test('assert subscribeFollows', async ({ createMockRelay, createClient }) => {
+test('assert subscribeFollows', async ({ createMockRelay, createContext }) => {
   const relay = createMockRelay(RELAY_1, [
     fakeEvent({
       kind: Kind.Follows,
@@ -22,7 +22,7 @@ test('assert subscribeFollows', async ({ createMockRelay, createClient }) => {
     fakeEvent({ kind: Kind.RelayList, pubkey: '3' }),
   ])
 
-  const client = createClient({ relays: [RELAY_1], settings: { outbox: true } })
+  const client = createContext({ relays: [RELAY_1], settings: { outbox: true } })
   const $ = subscribeFollows('1', client)
 
   const spy = subscribeSpyTo($)

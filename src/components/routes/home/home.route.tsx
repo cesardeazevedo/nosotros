@@ -29,7 +29,7 @@ export const HomeRoute = observer(function HomeRoute() {
 
   const [expanded, setExpanded] = useState(false)
 
-  useFeedSubscription(module.feed, module.contextWithFallback.client)
+  useFeedSubscription(module.feed, module.contextWithFallback.context)
 
   return (
     <CenteredContainer margin>

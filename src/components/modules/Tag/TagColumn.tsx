@@ -22,7 +22,7 @@ export const TagsColumn = observer(function TagsColumn(props: Props) {
   const { module } = props
   const { feed } = module
   const { delay } = useContext(DeckContext)
-  useFeedSubscription(feed, module.contextWithFallback.client)
+  useFeedSubscription(feed, module.contextWithFallback.context)
   return (
     <>
       <DeckColumnHeader

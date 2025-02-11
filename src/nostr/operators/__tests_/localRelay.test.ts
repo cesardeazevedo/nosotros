@@ -16,8 +16,7 @@ describe('localRelay', () => {
     const relay = createMockRelay(RELAY_1, [note1, note2])
 
     const sub = new NostrSubscription({ kinds: [Kind.Text], authors: ['1'] })
-    const pool = new Pool()
-    const $ = queryLocalRelay(pool, [RELAY_1], sub)
+    const $ = queryLocalRelay([RELAY_1], sub)
 
     const spy = subscribeSpyTo($)
 

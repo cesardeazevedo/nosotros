@@ -3,10 +3,10 @@ import { mergeRelayHints } from '@/core/mergers/mergeRelayHints'
 import { ofKind } from '@/core/operators/ofKind'
 import type { Observable } from 'rxjs'
 import { EMPTY, expand, from, mergeMap, of, skip } from 'rxjs'
-import type { NostrClient } from '../nostr'
-import { subscribeIdsFromQuotes } from './subscribeIdsFromQuotes'
+import type { NostrContext } from '../context'
 import type { NostrEventComment, NostrEventNote } from '../types'
 import { metadataSymbol } from '../types'
+import { subscribeIdsFromQuotes } from './subscribeIdsFromQuotes'
 import { subscribeParent } from './subscribeParent'
 
 export type Note$ = Observable<NostrEventNote | NostrEventComment>
@@ -15,7 +15,7 @@ export type QuoteOptions = {
   depth?: number
 }
 
-export function subscribeQuotes(client: NostrClient, options?: QuoteOptions) {
+export function subscribeQuotes(ctx: NostrContext, options?: QuoteOptions) {
   const maxDepth = options?.depth || 16
   return (source$: Note$) => {
     return source$.pipe(
@@ -32,9 +32,9 @@ export function subscribeQuotes(client: NostrClient, options?: QuoteOptions) {
               return from(ids).pipe(
                 mergeMap((id) => {
                   const relayHints = mergeRelayHints([metadata.relayHints, { idHints: { [id]: [event.pubkey] } }])
-                  return subscribeIdsFromQuotes(id, client, { relayHints }).pipe(
+                  return subscribeIdsFromQuotes(id, { ...ctx, subOptions: { relayHints } }).pipe(
                     ofKind<NostrEventNote>([Kind.Text]),
-                    subscribeParent(client),
+                    subscribeParent(ctx),
                   )
                 }),
               )

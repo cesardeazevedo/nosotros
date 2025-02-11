@@ -17,9 +17,7 @@ export const initialState: RootStoreSnapshotIn = {
   globalSettings: {
     lang: 'en',
     theme: 'auto',
-  },
-  nostrSettings: {
-    ...defaultNostrSettings,
+    clientTag: true,
     scroll: {
       reposts: true,
       reactions: true,
@@ -27,10 +25,11 @@ export const initialState: RootStoreSnapshotIn = {
       replies: true,
     },
   },
+  nostrSettings: {
+    ...defaultNostrSettings,
+  },
   defaultContext: {
-    options: {
-      relays: DEFAULT_RELAYS,
-    },
+    relays: DEFAULT_RELAYS,
   },
   tempModules: {},
   persistedModules: {},

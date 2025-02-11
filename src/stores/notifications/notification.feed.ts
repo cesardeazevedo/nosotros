@@ -1,5 +1,5 @@
 import { Kind } from '@/constants/kinds'
-import type { NostrClient } from '@/nostr/nostr'
+import type { NostrContext } from '@/nostr/context'
 import { subscribeNotifications } from '@/nostr/subscriptions/subscribeNotifications'
 import type { NostrEventNote, NostrEventRepost, NostrEventZapReceipt } from '@/nostr/types'
 import { metadataSymbol, type NostrEventMetadata } from '@/nostr/types'
@@ -29,12 +29,12 @@ export const NotificationFeedModel = NotesFeedSubscriptionModel(FeedPaginationLi
       self.notifications.set(notification.id, notification)
     },
 
-    subscribe(client: NostrClient) {
+    subscribe(ctx: NostrContext) {
       const author = self.pagination.getValue()['#p']?.[0]
       return toStream(() => [self.filter, self.mentions, self.replies]).pipe(
         tap(() => self.pagination.setFilter({ kinds: self.filter.kinds })),
         switchMap(() => {
-          return subscribeNotifications(client, self.pagination).pipe(
+          return subscribeNotifications(self.pagination, ctx).pipe(
             // filter out same author notifications
             filter((notification) => notification.pubkey !== author),
 

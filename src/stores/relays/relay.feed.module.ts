@@ -29,9 +29,9 @@ export const RelayFeedModuleModel = BaseModuleModel.named('RelayFeedModuleModel'
           mergeMap(identity),
           distinct((value) => value[0] + value[1]),
           // Authenticate
-          mergeMap(([relay, challenge]) => authenticate(rootStore.rootContext.client, relay, challenge)),
+          mergeMap(([relay, challenge]) => authenticate(rootStore.rootContext.context, relay, challenge)),
           // Restart the feed
-          mergeMap(() => self.feed.subscribe(self.context!.client)),
+          mergeMap(() => self.feed.subscribe(self.contextWithFallback.context)),
         )
         .subscribe()
     },
@@ -46,7 +46,6 @@ export function createRelayFeedModule(relays: string[]) {
       scope: 'self',
       blured: true,
       options: {
-        queryLocal: false,
         includeParents: true,
         includeReplies: true,
       },
@@ -54,21 +53,13 @@ export function createRelayFeedModule(relays: string[]) {
     context: {
       settings: {
         ...rootStore.nostrSettings,
-        scroll: {
-          zaps: true,
-          replies: true,
-          reposts: true,
-          reactions: true,
-        },
         nip05: false,
         hints: true,
         outbox: false,
         localDB: false,
         localRelays: [],
       },
-      options: {
-        relays,
-      },
+      relays,
     },
   })
 }

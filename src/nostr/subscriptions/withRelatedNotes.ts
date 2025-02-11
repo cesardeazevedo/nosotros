@@ -1,20 +1,20 @@
 import { connect, ignoreElements, merge } from 'rxjs'
-import type { ClientSubOptions, NostrClient } from '../nostr'
+import type { NostrContext } from '../context'
 import { subscribeAuthorsFromNote } from './subscribeNoteAuthors'
 import type { QuoteOptions } from './subscribeQuotes'
 import { subscribeQuotes } from './subscribeQuotes'
 import type { Note$ } from './subscribeThreads'
 
-type RelatedOptions = ClientSubOptions & {
+type RelatedOptions = {
   quotes?: QuoteOptions
 }
 
-export function withRelatedNotes(client: NostrClient, options?: RelatedOptions) {
+export function withRelatedNotes(ctx: NostrContext, options?: RelatedOptions) {
   return connect((event$: Note$) => {
     return merge(
       event$,
-      event$.pipe(subscribeAuthorsFromNote(client), ignoreElements()),
-      event$.pipe(subscribeQuotes(client, options?.quotes), ignoreElements()),
+      event$.pipe(subscribeAuthorsFromNote(ctx), ignoreElements()),
+      event$.pipe(subscribeQuotes(ctx, options?.quotes), ignoreElements()),
     )
   })
 }

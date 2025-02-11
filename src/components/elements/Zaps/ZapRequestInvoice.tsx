@@ -63,8 +63,8 @@ export const ZapRequestInvoice = (props: Props) => {
   // }, [])
 
   const [paid] = useObservableState<boolean>(() => {
-    const options = event.relays ? { relays: of(event.relays) } : undefined
-    return waitForZapReceipt(event.id, invoice, context.client, options).pipe(
+    const subOptions = event.relays ? { relays: of(event.relays) } : undefined
+    return waitForZapReceipt(event.id, invoice, { ...context.context, subOptions }).pipe(
       first(),
       map(() => true),
     )

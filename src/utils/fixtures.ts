@@ -1,14 +1,11 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-empty-pattern */
 import { Kind } from '@/constants/kinds'
 import { clearCache } from '@/nostr/cache'
 import { db } from '@/nostr/db'
 import { parseFollowList } from '@/nostr/helpers/parseFollowList'
 import { parseUser } from '@/nostr/helpers/parseUser'
-import { replay as replayMailbox } from '@/nostr/mailbox'
-import type { NostrClientOptions } from '@/nostr/nostr'
-import { NostrClient } from '@/nostr/nostr'
-// import { replayIds } from '@/nostr/subscriptions/subscribeIds'
+import type { NostrContext } from '@/nostr/context'
+import { emitMailbox, replay as replayMailbox } from '@/nostr/operators/trackMailbox'
 import { pool } from '@/nostr/pool'
 import { defaultNostrSettings, type NostrSettings } from '@/nostr/settings'
 import { replay as replayNIP02 } from '@/nostr/subscriptions/subscribeFollows'
@@ -34,15 +31,15 @@ interface Fixtures {
   root: RootStore
   clear: () => void
   login: (pubkey: string) => User
-  createClient: (
-    options?: Partial<Omit<NostrClientOptions, 'settings'> & { settings: Partial<NostrSettings> }>,
-  ) => NostrClient
+  createContext: (
+    options?: Partial<Omit<NostrContext, 'settings'> & { settings: Partial<NostrSettings> }>,
+  ) => NostrContext
   createUser: (data: Partial<NostrEvent>) => User
-  createNote: (data: Partial<NostrEvent>, client?: NostrClient) => Note
-  createComment: (data: Partial<NostrEvent>, client?: NostrClient) => Note
+  createNote: (data: Partial<NostrEvent>) => Note
+  createComment: (data: Partial<NostrEvent>) => Note
   createFollows: (pubkey: string, tags: string[]) => void
   createReaction: (data: Partial<NostrEvent>) => void
-  insertRelayList: (data: Partial<NostrEvent>, client?: NostrClient) => Promise<void>
+  insertRelayList: (data: Partial<NostrEvent>) => Promise<void>
   signer: TestSigner
 }
 
@@ -55,7 +52,7 @@ export const test = base.extend<Fixtures>({
   root: async ({}, use) => {
     await use(rootStore)
   },
-  clear: async ({ root }, use) => {
+  clear: async ({}, use) => {
     clearCache()
     pool.reset()
     //replayIds.clear()
@@ -68,26 +65,26 @@ export const test = base.extend<Fixtures>({
     replayUsers.clear()
     replayNIP02.clear()
     replayNIP65.clear()
-    await use(() => {})
+    await use(() => null)
   },
   login: async ({ root, createUser }, use) => {
     use((pubkey: string) => {
-      root.auth.login({ pubkey, context: { options: { pubkey }, signer: { name: 'nip07' } } })
+      root.auth.login({ pubkey, context: { pubkey, signer: { name: 'nip07' } } })
       return createUser({ pubkey })
     })
   },
-  createClient: async ({ clear }, use) => {
+  createContext: async ({}, use) => {
     use((options) => {
-      return new NostrClient(pool, {
+      return {
         ...options,
         settings: {
           ...defaultNostrSettings,
           ...options?.settings,
         },
-      })
+      } as NostrContext
     })
   },
-  createUser: async ({ root, clear }, use) => {
+  createUser: async ({}, use) => {
     use((data: Partial<NostrEvent>) => {
       const event = fakeEvent({
         id: '1',
@@ -101,7 +98,7 @@ export const test = base.extend<Fixtures>({
       return userStore.users.get(event.pubkey) as User
     })
   },
-  createNote: async ({ clear, createUser }, use) => {
+  createNote: async ({ createUser }, use) => {
     use((data: Partial<NostrEvent>) => {
       const event = fakeNote(data)
       eventStore.add(event)
@@ -110,17 +107,16 @@ export const test = base.extend<Fixtures>({
       return new Note(event)
     })
   },
-  createComment: async ({ clear, createUser }, use) => {
+  createComment: async ({ createUser }, use) => {
     use((data: Partial<NostrEvent>) => {
       const event = fakeComment({ kind: Kind.Comment, ...data })
       eventStore.add(event)
       noteStore.add(event)
       createUser({ pubkey: event.pubkey })
       return new Note(event)
-      // return commentStore.add(event, metadata)
     })
   },
-  createFollows: async ({ clear }, use) => {
+  createFollows: async ({}, use) => {
     use((pubkey: string, followings: string[]) => {
       const event = fakeEvent({
         kind: Kind.Follows,
@@ -130,18 +126,16 @@ export const test = base.extend<Fixtures>({
       followsStore.add(event, parseFollowList(event))
     })
   },
-  createReaction: async ({ clear }, use) => {
+  createReaction: async ({}, use) => {
     use((data: Partial<NostrEvent>) => {
       reactionStore.add(fakeEvent(data))
     })
   },
-  insertRelayList: async ({ clear }, use) => {
-    use(async (data: Partial<NostrEvent>, client?: NostrClient) => {
+  insertRelayList: async ({}, use) => {
+    use(async (data: Partial<NostrEvent>) => {
       const event = fakeEvent({ kind: Kind.RelayList, ...data })
       await db.event.insert(event)
-      if (client) {
-        client.mailbox.emit(event)
-      }
+      emitMailbox(event)
     })
     db.clearDB()
   },

@@ -3,11 +3,12 @@ import { NostrPublisher } from '@/core/NostrPublish'
 import { auth } from '@/core/operators/auth'
 import { RelayToClient } from '@/core/types'
 import { EMPTY, filter, mergeMap, of, take, throwError } from 'rxjs'
-import type { NostrClient } from './nostr'
+import type { NostrContext } from './context'
 import { pool } from './pool'
 
-export function authenticate(client: NostrClient, relay: string, challenge: string) {
-  if (!client.pubkey || !client.signer) {
+export function authenticate(ctx: NostrContext, relay: string, challenge: string) {
+  const { signer, pubkey } = ctx
+  if (!pubkey || !signer) {
     const error = 'Not authenticated'
     return throwError(() => new Error(error))
   }
@@ -16,7 +17,7 @@ export function authenticate(client: NostrClient, relay: string, challenge: stri
     {
       kind: Kind.ClientAuth,
       content: '',
-      pubkey: client.pubkey,
+      pubkey,
       created_at: Math.floor(Date.now() / 1000),
       tags: [
         ['relay', relay],
@@ -24,7 +25,7 @@ export function authenticate(client: NostrClient, relay: string, challenge: stri
       ],
     },
     {
-      signer: client.signer,
+      signer,
       relays: of([relay]),
     },
   )

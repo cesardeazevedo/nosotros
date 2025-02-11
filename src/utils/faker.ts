@@ -6,10 +6,6 @@ import { Kind } from 'constants/kinds'
 import type { NostrEvent } from 'nostr-tools'
 import { finalizeEvent, generateSecretKey } from 'nostr-tools'
 
-export function fakeImageUrl(width: number, height?: number) {
-  return `https://dummyimage.com/${width}x${height || width}/000/fff.jpg`
-}
-
 export function fakeEvent(data?: Partial<NostrEvent>): NostrEvent {
   return {
     kind: data?.kind ?? Kind.Text,

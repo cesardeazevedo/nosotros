@@ -2,8 +2,8 @@ import { APP_STORAGE_KEY } from '@/constants/app'
 import type { Instance, SnapshotIn } from 'mobx-state-tree'
 import { applySnapshot, onSnapshot, t } from 'mobx-state-tree'
 import { AuthStoreModel } from './auth/auth.store'
-import { NostrContextModel } from './context/nostr.context.store'
-import { NostrSettingsModel } from './context/nostr.settings.store'
+import { NostrStoreModel } from './nostr/nostr.context.store'
+import { NostrSettingsModel } from './nostr/nostr.settings.store'
 import { DeckStoreModel } from './deck/deck.store'
 import { initialState } from './helpers/initialState'
 import { ModuleStoreModel } from './modules/module.store'
@@ -14,7 +14,7 @@ export const RootStoreModel = t.model('RootStoreModel', {
   auth: AuthStoreModel,
   decks: DeckStoreModel,
 
-  defaultContext: NostrContextModel,
+  defaultContext: NostrStoreModel,
   nostrSettings: NostrSettingsModel,
   globalSettings: GlobalSettingsModel,
 

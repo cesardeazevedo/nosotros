@@ -1,16 +1,16 @@
 import type { Instance, SnapshotIn } from 'mobx-state-tree'
 import { t } from 'mobx-state-tree'
-import type { NostrContext } from '../context/nostr.context.store'
-import { NostrContextModel } from '../context/nostr.context.store'
+import type { NostrStore } from '../nostr/nostr.context.store'
+import { NostrStoreModel } from '../nostr/nostr.context.store'
 import { getRootStore } from '../helpers/getRootStore'
 
 export const BaseModuleModel = t
-  .model('ModuleModel', {
+  .model('BaseModuleModel', {
     id: t.optional(t.identifier, () => Math.random().toString().slice(2)),
-    context: t.late(() => t.maybe(NostrContextModel)),
+    context: t.late(() => t.maybe(NostrStoreModel)),
   })
   .views((self) => ({
-    get contextWithFallback(): NostrContext {
+    get contextWithFallback(): NostrStore {
       const root = getRootStore(self)
       return self.context || root.rootContext
     },

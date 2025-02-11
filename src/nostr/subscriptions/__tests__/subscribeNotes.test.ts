@@ -7,7 +7,7 @@ import { vi } from 'vitest'
 import { subscribeNotesWithParent } from '../subscribeNotes'
 
 describe('subscribeNotes', () => {
-  test('assert parent event and quotes', async ({ createMockRelay, createClient }) => {
+  test('assert parent event and quotes', async ({ createMockRelay, createContext }) => {
     const event1 = fakeEvent({ id: '1', pubkey: '1', tags: [] })
     const event2 = fakeEvent({
       id: '2',
@@ -34,7 +34,7 @@ describe('subscribeNotes', () => {
     const relay = createMockRelay(RELAY_1, [event1, event2, event3, event4, event5, event6, event7, event8])
 
     const eventSpy = vi.fn()
-    const client = createClient({ relays: [RELAY_1], settings: { outbox: false }, onEvent: eventSpy })
+    const client = createContext({ relays: [RELAY_1], settings: { outbox: false }, onEvent: eventSpy })
 
     const filter = { kinds: [Kind.Text], authors: ['1', '2'] }
     const spy = subscribeSpyTo(subscribeNotesWithParent(filter, client))

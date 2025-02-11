@@ -1,9 +1,8 @@
-import { useGlobalNostrSettings } from '@/hooks/useRootStore'
-import type { NoteStatsOptions } from '@/nostr/subscriptions/subscribeNoteStats'
+import { useGlobalSettings } from '@/hooks/useRootStore'
 import { subscribeNoteStats } from '@/nostr/subscriptions/subscribeNoteStats'
 import type { NostrEventComment, NostrEventMedia, NostrEventNote } from '@/nostr/types'
 import { metadataSymbol } from '@/nostr/types'
-import { useNostrClientContext } from '@/stores/context/nostr.context.hooks'
+import { useNostrClientContext } from '@/stores/nostr/nostr.context.hooks'
 import { eventStore } from '@/stores/events/event.store'
 import { LRUCache } from 'lru-cache'
 import type { NostrEvent } from 'nostr-tools'
@@ -26,13 +25,10 @@ const intersection = new IntersectionObserver(
   { threshold: 0 },
 )
 
-export function useNoteVisibility(
-  event: NostrEventNote | NostrEventComment | NostrEventMedia,
-  options?: NoteStatsOptions,
-) {
-  const context = useNostrClientContext()
-  const settings = useGlobalNostrSettings()
+export function useNoteVisibility(event: NostrEventNote | NostrEventComment | NostrEventMedia) {
+  const nostr = useNostrClientContext()
   const ref = useRef<HTMLDivElement | null>(null)
+  const globalSettings = useGlobalSettings()
 
   const sub = useObservable(() => {
     return onItem.pipe(
@@ -46,10 +42,7 @@ export function useNoteVisibility(
       filter((event) => !cache.has(event.id)),
       tap((event) => cache.set(event.id, true)),
       mergeMap((event) => {
-        return subscribeNoteStats(context.client, event as NostrEvent, {
-          ...settings.scroll,
-          ...options,
-        })
+        return subscribeNoteStats(event as NostrEvent, nostr.context, globalSettings.scroll)
       }),
     )
   })

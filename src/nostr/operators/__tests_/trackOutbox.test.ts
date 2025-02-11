@@ -1,9 +1,10 @@
 import { RELAY_1, RELAY_2, RELAY_3, RELAY_4, RELAY_5 } from '@/constants/testRelays'
 import { test } from '@/utils/fixtures'
 import { subscribeSpyTo } from '@hirez_io/observer-spy'
+import { trackOutbox } from '../trackOutbox'
 
-describe('OutboxTracker', async () => {
-  test('assert idHints', async ({ createClient, insertRelayList }) => {
+describe('trackOutbox', async () => {
+  test('assert idHints', async ({ createContext, insertRelayList }) => {
     await insertRelayList({
       pubkey: 'p1',
       tags: [
@@ -16,8 +17,8 @@ describe('OutboxTracker', async () => {
     await insertRelayList({ pubkey: 'p4', tags: [['r', RELAY_4]] })
     await insertRelayList({ pubkey: 'p5', tags: [['r', RELAY_5]] })
 
-    const client = createClient()
-    const $ = client.outboxTracker.subscribe(
+    const ctx = createContext()
+    const $ = trackOutbox(
       [
         {
           kinds: [0],
@@ -34,6 +35,7 @@ describe('OutboxTracker', async () => {
           '5': ['p5'],
         },
       },
+      ctx,
     )
 
     const spy = subscribeSpyTo($)
@@ -49,7 +51,7 @@ describe('OutboxTracker', async () => {
     ])
   })
 
-  test('assert authors', async ({ createClient, insertRelayList }) => {
+  test('assert authors', async ({ createContext, insertRelayList }) => {
     await insertRelayList({
       pubkey: '1',
       tags: [
@@ -62,14 +64,18 @@ describe('OutboxTracker', async () => {
     await insertRelayList({ pubkey: '4', tags: [['r', RELAY_4]] })
     await insertRelayList({ pubkey: '5', tags: [['r', RELAY_5]] })
 
-    const client = createClient()
-    const $ = client.outboxTracker.subscribe([
-      {
-        kinds: [0],
-        authors: ['1', '2', '3', '4', '5'],
-        limit: 1,
-      },
-    ])
+    const ctx = createContext()
+    const $ = trackOutbox(
+      [
+        {
+          kinds: [0],
+          authors: ['1', '2', '3', '4', '5'],
+          limit: 1,
+        },
+      ],
+      {},
+      ctx,
+    )
 
     const spy = subscribeSpyTo($)
     await spy.onComplete()
@@ -84,7 +90,7 @@ describe('OutboxTracker', async () => {
     ])
   })
 
-  test('assert #p', async ({ createClient, insertRelayList }) => {
+  test('assert #p', async ({ createContext, insertRelayList }) => {
     await insertRelayList({
       pubkey: '1',
       tags: [
@@ -97,14 +103,18 @@ describe('OutboxTracker', async () => {
     await insertRelayList({ pubkey: '4', tags: [['r', RELAY_4]] })
     await insertRelayList({ pubkey: '5', tags: [['r', RELAY_5]] })
 
-    const client = createClient()
-    const $ = client.outboxTracker.subscribe([
-      {
-        kinds: [0],
-        '#p': ['1', '2', '3', '4', '5'],
-        limit: 1,
-      },
-    ])
+    const ctx = createContext()
+    const $ = trackOutbox(
+      [
+        {
+          kinds: [0],
+          '#p': ['1', '2', '3', '4', '5'],
+          limit: 1,
+        },
+      ],
+      {},
+      ctx,
+    )
 
     const spy = subscribeSpyTo($)
     await spy.onComplete()

@@ -1,6 +1,5 @@
 import { nip05store } from '@/stores/nip05/nip05.store'
 import { bufferTime } from 'core/operators/bufferTime'
-import type { NostrClient } from 'nostr/nostr'
 import { EMPTY, Subject, catchError, concatMap, distinct, filter, from, identity, map, mergeMap, tap } from 'rxjs'
 import { fromFetch } from 'rxjs/fetch'
 import { db } from './db'
@@ -14,7 +13,7 @@ export class Nip05 {
   blacklist: Map<string, boolean>
   queueNIP05: Subject<string>
 
-  constructor(private client: NostrClient) {
+  constructor() {
     this.blacklist = new Map<string, boolean>()
 
     this.queueNIP05 = new Subject<string>()
@@ -78,10 +77,10 @@ export class Nip05 {
   }
 
   enqueue(nip05: string | undefined) {
-    if (this.client.settings.nip05) {
-      if (nip05 && typeof nip05 !== 'undefined') {
-        this.queueNIP05.next(nip05)
-      }
+    if (nip05 && typeof nip05 !== 'undefined') {
+      this.queueNIP05.next(nip05)
     }
   }
 }
+
+export const nip05 = new Nip05()

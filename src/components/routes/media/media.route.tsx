@@ -16,7 +16,7 @@ import { css } from 'react-strict-dom'
 export const MediaRoute = observer(function MediaRoute() {
   const module = useMediaModule()
   const feed = module.feed
-  useFeedSubscription(module.feed, module.contextWithFallback.client)
+  useFeedSubscription(module.feed, module.contextWithFallback.context)
   return (
     <CenteredContainer margin>
       <PaperContainer>

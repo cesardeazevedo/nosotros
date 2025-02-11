@@ -1,26 +1,34 @@
 import { Kind } from '@/constants/kinds'
 import type { NostrFilter } from '@/core/types'
-import { EMPTY, filter, from, mergeMap } from 'rxjs'
-import type { ClientSubOptions, NostrClient } from '../nostr'
+import { EMPTY, filter, from, identity, mergeMap } from 'rxjs'
+import type { NostrContext } from '../context'
 import { metadataSymbol } from '../types'
 import { subscribeArticles } from './subscribeArticles'
 import { subscribeMedia } from './subscribeMedia'
 import { subscribeNotesWithParent, subscribeNotesWithRelated } from './subscribeNotes'
 import { subscribeReposts } from './subscribeReposts'
 import { withRelatedNotes } from './withRelatedNotes'
+import { subscribeSearch } from './subscribeSearch'
 
-export type FeedOptions = ClientSubOptions & {
+export type FeedOptions = {
   includeParents?: boolean
   includeReplies?: boolean
 }
 
-export function subscribeFeed(filters: NostrFilter, client: NostrClient, options?: FeedOptions) {
+export function subscribeFeed(filters: NostrFilter, ctx: NostrContext, options?: FeedOptions) {
   return from(filters.kinds || []).pipe(
     mergeMap((kind) => {
       switch (kind) {
+        case Kind.Metadata: {
+          // feed when searching users
+          if (filters.search) {
+            return subscribeSearch(filters.search, 100).pipe(mergeMap(identity))
+          }
+          return EMPTY
+        }
         case Kind.Text: {
           const sub = options?.includeParents === false ? subscribeNotesWithRelated : subscribeNotesWithParent
-          return sub({ ...filters, kinds: [Kind.Text] }, client, options).pipe(
+          return sub({ ...filters, kinds: [Kind.Text] }, ctx).pipe(
             filter((note) => {
               const isRoot = note[metadataSymbol].isRoot
               if (options?.includeReplies === false && !isRoot) return false
@@ -30,15 +38,13 @@ export function subscribeFeed(filters: NostrFilter, client: NostrClient, options
           )
         }
         case Kind.Article: {
-          return options?.includeReplies !== false
-            ? subscribeArticles(filters, client, options).pipe(withRelatedNotes(client, options))
-            : EMPTY
+          return options?.includeReplies !== false ? subscribeArticles(filters, ctx).pipe(withRelatedNotes(ctx)) : EMPTY
         }
         case Kind.Media: {
-          return subscribeMedia(client, { ...filters, kinds: [Kind.Media] }, options)
+          return subscribeMedia({ ...filters, kinds: [Kind.Media] }, ctx)
         }
         case Kind.Repost: {
-          return subscribeReposts(filters, client, options)
+          return subscribeReposts(filters, ctx)
         }
         default: {
           return EMPTY

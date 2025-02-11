@@ -2,31 +2,32 @@ import type { NostrFilter } from '@/core/types'
 import { verifyWorker } from '@/nostr/operators/verifyWorker'
 import { mergeWith, of, tap } from 'rxjs'
 import { batcher } from '../batcher'
-import type { ClientSubOptions, NostrClient } from '../nostr'
+import type { NostrContext } from '../context'
 import { distinctEvent } from '../operators/distinctEvents'
 import { insert } from '../operators/insert'
 import { parseEventMetadata } from '../operators/parseEventMetadata'
 import { query } from '../operators/query'
+import { seen } from '../seen'
 import { createSubscription } from './createSubscription'
 
-export function subscribe(filters: NostrFilter | NostrFilter[], client: NostrClient, options?: ClientSubOptions) {
-  const sub = createSubscription(filters, client, options)
+export function subscribe(filters: NostrFilter, ctx: NostrContext) {
+  const sub = createSubscription(filters, ctx)
 
   return of(sub).pipe(
     batcher.subscribe(),
 
-    tap(([relay, event]) => client.seen.insert(relay, event)),
+    tap(([relay, event]) => seen.insert(relay, event)),
 
     distinctEvent(sub),
 
     verifyWorker(),
 
-    insert(client, options),
+    insert(ctx),
 
-    mergeWith(query(client, sub, options)),
+    mergeWith(query(sub, ctx)),
 
     parseEventMetadata(),
 
-    tap(client.options.onEvent),
+    tap(ctx.onEvent),
   )
 }

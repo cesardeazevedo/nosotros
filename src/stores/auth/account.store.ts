@@ -1,10 +1,10 @@
 import type { Instance, SnapshotIn, SnapshotOut } from 'mobx-state-tree'
 import { t } from 'mobx-state-tree'
-import { NostrContextModel } from '../context/nostr.context.store'
+import { NostrStoreModel } from '../nostr/nostr.context.store'
 
 export const AccountModel = t.model('AccountModel', {
   pubkey: t.identifier,
-  context: t.late(() => NostrContextModel),
+  context: t.late(() => NostrStoreModel),
 })
 
 export interface Account extends Instance<typeof AccountModel> {}

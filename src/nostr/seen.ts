@@ -38,3 +38,5 @@ export class Seen {
     }
   }
 }
+
+export const seen = new Seen()

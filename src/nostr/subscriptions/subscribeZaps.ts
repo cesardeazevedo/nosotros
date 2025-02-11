@@ -4,14 +4,14 @@ import { ofKind } from '@/core/operators/ofKind'
 import type { NostrFilter } from '@/core/types'
 import type { Observable } from 'rxjs'
 import { connect, from, ignoreElements, merge, mergeMap } from 'rxjs'
-import type { ClientSubOptions, NostrClient } from '../nostr'
+import type { NostrContext } from '../context'
 import { metadataSymbol, type NostrEventZapReceipt } from '../types'
 import { subscribe } from './subscribe'
 import { subscribeUser } from './subscribeUser'
 
 const kinds = [Kind.ZapReceipt]
 
-export function withZapAuthor(client: NostrClient) {
+export function withZapAuthor(ctx: NostrContext) {
   return connect((shared$: Observable<NostrEventZapReceipt>) => {
     return merge(
       shared$,
@@ -20,7 +20,7 @@ export function withZapAuthor(client: NostrClient) {
           // Get zapper and receiver authors
           const metadata = event[metadataSymbol]
           const authors = dedupe([metadata.receiver, metadata.zapper])
-          return from(authors).pipe(mergeMap((pubkey) => subscribeUser(pubkey, client)))
+          return from(authors).pipe(mergeMap((pubkey) => subscribeUser(pubkey, ctx)))
         }),
         ignoreElements(),
       ),
@@ -28,6 +28,6 @@ export function withZapAuthor(client: NostrClient) {
   })
 }
 
-export function subscribeZaps(filter: NostrFilter, client: NostrClient, options?: ClientSubOptions) {
-  return subscribe({ ...filter, kinds }, client, options).pipe(ofKind<NostrEventZapReceipt>(kinds))
+export function subscribeZaps(filter: NostrFilter, ctx: NostrContext) {
+  return subscribe({ ...filter, kinds }, ctx).pipe(ofKind<NostrEventZapReceipt>(kinds))
 }

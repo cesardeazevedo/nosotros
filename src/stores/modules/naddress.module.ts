@@ -1,4 +1,4 @@
-import type { ClientSubOptions, NostrClient } from '@/nostr/nostr'
+import type { NostrContext } from '@/nostr/context'
 import { replayIds } from '@/nostr/subscriptions/subscribeIds'
 import { subscribeIdsFromQuotes } from '@/nostr/subscriptions/subscribeIdsFromQuotes'
 import type { Instance, SnapshotIn, SnapshotOut } from 'mobx-state-tree'
@@ -23,10 +23,9 @@ export const NAddressModuleModel = BaseModuleModel.named('NAddressModuleModel')
       return `${kind}:${pubkey}:${identifier}`
     },
 
-    subscribe(client: NostrClient) {
-      const options = {} as ClientSubOptions
+    subscribe(ctx: NostrContext) {
       replayIds.invalidate(this.address)
-      return subscribeIdsFromQuotes(this.address, client, options)
+      return subscribeIdsFromQuotes(this.address, ctx)
     },
   }))
 
@@ -34,10 +33,8 @@ export function createNAddressModule(snapshot: Pick<NAddressModuleSnapshotIn, 'i
   return NAddressModuleModel.create({
     ...snapshot,
     context: {
-      options: {
-        pubkey: snapshot.options.pubkey,
-        relays: snapshot.options.relays,
-      },
+      pubkey: snapshot.options.pubkey,
+      // relays: snapshot.options.relays,
     },
   })
 }

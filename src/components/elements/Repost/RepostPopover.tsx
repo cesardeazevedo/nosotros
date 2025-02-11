@@ -32,7 +32,7 @@ export const RepostPopover = (props: Props) => {
   const [isReposting, submit] = useObservableState<boolean, Note>((input$) => {
     return input$.pipe(
       mergeMap((note) => {
-        return publishRepost(context.client, note.event.event).pipe(
+        return publishRepost(context.context, note.event.event).pipe(
           tap((event) => {
             toastStore.enqueue(<ToastEventPublished event={event} eventLabel='Repost' />, { duration: 10000_000 })
           }),

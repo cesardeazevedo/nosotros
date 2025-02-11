@@ -15,7 +15,7 @@ export function useFollowingUsers() {
         pluckFirst,
         mergeMap((user) => toStream(() => user?.following)),
         mergeMap((following) => following?.tags.get('p') || []),
-        mergeMap((pubkey) => subscribeUser(pubkey, context.client)),
+        mergeMap((pubkey) => subscribeUser(pubkey, context.context)),
         map((event) => userStore.get(event.pubkey)),
         filter((x) => !!x),
         bufferTime<User>(1000),

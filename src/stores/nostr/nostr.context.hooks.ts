@@ -1,20 +1,20 @@
-import { NostrClientContext } from '@/components/providers/NostrProvider'
-import type { NostrContext } from '@/stores/context/nostr.context.store'
+import { NostrReactContext } from '@/components/providers/NostrProvider'
+import type { NostrStore } from '@/stores/nostr/nostr.context.store'
 import { pluckFirst, useObservable, useSubscription } from 'observable-hooks'
 import { useContext } from 'react'
 import type { Observable } from 'rxjs'
 import { EMPTY, mergeMap } from 'rxjs'
 
 export function useNostrClientContext() {
-  return useContext(NostrClientContext)
+  return useContext(NostrReactContext)
 }
 
-export function useObservableNostrContext<T>(init: (context: NostrContext) => Observable<T>) {
+export function useObservableNostrContext<T>(init: (context: NostrStore) => Observable<T>) {
   const context = useNostrClientContext()
   return useObservable((context$) => context$.pipe(pluckFirst, mergeMap(init)), [context])
 }
 
-export function useNostrContextInitializer(context: NostrContext | undefined) {
+export function useNostrContextInitializer(context: NostrStore | undefined) {
   const sub = useObservable(() => context?.initialize({ subFollows: false }) || EMPTY)
   useSubscription(sub)
 }

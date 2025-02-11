@@ -1,10 +1,10 @@
 import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { Switch } from '@/components/ui/Switch/Switch'
-import { useGlobalNostrSettings } from '@/hooks/useRootStore'
+import { useGlobalSettings } from '@/hooks/useRootStore'
 import { observer } from 'mobx-react-lite'
 
 export const SettingsClientTag = observer(function SettingsClientTag() {
-  const settings = useGlobalNostrSettings()
+  const settings = useGlobalSettings()
   return (
     <MenuItem
       label='Add Client Tag'

@@ -9,7 +9,7 @@ import { Divider } from '@/components/ui/Divider/Divider'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { useFeedSubscription } from '@/hooks/useFeedSubscription'
-import { useNostrContextInitializer } from '@/stores/context/nostr.context.hooks'
+import { useNostrContextInitializer } from '@/stores/nostr/nostr.context.hooks'
 import { createRelayFeedModule } from '@/stores/relays/relay.feed.module'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconChevronDown, IconChevronUp } from '@tabler/icons-react'
@@ -30,7 +30,7 @@ export const RelayFeedRoute = observer(function RelayFeedRoute() {
   const [expanded, setExpanded] = useState(false)
 
   useNostrContextInitializer(module.context)
-  useFeedSubscription(module.feed, module.contextWithFallback.client)
+  useFeedSubscription(module.feed, module.contextWithFallback.context)
 
   return (
     <CenteredContainer margin>
