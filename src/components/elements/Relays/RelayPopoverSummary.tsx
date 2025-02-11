@@ -26,6 +26,7 @@ export const RelayPopoverSummary = observer(function RelayPopoverSummary() {
 
   return (
     <Popover
+      floatingStrategy='fixed'
       placement='bottom-end'
       contentRenderer={() => (
         <Paper elevation={2} surface='surfaceContainerLow' sx={styles.root}>
