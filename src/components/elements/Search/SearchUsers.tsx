@@ -7,6 +7,7 @@ import { useCurrentUser } from '@/hooks/useRootStore'
 import type { User } from '@/stores/users/user'
 import { spacing } from '@/themes/spacing.stylex'
 import { observer } from 'mobx-react-lite'
+import type { ReactNode } from 'react'
 import { forwardRef, useCallback, useImperativeHandle, useRef, useState } from 'react'
 import { css } from 'react-strict-dom'
 import { SearchFollowingUsers } from './SearchFollowingUsers'
@@ -22,13 +23,14 @@ export type Props = {
   query: string
   limit?: number
   dense?: boolean
+  children?: ReactNode
   onSelect?: (props: { pubkey: string }) => void
 } & Omit<PaperProps, 'children'>
 
 export const SearchUsers = observer(
   forwardRef<SearchUsersRef, Props>(function SearchUsers(props, ref) {
     const user = useCurrentUser()
-    const { query = '', limit = 10, dense = false, onSelect } = props
+    const { query = '', limit = 10, dense = false, children, onSelect } = props
     const [searchType, setSearchType] = useState<SearchType>(user ? 'following' : 'nip50')
     const [selectedIndex, setSelectedIndex] = useState(0)
     const searchRef = useRef<{ users: User[] } | null>(null)
@@ -120,6 +122,7 @@ export const SearchUsers = observer(
             />
           )}
         </Stack>
+        {children}
       </Paper>
     )
   }),
