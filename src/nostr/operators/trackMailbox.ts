@@ -20,13 +20,18 @@ export function emitMailbox(event: NostrEvent) {
   updates.next([event.pubkey, event])
 }
 
-export const trackMailbox = replay.wrap((pubkey: string, config: RelaySelectionConfig, ctx: NostrContext) => {
+const subscribeReplay = replay.wrap((pubkey: string, ctx: NostrContext) => {
   const sub = new NostrSubscription({ kinds: [Kind.RelayList], authors: [pubkey] })
-  const stream = from(query(sub, ctx)).pipe(
+  return from(query(sub, ctx)).pipe(
     parseMetadata(parseRelayList),
     tap((x) => ctx.onEvent?.(x)),
     map((x) => x[metadataSymbol].relayList),
     filter((x) => x.length > 0),
+  )
+})
+
+export const trackMailbox = (pubkey: string, config: RelaySelectionConfig, ctx: NostrContext) => {
+  const stream = subscribeReplay(pubkey, ctx).pipe(
     mergeWith(
       updates$.pipe(
         filter((x) => x[0] === pubkey),
@@ -38,6 +43,6 @@ export const trackMailbox = replay.wrap((pubkey: string, config: RelaySelectionC
     shareReplay(1),
   )
   return stream.pipe(map((data) => selectRelays(data, config)))
-})
+}
 
 export const toArrayRelay = map((data: UserRelay[]) => data.map((x) => x.relay))

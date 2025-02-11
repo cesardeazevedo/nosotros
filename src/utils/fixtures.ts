@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-empty-pattern */
 import { Kind } from '@/constants/kinds'
 import { clearCache } from '@/nostr/cache'
+import type { NostrContext } from '@/nostr/context'
 import { db } from '@/nostr/db'
 import { parseFollowList } from '@/nostr/helpers/parseFollowList'
 import { parseUser } from '@/nostr/helpers/parseUser'
-import type { NostrContext } from '@/nostr/context'
 import { emitMailbox, replay as replayMailbox } from '@/nostr/operators/trackMailbox'
 import { pool } from '@/nostr/pool'
 import { defaultNostrSettings, type NostrSettings } from '@/nostr/settings'
@@ -14,6 +15,9 @@ import { replay as replayUsers } from '@/nostr/subscriptions/subscribeUser'
 import { type NostrEventNote } from '@/nostr/types'
 import { eventStore } from '@/stores/events/event.store'
 import { followsStore } from '@/stores/follows/follows.store'
+import type { NostrStoreSnapshotIn } from '@/stores/nostr/nostr.context.store'
+import { NostrStoreModel } from '@/stores/nostr/nostr.context.store'
+import type { NostrSettingsSnapshotIn } from '@/stores/nostr/nostr.settings.store'
 import { Note } from '@/stores/notes/note'
 import { noteStore } from '@/stores/notes/notes.store'
 import { reactionStore } from '@/stores/reactions/reactions.store'
@@ -32,7 +36,7 @@ interface Fixtures {
   clear: () => void
   login: (pubkey: string) => User
   createContext: (
-    options?: Partial<Omit<NostrContext, 'settings'> & { settings: Partial<NostrSettings> }>,
+    options?: Partial<Omit<NostrStoreSnapshotIn, 'settings'>> & { settings?: Partial<NostrSettingsSnapshotIn> },
   ) => NostrContext
   createUser: (data: Partial<NostrEvent>) => User
   createNote: (data: Partial<NostrEvent>) => Note
@@ -73,18 +77,18 @@ export const test = base.extend<Fixtures>({
       return createUser({ pubkey })
     })
   },
-  createContext: async ({}, use) => {
+  createContext: async ({ clear }, use) => {
     use((options) => {
-      return {
+      return NostrStoreModel.create({
         ...options,
         settings: {
           ...defaultNostrSettings,
           ...options?.settings,
         },
-      } as NostrContext
+      }).context
     })
   },
-  createUser: async ({}, use) => {
+  createUser: async ({ clear }, use) => {
     use((data: Partial<NostrEvent>) => {
       const event = fakeEvent({
         id: '1',
@@ -98,7 +102,7 @@ export const test = base.extend<Fixtures>({
       return userStore.users.get(event.pubkey) as User
     })
   },
-  createNote: async ({ createUser }, use) => {
+  createNote: async ({ clear, createUser }, use) => {
     use((data: Partial<NostrEvent>) => {
       const event = fakeNote(data)
       eventStore.add(event)
@@ -107,7 +111,7 @@ export const test = base.extend<Fixtures>({
       return new Note(event)
     })
   },
-  createComment: async ({ createUser }, use) => {
+  createComment: async ({ clear, createUser }, use) => {
     use((data: Partial<NostrEvent>) => {
       const event = fakeComment({ kind: Kind.Comment, ...data })
       eventStore.add(event)
@@ -116,7 +120,7 @@ export const test = base.extend<Fixtures>({
       return new Note(event)
     })
   },
-  createFollows: async ({}, use) => {
+  createFollows: async ({ clear }, use) => {
     use((pubkey: string, followings: string[]) => {
       const event = fakeEvent({
         kind: Kind.Follows,
@@ -126,12 +130,12 @@ export const test = base.extend<Fixtures>({
       followsStore.add(event, parseFollowList(event))
     })
   },
-  createReaction: async ({}, use) => {
+  createReaction: async ({ clear }, use) => {
     use((data: Partial<NostrEvent>) => {
       reactionStore.add(fakeEvent(data))
     })
   },
-  insertRelayList: async ({}, use) => {
+  insertRelayList: async ({ clear }, use) => {
     use(async (data: Partial<NostrEvent>) => {
       const event = fakeEvent({ kind: Kind.RelayList, ...data })
       await db.event.insert(event)

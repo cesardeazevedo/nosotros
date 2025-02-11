@@ -1,4 +1,5 @@
 import { RELAY_1 } from '@/constants/testRelays'
+import * as module from '@/stores/helpers/addNostrEventToStore'
 import { subscribeSpyTo } from '@hirez_io/observer-spy'
 import { Kind } from 'constants/kinds'
 import { fakeEvent } from 'utils/faker'
@@ -33,8 +34,8 @@ describe('subscribeNotes', () => {
 
     const relay = createMockRelay(RELAY_1, [event1, event2, event3, event4, event5, event6, event7, event8])
 
-    const eventSpy = vi.fn()
-    const client = createContext({ relays: [RELAY_1], settings: { outbox: false }, onEvent: eventSpy })
+    const eventSpy = vi.spyOn(module, 'addNostrEventToStore')
+    const client = createContext({ relays: [RELAY_1], settings: { outbox: false } })
 
     const filter = { kinds: [Kind.Text], authors: ['1', '2'] }
     const spy = subscribeSpyTo(subscribeNotesWithParent(filter, client))
