@@ -70,10 +70,8 @@ export const HeaderSearch = (props: Props) => {
           {(props) => (
             <html.div style={styles.search} {...props.getProps()} ref={props.setRef}>
               <Search
-                label='Search on nostr'
-                onBlur={() => {
-                  setTimeout(() => handleCancel(), 200)
-                }}
+                placeholder='Search on nostr'
+                onBlur={() => setTimeout(() => handleCancel(), 200)}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(event) => searchUsersRef.current?.onKeyDown({ event })}
                 onCancel={onCancel}

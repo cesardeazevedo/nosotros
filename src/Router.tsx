@@ -19,6 +19,7 @@ import { NProfileMediaFeed } from './components/modules/NProfile/feeds/NProfileM
 import { NProfileNotesFeed } from './components/modules/NProfile/feeds/NProfileNotesFeed'
 import { NProfileRepliesFeed } from './components/modules/NProfile/feeds/NProfileRepliesFeed'
 import { SearchRoute } from './components/modules/Search/SearchRoute'
+import { TagsRoute } from './components/modules/Tag/TagRoute'
 import { DeckRoute } from './components/routes/deck/deck.route'
 import { EditorRoute } from './components/routes/editor/editor.route'
 import { MediaRoute } from './components/routes/media/media.route'
@@ -37,7 +38,6 @@ import { SettingsNetworkRoute } from './components/routes/settings/settings.netw
 import { SettingsRoute } from './components/routes/settings/settings.route'
 import { SettingsStorageRoute } from './components/routes/settings/settings.storage'
 import { useCurrentPubkey } from './hooks/useRootStore'
-import { TagsRoute } from './components/modules/Tag/TagRoute'
 
 const rootRoute = createRootRouteWithContext()({
   component: RootLayout,

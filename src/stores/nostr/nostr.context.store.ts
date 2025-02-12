@@ -1,6 +1,7 @@
 import { DEFAULT_RELAYS } from '@/constants/relays'
 import type { NostrContext } from '@/nostr/context'
 import { toArrayRelay, trackMailbox } from '@/nostr/operators/trackMailbox'
+import { defaultNostrSettings } from '@/nostr/settings'
 import { subscribeContextRelays } from '@/nostr/subscriptions/subscribeContextRelays'
 import { subscribeFollows } from '@/nostr/subscriptions/subscribeFollows'
 import { subscribeMutes } from '@/nostr/subscriptions/subscribeMutes'
@@ -11,7 +12,6 @@ import { cast, t } from 'mobx-state-tree'
 import { defaultIfEmpty, EMPTY, merge, of } from 'rxjs'
 import { addNostrEventToStore } from '../helpers/addNostrEventToStore'
 import { publishStore } from '../publish/publish.store'
-import { rootStore } from '../root.store'
 import { SignersModel } from '../signers/signers'
 import { userStore } from '../users/users.store'
 import { NostrSettingsModel } from './nostr.settings.store'
@@ -42,7 +42,7 @@ export const NostrStoreModel = t
         outboxSets: self.outboxSets,
         localSets: self.localSets,
         signer: self.signer?.signer,
-        settings: self.settings || rootStore.nostrSettings,
+        settings: self.settings || defaultNostrSettings,
         inbox$: of([]),
         outbox$: of([]),
         onEvent: (event) => addNostrEventToStore(event),

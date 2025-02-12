@@ -52,7 +52,7 @@ export const RelaySelectPopover = (props: Props) => {
               <Search
                 sx={styles.search}
                 leading={false}
-                label='wss://'
+                placeholder='wss://'
                 onChange={handleChange}
                 onCancel={() => setQuery('')}
               />

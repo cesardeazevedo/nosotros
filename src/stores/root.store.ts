@@ -42,7 +42,5 @@ onSnapshot(rootStore, (snapshot) => {
   storage.setItem(APP_STORAGE_KEY, snapshot)
 })
 
-export const modules = ModuleStoreModel.create({})
-
 export interface RootStore extends Instance<typeof RootStoreModel> {}
 export interface RootStoreSnapshotIn extends SnapshotIn<typeof RootStoreModel> {}
