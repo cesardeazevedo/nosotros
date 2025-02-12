@@ -1,4 +1,6 @@
 import { APP_DESCRIPTION, APP_NAME } from '@/constants/app'
+import type { NIP46RemoteSigner } from '@/core/signers/nip46.signer'
+import { nip05 } from '@/nostr/nip05'
 import { bytesToHex } from '@noble/hashes/utils'
 import { makeAutoObservable } from 'mobx'
 import { lazyObservable } from 'mobx-utils'
@@ -105,9 +107,7 @@ export const signinStore = makeAutoObservable({
         signer: {
           name: 'nip07',
         },
-        options: {
-          pubkey,
-        },
+        pubkey,
       },
     })
     this.reset()
@@ -118,9 +118,7 @@ export const signinStore = makeAutoObservable({
       pubkey,
       context: {
         signer: undefined,
-        options: {
-          pubkey,
-        },
+        pubkey,
       },
     })
     this.reset()
@@ -128,11 +126,36 @@ export const signinStore = makeAutoObservable({
 
   async submitNostrAddress(address: string) {
     const [name, url] = address.split('@')
-    const response = await firstValueFrom(rootStore.rootContext.client.nip05.fetch(url, name))
+    const response = await firstValueFrom(nip05.fetch(url, name))
     const pubkey = response.names?.[name]
     invariant(pubkey, 'Pubkey not found on remote server')
     this.submitReadonly(pubkey)
     return pubkey
+  },
+
+  async submitNostrConnect(signer: NIP46RemoteSigner, relay: string) {
+    const [, { result: pubkey }] = await signer.getPublicKey()
+    auth.login({
+      pubkey,
+      context: {
+        signer: {
+          name: 'nip46',
+          params: {
+            name: 'nip46',
+            method: {
+              method: 'nostrconnect',
+              relay,
+            },
+            secret: signer.secret,
+            clientSecret: bytesToHex(signer.clientSigner.secret),
+          },
+        },
+        pubkey,
+      },
+    })
+    this.setReponse('Authorized')
+    setTimeout(() => this.reset())
+    return true
   },
 
   async submitBunker(bunkerUrl: string) {
@@ -163,9 +186,7 @@ export const signinStore = makeAutoObservable({
               clientSecret: bytesToHex(signer.signer.clientSigner.secret),
             },
           },
-          options: {
-            pubkey,
-          },
+          pubkey,
         },
       })
       this.setReponse('Authorized')
@@ -173,6 +194,7 @@ export const signinStore = makeAutoObservable({
       return res
     } catch (res) {
       const error = res as Error
+      console.error(error)
       this.setReponse('')
       this.setError(error.message)
     }
