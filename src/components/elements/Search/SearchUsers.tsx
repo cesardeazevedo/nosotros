@@ -24,15 +24,17 @@ export type Props = {
   limit?: number
   dense?: boolean
   children?: ReactNode
+  initialSelected?: number
+  onEnterKey?: () => void
   onSelect?: (props: { pubkey: string }) => void
 } & Omit<PaperProps, 'children'>
 
 export const SearchUsers = observer(
   forwardRef<SearchUsersRef, Props>(function SearchUsers(props, ref) {
     const user = useCurrentUser()
-    const { query = '', limit = 10, dense = false, children, onSelect } = props
+    const { query = '', limit = 10, dense = false, children, onEnterKey, onSelect, initialSelected = 0 } = props
     const [searchType, setSearchType] = useState<SearchType>(user ? 'following' : 'nip50')
-    const [selectedIndex, setSelectedIndex] = useState(0)
+    const [selectedIndex, setSelectedIndex] = useState(initialSelected)
     const searchRef = useRef<{ users: User[] } | null>(null)
 
     const handleKeyUp = useCallback(() => {
@@ -69,11 +71,14 @@ export const SearchUsers = observer(
             return true
           }
           case 'Enter': {
-            const user = searchRef.current?.users[selectedIndex]
-            if (user) {
-              handleSelect(user.pubkey)
-              return true
+            if (selectedIndex > 0) {
+              const user = searchRef.current?.users[selectedIndex]
+              if (user) {
+                handleSelect(user.pubkey)
+                return true
+              }
             }
+            onEnterKey?.()
             return false
           }
           default: {

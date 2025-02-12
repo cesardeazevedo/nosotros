@@ -3,8 +3,10 @@ import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { typeScale } from '@/themes/typeScale.stylex'
 import { IconSearch, IconX } from '@tabler/icons-react'
+import type { Ref } from 'react'
 import { useRef, type ReactNode } from 'react'
 import { css } from 'react-strict-dom'
+import { mergeRefs } from '../helpers/mergeRefs'
 import { IconButton } from '../IconButton/IconButton'
 import { Stack } from '../Stack/Stack'
 import type { SxProps } from '../types'
@@ -14,16 +16,18 @@ type Props = {
   leading?: ReactNode | false
   trailing?: ReactNode
   onCancel?: () => void
+  ref?: Ref<HTMLInputElement | null>
 } & React.InputHTMLAttributes<HTMLInputElement>
 
 export const Search = (props: Props) => {
-  const { sx, leading, trailing, defaultValue, onCancel, ...rest } = props
+  const { sx, leading, trailing, onCancel, ...rest } = props
   const ref = useRef<HTMLInputElement>(null)
+  const refs = mergeRefs([ref, props.ref])
   return (
     <>
       <Stack sx={[styles.root, sx]} gap={1}>
         {leading !== false ? <IconSearch size={20} {...css.props(styles.icon)} /> : null}
-        <input ref={ref} {...css.props(styles.input)} {...rest} autoFocus type='text' />
+        <input {...css.props(styles.input)} {...rest} autoFocus type='text' ref={refs} />
         {trailing || (
           <IconButton
             size='sm'

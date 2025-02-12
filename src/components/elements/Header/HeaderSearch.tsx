@@ -46,9 +46,14 @@ export const HeaderSearch = (props: Props) => {
           contentRenderer={() => (
             <>
               <SearchUsers
+                initialSelected={-1}
                 ref={searchUsersRef}
                 query={query}
                 surface='surfaceContainerLowest'
+                onEnterKey={() => {
+                  navigate({ to: '/search', search: { q: query } })
+                  handleCancel()
+                }}
                 onSelect={({ pubkey }) => {
                   const user = userStore.get(pubkey)
                   navigate({

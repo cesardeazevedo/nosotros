@@ -18,6 +18,7 @@ import { useNavigate, useSearch } from '@tanstack/react-router'
 import { observer } from 'mobx-react-lite'
 import { getSnapshot } from 'mobx-state-tree'
 import { useObservable, useObservableCallback, useSubscription } from 'observable-hooks'
+import { useEffect, useRef } from 'react'
 import { css } from 'react-strict-dom'
 import { mergeMap, tap, throttleTime } from 'rxjs'
 import { SearchSettings } from './SearchSettings'
@@ -28,6 +29,7 @@ export const SearchRoute = observer(function SearchRoute() {
   const navigate = useNavigate()
 
   const feed = module?.feed
+  const searchRef = useRef<HTMLInputElement>(null)
 
   const [onChange, query$] = useObservableCallback<string>((input$) => {
     return input$.pipe(
@@ -44,6 +46,12 @@ export const SearchRoute = observer(function SearchRoute() {
   )
   useSubscription(sub)
 
+  useEffect(() => {
+    if (searchRef.current) {
+      searchRef.current.value = module.query
+    }
+  }, [module.query])
+
   return (
     <NostrProvider nostrContext={() => module.context!} subFollows={false}>
       <CenteredContainer margin>
@@ -59,6 +67,7 @@ export const SearchRoute = observer(function SearchRoute() {
         <PaperContainer>
           <Stack sx={styles.header} justify='space-between'>
             <Search
+              ref={searchRef}
               placeholder='Search on nostr'
               defaultValue={module.query}
               onChange={(e) => onChange(e.target.value)}
