@@ -5,14 +5,14 @@ import { withToggleAction } from '../helpers/withToggleAction'
 
 export const NostrSettingsModel = t
   .model('NostrSettingsModel', {
-    nip05: t.boolean,
-    hints: t.boolean,
-    outbox: t.boolean,
-    offline: t.boolean,
-    localDB: t.boolean,
-    localRelays: t.array(t.string),
-    maxRelaysPerUserInbox: t.number,
-    maxRelaysPerUserOutbox: t.number,
+    nip05: t.maybe(t.boolean),
+    hints: t.maybe(t.boolean),
+    outbox: t.maybe(t.boolean),
+    offline: t.maybe(t.boolean),
+    localDB: t.maybe(t.boolean),
+    localRelays: t.maybe(t.array(t.string)),
+    maxRelaysPerUserInbox: t.maybe(t.number),
+    maxRelaysPerUserOutbox: t.maybe(t.number),
   })
   .actions(withSetAction)
   .actions(withToggleAction)

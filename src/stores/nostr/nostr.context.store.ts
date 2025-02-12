@@ -1,7 +1,6 @@
 import { DEFAULT_RELAYS } from '@/constants/relays'
 import type { NostrContext } from '@/nostr/context'
 import { toArrayRelay, trackMailbox } from '@/nostr/operators/trackMailbox'
-import { defaultNostrSettings } from '@/nostr/settings'
 import { subscribeContextRelays } from '@/nostr/subscriptions/subscribeContextRelays'
 import { subscribeFollows } from '@/nostr/subscriptions/subscribeFollows'
 import { subscribeMutes } from '@/nostr/subscriptions/subscribeMutes'
@@ -15,6 +14,7 @@ import { publishStore } from '../publish/publish.store'
 import { SignersModel } from '../signers/signers'
 import { userStore } from '../users/users.store'
 import { NostrSettingsModel } from './nostr.settings.store'
+import { getRootStore } from '../helpers/getRootStore'
 
 const fallbackRelays = defaultIfEmpty<string[], string[]>(DEFAULT_RELAYS)
 
@@ -34,6 +34,16 @@ export const NostrStoreModel = t
     get user() {
       return userStore.get(self.pubkey)
     },
+    // Merged settings with root settings
+    get mergedSettings(): NostrContext['settings'] {
+      const local = self.settings
+      const global = getRootStore(self).nostrSettings
+      return {
+        ...JSON.parse(JSON.stringify(global || {})),
+        ...JSON.parse(JSON.stringify(local || {})),
+      }
+    },
+
     get _ctx(): NostrContext {
       return {
         relays: self.relays,
@@ -42,7 +52,7 @@ export const NostrStoreModel = t
         outboxSets: self.outboxSets,
         localSets: self.localSets,
         signer: self.signer?.signer,
-        settings: self.settings || defaultNostrSettings,
+        settings: this.mergedSettings,
         inbox$: of([]),
         outbox$: of([]),
         onEvent: (event) => addNostrEventToStore(event),
