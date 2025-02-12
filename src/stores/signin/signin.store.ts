@@ -1,6 +1,7 @@
 import { APP_DESCRIPTION, APP_NAME } from '@/constants/app'
 import type { NIP46RemoteSigner } from '@/core/signers/nip46.signer'
 import { nip05 } from '@/nostr/nip05'
+import { decodeNIP19 } from '@/utils/nip19'
 import { bytesToHex } from '@noble/hashes/utils'
 import { makeAutoObservable } from 'mobx'
 import { lazyObservable } from 'mobx-utils'
@@ -44,6 +45,7 @@ export const signinStore = makeAutoObservable({
   page: 'SELECT' as Pages,
   prevPage: 'SELECT' as Pages,
   submitting: false,
+  inputPubkey: '',
   response: '',
   error: '',
 
@@ -60,6 +62,20 @@ export const signinStore = makeAutoObservable({
   back() {
     this.prevPage = this.page
     this.page = 'SELECT'
+  },
+
+  setReadonlyInput(value: string) {
+    const decoded = decodeNIP19(value)
+    switch (decoded?.type) {
+      case 'npub': {
+        this.inputPubkey = decoded.data
+        break
+      }
+      case 'nprofile': {
+        this.inputPubkey = decoded.data.pubkey
+        break
+      }
+    }
   },
 
   setReponse(msg: string) {
@@ -86,6 +102,7 @@ export const signinStore = makeAutoObservable({
     this.prevPage = 'SELECT'
     this.error = ''
     this.response = ''
+    this.inputPubkey = ''
   },
 
   matches(page: Pages) {
@@ -94,7 +111,7 @@ export const signinStore = makeAutoObservable({
 
   async pasteClipboard() {
     const permissionStatus = await navigator.permissions.query({ name: 'clipboard-read' as PermissionName })
-    invariant(permissionStatus.state !== 'granted', 'Clipboard permission rejected')
+    invariant(permissionStatus.state === 'granted', 'Clipboard permission rejected')
     return await window.navigator.clipboard.readText()
   },
 
