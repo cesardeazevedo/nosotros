@@ -1,6 +1,5 @@
 import type { BunkerResponse, NIP46RemoteSignerOptions } from '@/core/signers/nip46.signer'
 import { NIP46RemoteSigner } from '@/core/signers/nip46.signer'
-import { pool } from '@/nostr/pool'
 import type { Instance } from 'mobx-state-tree'
 import { t } from 'mobx-state-tree'
 import type { Observable } from 'rxjs'
@@ -18,7 +17,7 @@ export const SignerNIP46 = t
       return EMPTY as Observable<BunkerResponse>
     }
     return {
-      signer: new NIP46RemoteSigner(pool, {
+      signer: new NIP46RemoteSigner({
         ...self.params,
         auth: onAuth,
       }),

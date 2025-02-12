@@ -7,7 +7,7 @@ import { Text } from '@/components/ui/Text/Text'
 import { TextField } from '@/components/ui/TextField/TextField'
 import { useGoBack } from '@/hooks/useNavigations'
 import { subscribeUser } from '@/nostr/subscriptions/subscribeUser'
-import { useObservableNostrContext } from '@/stores/context/nostr.context.hooks'
+import { useObservableNostrContext } from '@/stores/nostr/nostr.context.hooks'
 import { signinStore } from '@/stores/signin/signin.store'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconClipboardCopy, IconScan } from '@tabler/icons-react'
@@ -37,7 +37,7 @@ const UserPreview = observer(function UserPreview(props: { control: Control<Form
     return input$.pipe(
       filter((x) => !!x),
       debounceTime(250),
-      switchMap((value) => subscribeUser(value, context.client)),
+      switchMap((value) => subscribeUser(value, context.context)),
     )
   })
   const user = useObservableState(sub)
@@ -123,7 +123,6 @@ export const SignInReadOnly = observer(function SignInForm() {
       <SignInHeader>
         <Text variant='headline'>Sign In with Public Key</Text>
       </SignInHeader>
-      {/* <Text variant='headline'>Sign In with Public Key</Text> */}
       <Stack horizontal={false} gap={1} justify='center' sx={styles.content}>
         <UserPreview control={form.control} />
         <Stack horizontal={false} gap={2} grow justify='center' sx={styles.center}>
