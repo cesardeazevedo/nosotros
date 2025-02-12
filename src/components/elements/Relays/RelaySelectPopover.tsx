@@ -1,17 +1,16 @@
 import { Button } from '@/components/ui/Button/Button'
 import { Chip } from '@/components/ui/Chip/Chip'
-import { Divider } from '@/components/ui/Divider/Divider'
-import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Paper } from '@/components/ui/Paper/Paper'
 import { PopoverBase } from '@/components/ui/Popover/PopoverBase'
+import { Search } from '@/components/ui/Search/Search'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
-import { TextField } from '@/components/ui/TextField/TextField'
+import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import { IconBroadcast, IconX } from '@tabler/icons-react'
+import { IconBroadcast } from '@tabler/icons-react'
+import type { BaseSyntheticEvent } from 'react'
 import React, { useCallback, useState } from 'react'
-import { css, html } from 'react-strict-dom'
-import { SearchRelays } from '../Search/SearchRelays'
+import { css } from 'react-strict-dom'
 
 type Props = {
   label?: string
@@ -25,14 +24,9 @@ export const RelaySelectPopover = (props: Props) => {
   const [query, setQuery] = useState('')
   const [error, setError] = useState('')
 
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+  const handleChange = useCallback((e: BaseSyntheticEvent) => {
     setError('')
     setQuery(e.target.value)
-  }, [])
-
-  const handleSelect = useCallback((relay: string) => {
-    setQuery(relay)
-    setError('')
   }, [])
 
   const handleSubmit = useCallback(() => {
@@ -54,38 +48,19 @@ export const RelaySelectPopover = (props: Props) => {
         placement='bottom-start'
         contentRenderer={() => (
           <Paper elevation={2} surface='surfaceContainerLow' sx={styles.paper}>
-            <Stack justify='space-between' sx={styles.header}>
-              <Text variant='label' size='lg'>
-                Relays
-              </Text>
-              <IconButton size='sm' onClick={() => setOpen(false)} icon={<IconX size={18} />} />
-            </Stack>
-            <html.div style={styles.content}>
-              <TextField
-                size='sm'
-                shrink
-                fullWidth
-                error={!!error}
-                label='Search or add a relay'
-                placeholder='wss://'
-                value={query}
+            <Stack gap={0.5}>
+              <Search
+                sx={styles.search}
+                leading={false}
+                label='wss://'
                 onChange={handleChange}
-                trailing={
-                  <IconButton size='sm' onClick={() => setQuery('')}>
-                    <IconX size={18} />
-                  </IconButton>
-                }
+                onCancel={() => setQuery('')}
               />
-              {error && <Text>{error}</Text>}
-            </html.div>
-            <Divider />
-            <Stack gap={0.5} horizontal={false} sx={styles.content} align='flex-start'>
-              <SearchRelays query={query} onSelect={handleSelect} />
+              <Button variant='filled' onClick={handleSubmit}>
+                Add
+              </Button>
             </Stack>
-            <Divider />
-            <Stack horizontal={false} sx={styles.actions} align='flex-end'>
-              <Button onClick={handleSubmit}>Add</Button>
-            </Stack>
+            {error && <Text sx={styles.error}>{error}</Text>}
           </Paper>
         )}>
         {({ setRef, getProps }) => (
@@ -105,21 +80,15 @@ export const RelaySelectPopover = (props: Props) => {
 
 const styles = css.create({
   paper: {
-    width: 280,
-  },
-  header: {
-    paddingBlock: spacing.padding1,
-    paddingInline: spacing.padding2,
-  },
-  input: {
+    width: 300,
     padding: spacing.padding1,
   },
-  content: {
-    padding: spacing.padding1,
-    maxHeight: 250,
-    overflowY: 'auto',
+  error: {
+    marginLeft: spacing.margin1,
+    paddingBottom: spacing.margin1,
+    color: palette.error,
   },
-  actions: {
-    padding: spacing.padding1,
+  search: {
+    height: 40,
   },
 })

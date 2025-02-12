@@ -58,7 +58,11 @@ export const SearchRoute = observer(function SearchRoute() {
         <br />
         <PaperContainer>
           <Stack sx={styles.header} justify='space-between'>
-            <Search label='Search on nostr' defaultValue={module.query} onChange={(e) => onChange(e.target.value)} />
+            <Search
+              placeholder='Search on nostr'
+              defaultValue={module.query}
+              onChange={(e) => onChange(e.target.value)}
+            />
           </Stack>
           <Expandable expanded>
             <SearchSettings module={module} />

@@ -35,7 +35,7 @@ export const EditorBroadcaster = observer(function EditorBroadcaster(props: Prop
           </Stack>
           <Stack horizontal wrap gap={0.5}>
             {store.myOutboxRelays.map(({ relay }) => (
-              <RelayInputChip renderConnectedIcon key={relay} url={relay} onDelete={() => store.excludeRelay(relay)} />
+              <RelayInputChip key={relay} url={relay} onDelete={() => store.excludeRelay(relay)} />
             ))}
             {/* <RelayChipAdd onSubmit={(relay) => store.includeRelay(relay)} /> */}
           </Stack>

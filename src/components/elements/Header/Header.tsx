@@ -9,7 +9,7 @@ import { useMatch } from '@tanstack/react-router'
 import { useMobile } from 'hooks/useMobile'
 import { useNostrRoute } from 'hooks/useNavigations'
 import { observer } from 'mobx-react-lite'
-import React from 'react'
+import React, { useState } from 'react'
 import { css, html } from 'react-strict-dom'
 import { CenteredContainer } from '../Layouts/CenteredContainer'
 import { NavigationHeader } from '../Navigation/NavigationHeader'
@@ -19,6 +19,7 @@ import { RelayPopoverSummary } from '../Relays/RelayPopoverSummary'
 import { SettingsPopover } from '../Settings/SettingsPopover'
 import { HeaderLogo } from './HeaderLogo'
 import { HeaderSignIn } from './HeaderSignIn'
+import { HeaderSearch } from './HeaderSearch'
 
 // Way too buggy on ios, might not worth it
 export const HideOnScroll = React.memo(
@@ -40,6 +41,7 @@ type Props = {
 
 export const Header = observer(function Header(props: Props) {
   const isMobile = useMobile()
+  const [searchOpen, setSearchOpen] = useState(false)
   useMatch({ from: '__root__' })
 
   const pubkey = useCurrentPubkey()
@@ -66,6 +68,11 @@ export const Header = observer(function Header(props: Props) {
             </CenteredContainer>
             <html.div style={styles.trailing}>
               <Stack gap={1}>
+                <HeaderSearch
+                  open={searchOpen}
+                  onClick={() => setSearchOpen(true)}
+                  onCancel={() => setSearchOpen(false)}
+                />
                 <SettingsPopover />
                 {pubkey && <RelayPopoverSummary />}
                 <HeaderSignIn />

@@ -1,4 +1,3 @@
-import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
 import { userStore } from '@/stores/users/users.store'
 import { palette } from '@/themes/palette.stylex'
 import { LinkProfile } from 'components/elements/Links/LinkProfile'
@@ -14,10 +13,9 @@ export type Props = {
 export const NProfile = observer(function NProfile(props: Props) {
   const { pubkey } = props
   const user = userStore.get(pubkey)
-  const name = user?.displayName || nip19.npubEncode(pubkey).slice(0, 10)
+  const name = user?.displayName || nip19.npubEncode(pubkey).slice(0, 12) + '...'
   return (
     <>
-      {!user && <Skeleton sx={styles.loading} animation='wave' variant='rectangular' />}
       <UserPopover pubkey={pubkey}>
         <LinkProfile underline pubkey={pubkey} sx={styles.link}>
           @{name}

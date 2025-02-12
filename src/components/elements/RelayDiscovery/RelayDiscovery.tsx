@@ -27,9 +27,9 @@ import { RelayDiscoveryRowLoading } from './RelayDiscoveryRowLoading'
 import { RelayDiscoveryTableHeader } from './RelayDiscoveryTableHeader'
 
 export const RelayDiscovery = observer(function RelayDiscovery() {
-  const client = useRootContext().client
+  const rootContext = useRootContext()
   const promise = useMemo(() => firstValueFrom(timer(3200)), [])
-  const sub = useObservable(() => subscribeRelayDiscorvery(client))
+  const sub = useObservable(() => subscribeRelayDiscorvery(rootContext.context))
   useSubscription(sub)
   return (
     <Stack horizontal gap={1} justify='space-between' align='flex-start'>

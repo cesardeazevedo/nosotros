@@ -1,4 +1,3 @@
-import { focusRingTokens } from '@/components/ui/FocusRing/FocusRing.stylex'
 import { rippleTokens } from '@/components/ui/Ripple/Ripple.stylex'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Tab } from '@/components/ui/Tab/Tab'

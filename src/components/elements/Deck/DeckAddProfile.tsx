@@ -1,9 +1,7 @@
+import { Search } from '@/components/ui/Search/Search'
 import { Stack } from '@/components/ui/Stack/Stack'
-import { palette } from '@/themes/palette.stylex'
-import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import { typeScale } from '@/themes/typeScale.stylex'
-import { IconSearch } from '@tabler/icons-react'
+import type { BaseSyntheticEvent } from 'react'
 import { useCallback, useRef, useState } from 'react'
 import { css, html } from 'react-strict-dom'
 import type { SearchUsersRef } from '../Search/SearchUsers'
@@ -21,24 +19,14 @@ export const DeckAddProfile = (props: Props) => {
     ref.current?.onKeyDown({ event })
   }, [])
 
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = useCallback((e: BaseSyntheticEvent) => {
     setQuery(e.target.value)
   }, [])
 
   return (
     <>
       <html.div style={styles.header}>
-        <Stack sx={styles.search} gap={1}>
-          <IconSearch size={20} style={{ opacity: 0.5 }} />
-          <html.input
-            autoFocus
-            style={styles.input}
-            type='text'
-            placeholder='Search users'
-            onChange={handleChange}
-            onKeyDown={handleKeydown}
-          />
-        </Stack>
+        <Search placeholder='Search Users' onChange={handleChange} onKeyDown={handleKeydown} />
       </html.div>
       <Stack horizontal={false} sx={styles.content}>
         <SearchUsers
@@ -57,18 +45,6 @@ export const DeckAddProfile = (props: Props) => {
 const styles = css.create({
   header: {
     padding: spacing.padding1,
-  },
-  search: {
-    paddingInline: spacing.padding2,
-    backgroundColor: palette.surfaceContainerHigh,
-    borderRadius: shape.lg,
-    fontSize: typeScale.bodySize$lg,
-  },
-  input: {
-    border: 'none',
-    paddingBlock: spacing.padding2,
-    width: '100%',
-    height: '100%',
   },
   content: {
     height: 'calc(100vh - 220px)',

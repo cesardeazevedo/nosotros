@@ -38,7 +38,7 @@ export const Reply = observer(function Reply(props: Props) {
   const isMobile = useMobile()
   const collapsedLevel = isMobile ? 5 : 6
   const [open, setOpen] = useState(level < collapsedLevel)
-  const [ref] = useNoteVisibility(event, { replies: false })
+  const [ref] = useNoteVisibility(event)
   const user = useCurrentUser()
   const { blured } = useContentContext()
 

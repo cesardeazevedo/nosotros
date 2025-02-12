@@ -5,9 +5,10 @@ import { Divider } from '@/components/ui/Divider/Divider'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { useMobile } from '@/hooks/useMobile'
 import { useNoteStore } from '@/hooks/useNoteStore'
+import { useGlobalSettings } from '@/hooks/useRootStore'
 import { subscribeNoteStats } from '@/nostr/subscriptions/subscribeNoteStats'
 import type { NostrEventComment, NostrEventMedia, NostrEventNote } from '@/nostr/types'
-import { useNostrClientContext } from '@/stores/context/nostr.context.hooks'
+import { useNostrClientContext } from '@/stores/nostr/nostr.context.hooks'
 import { spacing } from '@/themes/spacing.stylex'
 import { useRouter } from '@tanstack/react-router'
 import { observer } from 'mobx-react-lite'
@@ -35,12 +36,13 @@ export const PostRoot = observer(function PostRoot(props: Props) {
   const [ref] = useNoteVisibility(event)
   const context = useNostrClientContext()
   const contentContext = useContentContext()
+  const globalSettings = useGlobalSettings()
   const note = useNoteStore(event, open)
 
   const handleRepliesClick = useCallback(() => {
     note.toggleReplies()
     note.setRepliesStatus('LOADING')
-    subscribeNoteStats(context.client, note.event.event, {}).subscribe({
+    subscribeNoteStats(note.event.event, context.context, globalSettings.scroll).subscribe({
       complete: () => {
         note.setRepliesStatus('LOADED')
       },
@@ -69,9 +71,7 @@ export const PostRoot = observer(function PostRoot(props: Props) {
         {note.repliesOpen && (
           <>
             <Divider />
-            <html.div style={styles.editor}>
-              <Editor renderBubble initialOpen={false} store={note.editor} />
-            </html.div>
+            <Editor sx={styles.editor} renderBubble initialOpen={false} store={note.editor} />
             <Replies onLoadMoreClick={handleLoadMore} />
           </>
         )}
@@ -83,6 +83,8 @@ export const PostRoot = observer(function PostRoot(props: Props) {
 
 const styles = css.create({
   editor: {
-    paddingInline: spacing.padding1,
+    padding: spacing.padding2,
+    paddingTop: spacing.padding2,
+    paddingBottom: 0,
   },
 })

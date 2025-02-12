@@ -15,8 +15,10 @@ import { useEffect } from 'react'
 import { decodeNIP19 } from 'utils/nip19'
 import { z } from 'zod'
 import { NProfileArticlesFeed } from './components/modules/NProfile/feeds/NProfileArticlesFeed'
+import { NProfileMediaFeed } from './components/modules/NProfile/feeds/NProfileMediaFeed'
 import { NProfileNotesFeed } from './components/modules/NProfile/feeds/NProfileNotesFeed'
 import { NProfileRepliesFeed } from './components/modules/NProfile/feeds/NProfileRepliesFeed'
+import { SearchRoute } from './components/modules/Search/SearchRoute'
 import { DeckRoute } from './components/routes/deck/deck.route'
 import { EditorRoute } from './components/routes/editor/editor.route'
 import { MediaRoute } from './components/routes/media/media.route'
@@ -35,7 +37,7 @@ import { SettingsNetworkRoute } from './components/routes/settings/settings.netw
 import { SettingsRoute } from './components/routes/settings/settings.route'
 import { SettingsStorageRoute } from './components/routes/settings/settings.storage'
 import { useCurrentPubkey } from './hooks/useRootStore'
-import { NProfileMediaFeed } from './components/modules/NProfile/feeds/NProfileMediaFeed'
+import { TagsRoute } from './components/modules/Tag/TagRoute'
 
 const rootRoute = createRootRouteWithContext()({
   component: RootLayout,
@@ -217,6 +219,19 @@ const nprofileArticlesRoute = createRoute({
   },
 })
 
+const tagsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/tag/$tag',
+  component: () => <TagsRoute />,
+})
+
+const searchRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/search',
+  validateSearch: z.object({ q: z.string().optional() }),
+  component: () => <SearchRoute />,
+})
+
 const relaysRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/relays',
@@ -257,6 +272,8 @@ export const routeTree = rootRoute.addChildren([
   homeRoute,
   nostrRoute.addChildren([nprofileIndexRoute, nprofileRepliesRoute, nprofileMediaRoute, nprofileArticlesRoute]),
   deckRoute,
+  tagsRoute,
+  searchRoute,
   notificationsRoute,
   mediaRoute,
   composeRoute,

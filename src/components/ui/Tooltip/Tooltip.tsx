@@ -35,9 +35,9 @@ export const Tooltip = function Tooltip(props: Props) {
           forwardProps
           openEvents={{ hover: true, focus: true }}>
           {({ getProps, setRef, close }) => (
-            <html.div {...getProps()} ref={setRef} onMouseLeave={!keepMounted ? close : undefined}>
+            <html.span {...getProps()} ref={setRef} onMouseLeave={!keepMounted ? close : undefined}>
               {children}
-            </html.div>
+            </html.span>
           )}
         </PopoverBase>
       </FloatingDelayGroup>
