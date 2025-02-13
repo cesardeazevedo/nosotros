@@ -1,3 +1,9 @@
+import { CenteredContainer } from '@/components/elements/Layouts/CenteredContainer'
+import { RelayDiscovery } from '@/components/elements/RelayDiscovery/RelayDiscovery'
+import { RelayMailboxList } from '@/components/elements/Relays/RelayMailboxList'
+import { Button } from '@/components/ui/Button/Button'
+import { Stack } from '@/components/ui/Stack/Stack'
+import { Text } from '@/components/ui/Text/Text'
 import { useFollowingUsers } from '@/hooks/useFollowingUsers'
 import { useMobile } from '@/hooks/useMobile'
 import { useCurrentPubkey, useCurrentUser } from '@/hooks/useRootStore'
@@ -7,12 +13,6 @@ import { IconPencil } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
 import { useState } from 'react'
 import { css, html } from 'react-strict-dom'
-import { CenteredContainer } from '../elements/Layouts/CenteredContainer'
-import { RelayDiscovery } from '../elements/RelayDiscovery/RelayDiscovery'
-import { RelayMailboxList } from '../elements/Relays/RelayMailboxList'
-import { Button } from '../ui/Button/Button'
-import { Stack } from '../ui/Stack/Stack'
-import { Text } from '../ui/Text/Text'
 
 export const RelayRoute = observer(function RelayRoute() {
   const [isEditing, setIsEditing] = useState(false)

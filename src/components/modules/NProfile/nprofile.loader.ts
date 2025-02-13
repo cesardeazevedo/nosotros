@@ -1,7 +1,7 @@
 import type { NProfileFeeds, NProfileModule } from '@/stores/nprofile/nprofile.module'
 import { createNprofileModule } from '@/stores/nprofile/nprofile.module'
 import type { AnyRoute, AnyRouteMatch } from '@tanstack/react-router'
-import type { Props } from './nprofile.route'
+import type { Props } from './NProfileRoute'
 
 export function nprofileLoader(options: Props) {
   const id = 'nprofile_' + options.pubkey

@@ -1,5 +1,5 @@
 import { createNEventModule } from '@/stores/modules/nevent.module'
-import type { Props } from './nevent.route'
+import type { Props } from './NEventRoute'
 
 export function neventLoader(options: Props) {
   const module = createNEventModule({ options })

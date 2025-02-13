@@ -1,8 +1,11 @@
+import { PostFabButton } from '@/components/elements/Buttons/PostFabButton'
 import { Editor } from '@/components/elements/Editor/Editor'
 import { NostrEventFeedItem } from '@/components/elements/Event/NostrEventFeedItem'
 import { FeedList } from '@/components/elements/Feed/FeedList'
 import { FeedSettings } from '@/components/elements/Feed/FeedSettings'
 import { FeedTabs } from '@/components/elements/Feed/FeedTabs'
+import { CenteredContainer } from '@/components/elements/Layouts/CenteredContainer'
+import { PaperContainer } from '@/components/elements/Layouts/PaperContainer'
 import { PostLoading } from '@/components/elements/Posts/PostLoading'
 import { ContentProvider } from '@/components/providers/ContentProvider'
 import { Button } from '@/components/ui/Button/Button'
@@ -16,9 +19,6 @@ import { useCurrentPubkey } from '@/hooks/useRootStore'
 import { IconChevronDown, IconChevronUp } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
 import { useState } from 'react'
-import { PostFabButton } from '../../elements/Buttons/PostFabButton'
-import { CenteredContainer } from '../../elements/Layouts/CenteredContainer'
-import { PaperContainer } from '../../elements/Layouts/PaperContainer'
 
 export const HomeRoute = observer(function HomeRoute() {
   const mobile = useMobile()

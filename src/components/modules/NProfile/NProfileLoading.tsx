@@ -5,7 +5,7 @@ import { Divider } from '@/components/ui/Divider/Divider'
 import { CenteredContainer } from '../../elements/Layouts/CenteredContainer'
 import { PaperContainer } from '../../elements/Layouts/PaperContainer'
 
-export const NProfilePending = function NProfilePending() {
+export const NProfileLoading = function NProfileLoading() {
   return (
     <CenteredContainer>
       <PaperContainer>
