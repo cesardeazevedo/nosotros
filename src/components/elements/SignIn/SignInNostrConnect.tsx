@@ -15,7 +15,7 @@ import { useObservable, useSubscription } from 'observable-hooks'
 import { QRCodeCanvas } from 'qrcode.react'
 import { useRef, useState } from 'react'
 import { css, html } from 'react-strict-dom'
-import { EMPTY, mergeMap, tap } from 'rxjs'
+import { mergeMap, tap } from 'rxjs'
 import type { CopyButtonRef } from '../Buttons/CopyIconButton'
 import { SignInHeader } from './SignInHeader'
 
@@ -26,14 +26,13 @@ export const SignInNostrConnect = observer(function SignInNostrConnect() {
   const relay = 'wss://relay.nsec.app'
   const [signer] = useState(
     new NIP46RemoteSigner({
-      auth: () => EMPTY,
       method: { method: 'nostrconnect', relay },
       name: APP_NAME,
     }),
   )
 
   const sub = useObservable(() =>
-    signer.events$.pipe(
+    signer.connected$.pipe(
       mergeMap(() => signinStore.submitNostrConnect(signer, relay)),
       tap(() => goBack()),
     ),

@@ -200,6 +200,7 @@ export const signinStore = makeAutoObservable({
             ...signer,
             params: {
               ...signer.params,
+              secret: signer.signer.secret,
               clientSecret: bytesToHex(signer.signer.clientSigner.secret),
             },
           },
