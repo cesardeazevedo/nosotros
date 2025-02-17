@@ -11,7 +11,7 @@ export function query(sub: NostrSubscription, ctx: NostrContext) {
   const { subOptions } = ctx
   const filters = subOptions?.cacheFilter ? [subOptions.cacheFilter] : sub.filters
   if (filters.length > 0 && subOptions?.queryLocal !== false) {
-    const localDB$ = ctx.settings.localDB ? queryDB(filters) : EMPTY
+    const localDB$ = ctx.settings.localDB !== false ? queryDB(filters) : EMPTY
     const localRelays$ = queryLocalRelay(Array.from(ctx.localSets), sub, filters)
     return merge(localDB$, localRelays$).pipe(
       tap((event) => {

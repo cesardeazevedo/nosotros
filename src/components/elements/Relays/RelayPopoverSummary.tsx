@@ -74,7 +74,7 @@ export const RelayPopoverSummary = observer(function RelayPopoverSummary() {
             {user && (
               <Stack gap={1} horizontal={false} sx={styles.content}>
                 <Text>These are the relays where others will reply or tag you</Text>
-                <RelayUserChipList relays={user.outboxRelays} />
+                <RelayUserChipList relays={user.inboxRelays} />
               </Stack>
             )}
           </Expandable>

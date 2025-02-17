@@ -1,4 +1,3 @@
-import { useContentContext } from '@/components/providers/ContentProvider'
 import { Button } from '@/components/ui/Button/Button'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
@@ -16,7 +15,6 @@ type Props = {
 export const YoutubeEmbed = (props: Props) => {
   const { src } = props
   const [open, setOpen] = useState(false)
-  const { dense } = useContentContext()
 
   const embedId = useMemo(() => src.match(REGEX_VIDEO_ID)?.[1].replace('/', ''), [src])
 
@@ -24,14 +22,14 @@ export const YoutubeEmbed = (props: Props) => {
   const posterUrl = `https://i.ytimg.com/vi/${embedId}/hqdefault.jpg`
 
   return (
-    <html.div style={[styles.root, dense && styles.root$dense]}>
+    <html.div>
       {embedId && (
         <html.div style={styles.content}>
-          {!open && <Image dense proxy={false} src={posterUrl} onClick={() => setOpen(true)} />}
+          {!open && <Image proxy={false} src={posterUrl} onClick={() => setOpen(true)} />}
           {open && <iframe {...css.props(styles.iframe)} src={iframeSrc} width={400} height={280} />}
           {!open && (
             <Button sx={styles.button} onClick={() => setOpen(true)}>
-              <IconPlayerPlayFilled fill='red' />
+              <IconPlayerPlayFilled fill='white' />
             </Button>
           )}
         </html.div>
@@ -41,12 +39,6 @@ export const YoutubeEmbed = (props: Props) => {
 }
 
 const styles = css.create({
-  root: {
-    paddingInline: spacing.padding2,
-  },
-  root$dense: {
-    padding: 0,
-  },
   content: {
     position: 'relative',
     borderRadius: 1,

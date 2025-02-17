@@ -47,6 +47,7 @@ export const RelayMailboxList = observer(function RelayMailboxList(props: Props)
       }
       const url = new URL(input)
       onSubmit([{ relay: formatRelayUrl(url.href), permission, pubkey: user?.pubkey || '' }, false])
+      setInput('')
       setError(false)
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {

@@ -12,6 +12,7 @@ import { githubDarkTheme } from '@uiw/react-json-view/githubDark'
 import { observer } from 'mobx-react-lite'
 import { lazy, Suspense, useState } from 'react'
 import { css } from 'react-strict-dom'
+import { EditorSettingsUpload } from './EditorSettingsUpload'
 
 type Props = {
   store: EditorStore
@@ -42,7 +43,13 @@ export const EditorSettings = observer(function EditorSettings(props: Props) {
               </IconButton>
             </Tooltip>
           </Stack>
-          <Stack horizontal={false} gap={1}>
+          <Stack horizontal={false} gap={2}>
+            <Stack gap={1}>
+              <Text size='md' sx={styles.label}>
+                Upload servers
+              </Text>
+              <EditorSettingsUpload store={store} />
+            </Stack>
             <Stack gap={1}>
               <Text size='md' sx={styles.label}>
                 Client tag
