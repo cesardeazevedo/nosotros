@@ -26,6 +26,7 @@ import { DeckAddRelayFeeds } from './DeckAddRelayFeeds'
 import { DeckAddTags } from './DeckAddTag'
 import { DeckColumn } from './DeckColumn'
 import { DeckColumnHeader } from './DeckColumnHeader'
+import { DeckAddSearch } from './DeckAddSearch'
 
 type Views = 'profiles' | 'tags' | 'search' | 'relayfeeds'
 
@@ -93,6 +94,11 @@ export const DeckNewColumnList = function DeckNewColumnList(props: Props) {
     props.onClose?.()
   }, [])
 
+  const handleAddSearch = useCallback((query: string) => {
+    deck.addSearch({ query })
+    props.onClose?.()
+  }, [])
+
   const handleAddRelayFeed = useCallback((relay: string) => {
     deck.addRelayFeed([relay])
     props.onClose?.()
@@ -156,7 +162,7 @@ export const DeckNewColumnList = function DeckNewColumnList(props: Props) {
                 <IconSearch size={28} strokeWidth={'1.8'} />
               </IconWrapper>
             }
-            onClick={handleAddNotification}
+            onClick={() => setView('search')}
             supportingText={<span>Search something on search relays</span>}>
             <Text size='lg'>Search</Text>
           </ListItem>
@@ -203,6 +209,7 @@ export const DeckNewColumnList = function DeckNewColumnList(props: Props) {
       )}
       {view === 'profiles' && <DeckAddProfile onSelect={handleAddProfile} />}
       {view === 'tags' && <DeckAddTags onSelect={handleAddTag} />}
+      {view === 'search' && <DeckAddSearch onSelect={handleAddSearch} />}
       {view === 'relayfeeds' && <DeckAddRelayFeeds onSelect={handleAddRelayFeed} />}
     </DeckColumn>
   )

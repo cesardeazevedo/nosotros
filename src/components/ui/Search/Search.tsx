@@ -26,7 +26,7 @@ export const Search = (props: Props) => {
   return (
     <>
       <Stack sx={[styles.root, sx]} gap={1}>
-        {leading !== false ? <IconSearch size={20} {...css.props(styles.icon)} /> : null}
+        {leading !== false ? leading || <IconSearch size={20} {...css.props(styles.icon)} /> : undefined}
         <input {...css.props(styles.input)} {...rest} autoFocus type='text' ref={refs} />
         {trailing || (
           <IconButton

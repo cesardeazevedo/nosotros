@@ -4,6 +4,7 @@ import { NEventColumn } from '@/components/modules/NEvent/NEventColumn'
 import { NotificationsColumn } from '@/components/modules/Notifications/NotificationsColumn'
 import { NProfileColumn } from '@/components/modules/NProfile/NProfileColumn'
 import { RelayFeedColumn } from '@/components/modules/RelayFeed/RelayFeedColumn'
+import { SearchColumn } from '@/components/modules/Search/SearchColumn'
 import { TagsColumn } from '@/components/modules/Tag/TagColumn'
 import { NostrProvider } from '@/components/providers/NostrProvider'
 import { useRootStore } from '@/hooks/useRootStore'
@@ -16,6 +17,7 @@ import {
   isNotificationModule,
   isNProfileModule,
   isRelayFeedModule,
+  isSearchModule,
   isTagModule,
 } from '@/stores/modules/module.store'
 import { HomeColumn } from 'components/modules/Home/HomeColumn'
@@ -54,6 +56,7 @@ export const DeckList = observer(function DeckList() {
                 {isMediaModule(module) && <MediaColumn module={module} />}
                 {isRelayFeedModule(module) && <RelayFeedColumn module={module} />}
                 {isTagModule(module) && <TagsColumn module={module} />}
+                {isSearchModule(module) && <SearchColumn module={module} />}
               </DeckModuleContext>
             </DeckContext.Provider>
           </DeckColumn>

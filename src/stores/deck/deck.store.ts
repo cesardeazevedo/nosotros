@@ -5,6 +5,7 @@ import { ModuleStoreModel, type ModulesInstances } from '../modules/module.store
 import { createNAddressModule } from '../modules/naddress.module'
 import { createNEventModule } from '../modules/nevent.module'
 import { createNotificationModule } from '../modules/notification.module'
+import { createSearchModule } from '../modules/search.module'
 import { createTagModule } from '../modules/tag.module'
 import { createNprofileModule } from '../nprofile/nprofile.module'
 import { createRelayFeedModule } from '../relays/relay.feed.module'
@@ -58,6 +59,10 @@ export const DeckModel = t
 
     addMedia(snapshot: Parameters<typeof createMediaModule>[0], index?: number) {
       self.add(createMediaModule(snapshot), index)
+    },
+
+    addSearch(snapshot: Parameters<typeof createSearchModule>[0], index?: number) {
+      self.add(createSearchModule(snapshot), index)
     },
 
     addTag(tags: string[], index?: number) {

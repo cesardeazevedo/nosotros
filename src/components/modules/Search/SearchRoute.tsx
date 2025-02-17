@@ -17,11 +17,12 @@ import { IconChevronLeft } from '@tabler/icons-react'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { observer } from 'mobx-react-lite'
 import { getSnapshot } from 'mobx-state-tree'
-import { useObservable, useObservableCallback, useSubscription } from 'observable-hooks'
+import { useObservable, useSubscription } from 'observable-hooks'
 import { useEffect, useRef } from 'react'
 import { css } from 'react-strict-dom'
-import { mergeMap, tap, throttleTime } from 'rxjs'
+import { mergeMap } from 'rxjs'
 import { SearchSettings } from './SearchSettings'
+import { useSearchChange } from './hooks/useSearchChange'
 
 export const SearchRoute = observer(function SearchRoute() {
   const params = useSearch({ from: '/search' })
@@ -31,14 +32,7 @@ export const SearchRoute = observer(function SearchRoute() {
   const feed = module?.feed
   const searchRef = useRef<HTMLInputElement>(null)
 
-  const [onChange, query$] = useObservableCallback<string>((input$) => {
-    return input$.pipe(
-      throttleTime(1300, undefined, { leading: false, trailing: true }),
-      tap((query) => navigate({ to: '/search', search: { q: query } })),
-      tap((query) => module.setQuery(query)),
-    )
-  })
-  useSubscription(query$)
+  const onChange = useSearchChange(module, true)
 
   const sub = useObservable(
     (module$) => module$.pipe(mergeMap(([module]) => module.subscribe())),
