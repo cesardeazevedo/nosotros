@@ -5,6 +5,12 @@ import { from, lastValueFrom, map, mergeMap, tap, toArray } from 'rxjs'
 
 const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'video/mp4', 'video/mpeg', 'video/webm']
 
+export function bufferToHex(buffer: ArrayBuffer) {
+  return Array.from(new Uint8Array(buffer))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('')
+}
+
 type Options = {
   sign: (event: EventTemplate) => Promise<NostrEvent>
   defaultUploadType: 'blossom' | 'nip96'
@@ -21,6 +27,10 @@ export class UploadStore {
     })
   }
 
+  async hash(file: File) {
+    return bufferToHex(await crypto.subtle.digest('SHA-256', await file.arrayBuffer()))
+  }
+
   async uploadFiles() {
     return await lastValueFrom(
       from(this.files).pipe(
@@ -30,10 +40,11 @@ export class UploadStore {
             serverUrl: file.uploadUrl,
             sign: this.options.sign,
           }
+          const expiration = 10 * 365 * 24 * 3600 // 10 years, this should be optional on blossom
           this.setUploading(file)
-          return from(file.uploadType === 'blossom' ? uploadBlossom(data) : uploadNIP96(data)).pipe(
-            map((response) => ({ file, response })),
-          )
+          return from(
+            file.uploadType === 'blossom' ? uploadBlossom({ ...data, expiration, hash: this.hash }) : uploadNIP96(data),
+          ).pipe(map((response) => ({ file, response })))
         }),
         tap(({ file, response }) => this.setReponse(file, response)),
         toArray(),

@@ -2,7 +2,7 @@ import { useContentContext } from '@/components/providers/ContentProvider'
 import { ButtonBase } from '@/components/ui/ButtonBase/ButtonBase'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { SxProps } from '@/components/ui/types'
-import { useCurrentPubkey } from '@/hooks/useRootStore'
+import { useCurrentPubkey, useGlobalSettings } from '@/hooks/useRootStore'
 import type { EditorStore } from '@/stores/editor/editor.store'
 import { UploadStore } from '@/stores/editor/upload.store'
 import { palette } from '@/themes/palette.stylex'
@@ -14,7 +14,7 @@ import { observer } from 'mobx-react-lite'
 import { useObservableState } from 'observable-hooks'
 import { useEffect, useMemo } from 'react'
 import { css } from 'react-strict-dom'
-import { concat, concatMap, defer, endWith, from, map, mergeMap, startWith, takeUntil } from 'rxjs'
+import { concat, concatMap, defer, endWith, from, map, mergeMap, startWith, takeUntil, tap } from 'rxjs'
 import { MediaListEditor } from '../Media/MediaListEditor'
 import { EditorContainer } from './EditorContainer'
 import { EditorExpandables } from './EditorExpandables'
@@ -37,6 +37,7 @@ type Props = {
 export const EditorMedia = observer(function EditorMedia(props: Props) {
   const { store, initialOpen, renderDiscard = true, onDiscard } = props
   const { dense } = useContentContext()
+  const globalSettings = useGlobalSettings()
 
   const pubkey = useCurrentPubkey()
 
@@ -48,8 +49,8 @@ export const EditorMedia = observer(function EditorMedia(props: Props) {
     () =>
       new UploadStore({
         sign: (event) => store.sign(event),
-        defaultUploadType: 'nip96',
-        defaultUploadUrl: 'https://nostr.build',
+        defaultUploadType: globalSettings.defaultUploadType as 'nip96' | 'blossom',
+        defaultUploadUrl: globalSettings.defaultUploadUrl,
       }),
     [],
   )
@@ -65,6 +66,7 @@ export const EditorMedia = observer(function EditorMedia(props: Props) {
                 tags: [...imetas, ...store.rawEvent.tags],
               })
             }),
+            tap(() => uploadStore.reset()),
             map(() => false),
             startWith(0),
           ),
