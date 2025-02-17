@@ -8,7 +8,7 @@ import { pruneFilters } from '../prune'
 export function createSubscription(filters: NostrFilter, ctx: NostrContext) {
   return new NostrSubscription(filters, {
     ...ctx.subOptions,
-    relays: merge(ctx.inbox$, ctx.outbox$, of(ctx.relays || [])),
+    relays: merge(ctx.inbox$, ctx.outbox$, of(ctx.relays || []), ctx.subOptions?.relays || EMPTY),
     relayHints: ctx.settings.hints ? ctx?.subOptions?.relayHints : {},
     outbox:
       ctx.settings.outbox && ctx?.subOptions?.outbox !== false
