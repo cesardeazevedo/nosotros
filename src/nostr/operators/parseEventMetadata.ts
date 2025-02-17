@@ -39,7 +39,7 @@ export function parseEventMetadata() {
             return of(event).pipe(parseMetadata(parseRepost))
           }
           case Kind.Media: {
-            return of(event).pipe(parseMetadata(parseMedia))
+            return of(event).pipe(persistMetadata(parseMedia))
           }
           case Kind.RelayList: {
             return of(event).pipe(parseMetadata(parseRelayList))

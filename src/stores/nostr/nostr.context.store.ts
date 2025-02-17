@@ -1,6 +1,7 @@
 import { DEFAULT_RELAYS } from '@/constants/relays'
 import type { NostrContext } from '@/nostr/context'
 import { toArrayRelay, trackMailbox } from '@/nostr/operators/trackMailbox'
+import { subscribeBlossomServers } from '@/nostr/subscriptions/subscribeBlossomServers'
 import { subscribeContextRelays } from '@/nostr/subscriptions/subscribeContextRelays'
 import { subscribeFollows } from '@/nostr/subscriptions/subscribeFollows'
 import { subscribeMutes } from '@/nostr/subscriptions/subscribeMutes'
@@ -10,11 +11,11 @@ import type { Instance, SnapshotIn } from 'mobx-state-tree'
 import { cast, t } from 'mobx-state-tree'
 import { defaultIfEmpty, EMPTY, merge, of } from 'rxjs'
 import { addNostrEventToStore } from '../helpers/addNostrEventToStore'
+import { getRootStore } from '../helpers/getRootStore'
 import { publishStore } from '../publish/publish.store'
 import { SignersModel } from '../signers/signers'
 import { userStore } from '../users/users.store'
 import { NostrSettingsModel } from './nostr.settings.store'
-import { getRootStore } from '../helpers/getRootStore'
 
 const fallbackRelays = defaultIfEmpty<string[], string[]>(DEFAULT_RELAYS)
 
@@ -89,6 +90,7 @@ export const NostrStoreModel = t
         subscribeContextRelays(self.context),
         pubkey ? subscribeUser(pubkey, self.context) : EMPTY,
         pubkey ? subscribeMutes(pubkey, self.context) : EMPTY,
+        pubkey ? subscribeBlossomServers(pubkey, self.context) : EMPTY,
         pubkey && subFollows !== false ? subscribeFollows(pubkey, self.context) : EMPTY,
       )
     },

@@ -6,7 +6,6 @@ import { useMemo } from 'react'
 import { css } from 'react-strict-dom'
 import { AltButton } from '../Buttons/AltButton'
 import { DeleteButton } from '../Buttons/DeleteButton'
-import { UploadButton } from '../Buttons/UploadButton'
 
 type Props = VideoAttributes & {
   onUpdate: (attrs: Partial<VideoAttributes>) => void
@@ -16,7 +15,7 @@ type Props = VideoAttributes & {
 
 export const VideoEditor = (props: Props) => {
   const { src, sx } = props
-  const isUploaded = !src.startsWith('blob://http')
+  const isUploaded = !src.startsWith('blob:http')
   const extension = useMemo(() => new URL(src).pathname.split('.').pop(), [src])
   return (
     <>
@@ -27,7 +26,6 @@ export const VideoEditor = (props: Props) => {
         </video>
       </ContentProvider>
       {!isUploaded && <AltButton value={props.alt} onChange={(alt) => props.onUpdate({ alt })} />}
-      <UploadButton {...props} />
     </>
   )
 }

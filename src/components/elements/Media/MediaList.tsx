@@ -6,6 +6,7 @@ import { css, html } from 'react-strict-dom'
 import { useDraggable } from 'react-use-draggable-scroll'
 import { Image } from '../Content/Image/Image'
 import { Video } from '../Content/Video/Video'
+import { MediaWrapper } from '../Content/Layout/MediaWrapper'
 
 export const MediaList = () => {
   const { note } = useNoteContext()
@@ -20,8 +21,14 @@ export const MediaList = () => {
       <div {...css.props(styles.root)} {...events} ref={ref}>
         {note.imetaList.map(([type, src]) => (
           <html.div key={src} style={styles.item}>
-            {type === 'image' && <Image draggable={false} src={src} sx={isMultiple && styles.mediaMultiple} />}
-            {type === 'video' && <Video src={src} sx={isMultiple && styles.mediaMultiple} />}
+            <MediaWrapper
+              disablePadding
+              size={isMultiple ? 'sm' : 'md'}
+              fixedHeight={isMultiple ? 320 : undefined}
+              src={src}>
+              {type === 'image' && <Image draggable={false} src={src} sx={isMultiple && styles.mediaMultiple} />}
+              {type === 'video' && <Video preload='auto' src={src} sx={isMultiple && styles.mediaMultiple} />}
+            </MediaWrapper>
           </html.div>
         ))}
       </div>
@@ -45,10 +52,12 @@ const styles = css.create({
     scrollbarWidth: 0,
   },
   mediaMultiple: {
-    maxHeight: 310,
+    objectFit: 'cover',
   },
   item: {
     userSelect: 'none',
     userDrag: 'none',
+    width: 'fit-content',
+    height: 'fit-content',
   },
 })

@@ -26,6 +26,8 @@ export const GlobalSettingsModel = t
     theme: ThemeKeysEnum,
     imgproxy: t.optional(t.string, import.meta.env.VITE_IMGPROXY_URL),
     defaultEmoji: t.optional(t.string, ''),
+    defaultUploadType: t.optional(t.string, 'nip96'),
+    defaultUploadUrl: t.optional(t.string, 'https://nostr.build'),
     scroll: ScrollSettingsModel,
     clientTag: t.boolean,
   })
@@ -36,3 +38,5 @@ export const GlobalSettingsModel = t
   }))
   .actions(withSetAction)
   .actions(withToggleAction)
+
+export interface GlobalSettings extends Instance<typeof GlobalSettingsModel> {}

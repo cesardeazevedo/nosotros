@@ -31,6 +31,7 @@ import { RelayRoute } from './components/modules/Relays/RelaysRoute'
 import { SearchRoute } from './components/modules/Search/SearchRoute'
 import { SettingsContentRoute } from './components/modules/Settings/SettingsContentRoute'
 import { SettingsDisplayRoute } from './components/modules/Settings/SettingsDisplayRoute'
+import { SettingsMediaStorage } from './components/modules/Settings/SettingsMediaStorage'
 import { SettingsNetworkRoute } from './components/modules/Settings/SettingsNetworkRoute'
 import { SettingsRoute } from './components/modules/Settings/SettingsRoute'
 import { SettingsStorageRoute } from './components/modules/Settings/SettingsStorageRoute'
@@ -262,6 +263,12 @@ const settingsContentRoute = createRoute({
   component: SettingsContentRoute,
 })
 
+const settingsMediaStorage = createRoute({
+  getParentRoute: () => settingsRoute,
+  path: '/blossom',
+  component: SettingsMediaStorage,
+})
+
 const settingsStorageRoute = createRoute({
   getParentRoute: () => settingsRoute,
   path: '/storage',
@@ -278,7 +285,13 @@ export const routeTree = rootRoute.addChildren([
   mediaRoute,
   composeRoute,
   relaysRoute,
-  settingsRoute.addChildren([settingsDisplayRoute, settingsNetworkRoute, settingsContentRoute, settingsStorageRoute]),
+  settingsRoute.addChildren([
+    settingsDisplayRoute,
+    settingsNetworkRoute,
+    settingsContentRoute,
+    settingsMediaStorage,
+    settingsStorageRoute,
+  ]),
 ])
 
 export const router = createRouter({

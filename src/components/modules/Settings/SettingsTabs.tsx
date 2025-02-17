@@ -5,7 +5,7 @@ import { tabTokens } from '@/components/ui/Tab/Tab.stylex'
 import { Tabs } from '@/components/ui/Tabs/Tabs'
 import { useMobile } from '@/hooks/useMobile'
 import { shape } from '@/themes/shape.stylex'
-import { IconBrush, IconDatabase, IconHeart, IconServerBolt } from '@tabler/icons-react'
+import { IconBrush, IconDatabase, IconHeart, IconPhotoUp, IconServerBolt } from '@tabler/icons-react'
 import { Link, useLocation } from '@tanstack/react-router'
 import { css } from 'react-strict-dom'
 
@@ -26,6 +26,9 @@ export const SettingsTabs = () => {
         </Link>
         <Link to='/settings/network'>
           <Tab sx={styles.tab} icon={<IconServerBolt size={22} />} anchor='/settings/network' label='Network' />
+        </Link>
+        <Link to='/settings/blossom'>
+          <Tab sx={styles.tab} icon={<IconPhotoUp size={22} />} anchor='/settings/blossom' label='Media Storage' />
         </Link>
         <Link to='/settings/storage'>
           <Tab sx={styles.tab} icon={<IconDatabase size={22} />} anchor='/settings/storage' label='Storage' />

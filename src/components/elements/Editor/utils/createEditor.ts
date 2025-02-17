@@ -18,7 +18,12 @@ const addNodeView = (Component: React.ComponentType<NodeViewProps>) => ({
   addNodeView: () => ReactNodeViewRenderer(Component),
 })
 
-export function createEditor(store: EditorStore) {
+type Settings = {
+  defaultUploadUrl: string
+  defaultUploadType: string
+}
+
+export function createEditor(store: EditorStore, settings: Settings) {
   return new Editor({
     extensions: [
       StarterKit,
@@ -28,10 +33,8 @@ export function createEditor(store: EditorStore) {
           openOnClick: false,
         },
         image: {
-          defaultUploadUrl: 'https://nostr.build',
-          defaultUploadType: 'nip96',
-          // defaultUploadUrl: 'http://localhost:3000',
-          // defaultUploadType: 'blossom',
+          defaultUploadUrl: settings.defaultUploadUrl || 'https://nostr.build',
+          defaultUploadType: (settings.defaultUploadType || 'nip96') as 'nip96' | 'blossom',
         },
         video: {
           defaultUploadUrl: 'https://nostr.build',

@@ -29,6 +29,7 @@ export enum Kind {
   Article = 30023,
   RelayDiscovery = 30166,
   BookmarkList = 10003,
+  BlossomServerList = 10063,
   MonitorDiscovery = 10166,
   NostrConnect = 24133,
 }
