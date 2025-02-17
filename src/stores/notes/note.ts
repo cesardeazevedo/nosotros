@@ -237,7 +237,7 @@ export class Note {
 
   get imetaList() {
     const imageExts = ['jpeg', 'jpg', 'png', 'gif', 'webp']
-    const videoExts = ['mp4', 'webm', 'ogg']
+    const videoExts = ['mp4', 'webm', 'ogg', 'mov', 'quicktime']
     return Object.entries(this.metadata.imeta).map(([src, data]) => {
       // Some imeta tags are missing mimetypes
       const ext = data.m?.split('/')[1] || new URL(src).pathname.split('.')?.toReversed()?.[0] || ''

@@ -1,7 +1,9 @@
-import { useContentContext } from '@/components/providers/ContentProvider'
+import { useNoteContext } from '@/components/providers/NoteProvider'
 import type { SxProps } from '@/components/ui/types'
+import { useMediaStore } from '@/hooks/useMediaStore'
+import { mediaStore } from '@/stores/media/media.store'
 import { shape } from '@/themes/shape.stylex'
-import { spacing } from '@/themes/spacing.stylex'
+import { observer } from 'mobx-react-lite'
 import { useMemo } from 'react'
 import { css } from 'react-strict-dom'
 import { BlurContainer } from '../../Layouts/BlurContainer'
@@ -12,44 +14,49 @@ type Props = {
   muted?: boolean
   autoPlay?: boolean
   controls?: boolean
+  preload?: HTMLVideoElement['preload']
   sx?: SxProps
 }
 
-export const Video = (props: Props) => {
-  const { src, controls = true, muted = false, loop = false, autoPlay = false, sx } = props
-  const { dense } = useContentContext()
+export const Video = observer(function Video(props: Props) {
+  const { src, controls = true, muted = false, loop = false, autoPlay = false, preload = 'metadata', sx } = props
+  const { note } = useNoteContext()
   const extension = useMemo(() => new URL(src).pathname.split('.').pop(), [src])
+  const { onLoad, ...media } = useMediaStore(src, note.metadata.imeta)
   return (
     <BlurContainer>
       {({ blurStyles }) => (
         <video
-          {...css.props([styles.root, dense && styles.root$dense, blurStyles, sx])}
+          {...css.props([styles.video, blurStyles, sx])}
           loop={loop}
           muted={muted}
           autoPlay={autoPlay}
-          preload='none'
+          preload={preload}
           controls={controls}
-          src={src}>
+          src={src}
+          {...media}
+          onLoadedMetadata={(e) => {
+            const element = e.target as HTMLVideoElement
+            const { videoWidth, videoHeight } = element
+            mediaStore.add(src, [videoWidth, videoHeight])
+          }}>
           <source src={src} type={`video/${extension === 'mov' ? 'mp4' : extension}`} />
         </video>
       )}
     </BlurContainer>
   )
-}
+})
 
 const styles = css.create({
-  root: {
-    marginTop: spacing.margin1,
-    marginLeft: spacing.margin2,
-    marginRight: spacing.margin2,
-    marginBottom: spacing.margin1,
+  video: {
     borderRadius: shape.lg,
-    width: 'fit-content',
-    maxHeight: 420,
     backgroundColor: '#000',
-  },
-  root$dense: {
-    marginLeft: 0,
-    marginRight: 0,
+    objectFit: 'cover',
+    width: '100%',
+    height: '100%',
+    transition: 'transform 150ms ease',
+    ':active': {
+      transform: 'scale(0.985)',
+    },
   },
 })

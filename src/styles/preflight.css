@@ -435,8 +435,10 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 
 img,
 video {
-  max-width: 100%;
-  height: auto;
+  /* max-width: 100%; */
+  /* react-strict dom is applying this causing a bunch of issues */
+  /* height: unset; */
+  /* aspect-ratio: unset; */
 }
 
 /* Make elements with the HTML hidden attribute stay hidden by default */
