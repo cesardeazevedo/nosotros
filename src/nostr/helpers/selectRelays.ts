@@ -12,6 +12,7 @@ export function selectRelays(data: UserRelay[], config?: RelaySelectionConfig) {
   return data
     .filter((data) => !config?.blacklist?.has(data.relay))
     .filter((data) => !config?.ignore?.has(data.relay))
+    .filter((data) => data.relay.startsWith('wss://'))
     .filter((data) => {
       return config?.permission !== undefined ? !!(data.permission & config.permission) || !data.permission : true
     })

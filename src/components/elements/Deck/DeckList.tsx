@@ -4,6 +4,7 @@ import { NEventColumn } from '@/components/modules/NEvent/NEventColumn'
 import { NotificationsColumn } from '@/components/modules/Notifications/NotificationsColumn'
 import { NProfileColumn } from '@/components/modules/NProfile/NProfileColumn'
 import { RelayFeedColumn } from '@/components/modules/RelayFeed/RelayFeedColumn'
+import { SearchColumn } from '@/components/modules/Search/SearchColumn'
 import { TagsColumn } from '@/components/modules/Tag/TagColumn'
 import { NostrProvider } from '@/components/providers/NostrProvider'
 import { useRootStore } from '@/hooks/useRootStore'
@@ -16,14 +17,14 @@ import {
   isNotificationModule,
   isNProfileModule,
   isRelayFeedModule,
+  isSearchModule,
   isTagModule,
 } from '@/stores/modules/module.store'
 import { HomeColumn } from 'components/modules/Home/HomeColumn'
 import { observer } from 'mobx-react-lite'
 import React from 'react'
-import { firstValueFrom, timer } from 'rxjs'
 import { DeckColumn } from './DeckColumn'
-import { DeckContext } from './DeckContext'
+import { DeckContext, deckContextvalues } from './DeckContext'
 
 const DeckModuleContext = function DeckModuleContext(props: {
   children: React.ReactNode
@@ -37,8 +38,6 @@ const DeckModuleContext = function DeckModuleContext(props: {
   return children
 }
 
-const delay = firstValueFrom(timer(800))
-
 export const DeckList = observer(function DeckList() {
   const root = useRootStore()
   return (
@@ -47,7 +46,7 @@ export const DeckList = observer(function DeckList() {
         const key = `${module.type}:${module.id}`
         return (
           <DeckColumn key={key}>
-            <DeckContext.Provider value={{ module, index, delay }}>
+            <DeckContext.Provider value={{ ...deckContextvalues, module, index }}>
               <DeckModuleContext module={module} enabled={!isRelayFeedModule(module)}>
                 {isHomeModule(module) && <HomeColumn module={module} />}
                 {isNProfileModule(module) && <NProfileColumn module={module} />}
@@ -57,6 +56,7 @@ export const DeckList = observer(function DeckList() {
                 {isMediaModule(module) && <MediaColumn module={module} />}
                 {isRelayFeedModule(module) && <RelayFeedColumn module={module} />}
                 {isTagModule(module) && <TagsColumn module={module} />}
+                {isSearchModule(module) && <SearchColumn module={module} />}
               </DeckModuleContext>
             </DeckContext.Provider>
           </DeckColumn>

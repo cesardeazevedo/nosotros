@@ -1,10 +1,13 @@
 import { ContentProvider } from '@/components/providers/ContentProvider'
 import { ListItem } from '@/components/ui/ListItem/ListItem'
+import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
 import { useFollowingUsers } from '@/hooks/useFollowingUsers'
 import type { User } from '@/stores/users/user'
+import { shape } from '@/themes/shape.stylex'
+import { spacing } from '@/themes/spacing.stylex'
 import { observer } from 'mobx-react-lite'
 import { forwardRef, useImperativeHandle, useMemo } from 'react'
-import { css } from 'react-strict-dom'
+import { css, html } from 'react-strict-dom'
 import { UserAvatar } from '../User/UserAvatar'
 import { UserName } from '../User/UserName'
 
@@ -36,6 +39,11 @@ export const SearchFollowingUsers = observer(
 
     return (
       <ContentProvider value={{ disableLink: true }}>
+        {users.length === 0 && (
+          <html.div style={styles.loading$container}>
+            <Skeleton sx={styles.loading} />
+          </html.div>
+        )}
         {users?.map((user, index) => (
           <ListItem
             interactive
@@ -56,5 +64,12 @@ const styles = css.create({
   item: {
     flex: 0,
     width: '100%',
+  },
+  loading$container: {
+    paddingInline: spacing.padding1,
+  },
+  loading: {
+    borderRadius: shape.lg,
+    height: 36,
   },
 })

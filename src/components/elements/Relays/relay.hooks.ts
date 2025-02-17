@@ -9,7 +9,7 @@ export function usePublishRelayList() {
   return useObservableState<boolean, [UserRelay, boolean]>((input$) => {
     return input$.pipe(
       mergeMap(([userRelay, revoke]) => {
-        return publishRelayList(rootContext.client, userRelay, revoke).pipe(
+        return publishRelayList(rootContext.context, userRelay, revoke).pipe(
           last(),
           map(() => false),
           catchError(() => of(false)),

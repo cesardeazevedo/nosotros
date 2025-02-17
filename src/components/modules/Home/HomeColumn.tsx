@@ -26,7 +26,7 @@ export const HomeColumn = observer(function HomeColumn(props: Props) {
   const feed = module.feed
   const { delay } = useContext(DeckContext)
 
-  useFeedSubscription(feed, module.contextWithFallback.client)
+  useFeedSubscription(feed, module.contextWithFallback.context)
 
   return (
     <>

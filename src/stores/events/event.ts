@@ -1,7 +1,9 @@
+import { parseTags } from '@/nostr/helpers/parseTags'
 import { pool } from '@/nostr/pool'
 import type { NostrEventComment, NostrEventNote } from '@/nostr/types'
 import { metadataSymbol } from '@/nostr/types'
 import { encodeSafe } from '@/utils/nip19'
+import type { NostrEvent } from 'nostr-tools'
 import { nip19 } from 'nostr-tools'
 import { isParameterizedReplaceableKind } from 'nostr-tools/kinds'
 import { seenStore } from '../seen/seen.store'
@@ -20,7 +22,11 @@ export class Event {
   }
 
   get metadata() {
-    return this.event[metadataSymbol]
+    return metadataSymbol in this.event ? this.event[metadataSymbol] : null
+  }
+
+  get tags() {
+    return this.metadata?.tags || parseTags(this.event.tags)
   }
 
   get user() {
@@ -36,15 +42,15 @@ export class Event {
   }
 
   get pow() {
-    return this.metadata.tags.nonce?.flat()
+    return this.tags.nonce?.flat()
   }
 
   get alt() {
-    return this.metadata.tags.alt?.flat()?.[1]
+    return this.tags.alt?.flat()?.[1]
   }
 
   get d() {
-    return this.metadata.tags.d?.flat()?.[1]
+    return this.tags.d?.flat()?.[1]
   }
 
   get isAddressable() {

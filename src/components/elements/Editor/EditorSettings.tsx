@@ -8,11 +8,11 @@ import type { EditorStore } from '@/stores/editor/editor.store'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconCode } from '@tabler/icons-react'
-import JsonView from '@uiw/react-json-view'
 import { githubDarkTheme } from '@uiw/react-json-view/githubDark'
 import { observer } from 'mobx-react-lite'
-import { useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { css } from 'react-strict-dom'
+import { EditorSettingsUpload } from './EditorSettingsUpload'
 
 type Props = {
   store: EditorStore
@@ -22,6 +22,8 @@ const jsonTheme = {
   ...githubDarkTheme,
   '--w-rjv-background-color': '#0d0f12',
 }
+
+const JsonView = lazy(() => import('@uiw/react-json-view'))
 
 export const EditorSettings = observer(function EditorSettings(props: Props) {
   const [jsonOpen, setJsonOpen] = useState(false)
@@ -41,7 +43,13 @@ export const EditorSettings = observer(function EditorSettings(props: Props) {
               </IconButton>
             </Tooltip>
           </Stack>
-          <Stack horizontal={false} gap={1}>
+          <Stack horizontal={false} gap={2}>
+            <Stack gap={1}>
+              <Text size='md' sx={styles.label}>
+                Upload servers
+              </Text>
+              <EditorSettingsUpload store={store} />
+            </Stack>
             <Stack gap={1}>
               <Text size='md' sx={styles.label}>
                 Client tag
@@ -61,13 +69,15 @@ export const EditorSettings = observer(function EditorSettings(props: Props) {
         </Stack>
         <Stack>
           {jsonOpen && (
-            <JsonView
-              highlightUpdates={false}
-              displayDataTypes={false}
-              value={store.event}
-              {...css.props(styles.json)}
-              style={{ ...jsonTheme }}
-            />
+            <Suspense>
+              <JsonView
+                highlightUpdates={false}
+                displayDataTypes={false}
+                value={store.event}
+                {...css.props(styles.json)}
+                style={{ ...jsonTheme }}
+              />
+            </Suspense>
           )}
         </Stack>
       </Stack>

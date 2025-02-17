@@ -1,11 +1,11 @@
 import { Kind } from '@/constants/kinds'
 import type { NostrEvent } from 'nostr-tools'
-import type { NostrClient } from '../nostr'
+import type { NostrContext } from '../context'
 import { publish } from './publish'
 
-export function publishReaction(client: NostrClient, event: NostrEvent, reaction: string) {
+export function publishReaction(ctx: NostrContext, event: NostrEvent, reaction: string) {
   return publish(
-    client,
+    ctx,
     {
       kind: Kind.Reaction,
       content: reaction,

@@ -58,7 +58,6 @@ const styles = css.create({
     '::after': {
       content: '""',
       flex: '1 1 calc(33.33% - 20px)',
-      aspectRatio: '1 / 1',
     },
   },
 })

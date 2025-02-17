@@ -1,23 +1,23 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-empty-pattern */
 import { Kind } from '@/constants/kinds'
-import { RELAY_1, RELAY_2, RELAY_3, RELAY_4, RELAY_5 } from '@/constants/testRelays'
 import { clearCache } from '@/nostr/cache'
+import type { NostrContext } from '@/nostr/context'
 import { db } from '@/nostr/db'
 import { parseFollowList } from '@/nostr/helpers/parseFollowList'
 import { parseUser } from '@/nostr/helpers/parseUser'
-import { replay as replayMailbox } from '@/nostr/mailbox'
-import { replay as replayUsers } from '@/nostr/nips/nip01.users'
-import { replay as replayNIP02 } from '@/nostr/nips/nip02.follows'
-import { replay as replayNIP65 } from '@/nostr/nips/nip65.relaylist'
-import type { NostrClientOptions } from '@/nostr/nostr'
-import { NostrClient } from '@/nostr/nostr'
-import { replayIds } from '@/nostr/operators/subscribeIds'
+import { emitMailbox, replay as replayMailbox } from '@/nostr/operators/trackMailbox'
 import { pool } from '@/nostr/pool'
 import { defaultNostrSettings, type NostrSettings } from '@/nostr/settings'
+import { replay as replayNIP02 } from '@/nostr/subscriptions/subscribeFollows'
+import { replay as replayNIP65 } from '@/nostr/subscriptions/subscribeRelayList'
+import { replay as replayUsers } from '@/nostr/subscriptions/subscribeUser'
 import { type NostrEventNote } from '@/nostr/types'
 import { eventStore } from '@/stores/events/event.store'
 import { followsStore } from '@/stores/follows/follows.store'
+import type { NostrStoreSnapshotIn } from '@/stores/nostr/nostr.context.store'
+import { NostrStoreModel } from '@/stores/nostr/nostr.context.store'
+import type { NostrSettingsSnapshotIn } from '@/stores/nostr/nostr.settings.store'
 import { Note } from '@/stores/notes/note'
 import { noteStore } from '@/stores/notes/notes.store'
 import { reactionStore } from '@/stores/reactions/reactions.store'
@@ -27,29 +27,23 @@ import type { User } from '@/stores/users/user'
 import { userStore } from '@/stores/users/users.store'
 import { type NostrEvent } from 'nostr-tools'
 import { test as base } from 'vitest'
-import WS from 'vitest-websocket-mock'
 import { fakeComment, fakeEvent, fakeNote } from './faker'
 import { RelayServer, TestSigner } from './testHelpers'
 
 interface Fixtures {
   createMockRelay: (url: string, db: NostrEvent[]) => RelayServer
-  relay: WS
-  relay2: WS
-  relay3: WS
-  relay4: WS
-  relay5: WS
   root: RootStore
   clear: () => void
   login: (pubkey: string) => User
-  createClient: (
-    options?: Partial<Omit<NostrClientOptions, 'settings'> & { settings: Partial<NostrSettings> }>,
-  ) => NostrClient
+  createContext: (
+    options?: Partial<Omit<NostrStoreSnapshotIn, 'settings'>> & { settings?: Partial<NostrSettingsSnapshotIn> },
+  ) => NostrContext
   createUser: (data: Partial<NostrEvent>) => User
-  createNote: (data: Partial<NostrEvent>, client?: NostrClient) => Note
-  createComment: (data: Partial<NostrEvent>, client?: NostrClient) => Note
+  createNote: (data: Partial<NostrEvent>) => Note
+  createComment: (data: Partial<NostrEvent>) => Note
   createFollows: (pubkey: string, tags: string[]) => void
   createReaction: (data: Partial<NostrEvent>) => void
-  insertRelayList: (data: Partial<NostrEvent>, client?: NostrClient) => Promise<void>
+  insertRelayList: (data: Partial<NostrEvent>) => Promise<void>
   signer: TestSigner
 }
 
@@ -59,38 +53,13 @@ export const test = base.extend<Fixtures>({
       return new RelayServer(url, db)
     })
   },
-  relay: async ({}, use) => {
-    const relay = new WS(RELAY_1, { jsonProtocol: true })
-    await use(relay)
-    relay.close()
-  },
-  relay2: async ({}, use) => {
-    const relay = new WS(RELAY_2, { jsonProtocol: true })
-    await use(relay)
-    relay.close()
-  },
-  relay3: async ({}, use) => {
-    const relay = new WS(RELAY_3, { jsonProtocol: true })
-    await use(relay)
-    relay.close()
-  },
-  relay4: async ({}, use) => {
-    const relay = new WS(RELAY_4, { jsonProtocol: true })
-    await use(relay)
-    relay.close()
-  },
-  relay5: async ({}, use) => {
-    const relay = new WS(RELAY_5, { jsonProtocol: true })
-    await use(relay)
-    relay.close()
-  },
   root: async ({}, use) => {
     await use(rootStore)
   },
-  clear: async ({ root }, use) => {
+  clear: async ({}, use) => {
     clearCache()
     pool.reset()
-    replayIds.clear()
+    //replayIds.clear()
     userStore.clear()
     eventStore.clear()
     noteStore.clear()
@@ -100,26 +69,26 @@ export const test = base.extend<Fixtures>({
     replayUsers.clear()
     replayNIP02.clear()
     replayNIP65.clear()
-    await use(() => {})
+    await use(() => null)
   },
   login: async ({ root, createUser }, use) => {
     use((pubkey: string) => {
-      root.auth.login({ pubkey, context: { options: { pubkey }, signer: { name: 'nip07' } } })
+      root.auth.login({ pubkey, context: { pubkey, signer: { name: 'nip07' } } })
       return createUser({ pubkey })
     })
   },
-  createClient: async ({ clear }, use) => {
+  createContext: async ({ clear }, use) => {
     use((options) => {
-      return new NostrClient(pool, {
+      return NostrStoreModel.create({
         ...options,
         settings: {
           ...defaultNostrSettings,
           ...options?.settings,
         },
-      })
+      }).context
     })
   },
-  createUser: async ({ root, clear }, use) => {
+  createUser: async ({ clear }, use) => {
     use((data: Partial<NostrEvent>) => {
       const event = fakeEvent({
         id: '1',
@@ -149,7 +118,6 @@ export const test = base.extend<Fixtures>({
       noteStore.add(event)
       createUser({ pubkey: event.pubkey })
       return new Note(event)
-      // return commentStore.add(event, metadata)
     })
   },
   createFollows: async ({ clear }, use) => {
@@ -168,12 +136,10 @@ export const test = base.extend<Fixtures>({
     })
   },
   insertRelayList: async ({ clear }, use) => {
-    use(async (data: Partial<NostrEvent>, client?: NostrClient) => {
+    use(async (data: Partial<NostrEvent>) => {
       const event = fakeEvent({ kind: Kind.RelayList, ...data })
       await db.event.insert(event)
-      if (client) {
-        client.mailbox.emit(event)
-      }
+      emitMailbox(event)
     })
     db.clearDB()
   },

@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/Button/Button'
+import { Search } from '@/components/ui/Search/Search'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
@@ -26,10 +27,7 @@ export const DeckAddRelayFeeds = (props: Props) => {
       <form action={submit}>
         <html.div style={styles.header}>
           <Stack grow gap={0.5}>
-            <Stack grow sx={styles.search} gap={1}>
-              <IconServerBolt size={20} style={{ opacity: 0.5 }} />
-              <input name='value' autoFocus style={styles.input} type='text' placeholder='wss://' />
-            </Stack>
+            <Search name='value' placeholder='wss://' leading={<IconServerBolt size={20} style={{ opacity: 0.6 }} />} />
             <Button variant='filled' type='submit' sx={styles.button}>
               Add
             </Button>

@@ -45,7 +45,7 @@ export const MediaCell = observer(function MediaCell(props: { event: NostrEventM
                   <video
                     onClick={() => dialogStore.pushImage(src)}
                     onError={() => mediaStore.addError(src)}
-                    src={globalSettings.getImgProxyUrl('feed_img', src)}
+                    src={src}
                     {...css.props([styles.media, mobile && styles.media$mobile])}
                   />
                 )}

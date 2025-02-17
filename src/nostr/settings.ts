@@ -9,5 +9,4 @@ export const defaultNostrSettings = {
   localRelays: [] as string[],
   maxRelaysPerUserInbox: 2,
   maxRelaysPerUserOutbox: 2,
-  clientTag: true,
 }

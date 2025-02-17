@@ -16,7 +16,7 @@ export const NotificationContent = observer(function NotificationContent(props: 
   }
   return (
     <html.div style={styles.root}>
-      {note.metadata.contentSchema?.content.map((node, index) => (
+      {note.metadata?.contentSchema?.content.map((node, index) => (
         <React.Fragment key={node.type + index}>
           {node.type === 'heading' && <TextContent hardBreak={false} node={node} />}
           {node.type === 'paragraph' && <TextContent size='md' hardBreak={false} node={node} />}

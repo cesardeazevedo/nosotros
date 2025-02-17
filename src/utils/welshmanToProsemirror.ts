@@ -89,13 +89,18 @@ export function welshmanToProseMirror(welshmanSchema: Parsed[], blockNodesOption
           break
         }
         case ParsedType.Invoice: {
-          result.content.push({
-            type: 'bolt11',
-            attrs: {
-              bolt11: decode(node.raw),
-              lnbc: node.raw,
-            },
-          })
+          try {
+            result.content.push({
+              type: 'bolt11',
+              attrs: {
+                bolt11: decode(node.raw),
+                lnbc: node.raw,
+              },
+            })
+          } catch (error) {
+            console.error(error)
+            break
+          }
           break
         }
       }

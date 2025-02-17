@@ -1,10 +1,10 @@
 import { Kind } from '@/constants/kinds'
 import type { NostrEvent } from 'nostr-tools'
-import type { NostrClient } from '../nostr'
+import type { NostrContext } from '../context'
 import { publish } from './publish'
 
-export function publishRepost(client: NostrClient, event: NostrEvent) {
-  return publish(client, {
+export function publishRepost(ctx: NostrContext, event: NostrEvent) {
+  return publish(ctx, {
     kind: Kind.Repost,
     content: JSON.stringify(event),
     tags: [

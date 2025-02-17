@@ -1,6 +1,3 @@
-import { HomeRoute } from '@/components/routes/home/home.route'
-import { NEventRoute } from '@/components/routes/nevent/nevent.route'
-import { NProfileRoute } from '@/components/routes/nprofile/nprofile.route'
 import {
   createRootRouteWithContext,
   createRoute,
@@ -9,33 +6,39 @@ import {
   useRouteContext,
   useSearch,
 } from '@tanstack/react-router'
-import { ErrorBoundary } from 'ErrorBoundary'
-import { RootLayout } from 'components/elements/Layouts/RootLayout'
 import { useEffect } from 'react'
-import { decodeNIP19 } from 'utils/nip19'
 import { z } from 'zod'
+import { RootLayout } from './components/elements/Layouts/RootLayout'
+import { DeckRoute } from './components/modules/Deck/DeckRoute'
+import { EditorRoute } from './components/modules/Editor/EditorRoute'
+import { HomeRoute } from './components/modules/Home/HomeRoute'
+import { MediaRoute } from './components/modules/Media/MediaRoute'
+import { naddressLoader } from './components/modules/NAddress/naddress.loader'
+import { NAddressRoute } from './components/modules/NAddress/NAddressRoute'
+import { neventLoader } from './components/modules/NEvent/nevent.loader'
+import { NEventPending } from './components/modules/NEvent/NEventLoading'
+import { NEventRoute } from './components/modules/NEvent/NEventRoute'
+import { NotificationsRoute } from './components/modules/Notifications/notifications.route'
 import { NProfileArticlesFeed } from './components/modules/NProfile/feeds/NProfileArticlesFeed'
+import { NProfileMediaFeed } from './components/modules/NProfile/feeds/NProfileMediaFeed'
 import { NProfileNotesFeed } from './components/modules/NProfile/feeds/NProfileNotesFeed'
 import { NProfileRepliesFeed } from './components/modules/NProfile/feeds/NProfileRepliesFeed'
-import { DeckRoute } from './components/routes/deck/deck.route'
-import { EditorRoute } from './components/routes/editor/editor.route'
-import { MediaRoute } from './components/routes/media/media.route'
-import { naddressLoader } from './components/routes/naddress/naddress.loader'
-import { NAddressRoute } from './components/routes/naddress/naddress.route'
-import { neventLoader } from './components/routes/nevent/nevent.loader'
-import { NEventPending } from './components/routes/nevent/nevent.pending'
-import { NotificationsRoute } from './components/routes/notification/notifications.route'
-import { nprofileFeedLoader, nprofileLoader } from './components/routes/nprofile/nprofile.loader'
-import { NProfilePending } from './components/routes/nprofile/nprofile.pending'
-import { RelayFeedRoute } from './components/routes/relay/relay.feed.route'
-import { RelayRoute } from './components/routes/relays.route'
-import { SettingsContentRoute } from './components/routes/settings/settings.content'
-import { SettingsDisplayRoute } from './components/routes/settings/settings.display'
-import { SettingsNetworkRoute } from './components/routes/settings/settings.network'
-import { SettingsRoute } from './components/routes/settings/settings.route'
-import { SettingsStorageRoute } from './components/routes/settings/settings.storage'
+import { nprofileFeedLoader, nprofileLoader } from './components/modules/NProfile/nprofile.loader'
+import { NProfileLoading } from './components/modules/NProfile/NProfileLoading'
+import { NProfileRoute } from './components/modules/NProfile/NProfileRoute'
+import { RelayFeedRoute } from './components/modules/RelayFeed/RelayFeedRoute'
+import { RelayRoute } from './components/modules/Relays/RelaysRoute'
+import { SearchRoute } from './components/modules/Search/SearchRoute'
+import { SettingsContentRoute } from './components/modules/Settings/SettingsContentRoute'
+import { SettingsDisplayRoute } from './components/modules/Settings/SettingsDisplayRoute'
+import { SettingsMediaStorage } from './components/modules/Settings/SettingsMediaStorage'
+import { SettingsNetworkRoute } from './components/modules/Settings/SettingsNetworkRoute'
+import { SettingsRoute } from './components/modules/Settings/SettingsRoute'
+import { SettingsStorageRoute } from './components/modules/Settings/SettingsStorageRoute'
+import { TagsRoute } from './components/modules/Tag/TagRoute'
+import { ErrorBoundary } from './ErrorBoundary'
 import { useCurrentPubkey } from './hooks/useRootStore'
-import { NProfileMediaFeed } from './components/modules/NProfile/feeds/NProfileMediaFeed'
+import { decodeNIP19 } from './utils/nip19'
 
 const rootRoute = createRootRouteWithContext()({
   component: RootLayout,
@@ -160,7 +163,7 @@ export const nostrRoute = createRoute({
         return <NEventPending />
       }
       case 'nprofile': {
-        return <NProfilePending />
+        return <NProfileLoading />
       }
       default: {
         return null
@@ -217,6 +220,19 @@ const nprofileArticlesRoute = createRoute({
   },
 })
 
+const tagsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/tag/$tag',
+  component: () => <TagsRoute />,
+})
+
+const searchRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/search',
+  validateSearch: z.object({ q: z.string().optional() }),
+  component: () => <SearchRoute />,
+})
+
 const relaysRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/relays',
@@ -247,6 +263,12 @@ const settingsContentRoute = createRoute({
   component: SettingsContentRoute,
 })
 
+const settingsMediaStorage = createRoute({
+  getParentRoute: () => settingsRoute,
+  path: '/blossom',
+  component: SettingsMediaStorage,
+})
+
 const settingsStorageRoute = createRoute({
   getParentRoute: () => settingsRoute,
   path: '/storage',
@@ -257,11 +279,19 @@ export const routeTree = rootRoute.addChildren([
   homeRoute,
   nostrRoute.addChildren([nprofileIndexRoute, nprofileRepliesRoute, nprofileMediaRoute, nprofileArticlesRoute]),
   deckRoute,
+  tagsRoute,
+  searchRoute,
   notificationsRoute,
   mediaRoute,
   composeRoute,
   relaysRoute,
-  settingsRoute.addChildren([settingsDisplayRoute, settingsNetworkRoute, settingsContentRoute, settingsStorageRoute]),
+  settingsRoute.addChildren([
+    settingsDisplayRoute,
+    settingsNetworkRoute,
+    settingsContentRoute,
+    settingsMediaStorage,
+    settingsStorageRoute,
+  ]),
 ])
 
 export const router = createRouter({

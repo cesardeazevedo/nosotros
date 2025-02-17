@@ -70,13 +70,14 @@ export const SignInRemoteSigner = observer(function SignInRemoteSigner() {
               )}
             </Stack>
           </Stack>
-          {/* <Divider>OR</Divider> */}
-          {/* <Button variant='outlined' sx={styles.button} onClick={() => signinStore.goTo('REMOTE_SIGN_NOSTR_CONNECT')}> */}
-          {/*   Get NostrConnect URL */}
-          {/* </Button> */}
-          <Button type='submit' variant='filled' sx={styles.button} disabled={isPending}>
-            Connect
-          </Button>
+          <Stack horizontal={false} gap={1}>
+            <Button variant='outlined' sx={styles.button} onClick={() => signinStore.goTo('REMOTE_SIGN_NOSTR_CONNECT')}>
+              Get NostrConnect URL
+            </Button>
+            <Button type='submit' variant='filled' sx={styles.button} disabled={isPending}>
+              Connect
+            </Button>
+          </Stack>
         </Stack>
       </Stack>
     </form>

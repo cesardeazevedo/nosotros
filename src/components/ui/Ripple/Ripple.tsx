@@ -62,6 +62,9 @@ const styles = css.create({
       position: 'absolute',
       inset: 0,
       backgroundColor: rippleTokens.color$hover,
+      transitionProperty: 'opacity, background-color',
+      transitionDuration: '15ms, 15ms',
+      transitionTimingFunction: 'linear, linear',
     },
     '::after': {
       content: '',
@@ -70,6 +73,9 @@ const styles = css.create({
       // press ripple fade-out
       backgroundImage: `radial-gradient(closest-side, ${rippleTokens.color$hover} max(calc(100% - 70px), 65%), transparent 100%)`,
       transformOrigin: 'center center',
+      transitionProperty: 'opacity',
+      transitionDuration: '375ms',
+      transitionTimingFunction: 'linear',
     },
   },
   rippleSurface$hover: {
@@ -80,6 +86,7 @@ const styles = css.create({
   rippleSurface$pressed: {
     '::after': {
       opacity: '0.12',
+      transitionDuration: '105ms',
     },
   },
   rippleSurface$pressedStatic: {

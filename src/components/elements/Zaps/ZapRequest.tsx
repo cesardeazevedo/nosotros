@@ -49,9 +49,9 @@ export const ZapRequest = observer(function ZapRequest(props: Props) {
       mergeMap((user) => {
         return from(getZapEndpoint(user.event)).pipe(
           mergeMap((callback) => {
+            const { signer, pubkey } = context.context
             if (!callback) return throwError(() => new Error('Error when getting zap endpoint'))
-            if (!context.client.pubkey || !context.client.signer)
-              return throwError(() => new Error('Not authenticated'))
+            if (!pubkey || !signer) return throwError(() => new Error('Not authenticated'))
 
             const comment = store.comment
             const amount = store.amount * 1000
@@ -66,9 +66,9 @@ export const ZapRequest = observer(function ZapRequest(props: Props) {
             })
 
             const lnurl = bech32.encode('lnurl', bech32.toWords(utf8.decode(callback)), Bech32MaxSize)
-            const signed = context.client.signer.sign({
+            const signed = signer.sign({
               ...zapEvent,
-              pubkey: context.client.pubkey,
+              pubkey,
               tags: [...zapEvent.tags, ['lnurl', lnurl]],
             })
 

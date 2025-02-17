@@ -19,7 +19,6 @@ import {
 import { observer } from 'mobx-react-lite'
 import { css, html } from 'react-strict-dom'
 import { RelayIconButton } from './RelayIconButton'
-import { RelaySelectPopover } from './RelaySelectPopover'
 import { RelayUserChipList } from './RelayUserChipList'
 
 export const RelayPopoverSummary = observer(function RelayPopoverSummary() {
@@ -27,6 +26,7 @@ export const RelayPopoverSummary = observer(function RelayPopoverSummary() {
 
   return (
     <Popover
+      floatingStrategy='fixed'
       placement='bottom-end'
       contentRenderer={() => (
         <Paper elevation={2} surface='surfaceContainerLow' sx={styles.root}>
@@ -53,7 +53,7 @@ export const RelayPopoverSummary = observer(function RelayPopoverSummary() {
             )}>
             {user && (
               <Stack gap={1} horizontal={false} sx={styles.content}>
-                <Text>These are the relays you are reading from</Text>
+                <Text>These are the relays you are writing notes to</Text>
                 <RelayUserChipList relays={user.outboxRelays} />
               </Stack>
             )}
@@ -73,8 +73,8 @@ export const RelayPopoverSummary = observer(function RelayPopoverSummary() {
             )}>
             {user && (
               <Stack gap={1} horizontal={false} sx={styles.content}>
-                <Text>These are the relays you are writing notes to</Text>
-                <RelayUserChipList relays={user.outboxRelays} />
+                <Text>These are the relays where others will reply or tag you</Text>
+                <RelayUserChipList relays={user.inboxRelays} />
               </Stack>
             )}
           </Expandable>
@@ -84,7 +84,7 @@ export const RelayPopoverSummary = observer(function RelayPopoverSummary() {
               <>
                 <Stack gap={1} onClick={() => expand(!expanded)} sx={styles.subheader}>
                   <IconButton size='sm' icon={expanded ? <IconChevronDown /> : <IconChevronRight />} />
-                  <IconDatabaseSearch size={22} strokeWidth='1.5' />
+                  {/* <IconDatabaseSearch size={22} strokeWidth='1.5' /> */}
                   <Text variant='label' size='lg'>
                     Local Cache Relays
                   </Text>
@@ -95,7 +95,7 @@ export const RelayPopoverSummary = observer(function RelayPopoverSummary() {
             <Stack gap={1} horizontal={false} sx={styles.content} align='flex-start'>
               <Text>Local cache relays runs in your machine only, it's used to cache events and faster lookups</Text>
               <Chip icon={<IconDatabaseSearch size={18} strokeWidth='1.5' />} variant='filter' label='Browser Relay' />
-              <RelaySelectPopover onSubmit={() => {}} />
+              {/* <RelaySelectPopover onSubmit={() => {}} /> */}
             </Stack>
           </Expandable>
           {/* eslint-disable-next-line no-constant-binary-expression */}

@@ -4,7 +4,10 @@ import { EditorStore } from '../editor.store'
 describe('EditorStore', () => {
   test('assert mentionsZaps', async () => {
     const store = new EditorStore({})
-    const editor = createEditor(store)
+    const editor = createEditor(store, {
+      defaultUploadUrl: 'https://localhost:3000',
+      defaultUploadType: 'blossom',
+    })
     editor.commands.insertNProfile({
       bech32: 'nprofile1qqsy583gx72tyjfrl34t6umk54pywzz9c5y4s3zdf7956lth8yt7ycsf4hjc4',
     })

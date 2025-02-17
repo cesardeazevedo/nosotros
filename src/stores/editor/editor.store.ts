@@ -4,7 +4,7 @@ import { CLIENT_TAG } from '@/constants/tags'
 import type { UserRelay } from '@/nostr/helpers/parseRelayList'
 import { READ, WRITE } from '@/nostr/helpers/parseRelayList'
 import { isAuthorTag, isQuoteTag } from '@/nostr/helpers/parseTags'
-import type { NostrClient } from '@/nostr/nostr'
+import type { NostrContext } from '@/nostr/context'
 import { publish } from '@/nostr/publish/publish'
 import type { NostrEventMetadata } from '@/nostr/types'
 import type { Editor } from '@tiptap/core'
@@ -13,12 +13,13 @@ import type { FileUploadStorage, NostrStorage } from 'nostr-editor'
 import type { EventTemplate, NostrEvent, UnsignedEvent } from 'nostr-tools'
 import { createElement } from 'react'
 import { catchError, EMPTY, of, tap, throwError } from 'rxjs'
-import type { NostrContext } from '../context/nostr.context.store'
+import type { NostrStore } from '../nostr/nostr.context.store'
 import { toggle } from '../helpers/toggle'
 import type { Note } from '../notes/note'
 import { toastStore } from '../ui/toast.store'
 import { userRelayStore } from '../userRelays/userRelay.store'
 import { userStore } from '../users/users.store'
+import { rootStore } from '../root.store'
 
 type EditorStoreOptions = {
   kind?: Kind
@@ -29,7 +30,7 @@ type EditorStoreOptions = {
 type Sections = 'broadcast' | 'mentions' | 'pow' | 'settings' | 'zaps'
 
 export class EditorStore {
-  context: NostrContext | undefined = undefined
+  context: NostrStore | undefined = undefined
   signedEvent: NostrEvent | undefined = undefined
   content = ''
 
@@ -57,7 +58,7 @@ export class EditorStore {
     makeAutoObservable(this, {
       event: computed.struct,
       rawEvent: computed.struct,
-      myInboxRelays: computed.struct,
+      myOutboxRelays: computed.struct,
       otherInboxRelays: computed.struct,
       allRelays: computed.struct,
       mentions: computed.struct,
@@ -107,9 +108,9 @@ export class EditorStore {
     this.editor = editor
   }
 
-  setContext(context: NostrContext) {
+  setContext(context: NostrStore) {
     this.context = context
-    this.clientEnabled.toggle(context.client.settings?.clientTag || false)
+    this.clientEnabled.toggle(rootStore.globalSettings.clientTag || false)
   }
 
   onUpdate(editor: Editor) {
@@ -154,8 +155,8 @@ export class EditorStore {
     return this.zapSplits.get(pubkey) || 0
   }
 
-  get client(): NostrClient | undefined {
-    return this.context?.client
+  get ctx(): NostrContext | undefined {
+    return this.context?.context
   }
 
   get storage() {
@@ -219,7 +220,7 @@ export class EditorStore {
     return JSON.parse(JSON.stringify(this.event))
   }
 
-  get myInboxRelays() {
+  get myOutboxRelays() {
     if (this.context?.user) {
       return userRelayStore.select(this.context.user.pubkey, {
         permission: WRITE,
@@ -281,13 +282,13 @@ export class EditorStore {
       return userRelayStore.select(author, {
         ignore: this.excludedRelays,
         permission: READ,
-        maxRelaysPerUser: this.context?.client?.settings.maxRelaysPerUserInbox,
+        maxRelaysPerUser: this.context?.context.settings.maxRelaysPerUserInbox,
       })
     })
   }
 
   get allRelays() {
-    return [...this.myInboxRelays, ...this.otherInboxRelays]
+    return [...this.myOutboxRelays, ...this.otherInboxRelays]
   }
 
   get title() {
@@ -349,24 +350,26 @@ export class EditorStore {
   }
 
   async sign(event: EventTemplate) {
-    const { signer, pubkey } = this.client || {}
-    if (signer && pubkey) {
-      try {
-        return await signer.sign({ ...event, pubkey })
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      } catch (error) {
-        return Promise.reject('Signing rejected')
+    if (this.ctx) {
+      const { signer, pubkey } = this.ctx
+      if (signer && pubkey) {
+        try {
+          return await signer.sign({ ...event, pubkey })
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (error) {
+          return Promise.reject('Signing rejected')
+        }
       }
     }
     return Promise.reject('Missing signer')
   }
 
   submit(event: EventTemplate) {
-    const client = this.client
-    if (!client) {
+    const ctx = this.ctx
+    if (!ctx) {
       return throwError(() => 'Missing signer')
     }
-    return publish(client, event, {
+    return publish(ctx, event, {
       relays: of(this.allRelays.map((x) => x.relay)),
     }).pipe(
       tap((event) => {

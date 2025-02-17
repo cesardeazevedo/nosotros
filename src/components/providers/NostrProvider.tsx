@@ -1,4 +1,4 @@
-import type { NostrContext } from '@/stores/context/nostr.context.store'
+import type { NostrStore } from '@/stores/nostr/nostr.context.store'
 import { rootStore } from '@/stores/root.store'
 import { observer } from 'mobx-react-lite'
 import { useObservable, useSubscription } from 'observable-hooks'
@@ -7,12 +7,12 @@ import { mergeMap } from 'rxjs'
 
 type Props = {
   subFollows?: boolean
-  nostrContext: () => NostrContext
+  nostrContext: () => NostrStore
   children: React.ReactNode
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
-export const NostrClientContext = createContext<NostrContext>(rootStore.rootContext)
+export const NostrReactContext = createContext<NostrStore>(rootStore.rootContext)
 
 export const NostrProvider = observer(function NostrProvider(props: Props) {
   const { children, subFollows = false } = props
@@ -22,9 +22,9 @@ export const NostrProvider = observer(function NostrProvider(props: Props) {
     (input$) => {
       return input$.pipe(mergeMap(([nostrContext]) => nostrContext.initialize({ subFollows })))
     },
-    [nostrContext],
+    [nostrContext, nostrContext.context],
   )
   useSubscription(sub)
 
-  return <NostrClientContext.Provider value={nostrContext}>{children}</NostrClientContext.Provider>
+  return <NostrReactContext.Provider value={nostrContext}>{children}</NostrReactContext.Provider>
 })
