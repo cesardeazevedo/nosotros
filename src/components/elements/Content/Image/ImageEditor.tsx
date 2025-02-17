@@ -2,23 +2,24 @@ import type { SxProps } from '@/components/ui/types'
 import { shape } from '@/themes/shape.stylex'
 import type { ImageAttributes } from 'nostr-editor'
 import { css, html } from 'react-strict-dom'
-import { AltButton } from '../Buttons/AltButton'
 import { DeleteButton } from '../Buttons/DeleteButton'
+import { MediaUploading } from '../Layout/MediaUploading'
 
 type Props = ImageAttributes & {
   onUpdate: (attrs: Partial<ImageAttributes>) => void
   onDelete: () => void
   sx?: SxProps
+  uploading?: boolean
 }
 
 export const ImageEditor = (props: Props) => {
-  const { src, alt, sx } = props
-  const isUploaded = !src.startsWith('blob:http')
+  const { src, sx, uploading } = props
   return (
     <>
       <DeleteButton onClick={() => props.onDelete()} />
-      <html.img src={src} style={[styles.img, sx]} />
-      {!isUploaded && <AltButton value={alt} onChange={(alt) => props.onUpdate({ alt })} />}
+      <MediaUploading uploading={uploading}>
+        <html.img src={src} style={[styles.img, sx]} />
+      </MediaUploading>
     </>
   )
 }
