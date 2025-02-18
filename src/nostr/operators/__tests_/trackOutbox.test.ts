@@ -128,4 +128,34 @@ describe('trackOutbox', async () => {
       [RELAY_5, [{ kinds: [0], limit: 1, '#p': ['5'] }]],
     ])
   })
+
+  test('assert #e field for when passing idHints', async ({ createContext, insertRelayList }) => {
+    await insertRelayList({ pubkey: '1', tags: [['r', RELAY_1]] })
+    await insertRelayList({ pubkey: '2', tags: [['r', RELAY_2]] })
+    await insertRelayList({ pubkey: '3', tags: [['r', RELAY_3]] })
+    const ctx = createContext()
+    const $ = trackOutbox(
+      [
+        {
+          kinds: [0],
+          '#e': ['1', '2', '3', '4', '5'],
+        },
+      ],
+      {
+        idHints: {
+          1: ['1'],
+          2: ['2', '3'],
+        },
+      },
+      ctx,
+    )
+    const spy = subscribeSpyTo($)
+    await spy.onComplete()
+
+    expect(spy.getValues()).toStrictEqual([
+      ['wss://relay1.com', [{ kinds: [0], '#e': ['1'] }]],
+      ['wss://relay2.com', [{ kinds: [0], '#e': ['2'] }]],
+      ['wss://relay3.com', [{ kinds: [0], '#e': ['2'] }]],
+    ])
+  })
 })
