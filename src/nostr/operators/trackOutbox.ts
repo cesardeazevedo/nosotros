@@ -1,6 +1,6 @@
 import type { RelayFilters } from '@/core/NostrSubscription'
 import type { NostrFilter, RelayHints } from '@/core/types'
-import { delay, filter, from, identity, map, merge, mergeMap, takeUntil, timer } from 'rxjs'
+import { delay, EMPTY, filter, from, identity, map, merge, mergeMap, takeUntil, tap, timer } from 'rxjs'
 import type { RelaySelectionConfig } from '../helpers/selectRelays'
 import type { NostrContext } from '../context'
 import { WRITE } from '../types'
@@ -20,16 +20,21 @@ function trackPubkeys(
 }
 
 function trackIds(filter: NostrFilter, hints: RelayHints, config: RelaySelectionConfig, ctx: NostrContext) {
-  return from(Object.entries(hints?.idHints || {})).pipe(
-    mergeMap(([id, pubkeys]) => {
-      return from(pubkeys).pipe(
-        mergeMap((pubkey) => trackMailbox(pubkey, config, ctx)),
-        mergeMap(identity),
-        map((userRelay) => [id, userRelay.relay]),
-      )
-    }),
-    map(([id, relay]) => [relay, [{ ...filter, ids: [id] }]] as RelayFilters),
-  )
+  // the id field to be extracted from, current ids and '#e'
+  const field = filter.ids ? 'ids' : filter['#e'] ? '#e' : null
+  if (field) {
+    return from(Object.entries(hints?.idHints || {})).pipe(
+      mergeMap(([id, pubkeys]) => {
+        return from(pubkeys).pipe(
+          mergeMap((pubkey) => trackMailbox(pubkey, config, ctx)),
+          mergeMap(identity),
+          map((userRelay) => [id, userRelay.relay]),
+        )
+      }),
+      map(([id, relay]) => [relay, [{ ...filter, [field]: [id] }]] as RelayFilters),
+    )
+  }
+  return EMPTY
 }
 
 export function trackOutbox(filters: NostrFilter[], hints: RelayHints, ctx: NostrContext) {

@@ -9,6 +9,7 @@ import type { NostrEvent } from 'nostr-tools'
 import { useObservable, useSubscription } from 'observable-hooks'
 import { useEffect, useRef } from 'react'
 import { filter, identity, map, mergeMap, Subject, take, tap } from 'rxjs'
+import type { NostrContext } from '@/nostr/context'
 
 const cache = new LRUCache({ max: 1000 })
 
@@ -42,7 +43,17 @@ export function useNoteVisibility(event: NostrEventNote | NostrEventComment | No
       filter((event) => !cache.has(event.id)),
       tap((event) => cache.set(event.id, true)),
       mergeMap((event) => {
-        return subscribeNoteStats(event as NostrEvent, nostr.context, globalSettings.scroll)
+        const ctx = {
+          ...nostr.context,
+          subOptions: {
+            relayHints: {
+              idHints: {
+                [event.id]: [event.pubkey],
+              },
+            },
+          },
+        } as NostrContext
+        return subscribeNoteStats(event as NostrEvent, ctx, globalSettings.scroll)
       }),
     )
   })

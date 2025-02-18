@@ -3,6 +3,7 @@ import { useContentContext } from '@/components/providers/ContentProvider'
 import { NoteProvider } from '@/components/providers/NoteProvider'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
+import { Kind } from '@/constants/kinds'
 import { useMobile } from '@/hooks/useMobile'
 import { useNoteStore } from '@/hooks/useNoteStore'
 import { useGlobalSettings } from '@/hooks/useRootStore'
@@ -14,6 +15,7 @@ import { useRouter } from '@tanstack/react-router'
 import { observer } from 'mobx-react-lite'
 import { useCallback } from 'react'
 import { css, html } from 'react-strict-dom'
+import { ArticleHeader } from '../Articles/ArticleHeader'
 import { Editor } from '../Editor/Editor'
 import { Replies } from '../Replies/Replies'
 import { RepliesPreview } from '../Replies/RepliesPreview'
@@ -61,6 +63,7 @@ export const PostRoot = observer(function PostRoot(props: Props) {
     <NoteProvider value={{ ...contentContext, note }}>
       <html.article ref={ref}>
         <PostLink note={note} onClick={handleRepliesClick}>
+          {note.event.event.kind === Kind.Article && <ArticleHeader />}
           {header || <PostHeader />}
           <PostContent />
           <PostActions onReplyClick={handleRepliesClick} />
