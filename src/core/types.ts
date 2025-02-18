@@ -34,5 +34,5 @@ export type MessageReceived = MessageReceivedEvent | MessageReceivedEose | Messa
 export type RelayHints = {
   authors?: Record<string, string[]>
   ids?: Record<string, string[]>
-  fallback?: Record<string, string[]>
+  idHints?: Record<string, string[]>
 }

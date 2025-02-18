@@ -11,7 +11,7 @@ import { observer } from 'mobx-react-lite'
 import { useObservableState } from 'observable-hooks'
 import { useEffect } from 'react'
 import { css } from 'react-strict-dom'
-import { concat, concatMap, defer, endWith, from, map, startWith, takeUntil } from 'rxjs'
+import { concat, concatMap, defer, endWith, from, map, mergeMap, startWith, takeUntil } from 'rxjs'
 import { BubbleContainer } from '../Content/Layout/Bubble'
 import { EditorContainer } from './EditorContainer'
 import { EditorExpandables } from './EditorExpandables'
@@ -43,13 +43,14 @@ export const Editor = observer(function Editor(props: Props) {
   const [submitState, submit] = useObservableState<string | number | boolean, void>((input$) => {
     return input$.pipe(
       concatMap(() => {
-        const upload$ = defer(() =>
-          from(store.submit(store.rawEvent)).pipe(
+        const submit$ = defer(() => {
+          return from(store.uploader!.start()).pipe(
+            mergeMap(() => store.submit(store.rawEvent)),
             map(() => false),
             startWith(0),
-          ),
-        )
-        return concat(countDown$, upload$).pipe(takeUntil(cancel$), endWith(false))
+          )
+        })
+        return concat(countDown$, submit$).pipe(takeUntil(cancel$), endWith(false))
       }),
     )
   }, false)

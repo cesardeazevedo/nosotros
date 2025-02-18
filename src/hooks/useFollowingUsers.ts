@@ -1,3 +1,4 @@
+import { subscribeUser } from '@/nostr/subscriptions/subscribeUser'
 import { toStream } from '@/stores/helpers/toStream'
 import type { User } from '@/stores/users/user'
 import { userStore } from '@/stores/users/users.store'
@@ -14,7 +15,7 @@ export function useFollowingUsers() {
         pluckFirst,
         mergeMap((user) => toStream(() => user?.following)),
         mergeMap((following) => following?.tags.get('p') || []),
-        mergeMap((pubkey) => context.client.users.subscribe(pubkey)),
+        mergeMap((pubkey) => subscribeUser(pubkey, context.context)),
         map((event) => userStore.get(event.pubkey)),
         filter((x) => !!x),
         bufferTime<User>(1000),

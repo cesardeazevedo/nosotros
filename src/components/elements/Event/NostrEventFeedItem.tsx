@@ -11,6 +11,7 @@ import { observer } from 'mobx-react-lite'
 import { ArticleRoot } from '../Articles/ArticleRoot'
 import { PostRoot } from '../Posts/Post'
 import { RepostRoot } from '../Repost/Repost'
+import { UserRoot } from '../User/UserRoot'
 import { ZapReceiptRoot } from '../Zaps/ZapReceipt'
 import { NostrEventUnsupported } from './NostrEventUnsupported'
 
@@ -21,6 +22,9 @@ type Props = {
 export const NostrEventFeedItem = observer(function NostrEventFeedItem(props: Props) {
   const { event } = props
   switch (event[metadataSymbol].kind) {
+    case Kind.Metadata: {
+      return <UserRoot event={event as NostrEventMetadata} />
+    }
     case Kind.Text: {
       return <PostRoot event={event as NostrEventNote} />
     }

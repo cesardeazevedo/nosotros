@@ -1,5 +1,5 @@
-import type { ClientSubOptions, NostrClient } from '@/nostr/nostr'
-import { replayIds, subscribeIds } from '@/nostr/operators/subscribeIds'
+import type { NostrContext } from '@/nostr/context'
+import { replayIds, subscribeIds } from '@/nostr/subscriptions/subscribeIds'
 import { subscribeNoteStats } from '@/nostr/subscriptions/subscribeNoteStats'
 import type { Instance, SnapshotIn, SnapshotOut } from 'mobx-state-tree'
 import { t } from 'mobx-state-tree'
@@ -19,18 +19,13 @@ export const NEventModuleModel = BaseModuleModel.named('NEventModuleModel')
     options: t.frozen<NEventOptions>(),
   })
   .views((self) => ({
-    subscribe(client: NostrClient) {
+    subscribe(ctx: NostrContext) {
       const { id, relays } = self.options
-      const options = { relayHints: { ids: { [id]: relays } } } as ClientSubOptions
+      const subOptions = { relayHints: { ids: { [id]: relays } } } as NostrContext['subOptions']
       replayIds.invalidate(id)
-      return subscribeIds(id, client, options).pipe(
+      return subscribeIds(id, { ...ctx, subOptions }).pipe(
         mergeMap((event) => {
-          return subscribeNoteStats(client, event, {
-            zaps: true,
-            reposts: true,
-            replies: true,
-            reactions: true,
-          })
+          return subscribeNoteStats(event, ctx, {})
         }),
       )
     },
@@ -40,10 +35,8 @@ export function createNEventModule(snapshot: Pick<NEventModuleSnapshotIn, 'id' |
   return NEventModuleModel.create({
     ...snapshot,
     context: {
-      options: {
-        pubkey: snapshot.options.author,
-        relays: snapshot.options.relays,
-      },
+      pubkey: snapshot.options.author,
+      // relays: snapshot.options.relays,
     },
   })
 }

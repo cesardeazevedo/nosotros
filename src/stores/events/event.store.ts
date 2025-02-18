@@ -1,5 +1,5 @@
-import { metadataSymbol, type NostrEventComment, type NostrEventNote } from '@/nostr/types'
 import { makeAutoObservable, observable } from 'mobx'
+import type { NostrEvent } from 'nostr-tools'
 import { isParameterizedReplaceableKind } from 'nostr-tools/kinds'
 import { Event } from './event'
 
@@ -24,13 +24,14 @@ class EventStore {
     return this.addressable.get(id || '')
   }
 
-  add(nostrEvent: NostrEventNote | NostrEventComment) {
+  add(nostrEvent: NostrEvent) {
     const found = this.get(nostrEvent.id)
     if (!found) {
+      // @ts-ignore
       const event = new Event(nostrEvent)
       this.events.set(nostrEvent.id, event)
       if (isParameterizedReplaceableKind(nostrEvent.kind)) {
-        const d = nostrEvent[metadataSymbol].tags.d?.[0][1]
+        const d = event?.tags?.d?.[0][1]
         if (d) {
           const id = `${nostrEvent.kind}:${nostrEvent.pubkey}:${d}`
           this.addressable.set(id, event)

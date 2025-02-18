@@ -11,6 +11,7 @@ import { Tag } from './Tag/Tag'
 
 type TextMarkProps = {
   node: TextNode
+  shrinkLink?: boolean
 }
 
 function TextMark(props: TextMarkProps) {
@@ -30,9 +31,15 @@ function TextMark(props: TextMarkProps) {
             case 'code':
               return <CodeSpan>{content}</CodeSpan>
             case 'tag':
-              return <Tag>{content}</Tag>
+              return <Tag tag={mark.attrs.tag}>{content}</Tag>
             case 'link':
-              return disableLink ? content : <ContentLink href={mark.attrs.href}>{content}</ContentLink>
+              return disableLink ? (
+                content
+              ) : (
+                <ContentLink href={mark.attrs.href} shrink={props.shrinkLink}>
+                  {content}
+                </ContentLink>
+              )
             default:
               return content
           }
@@ -46,17 +53,18 @@ function TextMark(props: TextMarkProps) {
 export type Props = {
   node: ParagraphNode | HeadingNode | BlockQuoteNode
   hardBreak?: boolean
+  shrinkLink?: boolean
 } & Omit<TextProps, 'children'>
 
 export const TextContent = (props: Props) => {
-  const { node, hardBreak = true, ...rest } = props
+  const { node, hardBreak = true, shrinkLink = true, ...rest } = props
   const length = node.content?.length || 0
   return (
     <Text size='lg' {...rest}>
       {node.content?.map((node, index) => (
         <React.Fragment key={node.type + index}>
           {node.type === 'nprofile' && <NProfile pubkey={node.attrs.pubkey} />}
-          {node.type === 'text' && <TextMark node={node} />}
+          {node.type === 'text' && <TextMark node={node} shrinkLink={shrinkLink} />}
           {node.type === 'nevent' && <NEventInline attrs={node.attrs} />}
           {/*Don't render headBreaks at the beginning or end of the content*/}
           {node.type === 'hardBreak' && index !== 0 && index !== length - 1 && <>{hardBreak ? <br /> : ' '}</>}

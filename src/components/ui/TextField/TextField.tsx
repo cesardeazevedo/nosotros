@@ -56,7 +56,7 @@ export const TextField = forwardRef<HTMLInputElement, Props>((props, ref) => {
     onBlur,
     onChange,
     onFocus,
-    ...rest
+    shrink: shrinkProp,
   } = props
   const visualStateRef = useRef<HTMLElement>(null)
   const { visualState, setRef } = useVisualState(undefined, { retainFocusAfterClick: true })
@@ -75,7 +75,7 @@ export const TextField = forwardRef<HTMLInputElement, Props>((props, ref) => {
     onChange?.(e)
   }, [])
 
-  const shrink = props.shrink || visualState.focused || filled
+  const shrink = shrinkProp || visualState.focused || filled
 
   return (
     <html.div
@@ -107,21 +107,21 @@ export const TextField = forwardRef<HTMLInputElement, Props>((props, ref) => {
           />
         )}
         {!props.multiline && (
-          <html.input
+          <input
             type={inputType}
             ref={refs}
-            style={styles.input}
+            {...css.props(styles.input)}
             onChange={handleChange}
             onBlur={onBlur}
             onFocus={onFocus}
             placeholder={placeholder}
             value={value}
+            name={name}
             defaultValue={defaultValue}
             {...dataProps(visualState)}
             data-shrink={shrink}
             aria-invalid={!!error}
             aria-label={label}
-            {...rest}
           />
         )}
         {trailing && <html.div style={styles.trailing}>{trailing}</html.div>}

@@ -4,10 +4,10 @@ import { NostrSubscription } from '@/core/NostrSubscription'
 import { Pool } from '@/core/pool'
 import { fakeEvent } from '@/utils/faker'
 import { test } from '@/utils/fixtures'
-import { expectRelayPublish, relaySendOK } from '@/utils/testHelpers'
 import { subscribeSpyTo } from '@hirez_io/observer-spy'
 import { from } from 'rxjs'
-import { insertEvent, query } from '../localRelay'
+import { insertLocalRelay } from '../insertLocalRelay'
+import { queryLocalRelay } from '../queryLocalRelay'
 
 describe('localRelay', () => {
   test('query()', async ({ createMockRelay }) => {
@@ -16,8 +16,7 @@ describe('localRelay', () => {
     const relay = createMockRelay(RELAY_1, [note1, note2])
 
     const sub = new NostrSubscription({ kinds: [Kind.Text], authors: ['1'] })
-    const pool = new Pool()
-    const $ = query(pool, [RELAY_1], sub)
+    const $ = queryLocalRelay([RELAY_1], sub)
 
     const spy = subscribeSpyTo($)
 
@@ -30,27 +29,26 @@ describe('localRelay', () => {
     expect(spy.getValues()).toStrictEqual([note1, note2])
   })
 
-  test('insertEvent()', async ({ relay }) => {
+  test('insertEvent()', async ({ createMockRelay }) => {
     const note1 = fakeEvent({ kind: 0, id: '1', pubkey: '1', created_at: 5 })
     const note2 = fakeEvent({ kind: 0, id: '2', pubkey: '1', created_at: 10 })
     const note3 = fakeEvent({ kind: 0, id: '3', pubkey: '1', created_at: 8 }) // old created_at, ignored
     const note4 = fakeEvent({ kind: 0, id: '4', pubkey: '1', created_at: 15 })
+    const relay = createMockRelay(RELAY_1, [])
 
     const pool = new Pool()
-    const $ = from([note1, note2, note3, note4]).pipe(insertEvent(pool, [RELAY_1]))
+    const $ = from([note1, note2, note3, note4]).pipe(insertLocalRelay(pool, [RELAY_1]))
 
     const spy = subscribeSpyTo($)
-    await expectRelayPublish(relay, note1)
-    await expectRelayPublish(relay, note2)
-    await expectRelayPublish(relay, note3)
-    await expectRelayPublish(relay, note4)
-
-    relaySendOK(relay, [note1.id, true, ''])
-    relaySendOK(relay, [note2.id, true, ''])
-    relaySendOK(relay, [note3.id, true, ''])
-    relaySendOK(relay, [note4.id, true, ''])
     await spy.onComplete()
+    await relay.close()
 
+    expect(relay.received).toStrictEqual([
+      ['EVENT', note1],
+      ['EVENT', note2],
+      ['EVENT', note3],
+      ['EVENT', note4],
+    ])
     expect(spy.getValues()).toStrictEqual([note1, note2, note3, note4])
   })
 })

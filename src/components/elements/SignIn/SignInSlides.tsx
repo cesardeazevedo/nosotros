@@ -7,6 +7,7 @@ import { SignInNostrExtension } from './SignInNostrExtension'
 import { SignInReadOnly } from './SignInReadOnly'
 import { SignInRemoteSigner } from './SignInRemoteSigner'
 import { SignInSelect } from './SignInSelect'
+import { SignInNostrConnect } from './SignInNostrConnect'
 
 const easing = {
   enter: 'cubic-bezier(0.33, 1, 0.68, 1)',
@@ -50,6 +51,14 @@ export const SignInSlides = observer(function SignInSlides() {
         direction={signinStore.getSlideDirection('REMOTE_SIGN')}>
         <html.div style={styles.container}>
           <SignInRemoteSigner />
+        </html.div>
+      </Slide>
+      <Slide
+        {...props}
+        in={signinStore.matches('REMOTE_SIGN_NOSTR_CONNECT')}
+        direction={signinStore.getSlideDirection('REMOTE_SIGN_NOSTR_CONNECT')}>
+        <html.div style={styles.container}>
+          {signinStore.matches('REMOTE_SIGN_NOSTR_CONNECT') && <SignInNostrConnect />}
         </html.div>
       </Slide>
     </html.div>

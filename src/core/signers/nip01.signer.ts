@@ -1,6 +1,6 @@
 import { hexToBytes } from '@noble/hashes/utils'
 import type { UnsignedEvent } from 'nostr-tools'
-import { finalizeEvent, generateSecretKey, getPublicKey, nip44 } from 'nostr-tools'
+import { finalizeEvent, generateSecretKey, getPublicKey, nip44, nip04 } from 'nostr-tools'
 import type { Signer } from './signer'
 
 export class NIP01Signer implements Signer {
@@ -31,6 +31,10 @@ export class NIP01Signer implements Signer {
 
   encrypt(pubkey: string, msg: string) {
     return Promise.resolve(nip44.v2.encrypt(msg, this.#getSharedSecret(pubkey)))
+  }
+
+  decrypt04(pubkey: string, msg: string) {
+    return Promise.resolve(nip04.decrypt(this.secret, pubkey, msg))
   }
 
   decrypt(pubkey: string, msg: string) {

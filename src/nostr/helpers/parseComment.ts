@@ -46,14 +46,14 @@ function parseCommentHints(tags: ParsedTags) {
           case 'e': {
             appendHint(hints, 'ids', value, relay)
             if (pubkey) {
-              appendHint(hints, 'fallback', value, pubkey)
+              appendHint(hints, 'idHints', value, pubkey)
             }
             break
           }
           case 'q': {
             appendHint(hints, 'ids', value, relay)
             if (pubkey) {
-              appendHint(hints, 'fallback', value, pubkey)
+              appendHint(hints, 'idHints', value, pubkey)
             }
             break
           }

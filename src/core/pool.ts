@@ -6,6 +6,7 @@ type Options = {
   blacklist?: Array<{ pattern: RegExp }>
   open?: (url: string) => Relay
   auth?: (relay: Relay, challenge: string) => void
+  allowLocalConnection: boolean
 }
 
 export class Pool {
@@ -51,6 +52,9 @@ export class Pool {
 
   get(url: string): Relay | undefined {
     url = formatRelayUrl(url)
+    if (!url.startsWith('wss://') && this.options?.allowLocalConnection !== true) {
+      return
+    }
     if (this.blacklisted.has(url)) {
       return
     }

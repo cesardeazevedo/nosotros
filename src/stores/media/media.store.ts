@@ -1,8 +1,12 @@
-import { observable } from 'mobx'
+import { makeAutoObservable, observable } from 'mobx'
 
 class MediaStore {
   dims = new Map<string, [number, number]>()
   errors = observable.set<string>()
+
+  constructor() {
+    makeAutoObservable(this)
+  }
 
   hasError(src: string) {
     return this.errors.has(src)

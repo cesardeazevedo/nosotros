@@ -8,7 +8,7 @@ import { ContentProvider } from '@/components/providers/ContentProvider'
 import { Button } from '@/components/ui/Button/Button'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { useFeedSubscription } from '@/hooks/useFeedSubscription'
-import { useNostrContextInitializer } from '@/stores/context/nostr.context.hooks'
+import { useNostrContextInitializer } from '@/stores/nostr/nostr.context.hooks'
 import type { RelayFeedModule } from '@/stores/relays/relay.feed.module'
 import { IconChevronDown, IconChevronUp } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
@@ -22,7 +22,7 @@ export const RelayFeedColumn = observer(function RelayFeedColumn(props: Props) {
   const relays = module.relays
 
   useNostrContextInitializer(module.context)
-  useFeedSubscription(module.feed, module.context!.client)
+  useFeedSubscription(module.feed, module.contextWithFallback.context)
 
   return (
     <>

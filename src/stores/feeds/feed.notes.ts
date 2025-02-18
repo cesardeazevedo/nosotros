@@ -1,5 +1,7 @@
-import type { FeedOptions } from '@/nostr/feeds'
-import { type NostrClient } from '@/nostr/nostr'
+import { type NostrContext } from '@/nostr/context'
+import type { FeedOptions } from '@/nostr/subscriptions/subscribeFeed'
+import { subscribeFeedFollowing } from '@/nostr/subscriptions/subscribeFeedFollowing'
+import { subscribeFeedSelf } from '@/nostr/subscriptions/subscribeFeedSelf'
 import type { Instance, SnapshotIn } from 'mobx-state-tree'
 import { t } from 'mobx-state-tree'
 import { bufferTime, EMPTY, filter, finalize, map, mergeWith, switchMap, tap } from 'rxjs'
@@ -27,15 +29,15 @@ export const NotesFeedSubscriptionModel = (feed: FeedPaginations) =>
       options: t.optional(t.frozen<FeedOptions>(), {}),
     })
     .views((self) => ({
-      subscribe(client: NostrClient) {
+      subscribe(client: NostrContext) {
         function getFeedSubscription() {
           const { scope, pagination, options } = self
           switch (scope) {
             case 'self': {
-              return client.feeds.self(pagination, options)
+              return subscribeFeedSelf(pagination, client, options)
             }
             case 'following': {
-              return client.feeds.following(pagination, options)
+              return subscribeFeedFollowing(pagination, client, options)
             }
             case 'followingSet':
             case 'followers':
@@ -50,7 +52,7 @@ export const NotesFeedSubscriptionModel = (feed: FeedPaginations) =>
         return toStream(() => [self.scope, self.filter]).pipe(
           switchMap(() => {
             // Keep pagination filter in sync
-            self.pagination.setFilter({ kinds: self.filter.kinds })
+            self.pagination.setFilter({ ...self.filter })
             return getFeedSubscription().pipe(
               // trigger pagination if the feed.notes still empty
               mergeWith('paginateIfEmpty' in self ? self.paginateIfEmpty() : EMPTY),

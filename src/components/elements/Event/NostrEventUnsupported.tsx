@@ -7,18 +7,18 @@ import type { NostrEvent } from 'nostr-tools'
 import { css } from 'react-strict-dom'
 
 type Props = {
-  event: NostrEvent
+  event?: NostrEvent
 }
 
 export const NostrEventUnsupported = (props: Props) => {
   const { event } = props
-  const alt = event.tags.filter((x) => x[0] === 'alt')?.[1] || ''
+  const alt = event?.tags.filter((x) => x[0] === 'alt')?.[1] || ''
   return (
     <Stack sx={styles.root}>
       <Paper sx={styles.paper} surface='surfaceContainer'>
         <Stack horizontal={false} gap={1} align='center' justify='center'>
           <IconAlertCircleFilled size={28} strokeWidth='1.0' />
-          <Text size='lg'>Can't display event (kind:{event.kind})</Text>
+          <Text size='lg'>Can't display event (kind:{event?.kind})</Text>
           {alt && (
             <Text size='lg' sx={styles.alt}>
               Description: {alt}

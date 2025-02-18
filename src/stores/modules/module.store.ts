@@ -9,6 +9,8 @@ import { NAddressModuleModel, type NAddressModule } from './naddress.module'
 import { NEventModuleModel, type NEventModule } from './nevent.module'
 import type { NotificationModule } from './notification.module'
 import { NotificationModuleModel } from './notification.module'
+import type { SearchModule } from './search.module'
+import { SearchModuleModel } from './search.module'
 import type { TagModule } from './tag.module'
 import { TagModuleModel } from './tag.module'
 
@@ -19,6 +21,7 @@ export type ModulesInstances =
   | NEventModule
   | NAddressModule
   | TagModule
+  | SearchModule
   | RelayFeedModule
   | MediaModule
 
@@ -29,6 +32,7 @@ export const isNAddressModule = (m: ModulesInstances): m is NAddressModule => m.
 export const isNotificationModule = (m: ModulesInstances): m is NotificationModule => m.type === 'notification'
 export const isRelayFeedModule = (m: ModulesInstances): m is RelayFeedModule => m.type === 'relayfeed'
 export const isTagModule = (m: ModulesInstances): m is TagModule => m.type === 'tag'
+export const isSearchModule = (m: ModulesInstances): m is SearchModule => m.type === 'search'
 export const isMediaModule = (m: ModulesInstances): m is MediaModule => m.type === 'media'
 
 export const Modules = t.union(
@@ -40,6 +44,7 @@ export const Modules = t.union(
   RelayFeedModuleModel,
   MediaModuleModel,
   TagModuleModel,
+  SearchModuleModel,
 )
 
 export const ModuleStoreModel = t
@@ -60,6 +65,9 @@ export const ModuleStoreModel = t
     },
     delete(id: string) {
       self.modules.delete(id)
+    },
+    clear() {
+      self.modules.clear()
     },
   }))
 

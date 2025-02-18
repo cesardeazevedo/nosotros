@@ -1,8 +1,6 @@
 import { Kind } from '@/constants/kinds'
-import type { NostrClient } from '@/nostr/nostr'
 import type { Instance, SnapshotIn, SnapshotOut } from 'mobx-state-tree'
 import { t } from 'mobx-state-tree'
-import { EMPTY } from 'rxjs'
 import { createEditorStore } from '../editor/editor.store'
 import type { FeedScope, NotesFeedSubscription } from '../feeds/feed.notes'
 import { NotesFeedSubscriptionModel } from '../feeds/feed.notes'
@@ -27,13 +25,6 @@ export const HomeModuleModel = BaseModuleModel.named('HomeModuleModel')
     editor: createEditorStore({ onPublish: self.feed.addPublish }),
   }))
   .actions((self) => ({
-    subscribe(client: NostrClient) {
-      if (!self.feed.started) {
-        self.feed.started = true
-        return self.feed.subscribe(client)
-      }
-      return EMPTY
-    },
     select(feed: HomeFeeds) {
       self.selected = feed
     },

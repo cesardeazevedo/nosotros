@@ -24,7 +24,7 @@ export const NProfileColumn = observer(function NProfileColumn(props: Props) {
 
   const selected = module.selected as keyof NProfileModuleSnapshotOut['feeds']
 
-  useFeedSubscription(module.feed, module.contextWithFallback.client)
+  useFeedSubscription(module.feed, module.contextWithFallback.context)
 
   const handleChange = useCallback((anchor: string | undefined) => {
     if (anchor) {

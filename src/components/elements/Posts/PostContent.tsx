@@ -4,7 +4,7 @@ import { observer } from 'mobx-react-lite'
 import { Content } from '../Content/Content'
 import { MediaList } from '../Media/MediaList'
 import { PostContentWrapper } from './PostContentWrapper'
-import { PostReplyingHeader } from './PostReplyingHeader'
+import { ReplyHeader } from '../Replies/ReplyHeader'
 
 type Props = {
   initialExpanded?: boolean
@@ -15,7 +15,7 @@ export const PostContent = observer(function PostContent(props: Props) {
   const { note } = useNoteContext()
   return (
     <PostContentWrapper initialExpanded={initialExpanded}>
-      {note.metadata.isRoot === false && <PostReplyingHeader />}
+      {note.metadata.isRoot === false && <ReplyHeader />}
       {note.event.event.kind === Kind.Media ? (
         <>
           <MediaList />

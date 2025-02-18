@@ -9,7 +9,7 @@ import type {
 import { metadataSymbol } from '@/nostr/types'
 import { observer } from 'mobx-react-lite'
 import { PostRoot } from '../Posts/Post'
-import { PostThread } from '../Posts/PostThread'
+import { RepliesThread } from '../Replies/RepliesThread'
 import { RepostRoot } from '../Repost/Repost'
 import { ZapReceiptRoot } from '../Zaps/ZapReceipt'
 import { NostrEventUnsupported } from './NostrEventUnsupported'
@@ -27,7 +27,7 @@ export const NostrEventRoot = observer(function NostrEventRoot(props: Props) {
       return event[metadataSymbol].isRoot ? (
         <PostRoot event={event as NostrEventNote} open={open} />
       ) : (
-        <PostThread event={event as NostrEventNote} open={open} />
+        <RepliesThread event={event as NostrEventNote} open={open} />
       )
     }
     case Kind.Article: {

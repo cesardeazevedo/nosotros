@@ -30,7 +30,7 @@ vi.mock('nostr-tools', async () => {
 })
 
 vi.mock('constants/relays')
-vi.mock('core/operators/verifyWorker')
+vi.mock('nostr/operators/verifyWorker')
 
 // Reset Indexeddb
 beforeEach(() => db.clearDB())

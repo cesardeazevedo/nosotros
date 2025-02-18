@@ -6,33 +6,35 @@ import { typeFace } from '@/themes/typeFace.stylex'
 import React from 'react'
 import { css, html } from 'react-strict-dom'
 import type { Styles } from 'react-strict-dom/dist/types/styles'
-import { RelayPopoverLink } from '../../Relays/RelayPopoverLink'
+// import { RelayPopoverLink } from '../../Relays/RelayPopoverLink'
 
 type Props = {
   href: string
   underline?: boolean
+  shrink?: boolean
   children?: React.ReactNode | string
 }
 
 export const ContentLink = (props: Props) => {
-  const { href, underline } = props
+  const { href, underline, shrink = true } = props
   const isLongLink = (href?.length || 0) > 36
-  const isRelayLink = href?.startsWith('wss://')
-  const sx = [styles.root, underline && styles.root$underline] as Styles
+  const sx = [styles.root, underline && styles.root$underline, shrink && styles.shrink] as Styles
   const content = (
     <html.a href={href} target='_blank' rel='noopener noreferrer' style={sx}>
       {props.children}
     </html.a>
   )
-  if (isRelayLink) {
-    return (
-      <RelayPopoverLink url={href}>
-        <html.a href={href} target='_blank' rel='noopener noreferrer' style={sx}>
-          {props.children}
-        </html.a>
-      </RelayPopoverLink>
-    )
-  }
+  // TODO
+  // const isRelayLink = href?.startsWith('wss://')
+  // if (isRelayLink) {
+  //   return (
+  //     <RelayPopoverLink url={href}>
+  //       <html.a href={href} target='_blank' rel='noopener noreferrer' style={sx}>
+  //         {props.children}
+  //       </html.a>
+  //     </RelayPopoverLink>
+  //   )
+  // }
   if (isLongLink && href) {
     return <Tooltip text={href}>{content}</Tooltip>
   }
@@ -43,10 +45,6 @@ const styles = css.create({
   root: {
     color: palette.tertiary,
     fontWeight: typeFace.bold,
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    maxWidth: 300,
     display: 'inline-block',
     verticalAlign: 'top',
   },
@@ -54,6 +52,12 @@ const styles = css.create({
     ':hover': {
       textDecoration: 'underline',
     },
+  },
+  shrink: {
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    maxWidth: 300,
   },
   background: {
     paddingInline: spacing['padding1'],

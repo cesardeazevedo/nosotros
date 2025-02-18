@@ -7,7 +7,7 @@ import { Popover } from '@/components/ui/Popover/Popover'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { useRootContext } from '@/hooks/useRootStore'
-import { subscribeRelayDiscorvery } from '@/nostr/operators/subscribeRelayDiscovery'
+import { subscribeRelayDiscorvery } from '@/nostr/subscriptions/subscribeRelayDiscovery'
 import { relayDiscoveryStore } from '@/stores/relayDiscovery/relayDiscovery.store'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
@@ -27,9 +27,9 @@ import { RelayDiscoveryRowLoading } from './RelayDiscoveryRowLoading'
 import { RelayDiscoveryTableHeader } from './RelayDiscoveryTableHeader'
 
 export const RelayDiscovery = observer(function RelayDiscovery() {
-  const client = useRootContext().client
+  const rootContext = useRootContext()
   const promise = useMemo(() => firstValueFrom(timer(3200)), [])
-  const sub = useObservable(() => subscribeRelayDiscorvery(client))
+  const sub = useObservable(() => subscribeRelayDiscorvery(rootContext.context))
   useSubscription(sub)
   return (
     <Stack horizontal gap={1} justify='space-between' align='flex-start'>

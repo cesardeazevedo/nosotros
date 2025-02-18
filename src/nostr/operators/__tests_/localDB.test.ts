@@ -3,7 +3,8 @@ import { db } from '@/nostr/db'
 import { subscribeSpyTo } from '@hirez_io/observer-spy'
 import { from } from 'rxjs'
 import { fakeEvent } from 'utils/faker'
-import { insertEvent, query } from '../localDB'
+import { insertDB } from '../insertDB'
+import { queryDB } from '../queryDB'
 
 describe('localDB', () => {
   test('query()', async () => {
@@ -14,7 +15,7 @@ describe('localDB', () => {
     await db.event.insert(note2)
     await db.event.insert(note3)
 
-    const $ = query([{ kinds: [Kind.Text], authors: ['1'] }])
+    const $ = queryDB([{ kinds: [Kind.Text], authors: ['1'] }])
 
     const spy = subscribeSpyTo($)
     await spy.onComplete()
@@ -34,7 +35,7 @@ describe('localDB', () => {
     await db.event.insert(note4)
     await db.event.insert(note5)
 
-    const $ = query([{ kinds: [Kind.Text], authors: ['1'], limit: 3 }])
+    const $ = queryDB([{ kinds: [Kind.Text], authors: ['1'], limit: 3 }])
 
     const spy = subscribeSpyTo($)
     await spy.onComplete()
@@ -48,7 +49,7 @@ describe('localDB', () => {
     const note3 = fakeEvent({ kind: 0, id: '3', pubkey: '1', created_at: 8 }) // old created_at, ignored
     const note4 = fakeEvent({ kind: 0, id: '4', pubkey: '1', created_at: 15 })
 
-    const $ = from([note1, note2, note3, note4]).pipe(insertEvent())
+    const $ = from([note1, note2, note3, note4]).pipe(insertDB())
 
     const spy = subscribeSpyTo($)
     await spy.onComplete()

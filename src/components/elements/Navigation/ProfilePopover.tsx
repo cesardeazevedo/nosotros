@@ -21,6 +21,7 @@ export const ProfilePopover = observer(function ProfilePopover() {
   return (
     <ContentProvider value={{ disablePopover: true }}>
       <Popover
+        floatingStrategy='fixed'
         placement='bottom-end'
         contentRenderer={() => (
           <Paper elevation={2} shape='lg' surface='surfaceContainerLow' sx={styles.root}>

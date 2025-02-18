@@ -14,14 +14,16 @@ cleanupOutdatedCaches()
 precacheAndRoute(self.__WB_MANIFEST)
 
 registerRoute(
-  ({ request }) => request.destination === 'image',
+  ({ request, url }) => request.destination === 'image' && url.pathname.includes('/user_avatar'),
   new CacheFirst({
     cacheName: 'images',
     plugins: [
       new ExpirationPlugin({
-        maxEntries: 10000,
+        maxEntries: 1000,
         // Cache for a maximum of a week.
         maxAgeSeconds: 7 * 24 * 60 * 60,
+        // Automatically cleanup if quota is exceeded.
+        purgeOnQuotaError: true,
       }),
       // Only cache images that are OK to cache.
       new CacheableResponsePlugin({

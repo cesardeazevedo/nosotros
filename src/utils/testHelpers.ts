@@ -71,8 +71,9 @@ export class TestSigner implements Signer {
 }
 
 export class RelayServer extends WS {
-  public received = [] as [keyof typeof ClientToRelay, string, NostrFilter[]][]
+  public received = [] as unknown[]
   public sent = [] as [keyof typeof RelayToClient, string, NostrEvent][]
+
   private _reqCount = 0
 
   constructor(
@@ -83,10 +84,11 @@ export class RelayServer extends WS {
 
     this.on('connection', (socket) => {
       socket.on('message', (msg) => {
-        const data = JSON.parse(msg as string) as [keyof typeof ClientToRelay, string, NostrFilter[]]
-        const [verb, req, ..._filters] = data
+        const data = JSON.parse(msg as string)
+        const [verb] = data
         switch (verb) {
           case 'REQ': {
+            const [, req, ..._filters] = data as [keyof typeof ClientToRelay, string, NostrFilter[]]
             this._reqCount++
             const filters = _filters.flat()
             db.forEach((event) => {
@@ -97,9 +99,21 @@ export class RelayServer extends WS {
               }
             })
             socket.send(JSON.stringify(['EOSE', req]))
+            this.received.push([verb, this.reqCount, ..._filters])
+            break
+          }
+          case 'EVENT': {
+            const [, event] = data as [string, NostrEvent]
+            const exists = this.db.find((x) => x.id === event.id)
+            socket.send(JSON.stringify(['OK', event.id, !exists, exists ? 'status: duplicated event' : 'status: OK']))
+            this.received.push([verb, event])
+            break
+          }
+          case 'CLOSE': {
+            this.received.push(['CLOSE', this.reqCount])
+            break
           }
         }
-        this.received.push([verb, this.reqCount, ..._filters])
       })
     })
   }

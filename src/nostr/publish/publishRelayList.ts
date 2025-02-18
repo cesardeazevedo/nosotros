@@ -5,24 +5,26 @@ import { ofKind } from '@/core/operators/ofKind'
 import { start } from '@/core/operators/start'
 import { EMPTY, last, map, merge, mergeMap, of } from 'rxjs'
 import { cacheReplaceablePrune } from '../cache'
-import type { NostrClient } from '../nostr'
-import { parseEventMetadata } from '../operators/parseMetadata'
+import type { NostrContext } from '../context'
+import { parseEventMetadata } from '../operators/parseEventMetadata'
+import { pool } from '../pool'
+import { createSubscription } from '../subscriptions/createSubscription'
 import type { NostrEventRelayList, UserRelay } from '../types'
 import { addPermission, metadataSymbol, parseRelayListToTags, revokePermission } from '../types'
 import { publish } from './publish'
 
 const kinds = [Kind.RelayList]
 
-export function publishRelayList(client: NostrClient, userRelay: UserRelay, revoke: boolean) {
-  const { pubkey } = client
+export function publishRelayList(ctx: NostrContext, userRelay: UserRelay, revoke: boolean) {
+  const { pubkey } = ctx
   if (pubkey) {
     const filter = { kinds, authors: [pubkey] }
-    const options = { relays: of(OUTBOX_RELAYS) }
-    cacheReplaceablePrune.delete(`${Kind.RelayList}:${client.pubkey}`)
-    const sub = client.createSubscription(filter, options)
+    const subOptions = { ...ctx.subOptions, relays: of(OUTBOX_RELAYS) }
+    cacheReplaceablePrune.delete(`${Kind.RelayList}:${pubkey}`)
+    const sub = createSubscription(filter, { ...ctx, subOptions })
 
     return of(sub).pipe(
-      start(client.pool),
+      start(pool),
       map(([, event]) => event),
       parseEventMetadata(),
       ofKind<NostrEventRelayList>(kinds),
@@ -33,10 +35,10 @@ export function publishRelayList(client: NostrClient, userRelay: UserRelay, revo
           const data = { ...userRelay, relay: formatRelayUrl(userRelay.relay) }
           const tags = parseRelayListToTags(revoke ? revokePermission(relayList, data) : addPermission(relayList, data))
           return publish(
-            client,
+            ctx,
             { content: event.content, kind: Kind.RelayList, tags },
             {
-              relays: merge(of(OUTBOX_RELAYS), client.inbox$),
+              relays: merge(of(OUTBOX_RELAYS), ctx.inbox$),
             },
           )
         }

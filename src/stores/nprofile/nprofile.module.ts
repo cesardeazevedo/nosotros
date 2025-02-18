@@ -1,6 +1,6 @@
 import { Kind } from '@/constants/kinds'
 import type { SubscriptionOptions } from '@/core/NostrSubscription'
-import type { NostrClient } from '@/nostr/nostr'
+import type { NostrContext } from '@/nostr/context'
 import { Duration } from 'luxon'
 import type { Instance, SnapshotIn, SnapshotOut } from 'mobx-state-tree'
 import { t } from 'mobx-state-tree'
@@ -41,7 +41,7 @@ export const NProfileModuleModel = BaseModuleModel.named('NProfileModuleModel')
     select(selected: keyof NProfileFeeds) {
       self.selected = selected as string
     },
-    subscribe(client: NostrClient) {
+    subscribe(client: NostrContext) {
       if (!self.feed.started) {
         self.feed.started = true
         return self.feed.subscribe(client)
@@ -58,10 +58,8 @@ export function createNprofileModule(snapshot: Pick<NProfileModuleSnapshotIn, 'i
     ...snapshot,
     selected: 'notes',
     context: {
-      options: {
-        // Always use the pubkey relays from the actual author
-        pubkey: snapshot.options.pubkey,
-      },
+      // Always use the pubkey relays from the actual author
+      pubkey: snapshot.options.pubkey,
     },
     feeds: {
       notes: {

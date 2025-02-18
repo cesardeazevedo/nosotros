@@ -2,15 +2,15 @@ import { Button } from '@/components/ui/Button/Button'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Paper } from '@/components/ui/Paper/Paper'
+import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { useMobile } from '@/hooks/useMobile'
 import type { Note } from '@/stores/notes/note'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconChevronDown, IconChevronRight } from '@tabler/icons-react'
-import JsonView from '@uiw/react-json-view'
 import { githubDarkTheme } from '@uiw/react-json-view/githubDark'
-import React from 'react'
+import React, { lazy, Suspense } from 'react'
 import { RemoveScroll } from 'react-remove-scroll'
 import { css, html } from 'react-strict-dom'
 
@@ -18,6 +18,8 @@ type Props = {
   note: Note
   onClose?: () => void
 }
+
+const JsonView = lazy(() => import('@uiw/react-json-view'))
 
 const Panel = (props: { children: React.ReactNode; label: string; value?: object; defaultExpanded?: boolean }) => {
   const { label, defaultExpanded, children } = props
@@ -45,13 +47,15 @@ const JsonContent = function PostUserJson(props: { value?: object }) {
   return (
     <html.div style={styles.jsonview}>
       {value && (
-        <JsonView
-          value={value}
-          collapsed={false}
-          style={{ overflow: 'auto', padding: 12, maxHeight: isMobile ? '100%' : 300, ...githubDarkTheme }}
-          displayDataTypes={false}
-          enableClipboard={true}
-        />
+        <Suspense fallback={<Skeleton sx={styles.loading} />}>
+          <JsonView
+            value={value}
+            collapsed={false}
+            style={{ overflow: 'auto', padding: 12, maxHeight: isMobile ? '100%' : 300, ...githubDarkTheme }}
+            displayDataTypes={false}
+            enableClipboard={true}
+          />
+        </Suspense>
       )}
     </html.div>
   )
@@ -118,5 +122,9 @@ const styles = css.create({
   panel: {
     cursor: 'pointer',
     padding: spacing.padding1,
+  },
+  loading: {
+    width: 550,
+    height: 300,
   },
 })

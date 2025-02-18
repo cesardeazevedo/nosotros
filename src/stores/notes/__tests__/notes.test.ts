@@ -2,10 +2,6 @@ import { test } from '@/utils/fixtures'
 import { noteStore } from '../notes.store'
 
 describe('NoteStore', () => {
-  beforeEach(() => {
-    noteStore.clear()
-  })
-
   test('assert root note and replies', ({ createNote }) => {
     const note1 = createNote({ id: '1' })
     const note2 = createNote({ id: '2', tags: [['e', '1', '', 'root']] })

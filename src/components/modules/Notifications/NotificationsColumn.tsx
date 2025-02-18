@@ -23,7 +23,7 @@ export const NotificationsColumn = observer(function NotificationsColumn(props: 
   const { feed } = module
   const user = useCurrentUser()
   const { delay } = useContext(DeckContext)
-  useFeedSubscription(feed, module.contextWithFallback.client)
+  useFeedSubscription(feed, module.contextWithFallback.context)
   return (
     <>
       <DeckColumnHeader id={module.id} settings={<NotificationSettings feed={feed} />}>

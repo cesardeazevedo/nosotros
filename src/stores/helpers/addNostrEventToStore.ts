@@ -1,6 +1,7 @@
 import { Kind } from '@/constants/kinds'
 import type { NostrEventNote, NostrEventRelayDiscovery, NostrEventRepost } from '@/nostr/types'
 import { metadataSymbol, type NostrEventMetadata } from '@/nostr/types'
+import { blossomStore } from '../blossom/blossom.store'
 import { eventStore } from '../events/event.store'
 import { followsStore } from '../follows/follows.store'
 import { listStore } from '../lists/lists.store'
@@ -26,7 +27,6 @@ export function addNostrEventToStore(event: NostrEventMetadata) {
       noteStore.add(event as NostrEventNote)
       break
     }
-
     case Kind.Follows: {
       followsStore.add(event, metadata)
       break
@@ -35,9 +35,12 @@ export function addNostrEventToStore(event: NostrEventMetadata) {
       reactionStore.add(event)
       break
     }
-
     case Kind.Media: {
       eventStore.add(event as NostrEventNote)
+      return
+    }
+    case Kind.BlossomServerList: {
+      blossomStore.add(event as NostrEventNote)
       return
     }
     case Kind.Repost: {
@@ -62,6 +65,7 @@ export function addNostrEventToStore(event: NostrEventMetadata) {
       break
     }
     default: {
+      eventStore.add(event)
       break
     }
   }

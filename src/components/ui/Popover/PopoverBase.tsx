@@ -134,6 +134,7 @@ export const PopoverBase = forwardRef<HTMLDivElement, IPopoverBaseProps>(functio
     open: opened,
     onOpenChange: setOpened,
     whileElementsMounted: autoUpdate,
+    strategy: floatingStrategy || 'absolute',
     middleware: [
       offset(cursorType ? 4 + cursor.size.height : undefined),
       middlewares.flip &&

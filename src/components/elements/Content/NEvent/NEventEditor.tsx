@@ -1,5 +1,7 @@
 import { ContentProvider } from '@/components/providers/ContentProvider'
-import { useObservableNostrContext } from '@/stores/context/nostr.context.hooks'
+import { subscribeNotesWithRelated } from '@/nostr/subscriptions/subscribeNotes'
+import { subscribeUser } from '@/nostr/subscriptions/subscribeUser'
+import { useObservableNostrContext } from '@/stores/nostr/nostr.context.hooks'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
@@ -14,13 +16,11 @@ import { NEvent } from './NEvent'
 
 export const NEventEditor = (props: NodeViewProps) => {
   const attrs = props.node.attrs as NEventAttributes
-  const sub = useObservableNostrContext((context) => {
+  const sub = useObservableNostrContext((nostr) => {
+    const subOptions = { relayHints: { idHints: attrs.author ? { [attrs.id]: [attrs.author] } : {} } }
     return merge(
-      context.client.notes.subNotesWithRelated(
-        { ids: [attrs.id] },
-        { relayHints: { fallback: attrs.author ? { [attrs.id]: [attrs.author] } : {} } },
-      ),
-      attrs.author ? context.client.users.subscribe(attrs.author) : EMPTY,
+      subscribeNotesWithRelated({ ids: [attrs.id] }, { ...nostr.context, subOptions }),
+      attrs.author ? subscribeUser(attrs.author, nostr.context) : EMPTY,
     )
   })
   useSubscription(sub)

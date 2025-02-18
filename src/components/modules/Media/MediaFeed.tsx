@@ -8,6 +8,7 @@ import type { NostrEventMedia } from '@/nostr/types'
 import type { MediaModule } from '@/stores/modules/media.module'
 import { observer, Observer } from 'mobx-react-lite'
 import type { ReactNode } from 'react'
+import { css } from 'react-strict-dom'
 
 type Props = {
   header?: ReactNode
@@ -27,7 +28,7 @@ export const MediaFeed = observer(function MediaFeed(props: Props) {
       onScrollEnd={feed.paginate}
       wrapper={(children) =>
         module.layout === 'grid' ? (
-          <Stack wrap gap={0.5}>
+          <Stack wrap gap={0.5} justify='flex-start' sx={styles.grid}>
             {children}
           </Stack>
         ) : (
@@ -50,4 +51,13 @@ export const MediaFeed = observer(function MediaFeed(props: Props) {
       footer={module.layout === 'row' ? <PostLoading /> : <PostMediaLoading rows={3} />}
     />
   )
+})
+
+const styles = css.create({
+  grid: {
+    '::after': {
+      content: '""',
+      flex: '1 1 calc(33.33% - 20px)',
+    },
+  },
 })

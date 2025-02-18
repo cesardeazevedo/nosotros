@@ -3,22 +3,24 @@ import { ofKind } from '@/core/operators/ofKind'
 import { start } from '@/core/operators/start'
 import { EMPTY, last, map, mergeMap, of } from 'rxjs'
 import { cacheReplaceablePrune } from '../cache'
-import type { NostrClient } from '../nostr'
-import { parseEventMetadata } from '../operators/parseMetadata'
+import type { NostrContext } from '../context'
+import { parseEventMetadata } from '../operators/parseEventMetadata'
+import { pool } from '../pool'
+import { createSubscription } from '../subscriptions/createSubscription'
 import type { NostrEventFollow } from '../types'
 import { metadataSymbol } from '../types'
 import { publish } from './publish'
 
 const kinds = [Kind.Follows]
 
-export function publishFollowList(client: NostrClient, tag: 'p', related: string) {
-  if (!client.pubkey) return EMPTY
+export function publishFollowList(ctx: NostrContext, tag: 'p', related: string) {
+  if (!ctx.pubkey) return EMPTY
 
-  const filter = { kinds, authors: [client.pubkey] }
-  cacheReplaceablePrune.delete(`${Kind.Follows}:${client.pubkey}`)
-  const sub = client.createSubscription(filter, { queryLocal: false })
+  const filter = { kinds, authors: [ctx.pubkey] }
+  cacheReplaceablePrune.delete(`${Kind.Follows}:${ctx.pubkey}`)
+  const sub = createSubscription(filter, { ...ctx, subOptions: { queryLocal: false } })
   return of(sub).pipe(
-    start(client.pool),
+    start(pool),
     map(([, event]) => event),
     parseEventMetadata(),
     ofKind<NostrEventFollow>(kinds),
@@ -43,7 +45,7 @@ export function publishFollowList(client: NostrClient, tag: 'p', related: string
             return true
           })
 
-          return publish(client, {
+          return publish(ctx, {
             kind: Kind.Follows,
             content: event.content,
             tags,

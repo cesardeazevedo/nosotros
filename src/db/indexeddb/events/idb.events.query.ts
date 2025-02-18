@@ -26,7 +26,7 @@ export class IDBEventQuery {
   }
 
   async *start() {
-    if (this.filter.authors) {
+    if (this.filter.authors && !this.filter['#d']) {
       for (const kind of this.filter.kinds || []) {
         const index = this.events.index('kind_pubkey_created_at')
         for (const author of this.filter.authors) {

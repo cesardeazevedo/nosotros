@@ -1,4 +1,4 @@
-import { useRootContext } from '@/hooks/useRootStore'
+import { useGlobalSettings, useRootContext } from '@/hooks/useRootStore'
 import { type EditorStore } from '@/stores/editor/editor.store'
 import { spacing } from '@/themes/spacing.stylex'
 import { EditorContent as TiptapEditorContent } from '@tiptap/react'
@@ -20,7 +20,11 @@ export const EditorTiptap = observer(function EditorTiptap(props: Props) {
   const id = useId()
 
   const context = useRootContext()
-  const editor = useMemo(() => store.editor || (kind20 ? createEditorKind20(store) : createEditor(store)), [])
+  const globalSettings = useGlobalSettings()
+  const editor = useMemo(
+    () => store.editor || (kind20 ? createEditorKind20(store) : createEditor(store, globalSettings)),
+    [],
+  )
 
   useEffect(() => {
     store.setEditor(editor)

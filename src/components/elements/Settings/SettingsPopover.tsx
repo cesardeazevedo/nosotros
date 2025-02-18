@@ -25,6 +25,7 @@ export const SettingsPopover = () => {
   return (
     <>
       <Popover
+        floatingStrategy='fixed'
         placement='bottom-end'
         contentRenderer={({ close }) => (
           <Paper elevation={2} surface='surfaceContainerLow' sx={styles.root}>

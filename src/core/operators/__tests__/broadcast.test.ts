@@ -6,11 +6,11 @@ import { NostrPublisher } from 'core/NostrPublish'
 import { Pool } from 'core/pool'
 import { of } from 'rxjs'
 import { test } from 'utils/fixtures'
-import { expectRelayPublish, relaySendEvents, relaySendNotice, relaySendOK } from 'utils/testHelpers'
+import { relaySendEvents, relaySendNotice } from 'utils/testHelpers'
 import { broadcast } from '../broadcast'
 
-describe('publish', () => {
-  test('assert relays responses', async ({ relay, relay2, relay3, signer }) => {
+describe('broadcast', () => {
+  test('assert relays responses', async ({ createMockRelay, signer }) => {
     const pool = new Pool()
     const event = fakeEvent({
       id: '1',
@@ -26,19 +26,22 @@ describe('publish', () => {
     const $ = of(publisher).pipe(broadcast(pool))
     const spy = subscribeSpyTo($)
 
-    await expectRelayPublish(relay, event)
-    await expectRelayPublish(relay2, event)
-    await expectRelayPublish(relay3, event)
+    const relay = createMockRelay(RELAY_1, [])
+    const relay2 = createMockRelay(RELAY_2, [])
+    const relay3 = createMockRelay(RELAY_3, [event])
+
+    await spy.onComplete()
+    await relay.close()
+    await relay2.close()
+    await relay3.close()
+
+    expect(relay.received).toStrictEqual([['EVENT', event]])
+    expect(relay2.received).toStrictEqual([['EVENT', event]])
+    expect(relay3.received).toStrictEqual([['EVENT', event]])
 
     // Relay sending unrelated messages
     relaySendEvents(relay, '1000', [event])
     relaySendNotice(relay, 'msg')
-
-    relaySendOK(relay, [event.id, true, 'status: OK'])
-    relaySendOK(relay2, [event.id, true, 'status: OK'])
-    relaySendOK(relay3, [event.id, false, 'status: duplicated event'])
-
-    await spy.onComplete()
 
     expect(spy.getValues()).toStrictEqual([
       [RELAY_1, event.id, true, 'status: OK', event],
@@ -47,7 +50,7 @@ describe('publish', () => {
     ])
   })
 
-  test('assert related events being published', async ({ relay, signer }) => {
+  test('assert related events being published', async ({ createMockRelay, signer }) => {
     const pool = new Pool()
     const note = fakeEvent({
       id: '1',
@@ -71,14 +74,16 @@ describe('publish', () => {
       signer,
     })
 
+    const relay = createMockRelay(RELAY_1, [])
+
     const $ = of(publisher).pipe(broadcast(pool))
     const spy = subscribeSpyTo($)
 
-    await expectRelayPublish(relay, reaction)
-    await expectRelayPublish(relay, note)
-
-    relaySendOK(relay, [reaction.id, true, 'status: OK'])
-    relaySendOK(relay, [note.id, true, 'status: OK'])
+    await spy.onComplete()
+    expect(relay.received).toStrictEqual([
+      ['EVENT', reaction],
+      ['EVENT', note],
+    ])
 
     await spy.onComplete()
 

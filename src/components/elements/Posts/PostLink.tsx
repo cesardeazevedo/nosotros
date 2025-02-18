@@ -1,6 +1,4 @@
 import { useMobile } from '@/hooks/useMobile'
-import { subscribeNoteStats } from '@/nostr/subscriptions/subscribeNoteStats'
-import { useNostrClientContext } from '@/stores/context/nostr.context.hooks'
 import type { Note } from '@/stores/notes/note'
 import { useMatch, useNavigate, useRouter } from '@tanstack/react-router'
 import { observer } from 'mobx-react-lite'
@@ -16,13 +14,12 @@ type Props = {
 }
 
 export const PostLink = observer(function postList(props: Props) {
-  const { note, children } = props
+  const { note, children, onClick } = props
   const ref = useRef<HTMLDivElement>(null)
   const context = useMatch({ from: '/$nostr', shouldThrow: false })?.context
   const mobile = useMobile()
   const router = useRouter()
   const navigate = useNavigate()
-  const { client } = useNostrClientContext()
   const isCurrentNote = context?.decoded?.type === 'nevent' ? context?.decoded.data.id === note.id : false
   const isActive = isCurrentNote || note.repliesOpen === true
 
@@ -30,15 +27,15 @@ export const PostLink = observer(function postList(props: Props) {
     (e: StrictClickEvent) => {
       e.preventDefault()
       e.stopPropagation()
+      const element = 'target' in e ? (e.target as HTMLElement) : null
+      const isLink = element?.closest('a')
+      const isButton = element?.closest('button')
+      if (isButton || isLink) {
+        return
+      }
       if (!mobile) {
         note.toggleContent(true)
-        note.toggleReplies(true)
-        note.setRepliesStatus('LOADING')
-        subscribeNoteStats(client, note.event.event, {}).subscribe({
-          complete: () => {
-            note.setRepliesStatus('LOADED')
-          },
-        })
+        onClick?.()
       } else {
         navigate({
           to: '/$nostr',
