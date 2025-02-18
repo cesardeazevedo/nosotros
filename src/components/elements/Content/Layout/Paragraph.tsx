@@ -1,4 +1,6 @@
 import { useContentContext } from '@/components/providers/ContentProvider'
+import { useNoteContext } from '@/components/providers/NoteProvider'
+import { Kind } from '@/constants/kinds'
 import { spacing } from '@/themes/spacing.stylex'
 import type { ParagraphNode } from 'nostr-editor'
 import { css, html } from 'react-strict-dom'
@@ -10,10 +12,11 @@ type Props = {
 
 export const Paragraph = (props: Props) => {
   const { node } = props
+  const { note } = useNoteContext()
   const { dense } = useContentContext()
   return (
     <html.div style={[styles.container, dense && styles.container$dense]}>
-      <TextContent node={node} />
+      <TextContent shrinkLink={note.event.event.kind !== Kind.Article} node={node} />
     </html.div>
   )
 }
