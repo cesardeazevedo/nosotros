@@ -1,11 +1,11 @@
 import { RELAY_1, RELAY_2, RELAY_3 } from '@/constants/testRelays'
 import type { NostrEvent, RelayHints } from 'core/types'
 import { nip19 } from 'nostr-tools'
-import { fakeNote, fakeSignature } from 'utils/faker'
+import { fakeEvent, fakeSignature } from 'utils/faker'
 import { test } from 'utils/fixtures'
 import { parseNote } from '../parseNote'
 
-const parse = (partial: Partial<NostrEvent>) => parseNote(fakeNote(partial))
+const parse = (partial: Partial<NostrEvent>) => parseNote(fakeEvent(partial))
 
 describe('parseNote', () => {
   test('Should expect isRoot true', () => {
@@ -136,7 +136,7 @@ describe('parseNote', () => {
   })
 
   test('Should expect mentionedNotes match with nevent', () => {
-    const event = fakeSignature(fakeNote({ content: 'related' }))
+    const event = fakeSignature(fakeEvent({ content: 'related' }))
     const encoded = nip19.neventEncode({
       id: event.id,
       kind: 7,
@@ -158,7 +158,7 @@ describe('parseNote', () => {
   })
 
   test('Should expect mentionedNotes and mentionedAuthors from naddress', () => {
-    const event = fakeSignature(fakeNote({ kind: 30023, content: 'related' }))
+    const event = fakeSignature(fakeEvent({ kind: 30023, content: 'related' }))
     const encoded = nip19.naddrEncode({
       kind: event.kind,
       pubkey: event.pubkey,
@@ -219,14 +219,14 @@ describe('parseNote', () => {
   })
 
   test('Should expect relayHints from both tags and references', () => {
-    const event1 = fakeSignature(fakeNote())
-    const event2 = fakeSignature(fakeNote({ pubkey: '2' }))
+    const event1 = fakeSignature(fakeEvent())
+    const event2 = fakeSignature(fakeEvent({ pubkey: '2' }))
     const nevent1 = nip19.neventEncode({ id: event1.id, relays: [RELAY_2, RELAY_3] })
     const nevent2 = nip19.neventEncode({ id: event2.id, relays: [] })
     const profile1 = nip19.nprofileEncode({ pubkey: event1.pubkey, relays: [RELAY_2] })
     const profile2 = nip19.nprofileEncode({ pubkey: event2.pubkey, relays: [] })
     const note = parseNote(
-      fakeNote({
+      fakeEvent({
         id: '1',
         content: `hello nostr:${nevent1} nostr:${nevent2} nostr:${profile1} nostr:${profile2}`,
         tags: [
@@ -241,7 +241,7 @@ describe('parseNote', () => {
     expect(note.relayHints).toStrictEqual({
       authors: { '1': [RELAY_2], [event1.pubkey]: [RELAY_2] },
       ids: { '1': [RELAY_2], [event1.id]: [RELAY_2, RELAY_3] },
-      fallback: {
+      idHints: {
         '1': ['p1', 'p2'],
         '2': ['p3'],
       },

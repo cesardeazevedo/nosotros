@@ -31,7 +31,7 @@ export interface UseScrollTriggerOptions {
 export function useScrollTrigger(options: UseScrollTriggerOptions = {}) {
   const { target = window, ...other } = options
   const getTrigger = defaultTrigger
-  const store = React.useRef<number>()
+  const store = React.useRef<number>(undefined)
   const [trigger, setTrigger] = React.useState(() => getTrigger(store, other))
 
   React.useEffect(() => {

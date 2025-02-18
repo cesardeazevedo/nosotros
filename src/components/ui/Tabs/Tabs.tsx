@@ -58,6 +58,9 @@ export const Tabs = function Tabs(props: Props) {
     ]
   }, [])
 
+  const indicatorAnimationRef = useRef<Animation>(null)
+  const previousTabRef = useRef<HTMLElement | null>(null)
+
   const contextValue = useMemo(() => {
     return {
       id,
@@ -92,9 +95,6 @@ export const Tabs = function Tabs(props: Props) {
       disabled,
     } as TabsContextValues
   }, [id, variant, anchor, props.anchor, renderLabels, getIndicatorKeyframes, setAnchor, onChange, disabled])
-
-  const previousTabRef = useRef<HTMLElement | null>(null)
-  const indicatorAnimationRef = useRef<Animation>()
 
   return <TabsContext.Provider value={contextValue}>{props.children}</TabsContext.Provider>
 }

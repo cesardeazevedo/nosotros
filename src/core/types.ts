@@ -5,6 +5,7 @@ export type NostrFilter = Filter
 
 export enum ClientToRelay {
   REQ = 'REQ',
+  AUTH = 'AUTH',
   EVENT = 'EVENT',
   CLOSE = 'CLOSE',
   NEG_OPEN = 'NEG-OPEN',
@@ -33,5 +34,5 @@ export type MessageReceived = MessageReceivedEvent | MessageReceivedEose | Messa
 export type RelayHints = {
   authors?: Record<string, string[]>
   ids?: Record<string, string[]>
-  fallback?: Record<string, string[]>
+  idHints?: Record<string, string[]>
 }

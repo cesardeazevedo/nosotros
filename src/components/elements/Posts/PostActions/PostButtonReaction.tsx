@@ -1,24 +1,21 @@
+import { useContentContext } from '@/components/providers/ContentProvider'
 import { useNoteContext } from '@/components/providers/NoteProvider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
+import { useMobile } from '@/hooks/useMobile'
 import { useCurrentPubkey, useRootContext } from '@/hooks/useRootStore'
 import { publishReaction } from '@/nostr/publish/publishReaction'
-import type { Comment } from '@/stores/comment/comment'
-import type { Note } from '@/stores/notes/note'
 import { fallbackEmoji, reactionStore } from '@/stores/reactions/reactions.store'
+import { toastStore } from '@/stores/ui/toast.store'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconHeart, IconHeartFilled } from '@tabler/icons-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { observer } from 'mobx-react-lite'
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import { css, html } from 'react-strict-dom'
 import { ReactionPicker } from '../../Reactions/ReactionPicker'
 import { ReactionsTooltip } from '../../Reactions/ReactionsTooltip'
 import { ButtonContainer } from './PostButtonContainer'
 import { iconProps } from './utils'
-
-type Props = {
-  note: Note | Comment
-}
 
 // Only known emojis
 const emojiColors: Record<string, string> = {
@@ -33,21 +30,25 @@ const emojiColors: Record<string, string> = {
   '😡': colors.orange7,
 }
 
-export const ButtonReaction = observer(function ButtonReaction(props: Props) {
-  const { note } = props
-  const { dense } = useNoteContext()
+export const ButtonReaction = observer(function ButtonReaction() {
+  const { note } = useNoteContext()
+  const { dense } = useContentContext()
+  const [mobileOpen, setMobileOpen] = useState(false)
   const total = reactionStore.getTotal(note.id)
   const pubkey = useCurrentPubkey()
   const myReactions = reactionStore.getByPubkey(pubkey)
   const myReaction = fallbackEmoji(myReactions?.[note.id]?.[0])
   const color = myReaction ? emojiColors[myReaction] || colors.red7 : colors.red7
-  const context = useRootContext()
+  const { context } = useRootContext()
+  const mobile = useMobile()
 
   const handleReact = useCallback(
     (reaction: string) => {
-      publishReaction(context.client, note.event, reaction).subscribe()
+      publishReaction(context, note.event.event, reaction).subscribe({
+        error: (error) => toastStore.enqueue(error.message),
+      })
     },
-    [context.client, note],
+    [context, note],
   )
 
   return (
@@ -60,49 +61,53 @@ export const ButtonReaction = observer(function ButtonReaction(props: Props) {
             </ReactionsTooltip>
           )
         }>
-        <ReactionPicker onClick={handleReact}>
-          <span>
-            <AnimatePresence initial={false}>
-              <IconButton
-                size={dense ? 'sm' : 'md'}
-                selected={!!myReaction}
-                onClick={() => handleReact('❤️')}
-                sx={[(color && styles[`button$${color}`]) || styles.button$red]}
-                selectedIcon={
-                  <motion.div
-                    key='myreaction'
-                    style={{ color }}
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    exit={{ scale: 0 }}
-                    transition={{ type: 'spring', stiffness: 300, damping: 10 }}>
-                    {myReaction === '❤️' ? (
-                      <IconHeartFilled
-                        size={dense ? iconProps.size$dense : iconProps.size}
-                        strokeWidth={iconProps.strokeWidth}
-                      />
-                    ) : (
-                      <html.span style={styles.myCustomReaction}>{myReaction}</html.span>
-                    )}
-                  </motion.div>
+        <ReactionPicker mobileOpen={mobileOpen} onClick={handleReact} onClose={() => setMobileOpen(false)}>
+          <AnimatePresence initial={false}>
+            <IconButton
+              size={dense ? 'sm' : 'md'}
+              selected={!!myReaction}
+              onClick={(e) => {
+                e.stopPropagation()
+                e.preventDefault()
+                if (mobile && !mobileOpen) {
+                  setMobileOpen(true)
+                } else {
+                  handleReact('❤️')
+                  setMobileOpen(false)
                 }
-                icon={
-                  <motion.div
-                    key={'reaction'}
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    exit={{ scale: 0 }}
-                    transition={{ type: 'spring', stiffness: 300, damping: 10 }}
-                    whileTap={{ color: colors.red7, scale: 0.9 }}>
-                    <IconHeart
+              }}
+              sx={[(color && styles[`button$${color}`]) || styles.button$red]}
+              selectedIcon={
+                <motion.div
+                  key='myreaction'
+                  style={{ color }}
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  exit={{ scale: 0 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 10 }}>
+                  {myReaction === '❤️' ? (
+                    <IconHeartFilled
                       size={dense ? iconProps.size$dense : iconProps.size}
                       strokeWidth={iconProps.strokeWidth}
                     />
-                  </motion.div>
-                }
-              />
-            </AnimatePresence>
-          </span>
+                  ) : (
+                    <html.span style={styles.myCustomReaction}>{myReaction}</html.span>
+                  )}
+                </motion.div>
+              }
+              icon={
+                <motion.div
+                  key={'reaction'}
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  exit={{ scale: 0 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 10 }}
+                  whileTap={{ color: colors.red7, scale: 0.9 }}>
+                  <IconHeart size={dense ? iconProps.size$dense : iconProps.size} strokeWidth={iconProps.strokeWidth} />
+                </motion.div>
+              }
+            />
+          </AnimatePresence>
         </ReactionPicker>
       </ButtonContainer>
     </>

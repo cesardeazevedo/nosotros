@@ -1,3 +1,4 @@
+import { ContentProvider } from '@/components/providers/ContentProvider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
 import { Stack } from '@/components/ui/Stack/Stack'
@@ -25,13 +26,15 @@ export const QRCode = observer(function QRCode() {
       <IconButton sx={styles.close} onClick={dialogStore.closeQRCode} icon={<IconX />} />
       <Stack horizontal={false} gap={2} sx={styles.content}>
         {user && (
-          <Stack horizontal={false} gap={2} align='center' justify='center'>
-            <UserAvatar disableLink disabledPopover pubkey={user.pubkey} size='xl' sx={styles.avatar} />
-            <Stack horizontal={false} align='center'>
-              <UserName disableLink disablePopover variant='title' size='lg' pubkey={user?.pubkey}></UserName>
-              <UserNIP05 pubkey={user?.pubkey} />
+          <ContentProvider value={{ disablePopover: true, disableLink: true }}>
+            <Stack horizontal={false} gap={2} align='center' justify='center'>
+              <UserAvatar pubkey={user.pubkey} size='xl' sx={styles.avatar} />
+              <Stack horizontal={false} align='center'>
+                <UserName variant='title' size='lg' pubkey={user?.pubkey}></UserName>
+                <UserNIP05 pubkey={user?.pubkey} />
+              </Stack>
             </Stack>
-          </Stack>
+          </ContentProvider>
         )}
         {npub ? (
           <html.div style={styles.qrcode}>

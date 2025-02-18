@@ -1,14 +1,14 @@
-import { PaperContainer } from '@/components/elements/Layouts/PaperContainer'
+import { DeckContext } from '@/components/elements/Deck/DeckContext'
 import { UserHeader } from '@/components/elements/User/UserHeader'
 import { Divider } from '@/components/ui/Divider/Divider'
+import { useFeedSubscription } from '@/hooks/useFeedSubscription'
 import type { NProfileFeeds, NProfileModule, NProfileModuleSnapshotOut } from '@/stores/nprofile/nprofile.module'
-import { useRouter } from '@tanstack/react-router'
 import { DeckColumnHeader } from 'components/elements/Deck/DeckColumnHeader'
 import { UserProfileHeader } from 'components/elements/User/UserProfileHeader'
-import { reaction } from 'mobx'
 import { observer } from 'mobx-react-lite'
-import { useCallback, useEffect } from 'react'
+import { useCallback, useContext } from 'react'
 import { NProfileArticlesFeed } from './feeds/NProfileArticlesFeed'
+import { NProfileMediaFeed } from './feeds/NProfileMediaFeed'
 import { NProfileNotesFeed } from './feeds/NProfileNotesFeed'
 import { NProfileRepliesFeed } from './feeds/NProfileRepliesFeed'
 import { NProfileFeedTabsState } from './NProfileFeedTabsState'
@@ -20,18 +20,11 @@ type Props = {
 export const NProfileColumn = observer(function NProfileColumn(props: Props) {
   const { module } = props
   const { id } = module
-  const router = useRouter()
+  const context = useContext(DeckContext)
 
   const selected = module.selected as keyof NProfileModuleSnapshotOut['feeds']
-  useEffect(() => {
-    const disposer = reaction(
-      () => [module.selected],
-      () => {
-        router.invalidate()
-      },
-    )
-    return () => disposer()
-  }, [])
+
+  useFeedSubscription(module.feed, module.contextWithFallback.context)
 
   const handleChange = useCallback((anchor: string | undefined) => {
     if (anchor) {
@@ -53,11 +46,10 @@ export const NProfileColumn = observer(function NProfileColumn(props: Props) {
       <DeckColumnHeader id={id}>
         <UserHeader pubkey={module.options.pubkey} />
       </DeckColumnHeader>
-      <PaperContainer elevation={0} shape='none'>
-        {selected === 'notes' && <NProfileNotesFeed header={header} module={module} />}
-        {selected === 'replies' && <NProfileRepliesFeed header={header} module={module} />}
-        {selected === 'articles' && <NProfileArticlesFeed header={header} module={module} />}
-      </PaperContainer>
+      {selected === 'notes' && <NProfileNotesFeed column delay={context.delay} header={header} module={module} />}
+      {selected === 'replies' && <NProfileRepliesFeed column delay={context.delay} header={header} module={module} />}
+      {selected === 'media' && <NProfileMediaFeed column delay={context.delay} header={header} module={module} />}
+      {selected === 'articles' && <NProfileArticlesFeed column delay={context.delay} header={header} module={module} />}
     </>
   )
 })

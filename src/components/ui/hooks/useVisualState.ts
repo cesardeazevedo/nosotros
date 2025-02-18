@@ -1,3 +1,4 @@
+import type { Ref } from 'react'
 import { useCallback, useRef, useState } from 'react'
 
 export type IVisualState = {
@@ -10,7 +11,7 @@ export type IVisualState = {
 
 export type IUseVisualStateResult = {
   visualState: IVisualState
-  setRef: (element: Element | null) => void
+  setRef: Ref<Element>
 }
 
 export type IVisualStateOptions = {
@@ -25,9 +26,10 @@ export const useVisualState = (visualState?: IVisualState, options?: IVisualStat
   const [hovered, setHovered] = useState(false)
   const [focused, setFocused] = useState(false)
   const [pressed, setPressed] = useState(false)
-  const focusFromRef = useRef<'mouse'>()
+  const focusFromRef = useRef<'mouse'>(null)
 
   const handleMouseEnter = useCallback(() => setHovered(true), [])
+
   const handleMouseLeave = useCallback(() => {
     setHovered(false)
     setPressed(false)
@@ -39,7 +41,7 @@ export const useVisualState = (visualState?: IVisualState, options?: IVisualStat
   }, [options?.retainFocusAfterClick])
 
   const handleBlur = useCallback(() => {
-    focusFromRef.current = undefined
+    focusFromRef.current = null
     setFocused(false)
   }, [])
 
@@ -51,6 +53,7 @@ export const useVisualState = (visualState?: IVisualState, options?: IVisualStat
   }, [])
 
   const handleMouseUp = useCallback(() => {
+    setHovered(false)
     setPressed(false)
     activeTarget = null
   }, [])
@@ -69,24 +72,18 @@ export const useVisualState = (visualState?: IVisualState, options?: IVisualStat
   const setRef = useCallback(
     (element: Element | null) => {
       if (element && !options?.disabled && visualState?.strategy !== 'replace') {
-        element.addEventListener('mouseenter', handleMouseEnter)
-        element.addEventListener('mouseleave', handleMouseLeave)
-        element.addEventListener('focus', handleFocus)
-        element.addEventListener('blur', handleBlur)
-        element.addEventListener('mousedown', handleMouseDown)
-        element.addEventListener('mouseup', handleMouseUp)
-        element.addEventListener('keydown', handleKeyDown)
-        element.addEventListener('keyup', handleKeyUp)
-
+        const controller = new AbortController()
+        const signal = { signal: controller.signal }
+        element.addEventListener('mouseenter', handleMouseEnter, signal)
+        element.addEventListener('mouseleave', handleMouseLeave, signal)
+        element.addEventListener('mousedown', handleMouseDown, signal)
+        element.addEventListener('mouseup', handleMouseUp, signal)
+        element.addEventListener('focus', handleFocus, signal)
+        element.addEventListener('blur', handleBlur, signal)
+        element.addEventListener('keydown', handleKeyDown, signal)
+        element.addEventListener('keyup', handleKeyUp, signal)
         return () => {
-          element.removeEventListener('mouseenter', handleMouseEnter)
-          element.removeEventListener('mouseleave', handleMouseLeave)
-          element.removeEventListener('focus', handleFocus)
-          element.removeEventListener('blur', handleBlur)
-          element.removeEventListener('mousedown', handleMouseDown)
-          element.removeEventListener('mouseup', handleMouseUp)
-          element.removeEventListener('keydown', handleKeyDown)
-          element.removeEventListener('keyup', handleKeyUp)
+          controller.abort()
         }
       }
     },

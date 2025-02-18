@@ -3,9 +3,6 @@ import { defaultNostrSettings } from '@/nostr/settings'
 import type { RootStoreSnapshotIn } from '../root.store'
 
 export const initialState: RootStoreSnapshotIn = {
-  home: {
-    selected: 'notes',
-  },
   auth: {},
   decks: {
     selected: 'root',
@@ -20,9 +17,7 @@ export const initialState: RootStoreSnapshotIn = {
   globalSettings: {
     lang: 'en',
     theme: 'auto',
-  },
-  nostrSettings: {
-    ...defaultNostrSettings,
+    clientTag: true,
     scroll: {
       reposts: true,
       reactions: true,
@@ -30,9 +25,12 @@ export const initialState: RootStoreSnapshotIn = {
       replies: true,
     },
   },
-  defaultContext: {
-    options: {
-      relays: DEFAULT_RELAYS,
-    },
+  nostrSettings: {
+    ...defaultNostrSettings,
   },
+  defaultContext: {
+    relays: DEFAULT_RELAYS,
+  },
+  tempModules: {},
+  persistedModules: {},
 }

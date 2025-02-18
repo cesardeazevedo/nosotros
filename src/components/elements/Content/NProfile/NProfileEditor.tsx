@@ -1,5 +1,6 @@
 import { Text } from '@/components/ui/Text/Text'
-import { useObservableNostrContext } from '@/stores/context/nostr.context.hooks'
+import { subscribeUser } from '@/nostr/subscriptions/subscribeUser'
+import { useObservableNostrContext } from '@/stores/nostr/nostr.context.hooks'
 import { palette } from '@/themes/palette.stylex'
 import type { NodeViewProps } from '@tiptap/react'
 import { NodeViewWrapper } from '@tiptap/react'
@@ -11,7 +12,7 @@ import { NProfile } from './NProfile'
 export const NProfileEditor = (props: NodeViewProps) => {
   const attrs = props.node.attrs as NProfileAttributes
 
-  const sub = useObservableNostrContext((context) => context.client.users.subscribe(attrs.pubkey))
+  const sub = useObservableNostrContext((nostr) => subscribeUser(attrs.pubkey, nostr.context))
   useSubscription(sub)
 
   return (
@@ -27,5 +28,6 @@ const styles = css.create({
   text: {
     cursor: 'pointer',
     color: palette.tertiary,
+    fontWeight: 600,
   },
 })

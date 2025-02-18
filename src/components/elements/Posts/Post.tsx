@@ -1,54 +1,54 @@
 import { useNoteVisibility } from '@/components/elements/Posts/hooks/useNoteVisibility'
+import { useContentContext } from '@/components/providers/ContentProvider'
+import { NoteProvider } from '@/components/providers/NoteProvider'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
+import { Kind } from '@/constants/kinds'
 import { useMobile } from '@/hooks/useMobile'
+import { useNoteStore } from '@/hooks/useNoteStore'
+import { useGlobalSettings } from '@/hooks/useRootStore'
 import { subscribeNoteStats } from '@/nostr/subscriptions/subscribeNoteStats'
-import { useNostrClientContext } from '@/stores/context/nostr.context.hooks'
-import type { Note } from '@/stores/notes/note'
+import type { NostrEventComment, NostrEventMedia, NostrEventNote } from '@/nostr/types'
+import { useNostrClientContext } from '@/stores/nostr/nostr.context.hooks'
 import { spacing } from '@/themes/spacing.stylex'
 import { useRouter } from '@tanstack/react-router'
 import { observer } from 'mobx-react-lite'
 import { useCallback } from 'react'
 import { css, html } from 'react-strict-dom'
+import { ArticleHeader } from '../Articles/ArticleHeader'
 import { Editor } from '../Editor/Editor'
+import { Replies } from '../Replies/Replies'
+import { RepliesPreview } from '../Replies/RepliesPreview'
 import { PostActions } from './PostActions/PostActions'
 import { PostBroadcaster } from './PostBroadcaster'
 import { PostContent } from './PostContent'
 import { PostHeader } from './PostHeader'
-import { PostReplies } from './PostReplies/PostReplies'
-import { PostRepliesPreview } from './PostReplies/PostRepliesPreview'
+import { PostLink } from './PostLink'
 
 type Props = {
-  note: Note
+  open?: boolean
+  event: NostrEventNote | NostrEventComment | NostrEventMedia
   header?: React.ReactNode
 }
 
 export const PostRoot = observer(function PostRoot(props: Props) {
-  const { note, header } = props
+  const { event, header, open = false } = props
   const isMobile = useMobile()
   const router = useRouter()
-  const [ref] = useNoteVisibility(note)
+  const [ref] = useNoteVisibility(event)
   const context = useNostrClientContext()
+  const contentContext = useContentContext()
+  const globalSettings = useGlobalSettings()
+  const note = useNoteStore(event, open)
 
   const handleRepliesClick = useCallback(() => {
-    if (isMobile) {
-      router.navigate({
-        // @ts-ignore
-        to: './replies/$nevent',
-        // @ts-ignore
-        params: { nevent: note.nevent },
-        // @ts-ignore
-        state: { from: router.latestLocation.pathname },
-      })
-    } else {
-      note.toggleReplies()
-      note.setRepliesStatus('LOADING')
-      subscribeNoteStats(context.client, note.event, {}).subscribe({
-        complete: () => {
-          note.setRepliesStatus('LOADED')
-        },
-      })
-    }
+    note.toggleReplies()
+    note.setRepliesStatus('LOADING')
+    subscribeNoteStats(note.event.event, context.context, globalSettings.scroll).subscribe({
+      complete: () => {
+        note.setRepliesStatus('LOADED')
+      },
+    })
   }, [router.latestLocation.pathname, isMobile, note])
 
   const handleLoadMore = useCallback(() => {
@@ -60,32 +60,34 @@ export const PostRoot = observer(function PostRoot(props: Props) {
   }, [note])
 
   return (
-    <html.div style={styles.root} ref={ref}>
-      {header || <PostHeader note={note} />}
-      <PostContent note={note} />
-      <PostActions note={note} onReplyClick={handleRepliesClick} />
-      <Expandable expanded={note.broadcastOpen}>
-        <PostBroadcaster note={note} />
-      </Expandable>
-      {note.repliesOpen && (
-        <>
-          <Divider />
-          <html.div style={styles.editor}>
-            <Editor renderBubble initialOpen={false} store={note.editor} />
-          </html.div>
-          <PostReplies note={note} renderEmpty onLoadMoreClick={handleLoadMore} />
-        </>
-      )}
-      {note.repliesOpen === null && <PostRepliesPreview note={note} onLoadMoreClick={handleRepliesClick} />}
-    </html.div>
+    <NoteProvider value={{ ...contentContext, note }}>
+      <html.article ref={ref}>
+        <PostLink note={note} onClick={handleRepliesClick}>
+          {note.event.event.kind === Kind.Article && <ArticleHeader />}
+          {header || <PostHeader />}
+          <PostContent />
+          <PostActions onReplyClick={handleRepliesClick} />
+        </PostLink>
+        <Expandable expanded={note.broadcastOpen}>
+          <PostBroadcaster />
+        </Expandable>
+        {note.repliesOpen && (
+          <>
+            <Divider />
+            <Editor sx={styles.editor} renderBubble initialOpen={false} store={note.editor} />
+            <Replies onLoadMoreClick={handleLoadMore} />
+          </>
+        )}
+        {note.repliesOpen === null && <RepliesPreview onLoadMoreClick={handleRepliesClick} />}
+      </html.article>
+    </NoteProvider>
   )
 })
 
 const styles = css.create({
-  root: {
-    minHeight: 147,
-  },
   editor: {
-    paddingInline: spacing.padding1,
+    padding: spacing.padding2,
+    paddingTop: spacing.padding2,
+    paddingBottom: 0,
   },
 })

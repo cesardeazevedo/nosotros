@@ -1,14 +1,14 @@
 import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { Switch } from '@/components/ui/Switch/Switch'
 import { Text } from '@/components/ui/Text/Text'
-import { useGlobalNostrSettings } from '@/hooks/useRootStore'
+import { useGlobalSettings } from '@/hooks/useRootStore'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconBolt, IconHeart, IconMessageCircle, IconShare3 } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
 import { css } from 'react-strict-dom'
 
 export const SettingsContent = observer(function SettingsContent() {
-  const settings = useGlobalNostrSettings()
+  const settings = useGlobalSettings()
   return (
     <>
       <Text sx={styles.description}>

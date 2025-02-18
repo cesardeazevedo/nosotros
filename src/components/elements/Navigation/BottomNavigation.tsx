@@ -1,5 +1,7 @@
+import { focusRingTokens } from '@/components/ui/FocusRing/FocusRing.stylex'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Tab } from '@/components/ui/Tab/Tab'
+import { tabTokens } from '@/components/ui/Tab/Tab.stylex'
 import { Tabs } from '@/components/ui/Tabs/Tabs'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 import { useMobile } from '@/hooks/useMobile'
@@ -7,12 +9,13 @@ import { useCurrentPubkey, useCurrentUser } from '@/hooks/useRootStore'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import { IconBell, IconBellFilled, IconUser } from '@tabler/icons-react'
+import { IconBell, IconBellFilled, IconPhoto, IconUser } from '@tabler/icons-react'
 import { Link, useLocation } from '@tanstack/react-router'
 import { observer } from 'mobx-react-lite'
 import { css, html } from 'react-strict-dom'
 import { IconHome } from '../Icons/IconHome'
 import { IconHomeFilled } from '../Icons/IconHomeFilled'
+import { LinkSignIn } from '../Links/LinkSignIn'
 import { SignInButtonFab } from '../SignIn/SignInButtonFab'
 
 export const BottomNavigation = observer(function BottomNavigation() {
@@ -29,31 +32,30 @@ export const BottomNavigation = observer(function BottomNavigation() {
     <>
       <html.div style={styles.root}>
         {!pubkey ? <SignInButtonFab /> : null}
-        <Stack grow justify='space-evenly'>
+        <Stack grow justify='space-around'>
           <Tabs anchor={location.pathname}>
             <Tooltip text='Home' enterDelay={0}>
               <Link to='/' resetScroll>
                 <Tab anchor='/' sx={styles.tab} icon={<IconHome />} activeIcon={<IconHomeFilled />} />
               </Link>
             </Tooltip>
-            {/* <Tooltip text='Relays' enterDelay={0}> */}
-            {/*   <Link to='/relays'> */}
-            {/*     <Tab anchor='/relays' sx={styles.tab} icon={<IconServerBolt size={24} />} /> */}
-            {/*   </Link> */}
-            {/* </Tooltip> */}
+            <Link to='/media'>
+              <Tab anchor='/media' sx={styles.tab} icon={<IconPhoto />} activeIcon={<IconPhoto />} />
+            </Link>
             {user && (
-              <Tooltip text='Notifications' enterDelay={0}>
-                <Link to='/notifications'>
-                  <Tab anchor='/notifications' sx={styles.tab} icon={<IconBell />} activeIcon={<IconBellFilled />} />
-                </Link>
-              </Tooltip>
+              <Link to='/notifications'>
+                <Tab anchor='/notifications' sx={styles.tab} icon={<IconBell />} activeIcon={<IconBellFilled />} />
+              </Link>
             )}
-            {pubkey && user && (
-              <Tooltip text='Profile' enterDelay={0}>
-                <Link to='/$nostr' params={{ nostr: user!.nprofile! }}>
-                  <Tab anchor={`/${user.nprofile}`} sx={styles.tab} icon={<IconUser />} activeIcon={<IconUser />} />
-                </Link>
-              </Tooltip>
+            {user && (
+              <Link to='/$nostr' params={{ nostr: user!.nprofile! }}>
+                <Tab anchor={`/${user.nprofile}`} sx={styles.tab} icon={<IconUser />} activeIcon={<IconUser />} />
+              </Link>
+            )}
+            {!pubkey && (
+              <LinkSignIn>
+                <Tab anchor={`/signin_in`} sx={styles.tab} icon={<IconUser />} activeIcon={<IconUser />} />
+              </LinkSignIn>
             )}
           </Tabs>
         </Stack>
@@ -68,7 +70,7 @@ const styles = css.create({
     left: 0,
     right: 0,
     bottom: 0,
-    zIndex: 400,
+    zIndex: 200,
     margin: 'auto',
     display: 'flex',
     flexDirection: 'row',
@@ -76,13 +78,13 @@ const styles = css.create({
     alignItems: 'center',
     paddingTop: spacing.padding1,
     paddingBottom: 'calc(8px + env(safe-area-inset-bottom))',
-    backgroundColor: palette.surface,
-    //backgroundColor: `rgba(${backgroundChannel} / 0.66)`,
-    backdropFilter: 'blur(4px)',
+    backgroundColor: palette.surfaceContainerLowest,
   },
   tab: {
     height: 50,
-    width: 80,
+    width: 70,
     borderRadius: shape.full,
+    [tabTokens.containerShape]: shape.full,
+    [focusRingTokens.color]: palette.secondaryContainer,
   },
 })

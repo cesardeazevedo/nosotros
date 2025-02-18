@@ -7,16 +7,18 @@ import { typeScale } from '@/themes/typeScale.stylex'
 import type { ChangeEvent } from 'react'
 import { forwardRef, useCallback, useRef, useState } from 'react'
 import { css, html } from 'react-strict-dom'
+import type { StrictReactDOMInputProps } from 'react-strict-dom/dist/types/StrictReactDOMInputProps'
 import { dataProps } from '../helpers/dataProps'
 import { mergeRefs } from '../helpers/mergeRefs'
 import { useVisualState } from '../hooks/useVisualState'
 import type { SxProps } from '../types'
 import { textFieldTokens } from './TextField.stylex'
 
-type Props = {
+type Props = StrictReactDOMInputProps & {
   sx?: SxProps
   size?: 'sm' | 'md'
   type?: 'text' | 'number' | 'text' | 'date' | 'email' | 'password'
+  name?: string
   error?: boolean
   autoComplete?: boolean
   autoFocus?: boolean
@@ -31,7 +33,7 @@ type Props = {
   defaultValue?: string
   onBlur?: () => void
   onFocus?: () => void
-  onChange?: (e: ChangeEvent<HTMLInputElement>) => void
+  onChange?: (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void
   placeholder?: string
   leading?: React.ReactNode
   trailing?: React.ReactNode
@@ -40,6 +42,7 @@ type Props = {
 export const TextField = forwardRef<HTMLInputElement, Props>((props, ref) => {
   const {
     sx,
+    name,
     size = 'md',
     type: inputType = 'text',
     defaultValue,
@@ -53,6 +56,7 @@ export const TextField = forwardRef<HTMLInputElement, Props>((props, ref) => {
     onBlur,
     onChange,
     onFocus,
+    shrink: shrinkProp,
   } = props
   const visualStateRef = useRef<HTMLElement>(null)
   const { visualState, setRef } = useVisualState(undefined, { retainFocusAfterClick: true })
@@ -65,13 +69,13 @@ export const TextField = forwardRef<HTMLInputElement, Props>((props, ref) => {
     return false
   })
 
-  const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+  const handleChange = useCallback((e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { value } = e.target
     setFilled(!!value && value !== '')
     onChange?.(e)
   }, [])
 
-  const shrink = props.shrink || visualState.focused || filled
+  const shrink = shrinkProp || visualState.focused || filled
 
   return (
     <html.div
@@ -86,15 +90,15 @@ export const TextField = forwardRef<HTMLInputElement, Props>((props, ref) => {
           </html.div>
         )}
         {props.multiline && (
-          <html.textarea
+          <textarea
             rows={props.rows}
             ref={refs}
-            style={[styles.input, styles.textarea]}
+            name={name}
+            {...css.props([styles.input, styles.textarea])}
             onChange={handleChange}
             onBlur={onBlur}
             onFocus={onFocus}
             placeholder={placeholder}
-            // value={value}
             defaultValue={defaultValue}
             {...dataProps(visualState)}
             data-shrink
@@ -103,15 +107,16 @@ export const TextField = forwardRef<HTMLInputElement, Props>((props, ref) => {
           />
         )}
         {!props.multiline && (
-          <html.input
+          <input
             type={inputType}
             ref={refs}
-            style={styles.input}
+            {...css.props(styles.input)}
             onChange={handleChange}
             onBlur={onBlur}
             onFocus={onFocus}
             placeholder={placeholder}
             value={value}
+            name={name}
             defaultValue={defaultValue}
             {...dataProps(visualState)}
             data-shrink={shrink}

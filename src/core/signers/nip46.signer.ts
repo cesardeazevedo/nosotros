@@ -9,7 +9,8 @@ import { NostrSubscription } from '../NostrSubscription'
 import { broadcast } from '../operators/broadcast'
 import { subscribe } from '../operators/subscribe'
 import { verify } from '../operators/verify'
-import type { Pool } from '../pool'
+import { Pool } from '../pool'
+import { Relay } from '../Relay'
 import { type NostrFilter } from '../types'
 import { NIP01Signer } from './nip01.signer'
 import type { Signer } from './signer'
@@ -24,18 +25,6 @@ type NIP05Response = {
   } & {
     [pubkey: string]: string[]
   }
-}
-
-export type BunkerResponse = {
-  id: string
-  result: string
-  error: string
-}
-
-export type BunkerPointer = {
-  relay: string
-  pubkey: string
-  secret?: string
 }
 
 export type BunkerMethodNIP05 = {
@@ -62,14 +51,26 @@ export type NIP46RemoteSignerOptions = {
   name?: string
   description?: string
   method: BunkerMethods
-  auth: (url: string) => Observable<BunkerResponse>
 }
 
-type BunkerEvent = [BunkerPointer, NostrEvent, BunkerResponse]
+export type MessageDecrypted = {
+  id: string
+  result: string
+  error: string
+}
 
-function buildNostrConnectUrl(relay: string, pubkey: string, options: NIP46RemoteSignerOptions) {
-  const { auth, method, ...rest } = options
-  const params = new URLSearchParams({ ...rest, ...method })
+export type BunkerPointer = {
+  relay: string
+  pubkey: string
+  secret?: string
+}
+
+type BunkerEvent = [BunkerPointer, NostrEvent, MessageDecrypted]
+type BunkerPubkey = [BunkerPointer, string]
+
+function buildNostrConnectUrl(relay: string, pubkey: string, options: Omit<NIP46RemoteSignerOptions, 'method'>) {
+  const { clientSecret, ...rest } = options
+  const params = new URLSearchParams({ ...rest })
   params.append('relay', relay)
   return `nostrconnect://${pubkey}?${params.toString()}`
 }
@@ -90,7 +91,7 @@ function fetchNIP05(nip05: string) {
   )
 }
 
-function parseBunkerUrl(input: string) {
+export function parseBunkerUrl(input: string) {
   const match = input.match(BUNKER_REGEX)
   invariant(match, 'Error on parsing bunkerUrl')
   const pubkey = match[1]
@@ -102,23 +103,24 @@ function parseBunkerUrl(input: string) {
   } as BunkerPointer
 }
 
+const pool = new Pool({ allowLocalConnection: true })
+
 export class NIP46RemoteSigner implements Signer<NIP46RemoteSignerOptions> {
   name = 'nip46'
 
-  pool: Pool
-  #secret: string
+  secret: string
   options: NIP46RemoteSignerOptions
   nostrconnect?: string
 
   clientSigner: NIP01Signer
 
-  private events$: Observable<BunkerEvent>
-  private bunker$: Observable<BunkerPointer>
+  events$: Observable<BunkerEvent>
+  bunker$: Observable<BunkerPointer>
+  connected$: Observable<BunkerPubkey>
 
-  constructor(pool: Pool, options: NIP46RemoteSignerOptions) {
-    this.pool = pool
+  constructor(options: NIP46RemoteSignerOptions) {
     this.options = options
-    this.#secret = options.secret || Math.random().toString(36).slice(-7)
+    this.secret = options.secret || Math.random().toString(36).slice(-7)
     this.clientSigner = new NIP01Signer(options.clientSecret)
 
     this.bunker$ = of(this.options.method).pipe(
@@ -144,31 +146,41 @@ export class NIP46RemoteSigner implements Signer<NIP46RemoteSignerOptions> {
 
     this.events$ = this.bunker$.pipe(
       mergeMap((bunker) => this.subscribeBunker(bunker)),
+      shareReplay(1),
+    )
 
-      mergeMap(([bunker, event, res]) => {
+    // Cached connected response
+    this.connected$ = this.events$.pipe(
+      filter(([, , res]) => {
         if (res.result === 'auth_url') {
-          if (this.options.auth) {
-            return this.options.auth(res.error).pipe(map((res) => [bunker, event, res] as BunkerEvent))
-          }
-          console.log(`remote signer ${bunker.pubkey} authentication required: ${res.error}`)
+          window.open(res.error, 'popup', 'width=600,height800')
+          return false
         }
-        return of([bunker, event, res] as BunkerEvent)
+        return true
       }),
+
+      filter(([, , res]) => res.result === 'ack' || res.result === this.secret),
+
+      mergeMap(([bunker, event]) => this.send('get_public_key', [], [bunker, bunker.pubkey || event.pubkey])),
+
+      map(([bunker, res]) => [bunker, res.result] as BunkerPubkey),
+
+      take(1),
 
       shareReplay(1),
     )
-    this.events$.subscribe()
   }
 
   getNostrconnect() {
     invariant(this.options.method.method === 'nostrconnect', 'No relays provided')
+    const { method, ...rest } = this.options
     return buildNostrConnectUrl(this.options.method.relay, this.clientSigner.pubkey, {
-      ...this.options,
-      secret: this.#secret,
+      ...rest,
+      secret: this.secret,
     })
   }
 
-  private subscribeBunker(bunker: BunkerPointer) {
+  private subscribeBunker(bunker: BunkerPointer): Observable<BunkerEvent> {
     const subFilter: NostrFilter = {
       kinds: [Kind.NostrConnect],
       '#p': [this.clientSigner.pubkey],
@@ -178,40 +190,45 @@ export class NIP46RemoteSigner implements Signer<NIP46RemoteSignerOptions> {
     }
 
     const sub = new NostrSubscription(subFilter)
+    const relay = pool.get(bunker.relay) || new Relay(bunker.relay)
 
     return of(sub).pipe(
-      subscribe(this.pool.get(bunker.relay)!, undefined, false),
+      subscribe(relay, undefined, false),
 
       mergeMap(async ([, event]) => {
-        const res = JSON.parse(await this.clientSigner.decrypt(bunker.pubkey, event.content))
+        const pubkey = bunker.pubkey || event.pubkey
+        const msg = event.content
+        const decrypted = event.content.includes('?iv=')
+          ? await this.clientSigner.decrypt04(pubkey, msg)
+          : await this.clientSigner.decrypt(pubkey, msg)
+        const res = JSON.parse(decrypted)
         return [bunker, event, res] as BunkerEvent
       }),
     )
   }
 
-  private send(method: string, params: string[], bunker: BunkerPointer) {
+  private send(method: string, params: string[], [bunker, pubkey]: BunkerPubkey) {
     const id = Math.random().toString().slice(2)
     const msg = JSON.stringify({ id, method, params })
-    return from(this.clientSigner.encrypt(bunker.pubkey, msg)).pipe(
+    return from(this.clientSigner.encrypt(pubkey, msg)).pipe(
       mergeMap((encryptedContent) => {
         const event = {
           kind: kinds.NostrConnect,
           created_at: Math.floor(Date.now() / 1000),
           content: encryptedContent,
-          tags: [['p', bunker.pubkey]],
+          tags: [['p', pubkey]],
         } as UnsignedEvent
 
         const publisher = new NostrPublisher(event, { signer: this.clientSigner, relays: of([bunker.relay]) })
-        return of(publisher).pipe(broadcast(this.pool))
+        return of(publisher).pipe(broadcast(pool))
       }),
       mergeMap(() => {
         return this.events$.pipe(
           filter(([, , res]) => res.id === id),
           take(1),
-          map(([, , res]) => res),
         )
       }),
-      map((res) => {
+      map(([, , res]) => {
         if (res.error?.toLowerCase() === 'unauthorized') {
           throw new Error(res.error)
         }
@@ -221,24 +238,26 @@ export class NIP46RemoteSigner implements Signer<NIP46RemoteSignerOptions> {
   }
 
   ping() {
-    return this.events$.pipe(mergeMap(([bunker]) => this.send('ping', [], bunker))).subscribe()
+    return this.events$.pipe(mergeMap(([bunker]) => this.send('ping', [], [bunker, bunker.pubkey]))).subscribe()
   }
 
   async connect() {
     return firstValueFrom(
       this.bunker$.pipe(
-        mergeMap((bunker) => this.send('connect', [bunker.pubkey, bunker.secret || this.#secret], bunker)),
+        mergeMap((bunker) =>
+          this.send('connect', [bunker.pubkey, bunker.secret || this.secret], [bunker, bunker.pubkey]),
+        ),
       ),
     )
   }
 
   async getPublicKey() {
-    return firstValueFrom(this.bunker$.pipe(mergeMap((bunker) => this.send('get_public_key', [], bunker))))
+    return firstValueFrom(this.connected$.pipe(mergeMap((bunker) => this.send('get_public_key', [], bunker))))
   }
 
-  async sign(event: UnsignedEvent): Promise<NostrEvent | false> {
+  async sign(event: UnsignedEvent): Promise<NostrEvent> {
     return firstValueFrom(
-      this.bunker$.pipe(
+      this.connected$.pipe(
         mergeMap((bunker) => this.send('sign_event', [JSON.stringify(event)], bunker)),
         map(([, res]) => JSON.parse(res.result) as NostrEvent),
         verify(),
@@ -246,20 +265,18 @@ export class NIP46RemoteSigner implements Signer<NIP46RemoteSignerOptions> {
     )
   }
 
-  // todo
   encrypt(pubkey: string, msg: string) {
     return firstValueFrom(
-      this.bunker$.pipe(
+      this.connected$.pipe(
         mergeMap((bunker) => this.send('encrypt', [msg], bunker)),
         map(([, res]) => res.result),
       ),
     )
   }
 
-  // todo
   decrypt(pubkey: string, msg: string) {
     return firstValueFrom(
-      this.bunker$.pipe(
+      this.connected$.pipe(
         mergeMap((bunker) => this.send('decrypt', [msg], bunker)),
         map(([, res]) => res.result),
       ),

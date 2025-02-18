@@ -3,10 +3,9 @@ import { Divider } from '@/components/ui/Divider/Divider'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Paper } from '@/components/ui/Paper/Paper'
-import { PopoverBase } from '@/components/ui/Popover/PopoverBase'
+import { Popover } from '@/components/ui/Popover/Popover'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
-import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 import { spacing } from '@/themes/spacing.stylex'
 import {
   IconBrush,
@@ -17,30 +16,18 @@ import {
   IconTopologyStar,
 } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
-import { useCallback, useState } from 'react'
 import { css } from 'react-strict-dom'
 import { SettingsContent } from './SettingsContent'
 import { SettingsNetwork } from './SettingsNetwork'
 import { SettingsTheme } from './SettingsTheme'
 
 export const SettingsPopover = () => {
-  const [open, setOpen] = useState(false)
-
-  const handleClick = useCallback(() => {
-    setOpen(true)
-  }, [])
-
-  const handleClose = useCallback(() => {
-    setOpen(false)
-  }, [])
-
   return (
     <>
-      <PopoverBase
-        opened={open}
-        onClose={handleClose}
+      <Popover
+        floatingStrategy='fixed'
         placement='bottom-end'
-        contentRenderer={() => (
+        contentRenderer={({ close }) => (
           <Paper elevation={2} surface='surfaceContainerLow' sx={styles.root}>
             <Expandable
               initiallyExpanded
@@ -92,18 +79,16 @@ export const SettingsPopover = () => {
             </Expandable>
             <Divider />
             <Stack sx={styles.footer}>
-              <Link to='/settings' onClick={() => handleClose()}>
+              <Link to='/settings' onClick={close}>
                 <Button variant='filledTonal'>See full settings</Button>
               </Link>
             </Stack>
           </Paper>
         )}>
-        {({ getProps, setRef }) => (
-          <Tooltip cursor='arrow' text='Settings'>
-            <IconButton {...getProps()} ref={setRef} onClick={handleClick} icon={<IconSettings strokeWidth='1.4' />} />
-          </Tooltip>
+        {({ getProps, setRef, open }) => (
+          <IconButton {...getProps()} ref={setRef} onClick={open} icon={<IconSettings strokeWidth='1.4' />} />
         )}
-      </PopoverBase>
+      </Popover>
     </>
   )
 }

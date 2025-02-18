@@ -2,12 +2,14 @@ import { AppBar } from '@/components/ui/AppBar/AppBar'
 import type { Props as SlideProps } from '@/components/ui/Slide/Slide'
 import { Slide } from '@/components/ui/Slide/Slide'
 import { Stack } from '@/components/ui/Stack/Stack'
+import { useCurrentPubkey } from '@/hooks/useRootStore'
 import { useScrollTrigger } from '@/hooks/useScrollTrigger'
 import { spacing } from '@/themes/spacing.stylex'
 import { useMatch } from '@tanstack/react-router'
 import { useMobile } from 'hooks/useMobile'
 import { useNostrRoute } from 'hooks/useNavigations'
-import React from 'react'
+import { observer } from 'mobx-react-lite'
+import React, { useState } from 'react'
 import { css, html } from 'react-strict-dom'
 import { CenteredContainer } from '../Layouts/CenteredContainer'
 import { NavigationHeader } from '../Navigation/NavigationHeader'
@@ -17,7 +19,9 @@ import { RelayPopoverSummary } from '../Relays/RelayPopoverSummary'
 import { SettingsPopover } from '../Settings/SettingsPopover'
 import { HeaderLogo } from './HeaderLogo'
 import { HeaderSignIn } from './HeaderSignIn'
+import { HeaderSearch } from './HeaderSearch'
 
+// Way too buggy on ios, might not worth it
 export const HideOnScroll = React.memo(
   (props: { direction?: SlideProps['direction']; children: React.ReactElement }) => {
     const { direction = 'down', children } = props
@@ -31,24 +35,27 @@ export const HideOnScroll = React.memo(
   },
 )
 
-export const Header = React.memo(function Header() {
+type Props = {
+  children: React.ReactNode
+}
+
+export const Header = observer(function Header(props: Props) {
   const isMobile = useMobile()
+  const [searchOpen, setSearchOpen] = useState(false)
   useMatch({ from: '__root__' })
 
+  const pubkey = useCurrentPubkey()
   const isNostrRoute = !!useNostrRoute()
-
-  // const HideOnScrollContainer = isMobile ? HideOnScroll : React.Fragment
 
   return (
     <>
       <AppBar>
         {isMobile && (
-          <Stack align='center' justify='space-between' gap={2} sx={styles.content$mobile}>
+          <Stack align='center' justify='space-between' gap={0} sx={styles.content$mobile}>
             {!isNostrRoute && <Sidebar />}
-            {!isNostrRoute && <HeaderLogo />}
+            {!isNostrRoute && <HeaderLogo sx={[styles.logo$mobile, !!pubkey && styles.logo$logged]} />}
             {isNostrRoute && <NavigationHeader />}
-            <div />
-            <RelayPopoverSummary />
+            {pubkey ? <RelayPopoverSummary /> : <div />}
           </Stack>
         )}
         {!isMobile && (
@@ -61,14 +68,20 @@ export const Header = React.memo(function Header() {
             </CenteredContainer>
             <html.div style={styles.trailing}>
               <Stack gap={1}>
+                <HeaderSearch
+                  open={searchOpen}
+                  onClick={() => setSearchOpen(true)}
+                  onCancel={() => setSearchOpen(false)}
+                />
                 <SettingsPopover />
-                <RelayPopoverSummary />
+                {pubkey && <RelayPopoverSummary />}
                 <HeaderSignIn />
               </Stack>
             </html.div>
           </>
         )}
       </AppBar>
+      <html.div style={styles.body}>{props.children}</html.div>
     </>
   )
 })
@@ -76,6 +89,9 @@ export const Header = React.memo(function Header() {
 const styles = css.create({
   root: {
     position: 'relative',
+  },
+  body: {
+    marginTop: 64,
   },
   leading: {
     position: 'absolute',
@@ -85,6 +101,13 @@ const styles = css.create({
     position: 'absolute',
     right: spacing.margin3,
   },
+  logo$mobile: {
+    flex: 1,
+    marginLeft: -42,
+  },
+  logo$logged: {
+    marginLeft: -110,
+  },
   content: {
     display: 'flex',
     justifyContent: 'center',
@@ -92,6 +115,7 @@ const styles = css.create({
     marginTop: 0,
   },
   content$mobile: {
+    // flex: 1,
     width: '100%',
   },
 })

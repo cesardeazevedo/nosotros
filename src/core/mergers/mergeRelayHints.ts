@@ -5,6 +5,6 @@ import { removeEmptyKeys } from '../helpers/removeEmptyKeys'
 export function mergeRelayHints(hints: RelayHints[] = []) {
   const authors = groupKeysFromArray(hints.map((x) => x.authors))
   const ids = groupKeysFromArray(hints.map((x) => x.ids))
-  const fallback = groupKeysFromArray(hints.map((x) => x.fallback))
-  return removeEmptyKeys<RelayHints>({ authors, ids, fallback })
+  const idHints = groupKeysFromArray(hints.map((x) => x.idHints))
+  return removeEmptyKeys<RelayHints>({ authors, ids, idHints })
 }

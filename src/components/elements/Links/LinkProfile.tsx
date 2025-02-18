@@ -1,44 +1,50 @@
+import { useContentContext } from '@/components/providers/ContentProvider'
 import type { SxProps } from '@/components/ui/types'
+import { useRootStore } from '@/hooks/useRootStore'
+import { userStore } from '@/stores/users/users.store'
 import { Link, useMatch, useRouter } from '@tanstack/react-router'
 import { observer } from 'mobx-react-lite'
+import { nip19 } from 'nostr-tools'
 import { forwardRef, useCallback, useContext } from 'react'
 import { css } from 'react-strict-dom'
-import type { User } from '@/stores/users/user'
 import { DeckContext } from '../Deck/DeckContext'
-import { useRootStore } from '@/hooks/useRootStore'
 
 interface Props {
   sx?: SxProps
-  user?: User
+  pubkey: string
   underline?: boolean
-  disableLink?: boolean
   children: React.ReactNode
 }
 
 export const LinkProfile = observer(
   forwardRef<never, Props>(function LinkProfile(props, ref) {
-    const { user, disableLink = false, underline, children, ...rest } = props
+    const { pubkey, underline, children, sx, ...rest } = props
     const route = useMatch({ strict: false })
     const router = useRouter()
     const root = useRootStore()
     const isDeck = route.id === '/deck'
     const { index } = useContext(DeckContext)
+    const { disableLink } = useContentContext()
+
+    const nprofile = userStore.get(pubkey)?.nprofile || nip19.nprofileEncode({ pubkey })
 
     const handleClickDeck = useCallback(() => {
-      if (user) {
-        root.decks.selected.addNProfile({ pubkey: user.pubkey }, (index || 0) + 1)
-      }
-    }, [user, index])
+      root.decks.selected.addNProfile({ options: { pubkey } }, (index || 0) + 1)
+    }, [index])
 
-    if (disableLink || !user?.nprofile) {
+    if (disableLink || !nprofile) {
       return children
     }
 
     if (isDeck) {
       return (
-        <Link onClick={handleClickDeck} {...rest} ref={ref} {...css.props([underline && styles.underline, rest.sx])}>
+        <a
+          onClick={handleClickDeck}
+          {...rest}
+          ref={ref}
+          {...css.props([styles.cursor, underline && styles.underline, sx])}>
           {children}
-        </Link>
+        </a>
       )
     }
 
@@ -46,11 +52,10 @@ export const LinkProfile = observer(
       <Link
         resetScroll
         to='/$nostr'
-        params={{ nostr: user?.nprofile }}
-        // @ts-ignore
-        state={{ from: router.latestLocation.pathname }}
+        params={{ nostr: nprofile }}
+        state={{ from: router.latestLocation.pathname } as never}
         {...rest}
-        {...css.props([underline && styles.underline, rest.sx])}
+        {...css.props([underline && styles.underline, sx])}
         ref={ref}>
         {children}
       </Link>
@@ -59,6 +64,10 @@ export const LinkProfile = observer(
 )
 
 const styles = css.create({
+  cursor: {
+    cursor: 'pointer',
+    display: 'inline',
+  },
   underline: {
     textDecoration: {
       default: 'inherit',

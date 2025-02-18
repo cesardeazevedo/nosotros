@@ -10,5 +10,15 @@ type Props = {
 export const ZapChipAmount = observer(function ZapChipAmount(props: Props) {
   const { amount, store } = props
   const selected = store.amount === amount && !store.custom.value
-  return <Chip selected={selected} variant='filter' label={amount} onClick={() => store.setAmount(amount)} />
+  return (
+    <Chip
+      selected={selected}
+      variant='filter'
+      label={amount}
+      onClick={() => {
+        store.setAmount(amount)
+        store.custom.toggle(false)
+      }}
+    />
+  )
 })

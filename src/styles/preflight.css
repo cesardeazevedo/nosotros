@@ -20,6 +20,18 @@
   --sixui-content: '';
 }
 
+.tiptap p.is-editor-empty:first-child::before {
+  color: #adb5bd;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  max-width: 100%;
+  pointer-events: none;
+}
+.ProseMirror-gapcursor::after {
+  border: 2px solid currentColor;
+}
+
 /*
 1. Use a consistent sensible line-height in all browsers.
 2. Prevent adjustments of font size after orientation changes in iOS.
@@ -423,8 +435,10 @@ Constrain images and videos to the parent width and preserve their intrinsic asp
 
 img,
 video {
-  max-width: 100%;
-  height: auto;
+  /* max-width: 100%; */
+  /* react-strict dom is applying this causing a bunch of issues */
+  /* height: unset; */
+  /* aspect-ratio: unset; */
 }
 
 /* Make elements with the HTML hidden attribute stay hidden by default */

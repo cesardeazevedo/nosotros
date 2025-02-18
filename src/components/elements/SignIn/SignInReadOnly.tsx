@@ -1,3 +1,4 @@
+import { ContentProvider } from '@/components/providers/ContentProvider'
 import { Button } from '@/components/ui/Button/Button'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
@@ -5,15 +6,15 @@ import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { TextField } from '@/components/ui/TextField/TextField'
 import { useGoBack } from '@/hooks/useNavigations'
-import { useObservableNostrContext } from '@/stores/context/nostr.context.hooks'
+import { subscribeUser } from '@/nostr/subscriptions/subscribeUser'
+import { useObservableNostrContext } from '@/stores/nostr/nostr.context.hooks'
 import { signinStore } from '@/stores/signin/signin.store'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconClipboardCopy, IconScan } from '@tabler/icons-react'
 import { useMobile } from 'hooks/useMobile'
 import { observer } from 'mobx-react-lite'
 import { pluckFirst, useObservable, useObservableState } from 'observable-hooks'
-import { useCallback } from 'react'
-import { Controller, useForm, useWatch, type Control } from 'react-hook-form'
+import { useActionState, useCallback, useRef } from 'react'
 import { css } from 'react-strict-dom'
 import { debounceTime, filter, switchMap } from 'rxjs'
 import { dialogStore } from 'stores/ui/dialogs.store'
@@ -22,135 +23,115 @@ import { UserAvatar } from '../User/UserAvatar'
 import { UserName } from '../User/UserName'
 import { SignInHeader } from './SignInHeader'
 
-type FormValues = {
-  input: string
-  pubkey: string
-}
-
-const UserPreview = observer(function UserPreview(props: { control: Control<FormValues> }) {
-  const input = useWatch({ name: 'pubkey', control: props.control })
+const SignInPreview = observer(function UserPreview() {
+  const input = signinStore.inputPubkey
 
   const input$ = useObservable(pluckFirst, [input])
   const sub = useObservableNostrContext((context) => {
     return input$.pipe(
       filter((x) => !!x),
       debounceTime(250),
-      switchMap((value) => context.client.users.subscribe(value)),
+      switchMap((value) => subscribeUser(value, context.context)),
     )
   })
   const user = useObservableState(sub)
 
-  if (!user) {
-    return
-  }
   return (
-    <Stack horizontal={false} gap={2} justify='flex-end' align='center'>
-      {!user ? <Skeleton variant='circular' sx={styles.loading} /> : <UserAvatar pubkey={user.pubkey} size='lg' />}
-      {user && <UserName disableLink disablePopover variant='title' size='lg' pubkey={user.pubkey} />}
-    </Stack>
+    user && (
+      <ContentProvider value={{ disableLink: true, disablePopover: true }}>
+        <Stack horizontal={false} gap={2} justify='flex-end' align='center'>
+          {!user ? <Skeleton variant='circular' sx={styles.loading} /> : <UserAvatar pubkey={user.pubkey} size='lg' />}
+          {user && <UserName variant='title' size='lg' pubkey={user.pubkey} />}
+        </Stack>
+      </ContentProvider>
+    )
   )
 })
 
 export const SignInReadOnly = observer(function SignInForm() {
   const isMobile = useMobile()
   const goBack = useGoBack()
+  const ref = useRef<HTMLInputElement>(null)
 
-  const form = useForm<FormValues>({
-    mode: 'all',
-    reValidateMode: 'onChange',
-    resolver: (field) => {
-      if (field.input.startsWith('npub') || field.input.startsWith('nprofile')) {
-        const decoded = decodeNIP19(field.input)
-        switch (decoded?.type) {
-          case 'npub': {
-            form.setValue('pubkey', decoded.data)
-            break
-          }
-          case 'nprofile': {
-            form.setValue('pubkey', decoded.data.pubkey)
-            break
-          }
-          default: {
-            return { values: {}, errors: { input: { type: 'value', message: 'Invalid pubkey' } } }
-          }
+  const [error, submitAction] = useActionState(async (_: string | null, formData: FormData) => {
+    try {
+      const input = formData.get('input')?.toString() || ''
+      const decoded = decodeNIP19(input)
+      switch (decoded?.type) {
+        case 'npub': {
+          signinStore.submitReadonly(decoded.data)
+          break
         }
-      } else if (!field.input.includes('@')) {
-        const pubkey = field.input
-        form.setValue('pubkey', pubkey)
+        case 'nprofile': {
+          signinStore.submitReadonly(decoded.data.pubkey)
+          break
+        }
+        default: {
+          if (input.includes('@')) {
+            await signinStore.submitNostrAddress(input)
+            break
+          } else if (input.length === 64) {
+            signinStore.submitReadonly(input)
+            break
+          }
+          throw new Error('Invalid Input')
+        }
       }
-      return { values: { input: field.input, pubkey: field.pubkey }, errors: {} }
-    },
-    defaultValues: {
-      input: '',
-      pubkey: '',
-    },
-  })
-
-  const onSubmit = useCallback(async (values: FormValues) => {
-    if (values.input.includes('@')) {
-      const pubkey = await signinStore.submitNostrAddress(values.input)
-      if (!pubkey) {
-        form.setError('input', { message: 'name not found' })
-      }
-    } else {
-      signinStore.submitReadonly(values.pubkey)
+      goBack()
+      return null
+    } catch (err) {
+      const error = err as Error
+      return error.message
     }
-    goBack()
-  }, [])
+  }, null)
 
   const handleClipboard = useCallback(async () => {
-    const res = await signinStore.pasteClipboard()
-    if (res) {
-      return form.setValue('input', res, {
-        shouldDirty: true,
-        shouldTouch: true,
-        shouldValidate: true,
-      })
+    try {
+      const res = await signinStore.pasteClipboard()
+      if (ref.current) {
+        ref.current.value = res
+      }
+      signinStore.setReadonlyInput(res)
+    } catch (err) {
+      const error = err as Error
+      signinStore.setError(error.message)
     }
-    const error = {
-      type: 'value',
-      message: 'Permission not granted',
-    }
-    form.setError('input', error, { shouldFocus: true })
   }, [])
 
   return (
-    <Stack horizontal={false} align='center' justify='flex-start' sx={styles.root}>
-      <SignInHeader>
-        <Text variant='headline'>Sign In with Public Key</Text>
-      </SignInHeader>
-      {/* <Text variant='headline'>Sign In with Public Key</Text> */}
-      <Stack horizontal={false} gap={1} justify='center' sx={styles.content}>
-        <UserPreview control={form.control} />
-        <Stack horizontal={false} gap={2} grow justify='center' sx={styles.center}>
-          <Controller
-            name='input'
-            control={form.control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                shrink
-                error={Boolean(form.formState.errors.input) && form.formState.isSubmitted}
-                placeholder='npub, nprofile, nostr address (nip-05)'
-                trailing={isMobile && <IconButton onClick={dialogStore.openCamera} icon={<IconScan />} />}
-              />
-            )}
-          />
-          {form.formState.isSubmitted && <Text>{form.formState.errors.input?.message}</Text>}
-          <Button
-            variant='outlined'
-            sx={styles.button}
-            onClick={handleClipboard}
-            icon={<IconClipboardCopy size={18} strokeWidth='1.2' style={{ marginLeft: -20 }} />}>
-            Paste
+    <form action={submitAction} {...css.props(styles.root)}>
+      <Stack horizontal={false} align='center' justify='flex-start' sx={styles.root}>
+        <SignInHeader>
+          <Text variant='headline'>Sign In with Public Key</Text>
+        </SignInHeader>
+        <Stack horizontal={false} gap={1} justify='center' sx={styles.content}>
+          <SignInPreview />
+          <Stack horizontal={false} gap={2} grow justify='center' sx={styles.center}>
+            <TextField
+              shrink
+              name='input'
+              ref={ref}
+              onChange={(e) => signinStore.setReadonlyInput(e.target.value)}
+              error={!!error || !!signinStore.error}
+              placeholder='npub, nprofile, nostr address (nip-05)'
+              trailing={isMobile && <IconButton onClick={dialogStore.openCamera} icon={<IconScan />} />}
+            />
+            {error && <Text>{error}</Text>}
+            {signinStore.error && <Text>{signinStore.error}</Text>}
+            <Button
+              variant='outlined'
+              sx={styles.button}
+              onClick={handleClipboard}
+              icon={<IconClipboardCopy size={18} strokeWidth='1.2' style={{ marginLeft: -20 }} />}>
+              Paste
+            </Button>
+          </Stack>
+          <Button type='submit' sx={styles.button} variant='filled'>
+            Sign In
           </Button>
         </Stack>
-        {/* {clipboardError && <Text>{clipboardError}</Text>} */}
-        <Button sx={styles.button} variant='filled' onClick={() => form.handleSubmit(onSubmit)()}>
-          Sign In
-        </Button>
       </Stack>
-    </Stack>
+    </form>
   )
 })
 

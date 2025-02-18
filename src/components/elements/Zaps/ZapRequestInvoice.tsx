@@ -6,12 +6,13 @@ import { Text } from '@/components/ui/Text/Text'
 import { useGoBack } from '@/hooks/useNavigations'
 import { useRootContext } from '@/hooks/useRootStore'
 import { parseBolt11 } from '@/nostr/helpers/parseZap'
+import { waitForZapReceipt } from '@/nostr/subscriptions/waitForZapReceipt'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
-import { IconChevronLeft, IconCircleCheck } from '@tabler/icons-react'
-import { Link, useRouter } from '@tanstack/react-router'
+import { IconChevronLeft, IconCircleCheck, IconWallet } from '@tabler/icons-react'
+import { useNavigate } from '@tanstack/react-router'
 import { AnimatePresence, motion, MotionConfig } from 'framer-motion'
 import { decode } from 'light-bolt11-decoder'
 import { DateTime } from 'luxon'
@@ -42,7 +43,7 @@ export const ZapRequestInvoice = (props: Props) => {
   const context = useRootContext()
   const copyButtonRef = useRef<CopyButtonRef | null>(null)
   const goBack = useGoBack()
-  const router = useRouter()
+  const navigate = useNavigate()
 
   const bolt11 = useMemo(() => parseBolt11(decode(invoice)), [invoice])
 
@@ -62,8 +63,8 @@ export const ZapRequestInvoice = (props: Props) => {
   // }, [])
 
   const [paid] = useObservableState<boolean>(() => {
-    const options = event.relays ? { relays: of(event.relays) } : undefined
-    return context.client.zaps.waitForReceipt(event.id, invoice, options).pipe(
+    const subOptions = event.relays ? { relays: of(event.relays) } : undefined
+    return waitForZapReceipt(event.id, invoice, { ...context.context, subOptions }).pipe(
       first(),
       map(() => true),
     )
@@ -99,12 +100,12 @@ export const ZapRequestInvoice = (props: Props) => {
                       Amount: {formatter.format(parseInt(amount) / 1000)} SATS
                     </Text>
                   </Stack>
-                  {/* @ts-ignore */}
-                  <Link from={router.fullPath} search={{}}>
-                    <Button fullWidth variant='filledTonal'>
-                      Close
-                    </Button>
-                  </Link>
+                  <Button
+                    fullWidth
+                    variant='filledTonal'
+                    onClick={() => navigate({ to: '.', search: ({ nevent, invoice, ...rest }) => rest })}>
+                    Close
+                  </Button>
                 </Stack>
               </motion.div>
             )}
@@ -141,7 +142,14 @@ export const ZapRequestInvoice = (props: Props) => {
                     value={invoice.toUpperCase()}
                   />
                 </html.div>
-                <CopyButton fullWidth text={invoice} title='Copy Invoice' ref={copyButtonRef} />
+                <Stack horizontal={false} gap={1}>
+                  <CopyButton fullWidth text={invoice} title='Copy Invoice' ref={copyButtonRef} />
+                  <a href={`lightning:${invoice}`}>
+                    <Button fullWidth variant='filled' sx={styles.button} icon={<IconWallet strokeWidth='1.5' />}>
+                      Open Wallet
+                    </Button>
+                  </a>
+                </Stack>
               </motion.div>
             )}
           </AnimatePresence>
@@ -180,6 +188,7 @@ const styles = css.create({
     padding: spacing.padding1,
   },
   button: {
+    display: 'flex',
     height: 55,
   },
   expired: {

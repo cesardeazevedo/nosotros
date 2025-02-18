@@ -1,5 +1,6 @@
 /// <reference types="vite/client" />
 /// <reference types="unplugin-info/client" />
+/// <reference types="vite-plugin-pwa/client" />
 
 declare module 'eslint-plugin-react'
 

@@ -255,10 +255,12 @@ export const Slide = React.forwardRef<HTMLElement, Props>(function Slide(props, 
       {...other}>
       {(state: string, childProps) => {
         return React.cloneElement(children, {
+          // @ts-ignore
           ref: handleRef,
           style: {
             visibility: state === 'exited' && !inProp ? 'hidden' : 'visible',
             ...style,
+            // @ts-ignore
             ...children.props.style,
           },
           ...childProps,

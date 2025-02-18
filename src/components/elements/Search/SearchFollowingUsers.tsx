@@ -1,10 +1,13 @@
+import { ContentProvider } from '@/components/providers/ContentProvider'
 import { ListItem } from '@/components/ui/ListItem/ListItem'
-import { useCurrentUser } from '@/hooks/useRootStore'
+import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
+import { useFollowingUsers } from '@/hooks/useFollowingUsers'
 import type { User } from '@/stores/users/user'
-import { userStore } from '@/stores/users/users.store'
+import { shape } from '@/themes/shape.stylex'
+import { spacing } from '@/themes/spacing.stylex'
 import { observer } from 'mobx-react-lite'
 import { forwardRef, useImperativeHandle, useMemo } from 'react'
-import { css } from 'react-strict-dom'
+import { css, html } from 'react-strict-dom'
 import { UserAvatar } from '../User/UserAvatar'
 import { UserName } from '../User/UserName'
 
@@ -22,11 +25,7 @@ type SearchRef = {
 export const SearchFollowingUsers = observer(
   forwardRef<SearchRef, Props>(function SearchFollowingUsers(props, ref) {
     const { query, limit = 10, onSelect } = props
-    const user = useCurrentUser()
-
-    const usersData = useMemo(() => {
-      return [...(user?.following?.tags.get('p') || [])].map((author) => userStore.get(author)).filter((x) => !!x)
-    }, [])
+    const usersData = useFollowingUsers()
 
     const users = useMemo(() => {
       let result = usersData as User[]
@@ -39,7 +38,12 @@ export const SearchFollowingUsers = observer(
     useImperativeHandle(ref, () => ({ users }))
 
     return (
-      <>
+      <ContentProvider value={{ disableLink: true }}>
+        {users.length === 0 && (
+          <html.div style={styles.loading$container}>
+            <Skeleton sx={styles.loading} />
+          </html.div>
+        )}
         {users?.map((user, index) => (
           <ListItem
             interactive
@@ -48,10 +52,10 @@ export const SearchFollowingUsers = observer(
             selected={props.selectedIndex === index}
             onClick={() => onSelect(user.pubkey)}
             leadingIcon={<UserAvatar size='sm' pubkey={user.pubkey} />}>
-            <UserName pubkey={user.pubkey} disableLink />
+            <UserName pubkey={user.pubkey} />
           </ListItem>
         ))}
-      </>
+      </ContentProvider>
     )
   }),
 )
@@ -60,5 +64,12 @@ const styles = css.create({
   item: {
     flex: 0,
     width: '100%',
+  },
+  loading$container: {
+    paddingInline: spacing.padding1,
+  },
+  loading: {
+    borderRadius: shape.lg,
+    height: 36,
   },
 })

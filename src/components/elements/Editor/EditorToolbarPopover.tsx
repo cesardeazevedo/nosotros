@@ -1,3 +1,4 @@
+import { ContentProvider } from '@/components/providers/ContentProvider'
 import { Paper } from '@/components/ui/Paper/Paper'
 import { PopoverBase } from '@/components/ui/Popover/PopoverBase'
 import { Stack } from '@/components/ui/Stack/Stack'
@@ -8,10 +9,12 @@ import { css } from 'react-strict-dom'
 import { EditorBroadcaster } from './EditorBroadcaster'
 import { EditorMentions } from './EditorMentions'
 import { EditorSettings } from './EditorSettings'
+import { EditorZapSplits } from './EditorZapSplit'
 import { EditorButtonAddMedia } from './Toolbar/EditorButtonAddMedia'
 import { EditorButtonBroadcast } from './Toolbar/EditorButtonBroadcast'
 import { EditorButtonMentions } from './Toolbar/EditorButtonMentions'
 import { EditorButtonSettings } from './Toolbar/EditorButtonSettings'
+import { EditorButtonZapSplits } from './Toolbar/EditorButtonZapSplit'
 
 type Props = {
   store: EditorStore
@@ -23,47 +26,62 @@ export const EditorActionsPopover = observer(function EditorActionsPopover(props
 
   return (
     <Stack horizontal justify='space-between' sx={styles.root}>
-      <Stack gap={0.5}>
-        <EditorButtonAddMedia dense store={store} />
-        <PopoverBase
-          cursor='arrow'
-          opened={store.section === 'broadcast'}
-          onClose={() => store.openSection('broadcast')}
-          placement='bottom-start'
-          contentRenderer={() => (
-            <Paper elevation={2} surface='surfaceContainerLow' sx={styles.wrapper}>
-              <EditorBroadcaster store={store} />
-            </Paper>
-          )}>
-          {({ getProps, setRef }) => <EditorButtonBroadcast dense {...getProps()} ref={setRef} store={store} />}
-        </PopoverBase>
+      <ContentProvider value={{ dense: true }}>
+        <Stack gap={0.5}>
+          <EditorButtonAddMedia store={store} />
+          <PopoverBase
+            cursor='arrow'
+            opened={store.section === 'broadcast'}
+            onClose={() => store.openSection('broadcast')}
+            placement='bottom-start'
+            contentRenderer={() => (
+              <Paper elevation={2} surface='surfaceContainerLow' sx={styles.wrapper}>
+                <EditorBroadcaster store={store} />
+              </Paper>
+            )}>
+            {({ getProps, setRef }) => <EditorButtonBroadcast {...getProps()} ref={setRef} store={store} />}
+          </PopoverBase>
 
-        <PopoverBase
-          cursor='arrow'
-          opened={store.section === 'mentions'}
-          onClose={() => store.openSection('mentions')}
-          placement='bottom-start'
-          contentRenderer={() => (
-            <Paper elevation={2} surface='surfaceContainerLow' sx={styles.wrapper}>
-              <EditorMentions store={store} />
-            </Paper>
-          )}>
-          {({ getProps, setRef }) => <EditorButtonMentions dense {...getProps()} ref={setRef} store={store} />}
-        </PopoverBase>
+          <PopoverBase
+            cursor='arrow'
+            opened={store.section === 'mentions'}
+            onClose={() => store.openSection('mentions')}
+            placement='bottom-start'
+            contentRenderer={() => (
+              <Paper elevation={2} surface='surfaceContainerLow' sx={styles.wrapper}>
+                <EditorMentions store={store} />
+              </Paper>
+            )}>
+            {({ getProps, setRef }) => <EditorButtonMentions {...getProps()} ref={setRef} store={store} />}
+          </PopoverBase>
 
-        <PopoverBase
-          cursor='arrow'
-          opened={store.section === 'settings'}
-          onClose={() => store.openSection('settings')}
-          placement='bottom-start'
-          contentRenderer={() => (
-            <Paper elevation={2} surface='surfaceContainerLow' sx={styles.wrapper}>
-              <EditorSettings store={store} />
-            </Paper>
-          )}>
-          {({ getProps, setRef }) => <EditorButtonSettings dense {...getProps()} ref={setRef} store={store} />}
-        </PopoverBase>
-      </Stack>
+          <PopoverBase
+            cursor='arrow'
+            opened={store.section === 'zaps'}
+            onClose={() => store.openSection('zaps')}
+            placement='bottom-start'
+            contentRenderer={() => (
+              <Paper elevation={2} surface='surfaceContainerLow' sx={styles.wrapper}>
+                <EditorZapSplits store={store} />
+              </Paper>
+            )}>
+            {({ getProps, setRef }) => <EditorButtonZapSplits {...getProps()} ref={setRef} store={store} />}
+          </PopoverBase>
+
+          <PopoverBase
+            cursor='arrow'
+            opened={store.section === 'settings'}
+            onClose={() => store.openSection('settings')}
+            placement='bottom-start'
+            contentRenderer={() => (
+              <Paper elevation={2} surface='surfaceContainerLow' sx={styles.wrapper}>
+                <EditorSettings store={store} />
+              </Paper>
+            )}>
+            {({ getProps, setRef }) => <EditorButtonSettings {...getProps()} ref={setRef} store={store} />}
+          </PopoverBase>
+        </Stack>
+      </ContentProvider>
       {children}
     </Stack>
   )

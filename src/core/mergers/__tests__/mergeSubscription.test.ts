@@ -1,5 +1,5 @@
 import { RELAY_1, RELAY_2, RELAY_3 } from '@/constants/testRelays'
-import { fakeNote } from '@/utils/faker'
+import { fakeEvent } from '@/utils/faker'
 import { subscribeSpyTo } from '@hirez_io/observer-spy'
 import type { RelayFilters } from 'core/NostrSubscription'
 import { NostrSubscription } from 'core/NostrSubscription'
@@ -62,10 +62,10 @@ describe('mergeSubscriptions()', () => {
     const map2 = new Map<string, NostrEvent>()
     const map3 = new Map<string, NostrEvent>()
     const map4 = new Map<string, NostrEvent>()
-    const event1 = fakeNote({ id: '1' })
-    const event2 = fakeNote({ id: '2' })
-    const event3 = fakeNote({ id: '3' })
-    const event4 = fakeNote({ id: '4' })
+    const event1 = fakeEvent({ id: '1' })
+    const event2 = fakeEvent({ id: '2' })
+    const event3 = fakeEvent({ id: '3' })
+    const event4 = fakeEvent({ id: '4' })
     map1.set(event1.id, event1)
     map2.set(event2.id, event2)
     map3.set(event3.id, event3)

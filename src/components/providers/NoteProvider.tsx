@@ -1,13 +1,22 @@
+import type { Note } from '@/stores/notes/note'
 import { createContext, useContext } from 'react'
 
-type NoteContextValue = {
-  dense?: boolean
-  disableLink?: boolean
+type NoteContextValues = {
+  note: Note
 }
 
-export const NoteContext = createContext<NoteContextValue>({
-  dense: false,
-  disableLink: false,
-})
+const NoteContext = createContext<NoteContextValues | null>(null)
 
-export const useNoteContext = () => useContext(NoteContext)
+// eslint-disable-next-line react-refresh/only-export-components
+export const useNoteContext = () => {
+  const context = useContext(NoteContext)
+  if (!context) {
+    throw new Error('useNoteContext must be used within NoteProvider')
+  }
+  return context
+}
+
+export const NoteProvider = (props: { value: NoteContextValues; children: React.ReactNode }) => {
+  const { children, value } = props
+  return <NoteContext.Provider value={value}>{children}</NoteContext.Provider>
+}

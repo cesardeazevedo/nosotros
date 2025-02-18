@@ -1,11 +1,13 @@
+import { ContentProvider } from '@/components/providers/ContentProvider'
 import { Button } from '@/components/ui/Button/Button'
 import { Divider } from '@/components/ui/Divider/Divider'
-import { Menu } from '@/components/ui/Menu/Menu'
 import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
+import { MenuList } from '@/components/ui/MenuList/MenuList'
+import { Popover } from '@/components/ui/Popover/Popover'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { useRootContext } from '@/hooks/useRootStore'
-import { subscribeRelayDiscorvery } from '@/nostr/operators/subscribeRelayDiscovery'
+import { subscribeRelayDiscorvery } from '@/nostr/subscriptions/subscribeRelayDiscovery'
 import { relayDiscoveryStore } from '@/stores/relayDiscovery/relayDiscovery.store'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
@@ -25,46 +27,51 @@ import { RelayDiscoveryRowLoading } from './RelayDiscoveryRowLoading'
 import { RelayDiscoveryTableHeader } from './RelayDiscoveryTableHeader'
 
 export const RelayDiscovery = observer(function RelayDiscovery() {
-  const client = useRootContext().client
+  const rootContext = useRootContext()
   const promise = useMemo(() => firstValueFrom(timer(3200)), [])
-  const sub = useObservable(() => subscribeRelayDiscorvery(client))
+  const sub = useObservable(() => subscribeRelayDiscorvery(rootContext.context))
   useSubscription(sub)
   return (
     <Stack horizontal gap={1} justify='space-between' align='flex-start'>
-      <PaperContainer elevation={1} sx={styles.section}>
+      <PaperContainer>
         <Stack horizontal={false} sx={styles.box}>
           <Stack gap={0.5} sx={styles.header} justify='space-between'>
             <Text variant='title' size='md'>
               Relay Discovery
             </Text>
             <div>
-              <Menu
-                trigger={({ getProps }) => (
-                  <Button variant='filledTonal' sx={styles.monitor} {...getProps()}>
-                    <Stack gap={1}>
-                      <IconChevronDown size={18} />
-                      <UserHeader
-                        disableLink
-                        disablePopover
-                        size='md'
-                        pubkey={relayDiscoveryStore.selected}
-                        renderAvatar={false}
-                      />
-                    </Stack>
-                  </Button>
-                )}>
-                <Stack horizontal={false} gap={0.5}>
-                  {relayDiscoveryStore.listMonitors.map((monitor) => (
-                    <MenuItem
-                      key={monitor}
-                      label={<UserName size='md' disablePopover disableLink pubkey={monitor} />}
-                      supportingText={<UserNIP05 pubkey={monitor} />}
-                      onClick={() => relayDiscoveryStore.select(monitor)}
-                      sx={styles.menuItem}
-                    />
-                  ))}
-                </Stack>
-              </Menu>
+              <ContentProvider value={{ disablePopover: true, disableLink: true }}>
+                <Popover
+                  contentRenderer={({ close }) => (
+                    <MenuList surface='surfaceContainerLowest'>
+                      <Stack horizontal={false} gap={0.5}>
+                        {relayDiscoveryStore.listMonitors.map((monitor) => (
+                          <MenuItem
+                            key={monitor}
+                            label={<UserName size='md' pubkey={monitor} />}
+                            supportingText={<UserNIP05 pubkey={monitor} />}
+                            onClick={() => {
+                              relayDiscoveryStore.select(monitor)
+                              close()
+                            }}
+                            sx={styles.menuItem}
+                          />
+                        ))}
+                      </Stack>
+                    </MenuList>
+                  )}>
+                  {({ getProps, setRef, open }) => (
+                    <Button variant='filledTonal' sx={styles.monitor} ref={setRef} {...getProps()} onClick={open}>
+                      <Stack gap={1}>
+                        <IconChevronDown size={18} />
+                        {relayDiscoveryStore.selected && (
+                          <UserHeader size='md' pubkey={relayDiscoveryStore.selected} renderAvatar={false} />
+                        )}
+                      </Stack>
+                    </Button>
+                  )}
+                </Popover>
+              </ContentProvider>
             </div>
           </Stack>
           <Divider />
@@ -98,9 +105,6 @@ export const RelayDiscovery = observer(function RelayDiscovery() {
 })
 
 const styles = css.create({
-  section: {
-    marginTop: spacing.margin4,
-  },
   box: {},
   header: {
     padding: spacing.padding2,

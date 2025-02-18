@@ -1,9 +1,8 @@
+import { useContentContext } from '@/components/providers/ContentProvider'
 import { useNoteContext } from '@/components/providers/NoteProvider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { useCurrentPubkey, useGlobalSettings } from '@/hooks/useRootStore'
 import { useTheme } from '@/hooks/useTheme'
-import type { Comment } from '@/stores/comment/comment'
-import type { Note } from '@/stores/notes/note'
 import { zapStore } from '@/stores/zaps/zaps.store'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconBolt } from '@tabler/icons-react'
@@ -15,7 +14,6 @@ import { ButtonContainer, type ContainerProps } from './PostButtonContainer'
 import { iconProps } from './utils'
 
 type Props = {
-  note: Note | Comment
   onClick?: () => void
 }
 
@@ -43,8 +41,9 @@ function getZapColor(zapAmount: number, palette: (typeof themes)['light'] | (typ
 const formatter = new Intl.NumberFormat()
 
 export const ButtonZap = observer(function ButtonZap(props: Props & ContainerProps) {
-  const { onClick, note, ...rest } = props
-  const { dense, disableLink } = useNoteContext()
+  const { onClick, ...rest } = props
+  const { note } = useNoteContext()
+  const { dense, disableLink } = useContentContext()
   const router = useRouter()
   const pubkey = useCurrentPubkey()
   const globalSettings = useGlobalSettings()
@@ -60,9 +59,8 @@ export const ButtonZap = observer(function ButtonZap(props: Props & ContainerPro
     <ButtonContainer {...rest} sx={styles[color]} value={<>{total ? formatter.format(total) : ''}</>}>
       <LinkBase
         disabled={disableLink}
-        search={{ zap: note.nevent }}
-        // @ts-ignore
-        state={{ from: router.latestLocation.pathname }}>
+        search={{ zap: note.event.nevent }}
+        state={{ from: router.latestLocation.pathname } as never}>
         <IconButton
           size={dense ? 'sm' : 'md'}
           icon={

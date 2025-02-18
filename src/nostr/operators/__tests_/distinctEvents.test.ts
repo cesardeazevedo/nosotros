@@ -1,19 +1,20 @@
+import { NostrSubscription } from '@/core/NostrSubscription'
 import { clearCache } from '@/nostr/cache'
+import { test } from '@/utils/fixtures'
 import { subscribeSpyTo } from '@hirez_io/observer-spy'
 import type { NostrEvent } from 'core/types'
 import { of } from 'rxjs'
-import { fakeNote } from 'utils/faker'
+import { fakeEvent } from 'utils/faker'
 import { distinctEvent } from '../distinctEvents'
 
 describe('distinctEvents()', () => {
-  beforeEach(() => {
-    clearCache()
-  })
+  beforeEach(() => clearCache())
 
   test('assert distinctEvents', async () => {
-    const note1 = fakeNote({ id: '0' })
-    const note2 = fakeNote({ id: '1' })
-    const note3 = fakeNote({ id: '2' })
+    const note1 = fakeEvent({ id: '0' })
+    const note2 = fakeEvent({ id: '1' })
+    const note3 = fakeEvent({ id: '2' })
+    const sub = new NostrSubscription({ kinds: [1] })
     const $ = of<[string, NostrEvent][]>(
       ['a', note1],
       ['b', note1],
@@ -24,7 +25,7 @@ describe('distinctEvents()', () => {
       ['a', note3],
       ['b', note3],
       ['c', note3],
-    ).pipe(distinctEvent())
+    ).pipe(distinctEvent(sub))
 
     const spy = subscribeSpyTo($)
 
@@ -33,10 +34,11 @@ describe('distinctEvents()', () => {
   })
 
   test('assert distinctEvents for replaceable events', async () => {
-    const note1 = fakeNote({ kind: 0, id: '1', created_at: 1 })
-    const note2 = fakeNote({ kind: 0, id: '2', created_at: 2 })
-    const note3 = fakeNote({ kind: 0, id: '3', created_at: 3 })
-    const note4 = fakeNote({ kind: 0, id: '4', created_at: 4 })
+    const note1 = fakeEvent({ kind: 0, id: '1', created_at: 1 })
+    const note2 = fakeEvent({ kind: 0, id: '2', created_at: 2 })
+    const note3 = fakeEvent({ kind: 0, id: '3', created_at: 3 })
+    const note4 = fakeEvent({ kind: 0, id: '4', created_at: 4 })
+    const sub = new NostrSubscription({ kinds: [0] })
     const $ = of<[string, NostrEvent][]>(
       ['a', note3],
       ['b', note3],
@@ -45,11 +47,11 @@ describe('distinctEvents()', () => {
       ['a', note1],
       ['b', note1],
       ['d', note4],
-    ).pipe(distinctEvent())
+    ).pipe(distinctEvent(sub))
 
     const spy = subscribeSpyTo($)
 
     await spy.onComplete()
-    expect(spy.getValues()).toStrictEqual([note3, note4])
+    expect(spy.getValues()).toStrictEqual([note3, note2, note1, note4])
   })
 })

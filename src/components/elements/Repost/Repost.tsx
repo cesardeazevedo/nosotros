@@ -1,14 +1,16 @@
-import type { Repost } from '@/stores/reposts/repost'
+import type { NostrEventRepost } from '@/nostr/types'
+import { metadataSymbol } from '@/nostr/types'
+import { eventStore } from '@/stores/events/event.store'
 import { observer } from 'mobx-react-lite'
 import { PostRoot } from '../Posts/Post'
 import { RepostHeader } from './RepostHeader'
 
 type Props = {
-  repost: Repost
+  event: NostrEventRepost
 }
 
 export const RepostRoot = observer(function RepostRoot(props: Props) {
-  const { repost } = props
-  const note = repost.note
-  return note && <PostRoot note={note} header={<RepostHeader repost={repost} />} />
+  const { event } = props
+  const refEvent = eventStore.get(event[metadataSymbol].mentionedNotes?.[0])?.event
+  return refEvent && <PostRoot event={refEvent} header={<RepostHeader event={event} />} />
 })

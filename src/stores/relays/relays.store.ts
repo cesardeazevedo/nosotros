@@ -7,6 +7,7 @@ import { createRelayStore } from './relay'
 export const relaysStore = makeAutoObservable(
   {
     relays: new Map<string, RelayStore>(),
+    auths: new Map<string, string>(),
 
     add(url: string, stats?: RelayStatsDB) {
       const relay = this.relays.get(url)
@@ -16,6 +17,10 @@ export const relaysStore = makeAutoObservable(
         return newRelay
       }
       return relay
+    },
+
+    addAuth(url: string, challenge: string) {
+      this.auths.set(url, challenge)
     },
 
     getByUrl(url: string) {

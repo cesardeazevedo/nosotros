@@ -11,6 +11,7 @@ describe('selectRelays', () => {
       { pubkey: '1', relay: 'wss://relay4.com', permission: READ },
       { pubkey: '1', relay: 'wss://relay5.com', permission: WRITE },
       { pubkey: '1', relay: 'wss://relay6.com', permission: WRITE },
+      { pubkey: '1', relay: 'ws://relay7.com', permission: READ | WRITE },
     ]
     expect(selectRelays(data, { maxRelaysPerUser: 1 })).toStrictEqual([
       { pubkey: '1', relay: 'wss://relay1.com', permission: READ | WRITE },

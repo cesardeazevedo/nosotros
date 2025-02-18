@@ -2,7 +2,7 @@ import { Kind } from '@/constants/kinds'
 import { RELAY_1 } from '@/constants/testRelays'
 import { IDBStorage } from 'db/indexeddb/idb'
 import type { IDBPDatabase } from 'idb'
-import { fakeNote } from 'utils/faker'
+import { fakeEvent } from 'utils/faker'
 import { test } from 'utils/fixtures'
 import type { IndexedDBSchema } from '../../idb.schemas'
 
@@ -22,7 +22,7 @@ describe('IDBEventStore', () => {
     const idb = new IDBStorage('test')
     const db = await idb.db
 
-    const event = fakeNote({
+    const event = fakeEvent({
       id: '1',
       kind: 3,
       pubkey: 'pubkey1',
@@ -34,7 +34,7 @@ describe('IDBEventStore', () => {
     await getAndAssertEvent(db, event.id)
 
     // Insert a newer event
-    const event2 = fakeNote({
+    const event2 = fakeEvent({
       id: '2',
       kind: 3,
       pubkey: 'pubkey1',
@@ -49,7 +49,7 @@ describe('IDBEventStore', () => {
     await getAndAssertEvent(db, event2.id)
 
     // Insert an older event
-    const event3 = fakeNote({
+    const event3 = fakeEvent({
       id: '3',
       kind: 3,
       pubkey: 'pubkey1',
@@ -67,7 +67,7 @@ describe('IDBEventStore', () => {
     expect(await db.getAll('events')).toHaveLength(1)
     expect(await db.get('events', event3.id)).toBeUndefined()
 
-    const event4 = fakeNote({
+    const event4 = fakeEvent({
       id: '4',
       kind: 3,
       pubkey: 'pubkey1',
@@ -89,7 +89,7 @@ describe('IDBEventStore', () => {
   test('assert insert parameterized (addressable) replaceable events', async () => {
     const idb = new IDBStorage('test')
     const db = await idb.db
-    const event = fakeNote({
+    const event = fakeEvent({
       id: '1',
       kind: 30023,
       pubkey: 'pubkey1',
@@ -104,7 +104,7 @@ describe('IDBEventStore', () => {
     await getAndAssertEvent(db, event.id)
 
     // Insert a newer event
-    const event2 = fakeNote({
+    const event2 = fakeEvent({
       id: '2',
       kind: 30023,
       pubkey: 'pubkey1',
@@ -124,21 +124,21 @@ describe('IDBEventStore', () => {
 
   test('assert queryByPubkey', async () => {
     const idb = new IDBStorage('test')
-    const event1 = fakeNote({
+    const event1 = fakeEvent({
       id: '1',
       kind: 10002,
       pubkey: '1',
       created_at: 1,
       tags: [['r', RELAY_1]],
     })
-    const event2 = fakeNote({
+    const event2 = fakeEvent({
       id: '2',
       kind: 10002,
       pubkey: '1',
       created_at: 3,
       tags: [['r', RELAY_1]],
     })
-    const event3 = fakeNote({
+    const event3 = fakeEvent({
       id: '3',
       kind: 10002,
       pubkey: '1',
@@ -156,11 +156,11 @@ describe('IDBEventStore', () => {
   test('assert deleted tags from replaceable events', async () => {
     const base = { kind: Kind.Reaction, content: '+', pubkey: '2' }
     const eventId = '10'
-    const event1 = fakeNote({ ...base, id: '1', tags: [['e', eventId]] })
-    const event2 = fakeNote({ ...base, id: '2', tags: [['e', eventId]] })
-    const event3 = fakeNote({ ...base, id: '3', tags: [['e', eventId]] })
-    const event4 = fakeNote({ ...base, id: '4', tags: [['e', eventId]] })
-    const event5 = fakeNote({
+    const event1 = fakeEvent({ ...base, id: '1', tags: [['e', eventId]] })
+    const event2 = fakeEvent({ ...base, id: '2', tags: [['e', eventId]] })
+    const event3 = fakeEvent({ ...base, id: '3', tags: [['e', eventId]] })
+    const event4 = fakeEvent({ ...base, id: '4', tags: [['e', eventId]] })
+    const event5 = fakeEvent({
       ...base,
       id: '5',
       tags: [
@@ -168,8 +168,8 @@ describe('IDBEventStore', () => {
         ['e', eventId],
       ],
     }) // duplicated
-    const event6 = fakeNote({ kind: Kind.Follows, id: '20', pubkey: '1', created_at: 10, tags: [['p', '1']] })
-    const event7 = fakeNote({
+    const event6 = fakeEvent({ kind: Kind.Follows, id: '20', pubkey: '1', created_at: 10, tags: [['p', '1']] })
+    const event7 = fakeEvent({
       kind: Kind.Follows,
       id: '30',
       pubkey: '1',

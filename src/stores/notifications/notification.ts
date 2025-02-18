@@ -7,7 +7,7 @@ import {
   type NostrEventZapReceipt,
 } from '@/nostr/types'
 import { makeAutoObservable } from 'mobx'
-import { noteStore } from '../notes/notes.store'
+import { userStore } from '../users/users.store'
 
 export type NotificationItem =
   | {
@@ -53,7 +53,7 @@ export class Notification {
   get author() {
     switch (this.type) {
       case 'zap': {
-        return this.event.tags.find((tag) => tag[0] === 'p')?.[1] || this.event.pubkey
+        return this.event.tags.find((tag) => tag[0] === 'P')?.[1] || this.event.pubkey
       }
       default: {
         return this.event.pubkey
@@ -61,11 +61,12 @@ export class Notification {
     }
   }
 
+  get user() {
+    return userStore.get(this.author)
+  }
+
   get related() {
-    const tag = this.event.tags.findLast(isEventTag)
-    if (tag) {
-      return noteStore.get(tag[1])
-    }
+    return this.event.tags.findLast(isEventTag)?.[1]
   }
 
   get zapAmount() {

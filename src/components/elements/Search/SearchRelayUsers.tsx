@@ -1,8 +1,10 @@
+import { ContentProvider } from '@/components/providers/ContentProvider'
 import { ListItem } from '@/components/ui/ListItem/ListItem'
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
 import { useCurrentUser } from '@/hooks/useRootStore'
-import { useNostrClientContext } from '@/stores/context/nostr.context.hooks'
-import type { NostrContext } from '@/stores/context/nostr.context.store'
+import { subscribeSearch } from '@/nostr/subscriptions/subscribeSearch'
+import { useNostrClientContext } from '@/stores/nostr/nostr.context.hooks'
+import type { NostrStore } from '@/stores/nostr/nostr.context.store'
 import type { User } from '@/stores/users/user'
 import { userStore } from '@/stores/users/users.store'
 import { spacing } from '@/themes/spacing.stylex'
@@ -34,12 +36,12 @@ export const SearchRelayUsers = observer(
     const query$ = useObservable(pluckFirst, [query])
     const context$ = useObservable(pluckFirst, [context])
 
-    const [users] = useObservableState<User[], NostrContext>(
+    const [users] = useObservableState<User[], NostrStore>(
       () =>
         query$.pipe(
           withLatestFrom(context$),
           throttleTime(1000, undefined, { trailing: true }),
-          mergeMap(([query, context]) => context.client.search.subscribe(query, limit)),
+          mergeMap(([query]) => subscribeSearch(query, limit)),
           map((results) => results.sort((_, b) => (user?.following?.followsPubkey(b.pubkey) ? 1 : -1))),
           map((events) => events.map((x) => userStore.get(x.pubkey)).filter((x) => !!x)),
         ),
@@ -48,7 +50,7 @@ export const SearchRelayUsers = observer(
     useImperativeHandle(ref, () => ({ users }))
 
     return (
-      <>
+      <ContentProvider value={{ disableLink: true }}>
         {users.map((user, index) => (
           <ListItem
             interactive
@@ -58,7 +60,7 @@ export const SearchRelayUsers = observer(
             key={user.pubkey}
             supportingText={user.meta.nip05}
             leadingIcon={<UserAvatar size='sm' pubkey={user.pubkey} />}>
-            <UserName pubkey={user.pubkey} disableLink />
+            <UserName pubkey={user.pubkey} />
           </ListItem>
         ))}
         {!users.length && (
@@ -66,7 +68,7 @@ export const SearchRelayUsers = observer(
             <Skeleton sx={styles.skeleton} />
           </html.div>
         )}
-      </>
+      </ContentProvider>
     )
   }),
 )

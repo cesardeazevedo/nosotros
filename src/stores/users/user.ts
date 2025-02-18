@@ -63,11 +63,11 @@ export class User {
   }
 
   get outboxRelays() {
-    return this.userRelays?.filter((x) => !!(x.permission & READ)) || []
+    return this.userRelays?.filter((x) => !!(x.permission & WRITE)) || []
   }
 
   get inboxRelays() {
-    return this.userRelays?.filter((x) => !!(x.permission & WRITE)) || []
+    return this.userRelays?.filter((x) => !!(x.permission & READ)) || []
   }
 
   get relays() {

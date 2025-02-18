@@ -7,6 +7,7 @@ import { useCurrentUser } from '@/hooks/useRootStore'
 import type { User } from '@/stores/users/user'
 import { spacing } from '@/themes/spacing.stylex'
 import { observer } from 'mobx-react-lite'
+import type { ReactNode } from 'react'
 import { forwardRef, useCallback, useImperativeHandle, useRef, useState } from 'react'
 import { css } from 'react-strict-dom'
 import { SearchFollowingUsers } from './SearchFollowingUsers'
@@ -22,15 +23,18 @@ export type Props = {
   query: string
   limit?: number
   dense?: boolean
+  children?: ReactNode
+  initialSelected?: number
+  onEnterKey?: () => void
   onSelect?: (props: { pubkey: string }) => void
 } & Omit<PaperProps, 'children'>
 
 export const SearchUsers = observer(
   forwardRef<SearchUsersRef, Props>(function SearchUsers(props, ref) {
     const user = useCurrentUser()
-    const { query = '', limit = 10, dense = false, onSelect } = props
+    const { query = '', limit = 10, dense = false, children, onEnterKey, onSelect, initialSelected = 0 } = props
     const [searchType, setSearchType] = useState<SearchType>(user ? 'following' : 'nip50')
-    const [selectedIndex, setSelectedIndex] = useState(0)
+    const [selectedIndex, setSelectedIndex] = useState(initialSelected)
     const searchRef = useRef<{ users: User[] } | null>(null)
 
     const handleKeyUp = useCallback(() => {
@@ -67,11 +71,14 @@ export const SearchUsers = observer(
             return true
           }
           case 'Enter': {
-            const user = searchRef.current?.users[selectedIndex]
-            if (user) {
-              handleSelect(user.pubkey)
-              return true
+            if (selectedIndex > 0) {
+              const user = searchRef.current?.users[selectedIndex]
+              if (user) {
+                handleSelect(user.pubkey)
+                return true
+              }
             }
+            onEnterKey?.()
             return false
           }
           default: {
@@ -120,6 +127,7 @@ export const SearchUsers = observer(
             />
           )}
         </Stack>
+        {children}
       </Paper>
     )
   }),
@@ -129,7 +137,7 @@ const styles = css.create({
   root: {
     height: '100%',
     minWidth: 220,
-    paddingBlock: spacing.padding1,
+    paddingBlock: spacing['padding0.5'],
   },
   scroller: {
     height: '100%',

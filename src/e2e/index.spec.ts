@@ -2,7 +2,7 @@
 import { test as base, expect } from '@playwright/test'
 import { Kind } from 'constants/kinds'
 import { nip19 } from 'nostr-tools'
-import { fakeNote, fakeSignature } from 'utils/faker'
+import { fakeEvent, fakeSignature } from 'utils/faker'
 import { WebSocketServerCustom } from './helpers/websocket.server'
 
 const delay = (timeout = 500) => new Promise((r) => setTimeout(r, timeout))
@@ -92,12 +92,12 @@ test.skip('Should expect a basic note and user info', async ({ page, getRelays, 
   await expect(post).not.toBeVisible()
 
   // Send note back to the frontend
-  await relay1.send(reqId, fakeSignature(fakeNote({ kind: Kind.Metadata })))
+  await relay1.send(reqId, fakeSignature(fakeEvent({ kind: Kind.Metadata })))
   await expect(post).toBeVisible()
   await expect(user).not.toBeVisible()
 
   // Send user back to the frontend
-  await relay1.send(reqId, fakeSignature(fakeNote({ kind: Kind.Metadata, pubkey: authors[0] })))
+  await relay1.send(reqId, fakeSignature(fakeEvent({ kind: Kind.Metadata, pubkey: authors[0] })))
   await expect(user).toBeVisible()
 
   await expectSeenAt([relay1])
@@ -112,15 +112,15 @@ test.skip('Should expect a basic note and fetch the mentioned note', async ({ pa
 
   const reqId = await expectInitialFeed(relay1, authors)
 
-  const mentioned = fakeSignature(fakeNote({ pubkey: '2', content: 'Related Note' }))
+  const mentioned = fakeSignature(fakeEvent({ pubkey: '2', content: 'Related Note' }))
 
   const encodedNote = nip19.neventEncode({
     id: mentioned.id,
     author: mentioned.pubkey,
     relays: [RELAY_2],
   })
-  await relay1.send(reqId, fakeSignature(fakeNote({ pubkey: authors[0] })))
-  await relay1.send(reqId, fakeSignature(fakeNote({ content: `Check this nostr:${encodedNote}` })))
+  await relay1.send(reqId, fakeSignature(fakeEvent({ pubkey: authors[0] })))
+  await relay1.send(reqId, fakeSignature(fakeEvent({ content: `Check this nostr:${encodedNote}` })))
   const post = page.getByText('Check this')
   await expect(post).toBeVisible()
 
@@ -158,8 +158,8 @@ test.skip('Should receive a reply message then expect the parent note', async ({
 
   const reqId = await expectInitialFeed(relay1, authors)
 
-  const parentNote = fakeSignature(fakeNote({ content: 'Parent Note' }))
-  const replyNote = fakeSignature(fakeNote({ content: 'Reply Note', tags: [['e', parentNote.id, '', 'root']] }))
+  const parentNote = fakeSignature(fakeEvent({ content: 'Parent Note' }))
+  const replyNote = fakeSignature(fakeEvent({ content: 'Reply Note', tags: [['e', parentNote.id, '', 'root']] }))
   await relay1.send(reqId, replyNote)
 
   const parent = page.getByText('Parent Note')

@@ -6,7 +6,7 @@ import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 import { useCurrentUser } from '@/hooks/useRootStore'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
-import { IconBell, IconBellFilled, IconLayoutSidebarLeftExpand, IconServerBolt } from '@tabler/icons-react'
+import { IconBell, IconBellFilled, IconLayoutSidebarLeftExpand, IconPhoto, IconServerBolt } from '@tabler/icons-react'
 import { Link, useLocation } from '@tanstack/react-router'
 import { observer } from 'mobx-react-lite'
 import { useCallback } from 'react'
@@ -28,15 +28,15 @@ export const TopNavigation = observer(function TopNavigation() {
     <>
       <Tabs anchor={location.pathname}>
         <Tooltip text='Home' enterDelay={enterDelay}>
-          <Link tabIndex={-1} to='/' resetScroll onClick={handleClickHome}>
+          <Link tabIndex={-1} to='/' onClick={handleClickHome}>
             <Tab anchor='/' sx={styles.tab} icon={<IconHome />} activeIcon={<IconHomeFilled />} />
           </Link>
         </Tooltip>
-        {/* <Tooltip text='Photos' enterDelay={enterDelay}> */}
-        {/*   <Link tabIndex={-1} to='/photos'> */}
-        {/*     <Tab anchor='/photos' sx={styles.tab} icon={<IconPhoto strokeWidth='1.5' size={26} />} /> */}
-        {/*   </Link> */}
-        {/* </Tooltip> */}
+        <Tooltip text='Media' enterDelay={enterDelay}>
+          <Link tabIndex={-1} to='/media'>
+            <Tab anchor='/media' sx={styles.tab} icon={<IconPhoto strokeWidth='1.5' size={26} />} />
+          </Link>
+        </Tooltip>
         <Tooltip text='Relays' enterDelay={enterDelay}>
           <Link tabIndex={-1} to='/relays' resetScroll>
             <Tab anchor='/relays' sx={styles.tab} icon={<IconServerBolt strokeWidth='1.5' size={26} />} />
@@ -47,9 +47,6 @@ export const TopNavigation = observer(function TopNavigation() {
             <Tab anchor='/deck' sx={styles.tab} icon={<IconLayoutSidebarLeftExpand strokeWidth='1.5' size={26} />} />
           </Link>
         </Tooltip>
-        {/* <Tooltip text='Communities' enterDelay={enterDelay}> */}
-        {/*   <Tab anchor='/communities' sx={styles.tab} icon={<IconUsers strokeWidth='1.6' size={26} />} /> */}
-        {/* </Tooltip> */}
         <Tooltip text='Notifications' enterDelay={enterDelay}>
           <Link tabIndex={-1} to='/notifications' resetScroll>
             <Tab
@@ -67,7 +64,6 @@ export const TopNavigation = observer(function TopNavigation() {
 })
 
 const styles = css.create({
-  root: {},
   tab: {
     height: 50,
     borderRadius: shape.full,

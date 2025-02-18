@@ -134,6 +134,7 @@ export const PopoverBase = forwardRef<HTMLDivElement, IPopoverBaseProps>(functio
     open: opened,
     onOpenChange: setOpened,
     whileElementsMounted: autoUpdate,
+    strategy: floatingStrategy || 'absolute',
     middleware: [
       offset(cursorType ? 4 + cursor.size.height : undefined),
       middlewares.flip &&
@@ -234,6 +235,7 @@ export const PopoverBase = forwardRef<HTMLDivElement, IPopoverBaseProps>(functio
           placement: floating.placement,
           getProps: interactions.getReferenceProps,
           setRef: floating.refs.setReference,
+          open: () => setOpened(true),
           close: () => setOpened(false),
         })
       : children

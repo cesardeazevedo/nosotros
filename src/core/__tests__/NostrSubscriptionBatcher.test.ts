@@ -8,16 +8,15 @@ import { start } from 'core/operators/start'
 import { Pool } from 'core/pool'
 import type { NostrFilter } from 'core/types'
 import { from, of } from 'rxjs'
-import { fakeNote } from 'utils/faker'
+import { fakeEvent } from 'utils/faker'
 import { test } from 'utils/fixtures'
-import { expectRelayReceived, relaySendEose, relaySendEvents } from 'utils/testHelpers'
 
 describe('NostrSubscriptionBatcher', () => {
-  test('assert batched subscriptions events and their respective relays', async ({ relay, relay2, relay3 }) => {
-    const user1 = fakeNote({ kind: Kind.Metadata, pubkey: '1' })
-    const user2 = fakeNote({ kind: Kind.Metadata, pubkey: '2' })
-    const user4 = fakeNote({ kind: Kind.Metadata, pubkey: '4' })
-    const user5 = fakeNote({ kind: Kind.Metadata, pubkey: '5' })
+  test('assert batched subscriptions events and their respective relays', async ({ createMockRelay }) => {
+    const user1 = fakeEvent({ kind: Kind.Metadata, pubkey: '1' })
+    const user2 = fakeEvent({ kind: Kind.Metadata, pubkey: '2' })
+    const user4 = fakeEvent({ kind: Kind.Metadata, pubkey: '4' })
+    const user5 = fakeEvent({ kind: Kind.Metadata, pubkey: '5' })
 
     const pool = new Pool()
     const outbox = (filters: NostrFilter[]) => {
@@ -30,6 +29,10 @@ describe('NostrSubscriptionBatcher', () => {
       subscribe: (sub) => of(sub).pipe(start(pool)),
     })
 
+    const relay1 = createMockRelay(RELAY_1, [user1, user2])
+    const relay2 = createMockRelay(RELAY_2, [user4])
+    const relay3 = createMockRelay(RELAY_3, [user5])
+
     const relays = of([RELAY_1])
     const sub1 = new NostrSubscription({ kinds: [0], authors: ['1'] }, { relays, outbox })
     const sub2 = new NostrSubscription({ kinds: [0], authors: ['2'] }, { relays, outbox })
@@ -41,23 +44,26 @@ describe('NostrSubscriptionBatcher', () => {
     const spy3 = subscribeSpyTo(of(sub3).pipe(batcher.subscribe()))
     const spy4 = subscribeSpyTo(of(sub4).pipe(batcher.subscribe()))
 
-    const parentId = await expectRelayReceived(relay, { kinds: [0], authors: ['1', '2', '3', '4', '5'] })
-    await expectRelayReceived(relay2, { kinds: [0], authors: ['4'] })
-    await expectRelayReceived(relay3, { kinds: [0], authors: ['5'] })
-
-    relaySendEvents(relay, parentId, [user1, user2])
-    relaySendEose(relay, parentId)
-
-    relaySendEvents(relay2, parentId, [user4])
-    relaySendEose(relay2, parentId)
-
-    relaySendEvents(relay3, parentId, [user5])
-    relaySendEose(relay3, parentId)
-
     await spy1.onComplete()
     await spy2.onComplete()
     await spy3.onComplete()
     await spy4.onComplete()
+    await relay1.close()
+    await relay2.close()
+    await relay3.close()
+
+    expect(relay1.received).toStrictEqual([
+      ['REQ', '1', { kinds: [0], authors: ['1', '2', '3', '4', '5'] }],
+      ['CLOSE', '1'],
+    ])
+    expect(relay2.received).toStrictEqual([
+      ['REQ', '1', { kinds: [0], authors: ['4'] }],
+      ['CLOSE', '1'],
+    ])
+    expect(relay3.received).toStrictEqual([
+      ['REQ', '1', { kinds: [0], authors: ['5'] }],
+      ['CLOSE', '1'],
+    ])
 
     expect(spy1.getValues()).toStrictEqual([[RELAY_1, user1]])
     expect(spy2.getValues()).toStrictEqual([[RELAY_1, user2]])
@@ -85,7 +91,7 @@ describe('NostrSubscriptionBatcher', () => {
     expect(spy1.getValues()).toStrictEqual([])
   })
 
-  test('assert subscriptions transformers', async ({ relay }) => {
+  test('assert subscriptions transformers', async ({ createMockRelay }) => {
     const pool = new Pool()
     const batcher = new NostrSubscriptionBatcher({
       subscribe: (sub) => {
@@ -93,6 +99,7 @@ describe('NostrSubscriptionBatcher', () => {
       },
     })
 
+    const relay = createMockRelay(RELAY_1, [])
     const cache = new Map()
 
     const transform = (filters: NostrFilter[]) => {
@@ -120,12 +127,11 @@ describe('NostrSubscriptionBatcher', () => {
     cache.set('3', true)
     cache.set('4', true)
 
-    const parentId = await expectRelayReceived(relay, { kinds: [0], authors: ['5'] })
-    relaySendEose(relay, parentId)
-
     await spy1.onComplete()
     await spy2.onComplete()
     await spy3.onComplete()
     await spy4.onComplete()
+
+    expect(relay.received).toStrictEqual([['REQ', '1', { kinds: [0], authors: ['5'] }]])
   })
 })

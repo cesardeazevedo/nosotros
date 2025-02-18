@@ -10,8 +10,9 @@ import type { IVisualState } from '../hooks/useRipple'
 import { useVisualState } from '../hooks/useVisualState'
 import { Ripple } from '../Ripple/Ripple'
 import type { SxProps } from '../types'
+import type { StrictReactDOMButtonProps } from 'react-strict-dom/dist/types/StrictReactDOMButtonProps'
 
-export type Props = {
+export type Props = StrictReactDOMButtonProps & {
   sx?: SxProps
   tabIndex?: 0 | -1
   children?: React.ReactNode

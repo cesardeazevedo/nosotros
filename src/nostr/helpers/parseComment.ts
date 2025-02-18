@@ -4,7 +4,6 @@ import type { MetadataDB } from '@/db/types'
 import type { NostrEvent } from 'nostr-tools'
 import type { ContentMetadata } from './parseContent'
 import { parseContent } from './parseContent'
-import { editor } from './parseNote'
 import type { ParsedTags } from './parseTags'
 import { parseTags } from './parseTags'
 
@@ -13,6 +12,7 @@ export type CommentMetadata = MetadataDB &
     kind: Kind.Comment
     rootKind: string | undefined
     rootId: string | undefined
+    tags: ParsedTags
     isRoot: false // Just to be compatible with NoteMetadata
     parentKind: string | undefined
     parentId: string | undefined
@@ -46,14 +46,14 @@ function parseCommentHints(tags: ParsedTags) {
           case 'e': {
             appendHint(hints, 'ids', value, relay)
             if (pubkey) {
-              appendHint(hints, 'fallback', value, pubkey)
+              appendHint(hints, 'idHints', value, pubkey)
             }
             break
           }
           case 'q': {
             appendHint(hints, 'ids', value, relay)
             if (pubkey) {
-              appendHint(hints, 'fallback', value, pubkey)
+              appendHint(hints, 'idHints', value, pubkey)
             }
             break
           }
@@ -65,7 +65,7 @@ function parseCommentHints(tags: ParsedTags) {
 
 export function parseComment(event: NostrEvent): CommentMetadata {
   const tags = parseTags(event.tags)
-  const content = parseContent(editor, event, tags)
+  const content = parseContent(event, tags)
   const relayHints = parseCommentHints(tags)
   const rootTag = tags.E ? 'E' : tags.A ? 'A' : tags.I ? 'I' : ''
   const rootId = tags[rootTag]?.[0]?.[1]
@@ -78,6 +78,7 @@ export function parseComment(event: NostrEvent): CommentMetadata {
     id: event.id,
     kind: event.kind,
     isRoot: false,
+    tags,
     rootKind,
     rootId,
     parentId,

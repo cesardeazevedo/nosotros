@@ -1,53 +1,45 @@
-import { NoteContext } from '@/components/providers/NoteProvider'
+import { useGlobalSettings, useRootContext } from '@/hooks/useRootStore'
 import { type EditorStore } from '@/stores/editor/editor.store'
 import { spacing } from '@/themes/spacing.stylex'
 import { EditorContent as TiptapEditorContent } from '@tiptap/react'
 import { observer } from 'mobx-react-lite'
 import { useEffect, useId, useMemo } from 'react'
 import { css } from 'react-strict-dom'
-import { createEditor } from './createEditor'
+import { createEditor } from './utils/createEditor'
+import { createEditorKind20 } from './utils/createEditorKind20'
 
 type Props = {
   dense?: boolean
   placeholder?: string
+  kind20?: boolean
   store: EditorStore
 }
 
 export const EditorTiptap = observer(function EditorTiptap(props: Props) {
-  const { dense, store } = props
+  const { dense, store, kind20 = false } = props
   const id = useId()
 
-  const editor = useMemo(() => store.editor || createEditor(store), [store.editor])
+  const context = useRootContext()
+  const globalSettings = useGlobalSettings()
+  const editor = useMemo(
+    () => store.editor || (kind20 ? createEditorKind20(store) : createEditor(store, globalSettings)),
+    [],
+  )
 
   useEffect(() => {
     store.setEditor(editor)
   }, [store, editor])
 
+  useEffect(() => {
+    store.setContext(context)
+  }, [context])
+
   return (
-    <>
-      <style>
-        {`
-          .tiptap p.is-editor-empty:first-child::before {
-            color: #adb5bd;
-            content: attr(data-placeholder);
-            float: left;
-            height: 0;
-            max-width: 100%;
-            pointer-events: none;
-          }
-          .ProseMirror-gapcursor::after {
-            border: 2px solid currentColor;
-          }
-      `}
-      </style>
-      <NoteContext.Provider value={{ dense: true, disableLink: true }}>
-        <TiptapEditorContent
-          id={id}
-          editor={editor}
-          {...css.props([styles.root, dense && styles.root$dense, !store.open && styles.root$disabled])}
-        />
-      </NoteContext.Provider>
-    </>
+    <TiptapEditorContent
+      id={id}
+      editor={editor}
+      {...css.props([styles.root, dense && styles.root$dense, !store.open && styles.root$disabled])}
+    />
   )
 })
 

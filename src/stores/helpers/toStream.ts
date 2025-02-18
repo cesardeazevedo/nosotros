@@ -12,6 +12,9 @@ export const toStream = <T>(fn: () => T) => {
         fireImmediately: true,
       },
     )
-    return () => dispose()
+    return () => {
+      dispose()
+      observer.unsubscribe()
+    }
   })
 }

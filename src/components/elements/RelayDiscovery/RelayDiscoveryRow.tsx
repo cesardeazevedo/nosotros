@@ -1,14 +1,17 @@
+import { Button } from '@/components/ui/Button/Button'
 import { Chip } from '@/components/ui/Chip/Chip'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 import { formatRelayUrl } from '@/core/helpers/formatRelayUrl'
+import { useCurrentPubkey } from '@/hooks/useRootStore'
 import { metadataSymbol, type NostrEventRelayDiscovery } from '@/nostr/types'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconCoinBitcoin, IconLock } from '@tabler/icons-react'
+import { Link } from '@tanstack/react-router'
 import { css, html } from 'react-strict-dom'
 import { RelayChip } from '../Relays/RelayChip'
 import { RelayFriendsList } from '../Relays/RelayFriendsList'
@@ -19,6 +22,7 @@ type Props = {
 
 export const RelayDiscoveryRow = (props: Props) => {
   const { event } = props
+  const pubkey = useCurrentPubkey()
   const root = css.props(styles.root)
   const td = css.props(styles.cell)
   const tags = event[metadataSymbol].tags
@@ -43,9 +47,11 @@ export const RelayDiscoveryRow = (props: Props) => {
           )}
         </Stack>
       </td>
-      <td {...td} align='right'>
-        <RelayFriendsList relay={relay} />
-      </td>
+      {pubkey && (
+        <td {...td} align='right'>
+          <RelayFriendsList relay={relay} />
+        </td>
+      )}
       <td {...td} align='left'>
         <Stack justify='flex-start' gap={1}>
           <html.span style={styles.circle} />
@@ -55,9 +61,11 @@ export const RelayDiscoveryRow = (props: Props) => {
         </Stack>
       </td>
       <td {...td} align='right'>
-        {/* <Stack gap={1} justify='flex-end'> */}
-        {/*   <Button variant='filledTonal'>Explore</Button> */}
-        {/* </Stack> */}
+        <Stack gap={1} justify='flex-end'>
+          <Link to='/' search={{ relay }}>
+            <Button variant='filledTonal'>Explore</Button>
+          </Link>
+        </Stack>
       </td>
     </tr>
   )

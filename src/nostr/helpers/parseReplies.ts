@@ -35,7 +35,7 @@ function parseRepliesHints(tags: ParsedTags) {
             const pubkey = tag[3]
             appendHint(hints, 'ids', value, relay)
             if (pubkey) {
-              appendHint(hints, 'fallback', value, pubkey)
+              appendHint(hints, 'idHints', value, pubkey)
             }
             break
           }
@@ -43,7 +43,7 @@ function parseRepliesHints(tags: ParsedTags) {
             const pubkey = tag[4]
             appendHint(hints, 'ids', value, relay)
             if (pubkey) {
-              appendHint(hints, 'fallback', value, pubkey)
+              appendHint(hints, 'idHints', value, pubkey)
             }
             break
           }

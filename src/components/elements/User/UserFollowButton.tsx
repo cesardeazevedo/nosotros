@@ -3,7 +3,7 @@ import { CircularProgress } from '@/components/ui/Progress/CircularProgress'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { useCurrentUser, useRootContext } from '@/hooks/useRootStore'
 import { publishFollowList } from '@/nostr/publish/publishFollowList'
-import type { NostrContext } from '@/stores/context/nostr.context.store'
+import type { NostrStore } from '@/stores/nostr/nostr.context.store'
 import { observer } from 'mobx-react-lite'
 import { useObservableState } from 'observable-hooks'
 import { useState } from 'react'
@@ -20,11 +20,11 @@ export const UserFollowButton = observer(function UserFollowButton(props: Props)
   const rootContext = useRootContext()
   const currentUser = useCurrentUser()
 
-  const [pending, onSubmit] = useObservableState<boolean, NostrContext>((input$) => {
+  const [pending, onSubmit] = useObservableState<boolean, NostrStore>((input$) => {
     return input$.pipe(
-      mergeMap((context) => {
-        if (context.client.pubkey) {
-          return publishFollowList(context.client, 'p', pubkey).pipe(
+      mergeMap(({ context }) => {
+        if (context.pubkey) {
+          return publishFollowList(context, 'p', pubkey).pipe(
             map(() => false),
             catchError(() => of(false)),
             startWith(true),
@@ -36,6 +36,11 @@ export const UserFollowButton = observer(function UserFollowButton(props: Props)
   }, false)
 
   const isFollowing = currentUser?.following?.followsPubkey(pubkey)
+
+  if (currentUser?.pubkey === pubkey) {
+    // don't show the follow button for the same logged person
+    return
+  }
 
   return (
     <>

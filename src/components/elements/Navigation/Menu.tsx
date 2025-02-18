@@ -1,12 +1,13 @@
 import { Divider } from '@/components/ui/Divider/Divider'
 import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { MenuList } from '@/components/ui/MenuList/MenuList'
-import { useCurrentPubkey, useCurrentUser, useRootStore } from '@/hooks/useRootStore'
+import { useCurrentPubkey, useRootStore } from '@/hooks/useRootStore'
 import { shape } from '@/themes/shape.stylex'
-import { IconLogout, IconSettings, IconUser } from '@tabler/icons-react'
+import { IconLogout, IconPhoto, IconServerBolt, IconSettingsFilled, IconUserFilled } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
 import { observer } from 'mobx-react-lite'
 import { css } from 'react-strict-dom'
+import { IconNostr } from '../Icons/IconNostr'
 import { LinkProfile } from '../Links/LinkProfile'
 import { LinkSignIn } from '../Links/LinkSignIn'
 
@@ -18,39 +19,46 @@ type Props = {
 export const Menu = observer(function Menu(props: Props) {
   const { dense } = props
   const logout = useRootStore().auth.logout
-  const user = useCurrentUser()
   const pubkey = useCurrentPubkey()
   const iconProps = {
-    size: dense ? 24 : 30,
+    size: dense ? 24 : 28,
     strokeWidth: '1.4',
   }
   return (
     <MenuList elevation={0} sx={styles.root}>
-      {user && (
-        <LinkProfile user={user} underline={false}>
+      {pubkey && (
+        <LinkProfile pubkey={pubkey} underline={false}>
           <MenuItem
             sx={styles.item}
             onClick={() => props.onAction?.()}
-            leadingIcon={<IconUser {...iconProps} />}
+            leadingIcon={<IconUserFilled {...iconProps} />}
             label='Profile'
           />
         </LinkProfile>
       )}
-      {user && (
-        <Link to='/settings'>
-          <MenuItem
-            sx={styles.item}
-            leadingIcon={<IconSettings size={22} strokeWidth='1.5' />}
-            onClick={props.onAction}
-            label='Settings'
-          />
-        </Link>
-      )}
       {!pubkey && (
         <LinkSignIn>
-          <MenuItem label='Sign In' />
+          <MenuItem leadingIcon={<IconNostr />} label='Join Nostr' />
         </LinkSignIn>
       )}
+      {pubkey && (
+        <Link to='/media'>
+          <MenuItem onClick={() => props.onAction?.()} leadingIcon={<IconPhoto />} label='Media' />
+        </Link>
+      )}
+      {pubkey && (
+        <Link to='/relays'>
+          <MenuItem onClick={() => props.onAction?.()} leadingIcon={<IconServerBolt />} label='Relays' />
+        </Link>
+      )}
+      <Link to='/settings'>
+        <MenuItem
+          sx={styles.item}
+          leadingIcon={<IconSettingsFilled {...iconProps} />}
+          onClick={props.onAction}
+          label='Settings'
+        />
+      </Link>
       {pubkey && (
         <>
           <Divider />

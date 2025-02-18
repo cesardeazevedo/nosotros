@@ -7,7 +7,7 @@ export function getHintsFromNIP19(
   nprofiles: NProfileAttributes[],
   naddresses: NAddrAttributes[],
 ) {
-  const hints: Required<RelayHints> = { authors: {}, fallback: {}, ids: {} }
+  const hints: Required<RelayHints> = { authors: {}, idHints: {}, ids: {} }
   for (const nevent of nevents) {
     const { id, relays } = nevent
     if (relays?.length !== 0) {

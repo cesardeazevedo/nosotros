@@ -5,12 +5,12 @@ import { Text } from '@/components/ui/Text/Text'
 import { Kind } from '@/constants/kinds'
 import type { NotesFeedSubscription } from '@/stores/feeds/feed.notes'
 import { spacing } from '@/themes/spacing.stylex'
-import type { TablerIconsProps } from '@tabler/icons-react'
-import { IconArticle, IconMessage2, IconShare3 } from '@tabler/icons-react'
+import type { IconProps } from '@tabler/icons-react'
+import { IconArticle, IconBlur, IconMessage2, IconPhoto, IconShare3 } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
 import { css, html } from 'react-strict-dom'
 
-const iconProps: TablerIconsProps = {
+const iconProps: IconProps = {
   size: 18,
   strokeWidth: '1.5',
 }
@@ -24,7 +24,7 @@ export const FeedSettings = observer(function FeedSettings(props: Props) {
   return (
     <html.div style={styles.root}>
       <Divider />
-      <Stack horizontal={false} sx={styles.content} gap={1}>
+      <Stack horizontal={false} sx={styles.content} gap={2}>
         <Text variant='label' size='lg' sx={styles.label}>
           Feed Content
         </Text>
@@ -43,13 +43,13 @@ export const FeedSettings = observer(function FeedSettings(props: Props) {
             icon={<IconShare3 {...iconProps} />}
             onClick={() => feed.toggleKind(Kind.Repost)}
           />
-          {/* <Chip */}
-          {/*   label='Media' */}
-          {/*   variant='filter' */}
-          {/*   selected={feed.hasKind(Kind.Media)} */}
-          {/*   icon={<IconCamera {...iconProps} />} */}
-          {/*   onClick={() => feed.toggleKind(Kind.Media)} */}
-          {/* /> */}
+          <Chip
+            label='Media'
+            variant='filter'
+            selected={feed.hasKind(Kind.Media)}
+            icon={<IconPhoto {...iconProps} />}
+            onClick={() => feed.toggleKind(Kind.Media)}
+          />
           <Chip
             selected={feed.hasKind(Kind.Article)}
             variant='filter'
@@ -65,14 +65,24 @@ export const FeedSettings = observer(function FeedSettings(props: Props) {
           {/*   onClick={() => feed.toggleKind(Kind.Highlight)} */}
           {/* /> */}
           {/* <Chip variant='filter' icon={<IconBroadcast {...iconProps} />} label='Live Events' /> */}
-        </Stack>
-        <Stack>
           <Chip
             label='Reset'
             variant='assist'
             // icon={<IconHighlight {...iconProps} />}
             // selected={feed.hasKind(Kind.Highlight)}
             onClick={() => feed.resetFilter()}
+          />
+        </Stack>
+        <Text variant='label' size='lg' sx={styles.label}>
+          Safety
+        </Text>
+        <Stack gap={0.5} wrap>
+          <Chip
+            selected={feed.blured}
+            variant='filter'
+            icon={<IconBlur {...iconProps} />}
+            label='Blur Images'
+            onClick={() => feed.toggle('blured')}
           />
         </Stack>
       </Stack>

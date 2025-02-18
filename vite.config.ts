@@ -102,7 +102,7 @@ export default defineConfig(({ mode }) => {
           theme_color: '#000',
         },
         injectManifest: {
-          maximumFileSizeToCacheInBytes: 2500000,
+          maximumFileSizeToCacheInBytes: 2600000,
         },
         workbox: {
           cleanupOutdatedCaches: false,
@@ -112,7 +112,11 @@ export default defineConfig(({ mode }) => {
       }),
       !isTesting ? mkcert({}) : null,
       tsconfigPaths(),
-      react(),
+      react({
+        babel: {
+          plugins: [['babel-plugin-react-compiler', { target: '19' }]],
+        },
+      }),
       styleX({
         importSources: [
           {

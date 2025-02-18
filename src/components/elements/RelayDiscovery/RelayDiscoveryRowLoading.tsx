@@ -1,4 +1,5 @@
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
+import { useCurrentPubkey } from '@/hooks/useRootStore'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
@@ -12,6 +13,7 @@ type Props = {
 }
 
 export const RelayDiscoveryRowLoading = memo(function RelayDiscoveryRowLoading(props: Props) {
+  const pubkey = useCurrentPubkey()
   const list = [...Array(props.rows || 10).keys()]
   const row = css.props(styles.row)
   const cell = css.props(styles.cell)
@@ -25,9 +27,11 @@ export const RelayDiscoveryRowLoading = memo(function RelayDiscoveryRowLoading(p
               <td {...cell}>
                 <Skeleton sx={[styles.chip, styles.width(70, 180)]} />
               </td>
-              <td {...cell}>
-                <RelayFriendsListLoading />
-              </td>
+              {pubkey && (
+                <td {...cell}>
+                  <RelayFriendsListLoading />
+                </td>
+              )}
               <td align='left' {...cell}>
                 <Skeleton sx={[styles.latency, styles.width(30, 50)]} />
               </td>

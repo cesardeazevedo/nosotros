@@ -1,36 +1,37 @@
-import type { NodeViewProps } from '@tiptap/react'
-import { NodeViewWrapper } from '@tiptap/react'
+import type { SxProps } from '@/components/ui/types'
+import { shape } from '@/themes/shape.stylex'
 import type { ImageAttributes } from 'nostr-editor'
-import { css } from 'react-strict-dom'
-import { AltButton } from '../Buttons/AltButton'
+import { css, html } from 'react-strict-dom'
 import { DeleteButton } from '../Buttons/DeleteButton'
-import { UploadButton } from '../Buttons/UploadButton'
-import { Image } from './Image'
+import { MediaUploading } from '../Layout/MediaUploading'
 
-export const ImageEditor = (props: NodeViewProps) => {
-  const { src, alt } = props.node.attrs as ImageAttributes
-  const isUploaded = !src.startsWith('blob://http')
+type Props = ImageAttributes & {
+  onUpdate: (attrs: Partial<ImageAttributes>) => void
+  onDelete: () => void
+  sx?: SxProps
+  uploading?: boolean
+}
+
+export const ImageEditor = (props: Props) => {
+  const { src, sx, uploading } = props
   return (
-    <NodeViewWrapper
-      data-drag-handle=''
-      draggable={props.node.type.spec.draggable}
-      {...css.props([styles.root, props.selected && styles.root$selected])}>
-      <DeleteButton onClick={() => props.deleteNode()} />
-      <Image dense src={src} proxy={false} />
-      {!isUploaded && <AltButton value={alt} onChange={(alt) => props.updateAttributes({ alt })} />}
-      <UploadButton node={props} />
-    </NodeViewWrapper>
+    <>
+      <DeleteButton onClick={() => props.onDelete()} />
+      <MediaUploading uploading={uploading}>
+        <html.img src={src} style={[styles.img, sx]} />
+      </MediaUploading>
+    </>
   )
 }
 
 const styles = css.create({
-  root: {
-    width: 'fit-content',
-    height: 'fit-content',
-    position: 'relative',
-    opacity: 1,
-  },
-  root$selected: {
-    opacity: 0.9,
+  img: {
+    objectFit: 'contain',
+    width: 'auto',
+    height: 'auto',
+    userSelect: 'none',
+    cursor: 'pointer',
+    maxHeight: 350,
+    borderRadius: shape.lg,
   },
 })

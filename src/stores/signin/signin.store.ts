@@ -1,8 +1,11 @@
 import { APP_DESCRIPTION, APP_NAME } from '@/constants/app'
-import { getNostrExtensionPublicKey } from '@/nostr/nips/nip07.extensions'
+import type { NIP46RemoteSigner } from '@/core/signers/nip46.signer'
+import { nip05 } from '@/nostr/nip05'
+import { decodeNIP19 } from '@/utils/nip19'
 import { bytesToHex } from '@noble/hashes/utils'
 import { makeAutoObservable } from 'mobx'
 import { lazyObservable } from 'mobx-utils'
+import type { NostrEvent, UnsignedEvent } from 'nostr-tools'
 import { firstValueFrom } from 'rxjs'
 import invariant from 'tiny-invariant'
 import { rootStore } from '../root.store'
@@ -20,11 +23,29 @@ type Pages = keyof typeof PAGES
 
 const auth = rootStore.auth
 
+type NostrExtension = {
+  getPublicKey(): Promise<string>
+  signEvent(event: UnsignedEvent): Promise<NostrEvent>
+}
+
+export function getNostrExtension() {
+  if ('nostr' in window) {
+    return window.nostr as NostrExtension
+  }
+}
+
+export async function getNostrExtensionPublicKey() {
+  const nostr = getNostrExtension()
+  if (nostr) {
+    return await nostr.getPublicKey()
+  }
+}
+
 export const signinStore = makeAutoObservable({
   page: 'SELECT' as Pages,
   prevPage: 'SELECT' as Pages,
   submitting: false,
-  bunkerUrl: '',
+  inputPubkey: '',
   response: '',
   error: '',
 
@@ -43,8 +64,18 @@ export const signinStore = makeAutoObservable({
     this.page = 'SELECT'
   },
 
-  setBunker(bunker: string) {
-    this.bunkerUrl = bunker.trim()
+  setReadonlyInput(value: string) {
+    const decoded = decodeNIP19(value)
+    switch (decoded?.type) {
+      case 'npub': {
+        this.inputPubkey = decoded.data
+        break
+      }
+      case 'nprofile': {
+        this.inputPubkey = decoded.data.pubkey
+        break
+      }
+    }
   },
 
   setReponse(msg: string) {
@@ -69,9 +100,9 @@ export const signinStore = makeAutoObservable({
   reset() {
     this.page = 'SELECT'
     this.prevPage = 'SELECT'
-    this.bunkerUrl = ''
     this.error = ''
     this.response = ''
+    this.inputPubkey = ''
   },
 
   matches(page: Pages) {
@@ -80,7 +111,7 @@ export const signinStore = makeAutoObservable({
 
   async pasteClipboard() {
     const permissionStatus = await navigator.permissions.query({ name: 'clipboard-read' as PermissionName })
-    invariant(permissionStatus.state !== 'granted', 'Clipboard permission rejected')
+    invariant(permissionStatus.state === 'granted', 'Clipboard permission rejected')
     return await window.navigator.clipboard.readText()
   },
 
@@ -93,11 +124,10 @@ export const signinStore = makeAutoObservable({
         signer: {
           name: 'nip07',
         },
-        options: {
-          pubkey,
-        },
+        pubkey,
       },
     })
+    this.reset()
   },
 
   submitReadonly(pubkey: string) {
@@ -105,24 +135,48 @@ export const signinStore = makeAutoObservable({
       pubkey,
       context: {
         signer: undefined,
-        options: {
-          pubkey,
-        },
+        pubkey,
       },
     })
+    this.reset()
   },
 
   async submitNostrAddress(address: string) {
     const [name, url] = address.split('@')
-    const response = await firstValueFrom(rootStore.rootContext.client.dns.fetch(url, name))
+    const response = await firstValueFrom(nip05.fetch(url, name))
     const pubkey = response.names?.[name]
     invariant(pubkey, 'Pubkey not found on remote server')
     this.submitReadonly(pubkey)
     return pubkey
   },
 
-  async submitBunker() {
-    invariant(this.bunkerUrl, 'Bunker not set')
+  async submitNostrConnect(signer: NIP46RemoteSigner, relay: string) {
+    const [, { result: pubkey }] = await signer.getPublicKey()
+    auth.login({
+      pubkey,
+      context: {
+        signer: {
+          name: 'nip46',
+          params: {
+            name: 'nip46',
+            method: {
+              method: 'nostrconnect',
+              relay,
+            },
+            secret: signer.secret,
+            clientSecret: bytesToHex(signer.clientSigner.secret),
+          },
+        },
+        pubkey,
+      },
+    })
+    this.setReponse('Authorized')
+    setTimeout(() => this.reset())
+    return true
+  },
+
+  async submitBunker(bunkerUrl: string) {
+    invariant(bunkerUrl, 'Bunker not set')
 
     const signer = SignerNIP46.create({
       name: 'nip46',
@@ -131,14 +185,14 @@ export const signinStore = makeAutoObservable({
         description: APP_DESCRIPTION,
         method: {
           method: 'bunkerurl',
-          bunkerUrl: this.bunkerUrl,
+          bunkerUrl,
         },
       },
     })
 
     try {
-      const [bunker, res] = await signer.signer.connect()
-      const { pubkey } = bunker
+      const [, res] = await signer.signer.connect()
+      const [, { result: pubkey }] = await signer.signer.getPublicKey()
       auth.login({
         pubkey,
         context: {
@@ -146,18 +200,19 @@ export const signinStore = makeAutoObservable({
             ...signer,
             params: {
               ...signer.params,
+              secret: signer.signer.secret,
               clientSecret: bytesToHex(signer.signer.clientSigner.secret),
             },
           },
-          options: {
-            pubkey,
-          },
+          pubkey,
         },
       })
       this.setReponse('Authorized')
+      this.reset()
       return res
     } catch (res) {
       const error = res as Error
+      console.error(error)
       this.setReponse('')
       this.setError(error.message)
     }

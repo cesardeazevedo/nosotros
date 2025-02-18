@@ -1,7 +1,6 @@
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { useMatch } from '@tanstack/react-router'
-import { useMobile } from 'hooks/useMobile'
 import { DateTime } from 'luxon'
 import { memo } from 'react'
 import { css } from 'react-strict-dom'
@@ -13,9 +12,8 @@ import { Link } from '../Links/Link'
 const lastUpdated = DateTime.fromJSDate(new Date(committerDate)).toLocaleString()
 
 export const Stats = memo(function Stats() {
-  const isMobile = useMobile()
   const isDeck = useMatch({ from: '/deck', shouldThrow: false })
-  if (isMobile || isDeck) return null
+  if (isDeck) return null
   return (
     <Stack horizontal={false} gap={1} sx={styles.root}>
       <Text size='sm' sx={styles.text}>

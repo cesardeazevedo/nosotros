@@ -4,32 +4,33 @@ import { CLIENT_TAG } from '@/constants/tags'
 import type { UserRelay } from '@/nostr/helpers/parseRelayList'
 import { READ, WRITE } from '@/nostr/helpers/parseRelayList'
 import { isAuthorTag, isQuoteTag } from '@/nostr/helpers/parseTags'
-import type { NostrClient } from '@/nostr/nostr'
+import type { NostrContext } from '@/nostr/context'
 import { publish } from '@/nostr/publish/publish'
 import type { NostrEventMetadata } from '@/nostr/types'
 import type { Editor } from '@tiptap/core'
-import { action, computed, makeAutoObservable } from 'mobx'
+import { action, computed, makeAutoObservable, reaction } from 'mobx'
 import type { FileUploadStorage, NostrStorage } from 'nostr-editor'
 import type { EventTemplate, NostrEvent, UnsignedEvent } from 'nostr-tools'
 import { createElement } from 'react'
-import { catchError, EMPTY, from, mergeMap, of, tap, type Subscription } from 'rxjs'
-import type { NostrContext } from '../context/nostr.context.store'
+import { catchError, EMPTY, of, tap, throwError } from 'rxjs'
+import type { NostrStore } from '../nostr/nostr.context.store'
 import { toggle } from '../helpers/toggle'
 import type { Note } from '../notes/note'
 import { toastStore } from '../ui/toast.store'
 import { userRelayStore } from '../userRelays/userRelay.store'
-import type { Comment } from '../comment/comment'
+import { userStore } from '../users/users.store'
+import { rootStore } from '../root.store'
 
 type EditorStoreOptions = {
   kind?: Kind
-  parentNote?: Note | Comment
+  parentNote?: Note
   onPublish?: (event: NostrEventMetadata) => void
 }
 
-type Sections = 'broadcast' | 'mentions' | 'pow' | 'settings'
+type Sections = 'broadcast' | 'mentions' | 'pow' | 'settings' | 'zaps'
 
 export class EditorStore {
-  context: NostrContext | undefined = undefined
+  context: NostrStore | undefined = undefined
   signedEvent: NostrEvent | undefined = undefined
   content = ''
 
@@ -46,22 +47,36 @@ export class EditorStore {
   includedRelays = new Set<string>()
   excludedRelays = new Set<string>()
   excludedMentions = new Set<string>()
+  excludedMentionsZaps = new Set<string>()
 
-  submit$: Subscription | undefined = undefined
+  zapSplitsEnabled = false
+  zapSplits: Map<string, number> = new Map()
+
   editor: Editor | undefined = undefined
 
   constructor(public options: EditorStoreOptions) {
     makeAutoObservable(this, {
       event: computed.struct,
       rawEvent: computed.struct,
-      myInboxRelays: computed.struct,
+      myOutboxRelays: computed.struct,
       otherInboxRelays: computed.struct,
       allRelays: computed.struct,
+      mentions: computed.struct,
       sign: action.bound,
       onUpdate: action.bound,
-      onSubmit: action.bound,
+      submit: action.bound,
       selectFiles: action.bound,
+      updateZapSplit: action.bound,
     })
+
+    reaction(
+      () => this.mentions,
+      () => {
+        this.mentionsZaps.forEach((pubkey) => {
+          this.updateZapSplit(pubkey, Math.floor(100 / this.mentions.length))
+        })
+      },
+    )
   }
 
   // this needs to be a computed
@@ -81,15 +96,21 @@ export class EditorStore {
     } else {
       this.section = action
     }
+    if (action === 'zaps') {
+      this.zapSplitsEnabled = true
+      if (this.section === false && this.zapSplits.size === 0) {
+        this.zapSplitsEnabled = false
+      }
+    }
   }
 
   setEditor(editor: Editor) {
     this.editor = editor
   }
 
-  setContext(context: NostrContext) {
+  setContext(context: NostrStore) {
     this.context = context
-    this.clientEnabled.toggle(context.client.settings?.clientTag || false)
+    this.clientEnabled.toggle(rootStore.globalSettings.clientTag || false)
   }
 
   onUpdate(editor: Editor) {
@@ -105,6 +126,14 @@ export class EditorStore {
     this.powDifficulty = value
   }
 
+  reset() {
+    this.clearContent()
+    this.resetBroadcaster()
+    this.resetZapSplits()
+    this.open.toggle(false)
+    this.section = false
+  }
+
   resetSignedEvent() {
     this.signedEvent = undefined
   }
@@ -115,8 +144,31 @@ export class EditorStore {
     this.broadcastDirt.toggle(false)
   }
 
-  get client(): NostrClient | undefined {
-    return this.context?.client
+  resetZapSplits() {
+    this.openSection('zaps')
+    this.zapSplitsEnabled = false
+    this.zapSplits.clear()
+    this.excludedMentionsZaps.clear()
+  }
+
+  getZapSplit(pubkey: string): number {
+    return this.zapSplits.get(pubkey) || 0
+  }
+
+  get ctx(): NostrContext | undefined {
+    return this.context?.context
+  }
+
+  get storage() {
+    return this.editor?.storage?.nostr as NostrStorage | undefined
+  }
+
+  get uploader() {
+    return this.editor?.storage?.fileUpload?.uploader as FileUploadStorage['uploader'] | undefined
+  }
+
+  get tags() {
+    return this.event.tags
   }
 
   get clientTag() {
@@ -127,24 +179,22 @@ export class EditorStore {
     return this.nsfwEnabled.value ? [['content-warning', '']] : []
   }
 
-  get storage() {
-    return this.editor?.storage.nostr as NostrStorage
+  get replyTags() {
+    return this.parent?.replyTags || []
   }
 
-  get uploader() {
-    return this.editor?.storage.fileUpload!.uploader as FileUploadStorage['uploader']
-  }
-
-  get tags() {
-    return this.event.tags
+  get zapTags() {
+    if (this.zapSplitsEnabled) {
+      return this.zapSplitsList.map(([pubkey, amount]) => {
+        const user = userStore.get(pubkey)
+        return ['zap', pubkey, user?.headRelay || '', (amount / 100).toString()]
+      })
+    }
+    return []
   }
 
   get parent() {
     return this.options.parentNote
-  }
-
-  get replyTags() {
-    return this.parent?.replyTags || []
   }
 
   editorTags() {
@@ -153,20 +203,24 @@ export class EditorStore {
     return tags.filter((tag) => (isAuthorTag(tag) ? !this.excludedMentions.has(tag[1]) : true))
   }
 
+  get isEmpty() {
+    return this.event.content === ''
+  }
+
   get event() {
     return {
       ...(this.signedEvent || this.unsignedEvent),
       content: this.content,
       created_at: Math.floor(Date.now() / 1000),
-      tags: [...this.replyTags, ...this.editorTags(), ...this.clientTag, ...this.nsfwTag],
+      tags: [...this.replyTags, ...this.editorTags(), ...this.clientTag, ...this.nsfwTag, ...this.zapTags],
     } as UnsignedEvent
   }
 
-  get rawEvent() {
+  get rawEvent(): UnsignedEvent {
     return JSON.parse(JSON.stringify(this.event))
   }
 
-  get myInboxRelays() {
+  get myOutboxRelays() {
     if (this.context?.user) {
       return userRelayStore.select(this.context.user.pubkey, {
         permission: WRITE,
@@ -175,6 +229,43 @@ export class EditorStore {
       })
     }
     return []
+  }
+
+  get totalZaps() {
+    return this.zapSplits.values().reduce((acc, x) => acc + x, 0)
+  }
+
+  updateZapSplit(pubkey: string, percentage: number) {
+    this.zapSplits.set(pubkey, percentage)
+
+    const others = this.mentionsZaps
+      .filter((p) => p !== pubkey)
+      .sort((a, b) => ((this.zapSplits.get(a) || 0) > (this.zapSplits.get(b) || 0) ? 1 : -1))
+
+    const total = this.totalZaps
+
+    if (this.totalZaps > 100) {
+      others.forEach((other) => {
+        const otherValue = this.zapSplits.get(other) || 0
+        const remaining = total - 100
+        this.zapSplits.set(other, Math.max(0, otherValue - remaining))
+      })
+    }
+    if (this.totalZaps < 99) {
+      others.forEach((other) => {
+        const otherValue = this.zapSplits.get(other) || 0
+        const remaining = Math.abs(100 - this.totalZaps)
+        this.zapSplits.set(other, otherValue + remaining)
+      })
+    }
+  }
+
+  get zapSplitsList() {
+    return [...this.zapSplits.entries()]
+  }
+
+  get mentionsZaps() {
+    return this.mentions.filter((x) => !this.excludedMentionsZaps.has(x))
   }
 
   get mentions(): string[] {
@@ -191,13 +282,13 @@ export class EditorStore {
       return userRelayStore.select(author, {
         ignore: this.excludedRelays,
         permission: READ,
-        maxRelaysPerUser: this.context?.client?.settings.maxRelaysPerUserInbox,
+        maxRelaysPerUser: this.context?.context.settings.maxRelaysPerUserInbox,
       })
     })
   }
 
   get allRelays() {
-    return [...this.myInboxRelays, ...this.otherInboxRelays]
+    return [...this.myOutboxRelays, ...this.otherInboxRelays]
   }
 
   get title() {
@@ -253,59 +344,50 @@ export class EditorStore {
     this.excludedMentions.add(pubkey)
   }
 
-  async sign(event?: EventTemplate) {
-    const signed = await this.client?.signer?.sign(event || this.rawEvent)
-    if (signed) {
-      this.signedEvent = signed
-      return this.signedEvent
-    }
-    return Promise.reject('Signing rejected')
+  excludeMentionZap(pubkey: string) {
+    this.excludedMentionsZaps.add(pubkey)
+    this.zapSplits.delete(pubkey)
   }
 
-  reset() {
-    this.clearContent()
-    this.resetBroadcaster()
-    this.open.toggle(false)
-    this.section = false
+  async sign(event: EventTemplate) {
+    if (this.ctx) {
+      const { signer, pubkey } = this.ctx
+      if (signer && pubkey) {
+        try {
+          return await signer.sign({ ...event, pubkey })
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (error) {
+          return Promise.reject('Signing rejected')
+        }
+      }
+    }
+    return Promise.reject('Missing signer')
   }
 
-  onSubmit() {
-    const client = this.client
-    const uploader = this.uploader
-    if (!client || !uploader) {
-      return
+  submit(event: EventTemplate) {
+    const ctx = this.ctx
+    if (!ctx) {
+      return throwError(() => 'Missing signer')
     }
-
-    if (this.submit$) {
-      this.submit$.unsubscribe()
-    }
-
-    this.submit$ = from(uploader.start())
-      .pipe(
-        mergeMap(() => {
-          return publish(client, this.rawEvent, {
-            relays: of(this.allRelays.map((x) => x.relay)),
-          })
-        }),
-        tap(() => this.reset()),
-        tap((event) => {
-          const component = createElement(ToastEventPublished, {
-            event,
-            eventLabel: this.title,
-          })
-          toastStore.enqueue(component, { duration: 10000 })
-        }),
-        catchError((error) => {
-          console.dir(error)
-          this.isUploading.toggle(false)
-          return EMPTY
-        }),
-      )
-      .subscribe({
-        next: (event) => {
-          this.options.onPublish?.(event)
-        },
-      })
+    return publish(ctx, event, {
+      relays: of(this.allRelays.map((x) => x.relay)),
+    }).pipe(
+      tap((event) => {
+        const component = createElement(ToastEventPublished, {
+          event,
+          eventLabel: this.title,
+        })
+        toastStore.enqueue(component, { duration: 10000 })
+        this.reset()
+        this.options.onPublish?.(event)
+      }),
+      catchError((error) => {
+        console.dir(error)
+        this.isUploading.toggle(false)
+        toastStore.enqueue(error.message, { duration: 10000 })
+        return EMPTY
+      }),
+    )
   }
 }
 

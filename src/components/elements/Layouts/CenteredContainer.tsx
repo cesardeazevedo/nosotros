@@ -1,5 +1,4 @@
 import type { SxProps } from '@/components/ui/types'
-import { spacing } from '@/themes/spacing.stylex'
 import React from 'react'
 import { css, html } from 'react-strict-dom'
 
@@ -10,7 +9,10 @@ type Props = {
 }
 
 export const CenteredContainer = (props: Props) => (
-  <html.div style={[styles.root, props.margin && styles.margin, props.sx]}>{props.children}</html.div>
+  <html.div style={[styles.root, props.margin && styles.margin, props.sx]}>
+    <style>{`body {overflow-x: hidden}`}</style>
+    {props.children}
+  </html.div>
 )
 
 const MOBILE = '@media (max-width: 599.95px)'
@@ -27,9 +29,9 @@ const styles = css.create({
     marginBottom: 0,
   },
   margin: {
-    paddingBottom: spacing.padding9,
+    paddingBottom: 100,
     marginTop: {
-      default: spacing.margin4,
+      default: 100,
       [MOBILE]: 0,
     },
   },

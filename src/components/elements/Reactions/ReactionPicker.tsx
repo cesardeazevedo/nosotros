@@ -1,4 +1,6 @@
+import { PopoverBase } from '@/components/ui/Popover/PopoverBase'
 import { TooltipRich } from '@/components/ui/TooltipRich/TooltipRich'
+import { useMobile } from '@/hooks/useMobile'
 import { elevation } from '@/themes/elevation.stylex'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
@@ -7,17 +9,29 @@ import React, { memo, useRef } from 'react'
 import { css } from 'react-strict-dom'
 
 type Props = {
+  mobileOpen: boolean
+  onClose?: () => void
   onClick: (reaction: string) => void
   children: React.ReactNode
 }
 
+const reactions = {
+  like: { title: 'Like', reaction: '🤙' },
+  lfg: { title: 'LFG!', reaction: '🚀' },
+  fire: { title: 'Fire', reaction: '🔥' },
+  watching: { title: 'Watching', reaction: '👀' },
+  haha: { title: 'Haha', reaction: '😂' },
+  salute: { title: 'Salute', reaction: '🫡' },
+  hugs: { title: 'Hugs', reaction: '🫂' },
+  angry: { title: 'Angry', reaction: '😡' },
+} as const
+
 function ReactionIcon(props: {
-  title?: string
-  reaction: string
+  reaction: keyof typeof reactions
   mouseX: MotionValue<number>
   onClick?: (emoji: string) => void
 }) {
-  const { reaction, title, mouseX, onClick } = props
+  const { mouseX, onClick } = props
   const ref = useRef<HTMLDivElement | null>(null)
   const distance = useTransform(mouseX, (value: number) => {
     const bounds = ref.current?.getBoundingClientRect() ?? { x: 0, width: 0 }
@@ -29,10 +43,16 @@ function ReactionIcon(props: {
   const rotateZText = useTransform(distance, [-100, 0, 100], [0, 16, 0])
   const opacity = useTransform(distance, [-50, 0, 50], [0, 1, 0])
 
+  const { title, reaction } = reactions[props.reaction]
+
   return (
     <motion.div
       ref={ref}
-      onClick={() => onClick?.(reaction)}
+      onClick={(e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        onClick?.(reaction)
+      }}
       {...css.props(styles.reaction)}
       style={{ scale, marginRight, rotateZ }}>
       {title && (
@@ -50,23 +70,51 @@ function ReactionDock({ onClick }: { onClick: Props['onClick'] }) {
   const props = { mouseX, onClick }
   return (
     <div {...css.props(styles.dock)} onMouseMove={(e) => mouseX.set(e.pageX)}>
-      <ReactionIcon title='Like' reaction='🤙' {...props} />
-      <ReactionIcon title='LFG!' reaction='🚀' {...props} />
-      <ReactionIcon title='Fire' reaction='🔥' {...props} />
-      <ReactionIcon title='Watching' reaction='👀' {...props} />
-      <ReactionIcon title='Haha' reaction='😂' {...props} />
-      <ReactionIcon title='Salute' reaction='🫡' {...props} />
-      <ReactionIcon title='Hugs' reaction='🫂' {...props} />
-      <ReactionIcon title='Angry' reaction='😡' {...props} />
+      <ReactionIcon reaction='like' {...props} />
+      <ReactionIcon reaction='lfg' {...props} />
+      <ReactionIcon reaction='fire' {...props} />
+      <ReactionIcon reaction='watching' {...props} />
+      <ReactionIcon reaction='haha' {...props} />
+      <ReactionIcon reaction='salute' {...props} />
+      <ReactionIcon reaction='hugs' {...props} />
+      <ReactionIcon reaction='angry' {...props} />
     </div>
   )
 }
 
 export const ReactionPicker = memo(function ReactionPicker(props: Props) {
-  const { children, onClick } = props
+  const { mobileOpen, children, onClick, onClose } = props
+  const mobile = useMobile()
+
+  if (mobile && mobileOpen) {
+    return (
+      <PopoverBase
+        opened
+        cursor={false}
+        placement='top-start'
+        role='tooltip'
+        forwardProps
+        onClose={() => onClose?.()}
+        contentRenderer={(content) => (
+          <ReactionDock
+            onClick={(e) => {
+              content.close()
+              onClick(e)
+            }}
+          />
+        )}>
+        {(content) => (
+          <span {...content.getProps()} ref={content.setRef}>
+            {children}
+          </span>
+        )}
+      </PopoverBase>
+    )
+  }
 
   return (
     <TooltipRich
+      keepMounted
       cursor={false}
       placement='top-start'
       enterDelay={500}

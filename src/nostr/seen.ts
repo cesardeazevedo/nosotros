@@ -6,6 +6,8 @@ import type { NostrEvent } from 'nostr-tools'
 import { identity, mergeMap, Subject } from 'rxjs'
 import { db } from './db'
 
+const kinds = [Kind.Text, Kind.Comment, Kind.Article, Kind.Media, Kind.Highlight]
+
 export class Seen {
   private insert$ = new Subject<SeenDB>()
   private query$ = new Subject<NostrEvent>()
@@ -23,7 +25,7 @@ export class Seen {
   }
 
   insert(relay: string, event: NostrEvent) {
-    if ([Kind.Text, Kind.Comment, Kind.Article, Kind.Media, Kind.Highlight].includes(event.kind)) {
+    if (kinds.includes(event.kind)) {
       const data = { relay, kind: event.kind, eventId: event.id } as SeenDB
       seenStore.add(data)
       this.insert$.next(data)
@@ -31,6 +33,10 @@ export class Seen {
   }
 
   query(event: NostrEvent) {
-    this.query$.next(event)
+    if (kinds.includes(event.kind)) {
+      this.query$.next(event)
+    }
   }
 }
+
+export const seen = new Seen()

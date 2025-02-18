@@ -1,22 +1,30 @@
+import { useContentContext } from '@/components/providers/ContentProvider'
 import { Button } from '@/components/ui/Button/Button'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { useCurrentPubkey } from '@/hooks/useRootStore'
 import type { EditorStore } from '@/stores/editor/editor.store'
+import { observer } from 'mobx-react-lite'
 import { useCallback } from 'react'
 import { css } from 'react-strict-dom'
 import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDOMProps'
 import { LinkSignIn } from '../Links/LinkSignIn'
+import { cancel$ } from './utils/countDown'
 
 type Props = {
   store: EditorStore
-  dense?: boolean
   renderDiscard?: boolean
+  onSubmit: () => void
   onDiscard?: () => void
+  disabled?: boolean
+  state: number | string | boolean
 }
 
-export const EditorSubmit = (props: Props) => {
-  const { store, dense, renderDiscard, onDiscard } = props
+export const EditorSubmit = observer(function EditorSubmit(props: Props) {
+  const { store, state, disabled, renderDiscard, onSubmit, onDiscard } = props
+  const { dense } = useContentContext()
   const pubkey = useCurrentPubkey()
+
+  const isCountDown = typeof state === 'number'
 
   const handleDiscard = useCallback((event: StrictClickEvent) => {
     event.stopPropagation()
@@ -41,16 +49,16 @@ export const EditorSubmit = (props: Props) => {
       )}
       {pubkey && (
         <Button
-          disabled={store.isUploading.value}
+          disabled={disabled}
           sx={[dense && styles.button$dense]}
           variant='filled'
-          onClick={store.onSubmit}>
-          Post
+          onClick={() => (isCountDown ? cancel$.next() : onSubmit())}>
+          {isCountDown ? (state === 0 ? 'Posting' : `Posting in ${state} (cancel)`) : 'Post'}
         </Button>
       )}
     </Stack>
   )
-}
+})
 
 const styles = css.create({
   root: {

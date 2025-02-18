@@ -1,38 +1,50 @@
-import type { ModelEvent } from '@/stores/base/model.store'
-import { Note } from '@/stores/notes/note'
-import { Repost } from '@/stores/reposts/repost'
-import { ZapReceipt } from '@/stores/zaps/zap.receipt.store'
+import { Kind } from '@/constants/kinds'
+import type {
+  NostrEventMedia,
+  NostrEventMetadata,
+  NostrEventNote,
+  NostrEventRepost,
+  NostrEventZapReceipt,
+} from '@/nostr/types'
+import { metadataSymbol } from '@/nostr/types'
 import { observer } from 'mobx-react-lite'
 import { PostRoot } from '../Posts/Post'
-import { PostThread } from '../Posts/PostThread'
+import { RepliesThread } from '../Replies/RepliesThread'
 import { RepostRoot } from '../Repost/Repost'
 import { ZapReceiptRoot } from '../Zaps/ZapReceipt'
 import { NostrEventUnsupported } from './NostrEventUnsupported'
-import { Kind } from '@/constants/kinds'
 
 type Props = {
-  item: ModelEvent
+  event: NostrEventMetadata
+  open?: boolean
 }
 
 export const NostrEventRoot = observer(function NostrEventRoot(props: Props) {
-  const { item } = props
-  switch (true) {
-    case item instanceof Note: {
-      return item.metadata.isRoot || item.event.kind === Kind.Article ? (
-        <PostRoot note={item} />
+  const { event, open } = props
+  switch (event[metadataSymbol].kind) {
+    case Kind.Comment:
+    case Kind.Text: {
+      return event[metadataSymbol].isRoot ? (
+        <PostRoot event={event as NostrEventNote} open={open} />
       ) : (
-        <PostThread note={item} />
+        <RepliesThread event={event as NostrEventNote} open={open} />
       )
     }
-    case item instanceof Repost: {
-      return <RepostRoot repost={item} />
+    case Kind.Article: {
+      return <PostRoot event={event as NostrEventNote} open={open} />
     }
-    case item instanceof ZapReceipt: {
-      return <ZapReceiptRoot zap={item} />
+    case Kind.Repost: {
+      return <RepostRoot event={event as NostrEventRepost} />
+    }
+    case Kind.Media: {
+      return <PostRoot open={open} event={event as NostrEventMedia} />
+    }
+    case Kind.ZapReceipt: {
+      return <ZapReceiptRoot event={event as NostrEventZapReceipt} />
     }
     default: {
-      console.log('Unhandled item to render', item)
-      return <NostrEventUnsupported event={'event' in item ? item.event : item} />
+      console.log('Unhandled item to render', event)
+      return <NostrEventUnsupported event={event} />
     }
   }
 })

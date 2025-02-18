@@ -1,10 +1,8 @@
 import { Kind } from '@/constants/kinds'
 import type { MetadataDB } from '@/db/types'
-import { Editor } from '@tiptap/core'
-import StarterKit from '@tiptap/starter-kit'
+import { welshmanToProseMirror } from '@/utils/welshmanToProsemirror'
+import { parse } from '@welshman/content'
 import type { NostrEvent } from 'core/types'
-import type { ContentSchema } from 'nostr-editor'
-import { NEventExtension, NostrExtension } from 'nostr-editor'
 import { nip19 } from 'nostr-tools'
 import { encodeSafe } from 'utils/nip19'
 import { z } from 'zod'
@@ -43,34 +41,11 @@ export const schema = z
 
 export type UserMetadata = MetadataDB & z.infer<typeof schema> & { kind: Kind.Metadata }
 
-const editor = new Editor({
-  extensions: [
-    StarterKit.configure({ history: false }),
-    NostrExtension.configure({
-      image: false,
-      video: false,
-      nevent: false,
-      youtube: false,
-      tweet: false,
-      nsecReject: false,
-    }),
-    NEventExtension.extend({
-      inline: true,
-      group: 'inline',
-    }),
-  ],
-})
-
-export function parseUserAbout(event: NostrEvent): ContentSchema {
-  editor.commands.setEventContentKind0(event)
-  return editor.getJSON() as ContentSchema
-}
-
 export function parseUser(event: NostrEvent): UserMetadata {
   try {
     const content = JSON.parse(event.content || '{}')
-    const aboutParsed = parseUserAbout(event)
-    const metadata = schema.parse({ id: event.id, aboutParsed, ...content })
+    const { contentSchema } = welshmanToProseMirror(parse({ content: content.about || '' }), [])
+    const metadata = schema.parse({ id: event.id, aboutParsed: contentSchema, ...content })
     return {
       ...metadata,
       id: event.id,

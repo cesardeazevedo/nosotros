@@ -1,16 +1,18 @@
-import { useNoteContext } from '@/components/providers/NoteProvider'
+import { useContentContext } from '@/components/providers/ContentProvider'
 import { Text } from '@/components/ui/Text/Text'
 import { palette } from '@/themes/palette.stylex'
+import { Link } from '@tanstack/react-router'
 import React from 'react'
 import { css } from 'react-strict-dom'
-import { ContentLink } from '../Link/Link'
 
 type Props = {
+  tag: string
   children: React.ReactNode
 }
 
 export const Tag = (props: Props) => {
-  const { disableLink } = useNoteContext()
+  const { children, tag } = props
+  const { disableLink } = useContentContext()
   if (disableLink) {
     return (
       <Text sx={styles.root} size='lg'>
@@ -19,11 +21,11 @@ export const Tag = (props: Props) => {
     )
   }
   return (
-    <ContentLink href='#'>
+    <Link to='/tag/$tag' params={{ tag: tag.replace('#', '') }}>
       <Text sx={styles.root} size='lg'>
-        {props.children}
+        {children}
       </Text>
-    </ContentLink>
+    </Link>
   )
 }
 

@@ -1,38 +1,45 @@
-import type { Note } from '@/stores/notes/note'
+import { ContentProvider, useContentContext } from '@/components/providers/ContentProvider'
+import { NoteProvider } from '@/components/providers/NoteProvider'
+import { useNoteStore } from '@/hooks/useNoteStore'
+import type { NostrEventComment, NostrEventMedia } from '@/nostr/types'
+import { type NostrEventNote } from '@/nostr/types'
 import { spacing } from '@/themes/spacing.stylex'
 import { observer } from 'mobx-react-lite'
 import React from 'react'
-import { css, html } from 'react-strict-dom'
+import { css } from 'react-strict-dom'
+import { LinkNEvent } from '../Links/LinkNEvent'
 import { PostActions } from './PostActions/PostActions'
 import { PostContent } from './PostContent'
 import { PostUserHeader } from './PostUserHeader'
 
 type Props = {
-  note: Note
+  event: NostrEventNote | NostrEventComment | NostrEventMedia
   header?: React.ReactNode
 }
 
 export const PostQuote = observer(function PostQuote(props: Props) {
-  const { header, note } = props
+  const { event, header } = props
+  const note = useNoteStore(event)
+  const { blured } = useContentContext()
   return (
-    <html.div style={styles.root}>
-      <html.div style={styles.header}>{header || <PostUserHeader dense note={note} disableLink />}</html.div>
-      <PostContent initialExpanded note={note} />
-      <html.div style={styles.actions}>
-        <PostActions note={note} />
-      </html.div>
-    </html.div>
+    <LinkNEvent nevent={note.event.nevent}>
+      <NoteProvider value={{ note }}>
+        <ContentProvider value={{ blured, dense: true, disableLink: true }}>
+          {header || <PostUserHeader sx={styles.header} dense />}
+          <PostContent initialExpanded />
+          <PostActions sx={styles.actions} />
+        </ContentProvider>
+      </NoteProvider>
+    </LinkNEvent>
   )
 })
 
 const styles = css.create({
-  root: {
-    paddingBottom: spacing.padding1,
-  },
   header: {
     paddingBlock: spacing.padding1,
   },
   actions: {
     marginTop: spacing.margin1,
+    paddingBottom: spacing.padding1,
   },
 })

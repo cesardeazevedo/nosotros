@@ -15,7 +15,7 @@ describe('auth$ store', () => {
   })
 
   test('assert login and logout', () => {
-    auth.login({ pubkey: 'user1', context: { options: {}, signer: { name: 'nip07' } } })
+    auth.login({ pubkey: 'user1', context: { signer: { name: 'nip07' } } })
 
     const account = auth.selected
     invariant(account, 'account not defined')
@@ -37,8 +37,8 @@ describe('auth$ store', () => {
         fn(undefined)
       }
     })
-    auth.login({ pubkey: 'user1', context: { options: {}, signer: { name: 'nip07' } } })
-    auth.login({ pubkey: 'user2', context: { options: {}, signer: { name: 'nip07' } } })
+    auth.login({ pubkey: 'user1', context: { signer: { name: 'nip07' } } })
+    auth.login({ pubkey: 'user2', context: { signer: { name: 'nip07' } } })
     expect(fn).toHaveBeenCalledTimes(3)
     expect(fn).toHaveBeenNthCalledWith(1, undefined)
     expect(fn).toHaveBeenNthCalledWith(2, { pubkey: 'user1', signer: { name: 'nip07' } })
@@ -46,8 +46,8 @@ describe('auth$ store', () => {
   })
 
   test('assert reset', () => {
-    auth.login({ pubkey: 'user1', context: { options: {}, signer: { name: 'nip07' } } })
-    auth.login({ pubkey: 'user2', context: { options: {}, signer: { name: 'nip07' } } })
+    auth.login({ pubkey: 'user1', context: { signer: { name: 'nip07' } } })
+    auth.login({ pubkey: 'user2', context: { signer: { name: 'nip07' } } })
 
     expect(auth.accounts.size).toBe(2)
     auth.reset()
