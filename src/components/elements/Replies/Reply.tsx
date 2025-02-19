@@ -77,7 +77,7 @@ export const Reply = observer(function Reply(props: Props) {
           )}
           {open && (
             <>
-              <Stack align='flex-start' gap={1}>
+              <Stack align='flex-start' gap={1} sx={styles.wrapper}>
                 {level !== 1 && <html.div style={styles.anchor} />}
                 <UserAvatar pubkey={event.pubkey} />
                 <ReplyContent />
@@ -137,6 +137,9 @@ const styles = css.create({
     ':hover::before': {
       backgroundColor: 'gray',
     },
+  },
+  wrapper: {
+    width: 'fit-content',
   },
   anchor: {
     position: 'absolute',
