@@ -40,9 +40,9 @@ export const Editor = observer(function Editor(props: Props) {
     store.open.toggle(initialOpen)
   }, [])
 
-  const [submitState, submit] = useObservableState<string | number | boolean, void>((input$) => {
+  const [submitState, submit] = useObservableState<string | number | boolean, EditorStore>((input$) => {
     return input$.pipe(
-      concatMap(() => {
+      concatMap((store) => {
         const submit$ = defer(() => {
           return from(store.uploader!.start()).pipe(
             mergeMap(() => store.submit(store.rawEvent)),
@@ -85,7 +85,7 @@ export const Editor = observer(function Editor(props: Props) {
                   state={submitState}
                   disabled={store.isEmpty || store.isUploading.value}
                   renderDiscard={renderDiscard}
-                  onSubmit={() => submit()}
+                  onSubmit={() => submit(store)}
                   onDiscard={onDiscard}
                 />
               </EditorActions>

@@ -6,7 +6,6 @@ import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { Kind } from '@/constants/kinds'
 import { useMobile } from '@/hooks/useMobile'
 import { useNoteStore } from '@/hooks/useNoteStore'
-import { useGlobalSettings } from '@/hooks/useRootStore'
 import { subscribeNoteStats } from '@/nostr/subscriptions/subscribeNoteStats'
 import type { NostrEventComment, NostrEventMedia, NostrEventNote } from '@/nostr/types'
 import { useNostrClientContext } from '@/stores/nostr/nostr.context.hooks'
@@ -38,13 +37,12 @@ export const PostRoot = observer(function PostRoot(props: Props) {
   const [ref] = useNoteVisibility(event)
   const context = useNostrClientContext()
   const contentContext = useContentContext()
-  const globalSettings = useGlobalSettings()
   const note = useNoteStore(event, open)
 
   const handleRepliesClick = useCallback(() => {
     note.toggleReplies()
     note.setRepliesStatus('LOADING')
-    subscribeNoteStats(note.event.event, context.context, globalSettings.scroll).subscribe({
+    subscribeNoteStats(note.event.event, context.context, {}).subscribe({
       complete: () => {
         note.setRepliesStatus('LOADED')
       },

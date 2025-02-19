@@ -55,9 +55,9 @@ export const EditorMedia = observer(function EditorMedia(props: Props) {
     [],
   )
 
-  const [submitState, submit] = useObservableState<string | number | boolean, void>((input$) => {
+  const [submitState, submit] = useObservableState<string | number | boolean, EditorStore>((input$) => {
     return input$.pipe(
-      concatMap(() => {
+      concatMap((store) => {
         const upload$ = defer(() =>
           from(uploadStore.uploadFiles()).pipe(
             mergeMap((imetas) => {
@@ -104,7 +104,7 @@ export const EditorMedia = observer(function EditorMedia(props: Props) {
                 state={submitState}
                 disabled={uploadStore.files.length === 0 || store.isUploading.value}
                 renderDiscard={renderDiscard}
-                onSubmit={() => submit()}
+                onSubmit={() => submit(store)}
                 onDiscard={() => {
                   uploadStore.reset()
                   onDiscard?.()
