@@ -76,6 +76,10 @@ const MOBILE = '@media (max-width: 599.95px)'
 const styles = css.create({
   root: {
     marginBlock: spacing.margin2,
+    maxWidth: {
+      default: '100%',
+      [MOBILE]: 'calc(100vw - 60px)',
+    },
   },
   root$dense: {
     marginBlock: spacing.margin1,
@@ -86,17 +90,9 @@ const styles = css.create({
   },
   size$md: {
     maxHeight: MAX_BOUNDS.md.maxHeight,
-    maxWidth: {
-      default: MAX_BOUNDS.md.maxWidth,
-      [MOBILE]: 'calc(100vw - 90px)',
-    },
   },
   size$sm: {
     maxHeight: MAX_BOUNDS.sm.maxHeight,
-    maxWidth: {
-      default: MAX_BOUNDS.sm.maxWidth,
-      [MOBILE]: 'calc(100vw - 90px)',
-    },
   },
   fixedHeight: (height: number) => ({ height }),
   bounds: (width: number, height: number) => ({ width, height }),
