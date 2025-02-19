@@ -19,18 +19,14 @@ export const EditorQuoteDialog = observer(function EditorQuoteDialog() {
     navigate({ to: '.', search: ({ quoting, ...rest }) => rest })
   }, [])
 
-  const store = useMemo(
-    () =>
-      createEditorStore({
-        onPublish: () => handleClose(),
-      }),
-    [quoting],
-  )
+  const store = useMemo(() => {
+    return quoting ? createEditorStore({ onPublish: () => handleClose() }) : null
+  }, [quoting])
 
   useEffect(() => {
-    if (quoting && store.editor) {
+    if (quoting && store?.editor) {
       if (quoting.startsWith('nevent')) {
-        store.editor
+        store?.editor
           .chain()
           .insertContent({ type: 'text', text: ' ' })
           .insertNEvent({ bech32: 'nostr:' + quoting })
@@ -45,7 +41,7 @@ export const EditorQuoteDialog = observer(function EditorQuoteDialog() {
           .run()
       }
     }
-  }, [quoting, store.editor])
+  }, [quoting, store?.editor])
 
   return (
     <DialogSheet
@@ -58,7 +54,7 @@ export const EditorQuoteDialog = observer(function EditorQuoteDialog() {
         <>
           <RemoveScroll>
             <html.div style={styles.root}>
-              <Editor initialOpen store={store} onDiscard={handleClose} />
+              {store && <Editor initialOpen store={store} onDiscard={handleClose} />}
             </html.div>
           </RemoveScroll>
         </>
