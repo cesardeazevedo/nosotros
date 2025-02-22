@@ -27,7 +27,7 @@ export function createSuggestionPlugin(editor: Editor) {
         pubkey: props.pubkey,
         relays: userRelayStore.getRelays(props.pubkey),
       }
-      attrs.bech32 = 'nostr:' + nip19.nprofileEncode(attrs as nip19.ProfilePointer)
+      attrs.bech32 = nip19.nprofileEncode(attrs as nip19.ProfilePointer)
 
       editor
         .chain()
