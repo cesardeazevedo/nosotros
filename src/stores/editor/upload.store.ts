@@ -3,7 +3,7 @@ import { uploadBlossom, uploadNIP96, type ImageAttributes, type UploadTask, type
 import type { EventTemplate, NostrEvent } from 'nostr-tools'
 import { from, lastValueFrom, map, mergeMap, tap, toArray } from 'rxjs'
 
-const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'video/mp4', 'video/mpeg', 'video/webm']
+const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'video/mp4', 'video/mpeg', 'video/webm']
 
 export function bufferToHex(buffer: ArrayBuffer) {
   return Array.from(new Uint8Array(buffer))
@@ -49,28 +49,29 @@ export class UploadStore {
         tap(({ file, response }) => this.setReponse(file, response)),
         toArray(),
         map((responses) => {
-          const imetas =
-            responses
-              .filter((x) => !!x.response.sha256)
-              .map(({ file, response }) => {
-                // Provide default imeta based on what we know
-                const meta: Record<string, string> = {
-                  url: response.url,
-                  x: response.sha256,
-                  m: file.file.type,
-                }
-                // Add imeta based on tags returned by our uploader
-                for (const [k, v] of response.tags) {
-                  meta[k] = v
-                }
+          const sorted = this.files.map((x) => x.sha256)
+          const imetas = responses
+            .filter((x) => !!x.response.sha256)
+            .sort((a, b) => sorted.indexOf(a.response.sha256) - sorted.indexOf(b.response.sha256))
+            .map(({ file, response }) => {
+              // Provide default imeta based on what we know
+              const meta: Record<string, string> = {
+                url: response.url,
+                x: response.sha256,
+                m: file.file.type,
+              }
+              // Add imeta based on tags returned by our uploader
+              for (const [k, v] of response.tags) {
+                meta[k] = v
+              }
 
-                return [
-                  'imeta',
-                  ...Object.entries(meta)
-                    .map((kv) => kv.join(' '))
-                    .sort(),
-                ]
-              }) || []
+              return [
+                'imeta',
+                ...Object.entries(meta)
+                  .map((kv) => kv.join(' '))
+                  .sort(),
+              ]
+            })
           const imetaQueryable =
             responses.length === 1
               ? [
@@ -142,7 +143,6 @@ export class UploadStore {
   }
 
   delete(index: number) {
-    console.log('?????', index)
     this.files = this.files.filter((_, i) => i !== index)
   }
 }
