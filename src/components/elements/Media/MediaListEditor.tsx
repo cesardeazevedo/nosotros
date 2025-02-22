@@ -22,47 +22,47 @@ export const MediaListEditor = observer(function MediaListEditor(props: Props) {
   })
   return (
     <ContentProvider value={{ dense: true }}>
-      <div {...css.props(styles.root)} {...events} ref={ref}>
-        {uploadStore.files.map((file, index) => (
-          <html.div key={file.src} style={styles.itemWrap}>
-            {file.file.type.startsWith('image') && (
-              <ImageEditor
-                {...(file as ImageAttributes)}
-                sx={styles.item}
-                onDelete={() => uploadStore.delete(index)}
-                onUpdate={(attrs) => uploadStore.setFileData(file.src, attrs)}
-              />
-            )}
-            {file.file.type.startsWith('video') && (
-              <VideoEditor
-                {...(file as VideoAttributes)}
-                sx={styles.item}
-                onDelete={() => uploadStore.delete(index)}
-                onUpdate={(attrs) => uploadStore.setFileData(file.src, attrs)}
-              />
-            )}
-          </html.div>
-        ))}
-      </div>
+      <html.div style={styles.root1}>
+        <div {...css.props(styles.root)} {...events} ref={ref}>
+          {uploadStore.files.map((file, index) => (
+            <html.div key={file.src} style={styles.itemWrap}>
+              {file.file.type.startsWith('image') && (
+                <ImageEditor
+                  {...(file as ImageAttributes)}
+                  sx={styles.item}
+                  onDelete={() => uploadStore.delete(index)}
+                  onUpdate={(attrs) => uploadStore.setFileData(file.src, attrs)}
+                />
+              )}
+              {file.file.type.startsWith('video') && (
+                <VideoEditor
+                  {...(file as VideoAttributes)}
+                  sx={styles.item}
+                  onDelete={() => uploadStore.delete(index)}
+                  onUpdate={(attrs) => uploadStore.setFileData(file.src, attrs)}
+                />
+              )}
+            </html.div>
+          ))}
+        </div>
+      </html.div>
     </ContentProvider>
   )
 })
 
 const styles = css.create({
+  root1: {
+    overflowX: 'scroll',
+    overflowY: 'hidden',
+  },
   root: {
     display: 'flex',
     flexDirection: 'row',
     gap: spacing.margin1,
-    width: '100%',
-    overflowX: 'scroll',
+    width: 'max-content',
     overflowY: 'hidden',
     marginBottom: spacing.margin1,
     paddingBottom: 4,
-    '::-webkit-scrollbar': {
-      display: 'none',
-    },
-    '-ms-overflow-style': 'none',
-    scrollbarWidth: 0,
   },
   mediaMultiple: {
     maxHeight: 310,
