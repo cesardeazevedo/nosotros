@@ -15,7 +15,7 @@ import { useCurrentUser } from '@/hooks/useRootStore'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconChevronDown, IconChevronUp } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { css } from 'react-strict-dom'
 
 type Props = {
@@ -27,6 +27,7 @@ export const NotificationsRoute = observer(function NotificationRoute(props: Pro
   const [expanded, setExpanded] = useState(false)
   const feed = module.feed
   useFeedSubscription(feed, module.contextWithFallback.context)
+  const lastSeen = useMemo(() => module.feed.lastSeen, [])
   const user = useCurrentUser()
   return (
     <CenteredContainer margin>
@@ -53,7 +54,7 @@ export const NotificationsRoute = observer(function NotificationRoute(props: Pro
             filter={(event) => (!feed.muted ? user?.isEventMuted(event) || false : true)}
             render={(event) => {
               const notification = feed.notifications.get(event.id)
-              return notification && <NotificationItem notification={notification} />
+              return notification && <NotificationItem lastSeen={lastSeen} notification={notification} />
             }}
           />
           <NotificationLoading rows={8} />
