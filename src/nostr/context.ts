@@ -17,6 +17,7 @@ export type NostrContext = {
   signer: Signer | undefined
   relays?: string[]
   pubkey?: string
+  permission?: number
   settings: NostrSettings
   subOptions?: SubscriptionOptionsContext
   // volatiles

@@ -1,3 +1,4 @@
+import { Badge } from '@/components/ui/Badge/Badge'
 import { focusRingTokens } from '@/components/ui/FocusRing/FocusRing.stylex'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Tab } from '@/components/ui/Tab/Tab'
@@ -5,7 +6,7 @@ import { tabTokens } from '@/components/ui/Tab/Tab.stylex'
 import { Tabs } from '@/components/ui/Tabs/Tabs'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 import { useMobile } from '@/hooks/useMobile'
-import { useCurrentPubkey, useCurrentUser } from '@/hooks/useRootStore'
+import { useCurrentPubkey, useCurrentUser, useRootStore } from '@/hooks/useRootStore'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
@@ -19,6 +20,7 @@ import { LinkSignIn } from '../Links/LinkSignIn'
 import { SignInButtonFab } from '../SignIn/SignInButtonFab'
 
 export const BottomNavigation = observer(function BottomNavigation() {
+  const root = useRootStore()
   const user = useCurrentUser()
   const pubkey = useCurrentPubkey()
   const mobile = useMobile()
@@ -44,7 +46,13 @@ export const BottomNavigation = observer(function BottomNavigation() {
             </Link>
             {user && (
               <Link to='/notifications'>
-                <Tab anchor='/notifications' sx={styles.tab} icon={<IconBell />} activeIcon={<IconBellFilled />} />
+                <Tab
+                  anchor='/notifications'
+                  sx={styles.tab}
+                  icon={<IconBell />}
+                  activeIcon={<IconBellFilled />}
+                  badge={<Badge maxValue={20} value={root.rootNotifications?.feed.unseen?.length} />}
+                />
               </Link>
             )}
             {user && (

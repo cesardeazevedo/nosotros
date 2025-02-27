@@ -23,7 +23,7 @@ export const ProfilePopover = observer(function ProfilePopover() {
       <Popover
         floatingStrategy='fixed'
         placement='bottom-end'
-        contentRenderer={() => (
+        contentRenderer={(props) => (
           <Paper elevation={2} shape='lg' surface='surfaceContainerLow' sx={styles.root}>
             <html.img src={user?.meta.banner} style={styles.image} />
             <Stack sx={styles.header} justify='space-between'>
@@ -32,7 +32,7 @@ export const ProfilePopover = observer(function ProfilePopover() {
                 <IconButton onClick={dialogStore.openQRCode} icon={<IconQrcode strokeWidth='1.5' />} />
               </Tooltip>
             </Stack>
-            <Menu dense onAction={() => {}} />
+            <Menu dense onAction={() => props.close()} />
           </Paper>
         )}>
         {({ getProps, setRef, open }) => (

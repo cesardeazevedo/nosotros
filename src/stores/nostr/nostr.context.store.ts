@@ -23,6 +23,7 @@ export const NostrStoreModel = t
   .model('NostrContextModel', {
     relays: t.maybe(t.array(t.string)),
     pubkey: t.maybe(t.string),
+    permission: t.maybe(t.number),
     signer: t.maybe(SignersModel),
     settings: t.maybe(NostrSettingsModel),
   })
@@ -49,6 +50,7 @@ export const NostrStoreModel = t
       return {
         relays: self.relays,
         pubkey: self.pubkey,
+        permission: self.permission,
         inboxSets: self.inboxSets,
         outboxSets: self.outboxSets,
         localSets: self.localSets,

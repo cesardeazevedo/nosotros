@@ -18,9 +18,15 @@ export const NotificationFeedModel = NotesFeedSubscriptionModel(FeedPaginationLi
     muted: t.optional(t.boolean, false),
     mentions: t.optional(t.boolean, true),
     replies: t.optional(t.boolean, true),
+    lastSeen: t.number,
   })
   .volatile(() => ({
     notifications: observable.map<string, Notification>(),
+  }))
+  .views((self) => ({
+    get unseen() {
+      return self.list.filter((x) => x.created_at > self.lastSeen)
+    },
   }))
   .actions((self) => ({
     ...withToggleAction(self),
@@ -29,12 +35,17 @@ export const NotificationFeedModel = NotesFeedSubscriptionModel(FeedPaginationLi
       self.notifications.set(notification.id, notification)
     },
 
-    subscribe(ctx: NostrContext) {
+    setLastSeen(notification: Notification) {
+      self.lastSeen = Math.max(self.lastSeen, notification.created_at)
+    },
+
+    subscribe(ctx: NostrContext, updateSeen = true) {
       const author = self.pagination.getValue()['#p']?.[0]
       return toStream(() => [self.filter, self.mentions, self.replies]).pipe(
         tap(() => self.pagination.setFilter({ kinds: self.filter.kinds })),
         switchMap(() => {
-          return subscribeNotifications(self.pagination, ctx).pipe(
+          return self.pagination.pipe(
+            mergeMap((filter) => subscribeNotifications(filter, ctx)),
             // filter out same author notifications
             filter((notification) => notification.pubkey !== author),
 
@@ -50,6 +61,7 @@ export const NotificationFeedModel = NotesFeedSubscriptionModel(FeedPaginationLi
               const metadata = event[metadataSymbol]
               switch (metadata.kind) {
                 case Kind.Article:
+                case Kind.Comment:
                 case Kind.Text: {
                   return new Notification({
                     type: metadata.isRoot ? 'mention' : 'reply',
@@ -82,6 +94,7 @@ export const NotificationFeedModel = NotesFeedSubscriptionModel(FeedPaginationLi
 
             tap((notification) => self.add(notification.event)),
             tap((notification) => this.setNotification(notification)),
+            tap((notification) => updateSeen && this.setLastSeen(notification)),
 
             finalize(() => {
               self.reset()

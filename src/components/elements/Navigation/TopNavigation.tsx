@@ -1,9 +1,10 @@
+import { Badge } from '@/components/ui/Badge/Badge'
 import { focusRingTokens } from '@/components/ui/FocusRing/FocusRing.stylex'
 import { Tab } from '@/components/ui/Tab/Tab'
 import { tabTokens } from '@/components/ui/Tab/Tab.stylex'
 import { Tabs } from '@/components/ui/Tabs/Tabs'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
-import { useCurrentUser } from '@/hooks/useRootStore'
+import { useCurrentUser, useRootStore } from '@/hooks/useRootStore'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { IconBell, IconBellFilled, IconLayoutSidebarLeftExpand, IconPhoto, IconServerBolt } from '@tabler/icons-react'
@@ -17,6 +18,7 @@ import { IconHomeFilled } from '../Icons/IconHomeFilled'
 const enterDelay = 800
 
 export const TopNavigation = observer(function TopNavigation() {
+  const root = useRootStore()
   const location = useLocation()
   const user = useCurrentUser()
 
@@ -54,6 +56,7 @@ export const TopNavigation = observer(function TopNavigation() {
               sx={styles.tab}
               icon={<IconBell strokeWidth='1.6' />}
               activeIcon={<IconBellFilled strokeWidth='1.6' size={26} />}
+              badge={<Badge maxValue={20} value={root.rootNotifications?.feed.unseen?.length} />}
               disabled={!user}
             />
           </Link>
