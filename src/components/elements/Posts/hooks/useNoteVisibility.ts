@@ -2,14 +2,13 @@ import { useGlobalSettings } from '@/hooks/useRootStore'
 import { subscribeNoteStats } from '@/nostr/subscriptions/subscribeNoteStats'
 import type { NostrEventComment, NostrEventMedia, NostrEventNote } from '@/nostr/types'
 import { metadataSymbol } from '@/nostr/types'
-import { useNostrClientContext } from '@/stores/nostr/nostr.context.hooks'
 import { eventStore } from '@/stores/events/event.store'
+import { useNostrClientContext } from '@/stores/nostr/nostr.context.hooks'
 import { LRUCache } from 'lru-cache'
 import type { NostrEvent } from 'nostr-tools'
 import { useObservable, useSubscription } from 'observable-hooks'
 import { useEffect, useRef } from 'react'
 import { filter, identity, map, mergeMap, Subject, take, tap } from 'rxjs'
-import type { NostrContext } from '@/nostr/context'
 
 const cache = new LRUCache({ max: 1000 })
 
@@ -42,19 +41,7 @@ export function useNoteVisibility(event: NostrEventNote | NostrEventComment | No
       ]),
       filter((event) => !cache.has(event.id)),
       tap((event) => cache.set(event.id, true)),
-      mergeMap((event) => {
-        const ctx = {
-          ...nostr.context,
-          subOptions: {
-            relayHints: {
-              idHints: {
-                [event.id]: [event.pubkey],
-              },
-            },
-          },
-        } as NostrContext
-        return subscribeNoteStats(event as NostrEvent, ctx, globalSettings.scroll)
-      }),
+      mergeMap((event) => subscribeNoteStats(event as NostrEvent, nostr.context, globalSettings.scroll)),
     )
   })
 
