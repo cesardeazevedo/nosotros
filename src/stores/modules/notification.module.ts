@@ -1,21 +1,14 @@
 import { Kind } from '@/constants/kinds'
-import type { NostrContext } from '@/nostr/context'
 import type { Instance, SnapshotIn, SnapshotOut } from 'mobx-state-tree'
 import { t } from 'mobx-state-tree'
 import { BaseModuleModel } from './module'
 import { NotificationFeedModel } from '../notifications/notification.feed'
 
-export const NotificationModuleModel = BaseModuleModel.named('NotificationModuleModel')
-  .props({
-    type: t.optional(t.literal('notification'), 'notification'),
-    pubkey: t.string,
-    feed: NotificationFeedModel,
-  })
-  .actions((self) => ({
-    subscribe(ctx: NostrContext) {
-      return self.feed.subscribe(ctx)
-    },
-  }))
+export const NotificationModuleModel = BaseModuleModel.named('NotificationModuleModel').props({
+  type: t.optional(t.literal('notification'), 'notification'),
+  pubkey: t.string,
+  feed: NotificationFeedModel,
+})
 
 export function createNotificationModule(snapshot: Pick<NotificationModuleSnapshotIn, 'id' | 'pubkey'>) {
   return NotificationModuleModel.create({
@@ -25,8 +18,12 @@ export function createNotificationModule(snapshot: Pick<NotificationModuleSnapsh
     },
     feed: {
       scope: 'self' as const,
-      limit: 100,
-      filter: { kinds: [Kind.Text, Kind.Repost, Kind.Reaction, Kind.ZapReceipt], '#p': [snapshot.pubkey] },
+      limit: 50,
+      lastSeen: 0,
+      filter: {
+        kinds: [Kind.Text, Kind.Comment, Kind.Repost, Kind.Reaction, Kind.ZapReceipt],
+        '#p': [snapshot.pubkey],
+      },
     },
   })
 }
