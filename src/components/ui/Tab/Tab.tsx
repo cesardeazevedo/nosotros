@@ -3,9 +3,12 @@ import { palette } from '@/themes/palette.stylex'
 import { scale } from '@/themes/scale.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
+import type { ReactNode } from 'react'
 import React, { forwardRef, useCallback, useContext, useEffect, useRef } from 'react'
 import { css, html } from 'react-strict-dom'
 import type { StrictClickEvent, StrictReactDOMProps } from 'react-strict-dom/dist/types/StrictReactDOMProps'
+import { Anchored } from '../Anchored/Anchored'
+import { Badge } from '../Badge/Badge'
 import { Elevation } from '../Elevation/Elevation'
 import { FocusRing } from '../FocusRing/FocusRing'
 import { focusRingTokens } from '../FocusRing/FocusRing.stylex'
@@ -27,13 +30,13 @@ type Props = {
   variant?: TabVariant
   icon?: React.ReactNode
   activeIcon?: React.ReactNode
-  badge?: boolean // todo
+  badge?: ReactNode
   onClick?: StrictReactDOMProps['onClick']
   disabled?: boolean
 }
 
 export const Tab = forwardRef<HTMLButtonElement, Props>((props, ref) => {
-  const { sx, anchor, activeIcon, icon, label, onClick } = props
+  const { sx, anchor, activeIcon, icon, label, badge, onClick } = props
 
   const tabsContext = useContext(TabsContext)
   const variant = props.variant ?? tabsContext?.variant ?? 'primary'
@@ -71,6 +74,18 @@ export const Tab = forwardRef<HTMLButtonElement, Props>((props, ref) => {
   }, [active, anchor, tabsContext])
 
   const hasIcon = active ? !!activeIcon || !!icon : !!icon
+  const hasAnchoredBadge = !!badge && !disabled && (variant === 'primary' || !label)
+  const hasInlineBadge = !!badge && !disabled && !!label && (variant === 'secondary' || !hasIcon)
+
+  const renderAnchoredBadge = (content: React.ReactNode) => {
+    return hasAnchoredBadge ? (
+      <Anchored position='top-end' content={badge}>
+        {content}
+      </Anchored>
+    ) : (
+      content
+    )
+  }
 
   return (
     <html.button
@@ -85,17 +100,18 @@ export const Tab = forwardRef<HTMLButtonElement, Props>((props, ref) => {
       <Ripple element={actionRef} visualState={visualState} />
       <FocusRing sx={styles.focusRing} element={actionRef} visualState={visualState} />
       <html.div style={[styles.content, stacked && styles.content$stacked]}>
-        {hasIcon && (
-          <html.div aria-hidden style={[styles.icon, active && styles.icon$active, disabled && styles.icon$disabled]}>
-            {active ? activeIcon || icon : icon}
-          </html.div>
-        )}
+        {hasIcon &&
+          renderAnchoredBadge(
+            <html.div aria-hidden style={[styles.icon, active && styles.icon$active, disabled && styles.icon$disabled]}>
+              {active ? activeIcon || icon : icon}
+            </html.div>,
+          )}
         {label && (
           <html.div style={styles.labelContainer}>
             <html.div style={[styles.label, active && styles.label$active, disabled && styles.label$disabled]}>
               {tabsContext?.renderLabels && label}
             </html.div>
-            {/* badge */}
+            {hasInlineBadge && badge}
           </html.div>
         )}
         {!fullWidthIndicator && (
@@ -275,7 +291,7 @@ const styles = css.create({
     display: 'inline-flex',
     position: 'relative',
     writingMode: 'horizontal-tb',
-    //fontSize: tabTokens.iconSize,
+    // fontSize: tabTokens.iconSize,
     // width: tabTokens.iconSize,
     // height: tabTokens.iconSize,
     color: {

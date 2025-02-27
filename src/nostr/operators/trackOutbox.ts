@@ -1,8 +1,8 @@
 import type { RelayFilters } from '@/core/NostrSubscription'
 import type { NostrFilter, RelayHints } from '@/core/types'
-import { delay, EMPTY, filter, from, identity, map, merge, mergeMap, takeUntil, tap, timer } from 'rxjs'
-import type { RelaySelectionConfig } from '../helpers/selectRelays'
+import { delay, EMPTY, filter, from, identity, map, merge, mergeMap, takeUntil, timer } from 'rxjs'
 import type { NostrContext } from '../context'
+import type { RelaySelectionConfig } from '../helpers/selectRelays'
 import { WRITE } from '../types'
 import { trackMailbox } from './trackMailbox'
 

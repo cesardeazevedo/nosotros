@@ -5,6 +5,7 @@ import { useNoteStoreFromId } from '@/hooks/useNoteStore'
 import { useCurrentUser } from '@/hooks/useRootStore'
 import type { Notification } from '@/stores/notifications/notification'
 import { fallbackEmoji } from '@/stores/reactions/reactions.store'
+import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconAt, IconBolt, IconHeartFilled, IconMessage, IconShare3 } from '@tabler/icons-react'
@@ -19,22 +20,25 @@ import { NotificationContent } from './NotificationContent'
 import { NotificationMedia } from './NotificationMedia'
 
 type Props = {
+  lastSeen: number
   notification: Notification
 }
 
 const formatter = new Intl.NumberFormat()
 
 export const NotificationItem = observer(function NotificationItem(props: Props) {
-  const { notification } = props
+  const { notification, lastSeen = 0 } = props
   const user = useCurrentUser()
   const { type, author: pubkey } = notification
 
   const mobile = useMobile()
   const linkId = type === 'reply' || type === 'mention' ? notification.id : notification.related
   const note = useNoteStoreFromId(linkId)
+  const unseen = notification.created_at > lastSeen && lastSeen !== 0
 
   return (
-    <Stack gap={2} sx={styles.root} align='flex-start'>
+    <Stack gap={2} sx={[styles.root, unseen && styles.root$unseen]} align='flex-start'>
+      {unseen && <html.div style={styles.unseen} />}
       <Stack sx={styles.type} justify='flex-start' align='flex-start'>
         {type === 'zap' && (
           <>
@@ -118,9 +122,23 @@ export const NotificationItem = observer(function NotificationItem(props: Props)
 
 const styles = css.create({
   root: {
+    position: 'relative',
     paddingBlock: spacing.padding1,
     paddingInline: spacing.padding3,
     minHeight: 50,
+  },
+  root$unseen: {
+    backgroundColor: palette.surfaceContainerLow,
+  },
+  unseen: {
+    position: 'absolute',
+    width: 3,
+    height: 'calc(100% + 1px)', // cover divider
+    backgroundColor: palette.tertiary,
+    top: 0,
+    left: 0,
+    bottom: -2,
+    zIndex: 200,
   },
   type: {
     paddingTop: spacing['padding0.5'],

@@ -2,7 +2,7 @@ import { RELAY_1, RELAY_2, RELAY_3, RELAY_4, RELAY_5 } from '@/constants/testRel
 import { test } from '@/utils/fixtures'
 import { subscribeSpyTo } from '@hirez_io/observer-spy'
 
-describe('Nostrctx', () => {
+describe('NostrContext', () => {
   test('assert pubkey outbox and inbox relays', async ({ createContext, insertRelayList }) => {
     const pubkey = '1'
     await insertRelayList({

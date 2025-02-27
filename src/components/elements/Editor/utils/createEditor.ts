@@ -5,9 +5,13 @@ import { YoutubeEditor } from '@/components/elements/Content/Youtube/YoutubeEdit
 import type { EditorStore } from '@/stores/editor/editor.store'
 import type { NodeViewProps } from '@tiptap/core'
 import { Editor } from '@tiptap/core'
+import DocumentExtension from '@tiptap/extension-document'
+import HardbreakExtension from '@tiptap/extension-hard-break'
+import HistoryExtension from '@tiptap/extension-history'
+import ParagraphExtension from '@tiptap/extension-paragraph'
 import Placeholder from '@tiptap/extension-placeholder'
+import TextExtension from '@tiptap/extension-text'
 import { ReactNodeViewRenderer } from '@tiptap/react'
-import StarterKit from '@tiptap/starter-kit'
 import { NostrExtension } from 'nostr-editor'
 import { ImageNodeViewWrapper } from '../../Content/Image/ImageNodeViewWrapper'
 import { NAddrEditor } from '../../Content/NAddr/NAddrEditor'
@@ -26,7 +30,11 @@ type Settings = {
 export function createEditor(store: EditorStore, settings: Settings) {
   return new Editor({
     extensions: [
-      StarterKit,
+      TextExtension,
+      DocumentExtension,
+      ParagraphExtension,
+      HardbreakExtension,
+      HistoryExtension,
       Placeholder.configure({ placeholder: store.placeholder }),
       NostrExtension.configure({
         link: {

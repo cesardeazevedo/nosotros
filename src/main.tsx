@@ -11,7 +11,7 @@ import './styles/stylex.css'
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <StylexProvider>
     <RootStoreProvider>
-      <NostrProvider nostrContext={() => rootStore.rootContext} subFollows>
+      <NostrProvider nostrContext={() => rootStore.rootContext} subFollows subNotifications>
         <ContentProvider value={{}}>
           <RouterProvider router={router} />
         </ContentProvider>
