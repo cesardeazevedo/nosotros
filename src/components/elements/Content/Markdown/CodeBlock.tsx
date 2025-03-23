@@ -1,10 +1,13 @@
 import { CopyIconButton } from '@/components/elements/Buttons/CopyIconButton'
 import type { SxProps } from '@/components/ui/types'
+import { useMediaQuery } from '@/hooks/useMediaQuery'
+import { useGlobalSettings } from '@/hooks/useRootStore'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import type { CodeBlockNode } from 'nostr-editor'
-import React, { useRef } from 'react'
+import { useRef } from 'react'
+import ShikiHighlighter from 'react-shiki'
 import { css, html } from 'react-strict-dom'
 
 type Props = {
@@ -13,16 +16,27 @@ type Props = {
 }
 
 export const CodeBlock = (props: Props) => {
-  const refPre = useRef<HTMLPreElement | null>(null)
+  const refPre = useRef<HTMLDivElement | null>(null)
+  const isSystemDark = useMediaQuery('(prefers-color-scheme: dark)')
+  const theme = useGlobalSettings().theme
+  const isAuto = theme === 'auto'
+  const isDark = (isAuto && isSystemDark) || theme === 'dark'
+
+  const { language } = props.node.attrs
 
   return (
     <html.div style={[styles.root, props.sx]}>
-      <html.pre style={styles.pre} ref={refPre}>
+      <html.div style={styles.code} ref={refPre}>
         {props.node.content.map((node, index) => (
-          <React.Fragment key={node.type + index}>{node.type === 'text' && node.text}</React.Fragment>
+          <ShikiHighlighter
+            key={node.type + index}
+            language={language}
+            theme={isDark ? 'github-dark-high-contrast' : 'github-light-default'}>
+            {node.type === 'text' ? node.text.toString() : ''}
+          </ShikiHighlighter>
         ))}
         <CopyIconButton text={refPre.current?.innerText} title='Copy code' sx={styles.copy} />
-      </html.pre>
+      </html.div>
     </html.div>
   )
 }
@@ -30,18 +44,18 @@ export const CodeBlock = (props: Props) => {
 const styles = css.create({
   root: {
     padding: spacing.padding2,
-    paddingRight: spacing.padding6,
+    paddingRight: spacing.padding4,
   },
-  pre: {
+  code: {
     position: 'relative',
-    padding: spacing.padding2,
-    backgroundColor: palette.outlineVariant,
+    border: '1px solid',
+    borderColor: palette.outlineVariant,
     borderRadius: shape.lg,
-    overflow: 'scroll',
+    overflow: 'hidden',
   },
   copy: {
     position: 'absolute',
     top: 4,
-    right: 4,
+    right: 32,
   },
 })
