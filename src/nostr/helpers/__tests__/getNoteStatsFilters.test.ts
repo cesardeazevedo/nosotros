@@ -1,10 +1,10 @@
 import { Kind } from '@/constants/kinds'
+import { getNoteStatsFilters } from '@/nostr/helpers/getNoteStatsFilters'
 import { fakeEvent } from '@/utils/faker'
-import { buildFilters } from '../subscribeNoteStats'
 
 test('assert buildFilters', () => {
   expect(
-    buildFilters(fakeEvent({ kind: Kind.Text, id: '1' }), {
+    getNoteStatsFilters(fakeEvent({ kind: Kind.Text, id: '1' }), {
       replies: true,
       reposts: true,
       reactions: true,
@@ -13,7 +13,7 @@ test('assert buildFilters', () => {
   ).toStrictEqual([{ kinds: [Kind.Text, Kind.Repost, Kind.Reaction, Kind.ZapReceipt], '#e': ['1'] }])
 
   expect(
-    buildFilters(fakeEvent({ kind: Kind.Text, id: '2' }), {
+    getNoteStatsFilters(fakeEvent({ kind: Kind.Text, id: '2' }), {
       replies: true,
       reposts: false,
       reactions: false,
@@ -22,7 +22,7 @@ test('assert buildFilters', () => {
   ).toStrictEqual([{ kinds: [Kind.Text, Kind.ZapReceipt], '#e': ['2'] }])
 
   expect(
-    buildFilters(fakeEvent({ kind: Kind.Media, id: '1' }), {
+    getNoteStatsFilters(fakeEvent({ kind: Kind.Media, id: '1' }), {
       replies: true,
       reposts: false,
       reactions: false,
@@ -34,7 +34,7 @@ test('assert buildFilters', () => {
   ])
 
   expect(
-    buildFilters(fakeEvent({ kind: Kind.Article, id: '3', pubkey: '1', tags: [['d', '123']] }), {
+    getNoteStatsFilters(fakeEvent({ kind: Kind.Article, id: '3', pubkey: '1', tags: [['d', '123']] }), {
       replies: true,
       reposts: true,
       reactions: true,
@@ -51,7 +51,7 @@ test('assert buildFilters', () => {
 
   // We don't wanna fetch kind01 replies for Media kinds
   expect(
-    buildFilters(fakeEvent({ kind: Kind.Media, id: '3', pubkey: '1', tags: [['d', '123']] }), {
+    getNoteStatsFilters(fakeEvent({ kind: Kind.Media, id: '3', pubkey: '1', tags: [['d', '123']] }), {
       replies: true,
       reposts: true,
       reactions: true,
