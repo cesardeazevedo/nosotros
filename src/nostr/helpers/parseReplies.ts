@@ -1,13 +1,7 @@
 import type { RelayHints } from '@/core/types'
+import type { Metadata } from '../types'
 import type { ParsedTags } from './parseTags'
 import { isMention } from './parseTags'
-
-export type RepliesMetadata = {
-  isRoot: boolean
-  rootId: string | undefined
-  parentId: string | undefined
-  relayHints: RelayHints
-}
 
 function appendHint(hints: RelayHints, field: keyof RelayHints, key: string, value: string) {
   if (value) {
@@ -54,7 +48,7 @@ function parseRepliesHints(tags: ParsedTags) {
 }
 
 // These are NIP-10 reply marks
-export function parseReplies(tags: ParsedTags): RepliesMetadata {
+export function parseReplies(tags: ParsedTags): Metadata {
   const relayHints = parseRepliesHints(tags)
   const repliesTags = [
     ...(tags.e?.filter((tag) => !isMention(tag)) || []),
