@@ -1,5 +1,6 @@
 import { Pool } from 'core/pool'
 import { Relay } from 'core/Relay'
+import { enqueueRelayInfo } from './nip11'
 import { subscribeRelayStats } from './subscriptions/subscribeRelayStats'
 
 export const pool = new Pool({
@@ -8,13 +9,8 @@ export const pool = new Pool({
   allowLocalConnection: false,
 
   open(url) {
-    const relay = new Relay(url)
-    // collect relay stats
+    const relay = new Relay(url, { info$: enqueueRelayInfo(url) })
     subscribeRelayStats(relay)
     return relay
-  },
-
-  auth(relay: Relay, challenge: string) {
-    console.log('AUTH', relay.url, challenge)
   },
 })

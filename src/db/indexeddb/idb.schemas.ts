@@ -31,7 +31,7 @@ export interface IndexedDBSchema extends DBSchema {
     }
   }
   relayInfo: {
-    key: [name: string]
+    key: string
     value: RelayInfoDB
   }
   relayStats: {
@@ -82,7 +82,7 @@ const seen = {
 
 const relayInfo = {
   name: 'relayInfo' as const,
-  keyPath: 'name',
+  keyPath: 'url',
   indexes: [],
 } satisfies Schema<RelayInfoDB>
 
