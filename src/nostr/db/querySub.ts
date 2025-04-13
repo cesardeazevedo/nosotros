@@ -7,12 +7,10 @@ import { queryDB } from './queryDB'
 import { queryLocalRelay } from './queryLocalRelay'
 
 // Query locally, IndexedDB or local relays
-export function query(sub: NostrSubscription, ctx: NostrContext) {
-  const { subOptions } = ctx
-  const filters = subOptions?.cacheFilter ? [subOptions.cacheFilter] : sub.filters
-  if (filters.length > 0 && subOptions?.queryLocal !== false) {
-    const localDB$ = ctx.settings.localDB !== false ? queryDB(filters) : EMPTY
-    const localRelays$ = queryLocalRelay(Array.from(ctx.localSets), sub, filters)
+export function querySub(sub: NostrSubscription, ctx: NostrContext) {
+  if (sub.filters.length > 0 && ctx?.queryDB !== false) {
+    const localDB$ = queryDB(sub.filters)
+    const localRelays$ = queryLocalRelay(ctx.relaysLocal || [], sub)
     return merge(localDB$, localRelays$).pipe(
       tap((event) => {
         sub.add(event)
