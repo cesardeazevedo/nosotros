@@ -1,10 +1,8 @@
 import { Kind } from '@/constants/kinds'
-import { ofKind } from '@/core/operators/ofKind'
 import type { NostrFilter } from '@/core/types'
 import { connect, EMPTY, from, ignoreElements, merge, mergeMap } from 'rxjs'
 import type { NostrContext } from '../context'
 import { isEventTag } from '../helpers/parseTags'
-import { type NostrEventMetadata } from '../types'
 import { subscribeComments } from './subscribeComments'
 import { subscribeIdsFromQuotes } from './subscribeIdsFromQuotes'
 import { subscribeNotes } from './subscribeNotes'
@@ -14,7 +12,9 @@ import { subscribeUser } from './subscribeUser'
 import { subscribeZaps } from './subscribeZaps'
 import { withRelatedAuthors } from './withRelatedAuthor'
 
-export function subscribeNotifications(filter: NostrFilter, ctx: NostrContext) {
+export function subscribeNotifications(filter: NostrFilter, baseCtx: NostrContext) {
+  const ctx = { ...baseCtx, queryDB: false } as NostrContext
+
   return from(filter.kinds || []).pipe(
     mergeMap((kind) => {
       switch (kind) {
@@ -49,10 +49,7 @@ export function subscribeNotifications(filter: NostrFilter, ctx: NostrContext) {
           return subscribeReposts(filter, ctx)
         }
         case Kind.ZapReceipt: {
-          return subscribeZaps(filter, ctx).pipe(
-            withRelatedAuthors(ctx),
-            ofKind<NostrEventMetadata>([Kind.ZapReceipt]), // cast
-          )
+          return subscribeZaps(filter, ctx).pipe(withRelatedAuthors(ctx))
         }
         default: {
           return EMPTY

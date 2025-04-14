@@ -1,6 +1,17 @@
 import { formatRelayUrl } from '@/core/helpers/formatRelayUrl'
 import type { RelayStatsDB } from '@/db/types'
-import { BehaviorSubject, defaultIfEmpty, from, identity, mergeMap, reduce, shareReplay, switchMap, take } from 'rxjs'
+import {
+  BehaviorSubject,
+  defaultIfEmpty,
+  firstValueFrom,
+  from,
+  identity,
+  mergeMap,
+  reduce,
+  shareReplay,
+  skip,
+  switchMap,
+} from 'rxjs'
 import { db } from '../db'
 
 export type RelayStatsDBMap = Record<string, RelayStatsDB>
@@ -15,10 +26,10 @@ export const relayStats = refresh$.pipe(
       defaultIfEmpty({} as RelayStatsDBMap),
     )
   }),
-  take(1),
   shareReplay(1),
 )
 
-export function updateRelayStats$() {
+export async function updateRelayStats$() {
   refresh$.next()
+  return firstValueFrom(relayStats.pipe(skip(1)))
 }

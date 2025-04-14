@@ -24,6 +24,5 @@ export function subscribeSearch(query: string, limit = 10) {
     tap(addNostrEventToStore),
 
     toArray(),
-    // TODO: filter web of trust
   )
 }

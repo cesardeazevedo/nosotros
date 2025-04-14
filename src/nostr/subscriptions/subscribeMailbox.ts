@@ -19,7 +19,7 @@ const selectRelaysReplay = replay.wrap((_key: string, data: UserRelay[], ctx: No
 export const subscribeMailbox = (pubkey: string, ctx: NostrContext) => {
   return subscribeRelayList(pubkey, ctx).pipe(
     map((event) => event[metadataSymbol].relayList || []),
-    combineLatestWith(relayStats),
+    combineLatestWith(relayStats.pipe(take(1))),
     map(([userRelays, relayStats]) => {
       return [
         userRelays,
