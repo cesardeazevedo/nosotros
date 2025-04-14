@@ -1,21 +1,22 @@
-import { Search } from '@/components/ui/Search/Search'
+import type { SearchItem } from '@/components/modules/Search/hooks/useSearchSuggestions'
+import { SearchField } from '@/components/ui/Search/Search'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { spacing } from '@/themes/spacing.stylex'
 import type { BaseSyntheticEvent } from 'react'
-import { useCallback, useRef, useState } from 'react'
+import React, { useCallback, useRef, useState } from 'react'
 import { css, html } from 'react-strict-dom'
-import type { SearchUsersRef } from '../Search/SearchUsers'
-import { SearchUsers } from '../Search/SearchUsers'
+import type { OnKeyDownRef } from '../Search/SearchContent'
+import { SearchContent } from '../Search/SearchContent'
 
 type Props = {
-  onSelect: (item: { pubkey: string }) => void
+  onSelect: (item: SearchItem) => void
 }
 
 export const DeckAddProfile = (props: Props) => {
   const [query, setQuery] = useState('')
-  const ref = useRef<SearchUsersRef>(null)
+  const ref = useRef<OnKeyDownRef>(null)
 
-  const handleKeydown = useCallback((event: { key: string }) => {
+  const handleKeydown = useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
     ref.current?.onKeyDown({ event })
   }, [])
 
@@ -26,17 +27,10 @@ export const DeckAddProfile = (props: Props) => {
   return (
     <>
       <html.div style={styles.header}>
-        <Search placeholder='Search Users' onChange={handleChange} onKeyDown={handleKeydown} />
+        <SearchField placeholder='Search Users' onChange={handleChange} onKeyDown={handleKeydown} />
       </html.div>
       <Stack horizontal={false} sx={styles.content}>
-        <SearchUsers
-          ref={ref}
-          elevation={0}
-          surface='surfaceContainerLowest'
-          query={query}
-          limit={30}
-          onSelect={props.onSelect}
-        />
+        <SearchContent ref={ref} query={query} limit={30} onSelect={props.onSelect} />
       </Stack>
     </>
   )

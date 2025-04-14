@@ -34,10 +34,10 @@ const styles = css.create({
   root: {
     display: 'flex',
     flexDirection: 'column',
-    borderLeftWidth: 0,
-    borderRightWidth: 1,
     height: '100%',
     position: 'relative',
+    borderLeftWidth: 0,
+    borderRightWidth: 1,
     borderColor: palette.outlineVariant,
     overflow: 'hidden',
   },

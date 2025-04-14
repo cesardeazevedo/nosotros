@@ -1,32 +1,47 @@
+import type { SearchItem } from '@/components/modules/Search/hooks/useSearchSuggestions'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { List } from '@/components/ui/List/List'
 import { ListItem } from '@/components/ui/ListItem/ListItem'
 import { listItemTokens } from '@/components/ui/ListItem/ListItem.stylex'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
-import { RECOMMENDED_PUBKEYS } from '@/constants/recommended'
 import { useCurrentPubkey, useRootStore } from '@/hooks/useRootStore'
+import {
+  createArticleModule,
+  createHomeModule,
+  createMediaModule,
+  createNotificationModule,
+  createNProfileModule,
+  createRelayDiscoveryModule,
+  createRelayFeedModule,
+  createSearchModule,
+  createTagModule,
+} from '@/stores/modules/module.helpers'
+import type { ModulesInstances } from '@/stores/modules/module.store'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import {
   IconBell,
   IconChevronLeft,
   IconHash,
-  IconHome,
+  IconNews,
   IconPhoto,
   IconSearch,
   IconServerBolt,
   IconUser,
+  IconWorldBolt,
 } from '@tabler/icons-react'
+import { observer } from 'mobx-react-lite'
 import type { ReactNode } from 'react'
-import { useCallback, useState } from 'react'
+import { useState } from 'react'
 import { css, html } from 'react-strict-dom'
+import { IconHome } from '../../elements/Icons/IconHome'
 import { DeckAddProfile } from './DeckAddProfile'
 import { DeckAddRelayFeeds } from './DeckAddRelayFeeds'
+import { DeckAddSearch } from './DeckAddSearch'
 import { DeckAddTags } from './DeckAddTag'
 import { DeckColumn } from './DeckColumn'
 import { DeckColumnHeader } from './DeckColumnHeader'
-import { DeckAddSearch } from './DeckAddSearch'
 
 type Views = 'profiles' | 'tags' | 'search' | 'relayfeeds'
 
@@ -58,62 +73,47 @@ const getTitle = (view: Views | null) => {
   }
 }
 
-export const DeckNewColumnList = function DeckNewColumnList(props: Props) {
+const iconProps = { size: 28, strokeWidth: '1.8' }
+
+export const DeckNewColumnList = observer(function DeckNewColumnList(props: Props) {
   const [view, setView] = useState<Views | null>(null)
+  // const params = deckRoute.useParams()
   const deck = useRootStore().decks.selected
   const pubkey = useCurrentPubkey()
 
-  const handleBack = useCallback(() => {
+  const handleBack = () => {
     setView(null)
-  }, [])
+  }
 
-  const handleAddHome = useCallback(() => {
-    deck.addHome({ authors: pubkey ? [pubkey] : RECOMMENDED_PUBKEYS })
+  const add = (module: ModulesInstances) => {
+    deck.add(module)
     props.onClose?.()
-  }, [pubkey])
+  }
 
-  const handleAddProfile = useCallback((item: { pubkey: string }) => {
-    deck.addNProfile({ options: { pubkey: item.pubkey } })
-    props.onClose?.()
-  }, [])
-
-  const handleAddNotification = useCallback(() => {
-    if (pubkey) {
-      deck.addNotification({ pubkey })
-      props.onClose?.()
+  const handleAddProfile = (item: SearchItem) => {
+    switch (item.type) {
+      case 'user_relay':
+      case 'user': {
+        add(createNProfileModule(item.pubkey))
+        break
+      }
     }
-  }, [pubkey])
-
-  const handleAddMedia = useCallback(() => {
-    deck.addMedia({ authors: pubkey ? [pubkey] : RECOMMENDED_PUBKEYS })
-    props.onClose?.()
-  }, [pubkey])
-
-  const handleAddTag = useCallback((tag: string) => {
-    deck.addTag([tag])
-    props.onClose?.()
-  }, [])
-
-  const handleAddSearch = useCallback((query: string) => {
-    deck.addSearch({ query })
-    props.onClose?.()
-  }, [])
-
-  const handleAddRelayFeed = useCallback((relay: string) => {
-    deck.addRelayFeed([relay])
-    props.onClose?.()
-  }, [])
+  }
 
   return (
     <DeckColumn size='sm'>
-      <DeckColumnHeader id='addcolumn' onDelete={props.onClose}>
-        <Stack gap={1}>
-          {!!view && <IconButton onClick={handleBack} icon={<IconChevronLeft />} />}
-          <Text variant='title' size='md'>
-            {getTitle(view)}
-          </Text>
-        </Stack>
-      </DeckColumnHeader>
+      <DeckColumnHeader
+        id='addcolumn'
+        onDelete={props.onClose}
+        leading={
+          <Stack gap={1}>
+            {!!view && <IconButton onClick={handleBack} icon={<IconChevronLeft />} />}
+            <Text variant='title' size='md'>
+              {getTitle(view)}
+            </Text>
+          </Stack>
+        }
+      />
       {!view && (
         <List sx={styles.list}>
           <ListItem
@@ -121,10 +121,10 @@ export const DeckNewColumnList = function DeckNewColumnList(props: Props) {
             sx={styles.item}
             leadingIcon={
               <IconWrapper>
-                <IconHome size={28} strokeWidth={'1.8'} />
+                <IconHome {...iconProps} />
               </IconWrapper>
             }
-            onClick={handleAddHome}
+            onClick={() => add(createHomeModule(pubkey))}
             supportingText={<span>See your home feed timeline</span>}>
             <Text size='lg'>Home feed</Text>
           </ListItem>
@@ -133,7 +133,7 @@ export const DeckNewColumnList = function DeckNewColumnList(props: Props) {
             sx={styles.item}
             leadingIcon={
               <IconWrapper>
-                <IconUser size={28} strokeWidth={'1.8'} />
+                <IconUser {...iconProps} />
               </IconWrapper>
             }
             onClick={() => setView('profiles')}
@@ -146,20 +146,19 @@ export const DeckNewColumnList = function DeckNewColumnList(props: Props) {
             sx={styles.item}
             leadingIcon={
               <IconWrapper>
-                <IconBell size={28} strokeWidth={'1.8'} />
+                <IconBell {...iconProps} />
               </IconWrapper>
             }
-            onClick={handleAddNotification}
+            onClick={() => pubkey && add(createNotificationModule(pubkey))}
             supportingText={<span>Keep up with your notifications</span>}>
             <Text size='lg'>Notifications</Text>
           </ListItem>
           <ListItem
             interactive
-            disabled={!pubkey}
             sx={styles.item}
             leadingIcon={
               <IconWrapper>
-                <IconSearch size={28} strokeWidth={'1.8'} />
+                <IconSearch {...iconProps} />
               </IconWrapper>
             }
             onClick={() => setView('search')}
@@ -168,25 +167,35 @@ export const DeckNewColumnList = function DeckNewColumnList(props: Props) {
           </ListItem>
           <ListItem
             interactive
-            disabled={!pubkey}
             sx={styles.item}
             leadingIcon={
               <IconWrapper>
-                <IconPhoto size={28} strokeWidth={'1.8'} />
+                <IconNews size={28} strokeWidth={'1.5'} />
               </IconWrapper>
             }
-            onClick={handleAddMedia}
+            onClick={() => add(createArticleModule(pubkey))}
+            supportingText={<span>Search for long-form articles</span>}>
+            Articles
+          </ListItem>
+          <ListItem
+            interactive
+            sx={styles.item}
+            leadingIcon={
+              <IconWrapper>
+                <IconPhoto {...iconProps} />
+              </IconWrapper>
+            }
+            onClick={() => add(createMediaModule(pubkey))}
             supportingText={<span>Search for nostr media galaries</span>}>
             Media
           </ListItem>
           <ListItem
             interactive
-            disabled={!pubkey}
             sx={styles.item}
             onClick={() => setView('tags')}
             leadingIcon={
               <IconWrapper>
-                <IconHash size={28} strokeWidth={'1.8'} />
+                <IconHash {...iconProps} />
               </IconWrapper>
             }
             supportingText={<span>Find posts of a specific topic</span>}>
@@ -194,7 +203,6 @@ export const DeckNewColumnList = function DeckNewColumnList(props: Props) {
           </ListItem>
           <ListItem
             interactive
-            disabled={!pubkey}
             sx={styles.item}
             leadingIcon={
               <IconWrapper>
@@ -205,15 +213,27 @@ export const DeckNewColumnList = function DeckNewColumnList(props: Props) {
             supportingText={<span>View a feed of a specific or multiple relays you choose</span>}>
             <Text size='lg'>Relay Feeds</Text>
           </ListItem>
+          <ListItem
+            interactive
+            sx={styles.item}
+            leadingIcon={
+              <IconWrapper>
+                <IconWorldBolt size={28} strokeWidth={1.4} />
+              </IconWrapper>
+            }
+            onClick={() => add(createRelayDiscoveryModule())}
+            supportingText={<span>Discovery relays found by relay monitors (NIP-66)</span>}>
+            <Text size='lg'>Relay Discovery</Text>
+          </ListItem>
         </List>
       )}
       {view === 'profiles' && <DeckAddProfile onSelect={handleAddProfile} />}
-      {view === 'tags' && <DeckAddTags onSelect={handleAddTag} />}
-      {view === 'search' && <DeckAddSearch onSelect={handleAddSearch} />}
-      {view === 'relayfeeds' && <DeckAddRelayFeeds onSelect={handleAddRelayFeed} />}
+      {view === 'tags' && <DeckAddTags onSelect={(tag) => add(createTagModule(tag))} />}
+      {view === 'search' && <DeckAddSearch onSelect={(query) => add(createSearchModule(query))} />}
+      {view === 'relayfeeds' && <DeckAddRelayFeeds onSelect={(relay) => add(createRelayFeedModule([relay]))} />}
     </DeckColumn>
   )
-}
+})
 
 const styles = css.create({
   content: {
@@ -228,6 +248,7 @@ const styles = css.create({
     display: 'flex',
     flexDirection: 'column',
     paddingTop: spacing.padding1,
+    paddingInline: spacing.padding1,
     width: '100%',
   },
   item: {

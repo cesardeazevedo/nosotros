@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/Button/Button'
-import { Search } from '@/components/ui/Search/Search'
+import { SearchField } from '@/components/ui/Search/Search'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconHash } from '@tabler/icons-react'
@@ -23,7 +23,7 @@ export const DeckAddTags = (props: Props) => {
     <>
       <form action={submit}>
         <Stack grow gap={0.5} sx={styles.header}>
-          <Search name='value' leading={<IconHash size={20} style={{ opacity: 0.5 }} />} />
+          <SearchField name='value' leading={<IconHash size={20} style={{ opacity: 0.5 }} />} />
           <Button variant='filled' type='submit' sx={styles.button}>
             Add
           </Button>

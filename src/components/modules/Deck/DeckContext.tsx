@@ -3,7 +3,7 @@ import { createContext } from 'react'
 import { firstValueFrom, timer } from 'rxjs'
 
 export const deckContextvalues = {
-  delay: firstValueFrom(timer(1100)),
+  delay: firstValueFrom(timer(50)),
 }
 
 export const DeckContext = createContext({

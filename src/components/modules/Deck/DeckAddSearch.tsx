@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/Button/Button'
-import { Search } from '@/components/ui/Search/Search'
+import { SearchField } from '@/components/ui/Search/Search'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { spacing } from '@/themes/spacing.stylex'
 import { useActionState } from 'react'
@@ -22,7 +22,7 @@ export const DeckAddSearch = (props: Props) => {
     <>
       <form action={submit}>
         <Stack grow gap={0.5} sx={styles.header}>
-          <Search name='value' placeholder='Search on nostr' />
+          <SearchField name='value' placeholder='Search on nostr' />
           <Button variant='filled' type='submit' sx={styles.button}>
             Add
           </Button>
