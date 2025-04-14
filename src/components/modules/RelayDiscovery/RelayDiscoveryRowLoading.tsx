@@ -1,3 +1,5 @@
+import { RelayFriendsListLoading } from '@/components/elements/Relays/RelayFriendsListLoading'
+import { RelayTableHeader } from '@/components/elements/Relays/RelayTableHeader'
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
 import { useCurrentPubkey } from '@/hooks/useRootStore'
 import { palette } from '@/themes/palette.stylex'
@@ -5,8 +7,6 @@ import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { memo } from 'react'
 import { css } from 'react-strict-dom'
-import { RelayFriendsListLoading } from '../Relays/RelayFriendsListLoading'
-import { RelayDiscoveryTableHeader } from './RelayDiscoveryTableHeader'
 
 type Props = {
   rows?: number
@@ -19,8 +19,8 @@ export const RelayDiscoveryRowLoading = memo(function RelayDiscoveryRowLoading(p
   const cell = css.props(styles.cell)
   return (
     <>
-      <table>
-        <RelayDiscoveryTableHeader />
+      <table {...css.props(styles.table)}>
+        <RelayTableHeader />
         <tbody>
           {list.map((key) => (
             <tr key={key} {...row}>
@@ -47,6 +47,9 @@ export const RelayDiscoveryRowLoading = memo(function RelayDiscoveryRowLoading(p
 })
 
 const styles = css.create({
+  table: {
+    width: '100%',
+  },
   row: {
     width: '100%',
     padding: spacing.padding2,
