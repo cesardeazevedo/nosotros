@@ -73,7 +73,6 @@ export const SidebarMenuRelays = observer(function SidebarMenuRelays(props: Prop
             )}
           </Link>
         )}
-        {/* <SidebarRelaysAuth /> */}
       </Stack>
     </>
   )
