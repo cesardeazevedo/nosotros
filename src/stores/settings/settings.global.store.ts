@@ -28,6 +28,8 @@ export const GlobalSettingsModel = t
     defaultEmoji: t.optional(t.string, ''),
     defaultUploadType: t.optional(t.string, 'nip96'),
     defaultUploadUrl: t.optional(t.string, 'https://nostr.build'),
+    sidebarCollapsed: t.optional(t.boolean, false),
+    sidebarNotification: t.optional(t.boolean, false),
     scroll: ScrollSettingsModel,
     clientTag: t.boolean,
   })
