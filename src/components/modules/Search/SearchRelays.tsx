@@ -14,8 +14,8 @@ import type { Ref } from 'react'
 import { useImperativeHandle, useMemo, useState } from 'react'
 import { css } from 'react-strict-dom'
 import { from, identity, map, mergeMap } from 'rxjs'
-import type { OnKeyDownRef } from '../../modules/Search/SearchContent'
-import { RelayIcon } from '../Relays/RelayIcon'
+import type { OnKeyDownRef } from './SearchContent'
+import { RelayIcon } from '../../elements/Relays/RelayIcon'
 
 type Props = {
   sx?: SxProps
