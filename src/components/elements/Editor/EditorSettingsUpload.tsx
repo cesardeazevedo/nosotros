@@ -5,8 +5,7 @@ import { Popover } from '@/components/ui/Popover/Popover'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
-import { useCurrentPubkey, useGlobalSettings } from '@/hooks/useRootStore'
-import { blossomStore } from '@/stores/blossom/blossom.store'
+import { useCurrentUser, useGlobalSettings } from '@/hooks/useRootStore'
 import type { EditorStore } from '@/stores/editor/editor.store'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconBug, IconChevronDown } from '@tabler/icons-react'
@@ -22,6 +21,7 @@ const nip96urls = ['nostr.build', 'nostrcheck.me', 'nostrage.com']
 
 export const EditorSettingsUpload = observer(function EditorSettingsUpload(props: Props) {
   const { store } = props
+  const user = useCurrentUser()
   const globalSettings = useGlobalSettings()
   const selectedUrl = globalSettings.defaultUploadUrl
 
@@ -42,7 +42,6 @@ export const EditorSettingsUpload = observer(function EditorSettingsUpload(props
     }
   }
 
-  const pubkey = useCurrentPubkey()
   const [url, error] = useMemo(() => {
     try {
       const url = new URL(selectedUrl)
@@ -53,18 +52,17 @@ export const EditorSettingsUpload = observer(function EditorSettingsUpload(props
     }
   }, [selectedUrl])
 
-  const blossomServers = blossomStore.list(pubkey || '')
   return (
     <Popover
       placement='bottom'
       contentRenderer={({ close }) => (
         <MenuList>
-          {blossomServers && (
+          {user?.blossomServerList && (
             <>
               <Stack sx={styles.subheader}>
                 <Text>Blossom Servers</Text>
               </Stack>
-              {blossomServers.map((url) => {
+              {user.blossomServerList.map((url) => {
                 let formatted
                 try {
                   formatted = new URL(url)

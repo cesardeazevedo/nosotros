@@ -4,7 +4,7 @@ import { Stack } from '@/components/ui/Stack/Stack'
 import { useMobile } from '@/hooks/useMobile'
 import { useNoteStore } from '@/hooks/useNoteStore'
 import { useGlobalSettings } from '@/hooks/useRootStore'
-import type { NostrEventMedia } from '@/nostr/types'
+import type { NostrEventMetadata } from '@/nostr/types'
 import { mediaStore } from '@/stores/media/media.store'
 import { dialogStore } from '@/stores/ui/dialogs.store'
 import { palette } from '@/themes/palette.stylex'
@@ -13,7 +13,11 @@ import { observer } from 'mobx-react-lite'
 import { css, html } from 'react-strict-dom'
 import { UserAvatar } from '../User/UserAvatar'
 
-export const MediaCell = observer(function MediaCell(props: { event: NostrEventMedia }) {
+type Props = {
+  event: NostrEventMetadata
+}
+
+export const MediaCell = observer(function MediaCell(props: Props) {
   const { event } = props
   const note = useNoteStore(event)
   const globalSettings = useGlobalSettings()

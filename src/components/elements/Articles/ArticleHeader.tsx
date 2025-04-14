@@ -5,17 +5,26 @@ import { useGlobalSettings } from '@/hooks/useRootStore'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
+import { useMatchRoute } from '@tanstack/react-router'
 import { css, html } from 'react-strict-dom'
 
 export const ArticleHeader = () => {
   const { note } = useNoteContext()
   const globalSettings = useGlobalSettings()
-  const title = note.event.tags.title?.[0][1] || ''
-  const image = note.event.tags.image?.[0][1] || ''
-  const summary = note.event.tags.summary?.[0][1] || ''
+  const match = useMatchRoute()
+  const isDeck = match({ to: '/deck/$id' })
+  const { event } = note
+  const title = event.getTag('title')
+  const image = event.getTag('image')
+  const summary = event.getTag('summary')
   return (
     <Stack horizontal={false} sx={styles.root} gap={1}>
-      <html.img src={globalSettings.getImgProxyUrl('feed_img', image)} style={styles.banner} />
+      {image && (
+        <html.img
+          src={globalSettings.getImgProxyUrl('feed_img', image)}
+          style={[styles.banner, !isDeck && styles.banner$round]}
+        />
+      )}
       <Stack horizontal={false} gap={1} sx={styles.content}>
         <Text variant='display' size='md'>
           {title}
@@ -33,13 +42,16 @@ export const ArticleHeader = () => {
 const styles = css.create({
   root: {},
   content: {
-    paddingBlock: spacing.padding2,
+    paddingTop: spacing.padding4,
+    paddingBottom: spacing.padding2,
     paddingInline: spacing.padding2,
   },
   banner: {
     objectFit: 'cover',
     maxHeight: 350,
     width: '100%',
+  },
+  banner$round: {
     borderTopLeftRadius: shape.lg,
     borderTopRightRadius: shape.lg,
   },

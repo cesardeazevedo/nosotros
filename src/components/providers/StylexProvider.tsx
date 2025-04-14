@@ -43,9 +43,11 @@ const styles = css.create({
   html: {
     color: palette.onSurface,
     backgroundColor: palette.surface,
+    height: '100%',
   },
   body: {
     margin: 0,
+    height: '100%',
     fontFamily: typeFace.plain,
     fontSize: typeScale.bodySize$md,
     fontWeight: typeScale.bodyWeight$md,

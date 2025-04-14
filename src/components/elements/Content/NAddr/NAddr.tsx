@@ -17,8 +17,7 @@ type Props = {
 export const NAddr = observer(function NAddr(props: Props) {
   const { pointer } = props
   const { dense } = useContentContext()
-  const id = `${pointer.kind}:${pointer.pubkey}:${pointer.identifier}`
-  const event = eventStore.getFromAddress(id)
+  const event = eventStore.get([pointer.kind, pointer.pubkey, pointer.identifier].join(':'))
   return (
     <html.div style={[styles.root, dense && styles.root$dense]}>
       {!event && (

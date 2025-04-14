@@ -24,12 +24,13 @@ export const BlockQuote = (props: Props) => {
 const styles = css.create({
   root: {
     marginLeft: spacing.margin2,
-    marginBlock: spacing.margin4,
-    paddingInline: spacing.padding2,
-    paddingBlock: spacing.padding1,
+    marginBlock: spacing.margin2,
+    paddingLeft: spacing.padding1,
+    paddingRight: spacing.padding4,
     borderLeft: '6px solid',
-    borderColor: palette.outlineVariant,
+    borderLeftColor: palette.surfaceContainerHighest,
     fontStyle: 'italic',
-    opacity: 0.5,
+    color: palette.onSurfaceVariant,
+    opacity: 0.6,
   },
 })

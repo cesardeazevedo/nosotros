@@ -44,7 +44,7 @@ export const IconButton = forwardRef<HTMLButtonElement, Props>((props, ref) => {
   return (
     <Button
       icon={selected ? selectedIcon || icon : icon}
-      aria-label={toggle && selected ? ariaLabelSelected ?? ariaLabel : ariaLabel}
+      aria-label={toggle && selected ? (ariaLabelSelected ?? ariaLabel) : ariaLabel}
       sx={[
         styles.root,
         sizes[size],
@@ -63,7 +63,7 @@ const variants = css.create({
   standard: {
     [buttonTokens.labelTextColor]: palette.onSurfaceVariant,
     [iconButtonTokens.toggleIconColorSelected]: palette.primary,
-    [iconButtonTokens.toggleContainerColorSelected]: palette.surfaceContainer,
+    [iconButtonTokens.toggleContainerColorSelected]: palette.surfaceContainerHigh,
   },
   filled: {
     [buttonTokens.containerColor]: palette.primary,

@@ -4,9 +4,7 @@ import { Button } from '@/components/ui/Button/Button'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { useNoteStore } from '@/hooks/useNoteStore'
-import type { NostrEventComment } from '@/nostr/types'
-import { type NostrEventNote } from '@/nostr/types'
-import type { NEventModule } from '@/stores/modules/nevent.module'
+import type { NostrEventMetadata } from '@/nostr/types'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconDotsVertical } from '@tabler/icons-react'
@@ -14,7 +12,7 @@ import { useMatch } from '@tanstack/react-router'
 import { Observer } from 'mobx-react-lite'
 import { useContext, useEffect, useRef } from 'react'
 import { css, html } from 'react-strict-dom'
-import { DeckContext } from '../Deck/DeckContext'
+import { DeckContext } from '../../modules/Deck/DeckContext'
 import { Editor } from '../Editor/Editor'
 import { WaveDivider } from '../Layouts/WaveDivider'
 import { LinkNEvent } from '../Links/LinkNEvent'
@@ -24,9 +22,10 @@ import { PostHeader } from '../Posts/PostHeader'
 import { UserAvatar } from '../User/UserAvatar'
 import { Replies } from './Replies'
 import { ReplyContent } from './ReplyContent'
+import type { NostrModule } from '@/stores/modules/nostr.module'
 
 type Props = {
-  event: NostrEventNote | NostrEventComment
+  event: NostrEventMetadata
   open?: boolean
   renderParents?: boolean
   renderReplies?: boolean
@@ -37,10 +36,10 @@ export const RepliesThread = function RepliesThread(props: Props) {
   const { event, renderEditor = true, renderParents = true, renderReplies = true, open } = props
   const note = useNoteStore(event, open)
   const context = useMatch({ from: '/$nostr', shouldThrow: false })?.context
-  const module = useContext(DeckContext).module as NEventModule
+  const module = useContext(DeckContext).module as NostrModule
   const ref = useRef<HTMLDivElement>(null)
   const isCurrentNote =
-    context?.decoded?.type === 'nevent' ? context?.decoded.data.id === note.id : module.options.id === note.id
+    context?.decoded?.type === 'nevent' ? context?.decoded.data.id === note.id : module.filter.ids?.[0] === note.id
 
   useEffect(() => {
     if (isCurrentNote && ref.current) {
@@ -108,7 +107,15 @@ export const RepliesThread = function RepliesThread(props: Props) {
                 )}
               </ContentProvider>
               {renderReplies && isCurrentNote && note.repliesOpen && (
-                <Replies onLoadMoreClick={() => note.toggleReplies()} />
+                <Replies
+                  onLoadMoreClick={() => {
+                    if (note.repliesOpen) {
+                      note.paginate()
+                    } else {
+                      note.toggleReplies()
+                    }
+                  }}
+                />
               )}
             </>
           )}

@@ -81,7 +81,7 @@ export const ToastEventPublished = observer(function ToastEventPublished(props: 
               <RelayChip
                 key={published.relay}
                 url={published.relay}
-                icon={<RelayPublishIcon published={published} />}
+                trailingIcon={<RelayPublishIcon published={published} />}
               />
             ))}
           </Stack>

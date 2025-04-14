@@ -10,7 +10,7 @@ type Props = {
 export const UserNIP05 = observer(function UserNIP05(props: Props) {
   const { pubkey } = props
   const user = userStore.get(pubkey)
-  if (!user || !user.nip05) {
+  if (!user?.nip05) {
     return
   }
   return (

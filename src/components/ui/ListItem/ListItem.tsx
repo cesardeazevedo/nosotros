@@ -30,6 +30,7 @@ export type Props = {
   trailing?: React.ReactNode
   trailingIcon?: React.ReactNode
   onClick?: React.MouseEventHandler<HTMLElement>
+  onMouseOver?: React.MouseEventHandler<HTMLElement>
   children?: React.ReactNode
   overline?: React.ReactNode
   supportingText?: React.ReactNode
@@ -52,7 +53,8 @@ export const ListItem = forwardRef<HTMLElement, Props>((props, ref) => {
     trailingIcon,
     interactive,
     onClick,
-    size: sizeProp = 'sm',
+    onMouseOver,
+    size: sizeProp = 'md',
     children,
     supportingText,
     overline,
@@ -67,7 +69,7 @@ export const ListItem = forwardRef<HTMLElement, Props>((props, ref) => {
 
   const refs = useMergeRefs([ref, setRef, actionRef])
 
-  const Element = href ? 'a' : 'label'
+  const Element = href ? 'a' : 'div'
 
   const hasLeading = !!leadingIcon || leadingImage
   const hasTrailing = !!trailingIcon || trailing
@@ -78,6 +80,7 @@ export const ListItem = forwardRef<HTMLElement, Props>((props, ref) => {
       target={target}
       rel={rel}
       onClick={onClick}
+      onMouseOver={onMouseOver}
       {...css.props([
         styles.root,
         variants[variant],
@@ -139,13 +142,11 @@ const variants = css.create({
 const sizes = css.create({
   sm: {
     [listItemTokens.containerMinHeight]: listItemTokens.containerMinHeight$sm,
-    [listItemTokens.topSpace]: listItemTokens.topSpace$sm,
-    [listItemTokens.bottomSpace]: listItemTokens.bottomSpace$sm,
+    [listItemTokens.leadingSpace]: listItemTokens.leadingSpace$sm,
+    [listItemTokens.trailingSpace]: listItemTokens.trailingSpace$sm,
   },
   md: {
     [listItemTokens.containerMinHeight]: listItemTokens.containerMinHeight$md,
-    [listItemTokens.topSpace]: listItemTokens.topSpace$md,
-    [listItemTokens.bottomSpace]: listItemTokens.bottomSpace$md,
   },
 })
 
@@ -161,8 +162,6 @@ const styles = css.create({
     WebkitTapHighlightColor: 'transparent',
     paddingInlineStart: listItemTokens.leadingSpace,
     paddingInlineEnd: listItemTokens.trailingSpace,
-    paddingTop: listItemTokens.topSpace,
-    paddingBottom: listItemTokens.bottomSpace,
   },
   root$interactive: {
     cursor: 'pointer',
@@ -232,8 +231,6 @@ const styles = css.create({
   },
   ripple: {
     borderRadius: listItemTokens.containerShape,
-    marginInlineStart: spacing.padding1,
-    marginInlineEnd: spacing.padding1,
   },
   ripple$selected: {
     backgroundColor: listItemTokens.selectedContainerColor,

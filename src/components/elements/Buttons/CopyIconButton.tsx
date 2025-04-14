@@ -59,6 +59,7 @@ export const CopyIconButton = forwardRef<CopyButtonRef, Props>((props, ref) => {
           )
         }>
         <IconButton
+          size='sm'
           sx={styles.button}
           onClick={handleCopy}
           icon={
@@ -72,7 +73,7 @@ export const CopyIconButton = forwardRef<CopyButtonRef, Props>((props, ref) => {
                     key='check'
                     variants={variants}
                     style={{ display: 'flex' }}>
-                    <IconCheck size={20} strokeWidth='1.9' />
+                    <IconCheck size={18} strokeWidth='2.5' />
                   </motion.div>
                 ) : (
                   <motion.div
@@ -82,7 +83,7 @@ export const CopyIconButton = forwardRef<CopyButtonRef, Props>((props, ref) => {
                     key='copy'
                     variants={variants}
                     style={{ display: 'flex' }}>
-                    <IconCopy size={20} strokeWidth='1.9' />
+                    <IconCopy size={18} strokeWidth='1.8' />
                   </motion.div>
                 )}
               </AnimatePresence>

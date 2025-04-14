@@ -18,7 +18,7 @@ export const Camera = observer(function Camera() {
   return (
     <html.div style={styles.root}>
       <Stack horizontal={true} justify='space-between' align='center' sx={styles.header}>
-        <IconButton onClick={dialogStore.closeCamera} icon={<IconX {...iconProps} />} />
+        <IconButton onClick={() => dialogStore.toggleCamera(false)} icon={<IconX {...iconProps} />} />
         <Text size='lg'>CAMERA</Text>
         <IconButton
           onClick={() => setFlash(!flash)}

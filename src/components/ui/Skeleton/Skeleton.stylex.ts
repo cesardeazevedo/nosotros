@@ -6,7 +6,7 @@ const vars = {
   zIndex: 200,
 
   // container
-  containerShape: shape.sm,
+  containerShape: shape.xl,
   containerColor: palette.surfaceContainerHigh,
   // &:error
   containerColor$error: palette.errorContainer,

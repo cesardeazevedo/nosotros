@@ -63,6 +63,7 @@ const styles = css.create({
     minWidth: 340,
     height: 80,
     borderRadius: shape.lg,
+    zIndex: 50,
   },
   skeleton$dense: {
     paddingInline: 0,

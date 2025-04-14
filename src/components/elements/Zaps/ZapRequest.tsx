@@ -6,7 +6,7 @@ import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { TextField } from '@/components/ui/TextField/TextField'
 import { useNoteStoreFromId } from '@/hooks/useNoteStore'
-import { useCurrentUser, useRootContext } from '@/hooks/useRootStore'
+import { useCurrentSigner, useCurrentUser, useRootContext } from '@/hooks/useRootStore'
 import { toastStore } from '@/stores/ui/toast.store'
 import type { User } from '@/stores/users/user'
 import { createZapRequestStore } from '@/stores/zaps/zap.request.store'
@@ -35,6 +35,7 @@ const formatter = new Intl.NumberFormat()
 export const ZapRequest = observer(function ZapRequest(props: Props) {
   const { id } = props
   const context = useRootContext()
+  const signer = useCurrentSigner()
   const store = useMemo(() => createZapRequestStore(), [])
 
   const currentUser = useCurrentUser()
@@ -49,7 +50,7 @@ export const ZapRequest = observer(function ZapRequest(props: Props) {
       mergeMap((user) => {
         return from(getZapEndpoint(user.event)).pipe(
           mergeMap((callback) => {
-            const { signer, pubkey } = context.context
+            const { pubkey } = context
             if (!callback) return throwError(() => new Error('Error when getting zap endpoint'))
             if (!pubkey || !signer) return throwError(() => new Error('Not authenticated'))
 

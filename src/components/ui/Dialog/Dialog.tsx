@@ -2,6 +2,7 @@ import React, { forwardRef } from 'react'
 import { css } from 'react-strict-dom'
 import { PopoverBase } from '../Popover/PopoverBase'
 import type { SxProps } from '../types'
+import type { IPopoverBaseProps } from '../Popover/PopoverBase.types'
 
 export type Props = {
   sx?: SxProps
@@ -10,10 +11,12 @@ export type Props = {
   disabled?: boolean
   modal?: boolean
   children?: React.ReactNode
+  slotProps?: IPopoverBaseProps['slotProps']
+  trapFocus?: boolean
 }
 
 export const Dialog = forwardRef<HTMLDivElement, Props>((props, ref) => {
-  const { open, onClose, modal, disabled, children, sx } = props
+  const { open, onClose, modal, disabled, children, sx, slotProps, trapFocus = true } = props
   return (
     <PopoverBase
       sx={[styles.root, sx]}
@@ -23,12 +26,13 @@ export const Dialog = forwardRef<HTMLDivElement, Props>((props, ref) => {
       contentRenderer={() => children}
       floatingStrategy={false}
       placement='top'
+      slotProps={slotProps}
       closeEvents={{
         focusOut: false,
         clickOutside: !modal,
         escapeKey: !modal,
       }}
-      trapFocus
+      trapFocus={trapFocus}
       withScrim
       middlewares={{
         flip: false,

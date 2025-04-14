@@ -1,8 +1,10 @@
+import { ContentProvider } from '@/components/providers/ContentProvider'
 import { ButtonBase } from '@/components/ui/ButtonBase/ButtonBase'
 import { Paper } from '@/components/ui/Paper/Paper'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { TooltipRich } from '@/components/ui/TooltipRich/TooltipRich'
+import type { ColorPalette } from '@/themes/palette.stylex'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
@@ -14,14 +16,17 @@ type Props = {
   pubkeys: string[]
   max?: number
   description?: ReactNode
+  renderTooltip?: boolean
+  onPrimary?: boolean
+  borderColor?: keyof ColorPalette
 }
 
 export const UsersAvatars = (props: Props) => {
-  const { pubkeys, max = 3, description } = props
+  const { pubkeys, max = 3, description, borderColor, renderTooltip = true } = props
   const topUsers = pubkeys.slice(0, max)
   return (
     <Stack justify='flex-end' gap={0.5}>
-      {pubkeys.length > 3 && (
+      {renderTooltip && pubkeys.length > 3 && (
         <TooltipRich
           openEvents={{ click: true, hover: false }}
           content={() => (
@@ -42,9 +47,16 @@ export const UsersAvatars = (props: Props) => {
         </TooltipRich>
       )}
       <Stack>
-        {topUsers.map((pubkey) => (
-          <UserAvatar key={pubkey} sx={styles.avatar} size='xs' pubkey={pubkey} />
-        ))}
+        <ContentProvider value={{ disableLink: true, disablePopover: true }}>
+          {topUsers.map((pubkey) => (
+            <UserAvatar
+              key={pubkey}
+              sx={[styles.avatar, borderColor ? styles.avatarBorderColor(borderColor) : null]}
+              size='xs'
+              pubkey={pubkey}
+            />
+          ))}
+        </ContentProvider>
       </Stack>
     </Stack>
   )
@@ -53,8 +65,10 @@ export const UsersAvatars = (props: Props) => {
 const styles = css.create({
   avatar: {
     marginLeft: -8,
-    boxShadow: `0px 0px 0px 2px ${palette.surfaceContainerLowest}`,
+    boxShadow: `0px 0px 0px 2px `,
+    color: palette.surfaceContainerLowest,
   },
+  avatarBorderColor: (color: keyof ColorPalette) => ({ color: palette[color] }),
   avatar2: {
     marginLeft: -6,
     border: '2px solid',

@@ -4,7 +4,7 @@ import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { useNoteStore } from '@/hooks/useNoteStore'
 import { useGlobalSettings } from '@/hooks/useRootStore'
-import { type NostrEventNote } from '@/nostr/types'
+import type { NostrEventMetadata } from '@/nostr/types'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
@@ -16,19 +16,18 @@ import { PostHeaderDate } from '../Posts/PostHeaderDate'
 import { UserHeader } from '../User/UserHeader'
 
 type Props = {
-  event: NostrEventNote
+  event: NostrEventMetadata
 }
 
 export const ArticleRoot = observer(function ArticleRoot(props: Props) {
   const globalSettings = useGlobalSettings()
   const { dense } = useContentContext()
-  const { event } = props
-  const note = useNoteStore(event)
-  const { tags } = note.metadata
-  const title = tags.title?.[0][1]
-  const image = tags.image?.[0][1]
-  const summary = tags.summary?.[0][1]
-  const publishedAt = parseInt(tags.published_at?.[0][1] || note.event.event.created_at.toString())
+  const note = useNoteStore(props.event)
+  const { event } = note
+  const title = event.getTag('title')
+  const image = event.getTag('image')
+  const summary = event.getTag('summary')
+  const publishedAt = parseInt(event.getTag('published_at') || event.event.created_at.toString())
   return (
     <>
       <NoteProvider value={{ note }}>

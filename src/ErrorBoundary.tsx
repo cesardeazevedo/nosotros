@@ -2,25 +2,24 @@ import { db } from '@/nostr/db'
 import { IconTrashXFilled } from '@tabler/icons-react'
 import { CenteredContainer } from 'components/elements/Layouts/CenteredContainer'
 import { PaperContainer } from 'components/elements/Layouts/PaperContainer'
-import { applySnapshot } from 'mobx-state-tree'
 import { useCallback, useState } from 'react'
 import { css } from 'react-strict-dom'
 import { Button } from './components/ui/Button/Button'
 import { Stack } from './components/ui/Stack/Stack'
 import { Text } from './components/ui/Text/Text'
-import { initialState } from './stores/helpers/initialState'
-import { rootStore } from './stores/root.store'
+import { useRootStore } from './hooks/useRootStore'
 import { palette } from './themes/palette.stylex'
 import { spacing } from './themes/spacing.stylex'
 
 export const ErrorBoundary = () => {
   const [cleaning, setCleaning] = useState(false)
+  const rootStore = useRootStore()
 
   const handleClick = useCallback(async () => {
     setCleaning(true)
     await db.clearDB()
     setCleaning(false)
-    applySnapshot(rootStore, initialState)
+    rootStore.reset()
   }, [])
 
   return (

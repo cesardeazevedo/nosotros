@@ -1,27 +1,23 @@
-import { useRootStore } from '@/hooks/useRootStore'
-import { useRouter } from '@tanstack/react-router'
-import { DeckContainer } from 'components/elements/Deck/DeckContainer'
-import { DeckList } from 'components/elements/Deck/DeckList'
-import { DeckNew } from 'components/elements/Deck/DeckNew'
-import { DeckSidebar } from 'components/elements/Deck/DeckSidebar'
-import { reaction } from 'mobx'
-import { useEffect } from 'react'
+import { DeckContainer } from '@/components/modules/Deck/DeckContainer'
+import { DeckList } from '@/components/modules/Deck/DeckList'
+import { DeckNew } from '@/components/modules/Deck/DeckNew'
+import { useGlobalSettings } from '@/hooks/useRootStore'
+import { observer } from 'mobx-react-lite'
+import { css } from 'react-strict-dom'
 
-export const DeckRoute = function DeckRoute() {
-  const { auth, decks } = useRootStore()
-  const router = useRouter()
-  useEffect(() => {
-    const disposer = reaction(
-      () => [auth.pubkey, decks.selected.list],
-      () => router.invalidate(),
-    )
-    return () => disposer()
-  }, [])
+export const DeckRoute = observer(function DeckRoute() {
+  const { sidebarCollapsed } = useGlobalSettings()
+
   return (
-    <DeckContainer>
-      <DeckSidebar />
+    <DeckContainer sx={sidebarCollapsed && styles.expanded}>
       <DeckList />
       <DeckNew />
     </DeckContainer>
   )
-}
+})
+
+const styles = css.create({
+  expanded: {
+    marginLeft: 84,
+  },
+})

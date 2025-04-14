@@ -248,7 +248,7 @@ export const PopoverBase = forwardRef<HTMLDivElement, IPopoverBaseProps>(functio
       {transitionStatus.isMounted ? (
         <Portal root={root}>
           <FloatingFocusManager
-            modal
+            modal={false}
             disabled={!trapFocus}
             context={floating.context}
             closeOnFocusOut={closeEvents.focusOut}

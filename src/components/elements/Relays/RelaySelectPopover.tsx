@@ -2,12 +2,12 @@ import { Button } from '@/components/ui/Button/Button'
 import { Chip } from '@/components/ui/Chip/Chip'
 import { Paper } from '@/components/ui/Paper/Paper'
 import { PopoverBase } from '@/components/ui/Popover/PopoverBase'
-import { Search } from '@/components/ui/Search/Search'
+import { SearchField } from '@/components/ui/Search/Search'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import { IconBroadcast } from '@tabler/icons-react'
+import { IconPlus } from '@tabler/icons-react'
 import type { BaseSyntheticEvent } from 'react'
 import React, { useCallback, useState } from 'react'
 import { css } from 'react-strict-dom'
@@ -49,7 +49,7 @@ export const RelaySelectPopover = (props: Props) => {
         contentRenderer={() => (
           <Paper elevation={2} surface='surfaceContainerLow' sx={styles.paper}>
             <Stack gap={0.5}>
-              <Search
+              <SearchField
                 sx={styles.search}
                 leading={false}
                 placeholder='wss://'
@@ -70,7 +70,7 @@ export const RelaySelectPopover = (props: Props) => {
             onClick={() => setOpen(true)}
             variant='input'
             label={label}
-            icon={icon || <IconBroadcast strokeWidth='1.5' size={18} />}
+            icon={icon || <IconPlus strokeWidth='1.5' size={18} />}
           />
         )}
       </PopoverBase>
