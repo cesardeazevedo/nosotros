@@ -1,5 +1,4 @@
 import { CenteredContainer } from '@/components/elements/Layouts/CenteredContainer'
-import { RelayDiscovery } from '@/components/elements/RelayDiscovery/RelayDiscovery'
 import { RelayMailboxList } from '@/components/elements/Relays/RelayMailboxList'
 import { Button } from '@/components/ui/Button/Button'
 import { Stack } from '@/components/ui/Stack/Stack'
@@ -42,7 +41,6 @@ export const RelayRoute = observer(function RelayRoute() {
             </Stack>
           </html.div>
         )}
-        <RelayDiscovery />
       </Stack>
     </CenteredContainer>
   )

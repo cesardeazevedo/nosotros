@@ -9,11 +9,11 @@ import { spacing } from '@/themes/spacing.stylex'
 import { IconChevronLeft } from '@tabler/icons-react'
 import { css } from 'react-strict-dom'
 
-export const NEventPending = () => {
+export const NostrEventPending = () => {
   const isMobile = useMobile()
   const goBack = useGoBack()
   return (
-    <CenteredContainer sx={styles.root}>
+    <CenteredContainer margin>
       {!isMobile && (
         <Stack sx={styles.header}>
           <IconButton onClick={goBack} icon={<IconChevronLeft />} />
@@ -26,16 +26,7 @@ export const NEventPending = () => {
   )
 }
 
-const MOBILE = '@media (max-width: 599.95px)'
-
 const styles = css.create({
-  root: {
-    marginTop: {
-      default: spacing.margin2,
-      [MOBILE]: 0,
-    },
-    paddingBottom: 200,
-  },
   header: {
     paddingInline: spacing.padding1,
     paddingBottom: spacing.padding1,
