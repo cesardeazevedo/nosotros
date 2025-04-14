@@ -28,6 +28,8 @@ export class EventStore {
 
   clear() {
     this.events.clear()
+    this.eventsReplaceable.clear()
+    this.eventsAddressable.clear()
     this.indexKind.clear()
     this.indexPubkey.clear()
     this.indexKindPubkey.clear()
@@ -121,10 +123,6 @@ export class EventStore {
   }
 
   getIdsByKindPubkeyTag(kind: Kind, pubkey: string, tag: string) {
-    return this.indexKindPubkeyTag.get([kind, pubkey, tag].join(':'))
-  }
-
-  getEventsByKindPubkeyTag(kind: Kind, pubkey: string, tag: string) {
     return this.indexKindPubkeyTag.get([kind, pubkey, tag].join(':'))
   }
 
