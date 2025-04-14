@@ -30,12 +30,8 @@ describe('parseComment', () => {
         idHints: { id_1_reply_1: ['pubkey2'] },
       },
       isRoot: false,
-      id: 'id_1_reply_2',
-      kind: 1111,
-      rootKind: '1',
       rootId: 'id_1_root',
       parentId: 'id_1_reply_1',
-      parentKind: '1',
     })
   })
 
@@ -65,13 +61,9 @@ describe('parseComment', () => {
         idHints: { id_1_root: ['pubkey2'] },
       },
       isRoot: false,
-      id: 'id_1_reply_2',
-      kind: 1111,
       // isReplyOfAReply: false,
-      rootKind: '1',
       rootId: 'id_1_root',
       parentId: 'id_1_root',
-      parentKind: '1',
     })
   })
 })
