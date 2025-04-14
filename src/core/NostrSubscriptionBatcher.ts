@@ -1,20 +1,6 @@
 import { matchFilters } from 'nostr-tools'
 import type { Observable } from 'rxjs'
-import {
-  EMPTY,
-  Subject,
-  catchError,
-  combineLatestWith,
-  filter,
-  firstValueFrom,
-  map,
-  mergeMap,
-  of,
-  pipe,
-  share,
-  shareReplay,
-  tap,
-} from 'rxjs'
+import { EMPTY, Subject, catchError, filter, map, mergeMap, of, pipe, share, shareReplay, take, tap } from 'rxjs'
 import type { NostrSubscription } from './NostrSubscription'
 import { mergeSubscriptions } from './mergers/mergeSubscription'
 import { bufferTime } from './operators/bufferTime'
@@ -56,7 +42,12 @@ export class NostrSubscriptionBatcher {
 
       tap((sub: NostrSubscription) => this.subject.next(sub)),
 
-      combineLatestWith(firstValueFrom(this.buffer$)),
+      mergeMap((child) => {
+        return this.buffer$.pipe(
+          take(1),
+          map((parent) => [child, parent]),
+        )
+      }),
 
       mergeMap(([child, parent]) => {
         const events$ = this.subscriptions.get(parent.id)

@@ -144,4 +144,11 @@ describe('mergeFilters', () => {
     expect(filter1).toStrictEqual(clone1)
     expect(filter2).toStrictEqual(clone2)
   })
+
+  test('Should not filters that has tags', () => {
+    const filter1 = { kinds: [3000], authors: ['1'], '#d': ['1'], limit: 10 }
+    const filter2 = { kinds: [1], authors: ['1'], limit: 10 }
+    const result = mergeFilters([filter1, filter2])
+    expect(result).toStrictEqual([filter1, filter2])
+  })
 })

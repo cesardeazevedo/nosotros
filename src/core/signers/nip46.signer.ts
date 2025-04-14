@@ -15,7 +15,7 @@ import { type NostrFilter } from '../types'
 import { NIP01Signer } from './nip01.signer'
 import type { Signer } from './signer'
 
-export const BUNKER_REGEX = /^bunker:\/\/([0-9a-f]{64})\??([?/\w:.=&%-]*)$/
+const BUNKER_REGEX = /^bunker:\/\/([0-9a-f]{64})\??([?/\w:.=&%-]*)$/
 
 type NIP05Response = {
   names?: Record<string, string>
@@ -27,17 +27,17 @@ type NIP05Response = {
   }
 }
 
-export type BunkerMethodNIP05 = {
+type BunkerMethodNIP05 = {
   method: 'nip05'
   nip05: string
 }
 
-export type BunkerMethodURL = {
+type BunkerMethodURL = {
   method: 'bunkerurl'
   bunkerUrl: string
 }
 
-export type BunkerMethodNostrConnect = {
+type BunkerMethodNostrConnect = {
   method: 'nostrconnect'
   relay: string
 }
@@ -91,7 +91,7 @@ function fetchNIP05(nip05: string) {
   )
 }
 
-export function parseBunkerUrl(input: string) {
+function parseBunkerUrl(input: string) {
   const match = input.match(BUNKER_REGEX)
   invariant(match, 'Error on parsing bunkerUrl')
   const pubkey = match[1]
@@ -265,7 +265,7 @@ export class NIP46RemoteSigner implements Signer<NIP46RemoteSignerOptions> {
     )
   }
 
-  encrypt(pubkey: string, msg: string) {
+  encrypt(_pubkey: string, msg: string) {
     return firstValueFrom(
       this.connected$.pipe(
         mergeMap((bunker) => this.send('encrypt', [msg], bunker)),
@@ -274,7 +274,7 @@ export class NIP46RemoteSigner implements Signer<NIP46RemoteSignerOptions> {
     )
   }
 
-  decrypt(pubkey: string, msg: string) {
+  decrypt(_pubkey: string, msg: string) {
     return firstValueFrom(
       this.connected$.pipe(
         mergeMap((bunker) => this.send('decrypt', [msg], bunker)),
