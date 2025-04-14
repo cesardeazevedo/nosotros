@@ -2,9 +2,11 @@ import { useContentContext } from '@/components/providers/ContentProvider'
 import { ButtonBase } from '@/components/ui/ButtonBase/ButtonBase'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { SxProps } from '@/components/ui/types'
+import { Kind } from '@/constants/kinds'
 import { useCurrentPubkey, useGlobalSettings } from '@/hooks/useRootStore'
 import type { EditorStore } from '@/stores/editor/editor.store'
 import { UploadStore } from '@/stores/editor/upload.store'
+import { toastStore } from '@/stores/ui/toast.store'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
@@ -16,6 +18,7 @@ import { useEffect, useMemo } from 'react'
 import { css } from 'react-strict-dom'
 import { concat, concatMap, defer, endWith, from, map, mergeMap, startWith, takeUntil, tap } from 'rxjs'
 import { MediaListEditor } from '../Media/MediaListEditor'
+import { ToastEventPublished } from '../Toasts/ToastEventPublished'
 import { EditorContainer } from './EditorContainer'
 import { EditorExpandables } from './EditorExpandables'
 import { EditorHeader } from './EditorHeader'
@@ -42,6 +45,7 @@ export const EditorMedia = observer(function EditorMedia(props: Props) {
   const pubkey = useCurrentPubkey()
 
   useEffect(() => {
+    store.setKind(Kind.Media)
     store.open.toggle(initialOpen)
   }, [])
 
@@ -66,6 +70,9 @@ export const EditorMedia = observer(function EditorMedia(props: Props) {
                 tags: [...imetas, ...store.rawEvent.tags],
               })
             }),
+            tap((event) => {
+              toastStore.enqueue(<ToastEventPublished event={event} eventLabel={store.title} />, { duration: 10000 })
+            }),
             tap(() => uploadStore.reset()),
             map(() => false),
             startWith(0),
@@ -78,7 +85,7 @@ export const EditorMedia = observer(function EditorMedia(props: Props) {
 
   return (
     <>
-      <EditorContainer store={store}>
+      <EditorContainer open={store.open.value} onClick={() => store.setOpen()}>
         <UserAvatar size='md' pubkey={pubkey} />
         <Stack horizontal={false} align='stretch' justify={'center'} grow sx={styles.content}>
           <Stack sx={[styles.content, dense && styles.content$dense]} gap={2} align='flex-start'>
@@ -93,7 +100,7 @@ export const EditorMedia = observer(function EditorMedia(props: Props) {
                   </ButtonBase>
                 </>
               ) : (
-                <EditorPlaceholder store={store} />
+                <EditorPlaceholder placeholder={store.placeholder} />
               )}
             </Stack>
           </Stack>

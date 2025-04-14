@@ -5,8 +5,7 @@ import { DialogSheet } from 'components/elements/Layouts/Dialog'
 import { useGoBack } from 'hooks/useNavigations'
 import { observer } from 'mobx-react-lite'
 import { useCallback, useEffect, useMemo } from 'react'
-import { RemoveScroll } from 'react-remove-scroll'
-import { css, html } from 'react-strict-dom'
+import { css } from 'react-strict-dom'
 import { Editor } from '../elements/Editor/Editor'
 
 export const EditorDialog = observer(function EditorDialog() {
@@ -36,13 +35,7 @@ export const EditorDialog = observer(function EditorDialog() {
 
   return (
     <DialogSheet maxWidth='sm' sx={styles.dialog} surface='surfaceContainerLowest' open={open} onClose={handleClose}>
-      <>
-        <RemoveScroll>
-          <html.div style={styles.root}>
-            {store && <Editor initialOpen store={store} onDiscard={handleClose} />}
-          </html.div>
-        </RemoveScroll>
-      </>
+      {store && <Editor initialOpen store={store} onDiscard={handleClose} sx={styles.editor} />}
     </DialogSheet>
   )
 })
@@ -50,10 +43,10 @@ export const EditorDialog = observer(function EditorDialog() {
 const styles = css.create({
   dialog: {
     padding: spacing.padding1,
+    placeItems: 'baseline center',
+    paddingTop: '10%',
   },
-  root: {
-    position: 'relative',
-    overflowY: 'scroll',
-    maxHeight: '60vh',
+  editor: {
+    minHeight: 240,
   },
 })
