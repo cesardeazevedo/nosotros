@@ -1,7 +1,9 @@
 import { useContentContext } from '@/components/providers/ContentProvider'
 import { useNoteContext } from '@/components/providers/NoteProvider'
+import { Kind } from '@/constants/kinds'
+import { getMimeFromExtension } from '@/nostr/helpers/parseImeta'
 import { observer } from 'mobx-react-lite'
-import type { Node } from 'nostr-editor'
+import type { ImageNode, Node, VideoNode } from 'nostr-editor'
 import React from 'react'
 import { Image } from './Image/Image'
 import { MediaWrapper } from './Layout/MediaWrapper'
@@ -23,6 +25,16 @@ type Props = {
   renderMedia?: boolean
 }
 
+// Markdown videos are embbed as images, we need to figure out this in nostr-editor/tiptap-markdown
+const isVideoNode = (kind: Kind, node: Node): node is VideoNode => {
+  const type = kind === Kind.Article && node.type === 'image' ? getMimeFromExtension(node.attrs.src) : node.type
+  return type === 'video'
+}
+const isImageNode = (kind: Kind, node: Node): node is ImageNode => {
+  const type = kind === Kind.Article && node.type === 'image' ? getMimeFromExtension(node.attrs.src) : node.type
+  return type === 'image'
+}
+
 export const Content = observer(function Content(props: Props) {
   const { wrapper, children, renderMedia = true } = props
   const { note } = useNoteContext()
@@ -38,12 +50,12 @@ export const Content = observer(function Content(props: Props) {
               {children?.(index)}
               {node.type === 'heading' && <Heading node={node} />}
               {node.type === 'paragraph' && <Paragraph node={node} />}
-              {renderMedia && node.type === 'image' && (
+              {renderMedia && isImageNode(note.event.kind, node) && (
                 <MediaWrapper size={size} src={node.attrs.src}>
-                  <Image src={node.attrs.src} />
+                  <Image src={node.attrs!.src} />
                 </MediaWrapper>
               )}
-              {renderMedia && node.type === 'video' && (
+              {renderMedia && isVideoNode(note.event.kind, node) && (
                 <MediaWrapper size={size} src={node.attrs.src}>
                   <Video src={node.attrs.src} />
                 </MediaWrapper>
