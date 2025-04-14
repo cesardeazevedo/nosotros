@@ -1,14 +1,14 @@
 import { Kind } from '@/constants/kinds'
-import type { NostrEventComment, NostrEventMedia, NostrEventNote } from '@/nostr/types'
+import type { IMetaFields } from '@/nostr/helpers/parseImeta'
+import { getMimeType } from '@/nostr/helpers/parseImeta'
+import type { Metadata } from '@/nostr/types'
 import { metadataSymbol } from '@/nostr/types'
-import { noteStore } from '@/stores/notes/notes.store'
 import { computed, makeAutoObservable } from 'mobx'
 import { computedFn } from 'mobx-utils'
 import type { NostrEvent } from 'nostr-tools'
 import { createEditorStore } from '../editor/editor.store'
 import type { Event } from '../events/event'
 import { eventStore } from '../events/event.store'
-import { repostStore } from '../reposts/reposts.store'
 import type { User } from '../users/user'
 
 type ReplyStatus = 'IDLE' | 'LOADING' | 'LOADED'
@@ -36,7 +36,7 @@ export class Note {
   limit = PAGINATION_SIZE
 
   constructor(
-    public eventNote: NostrEventNote | NostrEventComment | NostrEventMedia,
+    public event: Event,
     open?: boolean,
   ) {
     makeAutoObservable(this, {
@@ -54,12 +54,12 @@ export class Note {
     }
   }
 
-  get event(): Event {
-    return eventStore.get(this.eventNote.id)!
+  get metadata() {
+    return this.event.event[metadataSymbol] as Metadata
   }
 
-  get metadata() {
-    return this.event.event[metadataSymbol]
+  get eventNote() {
+    return this.event.event
   }
 
   get id() {
@@ -97,11 +97,50 @@ export class Note {
   }
 
   get mentionNotes() {
-    return this.metadata.mentionedNotes.map((id) => eventStore.get(id)?.event).filter((event) => !!event)
+    return this.metadata.mentionedNotes?.map((id) => eventStore.get(id)?.event).filter((event) => !!event)
+  }
+
+  get reactions() {
+    return eventStore.getEventsByKindTagValue(Kind.Reaction, 'e', this.id)
+  }
+
+  get reactionsGrouped() {
+    // reactions grouped by reaction content
+    return Object.entries(
+      this.reactions.reduce(
+        (acc, { event: { content, pubkey } }) => ({
+          [content]: [...(acc?.[content] || []), pubkey],
+        }),
+        {} as Record<string, string[]>,
+      ),
+    ).sort((a, b) => b[1].length - a[1].length)
+  }
+
+  get reposts() {
+    return eventStore.getEventsByKindTagValue(Kind.Repost, 'e', this.id)
+  }
+
+  get zaps() {
+    return eventStore.getEventsByKindTagValue(Kind.ZapReceipt, 'e', this.id)
+  }
+
+  get zapAmount() {
+    return (
+      this.zaps
+        .flatMap(({ event }) => event[metadataSymbol].bolt11)
+        .reduce((acc, current) => {
+          const amount = parseInt(current?.amount?.value || '0')
+          return acc + amount
+        }, 0) / 1000
+    )
+  }
+
+  reactionsByPubkey(pubkey: string) {
+    return eventStore.getIdsByKindPubkeyTag(Kind.Reaction, pubkey, 'e')
   }
 
   get replies() {
-    return noteStore.getReplies(this.event) || []
+    return eventStore.getRepliesEvents(this.event) || []
   }
 
   repliesSorted = computedFn((user?: User) => {
@@ -113,7 +152,7 @@ export class Note {
           const isMutedAuthor = user?.mutedAuthors?.has(reply.pubkey)
           return !isMutedEvent && !isMutedAuthor
         })
-        .sort((a) => (user?.following?.followsPubkey(a.pubkey) ? -1 : 1))
+        .sort((a) => (user?.followsPubkey(a.pubkey) ? -1 : 1))
         // always put the current user at the top
         .sort((a) => (a.pubkey === user?.pubkey ? -1 : 1))
     )
@@ -132,7 +171,7 @@ export class Note {
   })
 
   repliesPreview = computedFn((user?: User) => {
-    return this.replies.filter((event) => user?.following?.followsPubkey(event.pubkey)).slice(0, 2)
+    return this.replies.filter((event) => user?.followsPubkey(event.pubkey)).slice(0, 2)
   })
 
   // Get preview replies from a single user
@@ -203,16 +242,12 @@ export class Note {
   }
 
   private getRepliesTotal(event: Event): number {
-    const replies = noteStore.getReplies(event)
+    const replies = eventStore.getRepliesEvents(event)
     return replies.reduce((total, reply) => total + 1 + this.getRepliesTotal(reply), 0)
   }
 
   get repliesTotal(): number {
     return this.getRepliesTotal(this.event)
-  }
-
-  get repostTotal() {
-    return repostStore.repostsByNote.get(this.id)?.size || 0
   }
 
   get isLoading() {
@@ -236,12 +271,9 @@ export class Note {
   }
 
   get imetaList() {
-    const imageExts = ['jpeg', 'jpg', 'png', 'gif', 'webp']
-    const videoExts = ['mp4', 'webm', 'ogg', 'mov', 'quicktime']
-    return Object.entries(this.metadata.imeta).map(([src, data]) => {
-      // Some imeta tags are missing mimetypes
-      const ext = data.m?.split('/')[1] || new URL(src).pathname.split('.')?.toReversed()?.[0] || ''
-      return [imageExts.includes(ext) ? 'image' : videoExts.includes(ext) ? 'video' : 'image', src, data] as const
+    return Object.entries(this.metadata.imeta || {}).map(([src, data]) => {
+      const mime = getMimeType(src, data as IMetaFields)
+      return [mime, src, data] as const
     })
   }
 

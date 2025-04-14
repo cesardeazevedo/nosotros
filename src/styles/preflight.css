@@ -15,11 +15,13 @@
   /* border-color: theme('borderColor.DEFAULT', currentColor); */ /* 2 */
 }
 
-::before,
-::after {
-  --sixui-content: '';
+#root {
+  height: 100%;
 }
 
+.ProseMirror {
+  height: 100%;
+}
 .tiptap p.is-editor-empty:first-child::before {
   color: #adb5bd;
   content: attr(data-placeholder);
@@ -30,6 +32,23 @@
 }
 .ProseMirror-gapcursor::after {
   border: 2px solid currentColor;
+}
+
+.shiki {
+  padding: 50px 24px 14px 18px;
+  overflow: auto;
+}
+
+.EmojiPickerReact {
+  --epr-search-input-border-radius: 16px !important;
+  @media (prefers-color-scheme: dark) {
+    --epr-hover-bg-color: #212529 !important;
+    --epr-dark-bg-color: #16191d !important;
+    --epr-dark-category-label-bg-color: #16191d !important;
+    --epr-search-input-bg-color: #0d0f12 !important;
+    --epr-search-input-bg-color-active: #0d0f12 !important;
+    --epr-search-border-color: #212529 !important;
+  }
 }
 
 /*

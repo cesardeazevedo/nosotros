@@ -1,13 +1,15 @@
+import type { Kind } from '@/constants/kinds'
 import { action, makeAutoObservable } from 'mobx'
 
 type DialogImageProps = Array<{ content: string } | false>
 
 export class DialogStore {
   camera = false
-
   qrcode = false
-
-  updateSW = false
+  search = false
+  stats = false as false | string
+  createDeck = false
+  createList = false as Kind | false
 
   images: DialogImageProps = [false]
 
@@ -15,32 +17,36 @@ export class DialogStore {
 
   constructor() {
     makeAutoObservable(this, {
-      openCamera: action.bound,
-      openQRCode: action.bound,
       pushReply: action.bound,
       pushImage: action.bound,
-      closeCamera: action.bound,
-      closeQRCode: action.bound,
       closeImage: action.bound,
       closeReply: action.bound,
       resetReply: action.bound,
     })
   }
 
-  openCamera() {
-    this.camera = true
+  toggleCamera(value?: boolean) {
+    this.camera = value ?? !this.camera
   }
 
-  closeCamera() {
-    this.camera = false
+  toggleQRCode(value?: boolean) {
+    this.qrcode = value ?? !this.qrcode
   }
 
-  openQRCode() {
-    this.qrcode = true
+  toggleSearch(value?: boolean) {
+    this.search = value ?? !this.search
   }
 
-  closeQRCode() {
-    this.qrcode = false
+  toggleDeck(value?: boolean) {
+    this.createDeck = value ?? !this.createDeck
+  }
+
+  setStats(id: string | false) {
+    this.stats = id
+  }
+
+  setCreateList(kind: number | false) {
+    this.createList = kind
   }
 
   pushImage(content: string) {

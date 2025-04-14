@@ -6,6 +6,7 @@ import { CardTitle } from '@/components/ui/Card/CardTitle'
 import { chipTokens } from '@/components/ui/Chip/Chip.stylex'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
+import { useGoBack } from '@/hooks/useNavigations'
 import { signinStore } from '@/stores/signin/signin.store'
 import { spacing } from '@/themes/spacing.stylex'
 import { typeScale } from '@/themes/typeScale.stylex'
@@ -17,6 +18,7 @@ import { css } from 'react-strict-dom'
 import { SignInHeader } from './SignInHeader'
 
 export const SignInSelect = observer(function SignInSelect() {
+  const goBack = useGoBack()
   const navigate = useNavigate()
 
   const handleSignUpClick = () => {
@@ -66,7 +68,16 @@ export const SignInSelect = observer(function SignInSelect() {
                 </CardContent>
               </Stack>
             </Card>
-            <Card variant='filled' sx={styles.card} onClick={() => signinStore.goTo('NOSTR_EXTENSION')}>
+            <Card
+              variant='filled'
+              sx={styles.card}
+              onClick={async () => {
+                if (signinStore.hasExtension) {
+                  await signinStore.submitNostrExtension()
+                  goBack()
+                }
+                signinStore.goTo('NOSTR_EXTENSION')
+              }}>
               <Stack grow justify='space-between'>
                 <CardContent>
                   <CardTitle headline={'Nostr extension'} subhead={'Sign in using a compatible browser extension'} />

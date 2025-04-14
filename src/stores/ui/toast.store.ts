@@ -1,5 +1,5 @@
-import type { ReactNode } from '@tanstack/react-router'
 import { makeAutoObservable, runInAction } from 'mobx'
+import type { ReactNode } from 'react'
 
 type ToastItem = {
   open: boolean

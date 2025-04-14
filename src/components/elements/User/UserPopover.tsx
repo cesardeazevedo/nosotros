@@ -12,6 +12,7 @@ import { UserContentAbout } from './UserContentAbout'
 import { UserFollowButton } from './UserFollowButton'
 import { UserName } from './UserName'
 import { UserNIP05 } from './UserNIP05'
+import { UserRelays } from './UserRelays'
 
 type Props = {
   pubkey: string
@@ -40,7 +41,10 @@ export const UserPopover = function UserPopover(props: Props) {
               <Paper elevation={2} shape='lg' surface='surfaceContainerLow' sx={styles.root}>
                 <Stack justify='space-between'>
                   <UserAvatar size='lg' pubkey={pubkey} />
-                  <UserFollowButton pubkey={pubkey} />
+                  <Stack gap={0.5}>
+                    <UserRelays pubkey={pubkey} />
+                    <UserFollowButton pubkey={pubkey} />
+                  </Stack>
                 </Stack>
                 <br />
                 <Stack horizontal={false} gap={2}>

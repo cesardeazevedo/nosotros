@@ -1,6 +1,5 @@
 import type { NIP46RemoteSignerOptions } from '@/core/signers/nip46.signer'
 import { NIP46RemoteSigner } from '@/core/signers/nip46.signer'
-import type { Instance } from 'mobx-state-tree'
 import { t } from 'mobx-state-tree'
 
 export const SignerNIP46 = t
@@ -11,5 +10,3 @@ export const SignerNIP46 = t
   .volatile((self) => ({
     signer: new NIP46RemoteSigner(self.params),
   }))
-
-export type SignerNIP46Type = Instance<typeof SignerNIP46>

@@ -5,7 +5,7 @@ import { from, lastValueFrom, map, mergeMap, tap, toArray } from 'rxjs'
 
 const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'video/mp4', 'video/mpeg', 'video/webm']
 
-export function bufferToHex(buffer: ArrayBuffer) {
+function bufferToHex(buffer: ArrayBuffer) {
   return Array.from(new Uint8Array(buffer))
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('')
