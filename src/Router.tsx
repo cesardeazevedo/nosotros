@@ -257,16 +257,16 @@ const settingsNetworkRoute = createRoute({
   component: SettingsNetworkRoute,
 })
 
-const settingsContentRoute = createRoute({
-  getParentRoute: () => settingsRoute,
-  path: '/content',
-  component: SettingsContentRoute,
+const settingsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/settings',
+  component: SettingsRoute,
 })
 
-const settingsMediaStorage = createRoute({
+const settingsPreferenceRoute = createRoute({
   getParentRoute: () => settingsRoute,
-  path: '/blossom',
-  component: SettingsMediaStorage,
+  path: '/',
+  component: SettingsPreferencesRoute,
 })
 
 const settingsStorageRoute = createRoute({
@@ -285,13 +285,9 @@ export const routeTree = rootRoute.addChildren([
   mediaRoute,
   composeRoute,
   relaysRoute,
-  settingsRoute.addChildren([
-    settingsDisplayRoute,
-    settingsNetworkRoute,
-    settingsContentRoute,
-    settingsMediaStorage,
-    settingsStorageRoute,
-  ]),
+  relayActiveRoute,
+  relayDiscoveryRoute,
+  settingsRoute.addChildren([settingsPreferenceRoute, settingsStorageRoute]),
 ])
 
 export const router = createRouter({

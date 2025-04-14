@@ -11,7 +11,7 @@ export const SettingsContent = observer(function SettingsContent() {
   const settings = useGlobalSettings()
   return (
     <>
-      <Text sx={styles.description}>
+      <Text sx={styles.description} size='md'>
         Reactions and zaps are loaded as you scroll through the feed, you can disable them to save bandwidth.
       </Text>
       <MenuItem
@@ -55,5 +55,6 @@ export const SettingsContent = observer(function SettingsContent() {
 const styles = css.create({
   description: {
     paddingInline: spacing.padding2,
+    maxWidth: 400,
   },
 })

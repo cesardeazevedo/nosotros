@@ -10,18 +10,18 @@ export const SettingsMaxRelaysOutbox = observer(function SettingsMaxRelaysOutbox
   const settings = useGlobalNostrSettings()
   return (
     <MenuItem
-      label={'Outbox max relays per person'}
+      label={'Max relays per person when query'}
       supportingText={'The number of relays to query per person when outbox is enabled'}
       trailing={
         <Stack gap={2} sx={styles.wrapper} justify='flex-end'>
           <Slider
-            value={settings.maxRelaysPerUserOutbox}
-            onChange={(value) => settings.set('maxRelaysPerUserOutbox', value)}
+            value={settings.maxRelaysPerUser}
+            onChange={(value) => settings.set('maxRelaysPerUser', value)}
             min={1}
             max={8}
           />
           <Text variant='title' size='md'>
-            {settings.maxRelaysPerUserOutbox}
+            {settings.maxRelaysPerUser}
           </Text>
         </Stack>
       }
