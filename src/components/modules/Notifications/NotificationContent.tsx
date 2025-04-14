@@ -2,21 +2,21 @@ import { eventStore } from '@/stores/events/event.store'
 import { observer } from 'mobx-react-lite'
 import React from 'react'
 import { css, html } from 'react-strict-dom'
-import { NEventInline } from '../Content/NEvent/NEventInline'
-import { TextContent } from '../Content/Text'
+import { NEventInline } from '../../elements/Content/NEvent/NEventInline'
+import { TextContent } from '../../elements/Content/Text'
 
 type Props = {
   id: string | undefined
 }
 
 export const NotificationContent = observer(function NotificationContent(props: Props) {
-  const note = eventStore.get(props.id)
-  if (!note) {
+  const event = eventStore.get(props.id)
+  if (!event) {
     return
   }
   return (
     <html.div style={styles.root}>
-      {note.metadata?.contentSchema?.content.map((node, index) => (
+      {event.metadata.contentSchema?.content.map((node, index) => (
         <React.Fragment key={node.type + index}>
           {node.type === 'heading' && <TextContent hardBreak={false} node={node} />}
           {node.type === 'paragraph' && <TextContent size='md' hardBreak={false} node={node} />}

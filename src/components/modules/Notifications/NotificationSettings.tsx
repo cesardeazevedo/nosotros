@@ -3,7 +3,7 @@ import { Divider } from '@/components/ui/Divider/Divider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { Kind } from '@/constants/kinds'
-import type { NotificationFeed } from '@/stores/notifications/notification.feed'
+import type { FeedModule } from '@/stores/modules/feed.module'
 import { spacing } from '@/themes/spacing.stylex'
 import type { IconProps } from '@tabler/icons-react'
 import { IconAt, IconBolt, IconHeart, IconMessage, IconShare3, IconVolumeOff } from '@tabler/icons-react'
@@ -11,7 +11,7 @@ import { observer } from 'mobx-react-lite'
 import { css, html } from 'react-strict-dom'
 
 type Props = {
-  feed: NotificationFeed
+  module: FeedModule
 }
 
 const iconProps: IconProps = {
@@ -20,7 +20,8 @@ const iconProps: IconProps = {
 }
 
 export const NotificationSettings = observer(function NotificationSettings(props: Props) {
-  const { feed } = props
+  const { module } = props
+  const { feed } = module
   return (
     <html.div style={styles.root}>
       <Divider />
@@ -46,16 +47,16 @@ export const NotificationSettings = observer(function NotificationSettings(props
           <Chip
             label='Replies'
             variant='filter'
-            selected={feed.replies}
+            selected={feed.options.includeReplies}
             icon={<IconMessage {...iconProps} />}
-            onClick={() => feed.toggle('replies')}
+            onClick={() => feed.options.toggle('includeReplies')}
           />
           <Chip
-            selected={feed.mentions}
+            selected={feed.options.includeMentions}
             label='Mentions'
             variant='filter'
             icon={<IconAt {...iconProps} />}
-            onClick={() => feed.toggle('mentions')}
+            onClick={() => feed.options.toggle('includeMentions')}
           />
           <Chip
             selected={feed.hasKind(Kind.ZapReceipt)}
@@ -65,11 +66,11 @@ export const NotificationSettings = observer(function NotificationSettings(props
             onClick={() => feed.toggleKind(Kind.ZapReceipt)}
           />
           <Chip
-            selected={feed.muted}
+            selected={feed.options.includeMuted}
             label='Muted'
             variant='filter'
             icon={<IconVolumeOff {...iconProps} />}
-            onClick={() => feed.toggle('muted')}
+            onClick={() => feed.options.toggle('includeMuted')}
           />
         </Stack>
         <Stack>

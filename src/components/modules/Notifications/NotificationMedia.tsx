@@ -2,7 +2,7 @@ import type { Note } from '@/stores/notes/note'
 import { shape } from '@/themes/shape.stylex'
 import { observer } from 'mobx-react-lite'
 import { css, html } from 'react-strict-dom'
-import { LinkNEvent } from '../Links/LinkNEvent'
+import { LinkNEvent } from '../../elements/Links/LinkNEvent'
 
 type Props = {
   note: Note
