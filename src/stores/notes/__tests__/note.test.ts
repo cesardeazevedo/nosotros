@@ -1,11 +1,13 @@
 import { Kind } from '@/constants/kinds'
-import { listStore } from '@/stores/lists/lists.store'
+import { eventStore } from '@/stores/events/event.store'
 import { seenStore } from '@/stores/seen/seen.store'
+import { fakeEvent } from '@/utils/faker'
 import { test } from '@/utils/fixtures'
+import { Mutelist } from 'nostr-tools/kinds'
 
 describe('Note', () => {
   test('assert isFollowing', ({ login, createNote, createFollows }) => {
-    const note = createNote({ pubkey: '2' })
+    const note = createNote({ id: '1', pubkey: '2' })
     const user = login(note.event.pubkey)
     expect(note.event.isFollowing(user)).toBe(false)
     createFollows(user.pubkey, [note.event.pubkey])
@@ -61,10 +63,18 @@ describe('Note', () => {
 
     createFollows(user.pubkey, ['2'])
 
-    listStore.muteE.set('1', new Set(['4']))
-    listStore.muteP.set('1', new Set(['3']))
+    eventStore.add(
+      fakeEvent({
+        kind: Mutelist,
+        pubkey: '1',
+        tags: [
+          ['e', '4'],
+          ['p', '3'],
+        ],
+      }),
+    )
 
-    expect(rootNote.repliesSorted(user)).toStrictEqual([reply2.event, reply1.event])
+    expect(rootNote.repliesSorted(user)).toEqual([reply2.event, reply1.event])
     expect(rootNote.repliesMuted(user)).toStrictEqual([reply3.event, reply4.event])
   })
 
