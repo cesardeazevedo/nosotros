@@ -8,7 +8,7 @@ import { useCurrentUser } from '@/hooks/useRootStore'
 import { dialogStore } from '@/stores/ui/dialogs.store'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import { Link, useMatchRoute } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
 import { observer } from 'mobx-react-lite'
 import { css } from 'react-strict-dom'
 import { IconUsersGroupFilled } from '../Icons/IconUsersGroupFilled'
@@ -17,15 +17,14 @@ import { SidebarSubheader } from './SidebarSubheader'
 
 export const SidebarMenuFollowSets = observer(function SidebarMenuFollowSets() {
   const user = useCurrentUser()
-  const match = useMatchRoute()
   return (
     <Expandable
-      initiallyExpanded={!!match({ to: '/feed' })}
+      initiallyExpanded
       trigger={(triggerProps) => (
         <SidebarSubheader
           {...triggerProps}
           label='Follow lists'
-          onCreateClick={() => dialogStore.setCreateList(Kind.FollowSets)}
+          onCreateClick={() => dialogStore.setListForm(Kind.FollowSets)}
         />
       )}>
       <Stack gap={0.5} horizontal={false} sx={styles.content}>
@@ -53,6 +52,7 @@ export const SidebarMenuFollowSets = observer(function SidebarMenuFollowSets() {
                   trailingIcon={
                     <ContentProvider value={{ disableLink: true }}>
                       <UsersAvatars
+                        borderColor={isActive ? 'surfaceContainer' : 'surfaceContainerLowest'}
                         pubkeys={pubkeys}
                         description={
                           <Text size='lg'>
@@ -85,6 +85,7 @@ const styles = css.create({
   content: {
     overflowY: 'auto',
     maxHeight: 300,
+    marginTop: spacing['margin0.5'],
   },
   gray: {
     color: palette.onSurfaceVariant,

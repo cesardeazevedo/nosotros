@@ -1,5 +1,6 @@
 import type { Kind } from '@/constants/kinds'
 import { action, makeAutoObservable } from 'mobx'
+import type { Event } from '../events/event'
 
 type DialogImageProps = Array<{ content: string } | false>
 
@@ -9,7 +10,7 @@ export class DialogStore {
   search = false
   stats = false as false | string
   createDeck = false
-  createList = false as Kind | false
+  listForm = false as Event | Kind.FollowSets | Kind.RelaySets | false
 
   images: DialogImageProps = [false]
 
@@ -45,8 +46,8 @@ export class DialogStore {
     this.stats = id
   }
 
-  setCreateList(kind: number | false) {
-    this.createList = kind
+  setListForm(event: Event | Kind.FollowSets | Kind.RelaySets | false) {
+    this.listForm = event
   }
 
   pushImage(content: string) {

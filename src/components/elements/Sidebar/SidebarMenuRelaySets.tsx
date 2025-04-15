@@ -20,7 +20,7 @@ export const SidebarMenuRelaySets = observer(function SidebarMenuRelaySets() {
         <SidebarSubheader
           {...triggerProps}
           label={`Relay lists`}
-          onCreateClick={() => dialogStore.setCreateList(Kind.RelaySets)}
+          onCreateClick={() => dialogStore.setListForm(Kind.RelaySets)}
         />
       )}>
       <Stack gap={0.5} horizontal={false} sx={styles.content}>
@@ -66,5 +66,6 @@ const styles = css.create({
   content: {
     overflowY: 'auto',
     maxHeight: 300,
+    marginTop: spacing['margin0.5'],
   },
 })

@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/Button/Button'
 import { Chip } from '@/components/ui/Chip/Chip'
 import { Paper } from '@/components/ui/Paper/Paper'
 import { Popover } from '@/components/ui/Popover/Popover'
@@ -6,6 +7,7 @@ import { Text } from '@/components/ui/Text/Text'
 import { Kind } from '@/constants/kinds'
 import type { Event } from '@/stores/events/event'
 import { eventStore } from '@/stores/events/event.store'
+import { dialogStore } from '@/stores/ui/dialogs.store'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconServerBolt } from '@tabler/icons-react'
@@ -28,10 +30,20 @@ export const RelaySetsChip = observer(function RelaySetsChip(props: Props) {
     <Popover
       floatingStrategy='fixed'
       placement='bottom-start'
-      contentRenderer={() => (
+      contentRenderer={(props) => (
         <Paper outlined elevation={4} surface='surfaceContainerLow' sx={styles.popover}>
-          <Stack sx={styles.header}>
+          <Stack sx={styles.header} justify='space-between'>
             <Text size='lg'>Relay Sets</Text>
+            {event && (
+              <Button
+                variant='filled'
+                onClick={() => {
+                  props.close()
+                  dialogStore.setListForm(event)
+                }}>
+                Edit
+              </Button>
+            )}
           </Stack>
           <Stack horizontal={false} align='flex-start' gap={0.5}>
             {relays.map((url) => (

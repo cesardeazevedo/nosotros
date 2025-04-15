@@ -6,6 +6,7 @@ import { TextField } from '@/components/ui/TextField/TextField'
 import { Kind } from '@/constants/kinds'
 import { useCurrentPubkey, useCurrentSigner } from '@/hooks/useRootStore'
 import { publish } from '@/nostr/publish/publish'
+import type { Event } from '@/stores/events/event'
 import { spacing } from '@/themes/spacing.stylex'
 import { useActionState, useRef } from 'react'
 import { css } from 'react-strict-dom'
@@ -13,8 +14,8 @@ import { defaultIfEmpty, delay, firstValueFrom } from 'rxjs'
 import { ListFormFollowsSets } from './ListFormFollowSets'
 import { ListFormRelaySet } from './ListFormRelaySets'
 
-type Props = {
-  kind: Kind.FollowSets | Kind.RelaySets
+type Props = ({ isEditing: true; event: Event } | { isEditing: false; kind: Kind.FollowSets | Kind.RelaySets }) & {
+  onClose?: () => void
 }
 
 const labels = {
@@ -27,7 +28,9 @@ export type RefListKind = {
 }
 
 export const ListForm = (props: Props) => {
-  const { kind } = props
+  const { isEditing, onClose } = props
+  const kind = isEditing ? props.event.kind : props.kind
+
   const ref = useRef<RefListKind>(null)
   const pubkey = useCurrentPubkey()
   const signer = useCurrentSigner()
@@ -38,20 +41,23 @@ export const ListForm = (props: Props) => {
     if (!title) return 'title required' as string
     if (!signer || !pubkey) return 'signin required' as string
 
-    const event = {
+    const uuid = window.crypto.randomUUID().replace(/-/g, '').slice(0, 21)
+    const d = isEditing ? props.event.getTag('d') || uuid : uuid
+    const newEvent = {
       kind,
-      content: '',
+      content: isEditing ? props.event.event.content : '',
       pubkey,
-      tags: [['title', title], ['d', window.crypto.randomUUID().replace(/-/g, '').slice(0, 21)], ...tags],
+      tags: [['title', title], ['d', d], ...tags],
     }
-    await firstValueFrom(publish(event, { signer }).pipe(defaultIfEmpty(null), delay(1000)))
+    await firstValueFrom(publish(newEvent, { signer }).pipe(defaultIfEmpty(null), delay(1000)))
+    onClose?.()
   }, null)
 
   return (
     <Stack sx={styles.root} horizontal={false}>
       <Stack sx={styles.header}>
         <Text variant='title' size='lg'>
-          Create custom {labels[kind]} list
+          {`${isEditing ? 'Edit' : 'Create'} ${labels[kind as keyof typeof labels]} list`}
         </Text>
       </Stack>
       <Divider />
@@ -59,14 +65,15 @@ export const ListForm = (props: Props) => {
         <Stack sx={styles.content} horizontal={false} gap={2}>
           <TextField
             error={!!error}
+            defaultValue={isEditing ? props.event.getTag('title') : ''}
             shrink
             fullWidth
             label='Name'
             name='title'
             placeholder='Give a name to your list'
           />
-          {kind === Kind.FollowSets && <ListFormFollowsSets ref={ref} />}
-          {kind === Kind.RelaySets && <ListFormRelaySet ref={ref} />}
+          {kind === Kind.FollowSets && <ListFormFollowsSets event={isEditing ? props.event : undefined} ref={ref} />}
+          {kind === Kind.RelaySets && <ListFormRelaySet event={isEditing ? props.event : undefined} ref={ref} />}
         </Stack>
         <Stack sx={styles.action}>
           <Button fullWidth disabled={isPending} type='submit' variant='filled' sx={styles.button}>

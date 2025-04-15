@@ -1,5 +1,6 @@
 import { Paper } from '@/components/ui/Paper/Paper'
 import { Stack } from '@/components/ui/Stack/Stack'
+import type { Event } from '@/stores/events/event'
 import { spacing } from '@/themes/spacing.stylex'
 import type { Ref } from 'react'
 import { useImperativeHandle, useState } from 'react'
@@ -9,12 +10,13 @@ import { UserChip } from '../User/UserChip'
 import type { RefListKind } from './ListForm'
 
 export type Props = {
+  event?: Event
   ref: Ref<RefListKind>
 }
 
 export const ListFormFollowsSets = (props: Props) => {
   const [, setQuery] = useState('')
-  const [selected, setSelected] = useState<string[]>([])
+  const [selected, setSelected] = useState<string[]>(props.event?.getTags('p') || [])
 
   const add = (pubkey: string) => {
     if (selected.indexOf(pubkey) === -1) {
@@ -30,17 +32,15 @@ export const ListFormFollowsSets = (props: Props) => {
   return (
     <>
       {selected.length > 0 && (
-        <Paper outlined sx={styles.content}>
-          <Stack gap={0.5} wrap sx={styles.maxScroll}>
-            {selected.map((pubkey) => (
-              <UserChip
-                key={pubkey}
-                pubkey={pubkey}
-                onDelete={() => setSelected((prev) => prev.filter((x) => x !== pubkey))}
-              />
-            ))}
-          </Stack>
-        </Paper>
+        <Stack gap={0.5} wrap sx={styles.maxScroll}>
+          {selected.map((pubkey) => (
+            <UserChip
+              key={pubkey}
+              pubkey={pubkey}
+              onDelete={() => setSelected((prev) => prev.filter((x) => x !== pubkey))}
+            />
+          ))}
+        </Stack>
       )}
       <Stack horizontal={false} gap={1}>
         <Paper surface='surfaceContainerLow' outlined>
@@ -48,23 +48,6 @@ export const ListFormFollowsSets = (props: Props) => {
             sx={styles.maxScroll}
             limit={50}
             placeholder='Search Users (npub, nprofile or hex)'
-            // onEnterKey={() => {
-            //   if (query.length === 64) {
-            //     add(query)
-            //   } else {
-            //     const decoded = decodeNIP19(query)
-            //     switch (decoded?.type) {
-            //       case 'npub': {
-            //         add(decoded.data)
-            //         break
-            //       }
-            //       case 'nprofile': {
-            //         add(decoded.data.pubkey)
-            //         break
-            //       }
-            //     }
-            //   }
-            // }}
             onSelect={(item) => {
               switch (item.type) {
                 case 'user':
