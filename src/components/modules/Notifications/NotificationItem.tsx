@@ -12,7 +12,7 @@ import { fallbackEmoji } from '@/utils/utils'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconAt, IconBolt, IconHeartFilled, IconMessage, IconShare3 } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { css, html } from 'react-strict-dom'
 import { LinkNEvent } from '../../elements/Links/LinkNEvent'
 import { PostHeaderDate } from '../../elements/Posts/PostHeaderDate'
@@ -35,7 +35,7 @@ export const NotificationItem = observer(function NotificationItem(props: Props)
   const { type, author: pubkey } = notification
 
   const mobile = useMobile()
-  const lastSeen = acc?.lastSeen.notification || Infinity
+  const lastSeen = useMemo(() => acc?.lastSeen.notification || Infinity, [])
   const linkId = type === 'reply' || type === 'mention' ? notification.id : notification.related
   const note = useNoteStoreFromId(linkId)
   const unseen = notification.created_at > lastSeen && lastSeen !== 0
