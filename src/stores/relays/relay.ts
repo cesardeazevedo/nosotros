@@ -1,13 +1,13 @@
-import type { RelayStatsDB } from '@/db/types'
+import { formatRelayUrl, prettyRelayUrl } from '@/core/helpers/formatRelayUrl'
+import type { RelayInfoDB, RelayStatsDB } from '@/db/types'
 import { db } from '@/nostr/db'
 import { autorun, makeAutoObservable, toJS } from 'mobx'
-import type { RelayInformation } from 'nostr-tools/nip11'
 
 export type RelayStore = ReturnType<typeof createRelayStore>
 
 export const createRelayStore = (url: string, stats?: RelayStatsDB) => {
   const state = makeAutoObservable({
-    url,
+    url: formatRelayUrl(url),
     connected: false,
     latency: 0,
     latencies: [] as number[],
@@ -27,11 +27,16 @@ export const createRelayStore = (url: string, stats?: RelayStatsDB) => {
       lastConnected: 0,
     }) as Omit<RelayStatsDB, 'url'>,
 
-    info: undefined as RelayInformation | undefined,
+    info: undefined as RelayInfoDB | undefined,
+
+    get pretty() {
+      return prettyRelayUrl(this.url)
+    },
 
     connect() {
       this.stats.connects++
       this.connected = true
+      this.stats.lastConnected = Date.now() / 1000
     },
 
     disconnect() {
@@ -53,7 +58,7 @@ export const createRelayStore = (url: string, stats?: RelayStatsDB) => {
       this.stats.errorMessages.push(message)
     },
 
-    addInfo(info: RelayInformation) {
+    addInfo(info: RelayInfoDB) {
       this.info = info
     },
   })
@@ -61,10 +66,10 @@ export const createRelayStore = (url: string, stats?: RelayStatsDB) => {
   autorun(
     async () => {
       const stats = toJS(state.stats)
-      const events = await db.seen.countByRelay(url)
-      db.relayStats.insert({ ...stats, events, url })
+      const events = await db.seen.countByRelay(state.url)
+      db.relayStats.insert({ ...stats, events, url: state.url })
     },
-    { delay: 5000 },
+    { delay: 7500 },
   )
 
   return state

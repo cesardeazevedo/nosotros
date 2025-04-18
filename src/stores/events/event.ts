@@ -1,20 +1,32 @@
 import { parseTags } from '@/nostr/helpers/parseTags'
 import { pool } from '@/nostr/pool'
-import type { NostrEventComment, NostrEventNote } from '@/nostr/types'
+import type { NostrEventMetadata } from '@/nostr/types'
 import { metadataSymbol } from '@/nostr/types'
 import { encodeSafe } from '@/utils/nip19'
-import type { NostrEvent } from 'nostr-tools'
+import { makeAutoObservable } from 'mobx'
+import { computedFn } from 'mobx-utils'
 import { nip19 } from 'nostr-tools'
-import { isParameterizedReplaceableKind } from 'nostr-tools/kinds'
+import { isParameterizedReplaceableKind, isReplaceableKind } from 'nostr-tools/kinds'
 import { seenStore } from '../seen/seen.store'
 import type { User } from '../users/user'
 import { userStore } from '../users/users.store'
 
+const keepAlive = { keepAlive: true }
+
 export class Event {
-  constructor(public event: NostrEventNote | NostrEventComment) {}
+  constructor(public event: NostrEventMetadata) {
+    makeAutoObservable(this, {
+      event: false,
+    })
+  }
 
   get id() {
     return this.event.id
+  }
+
+  get key() {
+    const { id, kind, pubkey } = this.event
+    return this.isReplaceable ? [kind, pubkey].join(':') : this.isAddressable ? [kind, pubkey, this.d].join(':') : id
   }
 
   get pubkey() {
@@ -22,11 +34,15 @@ export class Event {
   }
 
   get metadata() {
-    return metadataSymbol in this.event ? this.event[metadataSymbol] : null
+    return this.event[metadataSymbol]
+  }
+
+  get kind() {
+    return this.event.kind
   }
 
   get tags() {
-    return this.metadata?.tags || parseTags(this.event.tags)
+    return this.metadata && 'tags' in this.metadata ? this.metadata.tags || {} : parseTags(this.event.tags)
   }
 
   get user() {
@@ -57,8 +73,16 @@ export class Event {
     return isParameterizedReplaceableKind(this.event.kind)
   }
 
+  get isReplaceable() {
+    return isReplaceableKind(this.event.kind)
+  }
+
+  get replaceble() {
+    return [this.kind, this.pubkey].join(':')
+  }
+
   get address() {
-    return `${this.event.kind}:${this.pubkey}:${this.d}`
+    return [this.kind, this.pubkey, this.d].join(':')
   }
 
   get nprofile() {
@@ -90,7 +114,10 @@ export class Event {
     }
   }
 
+  getTag = computedFn((tag: string) => this.tags[tag]?.[0][1], keepAlive)
+  getTags = computedFn((tag: string) => this.tags[tag]?.map((x) => x[1]) || [], keepAlive)
+
   isFollowing(user?: User) {
-    return user?.following?.followsPubkey(this.event.pubkey) || false
+    return user?.followsPubkey(this.event.pubkey) || false
   }
 }

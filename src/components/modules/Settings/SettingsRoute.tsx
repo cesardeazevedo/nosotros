@@ -5,6 +5,7 @@ import { Divider } from '@/components/ui/Divider/Divider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { useMobile } from '@/hooks/useMobile'
+import { useResetScroll } from '@/hooks/useResetScroll'
 import { spacing } from '@/themes/spacing.stylex'
 import { Outlet } from '@tanstack/react-router'
 import { memo } from 'react'
@@ -12,8 +13,9 @@ import { css } from 'react-strict-dom'
 
 export const SettingsRoute = memo(() => {
   const isMobile = useMobile()
+  useResetScroll()
   return (
-    <CenteredContainer margin sx={styles.root}>
+    <CenteredContainer margin maxWidth='lg' sx={styles.root}>
       {!isMobile && (
         <Stack sx={styles.header}>
           <Text variant='headline' size='md'>
@@ -33,9 +35,7 @@ export const SettingsRoute = memo(() => {
 })
 
 const styles = css.create({
-  root: {
-    maxWidth: 720,
-  },
+  root: {},
   header: {
     padding: spacing.padding2,
   },

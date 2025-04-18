@@ -1,22 +1,31 @@
 import { Kind } from '@/constants/kinds'
 import { OUTBOX_RELAYS } from '@/constants/relays'
-import { ofKind } from '@/core/operators/ofKind'
-import { of, tap } from 'rxjs'
+import { NostrSubscription } from '@/core/NostrSubscription'
+import { addNostrEventToStore } from '@/stores/helpers/addNostrEventToStore'
+import { mergeWith, of, tap } from 'rxjs'
+import { batchers } from '../batcher'
 import type { NostrContext } from '../context'
-import { emitMailbox } from '../operators/trackMailbox'
+import { querySub } from '../db/querySub'
+import { distinctEvent } from '../operators/distinctEvents'
+import { insert } from '../operators/insert'
+import { parseMetadata } from '../operators/parseMetadata'
+import { verifyWorker } from '../operators/verifyWorker'
 import { ShareReplayCache } from '../replay'
-import type { NostrEventRelayList } from '../types'
-import { subscribe } from './subscribe'
+import { parseRelayList, type NostrEventMetadata } from '../types'
 
-export const replay = new ShareReplayCache<NostrEventRelayList>()
-
-const kinds = [Kind.RelayList]
+export const replay = new ShareReplayCache<NostrEventMetadata>()
 
 export const subscribeRelayList = replay.wrap((pubkey: string, ctx: NostrContext) => {
-  const filter = { kinds, authors: [pubkey] }
-  const subOptions = { ...ctx.subOptions, relays: of(OUTBOX_RELAYS) }
-  return subscribe(filter, { ...ctx, subOptions }).pipe(
-    ofKind<NostrEventRelayList>(kinds),
-    tap((event) => emitMailbox(event)),
+  // We don't use the `createSubscription` helper here to avoid circular references.
+  const filter = { kinds: [Kind.RelayList], authors: [pubkey] }
+  const sub = new NostrSubscription(filter, { relays: of(OUTBOX_RELAYS) })
+  return of(sub).pipe(
+    batchers.eager(),
+    distinctEvent(sub),
+    verifyWorker(),
+    insert(ctx),
+    mergeWith(querySub(sub, { ...ctx, queryDB: true })),
+    parseMetadata(parseRelayList),
+    tap((event) => addNostrEventToStore(event)),
   )
 })

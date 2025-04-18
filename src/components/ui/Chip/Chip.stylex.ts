@@ -1,13 +1,13 @@
 import { elevation } from '@/themes/elevation.stylex'
 import { palette } from '@/themes/palette.stylex'
+import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { state } from '@/themes/state.stylex'
 import { typeScale } from '@/themes/typeScale.stylex'
 import { css } from 'react-strict-dom'
-import { buttonTokens } from '../Button/Button.stylex'
 
 const vars = {
-  containerShape: buttonTokens.containerShape,
+  containerShape: shape.md,
   containerHeight: '32px',
 
   elevation: 'unset',

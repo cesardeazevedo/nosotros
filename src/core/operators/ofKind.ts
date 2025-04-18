@@ -3,9 +3,6 @@ import type { NostrEvent } from 'core/types'
 import type { OperatorFunction } from 'rxjs'
 import { filter } from 'rxjs'
 
-/**
- * filter by kind
- */
 export function ofKind<T extends NostrEvent>(kinds: Kind[]): OperatorFunction<NostrEvent, T> {
   return filter((event): event is T => {
     for (let i = 0; i < kinds.length; i++) {

@@ -8,7 +8,6 @@ import React, { forwardRef, useCallback, useContext, useEffect, useRef } from 'r
 import { css, html } from 'react-strict-dom'
 import type { StrictClickEvent, StrictReactDOMProps } from 'react-strict-dom/dist/types/StrictReactDOMProps'
 import { Anchored } from '../Anchored/Anchored'
-import { Badge } from '../Badge/Badge'
 import { Elevation } from '../Elevation/Elevation'
 import { FocusRing } from '../FocusRing/FocusRing'
 import { focusRingTokens } from '../FocusRing/FocusRing.stylex'
@@ -55,7 +54,9 @@ export const Tab = forwardRef<HTMLButtonElement, Props>((props, ref) => {
   const refs = mergeRefs([ref, setRef, actionRef])
 
   const stacked = variant === 'primary'
-  const fullWidthIndicator = variant === 'secondary'
+  // This deviates from material specification to look nicer
+  const fullWidthIndicator = false
+  // const fullWidthIndicator = variant === 'secondary'
 
   const handleClick = useCallback(
     (event: StrictClickEvent) => {
@@ -109,7 +110,7 @@ export const Tab = forwardRef<HTMLButtonElement, Props>((props, ref) => {
         {label && (
           <html.div style={styles.labelContainer}>
             <html.div style={[styles.label, active && styles.label$active, disabled && styles.label$disabled]}>
-              {tabsContext?.renderLabels && label}
+              {label}
             </html.div>
             {hasInlineBadge && badge}
           </html.div>
@@ -135,7 +136,7 @@ const variants = css.create({
     [tabTokens.activeStateLayerColor$pressed]: palette.primary,
     [tabTokens.activeStateLayerOpacity$pressed]: tabTokens.stateLayerOpacity$pressed,
 
-    [tabTokens.containerShape]: shape.sm,
+    [tabTokens.containerShape]: shape.full,
     [tabTokens.containerHeight$withIconAndLabelText]: '64px',
 
     [tabTokens.activeIconColor]: palette.primary,
@@ -152,6 +153,7 @@ const variants = css.create({
     [tabTokens.activeIndicatorHeight]: '2px',
     [tabTokens.activeIndicatorShape]: '0px',
 
+    [tabTokens.containerShape]: shape.full,
     [tabTokens.activeLabelTextColor]: palette.onSurface,
 
     [tabTokens.activeIconColor]: tabTokens.iconColor,
@@ -194,7 +196,7 @@ const styles = css.create({
     //   default: 'default',
     //   ':is([data-hovered])': 'pointer',
     // },
-    borderRadius: 'inherit',
+    borderRadius: tabTokens.containerShape,
     borderStyle: 'unset',
     backgroundColor: 'unset',
     textDecoration: 'none',

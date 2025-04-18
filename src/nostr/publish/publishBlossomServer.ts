@@ -1,28 +1,26 @@
 import { Kind } from '@/constants/kinds'
 import { formatRelayUrl } from '@/core/helpers/formatRelayUrl'
-import { EMPTY, mergeMap } from 'rxjs'
-import type { NostrContext } from '../context'
+import type { Signer } from '@/core/signers/signer'
+import { mergeMap } from 'rxjs'
 import { subscribeLast } from '../subscriptions/subscribeLast'
+import { WRITE } from '../types'
 import { publish } from './publish'
 
-export function publishBlossomServer(url: string, ctx: NostrContext) {
-  if (!ctx.pubkey) return EMPTY
-
+export function publishBlossomServer(url: string, pubkey: string, signer: Signer) {
   const formattedUrl = formatRelayUrl(url)
-  return subscribeLast({ kinds: [Kind.BlossomServerList], authors: [ctx.pubkey] }, ctx).pipe(
+  return subscribeLast({ kinds: [Kind.BlossomServerList], authors: [pubkey] }, { pubkey, permission: WRITE }).pipe(
     mergeMap((event) => {
       const exists = event?.tags?.find((x) => x[1] === url) || false
       const newEvent = {
         kind: Kind.BlossomServerList,
         content: '',
+        pubkey,
         tags:
           exists && event
-            ? // Server already exists, remove it
-              event.tags.filter((x) => formatRelayUrl(x[1]) !== formattedUrl)
-            : // Add new server
-              [...(event?.tags || []), ['server', formattedUrl]],
+            ? event.tags.filter((x) => formatRelayUrl(x[1]) !== formattedUrl)
+            : [...(event?.tags || []), ['server', formattedUrl]],
       }
-      return publish(ctx, newEvent)
+      return publish(newEvent, { signer })
     }),
   )
 }

@@ -11,8 +11,13 @@ export class IDBNip05 {
   }
 
   async insert(data: Nip05DB) {
-    const db = await this.db
-    await db.put('nip05', data)
-    return data
+    try {
+      const db = await this.db
+      await db.put('nip05', data)
+      return data
+    } catch (error) {
+      console.log(error)
+      return data
+    }
   }
 }

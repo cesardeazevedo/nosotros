@@ -20,7 +20,7 @@ export function broadcast(pool: Pool): OperatorFunction<NostrPublisher, Broadcas
 
         return relay.websocket$.pipe(
           filter((res) => res[1] === event.id),
-          filter((res): res is MessageReceivedOK => res[0].toLowerCase() === RelayToClient.OK),
+          filter((res): res is MessageReceivedOK => res[0].toUpperCase() === RelayToClient.OK),
           take(1),
           map((res) => [url, res[1], res[2], res[3], event] as BroadcastResponse),
           takeUntil(timer(10000)),

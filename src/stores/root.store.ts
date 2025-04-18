@@ -4,44 +4,33 @@ import { applySnapshot, onSnapshot, t } from 'mobx-state-tree'
 import { AuthStoreModel } from './auth/auth.store'
 import { DeckStoreModel } from './deck/deck.store'
 import { initialState } from './helpers/initialState'
-import { ModuleStoreModel } from './modules/module.store'
-import type { NotificationModule } from './modules/notification.module'
-import { NostrStoreModel } from './nostr/nostr.context.store'
-import { NostrSettingsModel } from './nostr/nostr.settings.store'
+import { NostrContextModel } from './nostr/nostr.context.model'
 import { storage } from './persisted/storage'
+import { RecentsModel } from './recents/recents.store'
 import { GlobalSettingsModel } from './settings/settings.global.store'
 
 export const RootStoreModel = t.model('RootStoreModel', {
   auth: AuthStoreModel,
   decks: DeckStoreModel,
+  recents: RecentsModel,
 
-  defaultContext: NostrStoreModel,
-  nostrSettings: NostrSettingsModel,
+  globalContext: NostrContextModel,
   globalSettings: GlobalSettingsModel,
-
-  tempModules: t.snapshotProcessor(ModuleStoreModel, { postProcessor: () => ({}) }),
-  persistedModules: ModuleStoreModel,
 })
 
-export const RootStoreViewsModel = RootStoreModel.views((self) => ({
-  get rootContext() {
-    return self.auth.selected?.context || self.defaultContext
-  },
-  get rootNotifications() {
-    return self.persistedModules.get(`notification_${self.auth.selected?.pubkey}`) as NotificationModule | undefined
+export const RootStoreViewsModel = RootStoreModel.actions((self) => ({
+  reset() {
+    applySnapshot(self, initialState)
   },
 }))
 
-export const rootStore = RootStoreViewsModel.create({
-  ...initialState,
-})
+export const rootStore = RootStoreViewsModel.create(initialState)
 
 const snapshot = storage.getItem(APP_STORAGE_KEY)
 if (RootStoreViewsModel.is(snapshot)) {
   applySnapshot(rootStore, snapshot)
 }
 
-// @ts-ignore
 onSnapshot(rootStore, (snapshot) => {
   storage.setItem(APP_STORAGE_KEY, snapshot)
 })

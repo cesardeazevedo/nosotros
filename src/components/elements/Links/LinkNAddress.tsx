@@ -1,12 +1,13 @@
 import { useContentContext } from '@/components/providers/ContentProvider'
 import { useRootStore } from '@/hooks/useRootStore'
+import { createNAddressModule } from '@/stores/modules/module.helpers'
 import { decodeNIP19 } from '@/utils/nip19'
 import { Link, useRouter } from '@tanstack/react-router'
 import { observer } from 'mobx-react-lite'
 import type { NAddr } from 'nostr-tools/nip19'
 import React, { useCallback, useContext } from 'react'
 import { css } from 'react-strict-dom'
-import { DeckContext } from '../Deck/DeckContext'
+import { DeckContext } from '../../modules/Deck/DeckContext'
 
 export type Props = {
   naddress: NAddr | undefined
@@ -25,7 +26,7 @@ export const LinkNAddress = observer(function LinkNAddress(props: Props) {
     if (naddress) {
       const decoded = decodeNIP19(naddress)
       if (decoded?.type === 'naddr') {
-        root.decks.selected.addNAddr({ options: decoded.data }, (index || 0) + 1)
+        root.decks.selected.add(createNAddressModule(decoded.data), (index || 0) + 1)
       }
     }
   }, [naddress, index])

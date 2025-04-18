@@ -5,11 +5,15 @@ import { Divider } from '@/components/ui/Divider/Divider'
 import { CenteredContainer } from '../../elements/Layouts/CenteredContainer'
 import { PaperContainer } from '../../elements/Layouts/PaperContainer'
 
-export const NProfileLoading = function NProfileLoading() {
+type Props = {
+  pubkey: string
+}
+
+export const NProfileLoading = function NProfileLoading(props: Props) {
   return (
     <CenteredContainer>
       <PaperContainer>
-        <UserProfileHeader pubkey={'0'} />
+        <UserProfileHeader pubkey={props.pubkey} />
         <Divider />
         <NProfileFeedTabs />
         <Divider />

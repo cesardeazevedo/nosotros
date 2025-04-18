@@ -1,4 +1,4 @@
-import { useGlobalSettings, useRootContext } from '@/hooks/useRootStore'
+import { useCurrentPubkey, useCurrentSigner, useGlobalSettings, useRootContext } from '@/hooks/useRootStore'
 import { type EditorStore } from '@/stores/editor/editor.store'
 import { spacing } from '@/themes/spacing.stylex'
 import { EditorContent as TiptapEditorContent } from '@tiptap/react'
@@ -19,7 +19,9 @@ export const EditorTiptap = observer(function EditorTiptap(props: Props) {
   const { dense, store, kind20 = false } = props
   const id = useId()
 
+  const pubkey = useCurrentPubkey()
   const context = useRootContext()
+  const signer = useCurrentSigner()
   const globalSettings = useGlobalSettings()
   const editor = useMemo(
     () => store.editor || (kind20 ? createEditorKind20(store) : createEditor(store, globalSettings)),
@@ -31,8 +33,11 @@ export const EditorTiptap = observer(function EditorTiptap(props: Props) {
   }, [store, editor])
 
   useEffect(() => {
-    store.setContext(context)
-  }, [context])
+    if (signer) {
+      store.setSigner(signer)
+    }
+    store.setContext({ ...context, pubkey }, globalSettings)
+  }, [context, pubkey])
 
   return (
     <TiptapEditorContent
@@ -45,6 +50,7 @@ export const EditorTiptap = observer(function EditorTiptap(props: Props) {
 
 const styles = css.create({
   root: {
+    flex: '1 1 auto',
     fontSize: '118%',
     fontWeight: 500,
     minHeight: 50,

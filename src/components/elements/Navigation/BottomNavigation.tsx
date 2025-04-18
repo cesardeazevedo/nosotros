@@ -1,18 +1,19 @@
-import { Badge } from '@/components/ui/Badge/Badge'
+import { NotificationBadge } from '@/components/modules/Notifications/NotificationBadge'
 import { focusRingTokens } from '@/components/ui/FocusRing/FocusRing.stylex'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Tab } from '@/components/ui/Tab/Tab'
 import { tabTokens } from '@/components/ui/Tab/Tab.stylex'
-import { Tabs } from '@/components/ui/Tabs/Tabs'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 import { useMobile } from '@/hooks/useMobile'
-import { useCurrentPubkey, useCurrentUser, useRootStore } from '@/hooks/useRootStore'
+import { useCurrentPubkey, useCurrentUser } from '@/hooks/useRootStore'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import { IconBell, IconBellFilled, IconPhoto, IconUser } from '@tabler/icons-react'
-import { Link, useLocation } from '@tanstack/react-router'
+import { encodeSafe } from '@/utils/nip19'
+import { IconBell, IconBellFilled, IconNews, IconPhoto, IconServerBolt, IconUser } from '@tabler/icons-react'
+import { Link } from '@tanstack/react-router'
 import { observer } from 'mobx-react-lite'
+import { nip19 } from 'nostr-tools'
 import { css, html } from 'react-strict-dom'
 import { IconHome } from '../Icons/IconHome'
 import { IconHomeFilled } from '../Icons/IconHomeFilled'
@@ -20,11 +21,9 @@ import { LinkSignIn } from '../Links/LinkSignIn'
 import { SignInButtonFab } from '../SignIn/SignInButtonFab'
 
 export const BottomNavigation = observer(function BottomNavigation() {
-  const root = useRootStore()
   const user = useCurrentUser()
   const pubkey = useCurrentPubkey()
   const mobile = useMobile()
-  const location = useLocation()
 
   if (!mobile) {
     return <></>
@@ -35,37 +34,55 @@ export const BottomNavigation = observer(function BottomNavigation() {
       <html.div style={styles.root}>
         {!pubkey ? <SignInButtonFab /> : null}
         <Stack grow justify='space-around'>
-          <Tabs anchor={location.pathname}>
-            <Tooltip text='Home' enterDelay={0}>
-              <Link to='/' resetScroll>
-                <Tab anchor='/' sx={styles.tab} icon={<IconHome />} activeIcon={<IconHomeFilled />} />
-              </Link>
-            </Tooltip>
-            <Link to='/media'>
-              <Tab anchor='/media' sx={styles.tab} icon={<IconPhoto />} activeIcon={<IconPhoto />} />
+          <Tooltip text='Home' enterDelay={0}>
+            <Link to='/' resetScroll>
+              {({ isActive }) => (
+                <Tab active={isActive} sx={styles.tab} icon={<IconHome />} activeIcon={<IconHomeFilled />} />
+              )}
             </Link>
-            {user && (
-              <Link to='/notifications'>
+          </Tooltip>
+          <Link to='/media'>
+            {({ isActive }) => (
+              <Tab active={isActive} sx={styles.tab} icon={<IconPhoto />} activeIcon={<IconPhoto />} />
+            )}
+          </Link>
+          {!pubkey && (
+            <Link to='/articles'>
+              {({ isActive }) => <Tab active={isActive} sx={styles.tab} icon={<IconNews />} />}
+            </Link>
+          )}
+          {!pubkey && (
+            <Link to='/explore/relays'>
+              {({ isActive }) => <Tab active={isActive} sx={styles.tab} icon={<IconServerBolt />} />}
+            </Link>
+          )}
+          {pubkey && (
+            <Link to='/notifications'>
+              {({ isActive }) => (
                 <Tab
-                  anchor='/notifications'
+                  active={isActive}
                   sx={styles.tab}
-                  icon={<IconBell />}
-                  activeIcon={<IconBellFilled />}
-                  badge={<Badge maxValue={20} value={root.rootNotifications?.feed.unseen?.length} />}
+                  icon={<NotificationBadge>{isActive ? <IconBellFilled /> : <IconBell />}</NotificationBadge>}
                 />
-              </Link>
-            )}
-            {user && (
-              <Link to='/$nostr' params={{ nostr: user!.nprofile! }}>
-                <Tab anchor={`/${user.nprofile}`} sx={styles.tab} icon={<IconUser />} activeIcon={<IconUser />} />
-              </Link>
-            )}
-            {!pubkey && (
-              <LinkSignIn>
-                <Tab anchor={`/signin_in`} sx={styles.tab} icon={<IconUser />} activeIcon={<IconUser />} />
-              </LinkSignIn>
-            )}
-          </Tabs>
+              )}
+            </Link>
+          )}
+          {pubkey && (
+            <Link
+              to='/$nostr'
+              params={{ nostr: user?.nprofile || (encodeSafe(() => nip19.nprofileEncode({ pubkey })) as string) }}>
+              {({ isActive }) => (
+                <Tab active={isActive} sx={styles.tab} icon={<IconUser />} activeIcon={<IconUser />} />
+              )}
+            </Link>
+          )}
+          {!pubkey && (
+            <LinkSignIn>
+              {({ isActive }) => (
+                <Tab active={isActive} sx={styles.tab} icon={<IconUser />} activeIcon={<IconUser />} />
+              )}
+            </LinkSignIn>
+          )}
         </Stack>
       </html.div>
     </>

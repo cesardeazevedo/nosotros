@@ -2,37 +2,50 @@ import type { SxProps } from '@/components/ui/types'
 import React from 'react'
 import { css, html } from 'react-strict-dom'
 
-type Props = {
+export type Props = {
   sx?: SxProps
   margin?: boolean
+  maxWidth?: 'md' | 'lg'
   children: React.ReactNode
 }
 
-export const CenteredContainer = (props: Props) => (
-  <html.div style={[styles.root, props.margin && styles.margin, props.sx]}>
-    <style>{`body {overflow-x: hidden}`}</style>
-    {props.children}
-  </html.div>
-)
+export const CenteredContainer = (props: Props) => {
+  const { maxWidth = 'md', margin, children, sx } = props
+  return <html.div style={[styles.root, margin && styles.margin, styles[maxWidth], sx]}>{children}</html.div>
+}
 
-const MOBILE = '@media (max-width: 599.95px)'
+const sm = '@media (max-width: 599.95px)'
+const md = '@media (max-width: 960px)'
+const lg = '@media (max-width: 1299.95px)'
 
 const styles = css.create({
   root: {
     width: '100%',
     margin: 'auto',
-    maxWidth: {
-      default: 600,
-      [MOBILE]: '100%',
-    },
     padding: 0,
     marginBottom: 0,
   },
   margin: {
     paddingBottom: 100,
     marginTop: {
-      default: 100,
-      [MOBILE]: 0,
+      default: 64,
+      [sm]: 0,
+    },
+  },
+  md: {
+    maxWidth: {
+      default: 600,
+      [md]: '100%',
+    },
+  },
+  lg: {
+    maxWidth: {
+      default: 960,
+      [lg]: '100%',
+    },
+    marginTop: {
+      default: 64,
+      [lg]: 0,
     },
   },
 })

@@ -25,6 +25,7 @@ export const Drawer = forwardRef<HTMLDivElement, Props>(function Drawer(props, r
       opened={opened}
       defaultOpened={defaultOpen}
       onClose={onClose}
+      closeEvents={{ clickOutside: true }}
       contentRenderer={children}
       floatingStrategy={false}
       placement={anchor}

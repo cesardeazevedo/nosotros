@@ -1,12 +1,5 @@
 import { Kind } from '@/constants/kinds'
-import type {
-  NostrEventComment,
-  NostrEventMedia,
-  NostrEventNote,
-  NostrEventRepost,
-  NostrEventZapReceipt,
-} from '@/nostr/types'
-import { metadataSymbol } from '@/nostr/types'
+import type { NostrEventMetadata } from '@/nostr/types'
 import { observer } from 'mobx-react-lite'
 import { ArticleRoot } from '../Articles/ArticleRoot'
 import { PostQuote } from '../Posts/PostQuote'
@@ -14,27 +7,27 @@ import { ZapReceiptRoot } from '../Zaps/ZapReceipt'
 import { NostrEventUnsupported } from './NostrEventUnsupported'
 
 type Props = {
-  event: NostrEventNote | NostrEventComment | NostrEventZapReceipt | NostrEventRepost | NostrEventMedia
+  event: NostrEventMetadata
 }
 
 export const NostrEventQuote = observer(function NostrEventQuote(props: Props) {
   const { event } = props
-  switch (event[metadataSymbol].kind) {
+  switch (event.kind) {
     case Kind.Article: {
-      return <ArticleRoot event={event as NostrEventNote} />
+      return <ArticleRoot event={event} />
     }
     case Kind.Text: {
-      return <PostQuote event={event as NostrEventNote} />
+      return <PostQuote event={event} />
     }
     case Kind.Comment: {
-      return <PostQuote event={event as NostrEventComment} />
+      return <PostQuote event={event} />
     }
     case Kind.Media: {
-      return <PostQuote event={event as NostrEventMedia} />
+      return <PostQuote event={event} />
     }
     case Kind.ZapReceipt: {
       // Ideally we would render a specific component for quotes, but zap root is fine here
-      return <ZapReceiptRoot event={event as NostrEventZapReceipt} />
+      return <ZapReceiptRoot event={event} />
     }
     default: {
       console.log('Unhandled item to render', event)

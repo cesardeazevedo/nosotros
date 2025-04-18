@@ -1,7 +1,6 @@
 import { useNoteContext } from '@/components/providers/NoteProvider'
 import type { SxProps } from '@/components/ui/types'
 import { useMediaStore } from '@/hooks/useMediaStore'
-import { mediaStore } from '@/stores/media/media.store'
 import { shape } from '@/themes/shape.stylex'
 import { observer } from 'mobx-react-lite'
 import { useMemo } from 'react'
@@ -22,7 +21,7 @@ export const Video = observer(function Video(props: Props) {
   const { src, controls = true, muted = false, loop = false, autoPlay = false, preload = 'metadata', sx } = props
   const { note } = useNoteContext()
   const extension = useMemo(() => new URL(src).pathname.split('.').pop(), [src])
-  const { onLoad, ...media } = useMediaStore(src, note.metadata.imeta)
+  const media = useMediaStore(src, note.metadata.imeta)
   return (
     <BlurContainer>
       {({ blurStyles }) => (
@@ -33,13 +32,11 @@ export const Video = observer(function Video(props: Props) {
           autoPlay={autoPlay}
           preload={preload}
           controls={controls}
+          onClick={(e) => {
+            e.stopPropagation()
+          }}
           src={src}
-          {...media}
-          onLoadedMetadata={(e) => {
-            const element = e.target as HTMLVideoElement
-            const { videoWidth, videoHeight } = element
-            mediaStore.add(src, [videoWidth, videoHeight])
-          }}>
+          {...media}>
           <source src={src} type={`video/${extension === 'mov' ? 'mp4' : extension}`} />
         </video>
       )}

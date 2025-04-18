@@ -28,9 +28,18 @@ export const Scrim = forwardRef<HTMLDivElement, Props>(function Scrim(props, for
 
   return (
     <FloatingOverlay
-      {...css.props(styles.root, styles[variant], styles[`transition$${transitionStatus.status}`], sx)}
+      {...css.props(
+        styles.root,
+        other.lockScroll && styles[variant],
+        styles[`transition$${transitionStatus.status}`],
+        sx,
+      )}
       {...other}
       lockScroll={false}
+      onClick={(e) => {
+        e.stopPropagation()
+        e.preventDefault()
+      }}
       ref={forwardedRef}>
       {other.lockScroll && <RemoveScroll noIsolation>{children}</RemoveScroll>}
     </FloatingOverlay>
@@ -41,6 +50,7 @@ const styles = css.create({
   root: {
     display: 'grid',
     placeItems: 'center',
+    pointerEvents: 'auto',
   },
   darken: {
     backgroundColor: scrimTokens.containerColor$darken,

@@ -1,3 +1,4 @@
+import { duration } from '@/themes/duration.stylex'
 import { forwardRef } from 'react'
 import { css, html } from 'react-strict-dom'
 import { mergeRefs } from '../helpers/mergeRefs'
@@ -63,7 +64,7 @@ const styles = css.create({
       inset: 0,
       backgroundColor: rippleTokens.color$hover,
       transitionProperty: 'opacity, background-color',
-      transitionDuration: '15ms, 15ms',
+      transitionDuration: duration.short1,
       transitionTimingFunction: 'linear, linear',
     },
     '::after': {
@@ -74,19 +75,19 @@ const styles = css.create({
       backgroundImage: `radial-gradient(closest-side, ${rippleTokens.color$hover} max(calc(100% - 70px), 65%), transparent 100%)`,
       transformOrigin: 'center center',
       transitionProperty: 'opacity',
-      transitionDuration: '375ms',
+      transitionDuration: duration.medium1,
       transitionTimingFunction: 'linear',
     },
   },
   rippleSurface$hover: {
     '::before': {
-      opacity: '0.10',
+      opacity: '0.08',
     },
   },
   rippleSurface$pressed: {
     '::after': {
-      opacity: '0.12',
-      transitionDuration: '105ms',
+      opacity: '0.10',
+      transitionDuration: duration.short1,
     },
   },
   rippleSurface$pressedStatic: {

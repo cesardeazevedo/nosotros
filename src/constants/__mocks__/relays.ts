@@ -1,4 +1,4 @@
-import { RELAY_1, RELAY_2, RELAY_3, RELAY_4, RELAY_5 } from '../testRelays'
+import { RELAY_1, RELAY_2, RELAY_3, RELAY_4, RELAY_5, RELAY_OUTBOX_1 } from '../testRelays'
 
-export const OUTBOX_RELAYS = [RELAY_1]
+export const OUTBOX_RELAYS = [RELAY_OUTBOX_1]
 export const DEFAULT_RELAYS = [RELAY_1, RELAY_2, RELAY_3, RELAY_4, RELAY_5]

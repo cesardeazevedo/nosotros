@@ -1,18 +1,17 @@
 import { Kind } from '@/constants/kinds'
 import { RELAY_1 } from '@/constants/testRelays'
-import { fakeNote } from '@/utils/faker'
+import { fakeEvent } from '@/utils/faker'
 import { test } from '@/utils/fixtures'
 import { subscribeSpyTo } from '@hirez_io/observer-spy'
 import { subscribeFeed } from '../subscribeFeed'
 
 describe('subscribeFeed', () => {
-  test('assert includeReplies', async ({ createMockRelay, createContext }) => {
-    const note1 = fakeNote({ id: '1', pubkey: '1', content: 'note' })
-    const note2 = fakeNote({ id: '2', pubkey: '1', content: 'note', tags: [['e', '1', '', 'root']] })
-    const note3 = fakeNote({
+  test('assert feed options', async ({ createMockRelay }) => {
+    const note1 = fakeEvent({ id: '1', pubkey: '1' })
+    const note2 = fakeEvent({ id: '2', pubkey: '2', tags: [['e', '1', '', 'root']] })
+    const note3 = fakeEvent({
       id: '3',
       pubkey: '1',
-      content: 'note',
       tags: [
         ['e', '1', '', 'root'],
         ['e', '2', '', 'reply'],
@@ -21,35 +20,33 @@ describe('subscribeFeed', () => {
 
     const relay = createMockRelay(RELAY_1, [note1, note2, note3])
 
-    const client = createContext({ relays: [RELAY_1], settings: { outbox: false } })
+    const ctx = { relays: [RELAY_1] }
     const filter = { kinds: [Kind.Text], authors: ['1'] }
-    const $ = subscribeFeed(filter, client, { includeParents: false, includeReplies: true })
 
-    const spy = subscribeSpyTo($)
-    await spy.onComplete()
-    await relay.close()
-    expect(spy.getValues()).toStrictEqual([note2, note3])
-  })
-
-  test('assert includeReplies with includeParents', async ({ createMockRelay, createContext }) => {
-    const note1 = fakeNote({ id: '1', pubkey: '2', content: 'note' })
-    const note2 = fakeNote({ id: '2', pubkey: '1', content: 'note', tags: [['e', '1', '', 'root']] })
-    const note3 = fakeNote({
-      id: '3',
-      pubkey: '1',
-      content: 'note',
-      tags: [],
+    // Only replies
+    const $1 = subscribeFeed({ kinds: [Kind.Text], authors: ['1', '2'] }, ctx, {
+      includeRoot: false,
+      includeParents: false,
+      includeReplies: true,
+    })
+    // Only root
+    const $2 = subscribeFeed(filter, ctx, { includeRoot: true, includeParents: false, includeReplies: false })
+    // Parent
+    const $3 = subscribeFeed({ kinds: [Kind.Text], authors: ['2'] }, ctx, {
+      includeRoot: true,
+      includeParents: true,
+      includeReplies: false,
     })
 
-    const relay = createMockRelay(RELAY_1, [note1, note2, note3])
-
-    const client = createContext({ relays: [RELAY_1], settings: { outbox: false } })
-    const filter = { kinds: [Kind.Text], authors: ['1'] }
-    const $ = subscribeFeed(filter, client, { includeParents: true, includeReplies: true })
-
-    const spy = subscribeSpyTo($)
+    const spy = subscribeSpyTo($1)
+    const spy2 = subscribeSpyTo($2)
+    const spy3 = subscribeSpyTo($3)
     await spy.onComplete()
+    await spy2.onComplete()
+    await spy3.onComplete()
     await relay.close()
-    expect(spy.getValues()).toStrictEqual([note3, note1])
+    expect(spy.getValues().map((x) => x.id)).toStrictEqual(['2', '3'])
+    expect(spy2.getValues().map((x) => x.id)).toStrictEqual(['1'])
+    expect(spy3.getValues().map((x) => x.id)).toStrictEqual(['1'])
   })
 })

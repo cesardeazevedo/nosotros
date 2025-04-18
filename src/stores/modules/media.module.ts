@@ -1,49 +1,36 @@
 import { Kind } from '@/constants/kinds'
-import type { Instance, SnapshotIn, SnapshotOut } from 'mobx-state-tree'
-import { t } from 'mobx-state-tree'
-import type { FeedScope } from '../feeds/feed.notes'
-import { NotesFeedSubscriptionModel } from '../feeds/feed.notes'
-import { FeedPaginationRange } from '../feeds/feed.pagination.range'
-import { BaseModuleModel } from './module'
+import { RECOMMENDED_PUBKEYS } from '@/constants/recommended'
+import { WRITE } from '@/nostr/types'
 import { Duration } from 'luxon'
-import { createEditorStore } from '../editor/editor.store'
+import type { Instance } from 'mobx-state-tree'
+import { t } from 'mobx-state-tree'
+import { FeedStoreModel } from '../feeds/feed.store'
+import { BaseModuleModel } from './base.module'
 
 export const MediaModuleModel = BaseModuleModel.named('MediaModuleModel')
   .props({
     type: t.optional(t.literal('media'), 'media'),
-    feed: NotesFeedSubscriptionModel(FeedPaginationRange),
     layout: t.enumeration<'row' | 'grid'>(['row', 'grid']),
+    pubkey: t.maybe(t.string),
   })
-  .volatile((self) => ({
-    editor: createEditorStore({ kind: Kind.Media, onPublish: self.feed.addPublish }),
-  }))
+  .volatile((self) => {
+    const { pubkey } = self
+    return {
+      feed: FeedStoreModel.create({
+        scope: pubkey ? 'following' : 'self',
+        context: { pubkey, permission: WRITE },
+        filter: {
+          kinds: [Kind.Media],
+          authors: pubkey ? [pubkey] : RECOMMENDED_PUBKEYS,
+        },
+        range: Duration.fromObject({ days: 3 }).as('minutes'),
+      }),
+    }
+  })
   .actions((self) => ({
-    afterCreate() {
-      if ('increaseRange' in self.feed.pagination) {
-        self.feed.pagination.increaseRange(Duration.fromObject({ hours: 24 }).as('minutes'))
-        self.feed.pagination.setFilter(self.feed.filter)
-      }
-    },
     setLayout(layout: 'row' | 'grid') {
       self.layout = layout
     },
   }))
 
-export function createMediaModule(snapshot: { id?: string; scope?: Instance<typeof FeedScope>; authors: string[] }) {
-  const { id, scope = 'following', authors } = snapshot
-  return MediaModuleModel.create({
-    id,
-    layout: 'row',
-    feed: {
-      scope,
-      filter: {
-        kinds: [Kind.Media],
-        authors,
-      },
-    },
-  })
-}
-
 export interface MediaModule extends Instance<typeof MediaModuleModel> {}
-export interface MediaModuleSnapshotIn extends SnapshotIn<typeof MediaModuleModel> {}
-export interface MediaModuleSnapshotOut extends SnapshotOut<typeof MediaModuleModel> {}

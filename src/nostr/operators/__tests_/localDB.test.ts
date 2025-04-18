@@ -4,7 +4,7 @@ import { subscribeSpyTo } from '@hirez_io/observer-spy'
 import { from } from 'rxjs'
 import { fakeEvent } from 'utils/faker'
 import { insertDB } from '../insertDB'
-import { queryDB } from '../queryDB'
+import { queryDB } from '../../db/queryDB'
 
 describe('localDB', () => {
   test('query()', async () => {

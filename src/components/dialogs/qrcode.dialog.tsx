@@ -5,7 +5,7 @@ import { dialogStore } from 'stores/ui/dialogs.store'
 
 export const QRCodeDialog = observer(function QRCodeDialog() {
   return (
-    <DialogSheet open={dialogStore.qrcode} onClose={dialogStore.closeQRCode} maxWidth='xs'>
+    <DialogSheet open={dialogStore.qrcode} onClose={() => dialogStore.toggleQRCode(false)} maxWidth='xs'>
       <QRCode />
     </DialogSheet>
   )

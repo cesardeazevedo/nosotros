@@ -1,12 +1,13 @@
 import type { Relay } from '@/core/Relay'
 import { RelayToClient } from '@/core/types'
 import { relaysStore } from '@/stores/relays/relays.store'
-import { catchError, EMPTY, map, merge, mergeMap, of, takeUntil, tap } from 'rxjs'
+import { catchError, EMPTY, filter, map, merge, mergeMap, of, takeUntil, tap } from 'rxjs'
 import { db } from '../db'
 
 export function subscribeRelayStats(relay: Relay) {
   of(relay.url)
     .pipe(
+      filter((url) => !!new URL(url)),
       mergeMap((url) => db.relayStats.query(url)),
       map((stats) => relaysStore.add(relay.url, stats)),
       mergeMap((relayStore) => {
@@ -15,7 +16,7 @@ export function subscribeRelayStats(relay: Relay) {
           relay.close$.pipe(tap(() => relayStore.disconnect())),
           relay.websocket$.pipe(
             tap((msg) => {
-              switch (msg[0].toLowerCase()) {
+              switch (msg[0].toUpperCase()) {
                 case RelayToClient.EVENT: {
                   relayStore.increment('events')
                   break

@@ -3,8 +3,9 @@ import { MenuList } from '@/components/ui/MenuList/MenuList'
 import { Popover } from '@/components/ui/Popover/Popover'
 import type { IPopoverBaseTriggerRendererProps } from '@/components/ui/Popover/PopoverBase.types'
 import { Kind } from '@/constants/kinds'
-import { useRootContext } from '@/hooks/useRootStore'
+import { useCurrentAccount } from '@/hooks/useRootStore'
 import { publishRepost } from '@/nostr/publish/publishRepost'
+import type { Account } from '@/stores/auth/account.store'
 import type { Note } from '@/stores/notes/note'
 import { toastStore } from '@/stores/ui/toast.store'
 import { spacing } from '@/themes/spacing.stylex'
@@ -13,7 +14,7 @@ import { useRouter } from '@tanstack/react-router'
 import { useObservableState } from 'observable-hooks'
 import React from 'react'
 import { css } from 'react-strict-dom'
-import { endWith, map, mergeMap, startWith, tap } from 'rxjs'
+import { EMPTY, endWith, map, mergeMap, startWith, tap } from 'rxjs'
 import { LinkBase } from '../Links/LinkBase'
 import { ToastEventPublished } from '../Toasts/ToastEventPublished'
 
@@ -27,14 +28,15 @@ type Props = {
 export const RepostPopover = (props: Props) => {
   const { note, children } = props
   const router = useRouter()
-  const context = useRootContext()
+  const acc = useCurrentAccount()
 
-  const [isReposting, submit] = useObservableState<boolean, Note>((input$) => {
+  const [isReposting, submit] = useObservableState<boolean, [Note, Account]>((input$) => {
     return input$.pipe(
-      mergeMap((note) => {
-        return publishRepost(context.context, note.event.event).pipe(
+      mergeMap(([note, acc]) => {
+        if (!acc.signer) return EMPTY
+        return publishRepost(acc.pubkey, note.event.event, { signer: acc.signer.signer }).pipe(
           tap((event) => {
-            toastStore.enqueue(<ToastEventPublished event={event} eventLabel='Repost' />, { duration: 10000_000 })
+            toastStore.enqueue(<ToastEventPublished event={event} eventLabel='Repost' />, { duration: 10_000_000 })
           }),
           map(() => false),
           startWith(true),
@@ -57,13 +59,19 @@ export const RepostPopover = (props: Props) => {
               disabled={isReposting}
               leadingIcon={<IconShare3 size={20} />}
               label={isReposting ? `Reposting...` : 'Repost'}
-              onClick={() => submit(note)}
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                if (acc) {
+                  submit([note, acc])
+                }
+              }}
             />
           )}
           <LinkBase
             search={{ quoting: note.event.isAddressable ? note.event.naddress : note.event.nevent }}
             state={{ from: router.latestLocation.pathname } as never}>
-            <MenuItem leadingIcon={<IconBlockquote strokeWidth='1.5' />} label='Quote' onClick={close} />
+            <MenuItem leadingIcon={<IconBlockquote strokeWidth='1.5' />} label='Quote' onClick={() => close()} />
           </LinkBase>
         </MenuList>
       )}>

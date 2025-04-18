@@ -1,25 +1,23 @@
-import { ToastEventPublished } from '@/components/elements/Toasts/ToastEventPublished'
 import { Kind } from '@/constants/kinds'
 import { CLIENT_TAG } from '@/constants/tags'
+import type { Signer } from '@/core/signers/signer'
+import type { NostrContext } from '@/nostr/context'
 import type { UserRelay } from '@/nostr/helpers/parseRelayList'
 import { READ, WRITE } from '@/nostr/helpers/parseRelayList'
 import { isAuthorTag, isQuoteTag } from '@/nostr/helpers/parseTags'
-import type { NostrContext } from '@/nostr/context'
+import { selectRelays } from '@/nostr/helpers/selectRelays'
 import { publish } from '@/nostr/publish/publish'
 import type { NostrEventMetadata } from '@/nostr/types'
 import type { Editor } from '@tiptap/core'
 import { action, computed, makeAutoObservable, reaction } from 'mobx'
 import type { FileUploadStorage, NostrStorage } from 'nostr-editor'
 import type { EventTemplate, NostrEvent, UnsignedEvent } from 'nostr-tools'
-import { createElement } from 'react'
 import { catchError, EMPTY, of, tap, throwError } from 'rxjs'
-import type { NostrStore } from '../nostr/nostr.context.store'
 import { toggle } from '../helpers/toggle'
 import type { Note } from '../notes/note'
+import type { GlobalSettings } from '../settings/settings.global.store'
 import { toastStore } from '../ui/toast.store'
-import { userRelayStore } from '../userRelays/userRelay.store'
 import { userStore } from '../users/users.store'
-import { rootStore } from '../root.store'
 
 type EditorStoreOptions = {
   kind?: Kind
@@ -27,17 +25,19 @@ type EditorStoreOptions = {
   onPublish?: (event: NostrEventMetadata) => void
 }
 
-type Sections = 'broadcast' | 'mentions' | 'pow' | 'settings' | 'zaps'
+type Sections = 'broadcast' | 'pow' | 'settings' | 'zaps' | 'reactions'
 
 export class EditorStore {
-  context: NostrStore | undefined = undefined
+  signer: Signer | undefined = undefined
+  context: NostrContext | undefined = undefined
+  globalSettings: GlobalSettings | undefined = undefined
   signedEvent: NostrEvent | undefined = undefined
   content = ''
 
   powDifficulty = 0
 
   section: Sections | false = false
-  open = toggle()
+  open = toggle(false)
   nsfwEnabled = toggle()
   clientEnabled = toggle()
 
@@ -83,7 +83,7 @@ export class EditorStore {
   get unsignedEvent() {
     return {
       kind: this.options.kind || Kind.Text,
-      pubkey: this.context?.user?.pubkey || '',
+      pubkey: this.context?.pubkey || '',
       created_at: Math.floor(Date.now() / 1000),
       content: '',
       tags: [],
@@ -108,13 +108,20 @@ export class EditorStore {
     this.editor = editor
   }
 
-  setContext(context: NostrStore) {
+  setSigner(signer: Signer) {
+    this.signer = signer
+  }
+
+  setContext(context: NostrContext, global: GlobalSettings) {
     this.context = context
-    this.clientEnabled.toggle(rootStore.globalSettings.clientTag || false)
+    this.clientEnabled.toggle(global.clientTag || false)
+  }
+
+  setKind(kind: Kind) {
+    this.options.kind = kind
   }
 
   onUpdate(editor: Editor) {
-    this.resetSignedEvent()
     this.setContent(editor.getText({ blockSeparator: '\n' }))
   }
 
@@ -134,10 +141,6 @@ export class EditorStore {
     this.section = false
   }
 
-  resetSignedEvent() {
-    this.signedEvent = undefined
-  }
-
   resetBroadcaster() {
     this.excludedRelays.clear()
     this.excludedMentions.clear()
@@ -153,10 +156,6 @@ export class EditorStore {
 
   getZapSplit(pubkey: string): number {
     return this.zapSplits.get(pubkey) || 0
-  }
-
-  get ctx(): NostrContext | undefined {
-    return this.context?.context
   }
 
   get storage() {
@@ -209,7 +208,7 @@ export class EditorStore {
 
   get event() {
     return {
-      ...(this.signedEvent || this.unsignedEvent),
+      ...this.unsignedEvent,
       content: this.content,
       created_at: Math.floor(Date.now() / 1000),
       tags: [...this.replyTags, ...this.editorTags(), ...this.clientTag, ...this.nsfwTag, ...this.zapTags],
@@ -221,11 +220,12 @@ export class EditorStore {
   }
 
   get myOutboxRelays() {
-    if (this.context?.user) {
-      return userRelayStore.select(this.context.user.pubkey, {
+    if (this.context?.pubkey) {
+      const userRelays = userStore.get(this.context.pubkey)?.relayList
+      return selectRelays(userRelays || [], {
         permission: WRITE,
-        ignore: this.excludedRelays,
-        maxRelaysPerUser: 10,
+        ignoreRelays: [...this.excludedRelays],
+        maxRelaysPerUser: 12,
       })
     }
     return []
@@ -279,10 +279,11 @@ export class EditorStore {
    */
   get otherInboxRelays(): UserRelay[] {
     return this.mentions.flatMap((author) => {
-      return userRelayStore.select(author, {
-        ignore: this.excludedRelays,
+      const userRelays = userStore.get(author)?.relayList
+      return selectRelays(userRelays || [], {
+        ignoreRelays: [...this.excludedRelays],
         permission: READ,
-        maxRelaysPerUser: this.context?.context.settings.maxRelaysPerUserInbox,
+        maxRelaysPerUser: 4,
       })
     })
   }
@@ -350,11 +351,11 @@ export class EditorStore {
   }
 
   async sign(event: EventTemplate) {
-    if (this.ctx) {
-      const { signer, pubkey } = this.ctx
-      if (signer && pubkey) {
+    if (this.context) {
+      const { pubkey } = this.context
+      if (this.signer && pubkey) {
         try {
-          return await signer.sign({ ...event, pubkey })
+          return await this.signer.sign({ ...event })
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) {
           return Promise.reject('Signing rejected')
@@ -364,20 +365,15 @@ export class EditorStore {
     return Promise.reject('Missing signer')
   }
 
-  submit(event: EventTemplate) {
-    const ctx = this.ctx
-    if (!ctx) {
+  submit(event: UnsignedEvent) {
+    if (!this.context) {
       return throwError(() => 'Missing signer')
     }
-    return publish(ctx, event, {
+    return publish(event, {
+      signer: this.signer,
       relays: of(this.allRelays.map((x) => x.relay)),
     }).pipe(
       tap((event) => {
-        const component = createElement(ToastEventPublished, {
-          event,
-          eventLabel: this.title,
-        })
-        toastStore.enqueue(component, { duration: 10000 })
         this.reset()
         this.options.onPublish?.(event)
       }),

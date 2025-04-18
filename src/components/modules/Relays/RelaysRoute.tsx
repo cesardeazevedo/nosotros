@@ -1,11 +1,11 @@
 import { CenteredContainer } from '@/components/elements/Layouts/CenteredContainer'
-import { RelayDiscovery } from '@/components/elements/RelayDiscovery/RelayDiscovery'
 import { RelayMailboxList } from '@/components/elements/Relays/RelayMailboxList'
 import { Button } from '@/components/ui/Button/Button'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { useFollowingUsers } from '@/hooks/useFollowingUsers'
 import { useMobile } from '@/hooks/useMobile'
+import { useResetScroll } from '@/hooks/useResetScroll'
 import { useCurrentPubkey, useCurrentUser } from '@/hooks/useRootStore'
 import { READ, WRITE } from '@/nostr/types'
 import { spacing } from '@/themes/spacing.stylex'
@@ -19,6 +19,7 @@ export const RelayRoute = observer(function RelayRoute() {
   const user = useCurrentUser()
   const pubkey = useCurrentPubkey()
   const mobile = useMobile()
+  useResetScroll()
   useFollowingUsers()
   return (
     <CenteredContainer margin sx={styles.root}>
@@ -42,7 +43,6 @@ export const RelayRoute = observer(function RelayRoute() {
             </Stack>
           </html.div>
         )}
-        <RelayDiscovery />
       </Stack>
     </CenteredContainer>
   )

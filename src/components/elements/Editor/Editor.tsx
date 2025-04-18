@@ -5,14 +5,16 @@ import { Stack } from '@/components/ui/Stack/Stack'
 import type { SxProps } from '@/components/ui/types'
 import { useCurrentPubkey } from '@/hooks/useRootStore'
 import type { EditorStore } from '@/stores/editor/editor.store'
+import { toastStore } from '@/stores/ui/toast.store'
 import { spacing } from '@/themes/spacing.stylex'
 import { UserAvatar } from 'components/elements/User/UserAvatar'
 import { observer } from 'mobx-react-lite'
 import { useObservableState } from 'observable-hooks'
 import { useEffect } from 'react'
 import { css } from 'react-strict-dom'
-import { concat, concatMap, defer, endWith, from, map, mergeMap, startWith, takeUntil } from 'rxjs'
+import { concat, concatMap, defer, endWith, from, map, mergeMap, startWith, takeUntil, tap } from 'rxjs'
 import { BubbleContainer } from '../Content/Layout/Bubble'
+import { ToastEventPublished } from '../Toasts/ToastEventPublished'
 import { EditorContainer } from './EditorContainer'
 import { EditorExpandables } from './EditorExpandables'
 import { EditorHeader } from './EditorHeader'
@@ -46,6 +48,9 @@ export const Editor = observer(function Editor(props: Props) {
         const submit$ = defer(() => {
           return from(store.uploader!.start()).pipe(
             mergeMap(() => store.submit(store.rawEvent)),
+            tap((event) => {
+              toastStore.enqueue(<ToastEventPublished event={event} eventLabel={store.title} />, { duration: 10000 })
+            }),
             map(() => false),
             startWith(0),
           )
@@ -64,17 +69,17 @@ export const Editor = observer(function Editor(props: Props) {
 
   return (
     <>
-      <EditorContainer store={store} renderBubble={renderBubble} sx={sx}>
+      <EditorContainer open={store.open.value} onClick={() => store.setOpen()} renderBubble={renderBubble} sx={sx}>
         <UserAvatar size='md' pubkey={pubkey} />
-        <Container {...ContainerProps}>
+        <Container {...ContainerProps} sx={styles.wrapper}>
           <Stack horizontal={false} grow>
-            <Stack sx={[styles.content, dense && styles.content$dense]} gap={2} align='flex-start'>
+            <Stack sx={[styles.content, dense && styles.content$dense]} gap={2} align='stretch'>
               <Stack horizontal={false} sx={styles.wrapper}>
                 <EditorHeader store={store} />
                 {store.open.value ? (
                   <EditorTiptap key='editor' dense={dense} store={store} placeholder={store.placeholder} />
                 ) : (
-                  <EditorPlaceholder store={store} />
+                  <EditorPlaceholder placeholder={store.placeholder} />
                 )}
               </Stack>
             </Stack>
@@ -100,7 +105,7 @@ export const Editor = observer(function Editor(props: Props) {
 
 const styles = css.create({
   content: {
-    flex: 1,
+    flex: '1 1 auto',
     width: '100%',
     wordBreak: 'break-word',
   },
@@ -109,6 +114,7 @@ const styles = css.create({
     paddingBlock: 0,
   },
   wrapper: {
+    flex: '1 1 auto',
     width: '100%',
   },
   bubble: {

@@ -49,9 +49,9 @@ export const DialogSheet = (props: Props) => {
     <>
       {isMobile && <MobileDialog {...props} />}
       {!isMobile && props.open && (
-        <Dialog {...props}>
+        <Dialog {...props} trapFocus={false}>
           {surface ? (
-            <DialogContent shape='lg' surface={surface} maxWidth={props.maxWidth} sx={styles.paper}>
+            <DialogContent shape='lg' surface={surface} maxWidth={props.maxWidth}>
               {children}
             </DialogContent>
           ) : (
@@ -83,7 +83,6 @@ const styles = css.create({
   floating: {
     height: '100vh',
   },
-  paper: {},
   drawerPaper: {
     height: '100%',
     borderRadius: shape.none,

@@ -1,5 +1,5 @@
 import type { NostrEvent } from 'nostr-tools'
-import { EMPTY, filter, map, merge, mergeMap, of, type Observable } from 'rxjs'
+import { EMPTY, filter, map, merge, mergeMap, of, take, type Observable } from 'rxjs'
 import { createFilter } from './helpers/createFilter'
 import { hintsToRelayFilters } from './helpers/hintsToRelayFilters'
 import { isFilterValid } from './helpers/isFilterValid'
@@ -52,7 +52,14 @@ export class NostrSubscription {
             // Apply fixed relays
             relaysToRelayFilters(this.relays, filters),
             // Apply relay hints ignoring fixed relays
-            this.relays.pipe(mergeMap((relays) => hintsToRelayFilters(filters, this.relayHints, relays))),
+            this.relays.pipe(
+              take(1),
+              mergeMap((relays) =>
+                hintsToRelayFilters(filters, this.relayHints)
+                  .filter((x) => !relays.includes(x[0]))
+                  .slice(0, 4),
+              ),
+            ),
             // Apply outbox
             this.outbox(filters, this.relayHints),
           )

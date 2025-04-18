@@ -1,5 +1,6 @@
 import { useContentContext } from '@/components/providers/ContentProvider'
 import { useRootStore } from '@/hooks/useRootStore'
+import { createNEventModule } from '@/stores/modules/module.helpers'
 import { seenStore } from '@/stores/seen/seen.store'
 import { decodeNIP19 } from '@/utils/nip19'
 import { Link, useRouter } from '@tanstack/react-router'
@@ -8,7 +9,7 @@ import { nip19 } from 'nostr-tools'
 import type { NEvent, Note } from 'nostr-tools/nip19'
 import React, { useCallback, useContext } from 'react'
 import { css } from 'react-strict-dom'
-import { DeckContext } from '../Deck/DeckContext'
+import { DeckContext } from '../../modules/Deck/DeckContext'
 
 export type Props = {
   nevent?: NEvent | Note
@@ -46,7 +47,7 @@ export const LinkNEvent = observer(function LinkNEvent(props: Props) {
     if (nevent) {
       const decoded = decodeNIP19(nevent)
       if (decoded?.type === 'nevent') {
-        root.decks.selected.addNEvent({ options: decoded.data }, (index || 0) + 1, replaceOnDeck)
+        root.decks.selected.add(createNEventModule(decoded.data), (index || 0) + 1, replaceOnDeck)
       }
     }
   }, [nevent, index])
@@ -65,7 +66,6 @@ export const LinkNEvent = observer(function LinkNEvent(props: Props) {
 
   return (
     <Link
-      resetScroll
       to={`/$nostr`}
       state={{ from: router.latestLocation.pathname } as never}
       {...rest}

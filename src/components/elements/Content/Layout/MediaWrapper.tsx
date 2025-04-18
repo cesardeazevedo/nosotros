@@ -25,8 +25,7 @@ const MAX_BOUNDS = {
   },
 } as const
 
-// eslint-disable-next-line react-refresh/only-export-components
-export function adjustDimensions(
+function adjustDimensions(
   width: number,
   height: number,
   maxWidth: number,
@@ -77,7 +76,7 @@ const styles = css.create({
   root: {
     marginBlock: spacing.margin2,
     maxWidth: {
-      default: '100%',
+      default: 425,
       [MOBILE]: 'calc(100vw - 60px)',
     },
   },

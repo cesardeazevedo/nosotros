@@ -1,5 +1,4 @@
 import { useNoteContext } from '@/components/providers/NoteProvider'
-import { Divider } from '@/components/ui/Divider/Divider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { useCurrentUser } from '@/hooks/useRootStore'
 import { spacing } from '@/themes/spacing.stylex'
@@ -41,7 +40,6 @@ export const RepliesPreview = function RepliesPreview(props: Props) {
 
   return (
     <>
-      <Divider />
       <Stack horizontal={false} sx={styles.root} justify='flex-start'>
         <html.div style={styles.repliesWrapper}>
           {replies && <RepliesTree nested={false} replies={replies} repliesOpen={note.repliesOpen} level={1} />}

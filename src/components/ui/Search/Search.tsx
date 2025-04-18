@@ -19,7 +19,7 @@ type Props = {
   ref?: Ref<HTMLInputElement | null>
 } & React.InputHTMLAttributes<HTMLInputElement>
 
-export const Search = (props: Props) => {
+export const SearchField = (props: Props) => {
   const { sx, leading, trailing, onCancel, ...rest } = props
   const ref = useRef<HTMLInputElement>(null)
   const refs = mergeRefs([ref, props.ref])

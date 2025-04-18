@@ -1,7 +1,7 @@
+import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
-import { reactionStore } from '@/stores/reactions/reactions.store'
 import { observer, Observer } from 'mobx-react-lite'
 import React from 'react'
 import { UserAvatar } from '../User/UserAvatar'
@@ -15,7 +15,7 @@ const maxUsers = 5
 
 export const ReactionsTooltip = observer(function ReactionsTooltip(props: Props) {
   const { children } = props
-  const list = reactionStore.sorted(props.noteId)
+  const { note } = useNoteContext()
   return (
     <Tooltip
       cursor='dot'
@@ -26,7 +26,7 @@ export const ReactionsTooltip = observer(function ReactionsTooltip(props: Props)
           <Observer>
             {() => (
               <>
-                {list
+                {note.reactionsGrouped
                   .filter(([emoji]) => !emoji.includes(':'))
                   .map(([emoji, pubkeys]) => (
                     <Stack key={emoji} gap={1}>

@@ -63,7 +63,7 @@ export const Chip = forwardRef<HTMLButtonElement, Props>(function Chip(props, re
   const isFilter = variant === 'filter'
   const isDeletable = (isFilter || isInput) && onDelete
   const hasLeading = loading || selected || hasIcon
-  const hasTrailing = trailingIcon || onDelete
+  const hasTrailing = !!trailingIcon || onDelete
   const { visualState, setRef } = useVisualState(undefined, { disabled })
   const refs = mergeRefs([setRef, ref])
 
@@ -86,7 +86,7 @@ export const Chip = forwardRef<HTMLButtonElement, Props>(function Chip(props, re
         {...dataProps(visualState)}
         style={[styles.container, styles[containerStyle], disabled && styles.disabled]}>
         {!!elevated && <Elevation sx={styles.elevation} />}
-        {!elevated && <html.div style={styles.outline} />}
+        {!elevated && !selected && <html.div style={styles.outline} />}
         <FocusRing visualState={visualState} />
         {!disabled && <Ripple visualState={visualState} />}
         <html.button
@@ -112,13 +112,19 @@ export const Chip = forwardRef<HTMLButtonElement, Props>(function Chip(props, re
           {label && <html.div style={styles.label}>{label}</html.div>}
         </html.button>
         {hasTrailing ? (
-          <ButtonBase
-            tabIndex={-1}
-            disabled={disabled}
-            sx={[styles.action$trailing, disabled && styles.action$disabled]}
-            onClick={onDelete || onTrailingClick}>
-            {isDeletable ? <IconX size={16} /> : trailingIcon}
-          </ButtonBase>
+          <>
+            {!!onDelete || !!onTrailingClick ? (
+              <ButtonBase
+                tabIndex={-1}
+                disabled={disabled}
+                sx={[styles.action$trailing, disabled && styles.action$disabled]}
+                onClick={onDelete || onTrailingClick}>
+                {isDeletable ? <IconX size={16} /> : trailingIcon}
+              </ButtonBase>
+            ) : (
+              <html.span style={[styles.action$trailing, styles.label]}>{trailingIcon}</html.span>
+            )}
+          </>
         ) : null}
       </html.div>
     </html.div>
@@ -223,6 +229,8 @@ const styles = css.create({
     justifyContent: 'center',
     cursor: 'pointer',
     color: chipTokens.iconColor,
+    userSelect: 'none',
+    zIndex: 1,
     //color: chipTokens.trailingIcon,
     textAlign: 'center',
     flexGrow: 0,
@@ -256,7 +264,7 @@ const styles = css.create({
     alignItems: 'center',
     flex: 1,
     whiteSpace: 'nowrap',
-    maxWidth: 160,
+    maxWidth: 210,
     overflow: 'clip',
     textOverflow: 'ellipsis',
   },

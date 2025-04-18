@@ -5,7 +5,7 @@ import { dialogStore } from 'stores/ui/dialogs.store'
 
 export const CameraDialog = observer(function CameraDialog() {
   return (
-    <DialogSheet maxWidth='xs' open={dialogStore.camera} onClose={dialogStore.closeCamera}>
+    <DialogSheet maxWidth='xs' open={dialogStore.camera} onClose={() => dialogStore.toggleCamera(false)}>
       <Camera />
     </DialogSheet>
   )

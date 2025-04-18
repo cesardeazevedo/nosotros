@@ -1,17 +1,17 @@
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
-import type { NostrEventRepost } from '@/nostr/types'
+import type { NostrEventMetadata } from '@/nostr/types'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconArrowForward } from '@tabler/icons-react'
 import { css, html } from 'react-strict-dom'
+import { PostHeaderDate } from '../Posts/PostHeaderDate'
 import { PostOptions } from '../Posts/PostOptions'
 import { PostUserHeader } from '../Posts/PostUserHeader'
 import { UserHeader } from '../User/UserHeader'
-import { PostHeaderDate } from '../Posts/PostHeaderDate'
 
 type Props = {
-  event: NostrEventRepost
+  event: NostrEventMetadata
 }
 
 export const RepostHeader = (props: Props) => {

@@ -1,5 +1,6 @@
 import type { Kind } from 'constants/kinds'
 import type { NostrEvent, NostrFilter } from 'core/types'
+import type { RelayInformation } from 'nostr-tools/nip11'
 
 export interface SeenStore {
   query(eventId: string): Promise<SeenDB[]>
@@ -15,7 +16,14 @@ export interface EventStore {
 
 export interface RelayStatsStore {
   query(url: string): Promise<RelayStatsDB | undefined>
+  queryAll(): Promise<RelayStatsDB[] | undefined>
   insert(data: RelayStatsDB): Promise<RelayStatsDB>
+}
+
+export interface RelayInfoStore {
+  query(url: string): Promise<RelayInfoDB | undefined>
+  queryAll(): Promise<RelayInfoDB[] | undefined>
+  insert(url: string, data: RelayInfoDB): Promise<RelayInfoDB>
 }
 
 export interface MetadataStore {
@@ -27,6 +35,7 @@ export interface DB {
   seen: SeenStore
   event: EventStore
   relayStats: RelayStatsStore
+  relayInfo: RelayInfoStore
   metadata: MetadataStore
   clearDB(): Promise<void>
 }
@@ -53,38 +62,9 @@ export interface SeenDB {
   relay: string
 }
 
-export interface RelayInfoDB {
-  name: string
-  description?: string
-  pubkey?: string
-  contact?: string
-  supported_nips?: number[]
-  software?: string
-  version?: string
-  payments_url?: string
-  fees?: {
-    [key: string]: Array<{
-      kinds?: number[]
-      amount: number
-      unit: string
-    }>
-  }
-  retention?: Array<{ kinds?: number[]; time?: number; count?: number }>
-  limitation?: {
-    max_message_length?: number
-    max_subscriptions?: number
-    max_filters?: number
-    max_limit?: number
-    max_subid_length?: number
-    max_event_tags?: number
-    max_content_length?: number
-    min_pow_difficulty?: number
-    auth_required?: boolean
-    payment_required?: boolean
-    restricted_writes?: boolean
-    created_at_lower_limit?: number
-    created_at_upper_limit?: number
-  }
+export interface RelayInfoDB extends RelayInformation {
+  url: string
+  timestamp: number
 }
 
 export interface RelayStatsDB {
