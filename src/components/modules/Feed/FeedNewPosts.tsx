@@ -44,9 +44,8 @@ export const FeedNewPosts = observer(function FeedNewPosts(props: Props) {
   }, false)
 
   const handleFlush = () => {
-    if (props.ref?.current) {
-      props.ref.current.scrollTo({ top: 0, behavior: 'smooth' })
-    }
+    const element = props.ref?.current || window
+    element.scrollTo({ top: 0, behavior: 'smooth' })
     feed.flush()
   }
   return (
