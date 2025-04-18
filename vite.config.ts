@@ -44,12 +44,11 @@ export default defineConfig(({ mode }) => {
       // circleDependency({ outputFilePath: './circleDep' }),
       VitePWA({
         srcDir: 'src',
+        strategies: 'generateSW',
         registerType: 'autoUpdate',
         devOptions: {
           enabled: true,
         },
-        filename: 'serviceWorker.ts',
-        strategies: 'injectManifest',
         manifest: {
           name: 'Nosotros',
           short_name: 'Nosotros',
@@ -102,13 +101,26 @@ export default defineConfig(({ mode }) => {
           scope: '/',
           theme_color: '#000',
         },
-        injectManifest: {
-          maximumFileSizeToCacheInBytes: 2600000,
-        },
         workbox: {
-          cleanupOutdatedCaches: false,
-          globDirectory: 'public/',
-          globPatterns: ['**/*.{js,css,png,jpg,jpeg,svg,webp}'],
+          sourcemap: true,
+          maximumFileSizeToCacheInBytes: 2600000,
+          runtimeCaching: [
+            {
+              urlPattern: ({ request, url }) =>
+                request.destination === 'image' && url.pathname.includes('/user_avatar'),
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'images',
+                expiration: {
+                  maxEntries: 1000,
+                  maxAgeSeconds: 7 * 24 * 60 * 60,
+                },
+                cacheableResponse: {
+                  statuses: [0, 200],
+                },
+              },
+            },
+          ],
         },
       }),
       !isTesting ? mkcert({}) : null,
