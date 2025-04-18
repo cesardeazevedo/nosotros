@@ -18,7 +18,7 @@ export default defineConfig(({ mode }) => {
     server: {
       host: true,
       port: 8000,
-      hmr: false,
+      hmr: true,
     },
     build: {
       sourcemap: true,
@@ -28,6 +28,7 @@ export default defineConfig(({ mode }) => {
     },
     test: {
       globals: true,
+      watch: false,
       testTimeout: 10000,
       reporters: ['verbose'],
       environment: 'jsdom',

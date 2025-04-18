@@ -1,6 +1,19 @@
 import { Kind } from '@/constants/kinds'
 import { mediaStore } from '@/stores/media/media.store'
-import { catchError, defaultIfEmpty, from, fromEvent, map, mergeMap, of, take, tap, toArray } from 'rxjs'
+import {
+  catchError,
+  defaultIfEmpty,
+  from,
+  fromEvent,
+  map,
+  mergeMap,
+  of,
+  take,
+  takeUntil,
+  tap,
+  timer,
+  toArray,
+} from 'rxjs'
 import { getMimeType } from '../helpers/parseImeta'
 import type { NostrEventMetadata } from '../types'
 import { metadataSymbol } from '../types'
@@ -33,6 +46,7 @@ function fromVideoMetadata(src: string) {
 function fromMediaMetadata(mime: 'image' | 'video', src: string, event: NostrEventMetadata) {
   const $ = mime === 'image' ? fromImageMetadata(src) : fromVideoMetadata(src)
   return $.pipe(
+    takeUntil(timer(2000)),
     catchError(() => {
       mediaStore.addError(src)
       return of(event)

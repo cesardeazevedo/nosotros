@@ -13,7 +13,7 @@ export const NostrContextModel = t
     batcher: t.maybe(t.frozen<NostrContext['batcher']>()),
     nip05: t.optional(t.boolean, true),
     outbox: t.optional(t.boolean, true),
-    autoAuth: t.optional(t.boolean, false),
+    authAuto: t.maybe(t.boolean),
     authWhitelist: t.optional(t.array(t.string), []),
     ignoreRelays: t.optional(t.array(t.string), []),
     queryDB: t.optional(t.boolean, true),
