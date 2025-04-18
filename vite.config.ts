@@ -103,12 +103,12 @@ export default defineConfig(({ mode }) => {
           theme_color: '#000',
         },
         injectManifest: {
+          globPatterns: ['**/*.{js,css,png,jpg,jpeg,svg,webp}'],
           maximumFileSizeToCacheInBytes: 2600000,
         },
         workbox: {
           cleanupOutdatedCaches: false,
           globDirectory: 'public/',
-          globPatterns: ['**/*.{js,css,png,jpg,jpeg,svg,webp}'],
         },
       }),
       !isTesting ? mkcert({}) : null,
