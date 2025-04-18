@@ -14,7 +14,7 @@ type Props = {
 export const SearchHeader = (props: Props) => {
   const { module, updateSearchParams = true } = props
   const searchRef = useRef<HTMLInputElement>(null)
-  const onChange = useSearchChange(updateSearchParams)
+  const onChange = useSearchChange(updateSearchParams, module?.feed)
   return (
     <Stack sx={styles.root} justify='space-between'>
       <SearchField

@@ -47,7 +47,7 @@ export const SearchContent = observer(function SearchContent(props: Props) {
     dense = false,
     header,
     onSelect,
-    initialSelected = -1,
+    initialSelected = 0,
     suggestQuery = false,
     ...rest
   } = props
@@ -186,6 +186,7 @@ const styles = css.create({
     paddingInlineStart: 14,
   },
   item: {
+    height: 'auto',
     [listItemTokens.leadingSpace]: spacing.padding1,
   },
   icon: {

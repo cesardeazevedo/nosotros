@@ -25,8 +25,6 @@ export const Search = (props: Props) => {
       limit={20}
       query={query}
       sx={sx}
-      suggestQuery
-      suggestRelays
       onSelect={onSelect}
       {...rest}
       header={

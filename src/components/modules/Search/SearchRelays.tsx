@@ -1,3 +1,4 @@
+import { RelayDescription } from '@/components/elements/Relays/RelayDescription'
 import { listItemTokens } from '@/components/ui/ListItem/ListItem.stylex'
 import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { Stack } from '@/components/ui/Stack/Stack'
@@ -14,8 +15,8 @@ import type { Ref } from 'react'
 import { useImperativeHandle, useMemo, useState } from 'react'
 import { css } from 'react-strict-dom'
 import { from, identity, map, mergeMap } from 'rxjs'
-import type { OnKeyDownRef } from './SearchContent'
 import { RelayIcon } from '../../elements/Relays/RelayIcon'
+import type { OnKeyDownRef } from './SearchContent'
 
 type Props = {
   sx?: SxProps
@@ -93,7 +94,7 @@ export const SearchRelays = observer(function SearchRelays(props: Props) {
           supportingText={
             <Stack horizontal={false}>
               <Text size='md'>{relay.pretty}</Text>
-              {relay.info?.description}
+              <RelayDescription description={relay.info?.description} />
             </Stack>
           }
           onClick={() => onSelect(relay.url)}

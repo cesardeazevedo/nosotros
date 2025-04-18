@@ -13,8 +13,8 @@ export const SearchColumn = (props: Props) => {
   const { module } = props
   return (
     <>
-      <DeckColumnHeader id={module.id} leading={<SearchHeader updateSearchParams={false} />}>
-        <SearchSettings module={module} />
+      <DeckColumnHeader id={module.id} leading={<SearchHeader module={module} updateSearchParams={false} />}>
+        <SearchSettings renderSearchField={false} module={module} />
       </DeckColumnHeader>
       <DeckScroll>
         <Feed column feed={module.feed} />
