@@ -3,8 +3,6 @@ import { useCurrentUser } from '@/hooks/useRootStore'
 import { metadataSymbol } from '@/nostr/types'
 import type { FeedStore } from '@/stores/feeds/feed.store'
 import { observer } from 'mobx-react-lite'
-import { useObservable } from 'observable-hooks'
-import { EMPTY } from 'rxjs'
 import { Feed } from '../Feed/Feed'
 import { NotificationItem } from './NotificationItem'
 import { NotificationLoading } from './NotificationLoading'
@@ -17,10 +15,6 @@ export const NotificationFeed = observer(function NotificationFeed(props: Props)
   const { feed, ...rest } = props
   const user = useCurrentUser()
 
-  useObservable(() => {
-    return EMPTY
-  })
-
   return (
     <Feed
       feed={feed}
@@ -32,7 +26,7 @@ export const NotificationFeed = observer(function NotificationFeed(props: Props)
         return true
       }}
       loading={<NotificationLoading rows={8} />}
-      render={(event) => <NotificationItem lastSeen={0} event={event} />}
+      render={(event) => <NotificationItem owner={feed.filter['#p']?.[0]} event={event} />}
       {...rest}
     />
   )

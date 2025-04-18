@@ -23,7 +23,7 @@ export const NotificationBadge = observer(function NotificationBadge(props: Prop
     async function preload() {
       try {
         if (router.latestLocation.pathname !== '/notifications') {
-          // await router.preloadRoute({ to: '/notifications' })
+          await router.preloadRoute({ to: '/notifications' })
         }
       } catch (error) {
         console.log(error)

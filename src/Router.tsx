@@ -370,7 +370,7 @@ export const notificationsRoute = createRoute({
   loader: (options) => {
     const { pubkey } = options.context
     const module = createNotificationModule(pubkey)
-    subscribeNotifications(module.feed, options.preload).subscribe()
+    subscribeFeedStore(module.feed).subscribe()
     return module
   },
   pendingComponent: NotificationPending,

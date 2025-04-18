@@ -3,7 +3,7 @@ import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { useMobile } from '@/hooks/useMobile'
 import { useNoteStoreFromId } from '@/hooks/useNoteStore'
-import { useCurrentUser } from '@/hooks/useRootStore'
+import { useCurrentAccount } from '@/hooks/useRootStore'
 import type { NostrEventMetadata } from '@/nostr/types'
 import { Notification } from '@/stores/notifications/notification'
 import { palette } from '@/themes/palette.stylex'
@@ -12,7 +12,7 @@ import { fallbackEmoji } from '@/utils/utils'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconAt, IconBolt, IconHeartFilled, IconMessage, IconShare3 } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { css, html } from 'react-strict-dom'
 import { LinkNEvent } from '../../elements/Links/LinkNEvent'
 import { PostHeaderDate } from '../../elements/Posts/PostHeaderDate'
@@ -22,25 +22,32 @@ import { NotificationContent } from './NotificationContent'
 import { NotificationMedia } from './NotificationMedia'
 
 type Props = {
-  lastSeen: number
   event: NostrEventMetadata
+  owner?: string
 }
 
 const formatter = new Intl.NumberFormat()
 
 export const NotificationItem = observer(function NotificationItem(props: Props) {
-  const { event, lastSeen = 0 } = props
-  const user = useCurrentUser()
+  const { event, owner } = props
+  const acc = useCurrentAccount()
   const [notification] = useState(new Notification(event))
   const { type, author: pubkey } = notification
 
   const mobile = useMobile()
+  const lastSeen = acc?.lastSeen.notification || Infinity
   const linkId = type === 'reply' || type === 'mention' ? notification.id : notification.related
   const note = useNoteStoreFromId(linkId)
   const unseen = notification.created_at > lastSeen && lastSeen !== 0
 
+  useEffect(() => {
+    if (owner === acc?.pubkey) {
+      acc?.setLastSeenNotification(event.created_at)
+    }
+  }, [owner, event])
+
   return (
-    <Stack gap={2} sx={[styles.root, unseen && styles.root$unseen]} align='flex-start'>
+    <Stack gap={1} sx={[styles.root, unseen && styles.root$unseen]} align='flex-start'>
       {unseen && <html.div style={styles.unseen} />}
       <Stack sx={styles.type} justify='flex-start' align='flex-start'>
         {type === 'zap' && (
@@ -92,7 +99,7 @@ export const NotificationItem = observer(function NotificationItem(props: Props)
               {type === 'reply' && (
                 <>
                   <Text size='md'>
-                    replied to {note?.event.pubkey === user?.pubkey ? 'your note' : 'a note you were mentioned'}
+                    replied to {note?.event.pubkey === acc?.pubkey ? 'your note' : 'a note you were mentioned'}
                     {': '}
                   </Text>{' '}
                   <NotificationContent id={notification.id} />
@@ -106,7 +113,7 @@ export const NotificationItem = observer(function NotificationItem(props: Props)
               {type === 'repost' && (
                 <>
                   <Text size='md'>
-                    reposted {note?.event.pubkey === user?.pubkey ? 'your note' : 'a note you were mentioned'}
+                    reposted {note?.event.pubkey === acc?.pubkey ? 'your note' : 'a note you were mentioned'}
                   </Text>{' '}
                   <NotificationContent id={notification.related} />
                 </>
@@ -127,7 +134,7 @@ const styles = css.create({
   root: {
     position: 'relative',
     paddingBlock: spacing.padding1,
-    paddingInline: spacing.padding3,
+    paddingInline: spacing.padding2,
     minHeight: 50,
     backgroundColor: {
       default: 'transparent',
@@ -170,6 +177,7 @@ const styles = css.create({
     display: 'inline-block',
     flex: 1,
     flexGrow: 1,
+    pointerEvents: 'none',
   },
   username: {
     display: 'inline-flex',

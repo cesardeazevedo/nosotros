@@ -27,15 +27,13 @@ export const NotificationMedia = observer(function NotificationMedia(props: Prop
 const styles = css.create({
   root: {
     position: 'relative',
-    width: 60,
-    height: 60,
   },
   img: {
     position: 'absolute',
     top: 0,
     right: 0,
-    width: 60,
-    height: 60,
+    width: 50,
+    height: 50,
     objectFit: 'cover',
     borderRadius: shape.md,
   },

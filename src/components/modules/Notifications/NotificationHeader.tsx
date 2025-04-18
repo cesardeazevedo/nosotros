@@ -18,7 +18,13 @@ export const NotificationHeader = observer(function NotificationHeader(props: Pr
   return (
     <>
       <RouteHeader label='Notifications'>
-        <Button variant='filledTonal' onClick={() => setExpanded((prev) => !prev)}>
+        <Button
+          variant='filledTonal'
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            setExpanded((prev) => !prev)
+          }}>
           <Stack gap={0.5}>
             <IconExpandable upwards expanded={expanded} />
             Settings

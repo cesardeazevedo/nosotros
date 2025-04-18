@@ -36,7 +36,11 @@ export const NotificationContent = observer(function NotificationContent(props: 
 const styles = css.create({
   root: {
     wordBreak: 'break-word',
-    overflow: 'auto',
-    maxHeight: 180,
+    overflow: 'hidden',
+    WebkitLineClamp: 3,
+    boxOrient: 'vertical',
+    WebkitBoxOrient: 'vertical',
+    display: '-webkit-box',
+    pointerEvents: 'none',
   },
 })
