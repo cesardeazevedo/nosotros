@@ -1,6 +1,6 @@
 import { Kind } from '@/constants/kinds'
 import { mediaStore } from '@/stores/media/media.store'
-import { catchError, defaultIfEmpty, from, fromEvent, map, mergeMap, of, takeUntil, tap, timer, toArray } from 'rxjs'
+import { catchError, defaultIfEmpty, from, fromEvent, map, mergeMap, of, take, tap, toArray } from 'rxjs'
 import { getMimeType } from '../helpers/parseImeta'
 import type { NostrEventMetadata } from '../types'
 import { metadataSymbol } from '../types'
@@ -10,6 +10,7 @@ function fromImageMetadata(src: string) {
   // Shouldn't really use rootStore here for works for now
   img.src = `${import.meta.env.VITE_IMGPROXY_URL}/_/feed_img/plain/${src}`
   return fromEvent(img, 'load').pipe(
+    take(1),
     tap((e) => {
       const element = e.target as HTMLImageElement
       mediaStore.add(src, [element.naturalWidth, element.naturalHeight])
@@ -21,6 +22,7 @@ function fromVideoMetadata(src: string) {
   const video = document.createElement('video')
   video.setAttribute('src', src)
   return fromEvent(video, 'loadedmetadata').pipe(
+    take(1),
     tap((e) => {
       const element = e.target as HTMLVideoElement
       mediaStore.add(src, [element.videoWidth, element.videoHeight])
@@ -31,7 +33,6 @@ function fromVideoMetadata(src: string) {
 function fromMediaMetadata(mime: 'image' | 'video', src: string, event: NostrEventMetadata) {
   const $ = mime === 'image' ? fromImageMetadata(src) : fromVideoMetadata(src)
   return $.pipe(
-    takeUntil(timer(1000)), // metadata taking too long to load, stop
     catchError(() => {
       mediaStore.addError(src)
       return of(event)
@@ -45,6 +46,7 @@ export function subscribeMediaStats() {
   return mergeMap((event: NostrEventMetadata) => {
     switch (event.kind) {
       case Kind.Text:
+      case Kind.Article:
       case Kind.Comment: {
         const meta = event[metadataSymbol]
         const imeta = meta.imeta
