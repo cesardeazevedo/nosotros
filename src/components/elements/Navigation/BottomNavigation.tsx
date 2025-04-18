@@ -10,7 +10,7 @@ import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { encodeSafe } from '@/utils/nip19'
-import { IconBell, IconBellFilled, IconPhoto, IconUser } from '@tabler/icons-react'
+import { IconBell, IconBellFilled, IconNews, IconPhoto, IconServerBolt, IconUser } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
 import { observer } from 'mobx-react-lite'
 import { nip19 } from 'nostr-tools'
@@ -46,6 +46,16 @@ export const BottomNavigation = observer(function BottomNavigation() {
               <Tab active={isActive} sx={styles.tab} icon={<IconPhoto />} activeIcon={<IconPhoto />} />
             )}
           </Link>
+          {!pubkey && (
+            <Link to='/articles'>
+              {({ isActive }) => <Tab active={isActive} sx={styles.tab} icon={<IconNews />} />}
+            </Link>
+          )}
+          {!pubkey && (
+            <Link to='/explore/relays'>
+              {({ isActive }) => <Tab active={isActive} sx={styles.tab} icon={<IconServerBolt />} />}
+            </Link>
+          )}
           {pubkey && (
             <Link to='/notifications'>
               {({ isActive }) => (
