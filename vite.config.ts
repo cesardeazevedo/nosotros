@@ -108,7 +108,7 @@ export default defineConfig(({ mode }) => {
         workbox: {
           cleanupOutdatedCaches: false,
           globDirectory: 'public/',
-          globPatterns: ['**/*.{html,js,css,png,jpg,jpeg,svg,webp}'],
+          globPatterns: ['**/*.{js,css,png,jpg,jpeg,svg,webp}'],
         },
       }),
       !isTesting ? mkcert({}) : null,
