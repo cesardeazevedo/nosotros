@@ -5,8 +5,10 @@ import { cleanupOutdatedCaches, precacheAndRoute } from 'workbox-precaching'
 import { registerRoute } from 'workbox-routing'
 import { CacheFirst } from 'workbox-strategies'
 
-// @ts-ignore
-self.skipWaiting()
+self.addEventListener('install', () => {
+  // @ts-ignore
+  self.skipWaiting()
+})
 clientsClaim()
 cleanupOutdatedCaches()
 
