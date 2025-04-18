@@ -2,7 +2,7 @@ import { dedupe } from '@/core/helpers/dedupe'
 import { PaginationSubject } from '@/core/PaginationSubject'
 import type { NostrEventMetadata } from '@/nostr/types'
 import { observable } from 'mobx'
-import { t, type Instance } from 'mobx-state-tree'
+import { getSnapshot, t, type Instance } from 'mobx-state-tree'
 import { createEditorStore } from '../editor/editor.store'
 import { withToggleAction } from '../helpers/withToggleAction'
 import { NostrStoreModel } from '../nostr/nostr.model'
@@ -54,7 +54,7 @@ export const FeedStoreModel = NostrStoreModel.named('FeedStoreModel')
   .volatile((self) => ({
     notes: observable.map<string, NostrEventMetadata>({}, { deep: false }),
     buffer: observable.map<string, NostrEventMetadata>({}, { deep: false }),
-    latest: observable.map<string, NostrEventMetadata>({}, { deep: false }),
+    latest: observable.array<NostrEventMetadata>([], { deep: false }),
     published: observable.map<string, NostrEventMetadata>({}, { deep: false }),
     pagination: new PaginationSubject(self.filter, { range: self.range }),
     paginationLive: new PaginationSubject({ ...self.filter, since: Math.floor(Date.now() / 1000), limit: 100 }),
@@ -67,6 +67,10 @@ export const FeedStoreModel = NostrStoreModel.named('FeedStoreModel')
     },
     get bufferPubkeys() {
       return dedupe([...self.buffer.values()].map((x) => x.pubkey))
+    },
+    get snapshot() {
+      const { blured, ...rest } = self
+      return getSnapshot(rest.context)
     },
     unseen(date: number) {
       if (date) {
@@ -92,9 +96,7 @@ export const FeedStoreModel = NostrStoreModel.named('FeedStoreModel')
       self.buffer.clear()
     },
     flush() {
-      self.latest.forEach((value, key) => self.notes.set(key, value))
-      self.latest.clear()
-      self.buffer.forEach((value, key) => self.latest.set(key, value))
+      self.latest.unshift(...self.buffer.values())
       self.buffer.clear()
     },
     paginate() {
