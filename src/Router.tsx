@@ -65,7 +65,6 @@ import { subscribeDeckColums } from './stores/subscriptions/subscribeDeckColumns
 import { startFeedStream, subscribeFeedStore } from './stores/subscriptions/subscribeFeedStore'
 import { subscribeLists } from './stores/subscriptions/subscribeLists'
 import { subscribeNostrModule } from './stores/subscriptions/subscribeNostrModule'
-import { subscribeNotifications } from './stores/subscriptions/subscribeNotifications'
 import { subscribeRelayDiscoveryModule } from './stores/subscriptions/subscribeRelayDiscoveryModule'
 import { decodeNIP19 } from './utils/nip19'
 import { useMobile } from './hooks/useMobile'
@@ -727,14 +726,13 @@ export const router = createRouter({
   defaultStaleTime: Infinity,
   defaultPreload: false,
   defaultPendingMinMs: 0,
-  scrollToTopSelectors: ['#main_scroll'],
-  scrollRestoration: true,
-  scrollRestorationBehavior: 'instant',
-  getScrollRestorationKey: (location) => location.pathname,
+  scrollRestoration: false,
   context: {
     rootStore,
   },
 })
+
+window.history.scrollRestoration = 'auto'
 
 declare module '@tanstack/react-router' {
   interface Register {

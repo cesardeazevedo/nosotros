@@ -54,7 +54,6 @@ const styles = css.create({
     flexDirection: 'column',
     alignItems: 'center',
     textAlign: 'center',
-    marginTop: spacing.margin8,
     padding: spacing.padding4,
   },
   title: {
