@@ -16,6 +16,7 @@ export type NostrContext = {
   maxRelaysPerUser?: number
   queryDB?: boolean
   insertDB?: boolean
+  insertStore?: boolean
   outbox?: boolean
   prune?: boolean
 }

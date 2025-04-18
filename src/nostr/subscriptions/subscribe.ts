@@ -36,6 +36,6 @@ export function subscribe(filters: NostrFilter, ctx: NostrContext) {
 
     subscribeMediaStats(),
 
-    tap((event) => addNostrEventToStore(event)),
+    tap((event) => ctx.insertStore !== false && addNostrEventToStore(event)),
   ) as Observable<NostrEventMetadata>
 }

@@ -94,33 +94,32 @@ export class User {
     })
   }
 
-  get followsRelaySets() {
-    return this.followsEvent
-      .getTags('p')
-      .flatMap((pubkey) => eventStore.getEventsByKindPubkey(Kind.RelaySets, pubkey))
+  get othersRelaySets() {
+    return eventStore
+      .getEventsByKind(Kind.RelaySets)
+      .filter((x) => x.pubkey !== this.pubkey && x.getTags('relay').length > 0)
       .toSorted((a, b) => {
-        const total1 = a.tags.relay?.length || 0
-        const total2 = b.tags.relay?.length || 0
+        const total1 = a.getTags('relay').length || 0
+        const total2 = b.getTags('relay').length || 0
         return total2 - total1
       })
   }
 
   get followSets() {
     return eventStore.getEventsByKindPubkey(Kind.FollowSets, this.pubkey).toSorted((a, b) => {
-      const total1 = a.tags.p?.length || 0
-      const total2 = b.tags.p?.length || 0
+      const total1 = a.getTags('p').length
+      const total2 = b.getTags('p').length
       return total2 - total1
     })
   }
 
-  get followsFollowSets() {
-    return this.followsEvent
-      .getTags('p')
-      .flatMap((pubkey) => eventStore.getEventsByKindPubkey(Kind.FollowSets, pubkey))
-      .filter((x) => x.getTags('p')?.length > 0)
+  get othersFollowSets() {
+    const events = eventStore.getEventsByKind(Kind.FollowSets)
+    return events
+      .filter((x) => x.pubkey !== this.pubkey && x.getTags('p').length > 0)
       .toSorted((a, b) => {
-        const total1 = a.tags.p?.length || 0
-        const total2 = b.tags.p?.length || 0
+        const total1 = a.getTags('p').length
+        const total2 = b.getTags('p').length
         return total2 - total1
       })
   }
