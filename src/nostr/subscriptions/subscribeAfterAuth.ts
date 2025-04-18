@@ -14,6 +14,6 @@ export function subscribeAfterAuth(sub: NostrSubscription, ctx: NostrContext) {
     filter((x) => !!x),
     mergeMap((relay) => relay.authOk$),
     map(([url]) => createSubscription(sub.filters[0], { ...ctx, relays: [url] })),
-    takeUntil(timer(4000)),
+    takeUntil(timer(10000)),
   )
 }

@@ -51,7 +51,11 @@ export const SignInSelect = observer(function SignInSelect() {
         </SignInHeader>
         <Stack horizontal={false} gap={4} align='center' justify='flex-start' sx={styles.content}>
           <Stack horizontal={false} gap={1} align='center'>
-            <Card variant='filled' sx={styles.card} onClick={() => signinStore.goTo('READ_ONLY')}>
+            <Card
+              variant='filled'
+              surface='surfaceContainer'
+              sx={styles.card}
+              onClick={() => signinStore.goTo('READ_ONLY')}>
               <Stack align='center'>
                 <CardContent grow>
                   <CardTitle
@@ -70,9 +74,10 @@ export const SignInSelect = observer(function SignInSelect() {
             </Card>
             <Card
               variant='filled'
+              surface='surfaceContainer'
               sx={styles.card}
               onClick={async () => {
-                if (signinStore.hasExtension) {
+                if (signinStore.hasExtension.current()) {
                   await signinStore.submitNostrExtension()
                   goBack()
                 }
@@ -87,7 +92,11 @@ export const SignInSelect = observer(function SignInSelect() {
                 </CardContent>
               </Stack>
             </Card>
-            <Card variant='filled' sx={styles.card} onClick={() => signinStore.goTo('REMOTE_SIGN')}>
+            <Card
+              variant='filled'
+              surface='surfaceContainer'
+              sx={styles.card}
+              onClick={() => signinStore.goTo('REMOTE_SIGN')}>
               <CardContent grow>
                 <CardTitle
                   headline={
@@ -104,7 +113,7 @@ export const SignInSelect = observer(function SignInSelect() {
                 <IconChevronRight />
               </CardContent>
             </Card>
-            <Card disabled variant='filled' sx={styles.card} onClick={() => {}}>
+            <Card disabled variant='filled' surface='surfaceContainerLow' sx={styles.card} onClick={() => {}}>
               <CardContent>
                 <CardTitle
                   headline={
@@ -117,6 +126,7 @@ export const SignInSelect = observer(function SignInSelect() {
               </CardContent>
             </Card>
           </Stack>
+          <Text size='md'>Don't have an account yet?</Text>
           <Button fullWidth variant='filled' sx={styles.button} onClick={handleSignUpClick}>
             <Stack justify='center' gap={1}>
               Create account on njump start
@@ -134,6 +144,8 @@ const styles = css.create({
     flex: 1,
     display: 'flex',
     alignItems: 'center',
+    paddingBlock: 12,
+    paddingInline: spacing.padding2,
     width: '100%',
   },
   chip: {
@@ -147,7 +159,7 @@ const styles = css.create({
     height: '100%',
   },
   content: {
-    padding: spacing.padding4,
+    padding: spacing.padding2,
     paddingTop: spacing['padding0.5'],
   },
   button: {

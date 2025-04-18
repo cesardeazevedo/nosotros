@@ -6,11 +6,10 @@ import { subscribeFeedFollowSet } from '@/nostr/subscriptions/subscribeFeedFollo
 import { subscribeFeedInbox } from '@/nostr/subscriptions/subscribeFeedInbox'
 import { subscribeFeedSelf } from '@/nostr/subscriptions/subscribeFeedSelf'
 import type { NostrEventMetadata } from '@/nostr/types'
-import { getSnapshot } from 'mobx-state-tree'
 import { matchFilter } from 'nostr-tools'
 import { EMPTY, bufferTime, filter, finalize, map, merge, mergeMap, mergeWith, switchMap, tap } from 'rxjs'
-import type { FeedStore } from '../feeds/feed.store'
 import { createContextAuthenticator } from '../auth/authenticator'
+import type { FeedStore } from '../feeds/feed.store'
 import { toStream } from '../helpers/toStream'
 import { rootStore } from '../root.store'
 
@@ -44,7 +43,7 @@ function subscribeFeedScope(feed: FeedStore, ctx: NostrContext, pagination: Pagi
 
 export function subscribeFeedStore(feed: FeedStore, live = true) {
   const ctx = { ...rootStore.globalContext, ...feed.context }
-  return toStream(() => ({ snap: getSnapshot(feed), feed })).pipe(
+  return toStream(() => ({ snap: feed.snapshot, feed })).pipe(
     mergeWith(createContextAuthenticator(ctx)),
 
     switchMap(({ feed }) => {

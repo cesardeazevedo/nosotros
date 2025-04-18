@@ -29,7 +29,6 @@ export const RelaySetCard = observer(function RelaySetCard(props: Props) {
     <Card key={event.id} variant='outlined' sx={styles.root}>
       <Stack horizontal={false}>
         <CardTitle
-          grow
           headline={
             <Stack gap={1}>
               <UserHeader dense size='sm' pubkey={event.pubkey} />
@@ -39,7 +38,6 @@ export const RelaySetCard = observer(function RelaySetCard(props: Props) {
         />
         <CardContent align='flex-start' sx={styles.content}>
           <CardTitle
-            grow
             headline={title || <html.span style={styles.gray}>#{d?.slice(0, 20)}</html.span>}
             supportingText={description}
           />

@@ -1,14 +1,14 @@
 import type { Kind } from '@/constants/kinds'
 import type { NostrFilter } from '@/core/types'
-import type { NostrContext } from '@/nostr/context'
 import { t } from 'mobx-state-tree'
 import { withToggleAction } from '../helpers/withToggleAction'
+import { NostrContextModel } from './nostr.context.model'
 
 export const NostrStoreModel = t
   .model('NostrSubscriptionModel', {
     blured: false,
     filter: t.frozen<NostrFilter>(),
-    context: t.frozen<NostrContext>(),
+    context: NostrContextModel,
   })
   .views((self) => ({
     hasKind(kind: Kind) {
@@ -17,20 +17,8 @@ export const NostrStoreModel = t
   }))
   .actions(withToggleAction)
   .actions((self) => ({
-    addRelay(relay: string) {
-      if (self.context?.relays) {
-        self.context?.relays.push(relay)
-      }
-    },
-    removeRelay(relay: string) {
-      if (self.context?.relays) {
-        self.context.relays = self.context.relays.filter((x) => x !== relay)
-      }
-    },
     setFilter(filter: NostrFilter) {
-      self.filter = {
-        ...filter,
-      }
+      self.filter = filter
     },
     resetFilter() {},
     toggleKind(kind: Kind) {

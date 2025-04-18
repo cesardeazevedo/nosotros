@@ -71,7 +71,7 @@ export const RepostPopover = (props: Props) => {
           <LinkBase
             search={{ quoting: note.event.isAddressable ? note.event.naddress : note.event.nevent }}
             state={{ from: router.latestLocation.pathname } as never}>
-            <MenuItem leadingIcon={<IconBlockquote strokeWidth='1.5' />} label='Quote' onClick={close} />
+            <MenuItem leadingIcon={<IconBlockquote strokeWidth='1.5' />} label='Quote' onClick={() => close()} />
           </LinkBase>
         </MenuList>
       )}>

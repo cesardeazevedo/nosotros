@@ -23,14 +23,14 @@ export const SidebarMenuFollowSets = observer(function SidebarMenuFollowSets() {
           />
         )}>
         <Stack gap={0.5} horizontal={false} sx={styles.content}>
-          {user?.followSets?.map((event) => <FollowSetMenuItem renderAvatars event={event} />)}
+          {user?.followSets?.map((event) => <FollowSetMenuItem key={event.id} renderAvatars event={event} />)}
         </Stack>
       </Expandable>
       <Expandable
         initiallyExpanded
         trigger={(triggerProps) => <SidebarSubheader {...triggerProps} label={"People's follow sets"} />}>
         <Stack gap={0.5} horizontal={false} sx={styles.content}>
-          {user?.followsFollowSets?.map((event) => <FollowSetMenuItem event={event} />)}
+          {user?.othersFollowSets?.map((event) => <FollowSetMenuItem key={event.id} event={event} />)}
         </Stack>
       </Expandable>
     </Stack>

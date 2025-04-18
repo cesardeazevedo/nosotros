@@ -22,7 +22,7 @@ export const SidebarMenuRelaySets = observer(function SidebarMenuRelaySets() {
         />
       )}>
       <Stack gap={0.5} horizontal={false} sx={styles.content}>
-        {user?.relaySets?.map((event) => <ListRelaySetMenuItem event={event} />)}
+        {user?.relaySets?.map((event) => <ListRelaySetMenuItem key={event.id} event={event} />)}
       </Stack>
     </Expandable>
   )

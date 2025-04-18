@@ -44,7 +44,10 @@ const styles = css.create({
   dialog: {
     padding: spacing.padding1,
     placeItems: 'baseline center',
-    paddingTop: '10%',
+    paddingTop: {
+      default: '10%',
+      ['@media (max-width: 960px)']: 0,
+    },
   },
   editor: {
     minHeight: 240,

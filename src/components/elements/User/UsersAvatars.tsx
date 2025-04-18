@@ -41,7 +41,7 @@ export const UsersAvatars = (props: Props) => {
           )}>
           <ButtonBase sx={styles.more}>
             <Text variant='body' size='sm'>
-              +{pubkeys.length - 3}
+              {pubkeys.length}
             </Text>
           </ButtonBase>
         </TooltipRich>
@@ -75,13 +75,17 @@ const styles = css.create({
     borderColor: palette.surfaceContainerLowest,
   },
   more: {
-    left: -6,
+    left: -8,
     backgroundColor: palette.surfaceContainer,
     borderRadius: shape.xs,
     paddingInline: 4,
     paddingBlock: 2,
     fontWeight: 500,
+    justifyContent: 'center',
+    alignItems: 'center',
     fontSize: '80%',
+    textAlign: 'center',
+    minWidth: 20,
   },
   tooltip: {
     padding: spacing.padding1,

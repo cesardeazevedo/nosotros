@@ -20,7 +20,7 @@ export const RelaySetsRoute = observer(function RelaySetsRoute() {
         People's relays sets
       </Text>
       <Stack wrap gap={2} sx={styles.content} align='stretch'>
-        {user?.followsRelaySets.map((event) => <RelaySetCard key={event.id} event={event} />)}
+        {user?.othersRelaySets.map((event) => <RelaySetCard key={event.id} event={event} />)}
       </Stack>
     </>
   )

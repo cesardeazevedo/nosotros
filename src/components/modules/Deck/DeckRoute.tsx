@@ -1,23 +1,14 @@
 import { DeckContainer } from '@/components/modules/Deck/DeckContainer'
 import { DeckList } from '@/components/modules/Deck/DeckList'
 import { DeckNew } from '@/components/modules/Deck/DeckNew'
-import { useGlobalSettings } from '@/hooks/useRootStore'
-import { observer } from 'mobx-react-lite'
-import { css } from 'react-strict-dom'
+import { useResetScroll } from '@/hooks/useResetScroll'
 
-export const DeckRoute = observer(function DeckRoute() {
-  const { sidebarCollapsed } = useGlobalSettings()
-
+export const DeckRoute = function DeckRoute() {
+  useResetScroll()
   return (
-    <DeckContainer sx={sidebarCollapsed && styles.expanded}>
+    <DeckContainer>
       <DeckList />
       <DeckNew />
     </DeckContainer>
   )
-})
-
-const styles = css.create({
-  expanded: {
-    marginLeft: 84,
-  },
-})
+}

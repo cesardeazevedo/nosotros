@@ -12,6 +12,7 @@ export const NostrContextModel = t
     permission: t.maybe(t.number),
     batcher: t.maybe(t.frozen<NostrContext['batcher']>()),
     nip05: t.optional(t.boolean, true),
+    outbox: t.optional(t.boolean, true),
     autoAuth: t.optional(t.boolean, false),
     authWhitelist: t.optional(t.array(t.string), []),
     ignoreRelays: t.optional(t.array(t.string), []),
@@ -28,14 +29,10 @@ export const NostrContextModel = t
   .actions(withToggleAction)
   .actions((self) => ({
     addRelay(relay: string) {
-      if (self.relays) {
-        self.relays.push(relay)
-      }
+      self.relays.push(relay)
     },
     removeRelay(relay: string) {
-      if (self.relays) {
-        self.relays = cast(self.relays.filter((x) => x !== relay))
-      }
+      self.relays = cast(self.relays.filter((x) => x !== relay))
     },
     toggleAuthRelay(url: string) {
       if (self.authWhitelist.includes(url)) {

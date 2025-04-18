@@ -2,7 +2,7 @@ type Props = {
   size?: number
 }
 
-export function IconUsersGroupFilled(props: Props) {
+export const IconUsersGroupFilled = (props: Props) => {
   const { size = 24 } = props
   return (
     <svg xmlns='http://www.w3.org/2000/svg' width={size} height={size} viewBox='0 0 256 256'>

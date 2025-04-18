@@ -33,9 +33,8 @@ export function createNotificationModule(pubkey: string) {
       filter: {
         kinds: [Kind.Text, Kind.Comment, Kind.Repost, Kind.Reaction, Kind.ZapReceipt],
         '#p': [pubkey],
-        limit: 20,
+        limit: 30,
       },
-      // range: Duration.fromObject({ days: 7 }).as('minutes'),
       options: {
         includeRoot: true,
         includeMentions: true,
@@ -151,9 +150,9 @@ export function createSearchModule(query: string) {
     type: 'search',
     feed: {
       scope: 'self',
-      context: { relays: ['wss://relay.nostr.band'] },
+      context: { batcher: 'raw', relays: ['wss://relay.nostr.band'] },
       filter: {
-        kinds: [Kind.Text],
+        kinds: [Kind.Metadata, Kind.Text],
         search: query,
         limit: 50,
       },
@@ -170,7 +169,7 @@ export function createSearchModule(query: string) {
 export function createRelayDiscoveryModule() {
   return RelayDiscoveryModuleModel.create({
     feed: {
-      filter: { kinds: [Kind.RelayDiscovery], limit: 500 },
+      filter: { kinds: [Kind.RelayDiscovery], limit: 100 },
       scope: 'self',
       context: {
         relays: ['wss://monitorlizard.nostr1.com'],

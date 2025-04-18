@@ -29,7 +29,7 @@ const styles = css.create({
     margin: 'auto',
     right: 0,
     left: 0,
-    width: 120,
+    width: 140,
     bottom: 100,
   },
 })

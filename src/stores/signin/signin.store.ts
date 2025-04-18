@@ -50,7 +50,7 @@ export const signinStore = makeAutoObservable({
   error: '',
 
   hasExtension: lazyObservable((sink) => {
-    setTimeout(() => sink('nostr' in window), 2000)
+    setTimeout(() => sink('nostr' in window), 1500)
     sink(undefined)
   }),
 

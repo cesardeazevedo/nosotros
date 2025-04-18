@@ -49,7 +49,7 @@ export const SignInNostrExtension = observer(function SignInNostrExtension() {
             <ContentLink href='https://nostrapps.com/#signers#all'>others</ContentLink>
           </Text>
         </Stack>
-        <Button variant='filled' sx={styles.button} onClick={handleSubmit}>
+        <Button variant='filled' sx={styles.button} onClick={handleSubmit} disabled={!hasExtension}>
           Sign In with Extension
         </Button>
       </Stack>
@@ -63,6 +63,7 @@ const styles = css.create({
   },
   content: {
     height: '100%',
+    textAlign: 'center',
     padding: spacing.padding4,
   },
   button: {

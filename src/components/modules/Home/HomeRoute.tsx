@@ -6,11 +6,13 @@ import { observer } from 'mobx-react-lite'
 import { useEffect } from 'react'
 import { Feed } from '../Feed/Feed'
 import { HomeHeader } from './HomeHeader'
+import { useResetScroll } from '@/hooks/useResetScroll'
 
 export const HomeRoute = observer(function HomeRoute() {
   const router = useRouter()
   const { rootStore } = homeRoute.useRouteContext()
   const module = homeRoute.useLoaderData()
+  useResetScroll()
 
   useEffect(() => {
     const disposer = reaction(

@@ -1,7 +1,7 @@
 import { dialogStore } from '@/stores/ui/dialogs.store'
 import { observer } from 'mobx-react-lite'
 import { DialogSheet } from '../elements/Layouts/Dialog'
-import { ListForm } from '../elements/Lists/ListForm'
+import { ListForm } from '../modules/Lists/ListForm'
 
 export const ListFormDialog = observer(function ListFormDialog() {
   const value = dialogStore.listForm

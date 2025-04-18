@@ -14,6 +14,10 @@ import { FeedRoute } from './components/modules/Feed/FeedRoute'
 import { FeedHeaderBase } from './components/modules/Feed/headers/FeedHeaderBase'
 import { HomePending } from './components/modules/Home/HomePending'
 import { HomeRoute } from './components/modules/Home/HomeRoute'
+import { FollowSetRoute } from './components/modules/Lists/FollowSets/FollowSetRoute'
+import { ListsPending } from './components/modules/Lists/ListPending'
+import { ListsRoute } from './components/modules/Lists/ListRoute'
+import { RelaySetsRoute } from './components/modules/Lists/RelaySets/RelaySetRoute'
 import { MediaPending } from './components/modules/Media/MediaPending'
 import { MediaRoute } from './components/modules/Media/MediaRoute'
 import { NostrEventPending } from './components/modules/NostrEvent/NostrEventLoading'
@@ -35,6 +39,7 @@ import { TagHeader } from './components/modules/Tag/TagHeader'
 import { Kind } from './constants/kinds'
 import type { NostrFilter } from './core/types'
 import { ErrorBoundary } from './ErrorBoundary'
+import { useResetScroll } from './hooks/useResetScroll'
 import type { NostrContext } from './nostr/context'
 import { subscribeSync } from './nostr/subscriptions/subscribeSync'
 import { READ, WRITE } from './nostr/types'
@@ -58,10 +63,16 @@ import { NProfileModuleModel } from './stores/modules/nprofile.module'
 import { rootStore, type RootStore } from './stores/root.store'
 import { subscribeDeckColums } from './stores/subscriptions/subscribeDeckColumns'
 import { startFeedStream, subscribeFeedStore } from './stores/subscriptions/subscribeFeedStore'
+import { subscribeLists } from './stores/subscriptions/subscribeLists'
 import { subscribeNostrModule } from './stores/subscriptions/subscribeNostrModule'
 import { subscribeNotifications } from './stores/subscriptions/subscribeNotifications'
 import { subscribeRelayDiscoveryModule } from './stores/subscriptions/subscribeRelayDiscoveryModule'
 import { decodeNIP19 } from './utils/nip19'
+import { useMobile } from './hooks/useMobile'
+import { RelayDiscoveryList } from './components/modules/RelayDiscovery/RelayDiscoveryList'
+import { RouteHeader } from './components/elements/Layouts/RouteHeader'
+import { RelayListRowLoading } from './components/elements/Relays/RelayListRowLoading'
+import { RelayTableRowLoading } from './components/elements/Relays/RelayTableRowLoading'
 
 const rootRoute = createRootRouteWithContext<{ rootStore: RootStore }>()({
   component: RootLayout,
@@ -284,7 +295,7 @@ export const feedRoute = createRoute({
       filter['#K'] = [deps.K].flat()
     }
 
-    const context = {} as NostrContext
+    const context: NostrContext = { batcher: 'eager' }
     if (relay) {
       context.relays = [relay].flat()
     }
@@ -480,6 +491,7 @@ export const nostrRoute = createRoute({
   },
   component: function NostrRoute() {
     const { decoded } = nostrRoute.useRouteContext()
+    useResetScroll()
     switch (decoded?.type) {
       case 'npub':
         return <NProfileRoute pubkey={decoded.data} />
@@ -582,8 +594,13 @@ const tagsRoute = createRoute({
   },
   component: function () {
     const module = tagsRoute.useLoaderData()
-    const { tag } = tagsRoute.useParams()
-    return <FeedRoute module={module} header={<FeedHeaderBase leading={<TagHeader tags={[tag]} />} />} />
+    useResetScroll()
+    return (
+      <FeedRoute
+        module={module}
+        header={<FeedHeaderBase feed={module.feed} renderRelaySettings leading={<TagHeader module={module} />} />}
+      />
+    )
   },
 })
 
@@ -605,6 +622,28 @@ const searchRoute = createRoute({
     const { module } = searchRoute.useLoaderData()
     return <FeedRoute module={module} header={<SearchSettings module={module} />} />
   },
+})
+
+const listsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/lists',
+  loader: () => subscribeLists().subscribe(),
+  pendingComponent: ListsPending,
+  component: ListsRoute,
+})
+
+const followSetsRoute = createRoute({
+  getParentRoute: () => listsRoute,
+  path: '/',
+  component: FollowSetRoute,
+})
+
+const relaySetsRoute = createRoute({
+  getParentRoute: () => listsRoute,
+  path: '/relaysets',
+  loader: () => subscribeLists().subscribe(),
+  pendingComponent: ListsPending,
+  component: RelaySetsRoute,
 })
 
 const relaysRoute = createRoute({
@@ -672,6 +711,7 @@ export const routeTree = rootRoute.addChildren([
   deckRoute,
   tagsRoute,
   searchRoute,
+  listsRoute.addChildren([followSetsRoute, relaySetsRoute]),
   notificationsRoute,
   mediaRoute,
   articleRoute,

@@ -20,7 +20,7 @@ export const FollowSetRoute = observer(function FollowSetRoute() {
         People's follow sets
       </Text>
       <Stack wrap gap={2} sx={styles.content} align='stretch'>
-        {user?.followsFollowSets.map((event) => <FollowSetCard key={event.id} event={event} renderAvatars={false} />)}
+        {user?.othersFollowSets.map((event) => <FollowSetCard key={event.id} event={event} renderAvatars={false} />)}
       </Stack>
     </>
   )

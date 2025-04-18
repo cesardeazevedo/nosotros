@@ -3,7 +3,7 @@ import { RouteHeader } from '@/components/elements/Layouts/RouteHeader'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Tab } from '@/components/ui/Tab/Tab'
 import { Text } from '@/components/ui/Text/Text'
-import { useMobile } from '@/hooks/useMobile'
+import { useLG } from '@/hooks/useMobile'
 import { useResetScroll } from '@/hooks/useResetScroll'
 import { spacing } from '@/themes/spacing.stylex'
 import { Link, Outlet } from '@tanstack/react-router'
@@ -11,13 +11,13 @@ import { observer } from 'mobx-react-lite'
 import { css } from 'react-strict-dom'
 
 export const ListsRoute = observer(function ListsRoute() {
-  const isMobile = useMobile()
+  const isLG = useLG()
   useResetScroll()
   return (
     <RouteContainer
       maxWidth='lg'
       headline={
-        !isMobile && (
+        !isLG && (
           <Text variant='headline' size='md' sx={styles.headline}>
             Lists
           </Text>

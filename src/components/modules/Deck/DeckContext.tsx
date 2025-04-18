@@ -1,10 +1,7 @@
 import type { ModulesInstances } from '@/stores/modules/module.store'
 import { createContext } from 'react'
-import { firstValueFrom, timer } from 'rxjs'
 
-export const deckContextvalues = {
-  delay: firstValueFrom(timer(50)),
-}
+export const deckContextvalues = {}
 
 export const DeckContext = createContext({
   ...deckContextvalues,
@@ -13,5 +10,4 @@ export const DeckContext = createContext({
 } as {
   module: ModulesInstances | undefined
   index: number | undefined
-  delay: Promise<0>
 })
