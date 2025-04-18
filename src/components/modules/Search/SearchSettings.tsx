@@ -1,5 +1,3 @@
-import { RelayInputChip } from '@/components/elements/Relays/RelayInputChip'
-import { RelaySelectPopover } from '@/components/elements/Relays/RelaySelectPopover'
 import { Chip } from '@/components/ui/Chip/Chip'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { SearchField } from '@/components/ui/Search/Search'
@@ -9,10 +7,12 @@ import { Kind } from '@/constants/kinds'
 import type { FeedModule } from '@/stores/modules/feed.module'
 import { spacing } from '@/themes/spacing.stylex'
 import type { IconProps } from '@tabler/icons-react'
-import { IconArticle, IconBlur, IconMessage2, IconPhoto, IconServerBolt, IconUser } from '@tabler/icons-react'
+import { IconArticle, IconMessage2, IconPhoto, IconUser } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
 import { useRef } from 'react'
 import { css, html } from 'react-strict-dom'
+import { FeedSettingsRelays } from '../Feed/settings/FeedSettingsRelays'
+import { FeedSettingsSafety } from '../Feed/settings/FeedSettingsSafety'
 import { useSearchChange } from './hooks/useSearchChange'
 
 const iconProps: IconProps = {
@@ -22,23 +22,26 @@ const iconProps: IconProps = {
 
 type Props = {
   module: FeedModule
+  renderSearchField?: boolean
 }
 
 export const SearchSettings = observer(function SearchSettings(props: Props) {
-  const { module } = props
-  const feed = module.feed
+  const { module, renderSearchField = true } = props
+  const { feed } = module
   const searchRef = useRef<HTMLInputElement>(null)
   const onChange = useSearchChange(true)
   return (
     <>
-      <Stack sx={styles.header} justify='space-between'>
-        <SearchField
-          ref={searchRef}
-          placeholder='Search on nostr'
-          defaultValue={module.feed.filter.search}
-          onChange={(e) => onChange(e.target.value)}
-        />
-      </Stack>
+      {renderSearchField && (
+        <Stack sx={styles.header} justify='space-between'>
+          <SearchField
+            ref={searchRef}
+            placeholder='Search on nostr'
+            defaultValue={module.feed.filter.search}
+            onChange={(e) => onChange(e.target.value)}
+          />
+        </Stack>
+      )}
       <html.div style={styles.root}>
         <Divider />
         <Stack horizontal={false} sx={styles.content} gap={2}>
@@ -47,13 +50,6 @@ export const SearchSettings = observer(function SearchSettings(props: Props) {
               Search Content
             </Text>
             <Stack gap={0.5} wrap>
-              <Chip
-                variant='filter'
-                label='Relays'
-                selected={feed.hasKind(Kind.RelayDiscovery)}
-                icon={<IconServerBolt {...iconProps} />}
-                onClick={() => feed.toggleKind(Kind.RelayDiscovery)}
-              />
               <Chip
                 variant='filter'
                 label='Users'
@@ -82,40 +78,11 @@ export const SearchSettings = observer(function SearchSettings(props: Props) {
                 label='Articles'
                 onClick={() => feed.toggleKind(Kind.Article)}
               />
-              <Chip
-                label='Reset'
-                variant='assist'
-                // icon={<IconHighlight {...iconProps} />}
-                // selected={feed.hasKind(Kind.Highlight)}
-                onClick={() => feed.resetFilter()}
-              />
+              {/* <Chip label='Reset' variant='assist' onClick={() => feed.resetFilter()} /> */}
             </Stack>
           </Stack>
-          <Stack horizontal={false} gap={0.5}>
-            <Text variant='label' size='lg' sx={styles.label}>
-              Safety
-            </Text>
-            <Stack gap={0.5} wrap>
-              <Chip
-                selected={feed.blured}
-                variant='filter'
-                icon={<IconBlur {...iconProps} />}
-                label='Blur Images'
-                onClick={() => feed.toggle('blured')}
-              />
-            </Stack>
-          </Stack>
-          <Stack horizontal={false} gap={0.5}>
-            <Text variant='label' size='lg' sx={styles.label}>
-              Search relays
-            </Text>
-            <Stack gap={0.5} wrap>
-              {module.feed.context.relays?.map((relay) => (
-                <RelayInputChip key={relay} url={relay} onDelete={() => module.feed.removeRelay(relay)} />
-              ))}
-              <RelaySelectPopover label='Add Search Relay' onSubmit={(relay) => module.feed.addRelay(relay)} />
-            </Stack>
-          </Stack>
+          <FeedSettingsSafety feed={feed} />
+          <FeedSettingsRelays feed={feed} name='Search relays' />
         </Stack>
       </html.div>
     </>

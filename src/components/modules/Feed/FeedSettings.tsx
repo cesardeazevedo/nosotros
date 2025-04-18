@@ -5,21 +5,24 @@ import { Text } from '@/components/ui/Text/Text'
 import { Kind } from '@/constants/kinds'
 import type { FeedStore } from '@/stores/feeds/feed.store'
 import { spacing } from '@/themes/spacing.stylex'
-import { IconArticle, IconBlur, IconMessage2, IconPhoto, IconShare3 } from '@tabler/icons-react'
+import { IconArticle, IconMessage2, IconPhoto, IconShare3 } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
 import { css, html } from 'react-strict-dom'
+import { FeedSettingsRelays } from './settings/FeedSettingsRelays'
+import { FeedSettingsSafety } from './settings/FeedSettingsSafety'
 
 const iconProps = {
   size: 18,
   strokeWidth: '1.5',
 }
 
-type Props = {
+export type Props = {
   feed: FeedStore
+  renderRelaySettings?: boolean
 }
 
 export const FeedSettings = observer(function FeedSettings(props: Props) {
-  const { feed } = props
+  const { feed, renderRelaySettings = false } = props
   return (
     <html.div style={styles.root}>
       <Divider />
@@ -64,72 +67,10 @@ export const FeedSettings = observer(function FeedSettings(props: Props) {
           {/*   onClick={() => feed.toggleKind(Kind.Highlight)} */}
           {/* /> */}
           {/* <Chip variant='filter' icon={<IconBroadcast {...iconProps} />} label='Live Events' /> */}
-          <Chip
-            label='Reset'
-            variant='assist'
-            // icon={<IconHighlight {...iconProps} />}
-            // selected={feed.hasKind(Kind.Highlight)}
-            onClick={() => feed.resetFilter()}
-          />
+          <Chip label='Reset' variant='assist' onClick={() => feed.resetFilter()} />
         </Stack>
-        {/* <Text variant='label' size='lg' sx={styles.label}> */}
-        {/*   Authors */}
-        {/* </Text> */}
-        {/* <Stack gap={0.5} wrap> */}
-        {/*   <Chip */}
-        {/*     selected={feed.scope === 'following'} */}
-        {/*     variant='filter' */}
-        {/*     icon={<IconUsers {...iconProps} />} */}
-        {/*     label={`Following`} */}
-        {/*     trailingIcon={user?.totalFollows} */}
-        {/*   /> */}
-        {/*   {user?.followSets?.map((event) => ( */}
-        {/*     <Chip */}
-        {/*       key={event.id} */}
-        {/*       // selected={feed.scope === 'followSet' && feed.followSets === event.getTag('d')} */}
-        {/*       label={event.getTag('title')} */}
-        {/*       trailingIcon={event.getTags('p')?.length || '0'} */}
-        {/*       onClick={() => { */}
-        {/*         const d = event.getTag('d') */}
-        {/*         if (d) { */}
-        {/*           // feed.setScope('followSet') */}
-        {/*           // feed.setFollowSets(d) */}
-        {/*         } */}
-        {/*       }} */}
-        {/*     /> */}
-        {/*   ))} */}
-        {/*   <Divider orientation='vertical' sx={styles.divider} /> */}
-        {/*   <Chip */}
-        {/*     variant='filter' */}
-        {/*     icon={<IconUsersGroup {...iconProps} />} */}
-        {/*     label={'Create user list'} */}
-        {/*     onClick={() => dialogStore.setCreateList(Kind.FollowSets)} */}
-        {/*   /> */}
-        {/* </Stack> */}
-        {/* <Text variant='label' size='lg' sx={styles.label}> */}
-        {/*   Relays */}
-        {/* </Text> */}
-        {/* <Stack gap={0.5} wrap> */}
-        {/*   <Chip */}
-        {/*     selected={feed.blured} */}
-        {/*     variant='filter' */}
-        {/*     // icon={<IconBlur {...iconProps} />} */}
-        {/*     label='My Relays' */}
-        {/*     onClick={() => feed.toggle('blured')} */}
-        {/*   /> */}
-        {/* </Stack> */}
-        <Text variant='label' size='lg' sx={styles.label}>
-          Safety
-        </Text>
-        <Stack gap={0.5} wrap>
-          <Chip
-            selected={feed.blured}
-            variant='filter'
-            icon={<IconBlur {...iconProps} />}
-            label='Blur Images'
-            onClick={() => feed.toggle('blured')}
-          />
-        </Stack>
+        <FeedSettingsSafety feed={feed} />
+        {renderRelaySettings && <FeedSettingsRelays feed={feed} />}
       </Stack>
     </html.div>
   )
