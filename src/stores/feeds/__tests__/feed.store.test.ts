@@ -41,4 +41,23 @@ describe('FeedStore', () => {
     expect(store.buffer).toHaveLength(0)
     expect(store.latest).toHaveLength(6)
   })
+
+  test('assert buffer data with published data', () => {
+    const store = FeedStoreModel.create({
+      filter: { kinds: [1], authors: ['1'] },
+      context: {},
+      scope: 'following',
+    })
+    const note1 = fakeEventMeta({ id: '1' })
+    const note2 = fakeEventMeta({ id: '2' })
+    const note3 = fakeEventMeta({ id: '3' })
+    store.add(note1)
+    store.addPublish(note2)
+    store.addBuffer(note2)
+    store.addBuffer(note3)
+    expect(store.buffer).toHaveLength(1)
+    expect(store.published).toHaveLength(1)
+    expect([...store.published.values()]).toStrictEqual([note2])
+    expect([...store.buffer.values()]).toStrictEqual([note3])
+  })
 })

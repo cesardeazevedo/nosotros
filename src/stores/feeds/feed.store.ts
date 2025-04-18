@@ -88,7 +88,9 @@ export const FeedStoreModel = NostrStoreModel.named('FeedStoreModel')
       self.published.set(item.id, item)
     },
     addBuffer(item: NostrEventMetadata) {
-      self.buffer.set(item.id, item)
+      if (!self.published.has(item.id)) {
+        self.buffer.set(item.id, item)
+      }
     },
     reset() {
       self.notes.clear()
