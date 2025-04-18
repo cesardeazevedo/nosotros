@@ -2,12 +2,14 @@ import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { useRelativeDate } from '@/hooks/useRelativeDate'
 import { relaysStore } from '@/stores/relays/relays.store'
+import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { observer } from 'mobx-react-lite'
 import { useMemo } from 'react'
 import { css } from 'react-strict-dom'
 import { UserAvatar } from '../User/UserAvatar'
 import { UserName } from '../User/UserName'
+import { RelayDescription } from './RelayDescription'
 import { RelayFriendsList } from './RelayFriendsList'
 import { RelayLatency } from './RelayLatency'
 
@@ -38,14 +40,12 @@ export const RelayRowDetails = observer(function RelayRowDetails(props: Props) {
   const [lastConnectedText] = useRelativeDate(lastConnected || 0, 'long')
   return (
     <Stack horizontal sx={styles.root} justify='space-between' align='flex-start' gap={2}>
-      <Stack horizontal={false} gap={1}>
+      <Stack horizontal={false} gap={1} sx={styles.section}>
         <Stack horizontal={false}>
           <Text variant='title' size='lg'>
             {info?.name}
           </Text>
-          <Text variant='title' size='sm'>
-            {info?.description}
-          </Text>
+          <RelayDescription variant='title' size='sm' description={info?.description} />
           {hasAuthor && (
             <Text variant='title' size='sm'>
               <Stack gap={1}>
@@ -64,7 +64,7 @@ export const RelayRowDetails = observer(function RelayRowDetails(props: Props) {
           </Text>
         </Stack>
       </Stack>
-      <Stack horizontal={false} gap={4}>
+      <Stack horizontal={false} gap={3}>
         <Stack horizontal gap={3} align='flex-start' wrap>
           <Stack horizontal={false}>
             <Text size='lg'>events</Text>
@@ -106,6 +106,17 @@ const styles = css.create({
     cursor: 'default',
     paddingBlock: spacing.padding2,
     paddingInline: spacing.padding2,
-    backgroundColor: 'inherit',
+    backgroundColor: palette.surfaceContainer,
+  },
+  section: {
+    maxWidth: 350,
+  },
+  description: {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    WebkitLineClamp: 2,
+    boxOrient: 'vertical',
+    WebkitBoxOrient: 'vertical',
+    display: '-webkit-box',
   },
 })

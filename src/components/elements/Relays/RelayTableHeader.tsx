@@ -1,5 +1,6 @@
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Stack } from '@/components/ui/Stack/Stack'
+import { useMobile, useSM } from '@/hooks/useMobile'
 import { useCurrentPubkey } from '@/hooks/useRootStore'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
@@ -18,14 +19,16 @@ export const RelayTableHeader = (props: Props) => {
   const pubkey = useCurrentPubkey()
   const root = css.props(styles.root)
   const td = css.props(styles.cell)
+  const isMobile = useMobile()
+  const isSM = useSM()
   return (
     <thead {...root}>
       <tr>
-        <th {...td} align='left'>
+        <th {...css.props([styles.cell, styles.minWidth])} align='left'>
           Relay
         </th>
         <th {...td} align='left'></th>
-        {pubkey && renderPeopleColumn && (
+        {!isMobile && pubkey && renderPeopleColumn && (
           <th {...td} align='left' onClick={onUsersColumnClick}>
             <Stack gap={0.5}>
               People
@@ -37,7 +40,7 @@ export const RelayTableHeader = (props: Props) => {
             </Stack>
           </th>
         )}
-        {renderLatencyColumn && (
+        {renderLatencyColumn && !isSM && (
           <th {...td} align='left'>
             Latency (ms)
           </th>
@@ -64,5 +67,8 @@ const styles = css.create({
     height: 22,
     minWidth: 22,
     minHeight: 22,
+  },
+  minWidth: {
+    minWidth: 220,
   },
 })

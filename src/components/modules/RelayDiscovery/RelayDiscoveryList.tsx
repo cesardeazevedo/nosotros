@@ -1,3 +1,4 @@
+import { RelayListRowLoading } from '@/components/elements/Relays/RelayListRowLoading'
 import { Button } from '@/components/ui/Button/Button'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { RelayDiscoveryModule } from '@/stores/modules/relay.discovery.module'
@@ -16,18 +17,18 @@ export const RelayDiscoveryList = observer(function RelayDiscoveryList(props: Pr
     <>
       <Stack horizontal={false}>
         {module.sortedByUsers.length === 0 ? (
-          <></>
+          <RelayListRowLoading />
         ) : (
           <>
-            {module.sortedByUsers.map((event) => (
+            {module.list.map((event) => (
               <RelayDiscoveryRow table={false} key={event.id} event={event.event} />
             ))}
           </>
         )}
         <Stack sx={styles.footer} justify='center'>
-          <Button variant='filledTonal' sx={styles.button} onClick={() => {}}>
+          <Button variant='filledTonal' sx={styles.button} onClick={() => module.feed.paginate()}>
             Load More
-            {/* {relayDiscoveryStore.left ? `(${relayDiscoveryStore.left})` : ''} */}
+            {module.left ? ` (${module.left})` : ''}
           </Button>
         </Stack>
       </Stack>

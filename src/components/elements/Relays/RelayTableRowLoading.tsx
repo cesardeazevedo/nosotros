@@ -12,7 +12,7 @@ type Props = {
   rows?: number
 }
 
-export const RelayDiscoveryRowLoading = memo(function RelayDiscoveryRowLoading(props: Props) {
+export const RelayTableRowLoading = memo(function RelayTableRowLoading(props: Props) {
   const pubkey = useCurrentPubkey()
   const list = [...Array(props.rows || 10).keys()]
   const row = css.props(styles.row)

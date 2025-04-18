@@ -627,11 +627,21 @@ const relayDiscoveryRoute = createRoute({
     subscribeRelayDiscoveryModule(module).subscribe()
     return module
   },
+  pendingComponent: function () {
+    const isMobile = useMobile()
+    return (
+      <RouteContainer maxWidth='lg' header={<RouteHeader label='Relay Discovery' />}>
+        {isMobile ? <RelayListRowLoading /> : <RelayTableRowLoading />}
+      </RouteContainer>
+    )
+  },
   component: function () {
     const module = relayDiscoveryRoute.useLoaderData()
+    const isMobile = useMobile()
+    useResetScroll()
     return (
       <RouteContainer maxWidth='lg' header={<RelayDiscoveryHeader module={module} />}>
-        <RelayDiscoveryTable module={module} />
+        {isMobile ? <RelayDiscoveryList module={module} /> : <RelayDiscoveryTable module={module} />}
       </RouteContainer>
     )
   },

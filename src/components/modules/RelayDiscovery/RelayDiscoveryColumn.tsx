@@ -2,7 +2,7 @@ import type { RelayDiscoveryModule } from '@/stores/modules/relay.discovery.modu
 import { DeckColumnHeader } from '../Deck/DeckColumnHeader'
 import { Feed } from '../Feed/Feed'
 import { RelayDiscoveryRow } from './RelayDiscoveryRow'
-import { RelayDiscoveryRowLoading } from './RelayDiscoveryRowLoading'
+import { RelayTableRowLoading } from '../../elements/Relays/RelayTableRowLoading'
 import { RelayDiscoveryTitle } from './RelayDiscoveryTitle'
 
 type Props = {
@@ -17,7 +17,7 @@ export const RelayDiscoveryColumn = (props: Props) => {
       <Feed
         column
         feed={module.feed}
-        loading={<RelayDiscoveryRowLoading />}
+        loading={<RelayTableRowLoading />}
         render={(event) => <RelayDiscoveryRow key={event.id} table={false} event={event} />}
       />
     </>

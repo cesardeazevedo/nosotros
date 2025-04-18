@@ -7,16 +7,17 @@ type Props = CenteredContainerProps & {
   headline?: React.ReactNode
   header?: React.ReactNode
   children: React.ReactNode
+  renderDivider?: boolean
 }
 
 export const RouteContainer = function RouteContainer(props: Props) {
-  const { children, headline, header, ...rest } = props
+  const { children, headline, header, renderDivider = true, ...rest } = props
   return (
     <CenteredContainer margin {...rest}>
       {headline}
-      <PaperContainer>
+      <PaperContainer maxWidth={rest.maxWidth}>
         {header}
-        <Divider />
+        {renderDivider && <Divider />}
         {children}
       </PaperContainer>
     </CenteredContainer>

@@ -5,8 +5,8 @@ import type { RelayDiscoveryModule } from '@/stores/modules/relay.discovery.modu
 import { spacing } from '@/themes/spacing.stylex'
 import { observer } from 'mobx-react-lite'
 import { css } from 'react-strict-dom'
+import { RelayTableRowLoading } from '../../elements/Relays/RelayTableRowLoading'
 import { RelayDiscoveryRow } from './RelayDiscoveryRow'
-import { RelayDiscoveryRowLoading } from './RelayDiscoveryRowLoading'
 
 type Props = {
   module: RelayDiscoveryModule
@@ -17,7 +17,7 @@ export const RelayDiscoveryTable = observer(function RelayDiscoveryTable(props: 
   return (
     <Stack horizontal={false}>
       {module.sortedByUsers.length === 0 ? (
-        <RelayDiscoveryRowLoading />
+        <RelayTableRowLoading />
       ) : (
         <table cellPadding={1}>
           <RelayTableHeader usersSorted={module.sorted} onUsersColumnClick={() => module.toggleSorted()} />
@@ -31,7 +31,7 @@ export const RelayDiscoveryTable = observer(function RelayDiscoveryTable(props: 
       <Stack sx={styles.footer} justify='center'>
         <Button variant='filledTonal' sx={styles.button} onClick={() => module.feed.paginate()}>
           Load More
-          {module.left ? `(${module.left})` : ''}
+          {module.left ? ` (${module.left})` : ''}
         </Button>
       </Stack>
     </Stack>

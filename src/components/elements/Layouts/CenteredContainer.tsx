@@ -5,22 +5,18 @@ import { css, html } from 'react-strict-dom'
 export type Props = {
   sx?: SxProps
   margin?: boolean
-  maxWidth?: 'md' | 'lg' | 'xl'
+  maxWidth?: 'md' | 'lg'
   children: React.ReactNode
 }
 
 export const CenteredContainer = (props: Props) => {
   const { maxWidth = 'md', margin, children, sx } = props
-  return (
-    <html.div style={[styles.root, margin && styles.margin, styles[maxWidth], sx]}>
-      <style>{`body {overflow-x: hidden}`}</style>
-      {children}
-    </html.div>
-  )
+  return <html.div style={[styles.root, margin && styles.margin, styles[maxWidth], sx]}>{children}</html.div>
 }
 
-const MOBILE = '@media (max-width: 599.95px)'
-const XL = '@media (max-width: 1299.95px)'
+const sm = '@media (max-width: 599.95px)'
+const md = '@media (max-width: 960px)'
+const lg = '@media (max-width: 1299.95px)'
 
 const styles = css.create({
   root: {
@@ -33,30 +29,23 @@ const styles = css.create({
     paddingBottom: 100,
     marginTop: {
       default: 64,
-      [MOBILE]: 0,
+      [sm]: 0,
     },
   },
   md: {
     maxWidth: {
       default: 600,
-      [MOBILE]: '100%',
+      [md]: '100%',
     },
   },
   lg: {
     maxWidth: {
       default: 960,
-      [MOBILE]: '100%',
-      [XL]: '100%',
+      [lg]: '100%',
     },
     marginTop: {
       default: 64,
-      [XL]: 0,
-    },
-  },
-  xl: {
-    maxWidth: {
-      default: 1200,
-      [MOBILE]: '100%',
+      [lg]: 0,
     },
   },
 })

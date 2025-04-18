@@ -12,8 +12,8 @@ type Props = {
 export const RelayDiscoveryTitle = observer(function RelayDiscoveryTitle(props: Props) {
   const { module } = props
   return (
-    <Stack gap={1}>
-      <Text variant='title' size='md'>
+    <Stack grow gap={0.5}>
+      <Text variant='headline' size='sm'>
         Relay Discovery
       </Text>
       <Text variant='title' size='md' sx={styles.total}>

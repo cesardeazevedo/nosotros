@@ -4,6 +4,7 @@ import type { SxProps } from '@/components/ui/types'
 import { relaysStore } from '@/stores/relays/relays.store'
 import { observer } from 'mobx-react-lite'
 import { UserAvatar } from '../User/UserAvatar'
+import { ContentProvider } from '@/components/providers/ContentProvider'
 
 type Props = {
   size?: AvatarProps['size']
@@ -20,7 +21,9 @@ export const RelayIcon = observer(function RelayIcon(props: Props) {
       {info?.icon ? (
         <Avatar size={size} src={info?.icon} sx={sx} />
       ) : info?.pubkey && !onlyRelayIcon ? (
-        <UserAvatar size={size} pubkey={info?.pubkey} sx={sx} />
+        <ContentProvider value={{ disableLink: true, disablePopover: true }}>
+          <UserAvatar size={size} pubkey={info?.pubkey} sx={sx} />
+        </ContentProvider>
       ) : (
         <></>
       )}

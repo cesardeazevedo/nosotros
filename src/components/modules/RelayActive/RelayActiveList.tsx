@@ -3,12 +3,12 @@ import { RelayTableRow } from '@/components/elements/Relays/RelayTableRow'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { relaysStore } from '@/stores/relays/relays.store'
 import { observer } from 'mobx-react-lite'
-import { RelayDiscoveryRowLoading } from '../RelayDiscovery/RelayDiscoveryRowLoading'
+import { RelayTableRowLoading } from '../../elements/Relays/RelayTableRowLoading'
 
 export const RelayActiveList = observer(function RelayActiveList() {
   return (
     <Stack horizontal={false}>
-      {relaysStore.connected.length === 0 && <RelayDiscoveryRowLoading />}
+      {relaysStore.connected.length === 0 && <RelayTableRowLoading />}
       <table cellPadding={1}>
         <RelayTableHeader renderLatencyColumn={false} />
         <tbody>

@@ -4,6 +4,7 @@ import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
+import { useMobile, useSM } from '@/hooks/useMobile'
 import { useCurrentPubkey } from '@/hooks/useRootStore'
 import { relaysStore } from '@/stores/relays/relays.store'
 import { palette } from '@/themes/palette.stylex'
@@ -15,6 +16,7 @@ import { css } from 'react-strict-dom'
 import { LinkRelayFeed } from '../Links/LinkRelayFeed'
 import { RelayChip } from '../Relays/RelayChip'
 import { RelayFriendsList } from '../Relays/RelayFriendsList'
+import { RelayDescription } from './RelayDescription'
 import { RelayIcon } from './RelayIcon'
 import { RelayLatency } from './RelayLatency'
 import { RelayRowDetails } from './RelayRowDetails'
@@ -34,6 +36,8 @@ export const RelayTableRow = observer(function RelayTableRow(props: Props) {
   const root = css.props(styles.root)
   const td = css.props(styles.cell)
   const info = relaysStore.getInfo(relay)
+  const isMD = useMobile()
+  const isSM = useSM()
   return (
     <>
       <tr {...root} onClick={() => setOpen(!open)}>
@@ -53,9 +57,7 @@ export const RelayTableRow = observer(function RelayTableRow(props: Props) {
               <Text variant='title' size='md'>
                 {info?.name}
               </Text>
-              <Text variant='body' size='sm'>
-                {info?.description}
-              </Text>
+              <RelayDescription description={info?.description} />
             </Stack>
           </Stack>
         </td>
@@ -79,12 +81,12 @@ export const RelayTableRow = observer(function RelayTableRow(props: Props) {
             )}
           </Stack>
         </td>
-        {pubkey && (
+        {pubkey && !isMD && (
           <td {...td} align='right'>
             <RelayFriendsList relay={relay} />
           </td>
         )}
-        {rtt && (
+        {rtt && !isSM && (
           <td {...td} align='left'>
             <RelayLatency value={rtt} />
           </td>
