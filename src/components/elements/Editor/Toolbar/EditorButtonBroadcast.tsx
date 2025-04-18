@@ -4,17 +4,16 @@ import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 import type { EditorStore } from '@/stores/editor/editor.store'
 import { IconServerBolt } from '@tabler/icons-react'
-import { forwardRef } from 'react'
+import { observer } from 'mobx-react-lite'
+import type { Ref } from 'react'
 
 type Props = IconButtonProps & {
   store: EditorStore
+  ref?: Ref<HTMLButtonElement | null>
 }
 
-export const EditorButtonBroadcast = forwardRef<HTMLButtonElement, Props>(function EditorButtonBroadcast(
-  props: Props,
-  ref,
-) {
-  const { store, ...rest } = props
+export const EditorButtonBroadcast = observer(function EditorButtonBroadcast(props: Props) {
+  const { store, ref, ...rest } = props
   const { dense } = useContentContext()
   return (
     <Tooltip cursor='arrow' text='Select relays' enterDelay={200}>

@@ -1,4 +1,4 @@
-import { useCurrentSigner, useGlobalSettings, useRootContext } from '@/hooks/useRootStore'
+import { useCurrentPubkey, useCurrentSigner, useGlobalSettings, useRootContext } from '@/hooks/useRootStore'
 import { type EditorStore } from '@/stores/editor/editor.store'
 import { spacing } from '@/themes/spacing.stylex'
 import { EditorContent as TiptapEditorContent } from '@tiptap/react'
@@ -19,6 +19,7 @@ export const EditorTiptap = observer(function EditorTiptap(props: Props) {
   const { dense, store, kind20 = false } = props
   const id = useId()
 
+  const pubkey = useCurrentPubkey()
   const context = useRootContext()
   const signer = useCurrentSigner()
   const globalSettings = useGlobalSettings()
@@ -35,8 +36,8 @@ export const EditorTiptap = observer(function EditorTiptap(props: Props) {
     if (signer) {
       store.setSigner(signer)
     }
-    store.setContext(context, globalSettings)
-  }, [context])
+    store.setContext({ ...context, pubkey }, globalSettings)
+  }, [context, pubkey])
 
   return (
     <TiptapEditorContent

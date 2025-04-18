@@ -3,7 +3,6 @@ import { Expandable } from '@/components/ui/Expandable/Expandable'
 import type { EditorStore } from '@/stores/editor/editor.store'
 import { observer } from 'mobx-react-lite'
 import { EditorBroadcaster } from './EditorBroadcaster'
-import { EditorMentions } from './EditorMentions'
 import { EditorSettings } from './EditorSettings'
 import { EditorZapSplits } from './EditorZapSplit'
 
@@ -18,10 +17,6 @@ export const EditorExpandables = observer(function EditorExpandables(props: Prop
       <Expandable expanded={store.section === 'broadcast'}>
         <Divider />
         <EditorBroadcaster store={store} />
-      </Expandable>
-      <Expandable expanded={store.section === 'mentions'}>
-        <Divider />
-        <EditorMentions key='mentions' store={store} />
       </Expandable>
       <Expandable expanded={store.section === 'settings'}>
         <Divider />

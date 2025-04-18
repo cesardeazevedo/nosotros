@@ -25,7 +25,7 @@ type EditorStoreOptions = {
   onPublish?: (event: NostrEventMetadata) => void
 }
 
-type Sections = 'broadcast' | 'mentions' | 'pow' | 'settings' | 'zaps'
+type Sections = 'broadcast' | 'pow' | 'settings' | 'zaps' | 'reactions'
 
 export class EditorStore {
   signer: Signer | undefined = undefined
@@ -225,7 +225,7 @@ export class EditorStore {
       return selectRelays(userRelays || [], {
         permission: WRITE,
         ignoreRelays: [...this.excludedRelays],
-        maxRelaysPerUser: 11,
+        maxRelaysPerUser: 12,
       })
     }
     return []
@@ -283,7 +283,7 @@ export class EditorStore {
       return selectRelays(userRelays || [], {
         ignoreRelays: [...this.excludedRelays],
         permission: READ,
-        maxRelaysPerUser: this.context?.maxRelaysPerUser,
+        maxRelaysPerUser: 4,
       })
     })
   }
