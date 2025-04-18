@@ -8,6 +8,8 @@ import { Observer } from 'mobx-react-lite'
 import { css } from 'react-strict-dom'
 import { IconButtonSearch } from '../Buttons/IconButtonSearch'
 import { HeaderLogo } from '../Header/HeaderLogo'
+import { useContext } from 'react'
+import { SidebarContext } from './SidebarContext'
 
 const iconProps = {
   size: 26,
@@ -16,18 +18,21 @@ const iconProps = {
 
 export const SidebarHeader = () => {
   const globalSettings = useGlobalSettings()
+  const context = useContext(SidebarContext)
   return (
     <Stack justify='space-between' sx={styles.root}>
       <HeaderLogo />
       <Stack gap={0.5}>
         <IconButtonSearch />
-        <Observer>
-          {() => (
-            <IconButton onClick={() => globalSettings.toggle('sidebarCollapsed')}>
-              <IconLayoutSidebarLeftCollapse {...iconProps} />
-            </IconButton>
-          )}
-        </Observer>
+        {context.renderCollapsedButton && (
+          <Observer>
+            {() => (
+              <IconButton onClick={() => globalSettings.toggle('sidebarCollapsed')}>
+                <IconLayoutSidebarLeftCollapse {...iconProps} />
+              </IconButton>
+            )}
+          </Observer>
+        )}
       </Stack>
     </Stack>
   )

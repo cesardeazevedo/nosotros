@@ -1,4 +1,6 @@
 import type { SxProps } from '@/components/ui/types'
+import { duration } from '@/themes/duration.stylex'
+import { easing } from '@/themes/easing.stylex'
 import React, { useRef } from 'react'
 import { css } from 'react-strict-dom'
 import { Transition } from 'react-transition-group'
@@ -9,10 +11,8 @@ type Props = {
   children: (transitionStyle: SxProps, ref: React.RefObject<null>) => React.ReactNode
 }
 
-const duration = 230
-
 export const SidebarTransition = (props: Props) => {
-  const { open, timeout = duration, children } = props
+  const { open, timeout = 2000, children } = props
   const ref = useRef(null)
   return (
     <Transition nodeRef={ref} in={open} timeout={timeout} unmountOnExit>
@@ -23,11 +23,13 @@ export const SidebarTransition = (props: Props) => {
 
 const styles = css.create({
   root: {
-    transition: `margin-left ${duration}ms ease-out`,
+    transitionProperty: `margin-left`,
+    transitionDuration: duration.medium2,
+    transitionTimingFunction: easing.emphasizedDecelerate,
   },
   entering: { marginLeft: 0 },
   entered: { marginLeft: 0 },
-  exiting: { marginLeft: -315 },
-  exited: { marginLeft: -315 },
+  exiting: { marginLeft: -500 },
+  exited: { marginLeft: -500 },
   unmounted: {},
 })

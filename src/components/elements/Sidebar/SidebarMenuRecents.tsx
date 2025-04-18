@@ -4,7 +4,7 @@ import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { visibleOnHoverStyle } from '@/components/ui/helpers/visibleOnHover.stylex'
-import { useRootContext, useRootStore } from '@/hooks/useRootStore'
+import { useGlobalSettings, useRootContext, useRootStore } from '@/hooks/useRootStore'
 import { subscribeUser } from '@/nostr/subscriptions/subscribeUser'
 import { userStore } from '@/stores/users/users.store'
 import { spacing } from '@/themes/spacing.stylex'
@@ -60,10 +60,14 @@ const RecentProfileRow = (props: { recent: { id: string } }) => {
 
 export const SidebarMenuRecents = observer(function SidebarMenuRecents() {
   const rootStore = useRootStore()
+  const globalSettings = useGlobalSettings()
   return (
     rootStore.recents.list.length > 0 && (
       <div>
-        <Expandable initiallyExpanded trigger={(triggerProps) => <SidebarSubheader {...triggerProps} label='Recent' />}>
+        <Expandable
+          initiallyExpanded={globalSettings.recentsCollapsed}
+          onChange={(expanded) => globalSettings.toggle('recentsCollapsed', expanded)}
+          trigger={(triggerProps) => <SidebarSubheader {...triggerProps} label='Recent' />}>
           <Stack horizontal={false} sx={styles.content}>
             {rootStore.recents.list.map((recent) => {
               if (recent.type === 'profile') {

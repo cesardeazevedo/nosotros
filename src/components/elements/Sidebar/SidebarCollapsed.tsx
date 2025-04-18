@@ -1,3 +1,4 @@
+import { NotificationBadge } from '@/components/modules/Notifications/NotificationBadge'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
@@ -15,15 +16,17 @@ import {
   IconPhoto,
   IconUser,
   IconUserFilled,
+  IconWorldBolt,
 } from '@tabler/icons-react'
-import { Link } from '@tanstack/react-router'
+import { Link, useMatchRoute } from '@tanstack/react-router'
 import { observer } from 'mobx-react-lite'
-import type { RefObject } from 'react'
+import { useContext, type RefObject } from 'react'
 import { css } from 'react-strict-dom'
 import { IconButtonSearch } from '../Buttons/IconButtonSearch'
 import { IconHome } from '../Icons/IconHome'
 import { IconHomeFilled } from '../Icons/IconHomeFilled'
 import { ProfilePopover } from '../Navigation/ProfilePopover'
+import { SidebarContext } from './SidebarContext'
 
 type Props = {
   ref?: RefObject<null>
@@ -35,11 +38,15 @@ export const SidebarCollapsed = observer(function SidebarCollapsed(props: Props)
   const { decks } = useRootStore()
   const user = useCurrentUser()
   const pubkey = useCurrentPubkey()
+  const match = useMatchRoute()
+  const context = useContext(SidebarContext)
   const iconProps = {
     size: 26,
     strokeWidth: '1.6',
     className: css.props(styles.icon).className,
   }
+  const isNoPane = !context.pane
+  const isNotifications = context.pane === '/notifications' || (!!match({ to: '/notifications' }) && isNoPane)
   return (
     <Stack
       ref={props.ref}
@@ -49,7 +56,12 @@ export const SidebarCollapsed = observer(function SidebarCollapsed(props: Props)
       sx={[styles.root, props.sx]}
       gap={1}>
       <Stack horizontal={false} align='center' gap={1}>
-        <IconButton sx={styles.iconButton} onClick={() => global.toggle('sidebarCollapsed', false)}>
+        <IconButton
+          sx={styles.iconButton}
+          onClick={() => {
+            context.setPane(false)
+            global.toggle('sidebarCollapsed', false)
+          }}>
           <IconLayoutSidebarLeftExpandFilled {...iconProps} />
         </IconButton>
         {/* <Tooltip cursor='arrow' enterDelay={0} text='Create note' placement='right'> */}
@@ -57,60 +69,70 @@ export const SidebarCollapsed = observer(function SidebarCollapsed(props: Props)
         {/*     <Fab flat variant='primary' icon={<IconPencil />} /> */}
         {/*   </Link> */}
         {/* </Tooltip> */}
-        {/* <br /> */}
         <Link to='/'>
           {({ isActive }) => (
             <IconButton
-              selected={isActive}
+              selected={isActive && isNoPane}
               toggle
               sx={styles.iconButton}
               icon={<IconHome {...iconProps} />}
               selectedIcon={<IconHomeFilled {...iconProps} />}
+              onClick={() => context.setPane(false)}
             />
           )}
         </Link>
-        {pubkey && (
-          <Link to='/notifications'>
-            {({ isActive }) => (
-              <IconButton
-                selected={isActive}
-                toggle
-                sx={styles.iconButton}
-                icon={<IconBell {...iconProps} />}
-                selectedIcon={<IconBellFilled {...iconProps} />}
-              />
-            )}
-          </Link>
-        )}
+        <IconButton
+          toggle
+          selected={isNotifications}
+          disabled={!pubkey}
+          sx={styles.iconButton}
+          icon={
+            <NotificationBadge>
+              {isNotifications ? <IconBellFilled {...iconProps} /> : <IconBell {...iconProps} />}
+            </NotificationBadge>
+          }
+          onClick={() => context.setPane('/notifications')}
+        />
         <Link to='/media'>
           {({ isActive }) => (
-            <IconButton selected={isActive} toggle sx={styles.iconButton} icon={<IconPhoto {...iconProps} />} />
+            <IconButton
+              selected={isActive && isNoPane}
+              toggle
+              sx={styles.iconButton}
+              icon={<IconPhoto {...iconProps} />}
+              onClick={() => context.setPane(false)}
+            />
           )}
         </Link>
         <Link to='/articles'>
           {({ isActive }) => (
             <IconButton
-              selected={isActive}
+              selected={isActive && isNoPane}
               toggle
               sx={styles.iconButton}
               icon={<IconNews {...iconProps} strokeWidth={1.4} />}
+              onClick={() => context.setPane(false)}
             />
           )}
         </Link>
         <IconButton
-          selected={false}
           toggle
+          disabled={!pubkey}
+          selected={context.pane === '/lists' || !!match({ to: '/lists' })}
           sx={styles.iconButton}
           icon={<IconListDetails {...iconProps} strokeWidth={1.4} />}
+          onClick={() => context.setPane('/lists')}
         />
         <Link to='/$nostr' params={{ nostr: `${user?.nprofile}` }}>
           {({ isActive }) => (
             <IconButton
-              selected={isActive}
               toggle
+              selected={isActive && isNoPane}
+              disabled={!pubkey}
               sx={styles.iconButton}
               icon={<IconUser {...iconProps} />}
               selectedIcon={<IconUserFilled {...iconProps} />}
+              onClick={() => context.setPane(false)}
             />
           )}
         </Link>
@@ -122,9 +144,7 @@ export const SidebarCollapsed = observer(function SidebarCollapsed(props: Props)
         <Stack horizontal={false} sx={styles.decks} gap={0.5}>
           {decks.list.map((deck) => (
             <Link key={deck.id} to='/deck/$id' params={{ id: deck.id }}>
-              {({ isActive }) => (
-                <IconButton selected={isActive} toggle sx={[styles.deckIconButton]} icon={deck.icon} />
-              )}
+              {({ isActive }) => <IconButton selected={isActive} toggle sx={styles.deckIconButton} icon={deck.icon} />}
             </Link>
           ))}
         </Stack>
@@ -133,6 +153,12 @@ export const SidebarCollapsed = observer(function SidebarCollapsed(props: Props)
         {/* <Tooltip cursor='arrow' enterDelay={0} text='Add column' placement='right'> */}
         {/*   <IconButton icon={<IconSquareRoundedPlus size={28} strokeWidth='1.5' />} /> */}
         {/* </Tooltip> */}
+        <IconButton
+          toggle
+          selected={context.pane === '/explore/relays' || !!match({ to: '/explore/relays' })}
+          onClick={() => context.setPane('/explore/relays')}>
+          <IconWorldBolt {...iconProps} />
+        </IconButton>
         <IconButtonSearch placement='right' sx={styles.iconButton} {...iconProps} />
         <ProfilePopover />
       </Stack>
@@ -142,7 +168,7 @@ export const SidebarCollapsed = observer(function SidebarCollapsed(props: Props)
 
 const styles = css.create({
   root: {
-    position: 'absolute',
+    position: 'fixed',
     backgroundColor: palette.surfaceContainerLowest,
     paddingTop: spacing.padding2,
     paddingBottom: spacing.padding4,
@@ -152,11 +178,7 @@ const styles = css.create({
     top: 0,
     bottom: 0,
     width: 84,
-    zIndex: 1,
-  },
-  fab: {
-    // width: 50,
-    // height: 50,
+    zIndex: 100,
   },
   iconButton: {
     width: 50,
@@ -167,17 +189,12 @@ const styles = css.create({
   deckIconButton: {
     width: 50,
     height: 50,
-    fontSize: 28,
-    // border: '1px solid',
-    // borderColor: palette.outlineVariant,
-    // backgroundColor: 'white',
+    fontSize: 24,
   },
   icon: {
     color: palette.onSurface,
   },
   decks: {
-    // border: '1px solid',
-    // borderColor: palette.outlineVariant,
     borderRadius: shape.full,
     padding: 0,
   },

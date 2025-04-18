@@ -31,9 +31,11 @@ export const Sidebar = observer(function Sidebar(props: Props) {
 
 const styles = css.create({
   sidebar: {
-    zIndex: 10,
+    zIndex: 50,
     width: 315,
-    position: 'relative',
+    top: 0,
+    bottom: 0,
+    position: 'fixed',
     overflowY: 'auto',
     backgroundColor: palette.surfaceContainerLowest,
     borderRight: '1px solid',

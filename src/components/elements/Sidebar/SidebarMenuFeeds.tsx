@@ -4,11 +4,14 @@ import { useCurrentUser } from '@/hooks/useRootStore'
 import { palette } from '@/themes/palette.stylex'
 import { Link } from '@tanstack/react-router'
 import { Observer, observer } from 'mobx-react-lite'
+import { useContext } from 'react'
 import { css } from 'react-strict-dom'
 import { IconHome } from '../Icons/IconHome'
 import { IconHomeFilled } from '../Icons/IconHomeFilled'
+import { SidebarContext } from './SidebarContext'
 
 export const SidebarMenuFeeds = observer(function SidebarMenuFeeds() {
+  const context = useContext(SidebarContext)
   const handleClickHome = () => {
     setTimeout(() => {
       window.scrollTo({ top: 0 })
@@ -25,21 +28,21 @@ export const SidebarMenuFeeds = observer(function SidebarMenuFeeds() {
   return (
     <Link tabIndex={-1} to='/' onClick={handleClickHome}>
       {({ isActive }) => (
-        <Observer>
-          {() => (
-            <MenuItem
-              selected={isActive}
-              onClick={() => {}}
-              leadingIcon={isActive ? <IconHomeFilled /> : <IconHome {...iconProps} />}
-              label={
+        <MenuItem
+          selected={isActive}
+          onClick={() => context.setPane(false)}
+          leadingIcon={isActive ? <IconHomeFilled /> : <IconHome {...iconProps} />}
+          label={
+            <Observer>
+              {() => (
                 <>
                   Following{' '}
                   {user?.totalFollows ? <Text size='md' sx={styles.gray}>{`(${user.totalFollows})`}</Text> : ''}
                 </>
-              }
-            />
-          )}
-        </Observer>
+              )}
+            </Observer>
+          }
+        />
       )}
     </Link>
   )

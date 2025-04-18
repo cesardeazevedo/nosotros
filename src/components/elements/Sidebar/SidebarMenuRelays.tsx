@@ -7,9 +7,11 @@ import { relaysStore } from '@/stores/relays/relays.store'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconServerBolt, IconWorldBolt } from '@tabler/icons-react'
-import { Link } from '@tanstack/react-router'
+import { Link, useMatchRoute } from '@tanstack/react-router'
 import { observer } from 'mobx-react-lite'
+import { useContext } from 'react'
 import { css } from 'react-strict-dom'
+import { SidebarContext } from './SidebarContext'
 import { SidebarSubheader } from './SidebarSubheader'
 
 type Props = {
@@ -23,7 +25,10 @@ const iconProps = {
 
 export const SidebarMenuRelays = observer(function SidebarMenuRelays(props: Props) {
   const pubkey = useCurrentPubkey()
+  const match = useMatchRoute()
+  const context = useContext(SidebarContext)
   const activeRelays = relaysStore.connected.length
+  const isRelayDiscovery = context.pane === '/explore/relays' || !!match({ to: '/explore/relays' })
   return (
     <>
       <SidebarSubheader label='Relays' />
@@ -31,7 +36,7 @@ export const SidebarMenuRelays = observer(function SidebarMenuRelays(props: Prop
         <Link tabIndex={-1} to='/relays/active'>
           {({ isActive }) => (
             <MenuItem
-              onClick={() => {}}
+              onClick={() => context.setPane(false)}
               selected={isActive}
               leadingIcon={<IconServerBolt {...iconProps} />}
               label={
@@ -49,24 +54,20 @@ export const SidebarMenuRelays = observer(function SidebarMenuRelays(props: Prop
             />
           )}
         </Link>
-        <Link tabIndex={-1} to='/explore/relays'>
-          {({ isActive }) => (
-            <MenuItem
-              selected={isActive}
-              sx={props.sx}
-              onClick={() => {}}
-              leadingIcon={<IconWorldBolt {...iconProps} />}
-              label={'Discover Relays'}
-            />
-          )}
-        </Link>
+        <MenuItem
+          selected={isRelayDiscovery}
+          sx={props.sx}
+          onClick={() => context.setPane('/explore/relays')}
+          leadingIcon={<IconWorldBolt {...iconProps} />}
+          label={'Discover Relays'}
+        />
         {pubkey && (
           <Link tabIndex={-1} to='/relays'>
             {({ isActive }) => (
               <MenuItem
                 selected={isActive}
                 sx={props.sx}
-                onClick={() => {}}
+                onClick={() => context.setPane(false)}
                 leadingIcon={<IconServerBolt {...iconProps} />}
                 label={'My Relays'}
               />
