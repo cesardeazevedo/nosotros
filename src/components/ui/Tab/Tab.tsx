@@ -110,7 +110,7 @@ export const Tab = forwardRef<HTMLButtonElement, Props>((props, ref) => {
         {label && (
           <html.div style={styles.labelContainer}>
             <html.div style={[styles.label, active && styles.label$active, disabled && styles.label$disabled]}>
-              {tabsContext?.renderLabels && label}
+              {label}
             </html.div>
             {hasInlineBadge && badge}
           </html.div>

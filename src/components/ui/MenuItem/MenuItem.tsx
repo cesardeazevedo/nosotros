@@ -27,7 +27,7 @@ export const MenuItem = forwardRef<HTMLElement, Props>((props, ref) => {
       tabIndex={isActive ? 0 : -1}
       {...other}
       interactive={!!other.onClick}
-      onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
+      onClick={(event) => {
         other.onClick?.(event)
         if (!keepOpenOnClick) {
           tree?.events.emit('click')

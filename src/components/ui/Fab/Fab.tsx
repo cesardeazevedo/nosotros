@@ -40,7 +40,7 @@ export const Fab = forwardRef<HTMLButtonElement, Props>((props, ref) => {
       ]}
       ref={ref}>
       {label && (
-        <Text variant='label' size='lg'>
+        <Text variant='label' size='lg' sx={styles.label}>
           {label}
         </Text>
       )}
@@ -117,5 +117,8 @@ const styles = css.create({
   },
   fullWidth: {
     width: '100%',
+  },
+  label: {
+    whiteSpace: 'nowrap',
   },
 })

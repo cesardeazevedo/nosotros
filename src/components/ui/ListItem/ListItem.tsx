@@ -5,6 +5,7 @@ import { useMergeRefs } from '@floating-ui/react'
 import type { AriaRole } from 'react'
 import React, { forwardRef, useRef } from 'react'
 import { css, html } from 'react-strict-dom'
+import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDOMProps'
 import { dataProps } from '../helpers/dataProps'
 import type { IVisualState } from '../hooks/useRipple'
 import { useVisualState } from '../hooks/useVisualState'
@@ -18,9 +19,6 @@ export type Props = {
   disabled?: boolean
   selected?: boolean
   role?: AriaRole
-  href?: string
-  rel?: HTMLAnchorElement['rel']
-  target?: HTMLAnchorElement['target']
   tabIndex?: -1 | 0
   interactive?: boolean
   visualState?: IVisualState
@@ -29,7 +27,8 @@ export type Props = {
   leadingImage?: string
   trailing?: React.ReactNode
   trailingIcon?: React.ReactNode
-  onClick?: React.MouseEventHandler<HTMLElement>
+  onClick?: (e: StrictClickEvent) => void
+  onMouseDown?: (e: StrictClickEvent) => void
   onMouseOver?: React.MouseEventHandler<HTMLElement>
   children?: React.ReactNode
   overline?: React.ReactNode
@@ -41,9 +40,6 @@ export type Props = {
 export const ListItem = forwardRef<HTMLElement, Props>((props, ref) => {
   const {
     sx,
-    href,
-    rel,
-    target,
     variant = 'standard',
     disabled,
     //leading,
@@ -53,6 +49,7 @@ export const ListItem = forwardRef<HTMLElement, Props>((props, ref) => {
     trailingIcon,
     interactive,
     onClick,
+    onMouseDown,
     onMouseOver,
     size: sizeProp = 'md',
     children,
@@ -60,28 +57,24 @@ export const ListItem = forwardRef<HTMLElement, Props>((props, ref) => {
     overline,
   } = props
 
-  const isInteractive = !!interactive || !!href
+  const isInteractive = !!interactive || !!onClick
   const selected = !disabled && props.selected
-  const adaptedSize = sizeProp // === 'md' && !!supportingText ? 'lg' : sizeProp
+  const adaptedSize = sizeProp
 
   const actionRef = useRef<HTMLButtonElement>(null)
   const { visualState, setRef } = useVisualState(props.visualState, { disabled })
 
   const refs = useMergeRefs([ref, setRef, actionRef])
 
-  const Element = href ? 'a' : 'div'
-
   const hasLeading = !!leadingIcon || leadingImage
   const hasTrailing = !!trailingIcon || trailing
 
   return (
-    <Element
-      href={href}
-      target={target}
-      rel={rel}
+    <html.div
       onClick={onClick}
       onMouseOver={onMouseOver}
-      {...css.props([
+      onMouseDown={onMouseDown}
+      style={[
         styles.root,
         variants[variant],
         sizes[adaptedSize],
@@ -89,7 +82,7 @@ export const ListItem = forwardRef<HTMLElement, Props>((props, ref) => {
         selected && styles.root$selected,
         disabled && styles.root$disabled,
         sx,
-      ])}
+      ]}
       {...dataProps(visualState)}
       ref={refs}>
       <html.div style={styles.container}>
@@ -119,7 +112,7 @@ export const ListItem = forwardRef<HTMLElement, Props>((props, ref) => {
           {trailingIcon ? <html.span style={styles.trailing$icon}>{trailingIcon}</html.span> : trailing}
         </html.div>
       )}
-    </Element>
+    </html.div>
   )
 })
 
