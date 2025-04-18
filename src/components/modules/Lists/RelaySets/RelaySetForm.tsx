@@ -8,17 +8,17 @@ import { observer } from 'mobx-react-lite'
 import type { Ref } from 'react'
 import { useImperativeHandle, useRef, useState } from 'react'
 import { css, html } from 'react-strict-dom'
-import type { OnKeyDownRef } from '../../modules/Search/SearchContent'
-import { SearchRelays } from '../../modules/Search/SearchRelays'
-import { RelayChip } from '../Relays/RelayChip'
-import type { RefListKind } from './ListForm'
+import type { OnKeyDownRef } from '../../Search/SearchContent'
+import { SearchRelays } from '../../Search/SearchRelays'
+import { RelayChip } from '../../../elements/Relays/RelayChip'
+import type { RefListKind } from '../ListForm'
 
 type Props = {
   ref: Ref<RefListKind>
   event?: Event
 }
 
-export const ListFormRelaySet = observer(function ListFormRelaySet(props: Props) {
+export const RelaySetForm = observer(function RelaySetForm(props: Props) {
   const [query, setQuery] = useState('')
   const [selected, setSelected] = useState<string[]>(props.event?.getTags('relay') || [])
 

@@ -5,16 +5,16 @@ import { spacing } from '@/themes/spacing.stylex'
 import type { Ref } from 'react'
 import { useImperativeHandle, useState } from 'react'
 import { css } from 'react-strict-dom'
-import { Search } from '../../modules/Search/Search'
-import { UserChip } from '../User/UserChip'
-import type { RefListKind } from './ListForm'
+import { Search } from '../../Search/Search'
+import { UserChip } from '../../../elements/User/UserChip'
+import type { RefListKind } from '../ListForm'
 
 export type Props = {
   event?: Event
   ref: Ref<RefListKind>
 }
 
-export const ListFormFollowsSets = (props: Props) => {
+export const FollowSetForm = (props: Props) => {
   const [, setQuery] = useState('')
   const [selected, setSelected] = useState<string[]>(props.event?.getTags('p') || [])
 
@@ -45,6 +45,8 @@ export const ListFormFollowsSets = (props: Props) => {
       <Stack horizontal={false} gap={1}>
         <Paper surface='surfaceContainerLow' outlined>
           <Search
+            suggestQuery={false}
+            suggestRelays={false}
             sx={styles.maxScroll}
             limit={50}
             placeholder='Search Users (npub, nprofile or hex)'

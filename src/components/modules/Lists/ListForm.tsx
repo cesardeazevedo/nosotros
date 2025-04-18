@@ -11,8 +11,8 @@ import { spacing } from '@/themes/spacing.stylex'
 import { useActionState, useRef } from 'react'
 import { css } from 'react-strict-dom'
 import { defaultIfEmpty, delay, firstValueFrom } from 'rxjs'
-import { ListFormFollowsSets } from './ListFormFollowSets'
-import { ListFormRelaySet } from './ListFormRelaySets'
+import { FollowSetForm } from './FollowSets/FollowSetForm'
+import { RelaySetForm } from './RelaySets/RelaySetForm'
 
 type Props = ({ isEditing: true; event: Event } | { isEditing: false; kind: Kind.FollowSets | Kind.RelaySets }) & {
   onClose?: () => void
@@ -72,8 +72,18 @@ export const ListForm = (props: Props) => {
             name='title'
             placeholder='Give a name to your list'
           />
-          {kind === Kind.FollowSets && <ListFormFollowsSets event={isEditing ? props.event : undefined} ref={ref} />}
-          {kind === Kind.RelaySets && <ListFormRelaySet event={isEditing ? props.event : undefined} ref={ref} />}
+          <TextField
+            defaultValue={isEditing ? props.event.getTag('description') : ''}
+            shrink
+            fullWidth
+            multiline
+            rows={3}
+            label='Description'
+            name='description'
+            placeholder='List description'
+          />
+          {kind === Kind.FollowSets && <FollowSetForm event={isEditing ? props.event : undefined} ref={ref} />}
+          {kind === Kind.RelaySets && <RelaySetForm event={isEditing ? props.event : undefined} ref={ref} />}
         </Stack>
         <Stack sx={styles.action}>
           <Button fullWidth disabled={isPending} type='submit' variant='filled' sx={styles.button}>
