@@ -24,26 +24,19 @@ export type Props = {
 export const FeedList = observer(function FeedList(props: Props) {
   const { feed, render, divider = true, onScrollEnd, filter = always, column } = props
   const ref = useRef<HTMLDivElement>(null)
-  const refWindow = useRef<HTMLDivElement>(null)
 
   useLayoutEffect(() => {
     if (!column) {
       const abort = new AbortController()
-      const main = document.querySelector<HTMLDivElement>('main')
-      if (main) {
-        main.addEventListener('scroll', handleWindowScroll, { signal: abort.signal })
-        refWindow.current = main
-      }
+      document.addEventListener('scroll', handleWindowScroll, { signal: abort.signal })
       return () => abort.abort()
     }
   })
 
   const handleWindowScroll = useCallback(() => {
-    if (refWindow.current) {
-      const offset = refWindow.current.scrollTop || 0
-      if (offset >= (refWindow.current.scrollHeight || Infinity) - 2000) {
-        onScrollEnd?.()
-      }
+    const offset = document.scrollingElement?.scrollTop || 0
+    if (offset >= (document.scrollingElement?.scrollHeight || Infinity) - 2000) {
+      onScrollEnd?.()
     }
   }, [onScrollEnd])
 
@@ -79,7 +72,7 @@ export const FeedList = observer(function FeedList(props: Props) {
   return (
     <>
       {props.header}
-      <FeedNewPosts ref={refWindow} feed={feed} />
+      <FeedNewPosts feed={feed} />
       {props.wrapper ? props.wrapper(<>{content}</>) : content}
       {props.footer}
     </>

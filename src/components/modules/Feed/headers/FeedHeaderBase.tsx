@@ -6,15 +6,17 @@ import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { FeedStore } from '@/stores/feeds/feed.store'
 import { useState } from 'react'
+import type { Props as FeedSettingsProps } from '../FeedSettings'
 import { FeedSettings } from '../FeedSettings'
 
-type Props = RouteHeaderProps & {
-  feed?: FeedStore
-}
+type Props = RouteHeaderProps &
+  Partial<FeedSettingsProps> & {
+    feed?: FeedStore
+  }
 
 export const FeedHeaderBase = (props: Props) => {
   const [expanded, setExpanded] = useState(false)
-  const { feed, ...rest } = props
+  const { feed, renderRelaySettings, ...rest } = props
   return (
     <>
       <RouteHeader {...rest}>
@@ -27,7 +29,9 @@ export const FeedHeaderBase = (props: Props) => {
           </Button>
         )}
       </RouteHeader>
-      <Expandable expanded={expanded}>{feed && <FeedSettings feed={feed} />}</Expandable>
+      <Expandable expanded={expanded}>
+        {feed && <FeedSettings feed={feed} renderRelaySettings={renderRelaySettings} />}
+      </Expandable>
     </>
   )
 }

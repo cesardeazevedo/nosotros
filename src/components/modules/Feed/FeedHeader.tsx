@@ -1,6 +1,7 @@
 import type { FeedModule } from '@/stores/modules/feed.module'
 import { FeedHeaderBase } from './headers/FeedHeaderBase'
 import { FeedHeaderFollowSet } from './headers/FeedHeaderFollowSet'
+import { FeedHeaderRelayFeed } from './headers/FeedHeaderRelayFeed'
 import { FeedHeaderRelaySets } from './headers/FeedHeaderRelaySets'
 import { FeedHeaderReposts } from './headers/FeedHeaderReposts'
 
@@ -16,6 +17,9 @@ export const FeedHeader = (props: Props) => {
     }
     case 'reposts': {
       return <FeedHeaderReposts selected='reposts' />
+    }
+    case 'relayfeed': {
+      return <FeedHeaderRelayFeed feed={module?.feed} />
     }
     case 'followset': {
       return <FeedHeaderFollowSet feed={module?.feed} />
