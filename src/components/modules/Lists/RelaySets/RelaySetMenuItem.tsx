@@ -1,4 +1,5 @@
 import { UserAvatar } from '@/components/elements/User/UserAvatar'
+import { ContentProvider } from '@/components/providers/ContentProvider'
 import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { Text } from '@/components/ui/Text/Text'
 import type { Event } from '@/stores/events/event'
@@ -17,18 +18,20 @@ export const ListRelaySetMenuItem = observer(function ListRelaySetMenuItem(props
   return (
     <RelaySetLink event={event}>
       {({ isActive }) => (
-        <MenuItem
-          size='sm'
-          selected={isActive}
-          leadingIcon={<UserAvatar size='xs' pubkey={event.pubkey} />}
-          label={
-            <>
-              {title} <Text size='md'>({relays.length})</Text>
-            </>
-          }
-          supportingText={description}
-          onClick={() => {}}
-        />
+        <ContentProvider value={{ disablePopover: true, disableLink: true }}>
+          <MenuItem
+            size='sm'
+            selected={isActive}
+            leadingIcon={<UserAvatar size='xs' pubkey={event.pubkey} />}
+            label={
+              <>
+                {title} <Text size='md'>({relays.length})</Text>
+              </>
+            }
+            supportingText={description}
+            onClick={() => {}}
+          />
+        </ContentProvider>
       )}
     </RelaySetLink>
   )

@@ -6,11 +6,20 @@ import { tabTokens } from '@/components/ui/Tab/Tab.stylex'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 import { useMobile } from '@/hooks/useMobile'
 import { useCurrentPubkey, useCurrentUser } from '@/hooks/useRootStore'
+import { dialogStore } from '@/stores/ui/dialogs.store'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { encodeSafe } from '@/utils/nip19'
-import { IconBell, IconBellFilled, IconNews, IconPhoto, IconServerBolt, IconUser } from '@tabler/icons-react'
+import {
+  IconBell,
+  IconBellFilled,
+  IconNews,
+  IconPhoto,
+  IconSearch,
+  IconServerBolt,
+  IconUser,
+} from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
 import { observer } from 'mobx-react-lite'
 import { nip19 } from 'nostr-tools'
@@ -18,7 +27,6 @@ import { css, html } from 'react-strict-dom'
 import { IconHome } from '../Icons/IconHome'
 import { IconHomeFilled } from '../Icons/IconHomeFilled'
 import { LinkSignIn } from '../Links/LinkSignIn'
-import { SignInButtonFab } from '../SignIn/SignInButtonFab'
 
 export const BottomNavigation = observer(function BottomNavigation() {
   const user = useCurrentUser()
@@ -32,7 +40,6 @@ export const BottomNavigation = observer(function BottomNavigation() {
   return (
     <>
       <html.div style={styles.root}>
-        {!pubkey ? <SignInButtonFab /> : null}
         <Stack grow justify='space-around'>
           <Tooltip text='Home' enterDelay={0}>
             <Link to='/' resetScroll>
@@ -41,16 +48,15 @@ export const BottomNavigation = observer(function BottomNavigation() {
               )}
             </Link>
           </Tooltip>
+          <div>
+            <Tab sx={styles.tab} icon={<IconSearch />} onClick={() => dialogStore.toggleSearch()} />
+          </div>
           <Link to='/media'>
             {({ isActive }) => (
               <Tab active={isActive} sx={styles.tab} icon={<IconPhoto />} activeIcon={<IconPhoto />} />
             )}
           </Link>
-          {!pubkey && (
-            <Link to='/articles'>
-              {({ isActive }) => <Tab active={isActive} sx={styles.tab} icon={<IconNews />} />}
-            </Link>
-          )}
+          <Link to='/articles'>{({ isActive }) => <Tab active={isActive} sx={styles.tab} icon={<IconNews />} />}</Link>
           {!pubkey && (
             <Link to='/explore/relays'>
               {({ isActive }) => <Tab active={isActive} sx={styles.tab} icon={<IconServerBolt />} />}
@@ -107,7 +113,7 @@ const styles = css.create({
   },
   tab: {
     height: 50,
-    width: 70,
+    width: 60,
     borderRadius: shape.full,
     [tabTokens.containerShape]: shape.full,
     [focusRingTokens.color]: palette.secondaryContainer,

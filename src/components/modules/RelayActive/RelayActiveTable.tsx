@@ -1,20 +1,21 @@
-import { RelayListRow } from '@/components/elements/Relays/RelayListRow'
-import { RelayListRowLoading } from '@/components/elements/Relays/RelayListRowLoading'
+import { RelayTableHeader } from '@/components/elements/Relays/RelayTableHeader'
+import { RelayTableRow } from '@/components/elements/Relays/RelayTableRow'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { relaysStore } from '@/stores/relays/relays.store'
 import { observer } from 'mobx-react-lite'
+import { RelayTableRowLoading } from '../../elements/Relays/RelayTableRowLoading'
 
-export const RelayActiveList = observer(function RelayActiveList() {
+export const RelayActiveTable = observer(function RelayActiveTable() {
   return (
     <Stack horizontal={false}>
-      {relaysStore.connected.length === 0 ? (
-        <RelayListRowLoading />
-      ) : (
-        <>
+      {relaysStore.connected.length === 0 && <RelayTableRowLoading />}
+      <table cellPadding={1}>
+        <RelayTableHeader renderLatencyColumn={false} />
+        <tbody>
           {relaysStore.connected.map((relay) => {
             const info = relaysStore.getInfo(relay.url)
             return (
-              <RelayListRow
+              <RelayTableRow
                 key={relay.url}
                 relay={relay.url}
                 relayPubkey={info?.pubkey}
@@ -23,8 +24,9 @@ export const RelayActiveList = observer(function RelayActiveList() {
               />
             )
           })}
-        </>
-      )}
+        </tbody>
+      </table>
+      <br />
     </Stack>
   )
 })

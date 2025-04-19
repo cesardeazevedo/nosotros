@@ -106,7 +106,7 @@ const styles = css.create({
     cursor: 'default',
     paddingBlock: spacing.padding2,
     paddingInline: spacing.padding2,
-    backgroundColor: palette.surfaceContainer,
+    backgroundColor: palette.surfaceContainerLow,
   },
   section: {
     maxWidth: 350,

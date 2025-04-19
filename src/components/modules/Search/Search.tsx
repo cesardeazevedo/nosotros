@@ -47,6 +47,7 @@ export const Search = (props: Props) => {
 const styles = css.create({
   header: {
     padding: spacing.padding1,
+    width: '100%',
   },
   search: {
     backgroundColor: palette.surfaceContainer,

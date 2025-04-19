@@ -3,10 +3,10 @@ import { useNostrSync } from '@/hooks/useNostrSync'
 import { useCurrentPubkey } from '@/hooks/useRootStore'
 import { Outlet } from '@tanstack/react-router'
 import { Dialogs } from 'components/modules/DialogsModule'
-import { PostFabButton } from '../Buttons/PostFabButton'
 import { Header } from '../Header/Header'
 import { BottomNavigation } from '../Navigation/BottomNavigation'
 import { SidebarLayout } from '../Sidebar/SidebarLayout'
+import { SignInButtonFab } from '../SignIn/SignInButtonFab'
 import { Toaster } from './Toaster'
 
 export const RootLayout = () => {
@@ -26,8 +26,8 @@ export const RootLayout = () => {
           <Outlet />
         </Header>
       )}
-      <PostFabButton />
       <BottomNavigation />
+      {!pubkey ? <SignInButtonFab /> : null}
       <Toaster />
     </>
   )

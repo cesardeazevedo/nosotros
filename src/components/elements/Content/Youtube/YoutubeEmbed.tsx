@@ -67,7 +67,7 @@ const styles = css.create({
     right: 0,
     bottom: 0,
     margin: 'auto',
-    zIndex: 1000,
+    zIndex: 10,
     width: 64,
     height: 44,
     color: 'white',

@@ -62,7 +62,7 @@ export const SidebarMenuRelays = observer(function SidebarMenuRelays(props: Prop
           label={'Discover Relays'}
         />
         {pubkey && (
-          <Link tabIndex={-1} to='/relays'>
+          <Link tabIndex={-1} to='/relays' activeOptions={{ exact: true }}>
             {({ isActive }) => (
               <MenuItem
                 selected={isActive}
