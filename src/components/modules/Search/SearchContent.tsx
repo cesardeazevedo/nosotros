@@ -117,6 +117,8 @@ export const SearchContent = observer(function SearchContent(props: Props) {
               return (
                 <ListItem
                   {...listItemProps}
+                  key={item.type + item.query}
+                  onClick={() => handleSelect(item)}
                   leadingIcon={
                     <html.span style={styles.icon}>
                       <IconSearch size={20} strokeWidth='2' />

@@ -20,14 +20,13 @@ export const EditorButtonReactions = observer(function EditorButtonReactions(pro
       placement='bottom-start'
       opened={store.section === 'reactions'}
       onClose={() => store.openSection('reactions')}
-      contentRenderer={({ close }) => (
+      contentRenderer={() => (
         <EmojiPicker
           open
           theme={Theme.AUTO}
           emojiStyle={EmojiStyle.NATIVE}
           previewConfig={{ showPreview: false }}
           onEmojiClick={({ emoji }) => {
-            close()
             store.editor?.chain().insertContent(emoji).focus().run()
           }}
         />

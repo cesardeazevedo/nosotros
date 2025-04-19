@@ -54,9 +54,9 @@ export const EditorSettingsUpload = observer(function EditorSettingsUpload(props
 
   return (
     <Popover
-      placement='bottom'
+      placement='bottom-end'
       contentRenderer={({ close }) => (
-        <MenuList>
+        <MenuList surface='surfaceContainerLowest'>
           {user?.blossomServerList && (
             <>
               <Stack sx={styles.subheader}>

@@ -101,7 +101,6 @@ const styles = css.create({
     paddingRight: 4,
     paddingBlock: 0,
     height: 18,
-    //lineHeight: '12px',
     borderRadius: shape.lg,
     backgroundColor: palette.surfaceContainer,
   },

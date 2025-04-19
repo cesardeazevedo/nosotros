@@ -63,8 +63,15 @@ export const FeedList = observer(function FeedList(props: Props) {
     return (
       <html.div style={styles.column} ref={ref} onScroll={handleScrollColumn}>
         {props.header}
-        <FeedNewPosts ref={ref} feed={feed} />
-        {props.wrapper ? props.wrapper(<>{content}</>) : content}
+        {!props.wrapper && <FeedNewPosts ref={ref} feed={feed} />}
+        {props.wrapper
+          ? props.wrapper(
+              <>
+                <FeedNewPosts ref={ref} feed={feed} />
+                {content}
+              </>,
+            )
+          : content}
         {props.footer}
       </html.div>
     )

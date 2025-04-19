@@ -11,17 +11,18 @@ type Props = DeckColumnHeaderProps & {
   header?: React.ReactNode
   settings?: React.ReactNode
   loading?: React.ReactNode
+  wrapper?: (children: React.ReactNode) => React.ReactNode
 }
 
 export const DeckColumnFeed = (props: Props) => {
-  const { id, feed, header, settings, loading, ...rest } = props
+  const { id, feed, header, settings, loading, wrapper, ...rest } = props
   return (
     <>
       <DeckColumnHeader id={id} {...rest}>
         {settings ?? <FeedSettings feed={feed} />}
       </DeckColumnHeader>
       {header}
-      <Feed column feed={feed} loading={loading} />
+      <Feed column feed={feed} loading={loading} wrapper={wrapper} />
     </>
   )
 }

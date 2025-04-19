@@ -6,7 +6,7 @@ import { NostrModuleModule } from '@/stores/modules/nostr.module'
 import { NProfileModuleModel } from '@/stores/modules/nprofile.module'
 import { RelayDiscoveryModuleModel } from '@/stores/modules/relay.discovery.module'
 import { observer } from 'mobx-react-lite'
-import { HomeFeedTabs } from '../Home/HomeFeedTabs'
+import { HomeColumn } from '../Home/HomeColumn'
 import { MediaColumn } from '../Media/MediaColumn'
 import { NostrEventColumn } from '../NostrEvent/NostrEventColumn'
 import { NotificationColumn } from '../Notifications/NotificationColumn'
@@ -27,9 +27,7 @@ export const DeckList = observer(function DeckList() {
         return (
           <DeckColumn key={key}>
             <DeckContext.Provider value={{ ...deckContextvalues, module, index }}>
-              {HomeModuleModel.is(module) && (
-                <DeckColumnFeed id={module.id} leading={<HomeFeedTabs module={module} />} feed={module.feed} />
-              )}
+              {HomeModuleModel.is(module) && <HomeColumn module={module} />}
               {NProfileModuleModel.is(module) && <NProfileColumn module={module} />}
               {MediaModuleModel.is(module) && <MediaColumn module={module} />}
               {module.type === 'notifications' && <NotificationColumn module={module} />}

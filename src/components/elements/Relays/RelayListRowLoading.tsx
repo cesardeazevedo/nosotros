@@ -1,5 +1,6 @@
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
 import { Stack } from '@/components/ui/Stack/Stack'
+import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { memo } from 'react'
 import { css } from 'react-strict-dom'
@@ -9,31 +10,28 @@ type Props = {
 }
 
 export const RelayListRowLoading = memo(function RelayListRowLoading(props: Props) {
-  const list = [...Array(props.rows || 10).keys()]
+  const list = [...Array(props.rows || 8).keys()]
   return list.map((value) => (
-    <Stack key={value} gap={1} sx={styles.root}>
+    <Stack key={value} gap={2} sx={styles.root} align='stretch'>
       <Skeleton variant='circular' sx={styles.avatar} />
-      <Stack horizontal={false} gap={0.5}>
-        <Skeleton variant='rectangular' sx={[styles.content, styles.width(100, 250)]} />
-        <Skeleton variant='rectangular' sx={[styles.content, styles.width(80, 200)]} />
-      </Stack>
+      <Skeleton variant='rectangular' sx={styles.content} />
     </Stack>
   ))
 })
 
 const styles = css.create({
   root: {
-    padding: spacing.padding1,
-    paddingLeft: spacing.padding2,
+    paddingInline: spacing.padding2,
+    paddingBlock: spacing.padding1,
   },
   avatar: {
     width: 32,
     height: 32,
   },
   content: {
-    height: 12,
+    height: 54,
+    flex: 1,
+    width: '100%',
+    borderRadius: shape.lg,
   },
-  width: (min: number, max: number) => ({
-    width: Math.floor(Math.random() * (max - min + 1)) + min,
-  }),
 })

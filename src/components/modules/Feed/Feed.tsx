@@ -13,6 +13,8 @@ export type Props = {
   filter?: (event: NostrEventMetadata) => boolean
   render?: (event: NostrEventMetadata) => React.ReactNode
   loading?: React.ReactNode
+  divider?: boolean
+  wrapper?: (children: React.ReactNode) => React.ReactNode
 } & Pick<ListProps, 'column' | 'header'>
 
 export const Feed = observer(function Feed(props: Props) {

@@ -15,13 +15,14 @@ import { Link } from '@tanstack/react-router'
 import { observer } from 'mobx-react-lite'
 import { useCallback } from 'react'
 import { css } from 'react-strict-dom'
+import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDOMProps'
 
 type PropsOptions = {
   note: Note
-  onCopyIdClick: () => void
-  onCopyAuthorIdClick: () => void
-  onCopyLinkClick: () => void
-  onDetailsClick: () => void
+  onCopyIdClick: (e: StrictClickEvent) => void
+  onCopyAuthorIdClick: (e: StrictClickEvent) => void
+  onCopyLinkClick: (e: StrictClickEvent) => void
+  onDetailsClick: (e: StrictClickEvent) => void
 }
 
 const iconProps = { size: 20 }
@@ -51,11 +52,6 @@ const Options = observer(function Options(props: PropsOptions) {
         onClick={props.onCopyAuthorIdClick}
       />
       <MenuItem size='sm' leadingIcon={<IconLink {...iconProps} />} label='Copy Link' onClick={props.onCopyLinkClick} />
-      {/* <PostMenuOpenIn nevent={props.note.nevent} /> */}
-      {/* <Divider /> */}
-      {/* <Text variant='label' size='sm' sx={styles.label}> */}
-      {/*   Coming Soon */}
-      {/* </Text> */}
       {/* <MenuItem disabled leadingIcon={<IconBookmark />} label='Bookmark' /> */}
       {/* <MenuItem disabled variant='danger' leadingIcon={<IconEyeOff />} label='Mute' /> */}
       {/* <MenuItem disabled variant='danger' leadingIcon={<IconUserMinus />} label='Unfollow' /> */}
@@ -69,7 +65,9 @@ export const PostOptions = observer(function PostOptions() {
 
   const handleCopy = useCallback(
     (value: string | undefined) => {
-      return () => {
+      return (e: StrictClickEvent) => {
+        e.stopPropagation()
+        e.preventDefault()
         if (value) {
           const type = 'text/plain'
           const blob = new Blob([value], { type })
@@ -96,7 +94,9 @@ export const PostOptions = observer(function PostOptions() {
             onCopyIdClick={handleCopy(nevent)}
             onCopyAuthorIdClick={handleCopy(note?.user?.nprofile)}
             onCopyLinkClick={handleCopy(link)}
-            onDetailsClick={() => {
+            onDetailsClick={(e) => {
+              e.stopPropagation()
+              e.preventDefault()
               dialogStore.setStats(note.id)
               props.close()
             }}

@@ -2,6 +2,9 @@ import { createRootRouteWithContext, createRoute, createRouter, redirect } from 
 import { z } from 'zod'
 import { RootLayout } from './components/elements/Layouts/RootLayout'
 import { RouteContainer } from './components/elements/Layouts/RouteContainer'
+import { RouteHeader } from './components/elements/Layouts/RouteHeader'
+import { RelayListRowLoading } from './components/elements/Relays/RelayListRowLoading'
+import { RelayTableRowLoading } from './components/elements/Relays/RelayTableRowLoading'
 import { ArticlesPending } from './components/modules/Articles/ArticlesPending'
 import { ArticlesRoute } from './components/modules/Articles/ArticlesRoute'
 import { DeckRoute } from './components/modules/Deck/DeckRoute'
@@ -28,6 +31,7 @@ import { NProfileLoading } from './components/modules/NProfile/NProfileLoading'
 import { NProfileRoute } from './components/modules/NProfile/NProfileRoute'
 import { RelayActiveRoute } from './components/modules/RelayActive/RelayActiveRoute'
 import { RelayDiscoveryHeader } from './components/modules/RelayDiscovery/RelayDiscoveryHeader'
+import { RelayDiscoveryList } from './components/modules/RelayDiscovery/RelayDiscoveryList'
 import { RelayDiscoveryTable } from './components/modules/RelayDiscovery/RelayDiscoveryTable'
 import { RelayRoute } from './components/modules/Relays/RelaysRoute'
 import { SearchHeader } from './components/modules/Search/SearchHeader'
@@ -39,6 +43,7 @@ import { TagHeader } from './components/modules/Tag/TagHeader'
 import { Kind } from './constants/kinds'
 import type { NostrFilter } from './core/types'
 import { ErrorBoundary } from './ErrorBoundary'
+import { useMobile } from './hooks/useMobile'
 import { useResetScroll } from './hooks/useResetScroll'
 import type { NostrContext } from './nostr/context'
 import { subscribeSync } from './nostr/subscriptions/subscribeSync'
@@ -67,11 +72,6 @@ import { subscribeLists } from './stores/subscriptions/subscribeLists'
 import { subscribeNostrModule } from './stores/subscriptions/subscribeNostrModule'
 import { subscribeRelayDiscoveryModule } from './stores/subscriptions/subscribeRelayDiscoveryModule'
 import { decodeNIP19 } from './utils/nip19'
-import { useMobile } from './hooks/useMobile'
-import { RelayDiscoveryList } from './components/modules/RelayDiscovery/RelayDiscoveryList'
-import { RouteHeader } from './components/elements/Layouts/RouteHeader'
-import { RelayListRowLoading } from './components/elements/Relays/RelayListRowLoading'
-import { RelayTableRowLoading } from './components/elements/Relays/RelayTableRowLoading'
 
 const rootRoute = createRootRouteWithContext<{ rootStore: RootStore }>()({
   component: RootLayout,
@@ -615,7 +615,7 @@ const searchRoute = createRoute({
     return { module, query }
   },
   pendingComponent: () => {
-    return <FeedPending header={<FeedHeaderBase leading={<SearchHeader />} />} />
+    return <FeedPending header={<SearchHeader />} />
   },
   component: function SearchRoute() {
     const { module } = searchRoute.useLoaderData()

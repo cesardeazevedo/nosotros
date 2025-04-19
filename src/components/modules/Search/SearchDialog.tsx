@@ -1,7 +1,8 @@
 import { DialogSheet } from '@/components/elements/Layouts/Dialog'
-import { Search } from '@/components/modules/Search/Search'
 import { useSearchShortcuts } from '@/components/modules/Search/hooks/useSearchShortcuts'
+import { Search } from '@/components/modules/Search/Search'
 import { SearchFooterDetails } from '@/components/modules/Search/SearchFooterDetails'
+import { useMobile } from '@/hooks/useMobile'
 import { dialogStore } from '@/stores/ui/dialogs.store'
 import { userStore } from '@/stores/users/users.store'
 import { useNavigate } from '@tanstack/react-router'
@@ -11,6 +12,7 @@ import { css } from 'react-strict-dom'
 
 export const SearchDialog = observer(() => {
   const open = !!dialogStore.search
+  const isMobile = useMobile()
   const navigate = useNavigate()
   useSearchShortcuts()
 
@@ -43,20 +45,30 @@ export const SearchDialog = observer(() => {
           handleClose()
         }}
       />
-      <SearchFooterDetails />
+      {!isMobile && <SearchFooterDetails />}
     </DialogSheet>
   )
 })
 
-const MOBILE = '@media (max-width: 599.95px)'
+const MOBILE = '@media (max-width: 1299.95px)'
 
 const styles = css.create({
   dialog: {
     placeItems: 'baseline center',
-    paddingTop: '20%',
+    paddingTop: {
+      default: '20%',
+      [MOBILE]: 0,
+    },
   },
   maxHeight: {
-    maxHeight: 505,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'stretch',
+    width: '100%',
+    maxHeight: {
+      default: 505,
+      [MOBILE]: '100%',
+    },
     maxWidth: {
       default: 600,
       [MOBILE]: '100%',
