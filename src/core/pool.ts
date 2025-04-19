@@ -1,5 +1,5 @@
 import { LRUCache } from 'lru-cache'
-import { distinct, mergeAll, mergeMap, of, Subject } from 'rxjs'
+import { distinct, mergeAll, mergeMap, of, ReplaySubject } from 'rxjs'
 import { formatRelayUrl } from './helpers/formatRelayUrl'
 import { Relay } from './Relay'
 
@@ -16,7 +16,7 @@ export class Pool {
     ttlAutopurge: true,
   })
 
-  private relaysSubject = new Subject<Relay>()
+  private relaysSubject = new ReplaySubject<Relay>()
   relays$ = this.relaysSubject.asObservable()
 
   messages$ = this.relays$.pipe(
@@ -40,8 +40,7 @@ export class Pool {
 
     // Stablish WebSocket connection
     relay.websocket$.subscribe({
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      error: (error: Event) => {
+      error: () => {
         this.delete(url)
         this.blacklist(url)
       },
