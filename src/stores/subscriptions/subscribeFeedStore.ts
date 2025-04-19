@@ -7,6 +7,7 @@ import { subscribeFeedInbox } from '@/nostr/subscriptions/subscribeFeedInbox'
 import { subscribeFeedSelf } from '@/nostr/subscriptions/subscribeFeedSelf'
 import type { NostrEventMetadata } from '@/nostr/types'
 import { matchFilter } from 'nostr-tools'
+import { identity } from 'observable-hooks'
 import { EMPTY, bufferTime, filter, finalize, map, merge, mergeMap, mergeWith, switchMap, tap } from 'rxjs'
 import { createContextAuthenticator } from '../auth/authenticator'
 import type { FeedStore } from '../feeds/feed.store'
@@ -54,6 +55,8 @@ export function subscribeFeedStore(feed: FeedStore, live = true) {
         live
           ? subscribeFeedScope(feed, { ...ctx, batcher: 'live' }, feed.paginationLive).pipe(
               filter((event) => matchFilter(pickBy(feed.paginationLive.filter, ['kinds', 'since']), event)),
+              bufferTime(1500),
+              mergeMap(identity),
               tap((item) => feed.addBuffer(item as NostrEventMetadata)),
               mergeMap(() => EMPTY),
             )
@@ -62,11 +65,11 @@ export function subscribeFeedStore(feed: FeedStore, live = true) {
         // trigger pagination if the feed.notes still empty
         mergeWith(feed.pagination.paginateIfEmpty(feed.notes)),
 
-        bufferTime(500),
+        bufferTime(600),
 
         filter((x) => x.length > 0),
 
-        map((x) => x.sort((a, b) => (a.created_at > b.created_at ? -1 : 1))),
+        map((x) => x.toSorted((a, b) => (a.created_at > b.created_at ? -1 : 1))),
 
         tap((items) => {
           items.forEach((item) => feed.add(item as NostrEventMetadata))
