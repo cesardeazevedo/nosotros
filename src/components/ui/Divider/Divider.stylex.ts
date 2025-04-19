@@ -11,8 +11,8 @@ const vars = {
   color: palette.outlineVariant,
 
   // inset
-  insetLeadingSpace: spacing.padding4,
-  insetTrailingSpace: spacing.padding4,
+  insetLeadingSpace: spacing.padding8,
+  insetTrailingSpace: spacing.padding8,
 
   // text
   textLeadingSpace: spacing.padding3,

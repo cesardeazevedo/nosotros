@@ -1,7 +1,6 @@
-import type { Kind } from '@/constants/kinds'
 import { formatRelayUrl } from '@/core/helpers/formatRelayUrl'
-import type { MetadataDB } from '@/db/types'
 import type { NostrEvent } from 'nostr-tools'
+import type { Metadata } from '../types'
 
 export type UserRelay = {
   pubkey: string
@@ -9,20 +8,11 @@ export type UserRelay = {
   permission: number
 }
 
-export type UserRelayList = {
-  relayList: UserRelay[]
-}
-
-export type UserRelayListMetadata = MetadataDB &
-  UserRelayList & {
-    kind: Kind.RelayList
-  }
-
 export const READ = 1 << 0
 export const WRITE = 1 << 1
 export const PERMISSIONS = { READ, WRITE }
 
-export function parseRelayList(event: NostrEvent): UserRelayListMetadata {
+export function parseRelayList(event: NostrEvent): Metadata {
   const { tags, pubkey } = event
   const grouped = tags
     .filter((tag) => tag[0] === 'r')
@@ -46,8 +36,6 @@ export function parseRelayList(event: NostrEvent): UserRelayListMetadata {
   const relayList = Object.values(grouped)
 
   return {
-    id: event.id,
-    kind: event.kind,
     relayList,
   }
 }

@@ -24,6 +24,8 @@ export enum Kind {
   RelayList = 10002,
   ClientAuth = 22242,
   // replaceable
+  FollowSets = 30000,
+  RelaySets = 30002,
   BadgeDefinition = 30008,
   ProfileBadge = 30009,
   Article = 30023,

@@ -1,6 +1,6 @@
-import type { NostrEvent, UnsignedEvent } from 'nostr-tools'
+import type { EventTemplate, NostrEvent } from 'nostr-tools'
 import type { Observable } from 'rxjs'
-import { concatWith, distinct, EMPTY, filter, from, identity, map, mergeMap, mergeWith, of, shareReplay } from 'rxjs'
+import { concatWith, distinct, filter, from, identity, map, mergeMap, of, shareReplay } from 'rxjs'
 import { sign } from './operators/sign'
 import { verify } from './operators/verify'
 import type { Signer } from './signers/signer'
@@ -9,7 +9,6 @@ export type PublisherOptions = {
   signer?: Signer
   relays?: Observable<string[]>
   include?: NostrEvent[]
-  inbox?: (event: NostrEvent) => Observable<string[]>
 }
 
 export class NostrPublisher {
@@ -19,7 +18,7 @@ export class NostrPublisher {
   signedEvent: Observable<NostrEvent>
 
   constructor(
-    public event: UnsignedEvent | undefined,
+    public event: EventTemplate | undefined,
     options: PublisherOptions,
   ) {
     this.signer = options.signer
@@ -41,7 +40,6 @@ export class NostrPublisher {
 
       mergeMap((event) => {
         return this.relays.pipe(
-          mergeWith(options.inbox?.(event) || EMPTY),
           mergeMap(identity),
           map((relay) => [relay, event] as [string, NostrEvent]),
         )

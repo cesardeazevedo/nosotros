@@ -1,23 +1,9 @@
-import type { Kind } from '@/constants/kinds'
 import type { RelayHints } from '@/core/types'
-import type { MetadataDB } from '@/db/types'
 import type { NostrEvent } from 'nostr-tools'
-import type { ContentMetadata } from './parseContent'
+import type { Metadata } from '../types'
 import { parseContent } from './parseContent'
 import type { ParsedTags } from './parseTags'
 import { parseTags } from './parseTags'
-
-export type CommentMetadata = MetadataDB &
-  ContentMetadata & {
-    kind: Kind.Comment
-    rootKind: string | undefined
-    rootId: string | undefined
-    tags: ParsedTags
-    isRoot: false // Just to be compatible with NoteMetadata
-    parentKind: string | undefined
-    parentId: string | undefined
-    relayHints: RelayHints
-  }
 
 function appendHint(hints: RelayHints, field: keyof RelayHints, key: string, value: string) {
   if (value) {
@@ -63,26 +49,20 @@ function parseCommentHints(tags: ParsedTags) {
   return hints
 }
 
-export function parseComment(event: NostrEvent): CommentMetadata {
+export function parseComment(event: NostrEvent): Metadata {
   const tags = parseTags(event.tags)
   const content = parseContent(event, tags)
   const relayHints = parseCommentHints(tags)
   const rootTag = tags.E ? 'E' : tags.A ? 'A' : tags.I ? 'I' : ''
   const rootId = tags[rootTag]?.[0]?.[1]
-  const rootKind = tags.K?.[0]?.[1]
   const parentId = tags[rootTag.toLowerCase()]?.[0]?.[1]
-  const parentKind = tags.k?.[0]?.[1]
 
   return {
     ...content,
-    id: event.id,
-    kind: event.kind,
     isRoot: false,
     tags,
-    rootKind,
     rootId,
     parentId,
-    parentKind,
     relayHints,
   }
 }

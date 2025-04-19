@@ -3,10 +3,10 @@ import { shape } from '@/themes/shape.stylex'
 import { css } from 'react-strict-dom'
 
 const vars = {
-  zIndex: 200,
+  zIndex: 40,
 
   // container
-  containerShape: shape.sm,
+  containerShape: shape.xl,
   containerColor: palette.surfaceContainerHigh,
   // &:error
   containerColor$error: palette.errorContainer,

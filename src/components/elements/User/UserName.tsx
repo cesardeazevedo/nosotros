@@ -28,12 +28,12 @@ export const UserName = observer(function UserName(props: Props) {
       {!user && <Skeleton variant='rectangular' sx={styles.loading} />}
       <UserPopover pubkey={pubkey}>
         <LinkProfile underline pubkey={pubkey}>
-          <Text variant='body' sx={[styles.text, rest.sx]} size={size} {...rest} element={html.div}>
+          <Text variant='body' {...rest} sx={[styles.text, rest.sx]} size={size} element={html.div}>
             {user?.displayName}
           </Text>
         </LinkProfile>
       </UserPopover>
-      {currentUser?.following?.followsPubkey(user?.pubkey) && (
+      {currentUser?.followsPubkey(user?.pubkey) && (
         <html.div style={styles.followingIndicator}>
           <IconUserCheck size={14} strokeWidth='2.0' />
         </html.div>

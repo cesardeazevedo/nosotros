@@ -5,30 +5,18 @@ import { tabTokens } from '@/components/ui/Tab/Tab.stylex'
 import { Tabs } from '@/components/ui/Tabs/Tabs'
 import { useMobile } from '@/hooks/useMobile'
 import { shape } from '@/themes/shape.stylex'
-import { IconBrush, IconDatabase, IconHeart, IconPhotoUp, IconServerBolt } from '@tabler/icons-react'
+import { IconDatabase, IconSettings } from '@tabler/icons-react'
 import { Link, useLocation } from '@tanstack/react-router'
 import { css } from 'react-strict-dom'
 
 export const SettingsTabs = () => {
   const isMobile = useMobile()
-  const loc = useLocation()
+  const location = useLocation()
   return (
     <Stack gap={0.5} sx={styles.tabs} align='stretch' justify='space-around'>
-      <Tabs variant='secondary' anchor={loc.pathname} renderLabels={!isMobile}>
-        {/* <Link to='/settings'> */}
-        {/*   <Tab sx={styles.tab} icon={<IconUser size={22} />} anchor='/settings' label='Profile' /> */}
-        {/* </Link> */}
+      <Tabs variant='secondary' anchor={location.pathname} renderLabels={!isMobile}>
         <Link to='/settings'>
-          <Tab sx={styles.tab} icon={<IconBrush size={22} />} anchor='/settings' label='Display' />
-        </Link>
-        <Link to='/settings/content'>
-          <Tab sx={styles.tab} icon={<IconHeart size={22} />} anchor='/settings/content' label='Content' />
-        </Link>
-        <Link to='/settings/network'>
-          <Tab sx={styles.tab} icon={<IconServerBolt size={22} />} anchor='/settings/network' label='Network' />
-        </Link>
-        <Link to='/settings/blossom'>
-          <Tab sx={styles.tab} icon={<IconPhotoUp size={22} />} anchor='/settings/blossom' label='Media Storage' />
+          <Tab sx={styles.tab} icon={<IconSettings size={22} />} anchor='/settings' label='Preferences' />
         </Link>
         <Link to='/settings/storage'>
           <Tab sx={styles.tab} icon={<IconDatabase size={22} />} anchor='/settings/storage' label='Storage' />

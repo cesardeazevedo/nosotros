@@ -1,12 +1,14 @@
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
+import { formatRelayUrl } from '@/core/helpers/formatRelayUrl'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { typeFace } from '@/themes/typeFace.stylex'
+import { Link } from '@tanstack/react-router'
 import React from 'react'
 import { css, html } from 'react-strict-dom'
 import type { Styles } from 'react-strict-dom/dist/types/styles'
-// import { RelayPopoverLink } from '../../Relays/RelayPopoverLink'
+import { RelayPopoverLink } from '../../Relays/RelayPopoverLink'
 
 type Props = {
   href: string
@@ -24,17 +26,21 @@ export const ContentLink = (props: Props) => {
       {props.children}
     </html.a>
   )
-  // TODO
-  // const isRelayLink = href?.startsWith('wss://')
-  // if (isRelayLink) {
-  //   return (
-  //     <RelayPopoverLink url={href}>
-  //       <html.a href={href} target='_blank' rel='noopener noreferrer' style={sx}>
-  //         {props.children}
-  //       </html.a>
-  //     </RelayPopoverLink>
-  //   )
-  // }
+  const isRelayLink = href?.startsWith('wss://')
+  if (isRelayLink) {
+    return (
+      <RelayPopoverLink url={href}>
+        <Link
+          to='/feed'
+          search={{ relay: formatRelayUrl(href) }}
+          target='_blank'
+          rel='noopener noreferrer'
+          {...css.props(sx)}>
+          {props.children}
+        </Link>
+      </RelayPopoverLink>
+    )
+  }
   if (isLongLink && href) {
     return <Tooltip text={href}>{content}</Tooltip>
   }
@@ -57,7 +63,8 @@ const styles = css.create({
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
-    maxWidth: 300,
+    maxWidth: 370,
+    width: 'fit-content',
   },
   background: {
     paddingInline: spacing['padding1'],

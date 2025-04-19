@@ -109,7 +109,6 @@ const styles = css.create({
     fontWeight: buttonTokens.labelTextWeight,
     lineHeight: buttonTokens.labelTextLineHeight,
     letterSpacing: buttonTokens.labelTextLetterSpacing,
-    verticalAlign: 'top',
     gap: spacing.padding1,
     paddingInlineStart: buttonTokens.leadingSpace,
     paddingInlineEnd: buttonTokens.leadingSpace,
@@ -121,10 +120,6 @@ const styles = css.create({
   },
   label: {
     position: 'relative',
-    //flexGrow: 1,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    textWrap: 'nowrap',
     color: {
       default: buttonTokens.labelTextColor,
       ':is([data-focused])': buttonTokens.labelTextColor$focus,
@@ -138,11 +133,12 @@ const styles = css.create({
   },
   icon: {
     position: 'relative',
+    display: 'inline-flex',
     color: buttonTokens.labelTextColor,
   },
   iconDisabled: {},
   fullWidth: {
-    display: 'block',
+    display: 'flex',
     width: '100%',
   },
 })

@@ -1,17 +1,11 @@
-import { useGlobalSettings } from '@/hooks/useRootStore'
+import { useGlobalSettings, useRootContext } from '@/hooks/useRootStore'
 import { subscribeNoteStats } from '@/nostr/subscriptions/subscribeNoteStats'
-import type { NostrEventComment, NostrEventMedia, NostrEventNote } from '@/nostr/types'
+import type { NostrEventMetadata } from '@/nostr/types'
 import { metadataSymbol } from '@/nostr/types'
-import { useNostrClientContext } from '@/stores/nostr/nostr.context.hooks'
 import { eventStore } from '@/stores/events/event.store'
-import { LRUCache } from 'lru-cache'
-import type { NostrEvent } from 'nostr-tools'
 import { useObservable, useSubscription } from 'observable-hooks'
 import { useEffect, useRef } from 'react'
-import { filter, identity, map, mergeMap, Subject, take, tap } from 'rxjs'
-import type { NostrContext } from '@/nostr/context'
-
-const cache = new LRUCache({ max: 1000 })
+import { filter, identity, map, mergeMap, Subject, take } from 'rxjs'
 
 const intersectionSubject = new Subject<IntersectionObserverEntry[]>()
 const onItem = intersectionSubject.pipe(
@@ -26,8 +20,8 @@ const intersection = new IntersectionObserver(
   { threshold: 0 },
 )
 
-export function useNoteVisibility(event: NostrEventNote | NostrEventComment | NostrEventMedia) {
-  const nostr = useNostrClientContext()
+export function useNoteVisibility(event: NostrEventMetadata) {
+  const ctx = useRootContext()
   const ref = useRef<HTMLDivElement | null>(null)
   const globalSettings = useGlobalSettings()
 
@@ -36,25 +30,10 @@ export function useNoteVisibility(event: NostrEventNote | NostrEventComment | No
       filter((x) => x.target === ref.current),
       take(1),
       map(() => event),
-      mergeMap((event) => [
-        event,
-        ...event[metadataSymbol].mentionedNotes.map((x) => eventStore.get(x)).filter((x) => !!x),
-      ]),
-      filter((event) => !cache.has(event.id)),
-      tap((event) => cache.set(event.id, true)),
-      mergeMap((event) => {
-        const ctx = {
-          ...nostr.context,
-          subOptions: {
-            relayHints: {
-              idHints: {
-                [event.id]: [event.pubkey],
-              },
-            },
-          },
-        } as NostrContext
-        return subscribeNoteStats(event as NostrEvent, ctx, globalSettings.scroll)
-      }),
+      mergeMap((event) => [event.id, ...(event[metadataSymbol].mentionedNotes || [])]),
+      map((id) => eventStore.get(id)),
+      filter((x) => !!x),
+      mergeMap(({ event }) => subscribeNoteStats(event, ctx, globalSettings.scroll)),
     )
   })
 
@@ -62,7 +41,7 @@ export function useNoteVisibility(event: NostrEventNote | NostrEventComment | No
 
   useEffect(() => {
     let refElement = null
-    if (ref.current && !cache.has(event.id)) {
+    if (ref.current) {
       intersection.observe(ref.current)
       refElement = ref.current
     }

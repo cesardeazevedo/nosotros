@@ -1,31 +1,34 @@
 import { useMobile } from '@/hooks/useMobile'
+import { useNostrSync } from '@/hooks/useNostrSync'
+import { useCurrentPubkey } from '@/hooks/useRootStore'
 import { Outlet } from '@tanstack/react-router'
 import { Dialogs } from 'components/modules/DialogsModule'
-import { useEffect } from 'react'
-import { Stats } from '../Footer/Stats'
 import { Header } from '../Header/Header'
 import { BottomNavigation } from '../Navigation/BottomNavigation'
+import { SidebarLayout } from '../Sidebar/SidebarLayout'
+import { SignInButtonFab } from '../SignIn/SignInButtonFab'
 import { Toaster } from './Toaster'
 
 export const RootLayout = () => {
-  const mobile = useMobile()
-  useEffect(() => {
-    const abortController = new AbortController()
-    const clearScrollRestoration = () => {
-      sessionStorage.removeItem('tsr-scroll-restoration-v1_3')
-    }
-    window.addEventListener('unload', clearScrollRestoration, { signal: abortController.signal })
-    return () => abortController.abort()
-  })
+  const isMobile = useMobile()
+  const pubkey = useCurrentPubkey()
+  useNostrSync(pubkey)
   return (
     <>
       <Dialogs />
-      <Header>
-        <Outlet />
-      </Header>
+      {!isMobile && (
+        <SidebarLayout>
+          <Outlet />
+        </SidebarLayout>
+      )}
+      {isMobile && (
+        <Header>
+          <Outlet />
+        </Header>
+      )}
       <BottomNavigation />
+      {!pubkey ? <SignInButtonFab /> : null}
       <Toaster />
-      {!mobile && <Stats />}
     </>
   )
 }

@@ -1,6 +1,7 @@
 import React, { forwardRef } from 'react'
 import { css, html } from 'react-strict-dom'
 import type { SxProps } from '../types'
+import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDOMProps'
 
 export type Props = {
   as?: 'div' | 'span' | 'p' | 'header' | 'main' | 'footer' | 'section' | 'article'
@@ -11,7 +12,7 @@ export type Props = {
   justify?: 'center' | 'flex-start' | 'flex-end' | 'stretch' | 'space-between' | 'space-around' | 'space-evenly'
   wrap?: boolean
   grow?: boolean
-  onClick?: () => void
+  onClick?: (e: StrictClickEvent) => void
   onMouseMove?: (e: MouseEvent) => void
   children?: React.ReactNode
 }

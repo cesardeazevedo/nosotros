@@ -17,17 +17,17 @@ export function subscribe(
 
     return relay.websocket$.multiplex(subMsg, unsubMsg, messageFilter).pipe(
       takeWhile((msg) => {
-        const verb = msg[0].toLowerCase()
+        const verb = msg[0].toUpperCase()
         return (verb !== RelayToClient.EOSE && verb !== RelayToClient.CLOSED) || closeOnEose === false
       }),
       // needed in case of closeOnEose false
-      filter(([verb]) => verb.toLowerCase() === RelayToClient.EVENT),
+      filter(([verb]) => verb.toUpperCase() === RelayToClient.EVENT),
 
       map((msg) => [relay.url, msg[2]] as [string, NostrEvent]),
 
       catchError(() => EMPTY),
 
-      takeUntil(closeOnEose ? timer(5000) : EMPTY),
+      takeUntil(closeOnEose ? timer(10000) : EMPTY),
     )
   })
 }

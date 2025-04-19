@@ -4,7 +4,7 @@ import { Stack } from '@/components/ui/Stack/Stack'
 import { spacing } from '@/themes/spacing.stylex'
 import React, { memo, useContext } from 'react'
 import { css, html } from 'react-strict-dom'
-import { DeckContext } from '../Deck/DeckContext'
+import { DeckContext } from '../../modules/Deck/DeckContext'
 
 type Props = {
   rows?: number

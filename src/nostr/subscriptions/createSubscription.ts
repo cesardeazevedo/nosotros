@@ -1,19 +1,16 @@
 import { NostrSubscription } from '@/core/NostrSubscription'
 import type { NostrFilter } from '@/core/types'
-import { EMPTY, merge, of } from 'rxjs'
+import { EMPTY } from 'rxjs'
 import type { NostrContext } from '../context'
-import { trackOutbox } from '../operators/trackOutbox'
+import { getRelayFiltersFromFilters } from '../observables/getRelayFiltersFromFilters'
+import { getRelaysFromContext } from '../observables/getRelaysFromContext'
 import { pruneFilters } from '../prune'
 
 export function createSubscription(filters: NostrFilter, ctx: NostrContext) {
   return new NostrSubscription(filters, {
-    ...ctx.subOptions,
-    relays: merge(ctx.inbox$, ctx.outbox$, of(ctx.relays || []), ctx.subOptions?.relays || EMPTY),
-    relayHints: ctx.settings.hints ? ctx?.subOptions?.relayHints : {},
-    outbox:
-      ctx.settings.outbox && ctx?.subOptions?.outbox !== false
-        ? (filters, hints) => trackOutbox(filters, hints || {}, ctx)
-        : () => EMPTY,
-    transform: ctx.subOptions?.prune === false ? undefined : pruneFilters,
+    relays: getRelaysFromContext(ctx),
+    relayHints: ctx.relayHints,
+    outbox: ctx.outbox ? (filters, hints) => getRelayFiltersFromFilters(filters, hints || {}, ctx) : () => EMPTY,
+    transform: ctx.prune === false ? undefined : pruneFilters,
   })
 }

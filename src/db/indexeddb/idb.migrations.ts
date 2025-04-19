@@ -32,4 +32,9 @@ export function migrate(
     deleteIndex(events as IDBStore, 'kind_created_at')
     deleteIndex(tags as IDBStore, 'kind_tag_value')
   }
+  if (oldVersion <= 12) {
+    // recreate table as it was created with wrong keyPath
+    deleteObjectStore(db, 'relayInfo')
+    db.createObjectStore('relayInfo', { keyPath: 'url' })
+  }
 }

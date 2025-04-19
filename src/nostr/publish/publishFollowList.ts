@@ -1,38 +1,24 @@
 import { Kind } from '@/constants/kinds'
-import { ofKind } from '@/core/operators/ofKind'
-import { start } from '@/core/operators/start'
-import { EMPTY, last, map, mergeMap, of } from 'rxjs'
+import type { PublisherOptions } from '@/core/NostrPublish'
+import { EMPTY, mergeMap } from 'rxjs'
 import { cacheReplaceablePrune } from '../cache'
-import type { NostrContext } from '../context'
-import { parseEventMetadata } from '../operators/parseEventMetadata'
-import { pool } from '../pool'
-import { createSubscription } from '../subscriptions/createSubscription'
-import type { NostrEventFollow } from '../types'
-import { metadataSymbol } from '../types'
+import { subscribeLast } from '../subscriptions/subscribeLast'
+import { WRITE } from '../types'
 import { publish } from './publish'
 
 const kinds = [Kind.Follows]
 
-export function publishFollowList(ctx: NostrContext, tag: 'p', related: string) {
-  if (!ctx.pubkey) return EMPTY
-
-  const filter = { kinds, authors: [ctx.pubkey] }
-  cacheReplaceablePrune.delete(`${Kind.Follows}:${ctx.pubkey}`)
-  const sub = createSubscription(filter, { ...ctx, subOptions: { queryLocal: false } })
-  return of(sub).pipe(
-    start(pool),
-    map(([, event]) => event),
-    parseEventMetadata(),
-    ofKind<NostrEventFollow>(kinds),
-    last(undefined, null),
+export function publishFollowList(pubkey: string, tag: 'p', related: string, options: PublisherOptions) {
+  const filter = { kinds, authors: [pubkey] }
+  cacheReplaceablePrune.delete([Kind.Follows, pubkey].join(':'))
+  return subscribeLast(filter, { pubkey, permission: WRITE }).pipe(
     mergeMap((event) => {
-      if (!event) return EMPTY
+      if (!event) return EMPTY // Couldn't find last follows list of the user
 
-      const metadata = event[metadataSymbol]
       switch (tag) {
         case 'p': {
           // Follows or unfollow the related author
-          const authors = metadata.tags.get('p') || new Set()
+          const authors = new Set(...event.tags.filter((x) => x[0] === 'p').map((x) => x[1]))
           const tags = (
             authors.has(related)
               ? event.tags.filter((pubkey) => pubkey[1] !== related)
@@ -45,11 +31,15 @@ export function publishFollowList(ctx: NostrContext, tag: 'p', related: string) 
             return true
           })
 
-          return publish(ctx, {
-            kind: Kind.Follows,
-            content: event.content,
-            tags,
-          })
+          return publish(
+            {
+              kind: Kind.Follows,
+              content: event.content,
+              pubkey,
+              tags,
+            },
+            options,
+          )
         }
         // todo: other tags to follow (topics)
         default: {

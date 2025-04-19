@@ -1,11 +1,15 @@
-import { CopyIconButton } from '@/components/elements/Buttons/CopyIconButton'
+import { Stack } from '@/components/ui/Stack/Stack'
 import type { SxProps } from '@/components/ui/types'
+import { useMediaQuery } from '@/hooks/useMediaQuery'
+import { useGlobalSettings } from '@/hooks/useRootStore'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import type { CodeBlockNode } from 'nostr-editor'
-import React, { useRef } from 'react'
+import { useRef } from 'react'
+import ShikiHighlighter from 'react-shiki'
 import { css, html } from 'react-strict-dom'
+import { CopyIconButton } from '../../Buttons/CopyIconButton'
 
 type Props = {
   sx?: SxProps
@@ -13,16 +17,31 @@ type Props = {
 }
 
 export const CodeBlock = (props: Props) => {
-  const refPre = useRef<HTMLPreElement | null>(null)
+  const refPre = useRef<HTMLDivElement | null>(null)
+  const isSystemDark = useMediaQuery('(prefers-color-scheme: dark)')
+  const theme = useGlobalSettings().theme
+  const isAuto = theme === 'auto'
+  const isDark = (isAuto && isSystemDark) || theme === 'dark'
+
+  const { node } = props
+  const { language } = props.node.attrs
+  const code = node.type === 'codeBlock' && node.content[0].type === 'text' ? node.content[0].text.toString() : ''
 
   return (
     <html.div style={[styles.root, props.sx]}>
-      <html.pre style={styles.pre} ref={refPre}>
-        {props.node.content.map((node, index) => (
-          <React.Fragment key={node.type + index}>{node.type === 'text' && node.text}</React.Fragment>
-        ))}
-        <CopyIconButton text={refPre.current?.innerText} title='Copy code' sx={styles.copy} />
-      </html.pre>
+      <html.div style={styles.code} ref={refPre}>
+        <Stack justify='space-between' sx={styles.header}>
+          <div>{language}</div>
+          <CopyIconButton text={refPre.current?.innerText} title='Copy code' />
+        </Stack>
+        <ShikiHighlighter
+          language={language}
+          showLanguage={false}
+          addDefaultStyles={false}
+          theme={isDark ? 'github-dark-high-contrast' : 'github-light-default'}>
+          {code}
+        </ShikiHighlighter>
+      </html.div>
     </html.div>
   )
 }
@@ -30,18 +49,30 @@ export const CodeBlock = (props: Props) => {
 const styles = css.create({
   root: {
     padding: spacing.padding2,
-    paddingRight: spacing.padding6,
+    paddingRight: spacing.padding4,
   },
-  pre: {
+  code: {
     position: 'relative',
-    padding: spacing.padding2,
-    backgroundColor: palette.outlineVariant,
+    border: '1px solid',
+    borderColor: palette.outlineVariant,
     borderRadius: shape.lg,
-    overflow: 'scroll',
+    overflow: 'hidden',
   },
-  copy: {
+  header: {
+    zIndex: 1,
     position: 'absolute',
-    top: 4,
-    right: 4,
+    top: 0,
+    left: 0,
+    right: 0,
+    borderBottom: '1px solid',
+    borderBottomColor: palette.outlineVariant,
+    paddingLeft: spacing.padding2,
+    paddingRight: spacing.padding1,
+    paddingBlock: spacing['padding0.5'],
+    color: palette.onSurfaceVariant,
+    fontFamily: 'monospace',
+    fontSize: '0.80rem',
+    letterSpacing: '-0.05em',
+    userSelect: 'none',
   },
 })

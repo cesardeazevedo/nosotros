@@ -39,12 +39,12 @@ export type Props = {
 }
 
 export const Paper = forwardRef<HTMLDivElement, Props>(function Paper(props, ref) {
-  const { children, surface = 'surfaceContainer', shape = 'xl', outlined = false, onClick } = props
+  const { children, surface, shape = 'xl', outlined = false, onClick } = props
   const elevation = outlined ? 0 : props.elevation
   const text = getContainerTextColor(surface)
   return (
     <html.div
-      style={[styles.root, surfaces[surface], shapes[shape], textColors[text], props.sx]}
+      style={[styles.root, surface && surfaces[surface], shapes[shape], textColors[text], props.sx]}
       ref={ref}
       onClick={onClick}>
       {!!elevation && <Elevation elevation={elevation} />}

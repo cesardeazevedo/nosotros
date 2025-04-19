@@ -1,13 +1,13 @@
 import { Button } from '@/components/ui/Button/Button'
 import { CircularProgress } from '@/components/ui/Progress/CircularProgress'
 import { Stack } from '@/components/ui/Stack/Stack'
-import { useCurrentUser, useRootContext } from '@/hooks/useRootStore'
+import { useCurrentAccount, useCurrentUser } from '@/hooks/useRootStore'
 import { publishFollowList } from '@/nostr/publish/publishFollowList'
-import type { NostrStore } from '@/stores/nostr/nostr.context.store'
+import type { Account } from '@/stores/auth/account.store'
 import { observer } from 'mobx-react-lite'
 import { useObservableState } from 'observable-hooks'
 import { useState } from 'react'
-import { html } from 'react-strict-dom'
+import { css, html } from 'react-strict-dom'
 import { catchError, map, mergeMap, of, startWith } from 'rxjs'
 
 type Props = {
@@ -17,14 +17,14 @@ type Props = {
 export const UserFollowButton = observer(function UserFollowButton(props: Props) {
   const { pubkey } = props
   const [hover, setHover] = useState(false)
-  const rootContext = useRootContext()
+  const acc = useCurrentAccount()
   const currentUser = useCurrentUser()
 
-  const [pending, onSubmit] = useObservableState<boolean, NostrStore>((input$) => {
+  const [pending, onSubmit] = useObservableState<boolean, Account>((input$) => {
     return input$.pipe(
-      mergeMap(({ context }) => {
-        if (context.pubkey) {
-          return publishFollowList(context, 'p', pubkey).pipe(
+      mergeMap((acc) => {
+        if (acc.signer) {
+          return publishFollowList(acc.pubkey, 'p', pubkey, { signer: acc.signer?.signer }).pipe(
             map(() => false),
             catchError(() => of(false)),
             startWith(true),
@@ -35,7 +35,7 @@ export const UserFollowButton = observer(function UserFollowButton(props: Props)
     )
   }, false)
 
-  const isFollowing = currentUser?.following?.followsPubkey(pubkey)
+  const isFollowing = currentUser?.followsPubkey(pubkey)
 
   if (currentUser?.pubkey === pubkey) {
     // don't show the follow button for the same logged person
@@ -46,7 +46,11 @@ export const UserFollowButton = observer(function UserFollowButton(props: Props)
     <>
       {isFollowing ? (
         <html.div onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
-          <Button disabled={pending} variant={hover ? 'danger' : 'outlined'} onClick={() => onSubmit(rootContext)}>
+          <Button
+            sx={styles.root}
+            disabled={pending}
+            variant={hover ? 'danger' : 'outlined'}
+            onClick={() => acc && onSubmit(acc)}>
             <Stack gap={1}>
               {pending && <CircularProgress size='xs' />}
               {hover ? 'Unfollow' : 'Following'}
@@ -54,7 +58,7 @@ export const UserFollowButton = observer(function UserFollowButton(props: Props)
           </Button>
         </html.div>
       ) : (
-        <Button disabled={pending} variant='filled' onClick={() => onSubmit(rootContext)}>
+        <Button sx={styles.root} disabled={pending} variant='filled' onClick={() => acc && onSubmit(acc)}>
           <Stack gap={1}>
             {pending && <CircularProgress size='xs' />}
             {pending ? 'Following' : 'Follow'}
@@ -63,4 +67,10 @@ export const UserFollowButton = observer(function UserFollowButton(props: Props)
       )}
     </>
   )
+})
+
+const styles = css.create({
+  root: {
+    width: 95,
+  },
 })

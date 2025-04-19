@@ -2,7 +2,7 @@ import { shape } from '@/themes/shape.stylex'
 import { css } from 'react-strict-dom'
 
 const tokens = {
-  containerShape: shape.md,
+  containerShape: shape.xl,
   containerElevation: 'unset',
 }
 

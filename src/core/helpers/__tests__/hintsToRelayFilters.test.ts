@@ -75,5 +75,31 @@ describe('hintsToRelayFilters', () => {
     ])
   })
 
-  test('assert ', () => {})
+  test('assert addressable events', () => {
+    const filters = [
+      {
+        '#d': ['123'],
+        authors: ['p1'],
+        kinds: [39000],
+      },
+    ]
+    const hints = {
+      ids: {
+        '39000:p1:123': ['wss://relay1.com'],
+      },
+    } as RelayHints
+    const res = hintsToRelayFilters(filters, hints)
+    expect(res).toStrictEqual([
+      [
+        'wss://relay1.com',
+        [
+          {
+            '#d': ['123'],
+            authors: ['p1'],
+            kinds: [39000],
+          },
+        ],
+      ],
+    ])
+  })
 })

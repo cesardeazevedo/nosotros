@@ -4,11 +4,11 @@ import { MenuList } from '@/components/ui/MenuList/MenuList'
 import { Popover } from '@/components/ui/Popover/Popover'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
-import { useCurrentPubkey, useGlobalSettings } from '@/hooks/useRootStore'
-import { blossomStore } from '@/stores/blossom/blossom.store'
+import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
+import { useCurrentUser, useGlobalSettings } from '@/hooks/useRootStore'
 import type { EditorStore } from '@/stores/editor/editor.store'
 import { spacing } from '@/themes/spacing.stylex'
-import { IconChevronDown } from '@tabler/icons-react'
+import { IconBug, IconChevronDown } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
 import { useMemo } from 'react'
 import { css } from 'react-strict-dom'
@@ -21,6 +21,7 @@ const nip96urls = ['nostr.build', 'nostrcheck.me', 'nostrage.com']
 
 export const EditorSettingsUpload = observer(function EditorSettingsUpload(props: Props) {
   const { store } = props
+  const user = useCurrentUser()
   const globalSettings = useGlobalSettings()
   const selectedUrl = globalSettings.defaultUploadUrl
 
@@ -41,20 +42,27 @@ export const EditorSettingsUpload = observer(function EditorSettingsUpload(props
     }
   }
 
-  const pubkey = useCurrentPubkey()
-  const url = useMemo(() => new URL(selectedUrl), [selectedUrl])
-  const blossomServers = blossomStore.list(pubkey || '')
+  const [url, error] = useMemo(() => {
+    try {
+      const url = new URL(selectedUrl)
+      return [url.hostname, false]
+    } catch (err) {
+      const error = err as Error
+      return [selectedUrl, error.message]
+    }
+  }, [selectedUrl])
+
   return (
     <Popover
-      placement='bottom'
+      placement='bottom-end'
       contentRenderer={({ close }) => (
-        <MenuList>
-          {blossomServers && (
+        <MenuList surface='surfaceContainerLowest'>
+          {user?.blossomServerList && (
             <>
               <Stack sx={styles.subheader}>
                 <Text>Blossom Servers</Text>
               </Stack>
-              {blossomServers.map((url) => {
+              {user.blossomServerList.map((url) => {
                 let formatted
                 try {
                   formatted = new URL(url)
@@ -96,8 +104,15 @@ export const EditorSettingsUpload = observer(function EditorSettingsUpload(props
         <Chip
           elevated
           variant='input'
-          label={url.hostname}
+          label={url}
           icon={<IconChevronDown color='currentColor' size={18} strokeWidth='2' />}
+          trailingIcon={
+            error && (
+              <Tooltip text={error}>
+                <IconBug color='red' size={20} strokeWidth={'1.5'} />
+              </Tooltip>
+            )
+          }
           onClick={open}
           ref={setRef}
           {...getProps()}

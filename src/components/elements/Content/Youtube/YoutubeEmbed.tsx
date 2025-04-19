@@ -1,10 +1,12 @@
 import { Button } from '@/components/ui/Button/Button'
+import { Text } from '@/components/ui/Text/Text'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconPlayerPlayFilled } from '@tabler/icons-react'
 import { useMemo, useState } from 'react'
 import { css, html } from 'react-strict-dom'
 import { Image } from '../Image/Image'
+import { ContentLink } from '../Link/Link'
 
 const REGEX_VIDEO_ID = /.*(?:youtu.be\/|v\/|u\/\w\/|shorts|embed\/|watch\?v=)([^#&?]*).*/
 
@@ -23,7 +25,7 @@ export const YoutubeEmbed = (props: Props) => {
 
   return (
     <html.div>
-      {embedId && (
+      {embedId ? (
         <html.div style={styles.content}>
           {!open && <Image proxy={false} src={posterUrl} onClick={() => setOpen(true)} />}
           {open && <iframe {...css.props(styles.iframe)} src={iframeSrc} width={400} height={280} />}
@@ -33,6 +35,13 @@ export const YoutubeEmbed = (props: Props) => {
             </Button>
           )}
         </html.div>
+      ) : (
+        // likely a playlist or some other youtube link
+        <Text size='lg'>
+          <ContentLink underline href={src} shrink={false}>
+            {src}
+          </ContentLink>
+        </Text>
       )}
     </html.div>
   )
@@ -58,7 +67,7 @@ const styles = css.create({
     right: 0,
     bottom: 0,
     margin: 'auto',
-    zIndex: 1000,
+    zIndex: 10,
     width: 64,
     height: 44,
     color: 'white',

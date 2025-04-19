@@ -1,13 +1,53 @@
-import { createEditor } from '@/components/elements/Editor/utils/createEditor'
+import { Editor } from '@tiptap/core'
+import DocumentExtension from '@tiptap/extension-document'
+import HardbreakExtension from '@tiptap/extension-hard-break'
+import ParagraphExtension from '@tiptap/extension-paragraph'
+import TextExtension from '@tiptap/extension-text'
+import { NostrExtension } from 'nostr-editor'
 import { EditorStore } from '../editor.store'
+
+export function createEditor(store: EditorStore) {
+  return new Editor({
+    extensions: [
+      TextExtension,
+      DocumentExtension,
+      ParagraphExtension,
+      HardbreakExtension,
+      NostrExtension.configure({
+        link: {
+          openOnClick: false,
+        },
+        image: {
+          defaultUploadUrl: 'https://blossom.nostr.com',
+          defaultUploadType: 'blossom',
+        },
+        video: {
+          defaultUploadUrl: 'https://nostr.build',
+          defaultUploadType: 'nip96',
+        },
+        fileUpload: {
+          immediateUpload: false,
+          sign: (event) => store.sign(event),
+          onStart() {
+            store.isUploading.toggle(true)
+          },
+          onComplete() {
+            store.isUploading.toggle(false)
+          },
+        },
+        extend: {},
+      }),
+    ],
+    onUpdate({ editor }) {
+      store.onUpdate(editor)
+    },
+  })
+}
 
 describe('EditorStore', () => {
   test('assert mentionsZaps', async () => {
     const store = new EditorStore({})
-    const editor = createEditor(store, {
-      defaultUploadUrl: 'https://localhost:3000',
-      defaultUploadType: 'blossom',
-    })
+    const editor = createEditor(store)
     editor.commands.insertNProfile({
       bech32: 'nprofile1qqsy583gx72tyjfrl34t6umk54pywzz9c5y4s3zdf7956lth8yt7ycsf4hjc4',
     })

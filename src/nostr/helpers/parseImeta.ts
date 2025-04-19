@@ -21,6 +21,22 @@ const IMETA_RENAME: Partial<Record<keyof IMetaFields, keyof IMetaFields>> = {
   bh: 'blurhash',
 }
 
+const imageExts = ['jpeg', 'jpg', 'png', 'gif', 'webp']
+const videoExts = ['mp4', 'webm', 'ogg', 'mov', 'quicktime']
+
+export function getMimeFromExtension(src: string) {
+  const ext = new URL(src).pathname.split('.')?.toReversed()?.[0] || ''
+  return imageExts.includes(ext) ? 'image' : videoExts.includes(ext) ? 'video' : 'image'
+}
+
+export function getMimeType(src: string, imeta: IMetaFields): 'image' | 'video' {
+  const mime = imeta?.m?.split('/')?.[0]
+  if (mime) {
+    return mime as 'image' | 'video'
+  }
+  return getMimeFromExtension(src)
+}
+
 export function parseImeta(tags: NostrEvent['tags']) {
   const metadata: IMetaTags = {}
   for (const tag of tags) {

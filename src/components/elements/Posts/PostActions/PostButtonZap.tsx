@@ -1,9 +1,8 @@
 import { useContentContext } from '@/components/providers/ContentProvider'
 import { useNoteContext } from '@/components/providers/NoteProvider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
-import { useCurrentPubkey, useGlobalSettings } from '@/hooks/useRootStore'
+import { useCurrentUser, useGlobalSettings } from '@/hooks/useRootStore'
 import { useTheme } from '@/hooks/useTheme'
-import { zapStore } from '@/stores/zaps/zaps.store'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconBolt } from '@tabler/icons-react'
 import { useRouter } from '@tanstack/react-router'
@@ -45,12 +44,11 @@ export const ButtonZap = observer(function ButtonZap(props: Props & ContainerPro
   const { note } = useNoteContext()
   const { dense, disableLink } = useContentContext()
   const router = useRouter()
-  const pubkey = useCurrentPubkey()
+  const user = useCurrentUser()
   const globalSettings = useGlobalSettings()
   const theme = useTheme(globalSettings.theme)
-  const myZaps = zapStore.zapsByPubkey.get(pubkey || '')
-  const hasZapped = myZaps?.has(note.id) || false
-  const total = zapStore.getTotal(note.id) || ''
+  const hasZapped = !!user?.zapByEventId(note.id)
+  const total = note.zapAmount
   const palette = themes[theme.key as 'light' | 'dark']
 
   const color = getZapColor(total || 0, palette)

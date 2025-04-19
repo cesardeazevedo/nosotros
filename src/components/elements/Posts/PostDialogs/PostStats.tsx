@@ -64,6 +64,7 @@ const JsonContent = function PostUserJson(props: { value?: object }) {
 export const PostStats = (props: Props) => {
   const { note, onClose } = props
   const isMobile = useMobile()
+  const { event } = note.event
   return (
     <RemoveScroll>
       <html.div style={styles.root}>
@@ -78,7 +79,7 @@ export const PostStats = (props: Props) => {
             {/*   ))} */}
             {/* </Panel> */}
             <Panel defaultExpanded label='Raw Event'>
-              <JsonContent value={note.event} />
+              <JsonContent value={event} />
             </Panel>
             {/* <Panel label='User Raw Event'> */}
             {/*   <JsonContent value={note.user?.meta} /> */}

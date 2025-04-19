@@ -70,39 +70,21 @@ export const SettingsStorageRoute = observer(function SettingsStorageRoute() {
         <Chip icon={<IconDatabase size={18} strokeWidth='1.5' />} label='IndexedDB' />
       </Stack>
       <Stack horizontal={false} align='stretch' gap={4}>
-        <Stack justify='flex-end' sx={styles.middle} align='flex-end'>
-          <table cellPadding={4}>
-            <tbody>
-              <tr>
-                <td align='right'>
-                  <Text variant='title' size='lg'>
-                    Events:
-                  </Text>
-                </td>
-                <td>
-                  <Text sx={styles.number} variant='title' size='lg'>
-                    {totalEvents ? (
-                      formatter.format(totalEvents)
-                    ) : (
-                      <Skeleton variant='rectangular' sx={styles.skeleton} />
-                    )}
-                  </Text>
-                </td>
-              </tr>
-              <tr>
-                <td align='right'>
-                  <Text variant='title' size='lg'>
-                    Tags:
-                  </Text>
-                </td>
-                <td>
-                  <Text sx={styles.number} variant='title' size='lg'>
-                    {totalTags ? formatter.format(totalTags) : <Skeleton variant='rectangular' sx={styles.skeleton} />}
-                  </Text>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <Stack horizontal={false} sx={styles.middle} align='flex-start'>
+          <Text sx={styles.number} variant='title' size='lg'>
+            {totalEvents ? (
+              formatter.format(totalEvents) + ' events'
+            ) : (
+              <Skeleton variant='rectangular' sx={styles.skeleton} />
+            )}
+          </Text>
+          <Text sx={styles.number} variant='title' size='lg'>
+            {totalTags ? (
+              formatter.format(totalTags) + ' tags'
+            ) : (
+              <Skeleton variant='rectangular' sx={styles.skeleton} />
+            )}
+          </Text>
         </Stack>
         <Stack horizontal={false} gap={2} align='stretch'>
           <Paper sx={styles.paper} surface='surfaceContainer'>

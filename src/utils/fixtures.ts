@@ -1,53 +1,58 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-empty-pattern */
 import { Kind } from '@/constants/kinds'
+import type { RelayStatsDB } from '@/db/types'
 import { clearCache } from '@/nostr/cache'
-import type { NostrContext } from '@/nostr/context'
 import { db } from '@/nostr/db'
-import { parseFollowList } from '@/nostr/helpers/parseFollowList'
+import { parseComment } from '@/nostr/helpers/parseComment'
+import { parseNote } from '@/nostr/helpers/parseNote'
 import { parseUser } from '@/nostr/helpers/parseUser'
-import { emitMailbox, replay as replayMailbox } from '@/nostr/operators/trackMailbox'
 import { pool } from '@/nostr/pool'
-import { defaultNostrSettings, type NostrSettings } from '@/nostr/settings'
 import { replay as replayNIP02 } from '@/nostr/subscriptions/subscribeFollows'
+import { replayIds } from '@/nostr/subscriptions/subscribeIds'
+import { replay as replayMailbox } from '@/nostr/subscriptions/subscribeMailbox'
 import { replay as replayNIP65 } from '@/nostr/subscriptions/subscribeRelayList'
 import { replay as replayUsers } from '@/nostr/subscriptions/subscribeUser'
-import { type NostrEventNote } from '@/nostr/types'
 import { eventStore } from '@/stores/events/event.store'
-import { followsStore } from '@/stores/follows/follows.store'
-import type { NostrStoreSnapshotIn } from '@/stores/nostr/nostr.context.store'
-import { NostrStoreModel } from '@/stores/nostr/nostr.context.store'
-import type { NostrSettingsSnapshotIn } from '@/stores/nostr/nostr.settings.store'
 import { Note } from '@/stores/notes/note'
-import { noteStore } from '@/stores/notes/notes.store'
-import { reactionStore } from '@/stores/reactions/reactions.store'
 import { rootStore, type RootStore } from '@/stores/root.store'
-import { userRelayStore } from '@/stores/userRelays/userRelay.store'
 import type { User } from '@/stores/users/user'
 import { userStore } from '@/stores/users/users.store'
 import { type NostrEvent } from 'nostr-tools'
 import { test as base } from 'vitest'
-import { fakeComment, fakeEvent, fakeNote } from './faker'
+import { fakeEvent, fakeEventMeta } from './faker'
 import { RelayServer, TestSigner } from './testHelpers'
 
 interface Fixtures {
   createMockRelay: (url: string, db: NostrEvent[]) => RelayServer
   root: RootStore
-  clear: () => void
+  reset: () => void
   login: (pubkey: string) => User
-  createContext: (
-    options?: Partial<Omit<NostrStoreSnapshotIn, 'settings'>> & { settings?: Partial<NostrSettingsSnapshotIn> },
-  ) => NostrContext
   createUser: (data: Partial<NostrEvent>) => User
   createNote: (data: Partial<NostrEvent>) => Note
   createComment: (data: Partial<NostrEvent>) => Note
   createFollows: (pubkey: string, tags: string[]) => void
-  createReaction: (data: Partial<NostrEvent>) => void
+  insertRelayStats: (url: string, data: Partial<RelayStatsDB>) => Promise<void>
   insertRelayList: (data: Partial<NostrEvent>) => Promise<void>
   signer: TestSigner
 }
 
 export const test = base.extend<Fixtures>({
+  reset: [
+    async ({}, use) => {
+      clearCache()
+      pool.reset()
+      userStore.clear()
+      eventStore.clear()
+      replayIds.clear()
+      replayMailbox.clear()
+      replayUsers.clear()
+      replayNIP02.clear()
+      replayNIP65.clear()
+      await db.clearDB()
+      await use(() => null)
+    },
+    { auto: true },
+  ],
   createMockRelay: async ({}, use) => {
     await use((url: string, db: NostrEvent[]) => {
       return new RelayServer(url, db)
@@ -56,92 +61,80 @@ export const test = base.extend<Fixtures>({
   root: async ({}, use) => {
     await use(rootStore)
   },
-  clear: async ({}, use) => {
-    clearCache()
-    pool.reset()
-    //replayIds.clear()
-    userStore.clear()
-    eventStore.clear()
-    noteStore.clear()
-    followsStore.clear()
-    userRelayStore.clear()
-    replayMailbox.clear()
-    replayUsers.clear()
-    replayNIP02.clear()
-    replayNIP65.clear()
-    await use(() => null)
-  },
   login: async ({ root, createUser }, use) => {
     use((pubkey: string) => {
-      root.auth.login({ pubkey, context: { pubkey, signer: { name: 'nip07' } } })
+      root.auth.login({ pubkey, signer: { name: 'nip07' } })
       return createUser({ pubkey })
     })
   },
-  createContext: async ({ clear }, use) => {
-    use((options) => {
-      return NostrStoreModel.create({
-        ...options,
-        settings: {
-          ...defaultNostrSettings,
-          ...options?.settings,
-        },
-      }).context
-    })
-  },
-  createUser: async ({ clear }, use) => {
+  createUser: async ({}, use) => {
     use((data: Partial<NostrEvent>) => {
-      const event = fakeEvent({
-        id: '1',
-        kind: Kind.Metadata,
-        content: '{"name": "user"}',
-        created_at: 1,
-        ...data,
-      })
-      userStore.add(event, parseUser(event))
+      const event = userStore.add(
+        fakeEventMeta(
+          {
+            id: '1',
+            kind: Kind.Metadata,
+            content: '{"name": "user"}',
+            created_at: 1,
+            ...data,
+          },
+          parseUser,
+        ),
+      )
 
       return userStore.users.get(event.pubkey) as User
     })
   },
-  createNote: async ({ clear, createUser }, use) => {
+  createNote: async ({ createUser }, use) => {
     use((data: Partial<NostrEvent>) => {
-      const event = fakeNote(data)
-      eventStore.add(event)
-      noteStore.add(event as NostrEventNote)
+      const event = eventStore.add(fakeEventMeta(data, parseNote))
       createUser({ pubkey: event.pubkey })
       return new Note(event)
     })
   },
-  createComment: async ({ clear, createUser }, use) => {
+  createComment: async ({ createUser }, use) => {
     use((data: Partial<NostrEvent>) => {
-      const event = fakeComment({ kind: Kind.Comment, ...data })
-      eventStore.add(event)
-      noteStore.add(event)
+      const event = eventStore.add(fakeEventMeta({ kind: Kind.Comment, ...data }, parseComment))
       createUser({ pubkey: event.pubkey })
       return new Note(event)
     })
   },
-  createFollows: async ({ clear }, use) => {
+  createFollows: async ({}, use) => {
     use((pubkey: string, followings: string[]) => {
-      const event = fakeEvent({
-        kind: Kind.Follows,
-        pubkey,
-        tags: followings.map((follow) => ['p', follow]),
-      })
-      followsStore.add(event, parseFollowList(event))
+      eventStore.add(
+        fakeEvent({
+          kind: Kind.Follows,
+          pubkey,
+          tags: followings.map((follow) => ['p', follow]),
+        }),
+      )
     })
   },
-  createReaction: async ({ clear }, use) => {
-    use((data: Partial<NostrEvent>) => {
-      reactionStore.add(fakeEvent(data))
-    })
-  },
-  insertRelayList: async ({ clear }, use) => {
+  insertRelayList: async ({}, use) => {
     use(async (data: Partial<NostrEvent>) => {
       const event = fakeEvent({ kind: Kind.RelayList, ...data })
       await db.event.insert(event)
-      emitMailbox(event)
     })
-    db.clearDB()
+  },
+  insertRelayStats: async ({}, use) => {
+    use(async (url: string, data: Partial<RelayStatsDB>) => {
+      await db.relayStats.insert({
+        connects: 0,
+        closes: 0,
+        events: 0,
+        eoses: 0,
+        notices: [],
+        auths: 0,
+        errors: 0,
+        errorMessages: [],
+        subscriptions: 0,
+        publishes: 0,
+        lastAuth: 0,
+        lastConnected: 0,
+        ...data,
+        url,
+      } as RelayStatsDB)
+    })
   },
   signer: async ({}, use) => {
     const signer = new TestSigner()

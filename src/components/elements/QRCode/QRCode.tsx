@@ -23,7 +23,7 @@ export const QRCode = observer(function QRCode() {
   const npub = useMemo(() => encodeSafe(() => nip19.npubEncode(user?.pubkey || '')), [user])
   return (
     <html.div style={styles.root}>
-      <IconButton sx={styles.close} onClick={dialogStore.closeQRCode} icon={<IconX />} />
+      <IconButton sx={styles.close} onClick={() => dialogStore.toggleQRCode(false)} icon={<IconX />} />
       <Stack horizontal={false} gap={2} sx={styles.content}>
         {user && (
           <ContentProvider value={{ disablePopover: true, disableLink: true }}>

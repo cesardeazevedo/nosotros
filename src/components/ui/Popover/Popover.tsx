@@ -24,7 +24,7 @@ export const Popover = memo(function Popover(props: Props) {
         close: handleClose,
         open: handleOpen,
       } as IPopoverBaseTriggerRendererProps)}>
-      <PopoverBase {...rest} opened={open} onClose={handleClose}>
+      <PopoverBase {...rest} opened={open} onClose={handleClose} closeEvents={{ clickOutside: true }}>
         {(props) => (
           <>
             {typeof children === 'function' ? children({ ...props, open: handleOpen, close: handleClose }) : children}

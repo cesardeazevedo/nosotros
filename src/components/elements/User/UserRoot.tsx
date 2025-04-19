@@ -24,6 +24,7 @@ export const UserRoot = observer(function UserRoot(props: Props) {
         <Stack sx={[styles.root, styles.action]} align='flex-start' gap={2}>
           <Stack grow horizontal={false} sx={styles.content} gap={2}>
             <UserHeader pubkey={pubkey} />
+            <br />
             <UserContentAbout pubkey={pubkey} />
           </Stack>
           <UserFollowButton pubkey={pubkey} />

@@ -45,7 +45,7 @@ const styles = css.create({
     right: 0,
     paddingInline: spacing.padding4,
     backgroundColor: 'transparent',
-    zIndex: 2000,
+    zIndex: 10,
     borderRadius: shape.lg,
     transition: 'all ease 0.2s',
     display: 'flex',
@@ -73,7 +73,7 @@ const styles = css.create({
     position: 'absolute',
     left: 6,
     bottom: 6,
-    zIndex: 2000,
+    zIndex: 10,
   },
   chip: {
     [chipTokens.flatContainerColor]: 'rgba(0, 0, 0, 0.8)',

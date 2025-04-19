@@ -1,12 +1,12 @@
 import type { Props as NProfileSuggestionProps } from '@/components/elements/Content/NProfile/NProfileSuggestion'
-import { userRelayStore } from '@/stores/userRelays/userRelay.store'
+import { userStore } from '@/stores/users/users.store'
 import type { Editor } from '@tiptap/react'
 import { ReactRenderer } from '@tiptap/react'
 import Suggestion, { SuggestionPluginKey } from '@tiptap/suggestion'
 import type { NProfileAttributes } from 'nostr-editor'
 import { nip19 } from 'nostr-tools'
+import type { OnKeyDownRef } from '../../../modules/Search/SearchContent'
 import { NProfileSuggestion } from '../../Content/NProfile/NProfileSuggestion'
-import type { SearchUsersRef } from '../../Search/SearchUsers'
 
 export function createSuggestionPlugin(editor: Editor) {
   return Suggestion({
@@ -25,7 +25,7 @@ export function createSuggestionPlugin(editor: Editor) {
 
       const attrs: Partial<NProfileAttributes> = {
         pubkey: props.pubkey,
-        relays: userRelayStore.getRelays(props.pubkey),
+        relays: userStore.get(props.pubkey)?.relays,
       }
       attrs.bech32 = nip19.nprofileEncode(attrs as nip19.ProfilePointer)
 
@@ -41,7 +41,7 @@ export function createSuggestionPlugin(editor: Editor) {
       window.getSelection()?.collapseToEnd()
     },
     render() {
-      let component: ReactRenderer<SearchUsersRef, NProfileSuggestionProps>
+      let component: ReactRenderer<OnKeyDownRef, NProfileSuggestionProps>
       return {
         onStart(props) {
           component = new ReactRenderer(NProfileSuggestion, {
@@ -56,7 +56,10 @@ export function createSuggestionPlugin(editor: Editor) {
           component.destroy()
         },
         onKeyDown(props) {
-          return component.ref?.onKeyDown?.(props) || false
+          return (
+            component.ref?.onKeyDown?.({ event: props.event as unknown as React.KeyboardEvent<HTMLInputElement> }) ||
+            false
+          )
         },
       }
     },

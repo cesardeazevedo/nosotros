@@ -10,32 +10,40 @@ import type { Props as ButtonProps } from '../Button/Button'
 import { Button } from '../Button/Button'
 import { buttonTokens } from '../Button/Button.stylex'
 import { rippleTokens } from '../Ripple/Ripple.stylex'
+import { Text } from '../Text/Text'
 
 type Variants = 'surface' | 'primary' | 'secondary' | 'tertiary' | 'branded'
 
-type Props = Omit<ButtonProps, 'variant' | 'icon' | 'trailingIcon'> & {
+type Props = Omit<ButtonProps, 'variant' | 'trailingIcon'> & {
   size?: 'sm' | 'md' | 'lg'
   variant?: Variants
   label?: React.ReactNode
+  flat?: boolean
 }
 
 export const Fab = forwardRef<HTMLButtonElement, Props>((props, ref) => {
-  const { variant = 'branded', children, label, size = 'md', ...rest } = props
+  const { variant = 'branded', children, label, icon, size = 'md', flat, fullWidth, ...rest } = props
   const extended = !!label
   return (
     <Button
       variant={'elevated'}
-      icon={children}
+      icon={icon || children}
       {...rest}
       sx={[
         styles.root,
+        flat && styles.flat,
         extended ? sizes.md : sizes[size],
         extended && styles.root$extended,
         variants[variant],
+        fullWidth && styles.fullWidth,
         rest.sx,
       ]}
       ref={ref}>
-      {label}
+      {label && (
+        <Text variant='label' size='lg' sx={styles.label}>
+          {label}
+        </Text>
+      )}
     </Button>
   )
 })
@@ -92,7 +100,6 @@ const sizes = css.create({
 
 const styles = css.create({
   root: {
-    zIndex: 500,
     [buttonTokens.leadingSpace]: 0,
     [buttonTokens.trailingSpace]: 0,
     [buttonTokens.containerMinWidth]: '40px',
@@ -104,5 +111,14 @@ const styles = css.create({
     width: 'auto',
     paddingLeft: spacing.padding2,
     paddingRight: spacing.padding2,
+  },
+  flat: {
+    [buttonTokens.containerElevation]: elevation.shadows0,
+  },
+  fullWidth: {
+    width: '100%',
+  },
+  label: {
+    whiteSpace: 'nowrap',
   },
 })

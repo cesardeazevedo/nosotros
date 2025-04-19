@@ -192,6 +192,7 @@ export const PopoverBase = forwardRef<HTMLDivElement, IPopoverBaseProps>(functio
   const dismiss = useDismiss(floating.context, {
     outsidePress: !!closeEvents.clickOutside,
     escapeKey: closeEvents.escapeKey,
+    outsidePressEvent: 'click',
   })
 
   const clientPoint = useClientPoint(floating.context, {
@@ -248,13 +249,15 @@ export const PopoverBase = forwardRef<HTMLDivElement, IPopoverBaseProps>(functio
       {transitionStatus.isMounted ? (
         <Portal root={root}>
           <FloatingFocusManager
-            modal
+            modal={false}
             disabled={!trapFocus}
             context={floating.context}
             closeOnFocusOut={closeEvents.focusOut}
             {...slotProps?.floatingFocusManager}>
             <html.div style={sx}>
-              {withScrim ? <Scrim floatingContext={floating.context} lockScroll {...slotProps?.scrim} /> : null}
+              {!openEvents.hover && (
+                <Scrim floatingContext={floating.context} lockScroll={withScrim} {...slotProps?.scrim} />
+              )}
               <div
                 {...css.props([
                   styles.floating,

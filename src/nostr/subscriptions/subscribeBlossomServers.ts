@@ -1,7 +1,7 @@
 import { Kind } from '@/constants/kinds'
-import type { NostrContext } from '../context'
+import { WRITE } from '../types'
 import { subscribe } from './subscribe'
 
-export function subscribeBlossomServers(pubkey: string, ctx: NostrContext) {
-  return subscribe({ kinds: [Kind.BlossomServerList], authors: [pubkey] }, ctx)
+export function subscribeBlossomServers(pubkey: string) {
+  return subscribe({ kinds: [Kind.BlossomServerList], authors: [pubkey] }, { pubkey, permission: WRITE })
 }

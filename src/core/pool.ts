@@ -1,12 +1,12 @@
 import { LRUCache } from 'lru-cache'
+import { distinct, mergeAll, mergeMap, of, ReplaySubject } from 'rxjs'
 import { formatRelayUrl } from './helpers/formatRelayUrl'
 import { Relay } from './Relay'
 
 type Options = {
   blacklist?: Array<{ pattern: RegExp }>
   open?: (url: string) => Relay
-  auth?: (relay: Relay, challenge: string) => void
-  allowLocalConnection: boolean
+  allowLocalConnection?: boolean
 }
 
 export class Pool {
@@ -16,16 +16,31 @@ export class Pool {
     ttlAutopurge: true,
   })
 
+  private relaysSubject = new ReplaySubject<Relay>()
+  relays$ = this.relaysSubject.asObservable()
+
+  messages$ = this.relays$.pipe(
+    mergeMap((relay) => of([relay.url, relay.message$])),
+    mergeAll(),
+  )
+
+  auths$ = this.relays$.pipe(
+    mergeMap((relay) => relay.auth$),
+    distinct((value) => value[0] + value[1]),
+  )
+
+  notices$ = this.relays$.pipe(mergeMap((relay) => relay.notice$))
+
   constructor(private options?: Options) {}
 
   private create(url: string) {
     const relay = this.options?.open?.(url) || new Relay(url)
     this.relays.set(url, relay)
+    this.relaysSubject.next(relay)
 
     // Stablish WebSocket connection
     relay.websocket$.subscribe({
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      error: (error: Event) => {
+      error: () => {
         this.delete(url)
         this.blacklist(url)
       },

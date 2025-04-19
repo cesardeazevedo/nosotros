@@ -34,8 +34,8 @@ export type IUseRippleResult = {
   pressed: boolean
 }
 
-const PRESS_GROW_MS = 700
-const MINIMUM_PRESS_MS = 225
+const PRESS_GROW_MS = 250
+const MINIMUM_PRESS_MS = 50
 const INITIAL_ORIGIN_SCALE = 0.09
 const PADDING = 10
 const SOFT_EDGE_MINIMUM_SIZE = 95
@@ -47,7 +47,7 @@ const ANIMATION_FILL = 'forwards'
  * Delay reacting to touch so that we do not show the ripple for a swipe or
  * scroll interaction.
  */
-const TOUCH_DELAY_MS = 100
+const TOUCH_DELAY_MS = 50
 
 /**
  * Interaction states for the ripple.
@@ -211,7 +211,7 @@ export const useRipple = ({ visualState, for: forElementRef, disabled }: IUseRip
       }
 
       const { width, height } = hostRef.getBoundingClientRect()
-      //Eend in the center
+      // End in the center
       const endPoint = {
         x: (width - initialSizeRef.current) / 2,
         y: (height - initialSizeRef.current) / 2,

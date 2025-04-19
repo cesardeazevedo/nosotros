@@ -14,12 +14,12 @@ export enum ClientToRelay {
 }
 
 export enum RelayToClient {
-  OK = 'ok',
-  AUTH = 'auth',
-  EOSE = 'eose',
-  EVENT = 'event',
-  NOTICE = 'notice',
-  CLOSED = 'closed',
+  OK = 'OK',
+  AUTH = 'AUTH',
+  EOSE = 'EOSE',
+  EVENT = 'EVENT',
+  NOTICE = 'NOTICE',
+  CLOSED = 'CLOSED',
   NEG_MSG = 'NEG-MSG',
   NEG_ERR = 'NEG-ERR',
 }

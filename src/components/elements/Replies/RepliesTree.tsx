@@ -9,5 +9,5 @@ export const RepliesTree = observer(function RepliesTree(props: {
   nested?: boolean
 }) {
   const { replies, ...rest } = props
-  return replies.map((event) => <Reply key={event.id} event={event.event} {...rest} />)
+  return replies.map((event) => <Reply key={event.id} event={event} {...rest} />)
 })

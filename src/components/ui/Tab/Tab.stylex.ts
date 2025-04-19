@@ -29,7 +29,7 @@ const vars = {
   containerElevation: elevation.shadows0,
   containerHeight: '64px',
   containerHeight$withIconAndLabelText: 'unset',
-  containerShape: shape.none,
+  containerShape: shape.full,
   // &:disabled
   containerElevation$disabled: elevation.shadows0,
   containerColor$disabled: palette.surface,

@@ -7,8 +7,6 @@ import { css } from 'react-strict-dom'
 const vars = {
   containerMinHeight: 'unset',
   containerColor: 'unset',
-  topSpace: 'unset',
-  bottomSpace: 'unset',
   nonTextOpacity: 'unset',
 
   // selectedContainer
@@ -17,7 +15,7 @@ const vars = {
 
   containerOpacity: '1',
   containerShape: shape.xl,
-  containerMinHeight$sm: '36px',
+  containerMinHeight$sm: '38px',
   containerMinHeight$md: '48px',
 
   containerColor$disabled: 'transparent',
@@ -29,14 +27,13 @@ const vars = {
   leadingSpace: spacing.padding2,
   trailingSpace: spacing.padding2,
 
+  leadingSpace$sm: spacing.padding1,
+  trailingSpace$sm: spacing.padding1,
+
   topSpace$sm: '0',
   bottomSpace$sm: '0',
   topSpace$md: '0',
   bottomSpace$md: '0',
-  topSpace$lg: spacing.padding1,
-  bottomSpace$lg: spacing.padding1,
-  topSpace$xl: spacing.padding2,
-  bottomSpace$xl: spacing.padding2,
 
   textColor: 'inherit',
   textOpacity: '1',

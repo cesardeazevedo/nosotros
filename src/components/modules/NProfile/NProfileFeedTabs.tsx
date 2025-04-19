@@ -15,7 +15,7 @@ export const NProfileFeedTabs = () => {
   const params = useParams({ from: '/$nostr' })
   return (
     <Stack justify='space-evenly' sx={styles.root}>
-      <Tabs anchor={current.routeId}>
+      <Tabs anchor={current.routeId || ''}>
         <Link to='/$nostr' params={{ nostr: params.nostr }}>
           <Tab sx={styles.tab} anchor='/$nostr/' label='Notes' />
         </Link>

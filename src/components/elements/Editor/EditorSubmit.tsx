@@ -34,7 +34,7 @@ export const EditorSubmit = observer(function EditorSubmit(props: Props) {
   }, [])
 
   return (
-    <Stack gap={1}>
+    <Stack gap={0.5}>
       {renderDiscard && (
         <Button sx={[dense && styles.button$dense]} onClick={handleDiscard}>
           Discard

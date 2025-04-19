@@ -13,7 +13,7 @@ import { css, html } from 'react-strict-dom'
 import { dialogStore } from 'stores/ui/dialogs.store'
 import { UserAvatar } from '../User/UserAvatar'
 import { UserName } from '../User/UserName'
-import { Menu } from './Menu'
+import { ProfilePopoverMenu } from './ProfilePopoverMenu'
 
 export const ProfilePopover = observer(function ProfilePopover() {
   const user = useCurrentUser()
@@ -23,20 +23,20 @@ export const ProfilePopover = observer(function ProfilePopover() {
       <Popover
         floatingStrategy='fixed'
         placement='bottom-end'
-        contentRenderer={() => (
+        contentRenderer={(props) => (
           <Paper elevation={2} shape='lg' surface='surfaceContainerLow' sx={styles.root}>
-            <html.img src={user?.meta.banner} style={styles.image} />
+            <html.img src={user?.metadata.banner} style={styles.image} />
             <Stack sx={styles.header} justify='space-between'>
-              {pubkey && <UserName pubkey={pubkey} />}
+              <ContentProvider value={{ disableLink: true }}>{pubkey && <UserName pubkey={pubkey} />}</ContentProvider>
               <Tooltip cursor='arrow' placement='bottom' text='Use the QR Code to scan your npub on your mobile device'>
-                <IconButton onClick={dialogStore.openQRCode} icon={<IconQrcode strokeWidth='1.5' />} />
+                <IconButton onClick={() => dialogStore.toggleQRCode()} icon={<IconQrcode strokeWidth='1.5' />} />
               </Tooltip>
             </Stack>
-            <Menu dense onAction={() => {}} />
+            <ProfilePopoverMenu onAction={() => props.close()} />
           </Paper>
         )}>
         {({ getProps, setRef, open }) => (
-          <div onClick={open} {...getProps} ref={setRef}>
+          <div onClick={open} {...getProps()} ref={setRef}>
             <ContentProvider value={{ disableLink: true, disablePopover: true }}>
               <UserAvatar pubkey={user?.pubkey} />
             </ContentProvider>
@@ -53,7 +53,7 @@ const styles = css.create({
   },
   header: {
     overflow: 'hidden',
-    paddingBlock: spacing.padding1,
+    paddingTop: spacing.padding1,
     paddingInline: spacing.padding2,
   },
   image: {

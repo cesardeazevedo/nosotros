@@ -50,7 +50,7 @@ export const signinStore = makeAutoObservable({
   error: '',
 
   hasExtension: lazyObservable((sink) => {
-    setTimeout(() => sink('nostr' in window), 2000)
+    setTimeout(() => sink('nostr' in window), 1500)
     sink(undefined)
   }),
 
@@ -120,24 +120,15 @@ export const signinStore = makeAutoObservable({
     invariant(pubkey, 'Pubkey permission rejected')
     auth.login({
       pubkey,
-      context: {
-        signer: {
-          name: 'nip07',
-        },
-        pubkey,
+      signer: {
+        name: 'nip07',
       },
     })
     this.reset()
   },
 
   submitReadonly(pubkey: string) {
-    auth.login({
-      pubkey,
-      context: {
-        signer: undefined,
-        pubkey,
-      },
-    })
+    auth.login({ pubkey })
     this.reset()
   },
 
@@ -154,20 +145,17 @@ export const signinStore = makeAutoObservable({
     const [, { result: pubkey }] = await signer.getPublicKey()
     auth.login({
       pubkey,
-      context: {
-        signer: {
+      signer: {
+        name: 'nip46',
+        params: {
           name: 'nip46',
-          params: {
-            name: 'nip46',
-            method: {
-              method: 'nostrconnect',
-              relay,
-            },
-            secret: signer.secret,
-            clientSecret: bytesToHex(signer.clientSigner.secret),
+          method: {
+            method: 'nostrconnect',
+            relay,
           },
+          secret: signer.secret,
+          clientSecret: bytesToHex(signer.clientSigner.secret),
         },
-        pubkey,
       },
     })
     this.setReponse('Authorized')
@@ -195,16 +183,13 @@ export const signinStore = makeAutoObservable({
       const [, { result: pubkey }] = await signer.signer.getPublicKey()
       auth.login({
         pubkey,
-        context: {
-          signer: {
-            ...signer,
-            params: {
-              ...signer.params,
-              secret: signer.signer.secret,
-              clientSecret: bytesToHex(signer.signer.clientSigner.secret),
-            },
+        signer: {
+          ...signer,
+          params: {
+            ...signer.params,
+            secret: signer.signer.secret,
+            clientSecret: bytesToHex(signer.signer.clientSigner.secret),
           },
-          pubkey,
         },
       })
       this.setReponse('Authorized')

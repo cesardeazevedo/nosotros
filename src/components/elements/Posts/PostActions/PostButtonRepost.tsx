@@ -1,8 +1,7 @@
 import { useContentContext } from '@/components/providers/ContentProvider'
 import { useNoteContext } from '@/components/providers/NoteProvider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
-import { useCurrentPubkey } from '@/hooks/useRootStore'
-import { repostStore } from '@/stores/reposts/reposts.store'
+import { useCurrentUser } from '@/hooks/useRootStore'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconShare3 } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
@@ -13,12 +12,11 @@ import { iconProps } from './utils'
 export const ButtonRepost = observer(function ButtonRepost() {
   const { dense } = useContentContext()
   const { note } = useNoteContext()
-  const pubkey = useCurrentPubkey()
-  const myReposts = repostStore.getByPubkey(pubkey)
-  const reposted = myReposts?.has(note.event.id)
+  const user = useCurrentUser()
+  const reposted = !!user?.repostedByEventId(note.id)
 
   return (
-    <ButtonContainer value={note.repostTotal}>
+    <ButtonContainer value={note.reposts.length}>
       <RepostPopover note={note}>
         {({ getProps, setRef, open }) => (
           <IconButton
