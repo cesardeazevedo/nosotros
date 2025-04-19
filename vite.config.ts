@@ -18,7 +18,7 @@ export default defineConfig(({ mode }) => {
     server: {
       host: true,
       port: 8000,
-      hmr: true,
+      hmr: false,
     },
     build: {
       sourcemap: true,
@@ -42,16 +42,36 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [
       // circleDependency({ outputFilePath: './circleDep' }),
+      !isTesting ? mkcert({}) : null,
+      tsconfigPaths(),
+      react({
+        babel: {
+          plugins: [['babel-plugin-react-compiler', { target: '19' }]],
+        },
+      }),
+      styleX({
+        importSources: [
+          {
+            from: 'react-strict-dom',
+            as: 'css',
+          },
+        ],
+        aliases: {
+          '@/*': [join(__dirname, './src', '*')],
+        },
+      }),
+      Info(),
+      visualizer() as PluginOption,
       VitePWA({
         strategies: 'generateSW',
         registerType: 'autoUpdate',
-        devOptions: {
-          enabled: true,
-        },
+        injectRegister: false,
         manifest: {
           name: 'Nosotros',
           short_name: 'Nosotros',
           description: 'A decentralized social network based on nostr protocol',
+          background_color: '#000',
+          theme_color: '#000',
           icons: [
             {
               src: '/apple-touch-icon-72x72.png',
@@ -94,25 +114,27 @@ export default defineConfig(({ mode }) => {
               sizes: '512x512',
             },
           ],
-          start_url: '/',
-          background_color: '#000',
-          display: 'standalone',
-          scope: '/',
-          theme_color: '#000',
+        },
+        devOptions: {
+          enabled: false,
         },
         workbox: {
           sourcemap: true,
           maximumFileSizeToCacheInBytes: 2600000,
+          globPatterns: ['**/*.{js,css,svg,html,ico}'],
+          globIgnores: ['assets/clarity-*.js'], // this file from shiki is crashing for some reason
+          cleanupOutdatedCaches: true,
+          clientsClaim: true,
+          skipWaiting: true,
           runtimeCaching: [
             {
-              urlPattern: ({ request, url }) =>
-                request.destination === 'image' && url.pathname.includes('/user_avatar'),
+              urlPattern: /^https:\/\/imgproxy\.nosotros\.app\/_\/user_avatar\/plain\/.+/,
               handler: 'CacheFirst',
               options: {
-                cacheName: 'images',
+                cacheName: 'dynamic-images',
                 expiration: {
                   maxEntries: 1000,
-                  maxAgeSeconds: 7 * 24 * 60 * 60,
+                  maxAgeSeconds: 7 * 24 * 60 * 60, // 1 week
                 },
                 cacheableResponse: {
                   statuses: [0, 200],
@@ -122,26 +144,6 @@ export default defineConfig(({ mode }) => {
           ],
         },
       }),
-      !isTesting ? mkcert({}) : null,
-      tsconfigPaths(),
-      react({
-        babel: {
-          plugins: [['babel-plugin-react-compiler', { target: '19' }]],
-        },
-      }),
-      styleX({
-        importSources: [
-          {
-            from: 'react-strict-dom',
-            as: 'css',
-          },
-        ],
-        aliases: {
-          '@/*': [join(__dirname, './src', '*')],
-        },
-      }),
-      Info(),
-      visualizer() as PluginOption,
     ],
     resolve: {
       alias: {
