@@ -62,7 +62,7 @@ const styles = css.create({
     bottom: 0,
     left: 0,
     right: 0,
-    zIndex: 40,
+    zIndex: 30,
     textAlign: 'center',
     paddingBottom: 40,
     transition: 'opacity 0.14s ease',
