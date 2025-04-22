@@ -591,7 +591,7 @@ const tagsRoute = createRoute({
     const { tag } = tagsRoute.useParams()
     return <FeedPending header={<FeedHeaderBase leading={<TagHeader tags={[tag]} />} />} />
   },
-  component: function () {
+  component: function() {
     const module = tagsRoute.useLoaderData()
     useResetScroll()
     return (
@@ -665,7 +665,7 @@ const relayDiscoveryRoute = createRoute({
     subscribeRelayDiscoveryModule(module).subscribe()
     return module
   },
-  pendingComponent: function () {
+  pendingComponent: function() {
     const isMobile = useMobile()
     return (
       <RouteContainer maxWidth='lg' header={<RouteHeader label='Relay Discovery' />}>
@@ -673,7 +673,7 @@ const relayDiscoveryRoute = createRoute({
       </RouteContainer>
     )
   },
-  component: function () {
+  component: function() {
     const module = relayDiscoveryRoute.useLoaderData()
     const isMobile = useMobile()
     useResetScroll()
