@@ -4,6 +4,7 @@ import { Divider } from '@/components/ui/Divider/Divider'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { Fab } from '@/components/ui/Fab/Fab'
 import { Stack } from '@/components/ui/Stack/Stack'
+import { useMobile } from '@/hooks/useMobile'
 import type { FeedStore } from '@/stores/feeds/feed.store'
 import { duration } from '@/themes/duration.stylex'
 import { shape } from '@/themes/shape.stylex'
@@ -24,6 +25,7 @@ type Props = {
 
 export const FeedNewPosts = observer(function FeedNewPosts(props: Props) {
   const { feed } = props
+  const isMobile = useMobile()
   const isDeck = useContext(DeckContext).index !== undefined
   const [, ref$] = useObservableRef(props.ref)
   const [fabVisible] = useObservableState(() => {
@@ -72,7 +74,7 @@ export const FeedNewPosts = observer(function FeedNewPosts(props: Props) {
         <Fab
           size='sm'
           variant='primary'
-          sx={[styles.fab, fabVisible && feed.buffer.size > 0 && styles.fab$visible]}
+          sx={[styles.fab, fabVisible && feed.buffer.size > 0 && styles.fab$visible, isMobile && styles.fab$mobile]}
           onClick={handleFlush}
           label={
             <Stack gap={2}>
@@ -113,7 +115,7 @@ const styles = css.create({
     left: 0,
     right: 0,
     height: 0,
-    zIndex: 100,
+    zIndex: 40,
   },
   fab: {
     display: 'flex',
@@ -127,11 +129,14 @@ const styles = css.create({
     padding: spacing.padding1,
     width: 'fit-content',
     margin: 'auto',
-    zIndex: 400,
+    zIndex: 90,
     opacity: 0,
     pointerEvents: 'none',
     transitionDuration: duration.short3,
     transitionProperty: 'transform, opacity',
+  },
+  fab$mobile: {
+    top: 60,
   },
   fab$visible: {
     opacity: 1,
