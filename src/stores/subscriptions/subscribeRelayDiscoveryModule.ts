@@ -5,7 +5,7 @@ import { relaysStore } from '../relays/relays.store'
 import { subscribeFeedStore } from './subscribeFeedStore'
 
 export function subscribeRelayDiscoveryModule(module: RelayDiscoveryModule) {
-  return subscribeFeedStore(module.feed, false).pipe(
+  return subscribeFeedStore(module.feed, { live: false }).pipe(
     mergeMap(identity),
     bufferTime(2500),
     mergeMap(identity),
