@@ -1,7 +1,7 @@
+import { ArticleRoot } from '@/components/modules/Articles/ArticleRoot'
 import { Kind } from '@/constants/kinds'
 import type { NostrEventMetadata } from '@/nostr/types'
 import { observer } from 'mobx-react-lite'
-import { ArticleRoot } from '../Articles/ArticleRoot'
 import { PostQuote } from '../Posts/PostQuote'
 import { ZapReceiptRoot } from '../Zaps/ZapReceipt'
 import { NostrEventUnsupported } from './NostrEventUnsupported'
