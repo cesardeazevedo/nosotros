@@ -42,7 +42,12 @@ function subscribeFeedScope(feed: FeedStore, ctx: NostrContext, pagination: Pagi
   }
 }
 
-export function subscribeFeedStore(feed: FeedStore, live = true) {
+type Options = {
+  live?: boolean
+  buffer?: number
+}
+
+export function subscribeFeedStore(feed: FeedStore, options?: Options) {
   const ctx = { ...rootStore.globalContext, ...feed.context }
   return toStream(() => ({ snap: feed.snapshot, feed })).pipe(
     mergeWith(createContextAuthenticator(ctx)),
@@ -52,20 +57,20 @@ export function subscribeFeedStore(feed: FeedStore, live = true) {
       feed.paginationLive.setFilter(feed.filter)
       return merge(
         subscribeFeedScope(feed, ctx, feed.pagination),
-        live
+        options?.live !== false
           ? subscribeFeedScope(feed, { ...ctx, batcher: 'live' }, feed.paginationLive).pipe(
-              filter((event) => matchFilter(pickBy(feed.paginationLive.filter, ['kinds', 'since']), event)),
-              bufferTime(1500),
-              mergeMap(identity),
-              tap((item) => feed.addBuffer(item as NostrEventMetadata)),
-              mergeMap(() => EMPTY),
-            )
+            filter((event) => matchFilter(pickBy(feed.paginationLive.filter, ['kinds', 'since']), event)),
+            bufferTime(1500),
+            mergeMap(identity),
+            tap((item) => feed.addBuffer(item as NostrEventMetadata)),
+            mergeMap(() => EMPTY),
+          )
           : EMPTY,
       ).pipe(
         // trigger pagination if the feed.notes still empty
         mergeWith(feed.pagination.paginateIfEmpty(feed.notes)),
 
-        bufferTime(600),
+        bufferTime(options?.buffer || 600),
 
         filter((x) => x.length > 0),
 

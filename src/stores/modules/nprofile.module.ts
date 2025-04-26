@@ -23,8 +23,7 @@ export const NProfileModuleModel = BaseModuleModel.named('NProfileModuleModel')
       feeds: {
         notes: FeedStoreModel.create({
           ...props,
-          range: Duration.fromObject({ days: 7 }).as('minutes'),
-          filter: { kinds: [Kind.Text, Kind.Repost], authors: [pubkey] },
+          filter: { kinds: [Kind.Text, Kind.Repost], authors: [pubkey], limit: 20 },
           options: {
             includeRoot: true,
             includeParents: false,
@@ -33,8 +32,7 @@ export const NProfileModuleModel = BaseModuleModel.named('NProfileModuleModel')
         }),
         replies: FeedStoreModel.create({
           ...props,
-          range: Duration.fromObject({ days: 7 }).as('minutes'),
-          filter: { kinds: [Kind.Text], authors: [pubkey] },
+          filter: { kinds: [Kind.Text], authors: [pubkey], limit: 20 },
           options: {
             includeRoot: false,
             includeParents: false,
@@ -43,23 +41,22 @@ export const NProfileModuleModel = BaseModuleModel.named('NProfileModuleModel')
         }),
         media: FeedStoreModel.create({
           ...props,
-          range: Duration.fromObject({ days: 30 }).as('minutes'),
-          filter: { kinds: [Kind.Media], authors: [pubkey] },
+          filter: { kinds: [Kind.Media], authors: [pubkey], limit: 20 },
         }),
         articles: FeedStoreModel.create({
           ...props,
           range: Duration.fromObject({ days: 180 }).as('minutes'),
-          filter: { kinds: [Kind.Article], authors: [pubkey] },
+          filter: { kinds: [Kind.Article], authors: [pubkey], limit: 20 },
         }),
         bookmarks: FeedStoreModel.create({
           ...props,
           range: Duration.fromObject({ days: 30 }).as('minutes'),
-          filter: { kinds: [Kind.BookmarkList], authors: [pubkey] },
+          filter: { kinds: [Kind.BookmarkList], authors: [pubkey], limit: 20 },
         }),
         reactions: FeedStoreModel.create({
           ...props,
           range: Duration.fromObject({ days: 7 }).as('minutes'),
-          filter: { kinds: [Kind.Reaction], authors: [pubkey] },
+          filter: { kinds: [Kind.Reaction], authors: [pubkey], limit: 20 },
         }),
       },
     }
@@ -75,4 +72,4 @@ export const NProfileModuleModel = BaseModuleModel.named('NProfileModuleModel')
     },
   }))
 
-export interface NProfileModule extends Instance<typeof NProfileModuleModel> {}
+export interface NProfileModule extends Instance<typeof NProfileModuleModel> { }
