@@ -138,32 +138,32 @@ export const PopoverBase = forwardRef<HTMLDivElement, IPopoverBaseProps>(functio
     middleware: [
       offset(cursorType ? 4 + cursor.size.height : undefined),
       middlewares.flip &&
-        flip({
-          crossAxis: placement.includes('-'),
-          fallbackAxisSideDirection: 'start',
-          padding: 5,
-          ...(isObject(middlewares.flip) ? middlewares.flip : undefined),
-        }),
+      flip({
+        crossAxis: placement.includes('-'),
+        fallbackAxisSideDirection: 'start',
+        padding: 5,
+        ...(isObject(middlewares.flip) ? middlewares.flip : undefined),
+      }),
       middlewares.shift &&
-        shift({
-          padding: 8,
-          ...(isObject(middlewares.shift) ? middlewares.shift : undefined),
-        }),
+      shift({
+        padding: 8,
+        ...(isObject(middlewares.shift) ? middlewares.shift : undefined),
+      }),
       !!cursorType &&
-        arrow({
-          element: arrowRef,
-        }),
+      arrow({
+        element: arrowRef,
+      }),
       middlewares.size &&
-        size({
-          apply: matchTargetWidth
-            ? ({ rects, elements }) => {
-                Object.assign(elements.floating.style, {
-                  width: `${rects.reference.width}px`,
-                })
-              }
-            : undefined,
-          ...(isObject(middlewares.size) ? middlewares.size : undefined),
-        }),
+      size({
+        apply: matchTargetWidth
+          ? ({ rects, elements }) => {
+            Object.assign(elements.floating.style, {
+              width: `${rects.reference.width}px`,
+            })
+          }
+          : undefined,
+        ...(isObject(middlewares.size) ? middlewares.size : undefined),
+      }),
       ...(additionalMiddlewares ?? []),
     ],
   })
@@ -232,13 +232,13 @@ export const PopoverBase = forwardRef<HTMLDivElement, IPopoverBaseProps>(functio
   const triggerElement =
     typeof children === 'function'
       ? children({
-          opened,
-          placement: floating.placement,
-          getProps: interactions.getReferenceProps,
-          setRef: floating.refs.setReference,
-          open: () => setOpened(true),
-          close: () => setOpened(false),
-        })
+        opened,
+        placement: floating.placement,
+        getProps: interactions.getReferenceProps,
+        setRef: floating.refs.setReference,
+        open: () => setOpened(true),
+        close: () => setOpened(false),
+      })
       : children
 
   const floatingHandleRef = useMergeRefs([floating.refs.setFloating, forwardedRef])
@@ -255,7 +255,7 @@ export const PopoverBase = forwardRef<HTMLDivElement, IPopoverBaseProps>(functio
             closeOnFocusOut={closeEvents.focusOut}
             {...slotProps?.floatingFocusManager}>
             <html.div style={sx}>
-              {!openEvents.hover && (
+              {!openEvents.hover && !props.disableScrim && (
                 <Scrim floatingContext={floating.context} lockScroll={withScrim} {...slotProps?.scrim} />
               )}
               <div
