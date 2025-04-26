@@ -91,7 +91,6 @@ const rootRoute = createRootRouteWithContext<{ rootStore: RootStore }>()({
 export const homeRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
-  staleTime: Infinity,
   loader: (options) => {
     const { pubkey } = options.context.rootStore.auth
     const module = createHomeModule(pubkey)
@@ -348,7 +347,6 @@ export const feedRoute = createRoute({
 export const deckRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/deck/$id',
-  staleTime: 2500,
   beforeLoad: (options) => {
     const { id } = options.params
     const { decks } = options.context.rootStore
@@ -723,7 +721,8 @@ export const routeTree = rootRoute.addChildren([
 
 export const router = createRouter({
   routeTree,
-  defaultStaleTime: Infinity,
+  defaultStaleTime: 300000,
+  defaultGcTime: 300000,
   defaultPreload: false,
   defaultPendingMinMs: 0,
   scrollRestoration: false,
