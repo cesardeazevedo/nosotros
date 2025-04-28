@@ -1,5 +1,7 @@
+import { useAppVisibility } from '@/hooks/useAppVisibility'
 import { useMobile } from '@/hooks/useMobile'
 import { useNostrSync } from '@/hooks/useNostrSync'
+import { useOnline } from '@/hooks/useOnline'
 import { useCurrentPubkey } from '@/hooks/useRootStore'
 import { Outlet } from '@tanstack/react-router'
 import { Dialogs } from 'components/modules/DialogsModule'
@@ -13,6 +15,9 @@ export const RootLayout = () => {
   const isMobile = useMobile()
   const pubkey = useCurrentPubkey()
   useNostrSync(pubkey)
+  useOnline()
+  useAppVisibility()
+
   return (
     <>
       <Dialogs />
