@@ -51,7 +51,7 @@
     "mobx-react-lite": "^4.0.7",
     "mobx-state-tree": "7.0.0-pre.1",
     "mobx-utils": "^6.1.0",
-    "nostr-editor": "0.0.4-pre.15",
+    "nostr-editor": "0.0.4-pre.16",
     "nostr-tools": "^2.10.4",
     "nstart-modal": "^1.4.0",
     "observable-hooks": "^4.2.3",
