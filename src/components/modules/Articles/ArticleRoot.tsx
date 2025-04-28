@@ -1,7 +1,13 @@
+import { LinkNAddress } from '@/components/elements/Links/LinkNAddress'
+import { useNoteVisibility } from '@/components/elements/Posts/hooks/useNoteVisibility'
+import { PostActions } from '@/components/elements/Posts/PostActions/PostActions'
+import { PostHeaderDate } from '@/components/elements/Posts/PostHeaderDate'
+import { UserHeader } from '@/components/elements/User/UserHeader'
 import { ContentProvider, useContentContext } from '@/components/providers/ContentProvider'
 import { NoteProvider } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
+import { useMobile } from '@/hooks/useMobile'
 import { useNoteStore } from '@/hooks/useNoteStore'
 import { useGlobalSettings } from '@/hooks/useRootStore'
 import type { NostrEventMetadata } from '@/nostr/types'
@@ -10,11 +16,6 @@ import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { observer } from 'mobx-react-lite'
 import { css, html } from 'react-strict-dom'
-import { LinkNAddress } from '../Links/LinkNAddress'
-import { useNoteVisibility } from '../Posts/hooks/useNoteVisibility'
-import { PostActions } from '../Posts/PostActions/PostActions'
-import { PostHeaderDate } from '../Posts/PostHeaderDate'
-import { UserHeader } from '../User/UserHeader'
 
 type Props = {
   event: NostrEventMetadata
@@ -26,6 +27,7 @@ export const ArticleRoot = observer(function ArticleRoot(props: Props) {
   const note = useNoteStore(props.event)
   const { event } = note
   const [ref] = useNoteVisibility(event.event)
+  const isMobile = useMobile()
   const title = event.getTag('title')
   const image = event.getTag('image')
   const summary = event.getTag('summary')
@@ -52,7 +54,7 @@ export const ArticleRoot = observer(function ArticleRoot(props: Props) {
                 </Stack>
                 {dense && <PostActions />}
               </Stack>
-              {image && <html.img src={globalSettings.getImgProxyUrl('feed_img', image)} style={styles.image} />}
+              {image && <html.img src={globalSettings.getImgProxyUrl('feed_img', image)} style={[styles.image, isMobile && styles.image$mobile]} />}
             </Stack>
           </ContentProvider>
         </LinkNAddress>
@@ -84,6 +86,10 @@ const styles = css.create({
     marginTop: spacing.margin1,
     marginBottom: 0,
     borderRadius: shape.lg,
+  },
+  image$mobile: {
+    width: 120,
+    height: 100,
   },
   topic: {
     paddingInline: spacing.padding1,

@@ -7,9 +7,10 @@ import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { useMatchRoute } from '@tanstack/react-router'
+import { observer } from 'mobx-react-lite'
 import { css, html } from 'react-strict-dom'
 
-export const ArticleHeader = () => {
+export const ArticleHeadline = observer(function ArticleHeadline() {
   const { note } = useNoteContext()
   const globalSettings = useGlobalSettings()
   const match = useMatchRoute()
@@ -39,7 +40,7 @@ export const ArticleHeader = () => {
       </Stack>
     </Stack>
   )
-}
+})
 
 const styles = css.create({
   root: {},

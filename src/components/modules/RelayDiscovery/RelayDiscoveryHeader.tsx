@@ -20,6 +20,7 @@ type Props = StackProps & {
   module: RelayDiscoveryModule
   collapsed?: boolean
   renderSearch?: boolean
+  renderTitle?: boolean
   children?: ReactNode
 }
 
@@ -29,7 +30,7 @@ const iconProps = {
 }
 
 export const RelayDiscoveryHeader = observer(function RelayDiscoveryHeader(props: Props) {
-  const { module, renderSearch = true, collapsed = false, children, ...rest } = props
+  const { module, renderTitle = true, renderSearch = true, collapsed = false, children, ...rest } = props
   const isMobile = useMobile()
   const isCollapsed = isMobile || collapsed
   const [expanded, setExpanded] = useState(false)
@@ -44,7 +45,7 @@ export const RelayDiscoveryHeader = observer(function RelayDiscoveryHeader(props
   return (
     <>
       <Stack gap={0.5} grow sx={styles.header} justify='space-between'>
-        <RelayDiscoveryTitle module={module} />
+        {renderTitle && <RelayDiscoveryTitle module={module} />}
         {!isCollapsed && filters}
         {isCollapsed && (
           <>

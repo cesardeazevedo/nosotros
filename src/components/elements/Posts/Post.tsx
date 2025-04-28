@@ -1,4 +1,5 @@
 import { useNoteVisibility } from '@/components/elements/Posts/hooks/useNoteVisibility'
+import { ArticleHeadline } from '@/components/modules/Articles/ArticleHeadline'
 import { useContentContext } from '@/components/providers/ContentProvider'
 import { NoteProvider } from '@/components/providers/NoteProvider'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
@@ -15,7 +16,6 @@ import { useRouter } from '@tanstack/react-router'
 import { observer } from 'mobx-react-lite'
 import { useCallback } from 'react'
 import { css, html } from 'react-strict-dom'
-import { ArticleHeader } from '../Articles/ArticleHeader'
 import { Editor } from '../Editor/Editor'
 import { Replies } from '../Replies/Replies'
 import { RepliesPreview } from '../Replies/RepliesPreview'
@@ -62,7 +62,7 @@ export const PostRoot = observer(function PostRoot(props: Props) {
     <NoteProvider value={{ ...contentContext, note }}>
       <html.article style={styles.root} ref={ref}>
         <PostLink note={note} onClick={handleRepliesClick}>
-          {note.event.event.kind === Kind.Article && <ArticleHeader />}
+          {note.event.event.kind === Kind.Article && <ArticleHeadline />}
           {header || <PostHeader />}
           <PostContent />
           <PostActions onReplyClick={handleRepliesClick} />

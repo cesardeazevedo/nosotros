@@ -91,7 +91,6 @@ const rootRoute = createRootRouteWithContext<{ rootStore: RootStore }>()({
 export const homeRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
-  staleTime: Infinity,
   loader: (options) => {
     const { pubkey } = options.context.rootStore.auth
     const module = createHomeModule(pubkey)
@@ -348,7 +347,6 @@ export const feedRoute = createRoute({
 export const deckRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/deck/$id',
-  staleTime: 2500,
   beforeLoad: (options) => {
     const { id } = options.params
     const { decks } = options.context.rootStore
@@ -380,7 +378,7 @@ export const notificationsRoute = createRoute({
   loader: (options) => {
     const { pubkey } = options.context
     const module = createNotificationModule(pubkey)
-    subscribeFeedStore(module.feed).subscribe()
+    subscribeFeedStore(module.feed, { buffer: 1500 }).subscribe()
     return module
   },
   pendingComponent: NotificationPending,
@@ -591,7 +589,7 @@ const tagsRoute = createRoute({
     const { tag } = tagsRoute.useParams()
     return <FeedPending header={<FeedHeaderBase leading={<TagHeader tags={[tag]} />} />} />
   },
-  component: function () {
+  component: function() {
     const module = tagsRoute.useLoaderData()
     useResetScroll()
     return (
@@ -665,7 +663,7 @@ const relayDiscoveryRoute = createRoute({
     subscribeRelayDiscoveryModule(module).subscribe()
     return module
   },
-  pendingComponent: function () {
+  pendingComponent: function() {
     const isMobile = useMobile()
     return (
       <RouteContainer maxWidth='lg' header={<RouteHeader label='Relay Discovery' />}>
@@ -673,7 +671,7 @@ const relayDiscoveryRoute = createRoute({
       </RouteContainer>
     )
   },
-  component: function () {
+  component: function() {
     const module = relayDiscoveryRoute.useLoaderData()
     const isMobile = useMobile()
     useResetScroll()
@@ -723,7 +721,8 @@ export const routeTree = rootRoute.addChildren([
 
 export const router = createRouter({
   routeTree,
-  defaultStaleTime: Infinity,
+  defaultStaleTime: 300000,
+  defaultGcTime: 300000,
   defaultPreload: false,
   defaultPendingMinMs: 0,
   scrollRestoration: false,

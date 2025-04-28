@@ -1,13 +1,13 @@
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
+import type { SxProps } from '@/components/ui/types'
 import { formatRelayUrl } from '@/core/helpers/formatRelayUrl'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { typeFace } from '@/themes/typeFace.stylex'
-import { Link } from '@tanstack/react-router'
 import React from 'react'
 import { css, html } from 'react-strict-dom'
-import type { Styles } from 'react-strict-dom/dist/types/styles'
+import { LinkRelayFeed } from '../../Links/LinkRelayFeed'
 import { RelayPopoverLink } from '../../Relays/RelayPopoverLink'
 
 type Props = {
@@ -20,7 +20,7 @@ type Props = {
 export const ContentLink = (props: Props) => {
   const { href, underline, shrink = true } = props
   const isLongLink = (href?.length || 0) > 36
-  const sx = [styles.root, underline && styles.root$underline, shrink && styles.shrink] as Styles
+  const sx = [styles.root, underline && styles.root$underline, shrink && styles.shrink] as SxProps
   const content = (
     <html.a href={href} target='_blank' rel='noopener noreferrer' style={sx}>
       {props.children}
@@ -30,14 +30,9 @@ export const ContentLink = (props: Props) => {
   if (isRelayLink) {
     return (
       <RelayPopoverLink url={href}>
-        <Link
-          to='/feed'
-          search={{ relay: formatRelayUrl(href) }}
-          target='_blank'
-          rel='noopener noreferrer'
-          {...css.props(sx)}>
+        <LinkRelayFeed url={formatRelayUrl(href)} sx={sx}>
           {props.children}
-        </Link>
+        </LinkRelayFeed>
       </RelayPopoverLink>
     )
   }

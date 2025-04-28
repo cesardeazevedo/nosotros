@@ -20,7 +20,7 @@ import {
   IconServerBolt,
   IconUser,
 } from '@tabler/icons-react'
-import { Link } from '@tanstack/react-router'
+import { Link, useRouter } from '@tanstack/react-router'
 import { observer } from 'mobx-react-lite'
 import { nip19 } from 'nostr-tools'
 import { css, html } from 'react-strict-dom'
@@ -32,17 +32,33 @@ export const BottomNavigation = observer(function BottomNavigation() {
   const user = useCurrentUser()
   const pubkey = useCurrentPubkey()
   const mobile = useMobile()
+  const router = useRouter()
 
   if (!mobile) {
     return <></>
   }
+
+  const handleResetScroll = (route: string) => () => {
+    if (router.latestLocation.pathname === route) {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      if (window.scrollY > 200) {
+        setTimeout(() => {
+          router.invalidate()
+        }, 700)
+      } else {
+        router.invalidate()
+      }
+    }
+  }
+
+  const nprofile = user?.nprofile || (encodeSafe(() => nip19.nprofileEncode({ pubkey: pubkey || '' })))
 
   return (
     <>
       <html.div style={styles.root}>
         <Stack grow justify='space-around'>
           <Tooltip text='Home' enterDelay={0}>
-            <Link to='/' resetScroll>
+            <Link to='/' onClick={handleResetScroll('/')}>
               {({ isActive }) => (
                 <Tab active={isActive} sx={styles.tab} icon={<IconHome />} activeIcon={<IconHomeFilled />} />
               )}
@@ -51,19 +67,19 @@ export const BottomNavigation = observer(function BottomNavigation() {
           <div>
             <Tab sx={styles.tab} icon={<IconSearch />} onClick={() => dialogStore.toggleSearch()} />
           </div>
-          <Link to='/media'>
+          <Link to='/media' onClick={handleResetScroll('/media')}>
             {({ isActive }) => (
               <Tab active={isActive} sx={styles.tab} icon={<IconPhoto />} activeIcon={<IconPhoto />} />
             )}
           </Link>
-          <Link to='/articles'>{({ isActive }) => <Tab active={isActive} sx={styles.tab} icon={<IconNews />} />}</Link>
+          <Link to='/articles' onClick={handleResetScroll('/articles')}>{({ isActive }) => <Tab active={isActive} sx={styles.tab} icon={<IconNews />} />}</Link>
           {!pubkey && (
             <Link to='/explore/relays'>
               {({ isActive }) => <Tab active={isActive} sx={styles.tab} icon={<IconServerBolt />} />}
             </Link>
           )}
           {pubkey && (
-            <Link to='/notifications'>
+            <Link to='/notifications' onClick={handleResetScroll('/notifications')}>
               {({ isActive }) => (
                 <Tab
                   active={isActive}
@@ -73,10 +89,11 @@ export const BottomNavigation = observer(function BottomNavigation() {
               )}
             </Link>
           )}
-          {pubkey && (
+          {pubkey && nprofile && (
             <Link
               to='/$nostr'
-              params={{ nostr: user?.nprofile || (encodeSafe(() => nip19.nprofileEncode({ pubkey })) as string) }}>
+              params={{ nostr: nprofile }}
+              onClick={handleResetScroll('/' + nprofile)}>
               {({ isActive }) => (
                 <Tab active={isActive} sx={styles.tab} icon={<IconUser />} activeIcon={<IconUser />} />
               )}
