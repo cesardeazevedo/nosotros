@@ -1,4 +1,4 @@
-import { SxProps } from '@/components/ui/types'
+import type { SxProps } from '@/components/ui/types'
 import { useRootStore } from '@/hooks/useRootStore'
 import { createRelayFeedModule } from '@/stores/modules/module.helpers'
 import type { LinkProps } from '@tanstack/react-router'

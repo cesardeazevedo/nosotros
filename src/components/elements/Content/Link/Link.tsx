@@ -1,5 +1,5 @@
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
-import { SxProps } from '@/components/ui/types'
+import type { SxProps } from '@/components/ui/types'
 import { formatRelayUrl } from '@/core/helpers/formatRelayUrl'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
@@ -30,10 +30,7 @@ export const ContentLink = (props: Props) => {
   if (isRelayLink) {
     return (
       <RelayPopoverLink url={href}>
-        <LinkRelayFeed
-          url={formatRelayUrl(href)}
-          sx={sx}
-        >
+        <LinkRelayFeed url={formatRelayUrl(href)} sx={sx}>
           {props.children}
         </LinkRelayFeed>
       </RelayPopoverLink>
