@@ -41,9 +41,13 @@ export const BottomNavigation = observer(function BottomNavigation() {
   const handleResetScroll = (route: string) => () => {
     if (router.latestLocation.pathname === route) {
       window.scrollTo({ top: 0, behavior: 'smooth' })
-      setTimeout(() => {
+      if (window.scrollY > 200) {
+        setTimeout(() => {
+          router.invalidate()
+        }, 700)
+      } else {
         router.invalidate()
-      }, 700)
+      }
     }
   }
 
