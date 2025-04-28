@@ -102,8 +102,8 @@ importers:
         specifier: ^6.1.0
         version: 6.1.0(mobx@6.13.6)
       nostr-editor:
-        specifier: 0.0.4-pre.15
-        version: 0.0.4-pre.15(@tiptap/core@2.11.5(@tiptap/pm@2.11.5))(@tiptap/extension-image@2.11.5(@tiptap/core@2.11.5(@tiptap/pm@2.11.5)))(@tiptap/extension-link@2.11.5(@tiptap/core@2.11.5(@tiptap/pm@2.11.5))(@tiptap/pm@2.11.5))(@tiptap/pm@2.11.5)(linkifyjs@4.2.0)(nostr-tools@2.10.4(typescript@5.7.3))(prosemirror-markdown@1.13.1)(prosemirror-model@1.24.1)(prosemirror-state@1.4.3)(tiptap-markdown@0.8.10(@tiptap/core@2.11.5(@tiptap/pm@2.11.5)))
+        specifier: 0.0.4-pre.17
+        version: 0.0.4-pre.17(@tiptap/core@2.11.5(@tiptap/pm@2.11.5))(@tiptap/extension-image@2.11.5(@tiptap/core@2.11.5(@tiptap/pm@2.11.5)))(@tiptap/extension-link@2.11.5(@tiptap/core@2.11.5(@tiptap/pm@2.11.5))(@tiptap/pm@2.11.5))(@tiptap/pm@2.11.5)(linkifyjs@4.2.0)(nostr-tools@2.10.4(typescript@5.7.3))(prosemirror-markdown@1.13.1)(prosemirror-model@1.24.1)(prosemirror-state@1.4.3)(tiptap-markdown@0.8.10(@tiptap/core@2.11.5(@tiptap/pm@2.11.5)))
       nostr-tools:
         specifier: ^2.10.4
         version: 2.10.4(typescript@5.7.3)
@@ -4501,6 +4501,9 @@ packages:
       node-notifier:
         optional: true
 
+  js-base64@3.7.7:
+    resolution: {integrity: sha512-7rCnleh0z2CkXhH67J8K1Ytz0b2Y+yxTPL+/KOJoa20hfnVQ/3/T6W/KflYI4bRHRagNeXeU2bkNGI3v1oS/lw==}
+
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
 
@@ -5033,8 +5036,8 @@ packages:
     resolution: {integrity: sha512-IO9QvjUMWxPQQhs60oOu10CRkWCiZzSUkzbXGGV9pviYl1fXYcvkzQ5jV9z8Y6un8ARoVRl4EtC6v6jNqbaJ/w==}
     engines: {node: '>=14.16'}
 
-  nostr-editor@0.0.4-pre.15:
-    resolution: {integrity: sha512-csHSW4d/DAkJ1tBboKKrd2s9+6MfMuQiMfajUHM0j715zI937ZLWckzxfR1A0ClSGM7YlaluQi6LzXw8UrUSkQ==}
+  nostr-editor@0.0.4-pre.17:
+    resolution: {integrity: sha512-A3e/SdEUHZhsr+lAMefKahUGx0vqGEfu4NSg6QuEHBL9RCk+p49JV48onS+KlhcYcdLTyB3xE4GgHQtcvClexg==}
     engines: {node: '>=18.16.1'}
     peerDependencies:
       '@tiptap/core': ^2.6.6
@@ -11900,6 +11903,8 @@ snapshots:
       - supports-color
       - ts-node
 
+  js-base64@3.7.7: {}
+
   js-tokens@4.0.0: {}
 
   js-yaml@3.14.1:
@@ -12508,12 +12513,13 @@ snapshots:
 
   normalize-url@8.0.1: {}
 
-  nostr-editor@0.0.4-pre.15(@tiptap/core@2.11.5(@tiptap/pm@2.11.5))(@tiptap/extension-image@2.11.5(@tiptap/core@2.11.5(@tiptap/pm@2.11.5)))(@tiptap/extension-link@2.11.5(@tiptap/core@2.11.5(@tiptap/pm@2.11.5))(@tiptap/pm@2.11.5))(@tiptap/pm@2.11.5)(linkifyjs@4.2.0)(nostr-tools@2.10.4(typescript@5.7.3))(prosemirror-markdown@1.13.1)(prosemirror-model@1.24.1)(prosemirror-state@1.4.3)(tiptap-markdown@0.8.10(@tiptap/core@2.11.5(@tiptap/pm@2.11.5))):
+  nostr-editor@0.0.4-pre.17(@tiptap/core@2.11.5(@tiptap/pm@2.11.5))(@tiptap/extension-image@2.11.5(@tiptap/core@2.11.5(@tiptap/pm@2.11.5)))(@tiptap/extension-link@2.11.5(@tiptap/core@2.11.5(@tiptap/pm@2.11.5))(@tiptap/pm@2.11.5))(@tiptap/pm@2.11.5)(linkifyjs@4.2.0)(nostr-tools@2.10.4(typescript@5.7.3))(prosemirror-markdown@1.13.1)(prosemirror-model@1.24.1)(prosemirror-state@1.4.3)(tiptap-markdown@0.8.10(@tiptap/core@2.11.5(@tiptap/pm@2.11.5))):
     dependencies:
       '@tiptap/core': 2.11.5(@tiptap/pm@2.11.5)
       '@tiptap/extension-image': 2.11.5(@tiptap/core@2.11.5(@tiptap/pm@2.11.5))
       '@tiptap/extension-link': 2.11.5(@tiptap/core@2.11.5(@tiptap/pm@2.11.5))(@tiptap/pm@2.11.5)
       '@tiptap/pm': 2.11.5
+      js-base64: 3.7.7
       light-bolt11-decoder: 3.2.0
       linkifyjs: 4.2.0
       nostr-tools: 2.10.4(typescript@5.7.3)
