@@ -24,13 +24,13 @@ export const SidebarPaneNotifications = observer(function SidebarPaneNotificatio
     select: (state) => {
       const predicate = (x: { routeId: string }) => x.routeId === '/notifications'
       const match = state.cachedMatches.find(predicate) || state.matches.find(predicate)
-      return match?.loaderData as FeedModule
+      return match?.loaderData?.module as FeedModule | undefined
     },
   })
   return (
     <Stack horizontal={false} ref={props.ref} sx={[styles.root, props.sx]}>
       <Link resetScroll to='/notifications' onClick={() => context.setPane(false)}>
-        <NotificationHeader module={module} />
+        {module && <NotificationHeader module={module} />}
       </Link>
       {module && (
         <DeckScroll>

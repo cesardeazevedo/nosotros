@@ -31,7 +31,7 @@ export const SidebarPaneRelayDiscovery = (props: Props) => {
       const match =
         state.cachedMatches.find((x) => x.routeId === '/explore/relays') ||
         state.matches.find((x) => x.routeId === '/explore/relays')
-      return match?.loaderData
+      return match?.loaderData?.module
     },
   })
   return (

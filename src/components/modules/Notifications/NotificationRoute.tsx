@@ -5,7 +5,7 @@ import { NotificationFeed } from './NotificationFeed'
 import { NotificationHeader } from './NotificationHeader'
 
 export const NotificationRoute = function NotificationRoute() {
-  const module = notificationsRoute.useLoaderData()
+  const { module } = notificationsRoute.useLoaderData()
   useResetScroll()
   return (
     <RouteContainer header={<NotificationHeader module={module} />}>

@@ -15,7 +15,7 @@ export const NotificationBadge = observer(function NotificationBadge(props: Prop
   const module = useRouterState({
     select: (state) => {
       const match = state.cachedMatches.find((x) => x.routeId === '/notifications')
-      return match?.loaderData
+      return match?.loaderData?.module
     },
   })
 

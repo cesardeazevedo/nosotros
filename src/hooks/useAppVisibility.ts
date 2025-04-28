@@ -1,10 +1,11 @@
 import { pool } from '@/nostr/pool'
 import { useRouter } from '@tanstack/react-router'
 import { useEffect, useRef } from 'react'
+import { useMobile } from './useMobile'
 
-// PWA visibility stuff
 export function useAppVisibility(resetAfterSeconds = 30) {
   const router = useRouter()
+  const isMobile = useMobile()
   const backgroundAt = useRef<number | null>(null)
 
   useEffect(() => {
@@ -13,18 +14,21 @@ export function useAppVisibility(resetAfterSeconds = 30) {
 
     document.addEventListener(
       'visibilitychange',
-      () => {
-        if (document.visibilityState === 'hidden') {
-          backgroundAt.current = Date.now()
-        } else if (document.visibilityState === 'visible') {
-          if (backgroundAt.current !== null) {
+      async () => {
+        if (isMobile) {
+          if (document.visibilityState === 'hidden') {
+            backgroundAt.current = Date.now()
+          } else if (backgroundAt.current !== null) {
             const inBackground = (Date.now() - backgroundAt.current) / 1000
 
             if (inBackground >= resetAfterSeconds) {
               pool.reset()
+              const data = await router.state.matches[router.state.matches.length - 1].loaderData
+              if (data && data.subscription) {
+                data.subscription.unsubscribe()
+              }
               router.invalidate()
             }
-
             backgroundAt.current = null
           }
         }
@@ -33,5 +37,5 @@ export function useAppVisibility(resetAfterSeconds = 30) {
     )
 
     return () => controller.abort()
-  }, [resetAfterSeconds])
+  }, [isMobile, resetAfterSeconds])
 }
