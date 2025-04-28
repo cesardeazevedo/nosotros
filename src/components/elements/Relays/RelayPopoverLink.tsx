@@ -31,7 +31,7 @@ const PopoverContent = observer(function PopoverContent(props: { url: string }) 
 
   return (
     <Paper elevation={2} surface='surfaceContainerLow' sx={styles.root}>
-      <Stack gap={2} justify='space-between'>
+      <Stack gap={2} align='flex-end' justify='space-between'>
         <Stack horizontal={false} gap={1}>
           <Stack>
             {info?.icon && <RelayIcon size='md' url={url} />}
@@ -42,7 +42,7 @@ const PopoverContent = observer(function PopoverContent(props: { url: string }) 
           <RelayChip icon={false} url={url} />
         </Stack>
         <LinkRelayFeed url={url}>
-          <Button variant='outlined'>See Feed</Button>
+          <Button variant='outlined'>Explore</Button>
         </LinkRelayFeed>
       </Stack>
       <br />
