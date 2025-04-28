@@ -1,6 +1,6 @@
-import { pool } from "@/nostr/pool"
-import { useRouter } from "@tanstack/react-router"
-import { useEffect, useRef } from "react"
+import { pool } from '@/nostr/pool'
+import { useRouter } from '@tanstack/react-router'
+import { useEffect, useRef } from 'react'
 
 // PWA visibility stuff
 export function useAppVisibility(resetAfterSeconds = 30) {
@@ -11,22 +11,26 @@ export function useAppVisibility(resetAfterSeconds = 30) {
     const controller = new AbortController()
     const { signal } = controller
 
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'hidden') {
-        backgroundAt.current = Date.now()
-      } else if (document.visibilityState === 'visible') {
-        if (backgroundAt.current !== null) {
-          const inBackground = (Date.now() - backgroundAt.current) / 1000
+    document.addEventListener(
+      'visibilitychange',
+      () => {
+        if (document.visibilityState === 'hidden') {
+          backgroundAt.current = Date.now()
+        } else if (document.visibilityState === 'visible') {
+          if (backgroundAt.current !== null) {
+            const inBackground = (Date.now() - backgroundAt.current) / 1000
 
-          if (inBackground >= resetAfterSeconds) {
-            pool.reset()
-            router.invalidate()
+            if (inBackground >= resetAfterSeconds) {
+              pool.reset()
+              router.invalidate()
+            }
+
+            backgroundAt.current = null
           }
-
-          backgroundAt.current = null
         }
-      }
-    }, { signal })
+      },
+      { signal },
+    )
 
     return () => controller.abort()
   }, [resetAfterSeconds])
