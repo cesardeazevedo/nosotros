@@ -94,5 +94,4 @@ const styles = css.create({
     color: palette.onSurfaceVariant,
     borderRadius: shape.lg,
   },
-  bounds: (width, height) => ({ width, height }),
 })

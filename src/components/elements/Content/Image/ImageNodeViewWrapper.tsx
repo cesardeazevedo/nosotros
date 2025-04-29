@@ -26,7 +26,7 @@ const styles = css.create({
     width: 'fit-content',
     height: 'fit-content',
     position: 'relative',
-    marginTop: spacing.margin1,
+    marginBlock: spacing.margin1,
     opacity: 1,
   },
   root$selected: {
