@@ -124,7 +124,7 @@ export const DeckNewColumnList = observer(function DeckNewColumnList(props: Prop
                 <IconHome {...iconProps} />
               </IconWrapper>
             }
-            onClick={() => add(createHomeModule(pubkey))}
+            onClick={() => add(createHomeModule(pubkey, Math.random().toString().slice(2)))}
             supportingText={<span>See your home feed timeline</span>}>
             <Text size='lg'>Home feed</Text>
           </ListItem>
