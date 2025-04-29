@@ -52,6 +52,15 @@ describe('DeckStoreModel', () => {
     expect(deck.columns).toEqual(['home2'])
   })
 
+  test('replace first column', () => {
+    const deck = store.decks.get('root')!
+    deck.add(HomeModuleModel.create({ id: 'home1' }))
+    deck.add(HomeModuleModel.create({ id: 'home2' }))
+    expect(deck.columns).toEqual(['home1', 'home2'])
+    deck.add(HomeModuleModel.create({ id: 'home1_updated' }), 0, true)
+    expect(deck.columns).toEqual(['home1_updated', 'home2'])
+  })
+
   test('move columns', () => {
     const deck = store.decks.get('root')!
     deck.add(HomeModuleModel.create({ id: 'home1' }))

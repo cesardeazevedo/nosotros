@@ -16,9 +16,9 @@ export function createFeedModule(snapshot: FeedModuleSnapshotIn) {
   return FeedModuleModel.create(snapshot)
 }
 
-export function createHomeModule(pubkey: string | undefined) {
+export function createHomeModule(pubkey: string | undefined, id?: string) {
   return HomeModuleModel.create({
-    id: pubkey ? 'home' : 'home_guest',
+    id: id || (pubkey ? 'home' : 'home_guest'),
     pubkey,
   })
 }
