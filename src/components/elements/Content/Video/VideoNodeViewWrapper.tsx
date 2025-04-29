@@ -1,3 +1,4 @@
+import { spacing } from '@/themes/spacing.stylex'
 import type { NodeViewProps } from '@tiptap/core'
 import { NodeViewWrapper } from '@tiptap/react'
 import type { VideoAttributes } from 'nostr-editor'
@@ -25,6 +26,7 @@ const styles = css.create({
     width: 'fit-content',
     height: 'fit-content',
     position: 'relative',
+    marginBlock: spacing.margin1,
     opacity: 1,
   },
   root$selected: {
