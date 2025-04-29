@@ -6,6 +6,7 @@ import type { EditorStore } from '@/stores/editor/editor.store'
 import type { NodeViewProps } from '@tiptap/core'
 import { Editor } from '@tiptap/core'
 import DocumentExtension from '@tiptap/extension-document'
+import Gapcursor from '@tiptap/extension-gapcursor'
 import HardbreakExtension from '@tiptap/extension-hard-break'
 import HistoryExtension from '@tiptap/extension-history'
 import ParagraphExtension from '@tiptap/extension-paragraph'
@@ -30,6 +31,7 @@ type Settings = {
 export function createEditor(store: EditorStore, settings: Settings) {
   return new Editor({
     extensions: [
+      Gapcursor,
       TextExtension,
       DocumentExtension,
       ParagraphExtension,

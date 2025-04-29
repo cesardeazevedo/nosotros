@@ -32,6 +32,7 @@
     "@tiptap/extension-history": "^2.11.0",
     "@tiptap/extension-paragraph": "^2.11.0",
     "@tiptap/extension-placeholder": "^2.11.0",
+    "@tiptap/extension-gapcursor": "^2.11.0",
     "@tiptap/extension-text": "^2.11.0",
     "@tiptap/pm": "^2.11.0",
     "@tiptap/react": "^2.11.0",
