@@ -3,39 +3,22 @@ import { CircularProgress } from '@/components/ui/Progress/CircularProgress'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { SxProps } from '@/components/ui/types'
 import { useCurrentAccount, useCurrentUser } from '@/hooks/useRootStore'
-import { publishFollowList } from '@/nostr/publish/publishFollowList'
-import type { Account } from '@/stores/auth/account.store'
 import { observer } from 'mobx-react-lite'
-import { useObservableState } from 'observable-hooks'
 import { useState } from 'react'
 import { css, html } from 'react-strict-dom'
-import { catchError, map, mergeMap, of, startWith } from 'rxjs'
+import { useFollowSubmit } from './hooks/useFollowSubmit'
 
 type Props = {
   pubkey: string
   sx?: SxProps
 }
 
-export const UserFollowButton = observer(function UserFollowButton(props: Props) {
+export const FollowButton = observer(function FollowButton(props: Props) {
   const { pubkey, sx } = props
   const [hover, setHover] = useState(false)
   const acc = useCurrentAccount()
   const currentUser = useCurrentUser()
-
-  const [pending, onSubmit] = useObservableState<boolean, Account>((input$) => {
-    return input$.pipe(
-      mergeMap((acc) => {
-        if (acc.signer) {
-          return publishFollowList(acc.pubkey, 'p', [pubkey], { signer: acc.signer?.signer }).pipe(
-            map(() => false),
-            catchError(() => of(false)),
-            startWith(true),
-          )
-        }
-        throw new Error('Not authenticated')
-      }),
-    )
-  }, false)
+  const [pending, onSubmit] = useFollowSubmit([pubkey])
 
   const isFollowing = currentUser?.followsPubkey(pubkey)
 
