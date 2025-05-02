@@ -315,7 +315,7 @@ export class EditorStore {
 
   focus() {
     setTimeout(() => {
-      this.editor?.commands.focus()
+      this.editor?.commands.focus('start', { scrollIntoView: false })
     })
   }
 
