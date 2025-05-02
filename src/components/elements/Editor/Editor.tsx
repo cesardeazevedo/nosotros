@@ -40,6 +40,9 @@ export const Editor = observer(function Editor(props: Props) {
 
   useEffect(() => {
     store.open.toggle(initialOpen)
+    if (initialOpen) {
+      store.focus()
+    }
   }, [])
 
   const [submitState, submit] = useObservableState<string | number | boolean, EditorStore>((input$) => {
