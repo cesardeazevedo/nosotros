@@ -7,7 +7,6 @@ import { withRelatedAuthors } from './withRelatedAuthor'
 // A subscription for base stuff like user metadata, follows, mute list and so that keeps in sync at all time
 export function subscribeSync(pubkey: string, kinds?: Kind[], baseCtx?: NostrContext) {
   const ctx = {
-    maxRelaysPerUser: 2,
     ...baseCtx,
     pubkey,
     queryDB: true,
@@ -25,5 +24,5 @@ export function subscribeSync(pubkey: string, kinds?: Kind[], baseCtx?: NostrCon
     ],
     authors: [pubkey],
   }
-  return subscribe(filter, { ...ctx, batcher: 'live' }).pipe(withRelatedAuthors(ctx))
+  return subscribe(filter, { ...ctx, batcher: 'live' }).pipe(withRelatedAuthors({ ...ctx, maxRelaysPerUser: 2 }))
 }
