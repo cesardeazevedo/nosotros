@@ -1,27 +1,28 @@
-import { UserHeader } from '@/components/elements/User/UserHeader'
 import { UserProfileHeader } from '@/components/elements/User/UserProfileHeader'
 import { Divider } from '@/components/ui/Divider/Divider'
 import type { NProfileModule } from '@/stores/modules/nprofile.module'
-import { DeckColumnHeader } from '../Deck/DeckColumnHeader'
+import { observer } from 'mobx-react-lite'
 import { Feed } from '../Feed/Feed'
+import { FeedHeaderNprofile } from '../Feed/headers/FeedHeaderNprofile'
 import { NProfileFeedTabsState } from './NProfileFeedTabsState'
 
 type Props = {
   module: NProfileModule
 }
 
-export const NProfileColumn = (props: Props) => {
+export const NProfileColumn = observer(function NProfileColumn(props: Props) {
   const { module } = props
   return (
     <>
-      <DeckColumnHeader id={module.id} leading={<UserHeader pubkey={module.pubkey} />} />
+      <FeedHeaderNprofile module={module} />
+      <Divider />
       <Feed
         column
         header={
           <>
             <UserProfileHeader pubkey={module.pubkey} />
             <Divider />
-            <NProfileFeedTabsState active={module.selected} onChange={() => {}} />
+            <NProfileFeedTabsState active={module.selected} onChange={(selected) => module.select(selected)} />
             <Divider />
           </>
         }
@@ -29,4 +30,4 @@ export const NProfileColumn = (props: Props) => {
       />
     </>
   )
-}
+})

@@ -55,11 +55,11 @@ const styles = css.create({
     },
   },
   shrink: {
-    whiteSpace: 'nowrap',
+    display: '-webkit-box',
+    WebkitLineClamp: 3,
     overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    maxWidth: 370,
-    width: 'fit-content',
+    boxOrient: 'vertical',
+    WebkitBoxOrient: 'vertical',
   },
   background: {
     paddingInline: spacing['padding1'],

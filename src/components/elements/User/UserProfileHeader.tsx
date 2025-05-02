@@ -11,8 +11,8 @@ import { observer } from 'mobx-react-lite'
 import { css, html } from 'react-strict-dom'
 import { UserAvatar } from './UserAvatar'
 import { UserContentAbout } from './UserContentAbout'
-import { UserFollowButton } from './UserFollowButton'
 import { UserRelays } from './UserRelays'
+import { FollowButton } from '@/components/modules/Follows/FollowButton'
 
 type Props = {
   pubkey: string
@@ -62,7 +62,7 @@ export const UserProfileHeader = observer(function UserProfileHeader(props: Prop
         <UserContentAbout pubkey={pubkey} />
         <Stack sx={styles.follow} gap={0.5}>
           <UserRelays pubkey={pubkey} />
-          <UserFollowButton pubkey={pubkey} />
+          <FollowButton pubkey={pubkey} />
         </Stack>
       </Stack>
     </>

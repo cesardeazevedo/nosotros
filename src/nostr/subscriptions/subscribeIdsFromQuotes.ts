@@ -7,7 +7,6 @@ import { ShareReplayCache } from '../replay'
 import { subscribe } from './subscribe'
 import { withAuthorsFromNote } from './subscribeNoteAuthors'
 import { subscribeUser } from './subscribeUser'
-import { withZapAuthor } from './subscribeZaps'
 
 export const replay = new ShareReplayCache<NostrEvent>()
 
@@ -18,15 +17,13 @@ export const subscribeIdsFromQuotes = replay.wrap((id: string, ctx: NostrContext
     mergeMap((event) => {
       switch (event.kind) {
         case Kind.Text:
-        case Kind.Article: {
+        case Kind.Article:
+        case Kind.ZapReceipt: {
           return of(event).pipe(withAuthorsFromNote(ctx))
         }
         // kind 6 reposts shouldn't be quoted
         case Kind.Repost: {
           return EMPTY
-        }
-        case Kind.ZapReceipt: {
-          return of(event).pipe(withZapAuthor(ctx))
         }
         default: {
           // generic event (always get the author)

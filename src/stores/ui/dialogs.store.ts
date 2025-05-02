@@ -1,8 +1,6 @@
-import type { Kind } from '@/constants/kinds'
 import { action, makeAutoObservable } from 'mobx'
 import type { Event } from '../events/event'
-
-type DialogImageProps = Array<{ content: string } | false>
+import type { Note } from '../notes/note'
 
 export class DialogStore {
   camera = false
@@ -10,9 +8,9 @@ export class DialogStore {
   search = false
   stats = false as false | string
   createDeck = false
-  listForm = false as Event | Kind.FollowSets | Kind.RelaySets | false
+  listForm = false as Event | number | false
 
-  images: DialogImageProps = [false]
+  image = false as { note: Note; src: string } | false
 
   replies: Array<string | false> = [false]
 
@@ -46,18 +44,16 @@ export class DialogStore {
     this.stats = id
   }
 
-  setListForm(event: Event | Kind.FollowSets | Kind.RelaySets | false) {
+  setListForm(event: Event | number | false) {
     this.listForm = event
   }
 
-  pushImage(content: string) {
-    this.images[this.images.length - 1] = { content }
-    this.images.push(false)
+  pushImage(note: Note, src: string) {
+    this.image = { note, src }
   }
 
   closeImage() {
-    this.images.pop()
-    this.images[this.images.length - 1] = false
+    this.image = false
   }
 
   pushReply(id: string) {

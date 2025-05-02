@@ -1,8 +1,8 @@
 import { createRootRouteWithContext, createRoute, createRouter, redirect } from '@tanstack/react-router'
 import { z } from 'zod'
+import { HeaderBase } from './components/elements/Layouts/HeaderBase'
 import { RootLayout } from './components/elements/Layouts/RootLayout'
 import { RouteContainer } from './components/elements/Layouts/RouteContainer'
-import { RouteHeader } from './components/elements/Layouts/RouteHeader'
 import { RelayListRowLoading } from './components/elements/Relays/RelayListRowLoading'
 import { RelayTableRowLoading } from './components/elements/Relays/RelayTableRowLoading'
 import { ArticlesPending } from './components/modules/Articles/ArticlesPending'
@@ -21,6 +21,7 @@ import { FollowSetRoute } from './components/modules/Lists/FollowSets/FollowSetR
 import { ListsPending } from './components/modules/Lists/ListPending'
 import { ListsRoute } from './components/modules/Lists/ListRoute'
 import { RelaySetsRoute } from './components/modules/Lists/RelaySets/RelaySetRoute'
+import { StarterPackRoute } from './components/modules/Lists/StarterPacks/StarterPackRoute'
 import { MediaPending } from './components/modules/Media/MediaPending'
 import { MediaRoute } from './components/modules/Media/MediaRoute'
 import { NostrEventPending } from './components/modules/NostrEvent/NostrEventLoading'
@@ -158,8 +159,8 @@ export const feedRoute = createRoute({
       .union([
         z.literal('self'),
         z.literal('following'),
-        z.literal('followset'),
-        z.literal('relaysets'),
+        z.literal('sets_p'),
+        z.literal('sets_e'),
         z.literal('relayfeed'),
         z.literal('inbox'),
       ])
@@ -183,6 +184,7 @@ export const feedRoute = createRoute({
         'relaysets',
         'relayfeed',
         'followset',
+        'starterpack',
         'notifications',
       ])
       .optional(),
@@ -642,9 +644,15 @@ const listsRoute = createRoute({
   component: ListsRoute,
 })
 
-const followSetsRoute = createRoute({
+const starterPackRoute = createRoute({
   getParentRoute: () => listsRoute,
   path: '/',
+  component: StarterPackRoute,
+})
+
+const followSetsRoute = createRoute({
+  getParentRoute: () => listsRoute,
+  path: '/followsets',
   component: FollowSetRoute,
 })
 
@@ -682,7 +690,7 @@ const relayDiscoveryRoute = createRoute({
   pendingComponent: function () {
     const isMobile = useMobile()
     return (
-      <RouteContainer maxWidth='lg' header={<RouteHeader label='Relay Discovery' />}>
+      <RouteContainer maxWidth='lg' header={<HeaderBase label='Relay Discovery' />}>
         {isMobile ? <RelayListRowLoading /> : <RelayTableRowLoading />}
       </RouteContainer>
     )
@@ -724,7 +732,7 @@ export const routeTree = rootRoute.addChildren([
   deckRoute,
   tagsRoute,
   searchRoute,
-  listsRoute.addChildren([followSetsRoute, relaySetsRoute]),
+  listsRoute.addChildren([starterPackRoute, followSetsRoute, relaySetsRoute]),
   notificationsRoute,
   mediaRoute,
   articleRoute,

@@ -6,6 +6,7 @@ import { CardContent } from '@/components/ui/Card/CardContent'
 import { CardTitle } from '@/components/ui/Card/CardTitle'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
+import { useSM } from '@/hooks/useMobile'
 import type { Event } from '@/stores/events/event'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
@@ -21,12 +22,13 @@ type Props = {
 
 export const RelaySetCard = observer(function RelaySetCard(props: Props) {
   const { event, renderEdit = false } = props
+  const isMobile = useSM()
   const title = event.getTag('title')
   const description = event.getTag('description')
   const d = event.getTag('d')
   const relays = event.getTags('relay') || []
   return (
-    <Card key={event.id} variant='outlined' sx={styles.root}>
+    <Card key={event.id} variant='outlined' sx={[styles.root, isMobile && styles.root$mobile]}>
       <Stack horizontal={false}>
         <CardTitle
           headline={
@@ -65,6 +67,9 @@ const styles = css.create({
   root: {
     width: '40%',
     padding: 12,
+  },
+  root$mobile: {
+    width: '100%',
   },
   content: {
     paddingBlock: spacing.padding2,

@@ -1,5 +1,5 @@
+import { HeaderBase } from '@/components/elements/Layouts/HeaderBase'
 import { RouteContainer } from '@/components/elements/Layouts/RouteContainer'
-import { RouteHeader } from '@/components/elements/Layouts/RouteHeader'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Tab } from '@/components/ui/Tab/Tab'
 import { Text } from '@/components/ui/Text/Text'
@@ -24,11 +24,13 @@ export const ListsRoute = observer(function ListsRoute() {
         )
       }
       header={
-        <RouteHeader
-          size='sm'
+        <HeaderBase
           leading={
             <Stack justify='flex-start' align='flex-start'>
               <Link to='/lists' activeOptions={{ exact: true }}>
+                {({ isActive }) => <Tab active={isActive} sx={styles.tab} anchor='starter' label='Starter Packs' />}
+              </Link>
+              <Link to='/lists/followsets' activeOptions={{ exact: true }}>
                 {({ isActive }) => <Tab active={isActive} sx={styles.tab} anchor='followset' label='Follow Sets' />}
               </Link>
               <Link to='/lists/relaysets'>

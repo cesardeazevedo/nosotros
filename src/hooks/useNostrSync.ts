@@ -10,7 +10,7 @@ export function useNostrSync(pubkey: string | undefined, kinds?: Kind[]) {
   const sub = useObservable(() => {
     return toStream(() => pubkey).pipe(
       filter((x): x is string => !!x),
-      mergeMap((pubkey) => subscribeSync(pubkey, kinds, rootStore.globalContext)),
+      mergeMap((pubkey) => subscribeSync(pubkey, kinds, { ...rootStore.globalContext, maxRelaysPerUser: 10 })),
     )
   }, [])
   useSubscription(sub)

@@ -120,6 +120,7 @@ const styles = css.create({
   },
   label: {
     position: 'relative',
+    whiteSpace: 'nowrap',
     color: {
       default: buttonTokens.labelTextColor,
       ':is([data-focused])': buttonTokens.labelTextColor$focus,

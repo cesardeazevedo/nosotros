@@ -64,8 +64,7 @@ const styles = css.create({
     width: '100%',
   },
   actionable: {
-    width: '100%',
-    textAlign: 'initial',
+    overflow: 'hidden',
   },
   elevation: {
     [elevationTokens.boxShadow]: cardTokens.containerElevation,

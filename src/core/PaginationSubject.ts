@@ -91,12 +91,12 @@ export class PaginationSubject {
     return this.$
   }
 
-  paginateIfEmpty(notes: Map<string, unknown>, min = 5) {
+  paginateIfEmpty(notes: Map<string, unknown>, min = 10) {
     if (this.options.range) {
       return interval(5000).pipe(
         map(() => notes.size),
         takeWhile((size) => size < min),
-        take(10),
+        take(5),
         tap(() => {
           this.increaseRange()
           this.subject.next()

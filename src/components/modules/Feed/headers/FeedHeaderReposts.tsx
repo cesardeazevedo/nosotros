@@ -4,5 +4,5 @@ import { FeedHeaderRepostsTabs, type Props as FeedHeaderRepostsTabsProps } from 
 type Props = FeedHeaderRepostsTabsProps & {}
 
 export const FeedHeaderReposts = (props: Props) => {
-  return <FeedHeaderBase size='sm' leading={<FeedHeaderRepostsTabs selected={props.selected} />} />
+  return <FeedHeaderBase leading={<FeedHeaderRepostsTabs selected={props.selected} />} />
 }

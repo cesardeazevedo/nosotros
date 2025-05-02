@@ -1,7 +1,6 @@
 import { SearchField } from '@/components/ui/Search/Search'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { FeedModule } from '@/stores/modules/feed.module'
-import { spacing } from '@/themes/spacing.stylex'
 import { useRef } from 'react'
 import { css } from 'react-strict-dom'
 import { useSearchChange } from './hooks/useSearchChange'
@@ -29,6 +28,6 @@ export const SearchHeader = (props: Props) => {
 
 const styles = css.create({
   root: {
-    padding: spacing.padding1,
+    height: 40,
   },
 })

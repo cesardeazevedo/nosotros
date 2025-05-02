@@ -1,3 +1,4 @@
+import { FollowButton } from '@/components/modules/Follows/FollowButton'
 import { ContentProvider, useContentContext } from '@/components/providers/ContentProvider'
 import { Paper } from '@/components/ui/Paper/Paper'
 import { Stack } from '@/components/ui/Stack/Stack'
@@ -9,7 +10,6 @@ import React from 'react'
 import { css, html } from 'react-strict-dom'
 import { UserAvatar } from './UserAvatar'
 import { UserContentAbout } from './UserContentAbout'
-import { UserFollowButton } from './UserFollowButton'
 import { UserName } from './UserName'
 import { UserNIP05 } from './UserNIP05'
 import { UserRelays } from './UserRelays'
@@ -43,7 +43,7 @@ export const UserPopover = function UserPopover(props: Props) {
                   <UserAvatar size='lg' pubkey={pubkey} />
                   <Stack gap={0.5}>
                     <UserRelays pubkey={pubkey} />
-                    <UserFollowButton pubkey={pubkey} />
+                    <FollowButton pubkey={pubkey} />
                   </Stack>
                 </Stack>
                 <br />

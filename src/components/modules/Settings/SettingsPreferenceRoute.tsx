@@ -8,6 +8,7 @@ import { SettingsTheme } from '@/components/modules/Settings/SettingsTheme'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { spacing } from '@/themes/spacing.stylex'
 import { css } from 'react-strict-dom'
+import { SettingsRelayAuth } from './SettingsRelaysAuth'
 
 export const SettingsPreferencesRoute = () => {
   return (
@@ -19,7 +20,10 @@ export const SettingsPreferencesRoute = () => {
       <Stack horizontal={false} gap={1} align='flex-start'>
         <SettingsSubHeader>Network Settings</SettingsSubHeader>
         <SettingsNIP05 />
+        <br />
         <SettingsMaxRelaysOutbox />
+        <br />
+        <SettingsRelayAuth />
       </Stack>
       <Stack horizontal={false} gap={1}>
         <SettingsSubHeader>Post Settings</SettingsSubHeader>
