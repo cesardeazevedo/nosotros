@@ -36,11 +36,11 @@ export const Image = observer(function Image(props: Props) {
     (e: StrictClickEvent) => {
       e.preventDefault()
       e.stopPropagation()
-      if (!hasError) {
-        return onClick ? onClick() : dialogStore.pushImage(src)
+      if (!hasError && note) {
+        return onClick ? onClick() : dialogStore.pushImage(note, src)
       }
     },
-    [src, disableLink, hasError],
+    [src, note, disableLink, hasError],
   )
 
   return (
