@@ -1,8 +1,7 @@
 import type { NostrContext } from '@/nostr/context'
 import { subscribeIds } from '@/nostr/subscriptions/subscribeIds'
 import { replay, subscribeNoteStats } from '@/nostr/subscriptions/subscribeNoteStats'
-import { mergeMap, mergeWith, tap } from 'rxjs'
-import { createContextAuthenticator } from '../auth/authenticator'
+import { mergeMap, tap } from 'rxjs'
 import type { NostrModule } from '../modules/nostr.module'
 import { rootStore } from '../root.store'
 
@@ -11,6 +10,5 @@ export function subscribeNostrModule(module: NostrModule) {
   return subscribeIds(module.filter, ctx).pipe(
     tap((x) => replay.invalidate(x.id)),
     mergeMap((event) => subscribeNoteStats(event, ctx, {})),
-    mergeWith(createContextAuthenticator(ctx)),
   )
 }
