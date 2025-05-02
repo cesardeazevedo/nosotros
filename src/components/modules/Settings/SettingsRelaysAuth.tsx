@@ -19,7 +19,7 @@ export const SettingsRelayAuth = observer(function SettingsRelayAuth() {
       label='Relays authentication'
       supportingText={'These relays are asking for authentication'}
       trailing={
-        <Stack grow horizontal={false} gap={1} align='flex-start' sx={styles.content}>
+        <Stack horizontal={false} gap={1} align='flex-start' sx={styles.content}>
           {relays.map((url) => (
             <Stack key={url} gap={1}>
               <RelayChip url={url} />

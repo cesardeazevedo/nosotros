@@ -93,7 +93,7 @@ export const ListForm = (props: Props) => {
         </Stack>
         <Stack sx={styles.action}>
           <Button fullWidth disabled={isPending} type='submit' variant='filled' sx={styles.button}>
-            Create
+            {isEditing ? 'Update' : 'Create'}
           </Button>
         </Stack>
       </form>

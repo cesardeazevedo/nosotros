@@ -136,6 +136,7 @@ const styles = css.create({
     borderRadius: chipTokens.containerShape,
     display: 'inline-flex',
     height: chipTokens.containerHeight,
+    minHeight: chipTokens.containerHeight,
     minWidth: 32,
     cursor: 'pointer',
     [focusRingTokens.shape]: chipTokens.containerShape,

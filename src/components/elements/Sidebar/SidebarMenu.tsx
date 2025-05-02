@@ -18,7 +18,7 @@ import {
   IconSettingsFilled,
   IconUser,
 } from '@tabler/icons-react'
-import { Link, useMatchRoute } from '@tanstack/react-router'
+import { Link, useMatchRoute, useNavigate } from '@tanstack/react-router'
 import { observer } from 'mobx-react-lite'
 import { nip19 } from 'nostr-tools'
 import { useContext } from 'react'
@@ -38,6 +38,7 @@ const iconProps = {
 export const SidebarMenu = observer(function SidebarMenu() {
   const root = useRootStore()
   const user = useCurrentUser()
+  const navigate = useNavigate()
   const match = useMatchRoute()
   const isMobile = useMobile()
   const context = useContext(SidebarContext)
@@ -146,6 +147,7 @@ export const SidebarMenu = observer(function SidebarMenu() {
               label='Log Out'
               onClick={() => {
                 context.setPane(false)
+                navigate({ to: '/' })
                 root.auth.logout()
               }}
             />

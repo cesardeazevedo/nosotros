@@ -54,7 +54,7 @@ export const StarterPackCard = observer(function StarterPackCard(props: Props) {
             </Stack>
             <Stack horizontal={false} justify='space-between'>
               <Text variant='body' size='lg'>
-                {title || '-'}
+                <strong>{title || '-'}</strong>
               </Text>
               <Text variant='body' size='sm' sx={styles.description}>
                 {description}
