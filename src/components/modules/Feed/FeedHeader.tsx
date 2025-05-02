@@ -21,6 +21,7 @@ export const FeedHeader = (props: Props) => {
     case 'relayfeed': {
       return <FeedHeaderRelayFeed feed={module?.feed} />
     }
+    case 'starterpack':
     case 'followset': {
       return <FeedHeaderFollowSet feed={module?.feed} />
     }

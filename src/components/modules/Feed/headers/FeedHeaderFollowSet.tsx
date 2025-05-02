@@ -14,9 +14,10 @@ export const FeedHeaderFollowSet = observer(function FeedHeaderFollowSet(props: 
   const { feed } = props
   const author = feed.filter.authors?.[0] || ''
   const d = feed.filter['#d']?.[0] || ''
+  const kind = feed.filter.kinds?.[0] || Kind.Follows
   const events = d
-    ? eventStore.getEventsByKindPubkeyTagValue(Kind.FollowSets, author, 'd', d)
-    : eventStore.getEventsByKindPubkey(Kind.FollowSets, author)
+    ? eventStore.getEventsByKindPubkeyTagValue(kind, author, 'd', d)
+    : eventStore.getEventsByKindPubkey(kind, author)
 
   return (
     <FeedHeaderBase

@@ -5,18 +5,17 @@ import React from 'react'
 import { css } from 'react-strict-dom'
 
 export type Props = {
-  size?: 'sm' | 'md'
   label?: React.ReactNode
   leading?: React.ReactNode
   children?: React.ReactNode
 }
 
-export const RouteHeader = (props: Props) => {
-  const { label, leading, children, size = 'md' } = props
+export const HeaderBase = (props: Props) => {
+  const { label, leading, children } = props
   return (
-    <Stack gap={1} sx={styles[size]} justify='space-between'>
+    <Stack gap={1} sx={styles.root} justify='space-between'>
       {props.label ? (
-        <Text variant='headline' size='sm' sx={styles.label}>
+        <Text variant='headline' size='sm'>
           {label}
         </Text>
       ) : leading ? (
@@ -28,13 +27,10 @@ export const RouteHeader = (props: Props) => {
 }
 
 const styles = css.create({
-  md: {
-    padding: spacing.padding2,
-  },
-  sm: {
-    padding: spacing.padding1,
-  },
-  label: {
-    marginLeft: spacing.margin1,
+  root: {
+    height: 64,
+    minHeight: 64,
+    paddingLeft: spacing.padding2,
+    paddingRight: spacing.padding1,
   },
 })

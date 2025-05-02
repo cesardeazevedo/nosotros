@@ -8,6 +8,7 @@ import { Text } from '@/components/ui/Text/Text'
 import { useCurrentPubkey, useRootStore } from '@/hooks/useRootStore'
 import {
   createArticleModule,
+  createFeedModule,
   createHomeModule,
   createMediaModule,
   createNotificationModule,
@@ -24,6 +25,7 @@ import {
   IconBell,
   IconChevronLeft,
   IconHash,
+  IconListDetails,
   IconNews,
   IconPhoto,
   IconSearch,
@@ -36,14 +38,16 @@ import type { ReactNode } from 'react'
 import { useState } from 'react'
 import { css, html } from 'react-strict-dom'
 import { IconHome } from '../../elements/Icons/IconHome'
+import { FeedHeaderBase } from '../Feed/headers/FeedHeaderBase'
+import { DeckAddList } from './DeckAddList'
 import { DeckAddProfile } from './DeckAddProfile'
 import { DeckAddRelayFeeds } from './DeckAddRelayFeeds'
 import { DeckAddSearch } from './DeckAddSearch'
 import { DeckAddTags } from './DeckAddTag'
 import { DeckColumn } from './DeckColumn'
-import { DeckColumnHeader } from './DeckColumnHeader'
+import { Divider } from '@/components/ui/Divider/Divider'
 
-type Views = 'profiles' | 'tags' | 'search' | 'relayfeeds'
+type Views = 'profiles' | 'tags' | 'search' | 'relayfeeds' | 'lists'
 
 type Props = {
   onClose?: () => void
@@ -75,7 +79,7 @@ const getTitle = (view: Views | null) => {
 
 const iconProps = { size: 28, strokeWidth: '1.8' }
 
-export const DeckNewColumnList = observer(function DeckNewColumnList(props: Props) {
+export const DeckMenu = observer(function DeckMenu(props: Props) {
   const [view, setView] = useState<Views | null>(null)
   // const params = deckRoute.useParams()
   const deck = useRootStore().decks.selected
@@ -102,8 +106,7 @@ export const DeckNewColumnList = observer(function DeckNewColumnList(props: Prop
 
   return (
     <DeckColumn size='sm'>
-      <DeckColumnHeader
-        id='addcolumn'
+      <FeedHeaderBase
         onDelete={props.onClose}
         leading={
           <Stack gap={1}>
@@ -114,6 +117,7 @@ export const DeckNewColumnList = observer(function DeckNewColumnList(props: Prop
           </Stack>
         }
       />
+      <Divider />
       {!view && (
         <List sx={styles.list}>
           <ListItem
@@ -204,13 +208,25 @@ export const DeckNewColumnList = observer(function DeckNewColumnList(props: Prop
           <ListItem
             interactive
             sx={styles.item}
+            onClick={() => setView('lists')}
+            leadingIcon={
+              <IconWrapper>
+                <IconListDetails {...iconProps} />
+              </IconWrapper>
+            }
+            supportingText={<span>View feeds from follow sets, relay sets or starter packs</span>}>
+            <Text size='lg'>Lists</Text>
+          </ListItem>
+          <ListItem
+            interactive
+            sx={styles.item}
             leadingIcon={
               <IconWrapper>
                 <IconServerBolt size={28} strokeWidth={1.8} />
               </IconWrapper>
             }
             onClick={() => setView('relayfeeds')}
-            supportingText={<span>View a feed of a specific or multiple relays you choose</span>}>
+            supportingText={<span>View feed of a specific or multiple relays you choose</span>}>
             <Text size='lg'>Relay Feeds</Text>
           </ListItem>
           <ListItem
@@ -230,6 +246,7 @@ export const DeckNewColumnList = observer(function DeckNewColumnList(props: Prop
       {view === 'profiles' && <DeckAddProfile onSelect={handleAddProfile} />}
       {view === 'tags' && <DeckAddTags onSelect={(tag) => add(createTagModule(tag))} />}
       {view === 'search' && <DeckAddSearch onSelect={(query) => add(createSearchModule(query))} />}
+      {view === 'lists' && <DeckAddList onSelect={(snapshot) => add(createFeedModule(snapshot))} />}
       {view === 'relayfeeds' && <DeckAddRelayFeeds onSelect={(relay) => add(createRelayFeedModule([relay]))} />}
     </DeckColumn>
   )

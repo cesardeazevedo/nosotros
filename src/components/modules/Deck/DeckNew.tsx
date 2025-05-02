@@ -4,13 +4,13 @@ import { IconNewSection } from '@tabler/icons-react'
 import { useState } from 'react'
 import { css } from 'react-strict-dom'
 import { DeckColumn } from './DeckColumn'
-import { DeckNewColumnList } from './DeckNewColumnList'
+import { DeckMenu } from './DeckMenu'
 
 export const DeckNew = () => {
   const [open, setOpen] = useState(false)
   return (
     <>
-      {open && <DeckNewColumnList onClose={() => setOpen(false)} />}
+      {open && <DeckMenu onClose={() => setOpen(false)} />}
       <DeckColumn paper={false} sx={styles.noborder}>
         <Stack horizontal={false} align='center' justify='center' sx={styles.root} gap={4}>
           <Stack horizontal={false} align='center' gap={4}>

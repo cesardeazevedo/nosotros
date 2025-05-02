@@ -1,5 +1,5 @@
+import { HeaderBase } from '@/components/elements/Layouts/HeaderBase'
 import { RouteContainer } from '@/components/elements/Layouts/RouteContainer'
-import { RouteHeader } from '@/components/elements/Layouts/RouteHeader'
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
@@ -11,7 +11,7 @@ const rows = [...Array(4).keys()]
 export const ListsPending = () => {
   return (
     <>
-      <RouteContainer maxWidth='lg' renderDivider={false} header={<RouteHeader label='Lists' />}>
+      <RouteContainer maxWidth='lg' renderDivider={false} header={<HeaderBase label='Lists' />}>
         <Text variant='title' size='lg' sx={styles.subheader}>
           My custom follow lists
         </Text>
