@@ -152,7 +152,7 @@ const styles = css.create({
     top: 0,
     left: 0,
     bottom: -2,
-    zIndex: 200,
+    zIndex: 1,
   },
   type: {
     paddingTop: spacing['padding0.5'],

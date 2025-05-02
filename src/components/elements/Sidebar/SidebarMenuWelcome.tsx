@@ -61,7 +61,11 @@ export const SidebarMenuWelcome = () => {
         )}
       </Link>
       <MenuItem disabled leadingIcon={<IconBell {...iconProps} />} label='Notifications' />
-      <MenuItem disabled leadingIcon={<IconListDetails {...iconProps} />} label='Lists' />
+      <MenuItem
+        leadingIcon={<IconListDetails {...iconProps} />}
+        label='Lists'
+        onClick={() => context.setPane('/lists')}
+      />
       <SidebarMenuRelays />
       <Link to='/settings'>
         <MenuItem onClick={() => {}} leadingIcon={<IconSettings {...iconProps} />} label='Settings' />

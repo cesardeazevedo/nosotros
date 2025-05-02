@@ -1,7 +1,7 @@
 import type { Signer } from '@/core/signers/signer'
 import type { NostrFilter } from 'core/types'
 import { ClientToRelay, RelayToClient } from 'core/types'
-import { matchFilters, type NostrEvent, type UnsignedEvent } from 'nostr-tools'
+import { matchFilters, type NostrEvent } from 'nostr-tools'
 import WS from 'vitest-websocket-mock'
 
 export function relaySendEvents(server: WS, reqId: string, messages: unknown[]) {
@@ -15,8 +15,13 @@ export function relaySendNotice(server: WS, msg: string) {
 export class TestSigner implements Signer {
   name = 'test_signer'
 
-  sign(event: UnsignedEvent): Promise<NostrEvent> {
-    return Promise.resolve(event as NostrEvent)
+  sign(event: NostrEvent): Promise<NostrEvent> {
+    return Promise.resolve({
+      ...event,
+      pubkey: event.pubkey || '',
+      id: event.id || Math.random().toString().slice(2),
+      sig: event.sig || '',
+    } as NostrEvent)
   }
 
   encrypt(_: string, msg: string): Promise<string> {
