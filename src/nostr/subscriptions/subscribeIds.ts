@@ -7,7 +7,6 @@ import { ShareReplayCache } from '../replay'
 import { subscribe } from './subscribe'
 import { withRepostedEvent } from './subscribeReposts'
 import { subscribeThreads } from './subscribeThreads'
-import { withZapAuthor } from './subscribeZaps'
 import { withRelatedAuthors } from './withRelatedAuthor'
 import { withRelatedNotes } from './withRelatedNotes'
 
@@ -29,7 +28,7 @@ export const subscribeIds = (filter: NostrFilter, ctx: NostrContext) => {
           return of(event).pipe(withRepostedEvent(ctx))
         }
         case Kind.ZapReceipt: {
-          return of(event).pipe(withZapAuthor(ctx))
+          return of(event).pipe(withRelatedAuthors(ctx))
         }
         default: {
           // generic event (always get the author)
