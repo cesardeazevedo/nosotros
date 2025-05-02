@@ -15,6 +15,7 @@ export const FeedTypeModel = t.union(
   t.literal('relaysets'),
   t.literal('relayfeed'),
   t.literal('followset'),
+  t.literal('starterpack'),
   t.literal('notifications'),
 )
 

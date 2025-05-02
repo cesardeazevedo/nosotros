@@ -3,48 +3,44 @@ import type { Event } from '@/stores/events/event'
 import type { FeedModuleSnapshotIn } from '@/stores/modules/feed.module'
 import type { LinkProps } from '@tanstack/react-router'
 import { Link } from '@tanstack/react-router'
-import { observer } from 'mobx-react-lite'
 
 type Props = LinkProps & {
   event: Event
   onClick?: (snapshot: FeedModuleSnapshotIn) => void
 }
 
-export const FollowSetLink = observer(function FollowSetLink(props: Props) {
-  const { event, children, onClick, ...rest } = props
-  const kinds = [Kind.FollowSets, Kind.Text, Kind.Repost]
-  const pubkey = event.pubkey
+export const StarterPackLink = (props: Props) => {
+  const { event, onClick, ...rest } = props
   const d = event.getTag('d') || ''
-
+  const kinds = [Kind.StarterPack, Kind.Text, Kind.Article]
   return (
     <Link
       to='/feed'
       search={{
-        scope: 'sets_p',
-        author: event.pubkey,
-        d: event.getTag('d'),
-        type: 'followset',
         kind: kinds,
+        scope: 'sets_p',
         limit: 20,
+        type: 'starterpack',
+        author: [event.pubkey],
+        d,
       }}
+      {...rest}
       disabled={!!onClick}
       onClick={() =>
         onClick?.({
-          type: 'followset',
+          type: 'starterpack',
           feed: {
+            scope: 'sets_p',
             filter: {
               kinds,
-              authors: [pubkey],
-              '#d': [d],
               limit: 20,
+              authors: [event.pubkey],
+              '#d': [d],
             },
-            scope: 'sets_p',
             context: {},
           },
         })
       }
-      {...rest}>
-      {children}
-    </Link>
+    />
   )
-})
+}

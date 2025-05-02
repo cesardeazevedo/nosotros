@@ -4,35 +4,31 @@ import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { Text } from '@/components/ui/Text/Text'
 import type { Event } from '@/stores/events/event'
 import { observer } from 'mobx-react-lite'
-import { RelaySetLink } from './RelaySetLink'
 
 type Props = {
   event: Event
+  selected?: boolean
 }
 
-export const ListRelaySetMenuItem = observer(function ListRelaySetMenuItem(props: Props) {
-  const { event } = props
+export const RelaySetMenuItem = observer(function RelaySetMenuItem(props: Props) {
+  const { event, selected } = props
   const title = event.getTag('title')
   const description = event.getTag('description')
   const relays = event.getTags('relay')
   return (
-    <RelaySetLink event={event}>
-      {({ isActive }) => (
-        <ContentProvider value={{ disablePopover: true, disableLink: true }}>
-          <MenuItem
-            size='sm'
-            selected={isActive}
-            leadingIcon={<UserAvatar size='xs' pubkey={event.pubkey} />}
-            label={
-              <>
-                {title} <Text size='md'>({relays.length})</Text>
-              </>
-            }
-            supportingText={description}
-            onClick={() => {}}
-          />
-        </ContentProvider>
-      )}
-    </RelaySetLink>
+    <ContentProvider value={{ disablePopover: true, disableLink: true }}>
+      <MenuItem
+        size='sm'
+        selected={selected}
+        leadingIcon={<UserAvatar size='xs' pubkey={event.pubkey} />}
+        label={
+          <>
+            {title} <Text size='md'>({relays.length})</Text>
+          </>
+        }
+        supportingText={description}
+        onClick={() => {}}
+      />
+    </ContentProvider>
   )
 })

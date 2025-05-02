@@ -57,7 +57,7 @@ export const ListItem = forwardRef<HTMLElement, Props>((props, ref) => {
     overline,
   } = props
 
-  const isInteractive = !!interactive || !!onClick
+  const isInteractive = !!interactive
   const selected = !disabled && props.selected
   const adaptedSize = sizeProp
 
@@ -148,7 +148,7 @@ const styles = css.create({
     display: 'flex',
     position: 'relative',
     alignItems: 'center',
-    height: '100%',
+    // height: '100%',
     gap: spacing.padding2,
     borderRadius: 'inherit',
     minHeight: listItemTokens.containerMinHeight,

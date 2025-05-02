@@ -8,6 +8,7 @@ import { CardContent } from '@/components/ui/Card/CardContent'
 import { CardTitle } from '@/components/ui/Card/CardTitle'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
+import { useSM } from '@/hooks/useMobile'
 import type { Event } from '@/stores/events/event'
 import { dialogStore } from '@/stores/ui/dialogs.store'
 import { palette } from '@/themes/palette.stylex'
@@ -24,12 +25,13 @@ type Props = {
 
 export const FollowSetCard = observer(function FollowSetCard(props: Props) {
   const { event, renderEdit = false, renderAvatars = true } = props
+  const isMobile = useSM()
   const title = event.getTag('title')
   const description = event.getTag('description')
   const d = event.getTag('d')
   const pubkeys = event.getTags('p') || []
   return (
-    <Card key={event.id} variant='outlined' sx={styles.root}>
+    <Card key={event.id} variant='outlined' sx={[styles.root, isMobile && styles.root$mobile]}>
       <Stack horizontal={false}>
         <CardTitle
           headline={
@@ -44,7 +46,7 @@ export const FollowSetCard = observer(function FollowSetCard(props: Props) {
             headline={title || <html.span style={styles.gray}>#{d?.slice(0, 20)}</html.span>}
             supportingText={description}
           />
-          <Stack gap={2}>
+          <Stack gap={3}>
             {!renderAvatars && (
               <Text variant='title' size='sm'>
                 <Stack gap={1} justify='space-between'>
@@ -75,6 +77,9 @@ const styles = css.create({
   root: {
     width: '40%',
     padding: 12,
+  },
+  root$mobile: {
+    width: '100%',
   },
   content: {
     paddingBlock: spacing.padding2,
