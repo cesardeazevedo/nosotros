@@ -74,6 +74,9 @@ importers:
       emoji-picker-react:
         specifier: 4.11.0
         version: 4.11.0(react@19.0.0)
+      fast-blurhash:
+        specifier: ^1.1.4
+        version: 1.1.4
       framer-motion:
         specifier: ^11.3.8
         version: 11.18.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -3664,6 +3667,9 @@ packages:
   fake-indexeddb@6.0.0:
     resolution: {integrity: sha512-YEboHE5VfopUclOck7LncgIqskAqnv4q0EWbYCaxKKjAvO93c+TJIaBuGy8CBFdbg9nKdpN3AuPRwVBJ4k7NrQ==}
     engines: {node: '>=18'}
+
+  fast-blurhash@1.1.4:
+    resolution: {integrity: sha512-xeH121M027hgWHHhHWYYjUmMKl8vCH3PPkXk439ixsP8Bvb/r3UFqg12oMSToD/aSAw8EE6XiTdfZ6M5jaLfzg==}
 
   fast-deep-equal@2.0.1:
     resolution: {integrity: sha512-bCK/2Z4zLidyB4ReuIsvALH6w31YfAQDmXMqMx6FyfHqvBxtjC0eRumeSu4Bs3XtXwpyIywtSTrVT99BxY1f9w==}
@@ -10831,6 +10837,8 @@ snapshots:
       - supports-color
 
   fake-indexeddb@6.0.0: {}
+
+  fast-blurhash@1.1.4: {}
 
   fast-deep-equal@2.0.1: {}
 
