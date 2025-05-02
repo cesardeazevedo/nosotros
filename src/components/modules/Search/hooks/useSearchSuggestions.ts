@@ -59,8 +59,17 @@ export function useSearchSuggestions(options: SearchOptions) {
   const usersFollowing = useSearchFollowingUsers(options)
   const querySuggestion =
     options.suggestQuery !== false && options.query ? { type: 'query', query: options.query } : undefined
+  const relaySuggestion =
+    options.suggestRelays !== false && options.query
+      ? {
+          type: 'relay',
+          relay:
+            (options.query.startsWith('wss://') || options.query.startsWith('ws://') ? '' : 'wss://') + options.query,
+        }
+      : undefined
   return [
     querySuggestion,
+    relaySuggestion,
     ...usersFollowing.map((x) => ({ type: 'user' as const, pubkey: x.pubkey })),
     ...usersRelay.map((x) => ({ type: 'user_relay' as const, pubkey: x.pubkey })),
   ].filter((x) => !!x) as SearchItem[]
