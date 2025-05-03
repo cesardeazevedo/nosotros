@@ -64,7 +64,7 @@ export const FeedStoreModel = NostrStoreModel.named('FeedStoreModel')
   .views((self) => ({
     get list() {
       const { chunk } = self
-      return [...self.published.values(), ...self.latest.values(), ...self.notes.values()].slice(0, chunk)
+      return [...self.latest.values(), ...self.published.values(), ...self.notes.values()].slice(0, chunk)
     },
     get bufferPubkeys() {
       return dedupe([...self.buffer.values()].map((x) => x.pubkey))
