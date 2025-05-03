@@ -105,12 +105,15 @@ export class Note {
   }
 
   get reactionsGrouped() {
-    // reactions grouped by reaction content
     return Object.entries(
       this.reactions.reduce(
-        (acc, { event: { content, pubkey } }) => ({
-          [content]: [...(acc?.[content] || []), pubkey],
-        }),
+        (acc, { event }) => {
+          const content = fallbackEmoji(event.content)
+          return {
+            ...acc,
+            [content]: [...(acc?.[content] || []), event.pubkey],
+          }
+        },
         {} as Record<string, string[]>,
       ),
     ).sort((a, b) => b[1].length - a[1].length)
