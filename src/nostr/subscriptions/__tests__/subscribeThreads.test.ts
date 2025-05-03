@@ -1,4 +1,4 @@
-import { RELAY_1, RELAY_2, RELAY_3 } from '@/constants/testRelays'
+import { RELAY_1, RELAY_2, RELAY_3, RELAY_OUTBOX_1 } from '@/constants/testRelays'
 import { WRITE } from '@/nostr/types'
 import { test } from '@/utils/fixtures'
 import { subscribeSpyTo } from '@hirez_io/observer-spy'
@@ -44,6 +44,7 @@ describe('subscribeThreads', () => {
     const relay = createMockRelay(RELAY_1, [note1.eventNote])
     const relay2 = createMockRelay(RELAY_2, [note2.eventNote])
     const relay3 = createMockRelay(RELAY_3, [note3.eventNote])
+    const relayOutbox = createMockRelay(RELAY_OUTBOX_1, [])
 
     const ctx = { pubkey: pubkey3, permission: WRITE }
     const $ = subscribeNotesWithRelated({ authors: ['p3'] }, ctx).pipe(subscribeThreads(ctx))
@@ -53,6 +54,7 @@ describe('subscribeThreads', () => {
     await relay.close()
     await relay2.close()
     await relay3.close()
+    await relayOutbox.close()
 
     expect(relay3.received).toStrictEqual([
       ['REQ', '1', { kinds: [1], authors: ['p3'] }],

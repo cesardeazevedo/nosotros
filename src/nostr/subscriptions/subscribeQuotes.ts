@@ -1,4 +1,5 @@
 import { Kind } from '@/constants/kinds'
+import { FALLBACK_RELAYS } from '@/constants/relays'
 import { dedupe } from '@/core/helpers/dedupe'
 import { mergeRelayHints } from '@/core/mergers/mergeRelayHints'
 import { ofKind } from '@/core/operators/ofKind'
@@ -30,7 +31,7 @@ export function subscribeQuotes(ctx: NostrContext, options?: QuoteOptions) {
               const relayHints = mergeRelayHints([
                 metadata.relayHints || {},
                 {
-                  ids: { [id]: ['wss://relay.nostr.band'] },
+                  ids: { [id]: FALLBACK_RELAYS },
                   idHints: { [id]: dedupe([event.pubkey, metadata.mentionedAuthors?.[0]]) },
                 },
               ])
