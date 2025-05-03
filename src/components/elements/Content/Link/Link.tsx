@@ -55,7 +55,7 @@ const styles = css.create({
     },
   },
   shrink: {
-    display: '-webkit-box',
+    display: '-webkit-inline-box',
     WebkitLineClamp: 3,
     overflow: 'hidden',
     boxOrient: 'vertical',

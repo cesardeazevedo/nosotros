@@ -2,7 +2,7 @@ import { Stack } from '@/components/ui/Stack/Stack'
 import { Tab } from '@/components/ui/Tab/Tab'
 import { Tabs } from '@/components/ui/Tabs/Tabs'
 import { Kind } from '@/constants/kinds'
-import { IconHeart, IconQuote, IconShare3 } from '@tabler/icons-react'
+import { IconQuote, IconShare3 } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
 import { css } from 'react-strict-dom'
 
@@ -15,13 +15,13 @@ export const FeedHeaderRepostsTabs = (props: Props) => {
   return (
     <Stack justify='flex-start' align='flex-start'>
       <Tabs anchor={selected}>
-        <Tab
-          sx={styles.tab}
-          variant='secondary'
-          icon={<IconHeart size={20} strokeWidth='2' />}
-          anchor='reactions'
-          label='Reactions'
-        />
+        {/* <Tab */}
+        {/*   sx={styles.tab} */}
+        {/*   variant='secondary' */}
+        {/*   icon={<IconHeart size={20} strokeWidth='2' />} */}
+        {/*   anchor='reactions' */}
+        {/*   label='Reactions' */}
+        {/* /> */}
         <Link to='.' search={({ e, kind, ...prev }) => ({ ...prev, kind: Kind.Text, q: prev.q || e, type: 'quotes' })}>
           <Tab
             sx={styles.tab}

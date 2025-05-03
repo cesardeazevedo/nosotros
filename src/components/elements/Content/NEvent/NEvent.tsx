@@ -48,7 +48,6 @@ const styles = css.create({
   },
   content: {
     position: 'relative',
-    paddingInline: spacing.padding2,
     transition: 'background',
     transitionTimingFunction: 'ease',
     transitionDuration: duration.short1,
