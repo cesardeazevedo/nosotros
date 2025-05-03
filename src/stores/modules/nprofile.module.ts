@@ -23,7 +23,7 @@ export const NProfileModuleModel = BaseModuleModel.named('NProfileModuleModel')
       feeds: {
         notes: FeedStoreModel.create({
           ...props,
-          filter: { kinds: [Kind.Text, Kind.Repost], authors: [pubkey], limit: 20 },
+          filter: { kinds: [Kind.Text, Kind.Repost], authors: [pubkey], limit: 50 },
           options: {
             includeRoot: true,
             includeParents: false,
@@ -32,7 +32,7 @@ export const NProfileModuleModel = BaseModuleModel.named('NProfileModuleModel')
         }),
         replies: FeedStoreModel.create({
           ...props,
-          filter: { kinds: [Kind.Text], authors: [pubkey], limit: 20 },
+          filter: { kinds: [Kind.Text], authors: [pubkey], limit: 30 },
           options: {
             includeRoot: false,
             includeParents: false,
@@ -41,12 +41,12 @@ export const NProfileModuleModel = BaseModuleModel.named('NProfileModuleModel')
         }),
         media: FeedStoreModel.create({
           ...props,
-          filter: { kinds: [Kind.Media], authors: [pubkey], limit: 20 },
+          filter: { kinds: [Kind.Media], authors: [pubkey], limit: 50 },
         }),
         articles: FeedStoreModel.create({
           ...props,
           range: Duration.fromObject({ days: 180 }).as('minutes'),
-          filter: { kinds: [Kind.Article], authors: [pubkey], limit: 20 },
+          filter: { kinds: [Kind.Article], authors: [pubkey], limit: 30 },
         }),
         bookmarks: FeedStoreModel.create({
           ...props,
@@ -72,4 +72,4 @@ export const NProfileModuleModel = BaseModuleModel.named('NProfileModuleModel')
     },
   }))
 
-export interface NProfileModule extends Instance<typeof NProfileModuleModel> { }
+export interface NProfileModule extends Instance<typeof NProfileModuleModel> {}
