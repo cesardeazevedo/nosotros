@@ -11,14 +11,13 @@ import {
   IconBell,
   IconBellFilled,
   IconListDetails,
-  IconLogout,
   IconNews,
   IconPhoto,
   IconSettings,
   IconSettingsFilled,
   IconUser,
 } from '@tabler/icons-react'
-import { Link, useMatchRoute, useNavigate } from '@tanstack/react-router'
+import { Link, useMatchRoute } from '@tanstack/react-router'
 import { observer } from 'mobx-react-lite'
 import { nip19 } from 'nostr-tools'
 import { useContext } from 'react'
@@ -27,6 +26,7 @@ import { IconPencil } from '../Icons/IconPencil'
 import { SidebarContext } from './SidebarContext'
 import { SidebarMenuDecks } from './SidebarMenuDecks'
 import { SidebarMenuFeeds } from './SidebarMenuFeeds'
+import { SidebarMenuLogout } from './SidebarMenuLogout'
 import { SidebarMenuRecents } from './SidebarMenuRecents'
 import { SidebarMenuRelays } from './SidebarMenuRelays'
 
@@ -38,7 +38,6 @@ const iconProps = {
 export const SidebarMenu = observer(function SidebarMenu() {
   const root = useRootStore()
   const user = useCurrentUser()
-  const navigate = useNavigate()
   const match = useMatchRoute()
   const isMobile = useMobile()
   const context = useContext(SidebarContext)
@@ -141,16 +140,7 @@ export const SidebarMenu = observer(function SidebarMenu() {
                 />
               )}
             </Link>
-            <MenuItem
-              interactive
-              leadingIcon={<IconLogout {...iconProps} />}
-              label='Log Out'
-              onClick={() => {
-                context.setPane(false)
-                navigate({ to: '/' })
-                root.auth.logout()
-              }}
-            />
+            <SidebarMenuLogout />
           </>
         )}
       </html.div>
