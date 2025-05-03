@@ -176,6 +176,7 @@ const styles = css.create({
   },
   img$mobile: {
     maxWidth: '100%',
+    maxHeight: 'calc(100vh - 120px)',
   },
   img$blur: {
     position: 'absolute',
@@ -205,6 +206,7 @@ const styles = css.create({
     position: 'absolute',
     left: 18,
     top: 18,
+    zIndex: 10,
     color: 'white',
     bgcolor: 'rgba(0, 0, 0, 0.8)',
   },
