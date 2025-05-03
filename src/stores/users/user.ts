@@ -6,9 +6,22 @@ import { computedFn } from 'mobx-utils'
 import type { NostrEvent } from 'nostr-tools'
 import { nip19 } from 'nostr-tools'
 import { encodeSafe } from 'utils/nip19'
+import type { Event } from '../events/event'
 import { eventStore } from '../events/event.store'
 import { nip05store } from '../nip05/nip05.store'
 import { relaysStore } from '../relays/relays.store'
+
+const sortByPTags = (a: Event, b: Event) => {
+  const total1 = a.getTags('p').length || 0
+  const total2 = b.getTags('p').length || 0
+  return total2 - total1
+}
+
+const sortByRelayTags = (a: Event, b: Event) => {
+  const total1 = a.getTags('relay').length || 0
+  const total2 = b.getTags('relay').length || 0
+  return total2 - total1
+}
 
 export class User {
   constructor(public event: NostrEventMetadata) {
@@ -87,41 +100,27 @@ export class User {
   }
 
   get relaySets() {
-    return eventStore.getEventsByKindPubkey(Kind.RelaySets, this.pubkey).toSorted((a, b) => {
-      const total1 = a.tags.relay?.length || 0
-      const total2 = b.tags.relay?.length || 0
-      return total2 - total1
-    })
+    return eventStore.getEventsByKindPubkey(Kind.RelaySets, this.pubkey).toSorted(sortByRelayTags)
   }
 
   get othersRelaySets() {
     return eventStore
       .getEventsByKind(Kind.RelaySets)
       .filter((x) => x.pubkey !== this.pubkey && x.getTags('relay').length > 0)
-      .toSorted((a, b) => {
-        const total1 = a.getTags('relay').length || 0
-        const total2 = b.getTags('relay').length || 0
-        return total2 - total1
-      })
+      .toSorted(sortByRelayTags)
   }
 
   get followSets() {
-    return eventStore.getEventsByKindPubkey(Kind.FollowSets, this.pubkey).toSorted((a, b) => {
-      const total1 = a.getTags('p').length
-      const total2 = b.getTags('p').length
-      return total2 - total1
-    })
+    return eventStore.getEventsByKindPubkey(Kind.FollowSets, this.pubkey).toSorted(sortByPTags)
   }
 
   get othersFollowSets() {
     const events = eventStore.getEventsByKind(Kind.FollowSets)
-    return events
-      .filter((x) => x.pubkey !== this.pubkey && x.getTags('p').length > 0)
-      .toSorted((a, b) => {
-        const total1 = a.getTags('p').length
-        const total2 = b.getTags('p').length
-        return total2 - total1
-      })
+    return events.filter((x) => x.pubkey !== this.pubkey && x.getTags('p').length > 0).toSorted(sortByPTags)
+  }
+
+  get starterPacks() {
+    return eventStore.getEventsByKindPubkey(Kind.StarterPack, this.pubkey).toSorted(sortByPTags)
   }
 
   get outboxRelays() {

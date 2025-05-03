@@ -6,6 +6,8 @@ import type { EditorStore } from '@/stores/editor/editor.store'
 import type { NodeViewProps } from '@tiptap/core'
 import { Editor } from '@tiptap/core'
 import DocumentExtension from '@tiptap/extension-document'
+import DropCursorExtension from '@tiptap/extension-dropcursor'
+import GapcursorExtension from '@tiptap/extension-gapcursor'
 import HardbreakExtension from '@tiptap/extension-hard-break'
 import HistoryExtension from '@tiptap/extension-history'
 import ParagraphExtension from '@tiptap/extension-paragraph'
@@ -35,6 +37,8 @@ export function createEditor(store: EditorStore, settings: Settings) {
       ParagraphExtension,
       HardbreakExtension,
       HistoryExtension,
+      DropCursorExtension,
+      GapcursorExtension,
       Placeholder.configure({ placeholder: store.placeholder }),
       NostrExtension.configure({
         link: {
@@ -53,6 +57,9 @@ export function createEditor(store: EditorStore, settings: Settings) {
           sign: (event) => store.sign(event),
           onStart() {
             store.isUploading.toggle(true)
+          },
+          onDrop() {
+            store.editor?.commands.focus()
           },
           onComplete() {
             store.isUploading.toggle(false)

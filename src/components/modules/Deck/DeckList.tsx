@@ -1,11 +1,12 @@
-import { RelayChip } from '@/components/elements/Relays/RelayChip'
 import { useRootStore } from '@/hooks/useRootStore'
-import { HomeModuleModel } from '@/stores/modules/home.module'
-import { MediaModuleModel } from '@/stores/modules/media.module'
-import { NostrModuleModule } from '@/stores/modules/nostr.module'
-import { NProfileModuleModel } from '@/stores/modules/nprofile.module'
-import { RelayDiscoveryModuleModel } from '@/stores/modules/relay.discovery.module'
+import type { HomeModule } from '@/stores/modules/home.module'
+import type { MediaModule } from '@/stores/modules/media.module'
+import type { ModulesInstances } from '@/stores/modules/module.store'
 import { observer } from 'mobx-react-lite'
+import { ArticlesHeader } from '../Articles/ArticlesHeader'
+import { FeedHeader } from '../Feed/FeedHeader'
+import { FeedHeaderFollowSet } from '../Feed/headers/FeedHeaderFollowSet'
+import { FeedHeaderRelaySets } from '../Feed/headers/FeedHeaderRelaySets'
 import { HomeColumn } from '../Home/HomeColumn'
 import { MediaColumn } from '../Media/MediaColumn'
 import { NostrEventColumn } from '../NostrEvent/NostrEventColumn'
@@ -18,6 +19,56 @@ import { DeckColumn } from './DeckColumn'
 import { DeckColumnFeed } from './DeckColumnFeed'
 import { DeckContext, deckContextvalues } from './DeckContext'
 
+type Props = {
+  module: ModulesInstances
+}
+
+const DeckModule = (props: Props) => {
+  const { module } = props
+  switch (module.type) {
+    case 'home': {
+      return <HomeColumn module={module as HomeModule} />
+    }
+    case 'nprofile': {
+      return <NProfileColumn module={module} />
+    }
+    case 'media': {
+      return <MediaColumn module={module as MediaModule} />
+    }
+    case 'notifications': {
+      return <NotificationColumn module={module} />
+    }
+    case 'tags': {
+      return <TagColumn module={module} />
+    }
+    case 'articles': {
+      return <DeckColumnFeed feed={module.feed} header={<ArticlesHeader />} />
+    }
+    case 'search': {
+      return <SearchColumn module={module} />
+    }
+    case 'event': {
+      return <NostrEventColumn module={module} />
+    }
+    case 'relaydiscovery': {
+      return <RelayDiscoveryColumn module={module} />
+    }
+    case 'relayfeed': {
+      return <DeckColumnFeed feed={module.feed} header={<FeedHeader module={module} />} />
+    }
+    case 'relaysets': {
+      return <DeckColumnFeed feed={module.feed} header={<FeedHeaderRelaySets feed={module.feed} />} />
+    }
+    case 'starterpack':
+    case 'followset': {
+      return <DeckColumnFeed feed={module.feed} header={<FeedHeaderFollowSet feed={module.feed} />} />
+    }
+    default: {
+      break
+    }
+  }
+}
+
 export const DeckList = observer(function DeckList() {
   const root = useRootStore()
   return (
@@ -27,24 +78,7 @@ export const DeckList = observer(function DeckList() {
         return (
           <DeckColumn key={key}>
             <DeckContext.Provider value={{ ...deckContextvalues, module, index }}>
-              {HomeModuleModel.is(module) && <HomeColumn module={module} />}
-              {NProfileModuleModel.is(module) && <NProfileColumn module={module} />}
-              {MediaModuleModel.is(module) && <MediaColumn module={module} />}
-              {module.type === 'notifications' && <NotificationColumn module={module} />}
-              {module.type === 'tags' && <TagColumn module={module} />}
-              {module.type === 'articles' && (
-                <DeckColumnFeed id={module.id} feed={module.feed} label='Articles' settings={false} />
-              )}
-              {module.type === 'search' && <SearchColumn module={module} />}
-              {module.type === 'relayfeed' && (
-                <DeckColumnFeed
-                  id={module.id}
-                  feed={module.feed}
-                  leading={module.feed.context.relays?.[0] && <RelayChip url={module.feed.context.relays?.[0]} />}
-                />
-              )}
-              {NostrModuleModule.is(module) && <NostrEventColumn module={module} />}
-              {RelayDiscoveryModuleModel.is(module) && <RelayDiscoveryColumn module={module} />}
+              <DeckModule module={module} />
             </DeckContext.Provider>
           </DeckColumn>
         )

@@ -15,7 +15,7 @@ export const SettingsRoute = memo(() => {
   const isMobile = useMobile()
   useResetScroll()
   return (
-    <CenteredContainer margin maxWidth='lg' sx={styles.root}>
+    <CenteredContainer margin maxWidth='md' sx={styles.root}>
       {!isMobile && (
         <Stack sx={styles.header}>
           <Text variant='headline' size='md'>

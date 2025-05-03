@@ -11,7 +11,7 @@ import type { User } from '@/stores/users/user'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import { IconSearch } from '@tabler/icons-react'
+import { IconSearch, IconServerBolt } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
 import type { ReactNode, Ref } from 'react'
 import React, { useCallback, useImperativeHandle, useRef, useState } from 'react'
@@ -128,6 +128,22 @@ export const SearchContent = observer(function SearchContent(props: Props) {
                 </ListItem>
               )
             }
+            case 'relay': {
+              return (
+                <ListItem
+                  {...listItemProps}
+                  key={item.type + item.relay}
+                  sx={[styles.item, styles.space]}
+                  onClick={() => handleSelect(item)}
+                  leadingIcon={
+                    <html.span style={styles.icon}>
+                      <IconServerBolt size={20} strokeWidth='2' />
+                    </html.span>
+                  }>
+                  Relay <strong>{item.relay}</strong>
+                </ListItem>
+              )
+            }
             case 'user_relay':
               return (
                 <React.Fragment key={item.type + item.pubkey}>
@@ -190,6 +206,9 @@ const styles = css.create({
   item: {
     height: 'auto',
     [listItemTokens.leadingSpace]: spacing.padding1,
+  },
+  space: {
+    marginTop: spacing['margin0.5'],
   },
   icon: {
     display: 'block',

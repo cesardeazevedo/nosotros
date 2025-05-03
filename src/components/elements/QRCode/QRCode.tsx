@@ -46,7 +46,9 @@ export const QRCode = observer(function QRCode() {
         <Text size='lg' sx={styles.npub}>
           {npub}
         </Text>
-        <Text>Follow me on Nostr</Text>
+        <Text variant='title' size='sm'>
+          Follow me on Nostr
+        </Text>
         {/* <Button */}
         {/*   variant='filled' */}
         {/*   onClick={dialogStore.openCamera} */}

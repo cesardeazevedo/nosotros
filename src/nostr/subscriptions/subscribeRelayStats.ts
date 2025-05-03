@@ -1,3 +1,4 @@
+import { ofAuthOk } from '@/core/operators/ofAuthOk'
 import type { Relay } from '@/core/Relay'
 import { RelayToClient } from '@/core/types'
 import { relaysStore } from '@/stores/relays/relays.store'
@@ -14,6 +15,10 @@ export function subscribeRelayStats(relay: Relay) {
         return merge(
           relay.open$.pipe(tap(() => relayStore.connect())),
           relay.close$.pipe(tap(() => relayStore.disconnect())),
+          relay.websocket$.pipe(
+            ofAuthOk(),
+            tap(() => relaysStore.removeAuth(relay.url)),
+          ),
           relay.websocket$.pipe(
             tap((msg) => {
               switch (msg[0].toUpperCase()) {

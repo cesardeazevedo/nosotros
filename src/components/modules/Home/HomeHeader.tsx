@@ -11,17 +11,18 @@ import { FeedHeaderBase } from '../Feed/headers/FeedHeaderBase'
 
 type Props = {
   module?: HomeModule
+  renderEditor?: boolean
 }
 
 export const HomeHeader = (props: Props) => {
-  const { module } = props
+  const { module, renderEditor = true } = props
   const pubkey = useCurrentPubkey()
   return (
     <>
-      <FeedHeaderBase size='sm' feed={module?.feed} leading={<HomeFeedTabs module={module} />} />
+      <FeedHeaderBase feed={module?.feed} leading={<HomeFeedTabs module={module} />} />
       <Divider />
       <Stack horizontal={false} align='stretch' justify='space-between'>
-        {module && <Editor initialOpen={false} store={module.feed.editor} />}
+        {module && renderEditor && <Editor initialOpen={false} store={module.feed.editor} />}
         {!module && (
           <EditorContainer open={false}>
             <UserAvatar size='md' pubkey={pubkey} />

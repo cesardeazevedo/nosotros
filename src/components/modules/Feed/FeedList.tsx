@@ -13,6 +13,7 @@ export type Props = {
   feed: FeedStore
   column?: boolean
   divider?: boolean
+  renderNewPostsIndicator?: boolean
   onScrollEnd?: () => void
   filter?: (item: NostrEventMetadata) => boolean
   render: (item: NostrEventMetadata) => React.ReactNode
@@ -22,7 +23,7 @@ export type Props = {
 }
 
 export const FeedList = observer(function FeedList(props: Props) {
-  const { feed, render, divider = true, onScrollEnd, filter = always, column } = props
+  const { feed, render, divider = true, onScrollEnd, filter = always, column, renderNewPostsIndicator = true } = props
   const ref = useRef<HTMLDivElement>(null)
 
   useLayoutEffect(() => {
@@ -63,11 +64,11 @@ export const FeedList = observer(function FeedList(props: Props) {
     return (
       <html.div style={styles.column} ref={ref} onScroll={handleScrollColumn}>
         {props.header}
-        {!props.wrapper && <FeedNewPosts ref={ref} feed={feed} />}
+        {!props.wrapper && renderNewPostsIndicator && <FeedNewPosts ref={ref} feed={feed} />}
         {props.wrapper
           ? props.wrapper(
               <>
-                <FeedNewPosts ref={ref} feed={feed} />
+                {renderNewPostsIndicator && <FeedNewPosts ref={ref} feed={feed} />}
                 {content}
               </>,
             )

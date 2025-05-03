@@ -52,7 +52,13 @@ export class Pool {
     return relay
   }
 
+  disconnect() {
+    const relays = [...this.relays.values()]
+    relays.forEach((relay) => relay.websocket$.complete())
+  }
+
   reset() {
+    this.disconnect()
     this.relays.clear()
     this.blacklisted.clear()
   }

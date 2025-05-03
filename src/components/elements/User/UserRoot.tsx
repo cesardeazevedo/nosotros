@@ -1,3 +1,4 @@
+import { FollowButton } from '@/components/modules/Follows/FollowButton'
 import { ContentProvider } from '@/components/providers/ContentProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { NostrEventMetadata } from '@/nostr/types'
@@ -6,7 +7,6 @@ import { observer } from 'mobx-react-lite'
 import { css } from 'react-strict-dom'
 import { LinkProfile } from '../Links/LinkProfile'
 import { UserContentAbout } from './UserContentAbout'
-import { UserFollowButton } from './UserFollowButton'
 import { UserHeader } from './UserHeader'
 
 type Props = {
@@ -27,7 +27,7 @@ export const UserRoot = observer(function UserRoot(props: Props) {
             <br />
             <UserContentAbout pubkey={pubkey} />
           </Stack>
-          <UserFollowButton pubkey={pubkey} />
+          <FollowButton pubkey={pubkey} />
         </Stack>
       </ContentProvider>
     </LinkProfile>

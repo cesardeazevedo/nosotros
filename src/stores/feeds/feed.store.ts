@@ -10,7 +10,8 @@ import { NostrStoreModel } from '../nostr/nostr.model'
 export const FeedScope = t.enumeration('FeedScope', [
   'self',
   'following',
-  'followset',
+  'sets_p',
+  'sets_e',
   'followers',
   'relayfeed',
   'inbox',
@@ -63,14 +64,13 @@ export const FeedStoreModel = NostrStoreModel.named('FeedStoreModel')
   .views((self) => ({
     get list() {
       const { chunk } = self
-      return [...self.published.values(), ...self.latest.values(), ...self.notes.values()].slice(0, chunk)
+      return [...self.latest.values(), ...self.published.values(), ...self.notes.values()].slice(0, chunk)
     },
     get bufferPubkeys() {
       return dedupe([...self.buffer.values()].map((x) => x.pubkey))
     },
     get snapshot() {
-      const { blured, ...rest } = self
-      return getSnapshot(rest.context)
+      return [getSnapshot(self.context), self.filter.kinds]
     },
     unseen(date: number) {
       if (date) {

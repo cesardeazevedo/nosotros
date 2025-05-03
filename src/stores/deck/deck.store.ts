@@ -23,7 +23,7 @@ export const DeckModel = t
         const oldId = self.columns[index]
         self.modules.delete(oldId)
         self.modules.add(module)
-        self.columns.splice(index - 1, 1, id)
+        self.columns.splice(index, 1, id)
       } else {
         self.modules.add(module)
         self.columns.splice(index ?? self.columns.length, 0, id)

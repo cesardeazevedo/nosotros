@@ -143,7 +143,7 @@ export const SidebarCollapsed = observer(function SidebarCollapsed(props: Props)
         </Text>
         <Stack horizontal={false} sx={styles.decks} gap={0.5}>
           {decks.list.map((deck) => (
-            <Link key={deck.id} to='/deck/$id' params={{ id: deck.id }}>
+            <Link key={deck.id} to='/deck/$id' params={{ id: deck.id }} onClick={() => context.setPane(false)}>
               {({ isActive }) => <IconButton selected={isActive} toggle sx={styles.deckIconButton} icon={deck.icon} />}
             </Link>
           ))}

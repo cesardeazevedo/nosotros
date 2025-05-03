@@ -1,4 +1,5 @@
 import type { SxProps } from '@/components/ui/types'
+import { Kind } from '@/constants/kinds'
 import { useRootStore } from '@/hooks/useRootStore'
 import { createRelayFeedModule } from '@/stores/modules/module.helpers'
 import type { LinkProps } from '@tanstack/react-router'
@@ -38,7 +39,7 @@ export const LinkRelayFeed = (props: Props) => {
     <Link
       to={`/feed`}
       target={target}
-      search={{ relay: url, kind: 1, limit: 50, type: 'relayfeed' }}
+      search={{ relay: url, kind: Kind.Text, limit: 30, type: 'relayfeed' }}
       state={{ from: router.latestLocation.pathname } as never}
       {...css.props(sx)}>
       {props.children}

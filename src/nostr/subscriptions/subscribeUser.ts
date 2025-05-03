@@ -1,5 +1,5 @@
 import { Kind } from '@/constants/kinds'
-import { tap } from 'rxjs'
+import { from, mergeMap, tap } from 'rxjs'
 import type { NostrContext } from '../context'
 import { nip05 } from '../nip05'
 import { ShareReplayCache } from '../replay'
@@ -28,3 +28,7 @@ export const subscribeUser = replay.wrap((pubkey: string, ctx: NostrContext) => 
     }),
   )
 })
+
+export const subscribeUsers = (pubkeys: string[], ctx: NostrContext) => {
+  return from(pubkeys).pipe(mergeMap((pubkey) => subscribeUser(pubkey, ctx)))
+}

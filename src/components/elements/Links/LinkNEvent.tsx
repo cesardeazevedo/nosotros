@@ -47,7 +47,7 @@ export const LinkNEvent = observer(function LinkNEvent(props: Props) {
     if (nevent) {
       const decoded = decodeNIP19(nevent)
       if (decoded?.type === 'nevent') {
-        root.decks.selected.add(createNEventModule(decoded.data), (index || 0) + 1, replaceOnDeck)
+        root.decks.selected.add(createNEventModule(decoded.data), (index || 0) + (replaceOnDeck ? 0 : 1), replaceOnDeck)
       }
     }
   }, [nevent, index])

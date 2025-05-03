@@ -7,6 +7,7 @@ import type { NostrEventMetadata } from '@/nostr/types'
 import type { FeedStore } from '@/stores/feeds/feed.store'
 import { observer } from 'mobx-react-lite'
 import React from 'react'
+import { FeedAuthNotice } from './FeedAuthNotice'
 
 export type Props = {
   feed: FeedStore
@@ -21,6 +22,7 @@ export const Feed = observer(function Feed(props: Props) {
   const { feed, render, loading, filter, ...rest } = props
   return (
     <ContentProvider value={{ blured: feed.blured }}>
+      <FeedAuthNotice context={feed.context} />
       <FeedList
         feed={feed}
         filter={filter}

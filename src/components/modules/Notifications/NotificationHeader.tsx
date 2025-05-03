@@ -1,5 +1,5 @@
 import { IconExpandable } from '@/components/elements/Icons/IconExpandable'
-import { RouteHeader } from '@/components/elements/Layouts/RouteHeader'
+import { HeaderBase } from '@/components/elements/Layouts/HeaderBase'
 import { NotificationSettings } from '@/components/modules/Notifications/NotificationSettings'
 import { Button } from '@/components/ui/Button/Button'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
@@ -17,7 +17,7 @@ export const NotificationHeader = observer(function NotificationHeader(props: Pr
   const [expanded, setExpanded] = useState(false)
   return (
     <>
-      <RouteHeader label='Notifications'>
+      <HeaderBase label='Notifications'>
         <Button
           variant='filledTonal'
           onClick={(e) => {
@@ -30,7 +30,7 @@ export const NotificationHeader = observer(function NotificationHeader(props: Pr
             Settings
           </Stack>
         </Button>
-      </RouteHeader>
+      </HeaderBase>
       <Expandable expanded={expanded}>{module && <NotificationSettings module={module} />}</Expandable>
     </>
   )

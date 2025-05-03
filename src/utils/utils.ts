@@ -1,5 +1,6 @@
-export function fallbackEmoji(reaction?: string) {
+export function fallbackEmoji(reaction: string) {
   switch (reaction) {
+    case '':
     case '+':
       return '🤙'
     case '-':

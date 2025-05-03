@@ -20,11 +20,6 @@ export const NostrContextModel = t
     insertDB: t.optional(t.boolean, true),
     maxRelaysPerUser: t.optional(t.number, 2),
   })
-  .views((self) => ({
-    get whitelist() {
-      return [...self.authWhitelist.values()]
-    },
-  }))
   .actions(withSetAction)
   .actions(withToggleAction)
   .actions((self) => ({

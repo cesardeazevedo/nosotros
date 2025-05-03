@@ -1,8 +1,8 @@
+import { Divider } from '@/components/ui/Divider/Divider'
+import { Stack } from '@/components/ui/Stack/Stack'
 import type { MediaModule } from '@/stores/modules/media.module'
-import { DeckColumnHeader } from '../Deck/DeckColumnHeader'
-import { MediaFeedLayoutButtons } from './MediaFeedLayoutToggles'
-import { DeckScroll } from '../Deck/DeckScroll'
 import { MediaFeed } from './MediaFeed'
+import { MediaHeader } from './MediaHeader'
 
 type Props = {
   module: MediaModule
@@ -11,14 +11,10 @@ type Props = {
 export const MediaColumn = (props: Props) => {
   const { module } = props
   return (
-    <>
-      <DeckColumnHeader
-        id={module.id}
-        label='Media'
-        trailing={() => <MediaFeedLayoutButtons module={module} />}></DeckColumnHeader>
-      <DeckScroll>
-        <MediaFeed module={module} />
-      </DeckScroll>
-    </>
+    <Stack horizontal={false}>
+      <MediaHeader module={module} />
+      <Divider />
+      <MediaFeed column module={module} />
+    </Stack>
   )
 }

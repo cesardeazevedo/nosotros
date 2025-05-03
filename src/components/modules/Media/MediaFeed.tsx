@@ -1,8 +1,8 @@
 import { NostrEventFeedItem } from '@/components/elements/Event/NostrEventFeedItem'
-import { FeedList } from '@/components/modules/Feed/FeedList'
 import { MediaCell } from '@/components/elements/Media/MediaCell'
 import { PostMediaLoading } from '@/components/elements/Media/MediaLoading'
 import { PostLoading } from '@/components/elements/Posts/PostLoading'
+import { FeedList } from '@/components/modules/Feed/FeedList'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { MediaModule } from '@/stores/modules/media.module'
 import { observer, Observer } from 'mobx-react-lite'
@@ -25,6 +25,7 @@ export const MediaFeed = observer(function MediaFeed(props: Props) {
       header={header}
       divider={module.layout === 'row'}
       onScrollEnd={feed.paginate}
+      renderNewPostsIndicator={module.layout === 'row'}
       wrapper={(children) =>
         module.layout === 'grid' ? (
           <Stack wrap gap={0.5} justify='flex-start' sx={styles.grid}>
@@ -48,7 +49,7 @@ const styles = css.create({
   grid: {
     '::after': {
       content: '""',
-      flex: '1 1 calc(33.33% - 20px)',
+      flex: '0 0 calc((100% - 0rem) / 3)',
     },
   },
 })

@@ -14,12 +14,16 @@ import { defaultIfEmpty, delay, firstValueFrom } from 'rxjs'
 import { FollowSetForm } from './FollowSets/FollowSetForm'
 import { RelaySetForm } from './RelaySets/RelaySetForm'
 
-type Props = ({ isEditing: true; event: Event } | { isEditing: false; kind: Kind.FollowSets | Kind.RelaySets }) & {
+type Props = (
+  | { isEditing: true; event: Event }
+  | { isEditing: false; kind: Kind.StarterPack | Kind.FollowSets | Kind.RelaySets }
+) & {
   onClose?: () => void
 }
 
 const labels = {
   [Kind.FollowSets]: 'follow',
+  [Kind.StarterPack]: 'starter pack',
   [Kind.RelaySets]: 'relay',
 }
 
@@ -82,12 +86,14 @@ export const ListForm = (props: Props) => {
             name='description'
             placeholder='List description'
           />
-          {kind === Kind.FollowSets && <FollowSetForm event={isEditing ? props.event : undefined} ref={ref} />}
+          {(kind === Kind.FollowSets || kind === Kind.StarterPack) && (
+            <FollowSetForm event={isEditing ? props.event : undefined} ref={ref} />
+          )}
           {kind === Kind.RelaySets && <RelaySetForm event={isEditing ? props.event : undefined} ref={ref} />}
         </Stack>
         <Stack sx={styles.action}>
           <Button fullWidth disabled={isPending} type='submit' variant='filled' sx={styles.button}>
-            Create
+            {isEditing ? 'Update' : 'Create'}
           </Button>
         </Stack>
       </form>

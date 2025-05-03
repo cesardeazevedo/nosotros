@@ -1,7 +1,6 @@
 import type { Observable, ThrottleConfig } from 'rxjs'
 import {
   BehaviorSubject,
-  EMPTY,
   ignoreElements,
   interval,
   map,
@@ -91,20 +90,17 @@ export class PaginationSubject {
     return this.$
   }
 
-  paginateIfEmpty(notes: Map<string, unknown>, min = 5) {
-    if (this.options.range) {
-      return interval(5000).pipe(
-        map(() => notes.size),
-        takeWhile((size) => size < min),
-        take(10),
-        tap(() => {
-          this.increaseRange()
-          this.subject.next()
-        }),
-        ignoreElements(),
-      )
-    }
-    return EMPTY
+  paginateIfEmpty(notes: Map<string, unknown>, min = 10) {
+    return interval(4000).pipe(
+      map(() => notes.size),
+      takeWhile((size) => size < min),
+      take(5),
+      tap(() => {
+        this.increaseRange()
+        this.subject.next()
+      }),
+      ignoreElements(),
+    )
   }
 
   paginate() {

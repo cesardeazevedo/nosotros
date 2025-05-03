@@ -34,6 +34,7 @@ export const SidebarSubheader = (props: Props) => {
       selected={selected}
       sx={[styles.root, visibleOnHoverStyle.root, sx]}
       onClick={isExpandable ? () => expand?.(!expanded) : undefined}
+      interactive={!!isExpandable}
       label={
         <Text size='md' sx={styles.label}>
           {label}

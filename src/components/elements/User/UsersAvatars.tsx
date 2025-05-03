@@ -4,11 +4,14 @@ import { Paper } from '@/components/ui/Paper/Paper'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { TooltipRich } from '@/components/ui/TooltipRich/TooltipRich'
+import { dedupe } from '@/core/helpers/dedupe'
+import { userStore } from '@/stores/users/users.store'
 import type { ColorPalette } from '@/themes/palette.stylex'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import type { ReactNode } from '@tanstack/react-router'
+import { observer } from 'mobx-react-lite'
 import { css } from 'react-strict-dom'
 import { UserAvatar } from './UserAvatar'
 
@@ -21,11 +24,14 @@ type Props = {
   borderColor?: keyof ColorPalette
 }
 
-export const UsersAvatars = (props: Props) => {
+export const UsersAvatars = observer(function UserAvatars(props: Props) {
   const { pubkeys, max = 3, description, borderColor, renderTooltip = true } = props
-  const topUsers = pubkeys.slice(0, max)
+  const usersSet = new Set(userStore.users.keys())
+  const pubkeysSet = new Set(pubkeys)
+  const existingUsersSet = usersSet.intersection(pubkeysSet)
+  const topUsers = dedupe([...existingUsersSet, ...pubkeys]).slice(0, max)
   return (
-    <Stack justify='flex-end' gap={0.5}>
+    <Stack justify='flex-end' gap={0.5} sx={styles.root}>
       {renderTooltip && pubkeys.length > 3 && (
         <TooltipRich
           openEvents={{ click: true, hover: false }}
@@ -60,9 +66,12 @@ export const UsersAvatars = (props: Props) => {
       </Stack>
     </Stack>
   )
-}
+})
 
 const styles = css.create({
+  root: {
+    marginLeft: 8,
+  },
   avatar: {
     marginLeft: -8,
     boxShadow: `0px 0px 0px 2px `,

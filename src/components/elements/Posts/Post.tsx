@@ -74,7 +74,7 @@ export const PostRoot = observer(function PostRoot(props: Props) {
         {note.repliesOpen && (
           <>
             {/* <Divider /> */}
-            <Editor sx={styles.editor} renderBubble initialOpen={false} store={note.editor} />
+            <Editor sx={styles.editor} renderBubble initialOpen store={note.editor} />
             <Replies onLoadMoreClick={handleLoadMore} />
           </>
         )}
