@@ -21,21 +21,23 @@ interface Props extends Omit<TextProps, 'children'> {
   children?: React.ReactNode
 }
 
-const UserNameSkeletonOrPubkey = observer((props: { pubkey: string }) => {
-  const { pubkey } = props
+const UserNameSkeletonOrPubkey = observer((props: Omit<Props, 'children'>) => {
+  const { pubkey, size = 'lg', ...rest } = props
   const [showPubkey, setShowPubkey] = useState<false | string>(false)
   useEffect(() => {
     const timeout = setTimeout(() => {
       const npub = encodeSafe(() => nip19.npubEncode(pubkey))
       setShowPubkey(npub || '')
-    }, 5000)
+    }, 4500)
     return () => clearTimeout(timeout)
   }, [])
   return (
     <>
       {showPubkey ? (
         <LinkProfile underline pubkey={pubkey}>
-          <html.div style={styles.trunkPubkey}>{showPubkey}</html.div>
+          <Text variant='body' {...rest} sx={[styles.text, rest.sx]} size={size} element={html.div}>
+            <html.div style={styles.trunkPubkey}>{showPubkey}</html.div>
+          </Text>
         </LinkProfile>
       ) : (
         <Skeleton variant='rectangular' sx={styles.loading} />
@@ -50,7 +52,7 @@ export const UserName = observer(function UserName(props: Props) {
   const currentUser = useCurrentUser()
   return (
     <Stack gap={0.5} sx={props.sx}>
-      {!user && <UserNameSkeletonOrPubkey pubkey={pubkey} />}
+      {!user && <UserNameSkeletonOrPubkey pubkey={pubkey} size={size} {...rest} />}
       <UserPopover pubkey={pubkey}>
         <LinkProfile underline pubkey={pubkey}>
           <Text variant='body' {...rest} sx={[styles.text, rest.sx]} size={size} element={html.div}>

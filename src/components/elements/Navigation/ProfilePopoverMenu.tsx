@@ -1,21 +1,20 @@
 import { Divider } from '@/components/ui/Divider/Divider'
 import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { Stack } from '@/components/ui/Stack/Stack'
-import { useCurrentPubkey, useRootStore } from '@/hooks/useRootStore'
+import { useCurrentPubkey } from '@/hooks/useRootStore'
 import { spacing } from '@/themes/spacing.stylex'
-import { IconLogout, IconSettings, IconUser } from '@tabler/icons-react'
+import { IconSettings, IconUser } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
 import { css } from 'react-strict-dom'
 import { LinkProfile } from '../Links/LinkProfile'
+import { SidebarMenuLogout } from '../Sidebar/SidebarMenuLogout'
 
 type Props = {
   onAction?: () => void
 }
 
 export const ProfilePopoverMenu = (props: Props) => {
-  const root = useRootStore()
   const pubkey = useCurrentPubkey()
-  const logout = root.auth.logout
   const iconProps = {
     size: 24,
     strokeWidth: '1.8',
@@ -36,15 +35,7 @@ export const ProfilePopoverMenu = (props: Props) => {
         <MenuItem size='sm' leadingIcon={<IconSettings {...iconProps} />} onClick={props.onAction} label='Settings' />
       </Link>
       <Divider />
-      <MenuItem
-        size='sm'
-        onClick={() => {
-          logout()
-          props.onAction?.()
-        }}
-        leadingIcon={<IconLogout {...iconProps} />}
-        label='Log out'
-      />
+      <SidebarMenuLogout size='sm' />
     </Stack>
   )
 }

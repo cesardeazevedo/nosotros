@@ -43,6 +43,10 @@ export const relaysStore = makeAutoObservable(
       this.getByUrl(url)?.increment('auths')
     },
 
+    removeAuth(url: string) {
+      this.auths.delete(url)
+    },
+
     getInfo(url: string | undefined) {
       return this.getByUrl(url)?.info || this.infosFromMonitors.get(formatRelayUrl(url))
     },

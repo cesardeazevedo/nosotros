@@ -22,18 +22,21 @@ export const StarterPackRoute = observer(function FollowSetRoute() {
         <Text variant='title' size='lg'>
           Starter Packs
         </Text>
-        <Button variant='filled' onClick={() => dialogStore.setListForm(Kind.StarterPack)}>
+        <Button disabled={!user} variant='filled' onClick={() => dialogStore.setListForm(Kind.StarterPack)}>
           Create Starter Pack
         </Button>
       </Stack>
-      {user?.starterPacks.length !== 0 && (
+      {user && user?.starterPacks.length !== 0 && (
         <Stack horizontal={false} gap={2}>
           <Text variant='title' size='lg'>
             My custom follow sets
           </Text>
           <Stack wrap gap={2} align='stretch'>
             {user?.starterPacks.map((event) => (
-              <StarterPackLink key={event.id} event={event} {...css.props(styles.link)}>
+              <StarterPackLink
+                key={event.id}
+                event={event}
+                {...css.props([styles.link, isMobile && styles.link$mobile])}>
                 <StarterPackCard event={event} sx={[styles.card, isMobile && styles.card$mobile]} />
               </StarterPackLink>
             ))}
@@ -41,7 +44,7 @@ export const StarterPackRoute = observer(function FollowSetRoute() {
         </Stack>
       )}
       <Stack horizontal={false} gap={2}>
-        {user?.starterPacks.length !== 0 && (
+        {user && user?.starterPacks.length !== 0 && (
           <Stack align='center' gap={1} justify='space-between'>
             <Text variant='title' size='lg'>
               Other Starter Packs
@@ -50,7 +53,7 @@ export const StarterPackRoute = observer(function FollowSetRoute() {
         )}
         <Stack wrap gap={2} align='stretch'>
           {starterPacks.map((event) => (
-            <StarterPackLink key={event.id} event={event} {...css.props(styles.link)}>
+            <StarterPackLink key={event.id} event={event} {...css.props([styles.link, isMobile && styles.link$mobile])}>
               <StarterPackCard event={event} sx={[styles.card, isMobile && styles.card$mobile]} />
             </StarterPackLink>
           ))}
@@ -70,6 +73,9 @@ const styles = css.create({
   link: {
     flex: '0 0 calc((100% - 2rem) / 3)',
     alignSelf: 'stretch',
+  },
+  link$mobile: {
+    flex: 1,
   },
   card$mobile: {
     width: '100%',

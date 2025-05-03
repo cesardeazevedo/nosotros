@@ -1,4 +1,4 @@
-import { RELAY_1, RELAY_2, RELAY_3 } from '@/constants/testRelays'
+import { RELAY_1, RELAY_2, RELAY_3, RELAY_OUTBOX_1 } from '@/constants/testRelays'
 import { WRITE } from '@/nostr/types'
 import { fakeEvent } from '@/utils/faker'
 import { test } from '@/utils/fixtures'
@@ -15,6 +15,7 @@ describe('subscribe()', () => {
     ]
     const relay1 = createMockRelay(RELAY_1, events)
     const relay2 = createMockRelay(RELAY_2, events)
+    const relayOutbox = createMockRelay(RELAY_OUTBOX_1, [])
 
     const filter = { kinds: [1], authors: ['1', '2', '3'] }
     const relays = [RELAY_1, RELAY_2]
@@ -34,6 +35,7 @@ describe('subscribe()', () => {
     await spy3.onComplete()
     await relay1.close()
     await relay2.close()
+    await relayOutbox.close()
     expect(spy3.getValues().map((x) => x.id)).toStrictEqual(['1', '2', '3', '4'])
     // todo: stub verifyWorker
   })
@@ -51,6 +53,7 @@ describe('subscribe()', () => {
     const relay1 = createMockRelay(RELAY_1, [])
     const relay2 = createMockRelay(RELAY_2, [])
     const relay3 = createMockRelay(RELAY_3, [])
+    const relayOutbox = createMockRelay(RELAY_OUTBOX_1, [])
 
     const $ = subscribe(
       { kinds: [1], authors: ['1'] },
@@ -65,6 +68,7 @@ describe('subscribe()', () => {
     await relay1.close()
     await relay2.close()
     await relay3.close()
+    await relayOutbox.close()
     const req = ['REQ', '1', { authors: ['1'], kinds: [1] }]
     const close = ['CLOSE', '1']
     expect(relay1.received).toStrictEqual([req, close])

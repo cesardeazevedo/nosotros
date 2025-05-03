@@ -1,4 +1,5 @@
 import { createRootRouteWithContext, createRoute, createRouter, redirect } from '@tanstack/react-router'
+import { useEffect } from 'react'
 import { z } from 'zod'
 import { HeaderBase } from './components/elements/Layouts/HeaderBase'
 import { RootLayout } from './components/elements/Layouts/RootLayout'
@@ -616,8 +617,13 @@ const tagsRoute = createRoute({
 const searchRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/search',
-  validateSearch: z.object({ q: z.string() }),
+  validateSearch: z.object({ q: z.string().optional() }),
   loaderDeps: ({ search: { q } }) => ({ q }),
+  beforeLoad: (x) => {
+    if (!x.search.q) {
+      throw redirect({ to: '/', replace: true })
+    }
+  },
   loader: (options) => {
     const { q: query = '' } = options.deps
     const module = createSearchModule(query)

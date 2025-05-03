@@ -11,7 +11,6 @@ import {
   IconBell,
   IconBellFilled,
   IconListDetails,
-  IconLogout,
   IconNews,
   IconPhoto,
   IconSettings,
@@ -27,6 +26,7 @@ import { IconPencil } from '../Icons/IconPencil'
 import { SidebarContext } from './SidebarContext'
 import { SidebarMenuDecks } from './SidebarMenuDecks'
 import { SidebarMenuFeeds } from './SidebarMenuFeeds'
+import { SidebarMenuLogout } from './SidebarMenuLogout'
 import { SidebarMenuRecents } from './SidebarMenuRecents'
 import { SidebarMenuRelays } from './SidebarMenuRelays'
 
@@ -140,15 +140,7 @@ export const SidebarMenu = observer(function SidebarMenu() {
                 />
               )}
             </Link>
-            <MenuItem
-              interactive
-              leadingIcon={<IconLogout {...iconProps} />}
-              label='Log Out'
-              onClick={() => {
-                context.setPane(false)
-                root.auth.logout()
-              }}
-            />
+            <SidebarMenuLogout />
           </>
         )}
       </html.div>

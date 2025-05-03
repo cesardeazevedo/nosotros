@@ -38,8 +38,8 @@ export const UserPopover = function UserPopover(props: Props) {
         <Observer>
           {() => (
             <ContentProvider value={{ disablePopover: true }}>
-              <Paper elevation={2} shape='lg' surface='surfaceContainerLow' sx={styles.root}>
-                <Stack justify='space-between'>
+              <Paper elevation={4} shape='lg' surface='surfaceContainerLow' sx={styles.root}>
+                <Stack justify='space-between' sx={styles.header}>
                   <UserAvatar size='lg' pubkey={pubkey} />
                   <Stack gap={0.5}>
                     <UserRelays pubkey={pubkey} />
@@ -48,7 +48,7 @@ export const UserPopover = function UserPopover(props: Props) {
                 </Stack>
                 <br />
                 <Stack horizontal={false} gap={2}>
-                  <Stack horizontal={false}>
+                  <Stack horizontal={false} sx={styles.content}>
                     <UserName pubkey={pubkey} />
                     <UserNIP05 pubkey={pubkey} />
                   </Stack>
@@ -68,13 +68,20 @@ export const UserPopover = function UserPopover(props: Props) {
 
 const styles = css.create({
   root: {
-    width: 360,
-    maxHeight: 290,
-    padding: spacing.padding2,
+    width: 300,
+    maxHeight: 450,
     pointerEvents: 'auto',
   },
+  header: {
+    padding: spacing.padding1,
+  },
+  content: {
+    paddingInline: spacing.padding2,
+  },
   scroller: {
-    maxHeight: 135,
+    maxHeight: 300,
     overflowY: 'auto',
+    paddingBottom: spacing.padding1,
+    paddingInline: spacing.padding2,
   },
 })

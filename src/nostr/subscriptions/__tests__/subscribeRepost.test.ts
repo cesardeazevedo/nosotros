@@ -1,5 +1,5 @@
 import { Kind } from '@/constants/kinds'
-import { RELAY_1, RELAY_2, RELAY_3 } from '@/constants/testRelays'
+import { RELAY_1, RELAY_2, RELAY_3, RELAY_OUTBOX_1 } from '@/constants/testRelays'
 import { WRITE } from '@/nostr/types'
 import { fakeEvent } from '@/utils/faker'
 import { test } from '@/utils/fixtures'
@@ -28,6 +28,7 @@ describe('subscribeReposts', () => {
         pubkey: pubkey2,
       }),
     ])
+    const relayOutbox = createMockRelay(RELAY_OUTBOX_1, [])
     await insertRelayList({
       pubkey,
       tags: [
@@ -49,6 +50,7 @@ describe('subscribeReposts', () => {
     await spy.onComplete()
     await relay.close()
     await relay2.close()
+    await relayOutbox.close()
     expect(relay.received).toStrictEqual([
       ['REQ', '1', { kinds: [6], authors: [pubkey] }],
       ['CLOSE', '1'],

@@ -1,5 +1,5 @@
 import { Kind } from '@/constants/kinds'
-import { RELAY_1, RELAY_2, RELAY_3, RELAY_4 } from '@/constants/testRelays'
+import { RELAY_1, RELAY_2, RELAY_3, RELAY_4, RELAY_FALLBACK_1, RELAY_OUTBOX_1 } from '@/constants/testRelays'
 import * as module from '@/stores/helpers/addNostrEventToStore'
 import { fakeEvent } from '@/utils/faker'
 import { test } from '@/utils/fixtures'
@@ -10,9 +10,11 @@ import { subscribeNotes, subscribeNotesWithParent, subscribeNotesWithRelated } f
 describe('subscribeNotes', () => {
   test('subscribeNotes', async ({ createMockRelay }) => {
     const relay = createMockRelay(RELAY_1, [fakeEvent({ id: '1', pubkey: 'p1' })])
+    const relayOutbox = createMockRelay(RELAY_OUTBOX_1, [])
     const spy = subscribeSpyTo(subscribeNotes({ authors: ['p1'] }, { relays: [RELAY_1] }).pipe())
     await spy.onComplete()
     await relay.close()
+    await relayOutbox.close()
     expect(relay.received).toStrictEqual([
       ['REQ', '1', { kinds: [1], authors: ['p1'] }],
       ['CLOSE', '1'],
@@ -44,6 +46,8 @@ describe('subscribeNotes', () => {
     const event8 = fakeEvent({ id: '23', pubkey: '11' })
 
     const relay = createMockRelay(RELAY_1, [event1, event2, event3, event4, event5, event6, event7, event8])
+    const relayOutbox = createMockRelay(RELAY_OUTBOX_1, [])
+    const relayFallback = createMockRelay(RELAY_FALLBACK_1, [])
 
     const eventSpy = vi.spyOn(module, 'addNostrEventToStore')
 
@@ -51,6 +55,8 @@ describe('subscribeNotes', () => {
     const spy = subscribeSpyTo(subscribeNotesWithParent(filter, { relays: [RELAY_1] }))
     await spy.onComplete()
     await relay.close()
+    await relayOutbox.close()
+    await relayFallback.close()
 
     expect(relay.received).toStrictEqual([
       ['REQ', '1', { kinds: [1], authors: ['1', '2'] }],
@@ -78,6 +84,8 @@ describe('subscribeNotes', () => {
     const relay2 = createMockRelay(RELAY_2, [])
     const relay3 = createMockRelay(RELAY_3, [])
     const relay4 = createMockRelay(RELAY_4, [])
+    const relayOutbox = createMockRelay(RELAY_OUTBOX_1, [])
+    const relayFallback = createMockRelay(RELAY_FALLBACK_1, [])
     await insertRelayList({ pubkey: '1', tags: [['r', RELAY_2, 'write']] })
     await insertRelayList({ pubkey: '2', tags: [['r', RELAY_3, 'write']] })
     await insertRelayList({ pubkey: '3', tags: [['r', RELAY_4, 'write']] })
@@ -86,6 +94,8 @@ describe('subscribeNotes', () => {
     const spy = subscribeSpyTo($)
     await spy.onComplete()
     await relay1.close()
+    await relayOutbox.close()
+    await relayFallback.close()
 
     expect(relay1.received).toStrictEqual([
       ['REQ', '1', { kinds: [1], authors: ['1', '2', '3'] }],

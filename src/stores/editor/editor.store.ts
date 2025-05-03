@@ -209,7 +209,7 @@ export class EditorStore {
   get event() {
     return {
       ...this.unsignedEvent,
-      content: this.content,
+      content: this.content.replace(/^\n+|\n+$/g, ''),
       created_at: Math.floor(Date.now() / 1000),
       tags: [...this.replyTags, ...this.editorTags(), ...this.clientTag, ...this.nsfwTag, ...this.zapTags],
     } as UnsignedEvent
@@ -315,7 +315,7 @@ export class EditorStore {
 
   focus() {
     setTimeout(() => {
-      this.editor?.commands.focus()
+      this.editor?.commands.focus('start', { scrollIntoView: false })
     })
   }
 

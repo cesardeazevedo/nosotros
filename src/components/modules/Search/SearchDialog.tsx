@@ -2,6 +2,7 @@ import { DialogSheet } from '@/components/elements/Layouts/Dialog'
 import { useSearchShortcuts } from '@/components/modules/Search/hooks/useSearchShortcuts'
 import { Search } from '@/components/modules/Search/Search'
 import { SearchFooterDetails } from '@/components/modules/Search/SearchFooterDetails'
+import { Kind } from '@/constants/kinds'
 import { useMobile } from '@/hooks/useMobile'
 import { dialogStore } from '@/stores/ui/dialogs.store'
 import { userStore } from '@/stores/users/users.store'
@@ -30,6 +31,18 @@ export const SearchDialog = observer(() => {
           switch (item.type) {
             case 'query': {
               navigate({ to: '/search', search: { q: item.query } })
+              break
+            }
+            case 'relay': {
+              navigate({
+                to: '/feed',
+                search: {
+                  kind: Kind.Text,
+                  type: 'relayfeed',
+                  limit: 30,
+                  relay: item.relay,
+                },
+              })
               break
             }
             case 'user_relay':

@@ -89,6 +89,6 @@ const styles = css.create({
     marginTop: spacing['padding0.5'],
   },
   name: {
-    maxWidth: 200,
+    maxWidth: 190,
   },
 })

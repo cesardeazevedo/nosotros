@@ -1,4 +1,5 @@
 import { Kind } from '@/constants/kinds'
+import { FALLBACK_RELAYS } from '@/constants/relays'
 import type { PaginationSubject } from '@/core/PaginationSubject'
 import { mergeMap } from 'rxjs'
 import type { NostrContext } from '../context'
@@ -36,7 +37,7 @@ export function subscribeFeedListSetsE(filter$: PaginationSubject, ctx: NostrCon
         { ids: filter.ids },
         {
           ...ctx,
-          relays: ['wss://relay.nostr.band'],
+          relays: FALLBACK_RELAYS,
         },
       )
     }),

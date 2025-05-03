@@ -1,5 +1,5 @@
 import { Kind } from '@/constants/kinds'
-import { RELAY_1 } from '@/constants/testRelays'
+import { RELAY_1, RELAY_OUTBOX_1 } from '@/constants/testRelays'
 import { fakeEvent } from '@/utils/faker'
 import { test } from '@/utils/fixtures'
 import { subscribeSpyTo } from '@hirez_io/observer-spy'
@@ -19,6 +19,7 @@ describe('subscribeFeed', () => {
     })
 
     const relay = createMockRelay(RELAY_1, [note1, note2, note3])
+    const relayOutbox = createMockRelay(RELAY_OUTBOX_1, [])
 
     const ctx = { relays: [RELAY_1] }
     const filter = { kinds: [Kind.Text], authors: ['1'] }
@@ -45,6 +46,7 @@ describe('subscribeFeed', () => {
     await spy2.onComplete()
     await spy3.onComplete()
     await relay.close()
+    await relayOutbox.close()
     expect(spy.getValues().map((x) => x.id)).toStrictEqual(['2', '3'])
     expect(spy2.getValues().map((x) => x.id)).toStrictEqual(['1'])
     expect(spy3.getValues().map((x) => x.id)).toStrictEqual(['1'])

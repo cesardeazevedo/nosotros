@@ -18,7 +18,7 @@ type Props = {
 }
 
 export const ContentLink = (props: Props) => {
-  const { href, underline, shrink = true } = props
+  const { href, underline = true, shrink = true } = props
   const isLongLink = (href?.length || 0) > 36
   const sx = [styles.root, underline && styles.root$underline, shrink && styles.shrink] as SxProps
   const content = (
@@ -55,7 +55,7 @@ const styles = css.create({
     },
   },
   shrink: {
-    display: '-webkit-box',
+    display: '-webkit-inline-box',
     WebkitLineClamp: 3,
     overflow: 'hidden',
     boxOrient: 'vertical',

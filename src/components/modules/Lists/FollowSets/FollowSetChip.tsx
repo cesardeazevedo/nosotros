@@ -7,7 +7,7 @@ import { PopoverBase } from '@/components/ui/Popover/PopoverBase'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { useCurrentPubkey } from '@/hooks/useRootStore'
-import { subscribeUser } from '@/nostr/subscriptions/subscribeUser'
+import { subscribeUsers } from '@/nostr/subscriptions/subscribeUser'
 import type { Event } from '@/stores/events/event'
 import { dialogStore } from '@/stores/ui/dialogs.store'
 import { spacing } from '@/themes/spacing.stylex'
@@ -34,8 +34,7 @@ export const FollowSetChip = observer(function FollowSetChip(props: Props) {
     (input$) => {
       return input$.pipe(
         filter(([, open]) => open),
-        mergeMap(([pubkeys]) => pubkeys),
-        mergeMap((pubkey) => subscribeUser(pubkey, {})),
+        mergeMap(([pubkeys]) => subscribeUsers(pubkeys, {})),
       )
     },
     [pubkeys, open],

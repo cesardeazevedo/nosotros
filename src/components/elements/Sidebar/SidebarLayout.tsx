@@ -51,7 +51,7 @@ export const SidebarLayout = observer(function SidebarLayout(props: Props) {
         </SidebarTransition>
         <html.main
           style={[
-            !isDeck && (!global.sidebarCollapsed ? styles.main : styles.main$sidebar$collapsed),
+            !isDeck && !global.sidebarCollapsed && styles.main,
             isDeck && styles.main$deck,
             isDeck && !global.sidebarCollapsed && styles.main$deck$expanded,
           ]}>
@@ -92,9 +92,6 @@ const styles = css.create({
     overflowY: 'hidden',
     width: 'fit-content',
     height: '100%',
-    marginLeft: 84,
-  },
-  main$sidebar$collapsed: {
     marginLeft: 84,
   },
   main$deck$expanded: {

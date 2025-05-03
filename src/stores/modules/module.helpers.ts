@@ -1,5 +1,6 @@
 import { Kind } from '@/constants/kinds'
 import { RECOMMENDED_PUBKEYS } from '@/constants/recommended'
+import { FALLBACK_RELAYS } from '@/constants/relays'
 import { READ, WRITE } from '@/nostr/types'
 import { Duration } from 'luxon'
 import type { AddressPointer, EventPointer } from 'nostr-tools/nip19'
@@ -107,7 +108,7 @@ export function createNoteModule(id: string) {
     type: 'event',
     filter: { ids: [id] },
     context: {
-      relays: ['wss://relay.nostr.band'],
+      relays: FALLBACK_RELAYS,
     },
   })
 }
@@ -123,7 +124,7 @@ export function createNAddressModule(naddress: AddressPointer) {
     context: {
       permission: WRITE,
       pubkey: naddress.pubkey,
-      relays: [...(naddress.relays || []), 'wss://relay.nostr.band'],
+      relays: [...(naddress.relays || []), ...FALLBACK_RELAYS],
     },
   })
 }
@@ -134,7 +135,7 @@ export function createTagModule(tag: string) {
     feed: {
       scope: 'self',
       context: {
-        relays: ['wss://relay.nostr.band'],
+        relays: FALLBACK_RELAYS,
       },
       filter: {
         kinds: [Kind.Text],
@@ -150,7 +151,7 @@ export function createSearchModule(query: string) {
     type: 'search',
     feed: {
       scope: 'self',
-      context: { batcher: 'raw', relays: ['wss://relay.nostr.band'] },
+      context: { batcher: 'raw', relays: FALLBACK_RELAYS },
       filter: {
         kinds: [Kind.Metadata, Kind.Text],
         search: query,

@@ -5,7 +5,7 @@ import type { NostrEventMetadata } from '@/nostr/types'
 import { spacing } from '@/themes/spacing.stylex'
 import { observer } from 'mobx-react-lite'
 import React from 'react'
-import { css } from 'react-strict-dom'
+import { css, html } from 'react-strict-dom'
 import { LinkNEvent } from '../Links/LinkNEvent'
 import { PostActions } from './PostActions/PostActions'
 import { PostContent } from './PostContent'
@@ -24,9 +24,11 @@ export const PostQuote = observer(function PostQuote(props: Props) {
     <LinkNEvent nevent={note.event.nevent}>
       <NoteProvider value={{ note }}>
         <ContentProvider value={{ blured, dense: true, disableLink: true }}>
-          {header || <PostUserHeader sx={styles.header} dense />}
-          <PostContent initialExpanded />
-          <PostActions sx={styles.actions} />
+          <html.div style={styles.root}>
+            {header || <PostUserHeader sx={styles.header} dense />}
+            <PostContent initialExpanded />
+            <PostActions sx={styles.actions} />
+          </html.div>
         </ContentProvider>
       </NoteProvider>
     </LinkNEvent>
@@ -34,6 +36,9 @@ export const PostQuote = observer(function PostQuote(props: Props) {
 })
 
 const styles = css.create({
+  root: {
+    paddingInline: spacing.padding2,
+  },
   header: {
     paddingBlock: spacing.padding1,
   },

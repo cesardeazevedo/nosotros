@@ -1,7 +1,7 @@
 {
   "name": "nosotros",
   "private": true,
-  "version": "0.2.0-pre.9",
+  "version": "0.2.0-pre.10",
   "type": "module",
   "author": "César Dias <cesardeazevedo@outlook.com>",
   "repository": "https://github.com/cesardeazevedo/nosotros",
@@ -29,6 +29,7 @@
     "@tiptap/core": "^2.11.0",
     "@tiptap/extension-document": "^2.11.0",
     "@tiptap/extension-gapcursor": "^2.11.0",
+    "@tiptap/extension-dropcursor": "^2.11.0",
     "@tiptap/extension-hard-break": "^2.11.0",
     "@tiptap/extension-history": "^2.11.0",
     "@tiptap/extension-paragraph": "^2.11.0",

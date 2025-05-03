@@ -64,6 +64,7 @@ const styles = css.create({
     width: '100%',
   },
   actionable: {
+    textAlign: 'left',
     overflow: 'hidden',
   },
   elevation: {

@@ -1,5 +1,5 @@
 import { Kind } from '@/constants/kinds'
-import { RELAY_1, RELAY_2, RELAY_OUTBOX_1 } from '@/constants/testRelays'
+import { RELAY_1, RELAY_2, RELAY_FALLBACK_1, RELAY_OUTBOX_1 } from '@/constants/testRelays'
 import { WRITE } from '@/nostr/types'
 import { fakeEvent } from '@/utils/faker'
 import { test } from '@/utils/fixtures'
@@ -17,6 +17,7 @@ describe('subscribeQuotes', () => {
 
     const relay1 = createMockRelay(RELAY_1, [note1.eventNote])
     const relay2 = createMockRelay(RELAY_2, [note2.eventNote])
+    const relayFallback = createMockRelay(RELAY_FALLBACK_1, [])
     const relayOutbox = createMockRelay(RELAY_OUTBOX_1, [
       fakeEvent({ kind: Kind.RelayList, pubkey: pubkey1, tags: [['r', RELAY_1, 'write']] }),
       fakeEvent({ kind: Kind.RelayList, pubkey: pubkey2, tags: [['r', RELAY_2, 'write']] }),
@@ -30,6 +31,7 @@ describe('subscribeQuotes', () => {
     await relay1.close()
     await relay2.close()
     await relayOutbox.close()
+    await relayFallback.close()
 
     expect(relay1.received).toStrictEqual([
       ['REQ', '1', { kinds: [1], authors: [pubkey1] }],
@@ -68,6 +70,7 @@ describe('subscribeQuotes', () => {
     ])
     const relay1 = createMockRelay(RELAY_1, [note1.eventNote])
     const relay2 = createMockRelay(RELAY_2, [])
+    const relayFallback = createMockRelay(RELAY_FALLBACK_1, [])
 
     const ctx = { pubkey: pubkey1, permission: WRITE }
     const $ = subscribeNotes({ authors: [pubkey1] }, ctx).pipe(subscribeQuotes(ctx))
@@ -77,6 +80,7 @@ describe('subscribeQuotes', () => {
     await relay1.close()
     await relay2.close()
     await relayOutbox.close()
+    await relayFallback.close()
 
     expect(relay1.received).toStrictEqual([
       ['REQ', '1', { kinds: [1], authors: ['p1'] }],
