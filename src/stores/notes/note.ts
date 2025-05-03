@@ -3,6 +3,7 @@ import type { IMetaFields } from '@/nostr/helpers/parseImeta'
 import { getMimeType } from '@/nostr/helpers/parseImeta'
 import type { Metadata } from '@/nostr/types'
 import { metadataSymbol } from '@/nostr/types'
+import { fallbackEmoji } from '@/utils/utils'
 import { computed, makeAutoObservable } from 'mobx'
 import { computedFn } from 'mobx-utils'
 import type { NostrEvent } from 'nostr-tools'
@@ -101,7 +102,12 @@ export class Note {
   }
 
   get reactions() {
-    return eventStore.getEventsByKindTagValue(Kind.Reaction, 'e', this.id)
+    return eventStore.mapEvents(
+      new Set([
+        ...(eventStore.getIdsByKindTagValue(Kind.Reaction, 'e', this.id) || []),
+        ...(eventStore.getIdsByKindTagValue(Kind.Reaction, 'a', this.event.address) || []),
+      ]),
+    )
   }
 
   get reactionsGrouped() {
@@ -120,11 +126,24 @@ export class Note {
   }
 
   get reposts() {
-    return eventStore.getEventsByKindTagValue(Kind.Repost, 'e', this.id)
+    return eventStore.mapEvents(
+      new Set([
+        ...(eventStore.getIdsByKindTagValue(Kind.Repost, 'e', this.id) || []),
+        ...(eventStore.getIdsByKindTagValue(Kind.Repost, 'a', this.event.address) || []),
+        // quotes
+        ...(eventStore.getIdsByKindTagValue(Kind.Text, 'q', this.id) || []),
+        ...(eventStore.getIdsByKindTagValue(Kind.Text, 'q', this.event.address) || []),
+      ]),
+    )
   }
 
   get zaps() {
-    return eventStore.getEventsByKindTagValue(Kind.ZapReceipt, 'e', this.id)
+    return eventStore.mapEvents(
+      new Set([
+        ...(eventStore.getIdsByKindTagValue(Kind.ZapReceipt, 'e', this.id) || []),
+        ...(eventStore.getIdsByKindTagValue(Kind.ZapReceipt, 'a', this.event.address) || []),
+      ]),
+    )
   }
 
   get zapAmount() {
@@ -227,6 +246,9 @@ export class Note {
               ['P', this.event.pubkey, this.user?.headRelay || ''],
             ],
           )
+          if (this.event.isAddressable) {
+            tags.unshift(['A', this.event.address, this.user?.headRelay || '', this.event.pubkey])
+          }
         }
         tags.push(
           ...[
