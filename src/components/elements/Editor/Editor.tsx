@@ -40,7 +40,7 @@ export const Editor = observer(function Editor(props: Props) {
 
   useEffect(() => {
     store.open.toggle(initialOpen)
-    if (initialOpen) {
+    if (initialOpen && !('ontouchstart' in window)) {
       store.focus()
     }
   }, [])
