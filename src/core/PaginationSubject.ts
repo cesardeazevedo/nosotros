@@ -1,7 +1,6 @@
 import type { Observable, ThrottleConfig } from 'rxjs'
 import {
   BehaviorSubject,
-  EMPTY,
   ignoreElements,
   interval,
   map,

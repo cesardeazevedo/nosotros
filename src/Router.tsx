@@ -1,5 +1,4 @@
 import { createRootRouteWithContext, createRoute, createRouter, redirect } from '@tanstack/react-router'
-import { useEffect } from 'react'
 import { z } from 'zod'
 import { HeaderBase } from './components/elements/Layouts/HeaderBase'
 import { RootLayout } from './components/elements/Layouts/RootLayout'
