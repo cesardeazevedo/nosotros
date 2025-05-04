@@ -49,6 +49,7 @@ export const SearchContent = observer(function SearchContent(props: Props) {
     onSelect,
     initialSelected = 0,
     suggestQuery = false,
+    suggestRelays = false,
     ...rest
   } = props
 
@@ -97,7 +98,7 @@ export const SearchContent = observer(function SearchContent(props: Props) {
     },
   }))
 
-  const items = useSearchSuggestions({ query, limit, suggestQuery })
+  const items = useSearchSuggestions({ query, limit, suggestQuery, suggestRelays })
 
   return (
     <ContentProvider value={{ disableLink: true, disablePopover: true }}>

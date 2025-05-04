@@ -25,6 +25,7 @@ export const SearchDialog = observer(() => {
     <DialogSheet surface='surfaceContainerLowest' open={open} onClose={handleClose} maxWidth='sm' sx={styles.dialog}>
       <Search
         suggestQuery
+        suggestRelays
         sx={styles.maxHeight}
         placeholder='Search on nostr'
         onSelect={(item) => {
