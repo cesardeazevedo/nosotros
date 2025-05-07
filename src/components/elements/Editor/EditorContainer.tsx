@@ -36,7 +36,7 @@ const styles = css.create({
     width: '100%',
     padding: spacing.padding1,
     paddingLeft: spacing.padding2,
-    paddingBlock: spacing.padding2,
+    paddingBlock: 20,
   },
   root$open: {
     cursor: 'inherit',

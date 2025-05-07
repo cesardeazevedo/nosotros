@@ -1,6 +1,6 @@
 import { Kind } from '@/constants/kinds'
 import { RECOMMENDED_PUBKEYS } from '@/constants/recommended'
-import { FALLBACK_RELAYS } from '@/constants/relays'
+import { FALLBACK_RELAYS, SEARCH_RELAYS } from '@/constants/relays'
 import { READ, WRITE } from '@/nostr/types'
 import { Duration } from 'luxon'
 import type { AddressPointer, EventPointer } from 'nostr-tools/nip19'
@@ -151,7 +151,7 @@ export function createSearchModule(query: string) {
     type: 'search',
     feed: {
       scope: 'self',
-      context: { batcher: 'raw', relays: FALLBACK_RELAYS },
+      context: { batcher: 'raw', relays: SEARCH_RELAYS },
       filter: {
         kinds: [Kind.Metadata, Kind.Text],
         search: query,

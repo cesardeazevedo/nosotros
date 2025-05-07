@@ -39,8 +39,8 @@ export const FeedHeaderBase = (props: Props) => {
   }
   return (
     <>
-      <HeaderBase {...rest}>
-        <Stack gap={1} sx={[visibleOnHoverStyle.root]}>
+      <HeaderBase {...rest} sx={[rest.sx, visibleOnHoverStyle.root]}>
+        <Stack gap={1}>
           {(isDeck || onDelete) && (
             <IconButton sx={visibleOnHoverStyle.item} onClick={onDelete || handleDelete}>
               <IconTrash size={22} strokeWidth='1.5' color={colors.red8} />
