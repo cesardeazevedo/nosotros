@@ -149,6 +149,7 @@ export const signinStore = makeAutoObservable({
         name: 'nip46',
         params: {
           name: 'nip46',
+          remotePubkey: pubkey,
           method: {
             method: 'nostrconnect',
             relay,
@@ -181,12 +182,14 @@ export const signinStore = makeAutoObservable({
     try {
       const [, res] = await signer.signer.connect()
       const [, { result: pubkey }] = await signer.signer.getPublicKey()
+      console.log('PUBKEY???', pubkey, signer)
       auth.login({
         pubkey,
         signer: {
           ...signer,
           params: {
             ...signer.params,
+            remotePubkey: pubkey,
             secret: signer.signer.secret,
             clientSecret: bytesToHex(signer.signer.clientSigner.secret),
           },

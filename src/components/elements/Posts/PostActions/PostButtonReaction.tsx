@@ -93,7 +93,7 @@ export const ButtonReaction = observer(function ButtonReaction() {
                       strokeWidth={iconProps.strokeWidth}
                     />
                   ) : (
-                    <html.span style={styles.myCustomReaction}>{myReaction}</html.span>
+                    <html.span style={styles.myCustomReaction}>{myReaction && fallbackEmoji(myReaction)}</html.span>
                   )}
                 </motion.div>
               }

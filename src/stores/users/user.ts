@@ -58,12 +58,16 @@ export class User {
     return eventStore.mapEvents(eventStore.getIdsByKindPubkeyTag(Kind.Reaction, this.pubkey, 'e'))
   }
 
+  get zaps() {
+    return eventStore.getEventsByKindTagValue(Kind.ZapReceipt, 'P', this.pubkey)
+  }
+
   reactionByEventId(id: string) {
     return eventStore.getEventsByKindPubkeyTagValue(Kind.Reaction, this.pubkey, 'e', id)?.[0]
   }
 
   zapByEventId(id: string) {
-    return eventStore.getEventsByKindPubkeyTagValue(Kind.ZapReceipt, this.pubkey, 'e', id)?.[0]
+    return this.zaps.find((x) => x.getTag('e') === id)
   }
 
   repostedByEventId(id: string) {
