@@ -751,7 +751,6 @@ export const routeTree = rootRoute.addChildren([
 export const router = createRouter({
   routeTree,
   defaultStaleTime: 300000,
-  defaultGcTime: 300000,
   defaultPreload: false,
   defaultPendingMinMs: 0,
   scrollRestoration: false,

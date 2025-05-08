@@ -23,7 +23,8 @@ export const NProfileModuleModel = BaseModuleModel.named('NProfileModuleModel')
       feeds: {
         notes: FeedStoreModel.create({
           ...props,
-          filter: { kinds: [Kind.Text, Kind.Repost], authors: [pubkey], limit: 50 },
+          range: Duration.fromObject({ days: 7 }).as('minutes'),
+          filter: { kinds: [Kind.Text, Kind.Repost], authors: [pubkey] },
           options: {
             includeRoot: true,
             includeParents: false,
@@ -32,7 +33,8 @@ export const NProfileModuleModel = BaseModuleModel.named('NProfileModuleModel')
         }),
         replies: FeedStoreModel.create({
           ...props,
-          filter: { kinds: [Kind.Text], authors: [pubkey], limit: 30 },
+          range: Duration.fromObject({ days: 7 }).as('minutes'),
+          filter: { kinds: [Kind.Text], authors: [pubkey] },
           options: {
             includeRoot: false,
             includeParents: false,

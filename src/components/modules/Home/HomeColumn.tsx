@@ -14,6 +14,7 @@ export const HomeColumn = observer(function HomeColumn(props: Props) {
   return (
     <>
       <DeckColumnFeed
+        renderDivider={false}
         wrapper={(children) => (
           <>
             <Editor initialOpen={false} store={module.feed.editor} />
