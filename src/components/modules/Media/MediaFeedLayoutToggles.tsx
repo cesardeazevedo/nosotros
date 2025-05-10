@@ -5,7 +5,7 @@ import { IconLayoutGrid, IconLayoutRows } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
 
 type Props = {
-  module: MediaModule
+  module?: MediaModule
 }
 
 export const MediaFeedLayoutButtons = observer(function MediaFeedLayoutButtons(props: Props) {
@@ -13,15 +13,15 @@ export const MediaFeedLayoutButtons = observer(function MediaFeedLayoutButtons(p
   return (
     <Stack align='flex-end' gap={0.5}>
       <Chip
-        selected={module.layout === 'row'}
-        onClick={() => module.setLayout('row')}
+        selected={module?.layout === 'row'}
+        onClick={() => module?.setLayout('row')}
         icon={<IconLayoutRows size={18} strokeWidth='1.5' />}
         label='Row'
       />
       <Chip
         icon={<IconLayoutGrid size={18} strokeWidth='1.5' />}
-        selected={module.layout === 'grid'}
-        onClick={() => module.setLayout('grid')}
+        selected={module?.layout === 'grid'}
+        onClick={() => module?.setLayout('grid')}
         label='Grid'
       />
     </Stack>

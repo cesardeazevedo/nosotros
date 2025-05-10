@@ -27,13 +27,12 @@ export const Card = forwardRef<HTMLButtonElement, Props>(function Card(props, re
   const actionable = !disabled && !!onClick
 
   return (
-    <Paper
-      surface={rest.surface || (variant === 'filled' ? 'surfaceContainer' : 'surfaceContainerLow')}
-      outlined={variant === 'outlined'}
-      {...rest}
-      sx={[styles.root, sx]}>
+    <Paper outlined={variant === 'outlined'} {...rest} sx={[styles.root, !actionable && sx]}>
       {actionable && (
-        <ButtonBase sx={[styles.actionable, variants[variant]]} onClick={actionable ? onClick : undefined} ref={ref}>
+        <ButtonBase
+          sx={[styles.actionable, variants[variant], sx]}
+          onClick={actionable ? onClick : undefined}
+          ref={ref}>
           {elevation && <Elevation sx={styles.elevation} />}
           {children}
         </ButtonBase>
@@ -58,11 +57,15 @@ const variants = css.create({
 
 const styles = css.create({
   root: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
     borderRadius: cardTokens.containerShape,
+    width: '100%',
   },
   actionable: {
-    //width: '100%',
-    textAlign: 'initial',
+    textAlign: 'left',
+    overflow: 'hidden',
   },
   elevation: {
     [elevationTokens.boxShadow]: cardTokens.containerElevation,

@@ -1,20 +1,16 @@
-import type { PaginationLimitSubject } from '@/core/PaginationLimitSubject'
-import type { PaginationSubject } from '@/core/PaginationRangeSubject'
-import { mergeMap } from 'rxjs'
+import type { PaginationSubject } from '@/core/PaginationSubject'
+import { from, mergeMap } from 'rxjs'
 import type { NostrContext } from '../context'
-import { metadataSymbol } from '../types'
 import type { FeedOptions } from './subscribeFeed'
 import { subscribeFeed } from './subscribeFeed'
 import { subscribeFollows } from './subscribeFollows'
 
-type Pagination = PaginationSubject | PaginationLimitSubject
-
-export function subscribeFeedFollowing(pagination$: Pagination, ctx: NostrContext, options?: FeedOptions) {
-  const currentAuthor = pagination$.authors[0]
-  return subscribeFollows(currentAuthor, { ...ctx, subOptions: { prune: false } }).pipe(
+export function subscribeFeedFollowing(filter$: PaginationSubject, ctx: NostrContext, options?: FeedOptions) {
+  return from(filter$.authors).pipe(
+    mergeMap((author) => subscribeFollows(author, ctx)),
     mergeMap((event) => {
-      const authors = [currentAuthor, ...(event[metadataSymbol].tags.get('p') || [])]
-      return pagination$.setFilter({ authors })
+      const pTags = event.tags.filter((x) => x[0] === 'p').map((x) => x[1]) || []
+      return filter$.setFilter({ authors: [event.pubkey, ...pTags] })
     }),
     mergeMap((filter) => subscribeFeed(filter, ctx, options)),
   )

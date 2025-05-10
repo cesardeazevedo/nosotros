@@ -12,21 +12,22 @@ export type Props = {
   pubkey?: string
   sx?: SxProps
   size?: AvatarProps['size']
+  fallback?: boolean
 }
 
 export const UserAvatar = observer(function UserAvatar(props: Props) {
-  const { sx, pubkey, size = 'md' } = props
+  const { sx, pubkey, size = 'md', fallback = true } = props
   const globalSettings = useGlobalSettings()
   const user = userStore.get(pubkey)
-  const avatarProps = user?.meta?.picture
-    ? { src: globalSettings.getImgProxyUrl('user_avatar', user.meta.picture) }
+  const avatarProps = user?.metadata?.picture
+    ? { src: globalSettings.getImgProxyUrl('user_avatar', user.metadata.picture) }
     : { src: '/user.jpg' }
   const avatar = (
     <Avatar {...avatarProps} size={size} sx={[styles.avatar, sx]}>
-      {user?.initials || pubkey || ''}
+      {fallback ? <Avatar src='/user.jpg' size={size} /> : pubkey?.[0]}
     </Avatar>
   )
-  if (user?.meta?.picture && pubkey) {
+  if (user?.metadata?.picture && pubkey) {
     return (
       <UserPopover pubkey={pubkey}>
         <LinkProfile pubkey={pubkey}>{avatar}</LinkProfile>

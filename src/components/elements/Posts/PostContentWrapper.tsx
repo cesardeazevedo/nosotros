@@ -62,7 +62,7 @@ const styles = css.create({
     bottom: 0,
     left: 0,
     right: 0,
-    zIndex: 100,
+    zIndex: 30,
     textAlign: 'center',
     paddingBottom: 40,
     transition: 'opacity 0.14s ease',
@@ -70,7 +70,7 @@ const styles = css.create({
   shadow: {
     position: 'absolute',
     bottom: 0,
-    zIndex: 1000,
+    zIndex: 40,
     width: '100%',
     height: 100,
     opacity: 0.2,

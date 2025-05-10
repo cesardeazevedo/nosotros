@@ -6,16 +6,23 @@ import { metadataSymbol } from '../types'
 import { subscribeArticles } from './subscribeArticles'
 import { subscribeMedia } from './subscribeMedia'
 import { subscribeNotesWithParent, subscribeNotesWithRelated } from './subscribeNotes'
+import { subscribeRelayDiscorvery } from './subscribeRelayDiscovery'
 import { subscribeReposts } from './subscribeReposts'
-import { withRelatedNotes } from './withRelatedNotes'
 import { subscribeSearch } from './subscribeSearch'
+import { withRelatedNotes } from './withRelatedNotes'
 
 export type FeedOptions = {
+  includeRoot?: boolean
   includeParents?: boolean
   includeReplies?: boolean
 }
 
-export function subscribeFeed(filters: NostrFilter, ctx: NostrContext, options?: FeedOptions) {
+export function subscribeFeed(filters: NostrFilter, baseCtx: NostrContext, options?: FeedOptions) {
+  const ctx = {
+    ...baseCtx,
+    outbox: true,
+    queryDB: false,
+  } as NostrContext
   return from(filters.kinds || []).pipe(
     mergeMap((kind) => {
       switch (kind) {
@@ -28,23 +35,26 @@ export function subscribeFeed(filters: NostrFilter, ctx: NostrContext, options?:
         }
         case Kind.Text: {
           const sub = options?.includeParents === false ? subscribeNotesWithRelated : subscribeNotesWithParent
-          return sub({ ...filters, kinds: [Kind.Text] }, ctx).pipe(
+          return sub(filters, ctx).pipe(
             filter((note) => {
               const isRoot = note[metadataSymbol].isRoot
+              if (options?.includeRoot === false && isRoot) return false
               if (options?.includeReplies === false && !isRoot) return false
-              if (options?.includeReplies === true && !options?.includeParents && isRoot) return false
               return true
             }),
           )
         }
         case Kind.Article: {
-          return options?.includeReplies !== false ? subscribeArticles(filters, ctx).pipe(withRelatedNotes(ctx)) : EMPTY
+          return subscribeArticles(filters, ctx).pipe(withRelatedNotes(ctx))
         }
         case Kind.Media: {
-          return subscribeMedia({ ...filters, kinds: [Kind.Media] }, ctx)
+          return subscribeMedia(filters, ctx)
         }
         case Kind.Repost: {
           return subscribeReposts(filters, ctx)
+        }
+        case Kind.RelayDiscovery: {
+          return subscribeRelayDiscorvery(filters, ctx)
         }
         default: {
           return EMPTY

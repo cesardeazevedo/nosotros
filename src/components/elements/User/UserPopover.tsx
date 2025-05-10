@@ -1,3 +1,4 @@
+import { FollowButton } from '@/components/modules/Follows/FollowButton'
 import { ContentProvider, useContentContext } from '@/components/providers/ContentProvider'
 import { Paper } from '@/components/ui/Paper/Paper'
 import { Stack } from '@/components/ui/Stack/Stack'
@@ -9,9 +10,9 @@ import React from 'react'
 import { css, html } from 'react-strict-dom'
 import { UserAvatar } from './UserAvatar'
 import { UserContentAbout } from './UserContentAbout'
-import { UserFollowButton } from './UserFollowButton'
 import { UserName } from './UserName'
 import { UserNIP05 } from './UserNIP05'
+import { UserRelays } from './UserRelays'
 
 type Props = {
   pubkey: string
@@ -37,14 +38,17 @@ export const UserPopover = function UserPopover(props: Props) {
         <Observer>
           {() => (
             <ContentProvider value={{ disablePopover: true }}>
-              <Paper elevation={2} shape='lg' surface='surfaceContainerLow' sx={styles.root}>
-                <Stack justify='space-between'>
+              <Paper elevation={4} shape='lg' surface='surfaceContainerLow' sx={styles.root}>
+                <Stack justify='space-between' sx={styles.header}>
                   <UserAvatar size='lg' pubkey={pubkey} />
-                  <UserFollowButton pubkey={pubkey} />
+                  <Stack gap={0.5}>
+                    <UserRelays pubkey={pubkey} />
+                    <FollowButton pubkey={pubkey} />
+                  </Stack>
                 </Stack>
                 <br />
                 <Stack horizontal={false} gap={2}>
-                  <Stack horizontal={false}>
+                  <Stack horizontal={false} sx={styles.content}>
                     <UserName pubkey={pubkey} />
                     <UserNIP05 pubkey={pubkey} />
                   </Stack>
@@ -64,13 +68,20 @@ export const UserPopover = function UserPopover(props: Props) {
 
 const styles = css.create({
   root: {
-    width: 360,
-    maxHeight: 290,
-    padding: spacing.padding2,
+    width: 300,
+    maxHeight: 450,
     pointerEvents: 'auto',
   },
+  header: {
+    padding: spacing.padding1,
+  },
+  content: {
+    paddingInline: spacing.padding2,
+  },
   scroller: {
-    maxHeight: 135,
+    maxHeight: 300,
     overflowY: 'auto',
+    paddingBottom: spacing.padding1,
+    paddingInline: spacing.padding2,
   },
 })

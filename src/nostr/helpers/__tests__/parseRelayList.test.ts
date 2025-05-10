@@ -24,8 +24,6 @@ test('parseRelayList()', () => {
   })
   const result = parseRelayList(event)
   expect(result).toStrictEqual({
-    id: '1',
-    kind: 10002,
     relayList: [
       { pubkey: '1', relay: 'wss://relay1.com', permission: READ | WRITE },
       { pubkey: '1', relay: 'wss://relay2.com', permission: READ | WRITE },
@@ -36,7 +34,7 @@ test('parseRelayList()', () => {
       { pubkey: '1', relay: 'wss://relay7.com', permission: WRITE },
     ],
   })
-  expect(parseRelayListToTags(result.relayList)).toStrictEqual([
+  expect(parseRelayListToTags(result.relayList || [])).toStrictEqual([
     ['r', 'wss://relay1.com'],
     ['r', 'wss://relay2.com'],
     ['r', 'wss://relay3.com'],
@@ -62,7 +60,7 @@ test('addPermission() revokePermission()', () => {
     ],
   })
 
-  const result = parseRelayList(event).relayList
+  const result = parseRelayList(event).relayList || []
   // add write permission to relay3
   const result2 = addPermission(result, { relay: 'wss://relay3.com', permission: WRITE, pubkey: '1' })
   // revoke write permission from relay5

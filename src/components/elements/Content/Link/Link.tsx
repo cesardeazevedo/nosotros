@@ -1,12 +1,14 @@
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
+import type { SxProps } from '@/components/ui/types'
+import { formatRelayUrl } from '@/core/helpers/formatRelayUrl'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { typeFace } from '@/themes/typeFace.stylex'
 import React from 'react'
 import { css, html } from 'react-strict-dom'
-import type { Styles } from 'react-strict-dom/dist/types/styles'
-// import { RelayPopoverLink } from '../../Relays/RelayPopoverLink'
+import { LinkRelayFeed } from '../../Links/LinkRelayFeed'
+import { RelayPopoverLink } from '../../Relays/RelayPopoverLink'
 
 type Props = {
   href: string
@@ -16,25 +18,24 @@ type Props = {
 }
 
 export const ContentLink = (props: Props) => {
-  const { href, underline, shrink = true } = props
+  const { href, underline = true, shrink = true } = props
   const isLongLink = (href?.length || 0) > 36
-  const sx = [styles.root, underline && styles.root$underline, shrink && styles.shrink] as Styles
+  const sx = [styles.root, underline && styles.root$underline, shrink && styles.shrink] as SxProps
   const content = (
     <html.a href={href} target='_blank' rel='noopener noreferrer' style={sx}>
       {props.children}
     </html.a>
   )
-  // TODO
-  // const isRelayLink = href?.startsWith('wss://')
-  // if (isRelayLink) {
-  //   return (
-  //     <RelayPopoverLink url={href}>
-  //       <html.a href={href} target='_blank' rel='noopener noreferrer' style={sx}>
-  //         {props.children}
-  //       </html.a>
-  //     </RelayPopoverLink>
-  //   )
-  // }
+  const isRelayLink = href?.startsWith('wss://')
+  if (isRelayLink) {
+    return (
+      <RelayPopoverLink url={href}>
+        <LinkRelayFeed url={formatRelayUrl(href)} sx={sx}>
+          {props.children}
+        </LinkRelayFeed>
+      </RelayPopoverLink>
+    )
+  }
   if (isLongLink && href) {
     return <Tooltip text={href}>{content}</Tooltip>
   }
@@ -54,10 +55,11 @@ const styles = css.create({
     },
   },
   shrink: {
-    whiteSpace: 'nowrap',
+    display: '-webkit-inline-box',
+    WebkitLineClamp: 3,
     overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    maxWidth: 300,
+    boxOrient: 'vertical',
+    WebkitBoxOrient: 'vertical',
   },
   background: {
     paddingInline: spacing['padding1'],

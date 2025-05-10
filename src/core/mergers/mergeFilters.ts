@@ -11,7 +11,7 @@ export function mergeFilters(filters: NostrFilter[]): NostrFilter[] {
   const groups: Record<string, NostrFilter> = {}
   for (const filter of filters) {
     const mainKey = Object.keys(pickBy(filter, FILTER_ARRAY_FIELDS))
-    const paginationKeys = JSON.stringify(pickBy(filter, ['until', 'limit', 'since', 'search']))
+    const paginationKeys = JSON.stringify(pickBy(filter, ['until', 'limit', 'since', 'search', '#d']))
     const key =
       mainKey.toString() +
       paginationKeys +

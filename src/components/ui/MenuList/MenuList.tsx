@@ -19,6 +19,6 @@ export const MenuList = (props: Props) => {
 
 const styles = css.create({
   root: {
-    paddingBlock: spacing.padding1,
+    padding: spacing.padding1,
   },
 })

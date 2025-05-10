@@ -36,7 +36,7 @@ export const NavigationHeader = observer(function NavigationHeader() {
   }
   const pubkey = getPubkey(context?.decoded)
   return (
-    <Stack justify='flex-start' gap={2} sx={styles.root}>
+    <Stack justify='flex-start' gap={1} sx={styles.root}>
       <IconButton onClick={goBack} icon={<IconChevronLeft color='currentColor' />} />
       {pubkey ? (
         <Stack horizontal={false}>

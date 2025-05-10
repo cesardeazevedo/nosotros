@@ -7,7 +7,7 @@ import type { StringUnitLength } from 'luxon'
 import type { NEvent } from 'nostr-tools/nip19'
 import { useContext } from 'react'
 import { css } from 'react-strict-dom'
-import { DeckContext } from '../Deck/DeckContext'
+import { DeckContext } from '../../modules/Deck/DeckContext'
 import { LinkNEvent } from '../Links/LinkNEvent'
 
 type Props = {
@@ -21,7 +21,7 @@ export const PostHeaderDate = function PostHeaderDate(props: Props) {
   const { date, nevent, sx, dateStyle } = props
   const [shortDate, fullDate] = useRelativeDate(date, dateStyle)
   const column = useContext(DeckContext)
-  const replaceOnDeck = column.module?.type === 'nevent' || column.module?.type === 'naddress'
+  const replaceOnDeck = column.module?.type === 'event'
   const content = (
     <Tooltip text={fullDate}>
       <Text size='sm' sx={[styles.root, sx]}>

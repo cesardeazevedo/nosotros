@@ -6,7 +6,7 @@ import type { IPopoverBaseProps } from '../Popover/PopoverBase.types'
 import { PopoverHoverRender } from '../Popover/PopoverHoverRender'
 import { tooltipTokens } from './Tooltip.stylex'
 
-export type Props = Omit<IPopoverBaseProps, 'children' | 'contentRenderer'> & {
+type Props = Omit<IPopoverBaseProps, 'children' | 'contentRenderer'> & {
   text: React.ReactNode
   enterDelay?: number
   keepMounted?: boolean

@@ -9,7 +9,7 @@ type NIP05Response = {
   relays?: Record<string, string[]>
 }
 
-export class Nip05 {
+class Nip05 {
   blacklist: Map<string, boolean>
   queueNIP05: Subject<string>
 
@@ -45,7 +45,7 @@ export class Nip05 {
               pubkey,
               nip05: handle + '@' + url,
               relays: response.relays?.[pubkey] || [],
-              timestamp: Date.now() + 86400 * 1000,
+              timestamp: Date.now(),
             }),
           )
         }),
@@ -63,7 +63,7 @@ export class Nip05 {
           nip05store.add(data)
         }
       }),
-      filter((res) => Date.now() > (res?.timestamp || 0)),
+      filter((res) => Date.now() > (res?.timestamp || 0) + 86400 * 1000),
       map(() => nip05),
     )
   }
@@ -73,6 +73,7 @@ export class Nip05 {
       selector: (res) => res.json(),
       mode: 'cors',
       credentials: 'omit',
+      priority: 'low',
     })
   }
 

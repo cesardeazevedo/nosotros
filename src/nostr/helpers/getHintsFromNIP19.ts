@@ -9,9 +9,11 @@ export function getHintsFromNIP19(
 ) {
   const hints: Required<RelayHints> = { authors: {}, idHints: {}, ids: {} }
   for (const nevent of nevents) {
-    const { id, relays } = nevent
+    const { id, author, relays } = nevent
     if (relays?.length !== 0) {
       hints.ids[id] = dedupe(hints.ids[id], relays)
+    } else if (author) {
+      hints.idHints[id] = dedupe(hints.idHints[id], [author])
     }
   }
   for (const naddress of naddresses) {

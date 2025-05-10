@@ -30,7 +30,6 @@ export const Skeleton = (props: Props) => {
     children,
     loaded,
     variant = 'rectangular',
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     animation: animationProp = 'pulse',
     length: lengthProp,
     hasError,
@@ -57,7 +56,7 @@ export const Skeleton = (props: Props) => {
         styles.root,
         hasError && styles.root$error,
         styles[`root$${variant}`],
-        //!!animation && styles[`animation$${animation}`],
+        !!animationProp && styles[`animation$${animationProp}`],
         sx,
       ]}
       {...other}>

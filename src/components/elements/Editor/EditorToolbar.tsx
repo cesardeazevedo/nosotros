@@ -1,3 +1,4 @@
+import { useContentContext } from '@/components/providers/ContentProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { EditorStore } from '@/stores/editor/editor.store'
 import { observer } from 'mobx-react-lite'
@@ -5,10 +6,9 @@ import type { ReactNode } from 'react'
 import { css } from 'react-strict-dom'
 import { EditorButtonAddMedia } from './Toolbar/EditorButtonAddMedia'
 import { EditorButtonBroadcast } from './Toolbar/EditorButtonBroadcast'
-import { EditorButtonMentions } from './Toolbar/EditorButtonMentions'
+import { EditorButtonReactions } from './Toolbar/EditorButtonReactions'
 import { EditorButtonSettings } from './Toolbar/EditorButtonSettings'
 import { EditorButtonZapSplits } from './Toolbar/EditorButtonZapSplit'
-import { useContentContext } from '@/components/providers/ContentProvider'
 
 type Props = {
   children?: ReactNode
@@ -22,10 +22,10 @@ export const EditorToolbar = observer(function EditorToolbar(props: Props) {
 
   return (
     <Stack horizontal justify='space-between' sx={[styles.root, dense && styles.root$dense]}>
-      <Stack gap={0.5}>
+      <Stack>
         {renderAddMedia && <EditorButtonAddMedia store={store} />}
         <EditorButtonBroadcast store={store} />
-        <EditorButtonMentions store={store} />
+        <EditorButtonReactions store={store} />
         <EditorButtonZapSplits store={store} />
         {/* <EditorButtonPow dense={dense} store={store} /> */}
         <EditorButtonSettings store={store} />

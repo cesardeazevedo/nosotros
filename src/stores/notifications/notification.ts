@@ -1,45 +1,38 @@
+import { Kind } from '@/constants/kinds'
 import { isEventTag } from '@/nostr/helpers/parseTags'
-import {
-  metadataSymbol,
-  type NostrEventMetadata,
-  type NostrEventNote,
-  type NostrEventRepost,
-  type NostrEventZapReceipt,
-} from '@/nostr/types'
+import { metadataSymbol, type NostrEventMetadata } from '@/nostr/types'
 import { makeAutoObservable } from 'mobx'
 import { userStore } from '../users/users.store'
 
-export type NotificationItem =
-  | {
-      type: 'reply' | 'mention'
-      event: NostrEventNote
-    }
-  | {
-      type: 'reaction'
-      event: NostrEventMetadata
-    }
-  | {
-      type: 'zap'
-      event: NostrEventZapReceipt
-    }
-  | {
-      type: 'repost'
-      event: NostrEventRepost
-    }
+export type NotificationItem = {
+  type: 'reaction' | 'reply' | 'mention' | 'zap' | 'repost'
+  event: NostrEventMetadata
+}
 
 export class Notification {
-  constructor(public item: NotificationItem) {
+  constructor(public event: NostrEventMetadata) {
     makeAutoObservable(this, {
-      item: false,
+      event: false,
     })
   }
 
   get type() {
-    return this.item.type
-  }
-
-  get event() {
-    return this.item.event
+    switch (this.event.kind) {
+      case Kind.Article:
+      case Kind.Comment:
+      case Kind.Text: {
+        return this.event[metadataSymbol]?.isRoot ? 'mention' : 'reply'
+      }
+      case Kind.Reaction: {
+        return 'reaction'
+      }
+      case Kind.Repost: {
+        return 'repost'
+      }
+      case Kind.ZapReceipt: {
+        return 'zap'
+      }
+    }
   }
 
   get id() {
@@ -70,9 +63,8 @@ export class Notification {
   }
 
   get zapAmount() {
-    const item = this.item
-    if (item.type === 'zap') {
-      return item.event[metadataSymbol].bolt11.amount?.value || '0'
+    if (this.type === 'zap') {
+      return this.event[metadataSymbol].bolt11?.amount?.value || '0'
     }
     return '0'
   }

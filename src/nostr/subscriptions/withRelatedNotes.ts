@@ -1,16 +1,17 @@
+import type { Observable } from 'rxjs'
 import { connect, ignoreElements, merge } from 'rxjs'
 import type { NostrContext } from '../context'
+import type { NostrEventMetadata } from '../types'
 import { subscribeAuthorsFromNote } from './subscribeNoteAuthors'
 import type { QuoteOptions } from './subscribeQuotes'
 import { subscribeQuotes } from './subscribeQuotes'
-import type { Note$ } from './subscribeThreads'
 
 type RelatedOptions = {
   quotes?: QuoteOptions
 }
 
 export function withRelatedNotes(ctx: NostrContext, options?: RelatedOptions) {
-  return connect((event$: Note$) => {
+  return connect((event$: Observable<NostrEventMetadata>) => {
     return merge(
       event$,
       event$.pipe(subscribeAuthorsFromNote(ctx), ignoreElements()),

@@ -1,5 +1,3 @@
-import { DEFAULT_RELAYS } from '@/constants/relays'
-import { defaultNostrSettings } from '@/nostr/settings'
 import type { RootStoreSnapshotIn } from '../root.store'
 
 export const initialState: RootStoreSnapshotIn = {
@@ -9,15 +7,19 @@ export const initialState: RootStoreSnapshotIn = {
     decks: {
       root: {
         id: 'root',
+        name: 'My Deck',
+        icon: '🤙',
         columns: [],
         modules: {},
       },
     },
   },
+  recents: {},
   globalSettings: {
     lang: 'en',
     theme: 'auto',
     clientTag: true,
+    sidebarCollapsed: false,
     scroll: {
       reposts: true,
       reactions: true,
@@ -25,12 +27,8 @@ export const initialState: RootStoreSnapshotIn = {
       replies: true,
     },
   },
-  nostrSettings: {
-    ...defaultNostrSettings,
+  globalContext: {
+    nip05: true,
+    maxRelaysPerUser: 2,
   },
-  defaultContext: {
-    relays: DEFAULT_RELAYS,
-  },
-  tempModules: {},
-  persistedModules: {},
 }

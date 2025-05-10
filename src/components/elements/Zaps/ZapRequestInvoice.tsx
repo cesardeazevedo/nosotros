@@ -14,15 +14,14 @@ import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconChevronLeft, IconCircleCheck, IconWallet } from '@tabler/icons-react'
 import { useNavigate } from '@tanstack/react-router'
 import { AnimatePresence, motion, MotionConfig } from 'framer-motion'
-import { decode } from 'light-bolt11-decoder'
 import { DateTime } from 'luxon'
 import type { EventPointer } from 'nostr-tools/nip19'
 import { useObservableState } from 'observable-hooks'
 import { QRCodeCanvas } from 'qrcode.react'
 import { useMemo, useRef } from 'react'
 import { css, html } from 'react-strict-dom'
-import { first, map, of } from 'rxjs'
-import { CopyButton } from '../Buttons/CopyButtonNormal'
+import { first, map } from 'rxjs'
+import { CopyButton } from '../Buttons/CopyButton'
 import type { CopyButtonRef } from '../Buttons/CopyIconButton'
 
 type Props = {
@@ -45,7 +44,7 @@ export const ZapRequestInvoice = (props: Props) => {
   const goBack = useGoBack()
   const navigate = useNavigate()
 
-  const bolt11 = useMemo(() => parseBolt11(decode(invoice)), [invoice])
+  const bolt11 = useMemo(() => parseBolt11(invoice), [invoice])
 
   const amount = bolt11.amount?.value || '0'
   const timestamp = bolt11.timestamp?.value || 0
@@ -63,8 +62,7 @@ export const ZapRequestInvoice = (props: Props) => {
   // }, [])
 
   const [paid] = useObservableState<boolean>(() => {
-    const subOptions = event.relays ? { relays: of(event.relays) } : undefined
-    return waitForZapReceipt(event.id, invoice, { ...context.context, subOptions }).pipe(
+    return waitForZapReceipt(event.id, invoice, { ...context, relays: event.relays }).pipe(
       first(),
       map(() => true),
     )

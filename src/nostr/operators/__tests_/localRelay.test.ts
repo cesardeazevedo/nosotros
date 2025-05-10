@@ -6,8 +6,8 @@ import { fakeEvent } from '@/utils/faker'
 import { test } from '@/utils/fixtures'
 import { subscribeSpyTo } from '@hirez_io/observer-spy'
 import { from } from 'rxjs'
+import { queryLocalRelay } from '../../db/queryLocalRelay'
 import { insertLocalRelay } from '../insertLocalRelay'
-import { queryLocalRelay } from '../queryLocalRelay'
 
 describe('localRelay', () => {
   test('query()', async ({ createMockRelay }) => {

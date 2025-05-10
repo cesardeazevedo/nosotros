@@ -48,7 +48,6 @@ const styles = css.create({
   },
   content: {
     position: 'relative',
-    paddingInline: spacing.padding2,
     transition: 'background',
     transitionTimingFunction: 'ease',
     transitionDuration: duration.short1,
@@ -63,6 +62,7 @@ const styles = css.create({
     minWidth: 340,
     height: 80,
     borderRadius: shape.lg,
+    zIndex: 50,
   },
   skeleton$dense: {
     paddingInline: 0,

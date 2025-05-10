@@ -247,4 +247,21 @@ describe('parseNote', () => {
       },
     } as RelayHints)
   })
+
+  test('assert nevent author as idHint', () => {
+    const event1 = fakeSignature(fakeEvent())
+    const nevent1 = nip19.neventEncode({ id: event1.id, author: event1.pubkey, relays: [] })
+    const note = parseNote(
+      fakeEvent({
+        id: '1',
+        content: `hello nostr:${nevent1}`,
+        tags: [],
+      }),
+    )
+    expect(note.relayHints).toStrictEqual({
+      idHints: {
+        [event1.id]: [event1.pubkey],
+      },
+    })
+  })
 })

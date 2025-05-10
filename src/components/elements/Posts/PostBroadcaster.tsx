@@ -3,7 +3,6 @@ import { Divider } from '@/components/ui/Divider/Divider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { spacing } from '@/themes/spacing.stylex'
-import { IconCheck } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
 import { css } from 'react-strict-dom'
 import { RelayChip } from '../Relays/RelayChip'
@@ -21,7 +20,7 @@ export const PostBroadcaster = observer(function PostBroadcaster() {
             Seen on relays
           </Text>
           <Stack horizontal wrap gap={0.5}>
-            {seens?.map((url) => <RelayChip key={url} url={url} icon={<IconCheck size={18} />} />)}
+            {seens?.map((url) => <RelayChip selected key={url} url={url} />)}
           </Stack>
         </Stack>
       </Stack>

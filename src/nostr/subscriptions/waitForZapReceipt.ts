@@ -1,9 +1,10 @@
 import { Kind } from '@/constants/kinds'
 import { start } from '@/core/operators/start'
 import { verify } from '@/core/operators/verify'
+import { addNostrEventToStore } from '@/stores/helpers/addNostrEventToStore'
 import { filter, of, tap } from 'rxjs'
-import { parseTags } from '../helpers/parseTags'
 import type { NostrContext } from '../context'
+import { parseTags } from '../helpers/parseTags'
 import { distinctEvent } from '../operators/distinctEvents'
 import { insert } from '../operators/insert'
 import { parseEventMetadata } from '../operators/parseEventMetadata'
@@ -20,7 +21,7 @@ export function waitForZapReceipt(id: string, invoice: string, ctx: NostrContext
     verify(),
     insert(ctx),
     parseEventMetadata(),
-    tap(ctx.onEvent),
+    tap((event) => addNostrEventToStore(event)),
     filter((event) => {
       // Make sure the zap receipt is the one we are looking for
       const tags = parseTags(event.tags)

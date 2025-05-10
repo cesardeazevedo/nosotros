@@ -8,8 +8,8 @@ class MediaStore {
     makeAutoObservable(this)
   }
 
-  hasError(src: string) {
-    return this.errors.has(src)
+  hasError(src: string | undefined) {
+    return this.errors.has(src || '')
   }
 
   add(src: string, dim: [number, number]) {

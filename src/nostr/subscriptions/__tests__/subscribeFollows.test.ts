@@ -1,11 +1,11 @@
 import { Kind } from '@/constants/kinds'
-import { RELAY_1 } from '@/constants/testRelays'
+import { RELAY_1, RELAY_OUTBOX_1 } from '@/constants/testRelays'
 import { fakeEvent } from '@/utils/faker'
 import { test } from '@/utils/fixtures'
 import { subscribeSpyTo } from '@hirez_io/observer-spy'
 import { subscribeFollows } from '../subscribeFollows'
 
-test('assert subscribeFollows', async ({ createMockRelay, createContext }) => {
+test('assert subscribeFollows', async ({ createMockRelay }) => {
   const relay = createMockRelay(RELAY_1, [
     fakeEvent({
       kind: Kind.Follows,
@@ -16,17 +16,19 @@ test('assert subscribeFollows', async ({ createMockRelay, createContext }) => {
         ['p', '3'],
       ],
     }),
-    fakeEvent({ kind: Kind.Metadata, pubkey: '2' }),
-    fakeEvent({ kind: Kind.Metadata, pubkey: '3' }),
+    fakeEvent({ kind: Kind.Metadata, content: '{}', pubkey: '2' }),
+    fakeEvent({ kind: Kind.Metadata, content: '{}', pubkey: '3' }),
     fakeEvent({ kind: Kind.RelayList, pubkey: '2' }),
     fakeEvent({ kind: Kind.RelayList, pubkey: '3' }),
   ])
+  const relayOutbox = createMockRelay(RELAY_OUTBOX_1, [])
 
-  const client = createContext({ relays: [RELAY_1], settings: { outbox: true } })
-  const $ = subscribeFollows('1', client)
+  const $ = subscribeFollows('1', { relays: [RELAY_1] })
 
   const spy = subscribeSpyTo($)
   await spy.onComplete()
+  await relay.close()
+  await relayOutbox.close()
 
   expect(relay.received).toStrictEqual([
     ['REQ', '1', { kinds: [3], authors: ['1'] }],

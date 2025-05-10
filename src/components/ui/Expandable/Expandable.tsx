@@ -3,7 +3,7 @@ import { easing } from '@/themes/easing.stylex'
 import { useMergeRefs } from '@floating-ui/react'
 import { forwardRef, useRef } from 'react'
 import { css, html } from 'react-strict-dom'
-import { CSSTransition } from 'react-transition-group'
+import { Transition } from 'react-transition-group'
 import { useControlledValue } from '../hooks/useControlledValue'
 import type { ISize } from '../hooks/useElementSize'
 import { useElementSize } from '../hooks/useElementSize'
@@ -84,19 +84,13 @@ export const Expandable = forwardRef<HTMLDivElement, Props>(function Expandable(
   return (
     <ExpandableContext.Provider value={context}>
       {triggerElement}
-
-      <CSSTransition nodeRef={transitionNodeRef} in={expanded} timeout={650}>
+      <Transition nodeRef={transitionNodeRef} in={expanded} timeout={650}>
         {(status) => (
           <html.div
             style={[
               styles.content(expandedSize),
               status === 'exited'
-                ? styles.animation$exited(
-                    collapsedSize,
-                    parseInt(`${collapsedSize.width}`) === 0 || parseInt(`${collapsedSize.height}`) === 0
-                      ? 'hidden'
-                      : 'visible',
-                  )
+                ? styles.animation$exited(collapsedSize)
                 : status === 'entering'
                   ? styles.animation$entering(expandedSize, transitionProperty)
                   : status === 'entered'
@@ -107,23 +101,16 @@ export const Expandable = forwardRef<HTMLDivElement, Props>(function Expandable(
               expanded && status === 'entered' && styles.content$expanded,
             ]}>
             <div {...other} aria-expanded={expanded} style={{ overflow: 'hidden' }} ref={transitionNodeHandleRef}>
-              {/* {status !== 'exiting' && children} */}
-              {expanded && children}
+              {status !== 'exited' && children}
             </div>
           </html.div>
         )}
-      </CSSTransition>
+      </Transition>
     </ExpandableContext.Provider>
   )
 })
 
 const styles = css.create({
-  host: {
-    //overflow: 'hidden',
-  },
-  host$expanded: {
-    //overflow: 'visible',
-  },
   content: (expandedSize: Partial<ISize<ICssSizeValue>>) => ({
     overflow: 'hidden',
     width: expandedSize.width,
@@ -137,7 +124,7 @@ const styles = css.create({
     width: expandedSize.width,
     height: expandedSize.height,
     transitionProperty,
-    transitionDuration: duration.short3,
+    transitionDuration: duration.short4,
     transitionTimingFunction: easing.emphasizedDecelerate,
   }),
   animation$entered: (expandedSize: Partial<ISize<ICssSizeValue>>) => ({
@@ -150,13 +137,12 @@ const styles = css.create({
     width: collapsedSize.width,
     height: collapsedSize.height,
     transitionProperty,
-    transitionDuration: duration.short3,
+    transitionDuration: duration.short4,
     transitionTimingFunction: easing.emphasizedDecelerate,
   }),
-  animation$exited: (size: Partial<ISize<ICssSizeValue>>, visibility: string) => ({
+  animation$exited: (size: Partial<ISize<ICssSizeValue>>) => ({
     opacity: 0,
     width: size.width,
     height: size.height,
-    visibility,
   }),
 })

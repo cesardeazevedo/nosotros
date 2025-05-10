@@ -5,7 +5,7 @@ import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { useNoteStore } from '@/hooks/useNoteStore'
 import { useCurrentUser } from '@/hooks/useRootStore'
-import type { NostrEventComment, NostrEventNote } from '@/nostr/types'
+import type { Event } from '@/stores/events/event'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { useNavigate, useRouter } from '@tanstack/react-router'
@@ -24,7 +24,7 @@ import { RepliesTree } from './RepliesTree'
 import { ReplyContent } from './ReplyContent'
 
 type Props = {
-  event: NostrEventNote | NostrEventComment
+  event: Event
   nested?: boolean
   repliesOpen: boolean | null
   level?: number
@@ -32,13 +32,13 @@ type Props = {
 
 export const Reply = observer(function Reply(props: Props) {
   const { event, level = 0, repliesOpen, nested = true } = props
-  const note = useNoteStore(event)
+  const note = useNoteStore(event.event)
   const navigate = useNavigate()
   const router = useRouter()
   const isMobile = useMobile()
   const collapsedLevel = isMobile ? 5 : 6
   const [open, setOpen] = useState(level < collapsedLevel)
-  const [ref] = useNoteVisibility(event)
+  const [ref] = useNoteVisibility(event.event)
   const user = useCurrentUser()
   const { blured } = useContentContext()
 
@@ -84,10 +84,12 @@ export const Reply = observer(function Reply(props: Props) {
               </Stack>
               <html.div style={styles.actions}>
                 <Stack>
-                  <PostActions renderOptions renderRelays={false} onReplyClick={() => note.toggleReplying()} />
+                  <PostActions renderOptions onReplyClick={() => note.toggleReplying()} />
                 </Stack>
                 <Expandable expanded={note.isReplying} trigger={() => <></>}>
-                  {note.isReplying && <Editor initialOpen renderBubble renderDiscard={false} store={note.editor} />}
+                  {note.isReplying && (
+                    <Editor sx={styles.editor} initialOpen renderBubble renderDiscard={false} store={note.editor} />
+                  )}
                 </Expandable>
               </html.div>
               {nested && (
@@ -113,6 +115,7 @@ const styles = css.create({
     position: 'relative',
   },
   root$deep: {
+    width: 'calc(100% - 18px)',
     marginLeft: spacing.margin3,
   },
   verticalLineContainer: {
@@ -139,7 +142,8 @@ const styles = css.create({
     },
   },
   wrapper: {
-    width: 'fit-content',
+    // width: 'fit-content',
+    width: '100%',
   },
   anchor: {
     position: 'absolute',
@@ -159,7 +163,11 @@ const styles = css.create({
     paddingBottom: spacing.padding2,
     paddingLeft: spacing.margin6,
   },
+  editor: {
+    paddingInline: 0,
+  },
   expandButton: {
+    width: 'fit-content',
     marginBottom: spacing.padding1,
   },
 })

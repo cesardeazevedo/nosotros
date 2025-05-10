@@ -2,10 +2,10 @@ import { useContentContext } from '@/components/providers/ContentProvider'
 import { useNoteContext } from '@/components/providers/NoteProvider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { useMobile } from '@/hooks/useMobile'
-import { useCurrentPubkey, useRootContext } from '@/hooks/useRootStore'
+import { useCurrentPubkey, useCurrentSigner, useCurrentUser } from '@/hooks/useRootStore'
 import { publishReaction } from '@/nostr/publish/publishReaction'
-import { fallbackEmoji, reactionStore } from '@/stores/reactions/reactions.store'
 import { toastStore } from '@/stores/ui/toast.store'
+import { fallbackEmoji } from '@/utils/utils'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconHeart, IconHeartFilled } from '@tabler/icons-react'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -34,21 +34,23 @@ export const ButtonReaction = observer(function ButtonReaction() {
   const { note } = useNoteContext()
   const { dense } = useContentContext()
   const [mobileOpen, setMobileOpen] = useState(false)
-  const total = reactionStore.getTotal(note.id)
+  const user = useCurrentUser()
+  const total = note.reactions.length
+  const myReaction = user?.reactionByEventId?.(note.id)?.event.content
+  const color = myReaction ? emojiColors[fallbackEmoji(myReaction)] || colors.red7 : colors.red7
   const pubkey = useCurrentPubkey()
-  const myReactions = reactionStore.getByPubkey(pubkey)
-  const myReaction = fallbackEmoji(myReactions?.[note.id]?.[0])
-  const color = myReaction ? emojiColors[myReaction] || colors.red7 : colors.red7
-  const { context } = useRootContext()
+  const signer = useCurrentSigner()
   const mobile = useMobile()
 
   const handleReact = useCallback(
     (reaction: string) => {
-      publishReaction(context, note.event.event, reaction).subscribe({
-        error: (error) => toastStore.enqueue(error.message),
-      })
+      if (pubkey) {
+        publishReaction(pubkey, note.event.event, reaction, { signer }).subscribe({
+          error: (error) => toastStore.enqueue(error.message),
+        })
+      }
     },
-    [context, note],
+    [pubkey, note],
   )
 
   return (
@@ -91,7 +93,7 @@ export const ButtonReaction = observer(function ButtonReaction() {
                       strokeWidth={iconProps.strokeWidth}
                     />
                   ) : (
-                    <html.span style={styles.myCustomReaction}>{myReaction}</html.span>
+                    <html.span style={styles.myCustomReaction}>{myReaction && fallbackEmoji(myReaction)}</html.span>
                   )}
                 </motion.div>
               }

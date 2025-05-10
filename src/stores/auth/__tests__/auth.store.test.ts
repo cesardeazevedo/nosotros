@@ -15,12 +15,12 @@ describe('auth$ store', () => {
   })
 
   test('assert login and logout', () => {
-    auth.login({ pubkey: 'user1', context: { signer: { name: 'nip07' } } })
+    auth.login({ pubkey: 'user1', signer: { name: 'nip07' } })
 
     const account = auth.selected
     invariant(account, 'account not defined')
     expect(account.pubkey).toBe('user1')
-    expect(account.context.signer?.name).toEqual('nip07')
+    expect(account.signer?.name).toEqual('nip07')
 
     auth.logout()
     expect(auth.selected).toBeUndefined()
@@ -31,14 +31,14 @@ describe('auth$ store', () => {
     const fn = vi.fn()
     autorun(() => {
       if (auth.selected) {
-        const { pubkey, context } = auth.selected
-        fn({ pubkey, signer: { name: context.signer?.name } })
+        const { pubkey, signer } = auth.selected
+        fn({ pubkey, signer: { name: signer?.name } })
       } else {
         fn(undefined)
       }
     })
-    auth.login({ pubkey: 'user1', context: { signer: { name: 'nip07' } } })
-    auth.login({ pubkey: 'user2', context: { signer: { name: 'nip07' } } })
+    auth.login({ pubkey: 'user1', signer: { name: 'nip07' } })
+    auth.login({ pubkey: 'user2', signer: { name: 'nip07' } })
     expect(fn).toHaveBeenCalledTimes(3)
     expect(fn).toHaveBeenNthCalledWith(1, undefined)
     expect(fn).toHaveBeenNthCalledWith(2, { pubkey: 'user1', signer: { name: 'nip07' } })
@@ -46,8 +46,8 @@ describe('auth$ store', () => {
   })
 
   test('assert reset', () => {
-    auth.login({ pubkey: 'user1', context: { signer: { name: 'nip07' } } })
-    auth.login({ pubkey: 'user2', context: { signer: { name: 'nip07' } } })
+    auth.login({ pubkey: 'user1', signer: { name: 'nip07' } })
+    auth.login({ pubkey: 'user2', signer: { name: 'nip07' } })
 
     expect(auth.accounts.size).toBe(2)
     auth.reset()

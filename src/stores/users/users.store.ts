@@ -1,6 +1,5 @@
-import type { UserMetadata } from '@/nostr/types'
+import type { NostrEventMetadata } from '@/nostr/types'
 import { action, makeObservable, observable } from 'mobx'
-import type { NostrEvent } from 'nostr-tools'
 import { User } from './user'
 
 export class UserStore {
@@ -21,8 +20,8 @@ export class UserStore {
     return undefined
   }
 
-  add(event: NostrEvent, metadata: UserMetadata) {
-    const user = new User(event, metadata)
+  add(event: NostrEventMetadata) {
+    const user = new User(event)
     this.users.set(user.pubkey, user)
     return user
   }

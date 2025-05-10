@@ -1,4 +1,5 @@
 import { Kind } from '@/constants/kinds'
+import { SEARCH_RELAYS } from '@/constants/relays'
 import { NostrSubscription } from '@/core/NostrSubscription'
 import { start } from '@/core/operators/start'
 import { addNostrEventToStore } from '@/stores/helpers/addNostrEventToStore'
@@ -14,7 +15,7 @@ export function subscribeSearch(query: string, limit = 10) {
     limit,
   }
 
-  const sub = new NostrSubscription(filter, { relays: of(['wss://relay.nostr.band']) })
+  const sub = new NostrSubscription(filter, { relays: of(SEARCH_RELAYS) })
 
   return of(sub).pipe(
     start(pool),
@@ -24,6 +25,5 @@ export function subscribeSearch(query: string, limit = 10) {
     tap(addNostrEventToStore),
 
     toArray(),
-    // TODO: filter web of trust
   )
 }

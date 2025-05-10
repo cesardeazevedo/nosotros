@@ -1,6 +1,5 @@
 import { IconLoader } from '@tabler/icons-react'
 import type React from 'react'
-import type { SyntheticEvent } from 'react'
 import { forwardRef, useCallback, useRef, useState } from 'react'
 import { html } from 'react-strict-dom'
 import { FocusRing } from '../FocusRing/FocusRing'
@@ -19,7 +18,7 @@ type Props = {
   icons?: boolean
   showOnlySelectedIcon?: boolean
   disabled?: boolean
-  onChange?: (e: SyntheticEvent) => void | Promise<void>
+  onChange?: React.InputHTMLAttributes<HTMLInputElement>['onChange']
   icon?: React.ReactNode
   selectedIcon?: React.ReactNode
   loading?: boolean
@@ -36,7 +35,7 @@ export const Switch = forwardRef<HTMLElement, Props>((props, ref) => {
   const actionRef = useRef<HTMLInputElement>(null)
   const refs = mergeRefs([ref, setRef, actionRef])
   const handleChange = useCallback(
-    (e: SyntheticEvent) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       const response = onChange?.(e) || Promise.resolve()
       setLoading(true)
       response.then(() => {

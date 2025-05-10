@@ -1,15 +1,102 @@
 import { Kind } from '@/constants/kinds'
-import { listStore } from '@/stores/lists/lists.store'
+import { eventStore } from '@/stores/events/event.store'
 import { seenStore } from '@/stores/seen/seen.store'
+import { fakeEvent } from '@/utils/faker'
 import { test } from '@/utils/fixtures'
+import { Mutelist } from 'nostr-tools/kinds'
 
 describe('Note', () => {
   test('assert isFollowing', ({ login, createNote, createFollows }) => {
-    const note = createNote({ pubkey: '2' })
+    const note = createNote({ id: '1', pubkey: '2' })
     const user = login(note.event.pubkey)
     expect(note.event.isFollowing(user)).toBe(false)
     createFollows(user.pubkey, [note.event.pubkey])
     expect(note.event.isFollowing(user)).toBe(true)
+  })
+
+  test('assert reactions', ({ createNote }) => {
+    const note = createNote({ id: '1', kind: Kind.Article, pubkey: '1', tags: [] })
+    const reaction = fakeEvent({ id: '10', kind: Kind.Reaction, pubkey: '2', tags: [['e', '1']] })
+    const reaction2 = fakeEvent({ id: '11', kind: Kind.Reaction, pubkey: '3', tags: [['e', '1']] })
+    // assert a note with both e and a so we can assert they won't duplicate
+    const reaction3 = fakeEvent({
+      id: '12',
+      kind: Kind.Reaction,
+      pubkey: '4',
+      tags: [
+        ['e', '1'],
+        ['a', note.event.address],
+      ],
+    })
+    eventStore.add(reaction)
+    eventStore.add(reaction2)
+    eventStore.add(reaction3)
+    expect(note.reactions).toHaveLength(3)
+  })
+
+  test('assert reposts', ({ createNote }) => {
+    const note = createNote({ id: '1', kind: Kind.Article, pubkey: '1', tags: [] })
+    const repost = fakeEvent({ id: '10', kind: Kind.Repost, pubkey: '2', tags: [['e', '1']] })
+    const repost2 = fakeEvent({ id: '11', kind: Kind.Repost, pubkey: '3', tags: [['e', '1']] })
+    // assert a note with both e and a so we can assert they won't duplicate
+    const repost3 = fakeEvent({
+      id: '12',
+      kind: Kind.Repost,
+      pubkey: '4',
+      tags: [
+        ['e', '1'],
+        ['a', note.event.address],
+      ],
+    })
+    const quote1 = fakeEvent({
+      id: '13',
+      kind: Kind.Text,
+      pubkey: '5',
+      tags: [['q', '1']],
+    })
+    const quote2 = fakeEvent({
+      id: '14',
+      kind: Kind.Text,
+      pubkey: '5',
+      tags: [['q', note.event.address]],
+    })
+    const quote3 = fakeEvent({
+      id: '15',
+      kind: Kind.Text,
+      pubkey: '5',
+      // This shouldn't really happen
+      tags: [
+        ['q', '1'],
+        ['q', note.event.address],
+      ],
+    })
+    eventStore.add(repost)
+    eventStore.add(repost2)
+    eventStore.add(repost3)
+    eventStore.add(quote1)
+    eventStore.add(quote2)
+    eventStore.add(quote3)
+    expect(note.reposts).toHaveLength(6)
+  })
+
+  test('assert zaps', ({ createNote }) => {
+    const note = createNote({ id: '1', kind: Kind.Article, pubkey: '1', tags: [] })
+    const zap = fakeEvent({ id: '10', kind: Kind.ZapReceipt, pubkey: '2', tags: [['e', '1']] })
+    const zap2 = fakeEvent({ id: '11', kind: Kind.ZapReceipt, pubkey: '3', tags: [['e', '1']] })
+    // assert a note with both e and a so we can assert they won't duplicate
+    const zap3 = fakeEvent({
+      id: '12',
+      kind: Kind.ZapReceipt,
+      pubkey: '4',
+      tags: [
+        ['e', '1'],
+        ['a', note.event.address],
+      ],
+    })
+    eventStore.add(zap)
+    eventStore.add(zap2)
+    eventStore.add(zap3)
+    expect(note.zaps).toHaveLength(3)
   })
 
   test('assert replies', ({ login, createNote }) => {
@@ -61,10 +148,18 @@ describe('Note', () => {
 
     createFollows(user.pubkey, ['2'])
 
-    listStore.muteE.set('1', new Set(['4']))
-    listStore.muteP.set('1', new Set(['3']))
+    eventStore.add(
+      fakeEvent({
+        kind: Mutelist,
+        pubkey: '1',
+        tags: [
+          ['e', '4'],
+          ['p', '3'],
+        ],
+      }),
+    )
 
-    expect(rootNote.repliesSorted(user)).toStrictEqual([reply2.event, reply1.event])
+    expect(rootNote.repliesSorted(user)).toEqual([reply2.event, reply1.event])
     expect(rootNote.repliesMuted(user)).toStrictEqual([reply3.event, reply4.event])
   })
 
@@ -141,6 +236,24 @@ describe('Note', () => {
     ])
   })
 
+  test('assert reply to article', ({ createNote }) => {
+    const article = createNote({
+      id: 'id_1_root',
+      pubkey: 'pubkey_1',
+      kind: Kind.Article,
+      tags: [['d', '123']],
+    })
+    expect(article.replyTags).toStrictEqual([
+      ['A', '30023:pubkey_1:123', '', 'pubkey_1'],
+      ['E', 'id_1_root', '', 'pubkey_1'],
+      ['K', '30023'],
+      ['P', 'pubkey_1'],
+      ['e', 'id_1_root', '', 'pubkey_1'],
+      ['k', '30023'],
+      ['p', 'pubkey_1'],
+    ])
+  })
+
   test('assert replyTags for comments', ({ createNote, createComment }) => {
     createNote({
       id: 'id_1_root',
@@ -148,7 +261,7 @@ describe('Note', () => {
       kind: Kind.Article,
       tags: [['d', '123']],
     })
-    const note3 = createComment({
+    const note1 = createComment({
       id: '1',
       pubkey: 'pubkey_2',
       tags: [
@@ -160,7 +273,7 @@ describe('Note', () => {
         ['k', '1'],
       ],
     })
-    expect(note3.replyTags).toStrictEqual([
+    expect(note1.replyTags).toStrictEqual([
       ['A', '30023:pubkey_1:123', '', 'pubkey_1'],
       ['E', 'id_1_root', '', 'pubkey_1'],
       ['K', '30023'],

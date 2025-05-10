@@ -6,8 +6,8 @@ import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { TextField } from '@/components/ui/TextField/TextField'
 import { useGoBack } from '@/hooks/useNavigations'
+import { useRootContext } from '@/hooks/useRootStore'
 import { subscribeUser } from '@/nostr/subscriptions/subscribeUser'
-import { useObservableNostrContext } from '@/stores/nostr/nostr.context.hooks'
 import { signinStore } from '@/stores/signin/signin.store'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconClipboardCopy, IconScan } from '@tabler/icons-react'
@@ -25,13 +25,14 @@ import { SignInHeader } from './SignInHeader'
 
 const SignInPreview = observer(function UserPreview() {
   const input = signinStore.inputPubkey
+  const context = useRootContext()
 
   const input$ = useObservable(pluckFirst, [input])
-  const sub = useObservableNostrContext((context) => {
+  const sub = useObservable(() => {
     return input$.pipe(
       filter((x) => !!x),
       debounceTime(250),
-      switchMap((value) => subscribeUser(value, context.context)),
+      switchMap((value) => subscribeUser(value, context)),
     )
   })
   const user = useObservableState(sub)
@@ -114,7 +115,7 @@ export const SignInReadOnly = observer(function SignInForm() {
               onChange={(e) => signinStore.setReadonlyInput(e.target.value)}
               error={!!error || !!signinStore.error}
               placeholder='npub, nprofile, nostr address (nip-05)'
-              trailing={isMobile && <IconButton onClick={dialogStore.openCamera} icon={<IconScan />} />}
+              trailing={isMobile && <IconButton onClick={() => dialogStore.toggleCamera()} icon={<IconScan />} />}
             />
             {error && <Text>{error}</Text>}
             {signinStore.error && <Text>{signinStore.error}</Text>}

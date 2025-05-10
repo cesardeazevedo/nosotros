@@ -1,7 +1,7 @@
 import type { Observable } from 'rxjs'
 import { connect, from, ignoreElements, merge, mergeMap } from 'rxjs'
-import { isAuthorTag } from '../helpers/parseTags'
 import type { NostrContext } from '../context'
+import { isAuthorTag } from '../helpers/parseTags'
 import type { NostrEventMetadata } from '../types'
 import { subscribeUser } from './subscribeUser'
 

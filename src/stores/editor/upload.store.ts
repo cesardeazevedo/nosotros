@@ -5,7 +5,7 @@ import { from, lastValueFrom, map, mergeMap, tap, toArray } from 'rxjs'
 
 const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'video/mp4', 'video/mpeg', 'video/webm']
 
-export function bufferToHex(buffer: ArrayBuffer) {
+function bufferToHex(buffer: ArrayBuffer) {
   return Array.from(new Uint8Array(buffer))
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('')
@@ -75,15 +75,15 @@ export class UploadStore {
           const imetaQueryable =
             responses.length === 1
               ? [
-                  responses[0].response.tags.find((x) => x[0] === 'm') || [],
-                  responses[0].response.tags.find((x) => x[0] === 'x') || [],
-                ]
+                responses[0].response.tags.find((x) => x[0] === 'm') || [],
+                responses[0].response.tags.find((x) => x[0] === 'x') || [],
+              ]
               : []
           return [
             ...imetas,
             ...imetaQueryable,
             ['alt', `This image was publish on nosotros.app ${responses[0].response.url}`],
-          ]
+          ].filter(x => x.length >= 2)
         }),
       ),
     )

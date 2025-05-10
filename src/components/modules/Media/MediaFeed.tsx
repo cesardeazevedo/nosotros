@@ -1,10 +1,9 @@
 import { NostrEventFeedItem } from '@/components/elements/Event/NostrEventFeedItem'
-import { FeedList } from '@/components/elements/Feed/FeedList'
 import { MediaCell } from '@/components/elements/Media/MediaCell'
 import { PostMediaLoading } from '@/components/elements/Media/MediaLoading'
 import { PostLoading } from '@/components/elements/Posts/PostLoading'
+import { FeedList } from '@/components/modules/Feed/FeedList'
 import { Stack } from '@/components/ui/Stack/Stack'
-import type { NostrEventMedia } from '@/nostr/types'
 import type { MediaModule } from '@/stores/modules/media.module'
 import { observer, Observer } from 'mobx-react-lite'
 import type { ReactNode } from 'react'
@@ -26,6 +25,7 @@ export const MediaFeed = observer(function MediaFeed(props: Props) {
       header={header}
       divider={module.layout === 'row'}
       onScrollEnd={feed.paginate}
+      renderNewPostsIndicator={module.layout === 'row'}
       wrapper={(children) =>
         module.layout === 'grid' ? (
           <Stack wrap gap={0.5} justify='flex-start' sx={styles.grid}>
@@ -37,18 +37,10 @@ export const MediaFeed = observer(function MediaFeed(props: Props) {
       }
       render={(event) => (
         <Observer>
-          {() => (
-            <>
-              {module.layout === 'row' ? (
-                <NostrEventFeedItem event={event} />
-              ) : (
-                <MediaCell event={event as NostrEventMedia} />
-              )}
-            </>
-          )}
+          {() => <>{module.layout === 'row' ? <NostrEventFeedItem event={event} /> : <MediaCell event={event} />}</>}
         </Observer>
       )}
-      footer={module.layout === 'row' ? <PostLoading /> : <PostMediaLoading rows={3} />}
+      footer={module.layout === 'row' ? <PostLoading rows={4} /> : <PostMediaLoading rows={3} />}
     />
   )
 })
@@ -57,7 +49,7 @@ const styles = css.create({
   grid: {
     '::after': {
       content: '""',
-      flex: '1 1 calc(33.33% - 20px)',
+      flex: '0 0 calc((100% - 0rem) / 3)',
     },
   },
 })
