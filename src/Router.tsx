@@ -35,7 +35,6 @@ import { RelayDiscoveryHeader } from './components/modules/RelayDiscovery/RelayD
 import { RelayDiscoveryList } from './components/modules/RelayDiscovery/RelayDiscoveryList'
 import { RelayDiscoveryTable } from './components/modules/RelayDiscovery/RelayDiscoveryTable'
 import { RelayRoute } from './components/modules/Relays/RelaysRoute'
-import { SearchHeader } from './components/modules/Search/SearchHeader'
 import { SearchSettings } from './components/modules/Search/SearchSettings'
 import { SettingsPreferencesRoute } from './components/modules/Settings/SettingsPreferenceRoute'
 import { SettingsRoute } from './components/modules/Settings/SettingsRoute'
@@ -632,7 +631,7 @@ const searchRoute = createRoute({
     return { module, subscription, query }
   },
   pendingComponent: () => {
-    return <FeedPending header={<SearchHeader />} />
+    return <FeedPending header={<SearchSettings />} />
   },
   component: function SearchRoute() {
     const { module } = searchRoute.useLoaderData()

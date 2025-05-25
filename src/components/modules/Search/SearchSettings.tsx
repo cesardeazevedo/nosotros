@@ -21,13 +21,12 @@ const iconProps: IconProps = {
 }
 
 type Props = {
-  module: FeedModule
+  module?: FeedModule
   renderSearchField?: boolean
 }
 
 export const SearchSettings = observer(function SearchSettings(props: Props) {
   const { module, renderSearchField = true } = props
-  const { feed } = module
   const searchRef = useRef<HTMLInputElement>(null)
   const onChange = useSearchChange(true)
   return (
@@ -37,7 +36,7 @@ export const SearchSettings = observer(function SearchSettings(props: Props) {
           <SearchField
             ref={searchRef}
             placeholder='Search on nostr'
-            defaultValue={module.feed.filter.search}
+            defaultValue={module?.feed.filter.search}
             onChange={(e) => onChange(e.target.value)}
           />
         </Stack>
@@ -53,36 +52,40 @@ export const SearchSettings = observer(function SearchSettings(props: Props) {
               <Chip
                 variant='filter'
                 label='Users'
-                selected={feed.hasKind(Kind.Metadata)}
+                selected={module?.feed.hasKind(Kind.Metadata)}
                 icon={<IconUser {...iconProps} />}
-                onClick={() => feed.toggleKind(Kind.Metadata)}
+                onClick={() => module?.feed.toggleKind(Kind.Metadata)}
               />
               <Chip
                 variant='filter'
                 label='Text Notes'
-                selected={feed.hasKind(Kind.Text)}
+                selected={module?.feed.hasKind(Kind.Text)}
                 icon={<IconMessage2 {...iconProps} />}
-                onClick={() => feed.toggleKind(Kind.Text)}
+                onClick={() => module?.feed.toggleKind(Kind.Text)}
               />
               <Chip
                 label='Media'
                 variant='filter'
-                selected={feed.hasKind(Kind.Media)}
+                selected={module?.feed.hasKind(Kind.Media)}
                 icon={<IconPhoto {...iconProps} />}
-                onClick={() => feed.toggleKind(Kind.Media)}
+                onClick={() => module?.feed.toggleKind(Kind.Media)}
               />
               <Chip
-                selected={feed.hasKind(Kind.Article)}
+                selected={module?.feed.hasKind(Kind.Article)}
                 variant='filter'
                 icon={<IconArticle {...iconProps} />}
                 label='Articles'
-                onClick={() => feed.toggleKind(Kind.Article)}
+                onClick={() => module?.feed.toggleKind(Kind.Article)}
               />
               {/* <Chip label='Reset' variant='assist' onClick={() => feed.resetFilter()} /> */}
             </Stack>
           </Stack>
-          <FeedSettingsSafety feed={feed} />
-          <FeedSettingsRelays feed={feed} name='Search relays' />
+          {module?.feed && (
+            <>
+              <FeedSettingsSafety feed={module.feed} />
+              <FeedSettingsRelays feed={module.feed} name='Search relays' />
+            </>
+          )}
         </Stack>
       </html.div>
     </>
