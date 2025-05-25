@@ -55,7 +55,7 @@ export const UserProfileHeader = observer(function UserProfileHeader(props: Prop
           </Text>
           {nip05 && (
             <Text variant='label' size='lg'>
-              {nip05}
+              {nip05.replace(/^_@/, '')}
             </Text>
           )}
         </Stack>
