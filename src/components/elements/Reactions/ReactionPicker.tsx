@@ -1,9 +1,11 @@
 import { PopoverBase } from '@/components/ui/Popover/PopoverBase'
+import { Stack } from '@/components/ui/Stack/Stack'
 import { TooltipRich } from '@/components/ui/TooltipRich/TooltipRich'
 import { useMobile } from '@/hooks/useMobile'
 import { elevation } from '@/themes/elevation.stylex'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
+import { spacing } from '@/themes/spacing.stylex'
 import { motion, useMotionValue, useTransform, type MotionValue } from 'framer-motion'
 import React, { memo, useRef } from 'react'
 import { css } from 'react-strict-dom'
@@ -17,6 +19,7 @@ type Props = {
 
 const reactions = {
   like: { title: 'Like', reaction: '🤙' },
+  heart: { title: 'Heart', reaction: '❤️' },
   lfg: { title: 'LFG!', reaction: '🚀' },
   fire: { title: 'Fire', reaction: '🔥' },
   watching: { title: 'Watching', reaction: '👀' },
@@ -26,11 +29,11 @@ const reactions = {
   angry: { title: 'Angry', reaction: '😡' },
 } as const
 
-function ReactionIcon(props: {
+const ReactionIconMotion = (props: {
   reaction: keyof typeof reactions
   mouseX: MotionValue<number>
   onClick?: (emoji: string) => void
-}) {
+}) => {
   const { mouseX, onClick } = props
   const ref = useRef<HTMLDivElement | null>(null)
   const distance = useTransform(mouseX, (value: number) => {
@@ -65,19 +68,54 @@ function ReactionIcon(props: {
   )
 }
 
-function ReactionDock({ onClick }: { onClick: Props['onClick'] }) {
+const ReactionIcon = (props: { reaction: keyof typeof reactions; onClick?: (emoji: string) => void }) => {
+  const { onClick } = props
+  const { reaction } = reactions[props.reaction]
+
+  return (
+    <span
+      {...css.props(styles.reaction$mobile)}
+      onClick={(e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        onClick?.(reaction)
+      }}>
+      {reaction}
+    </span>
+  )
+}
+
+const ReactionDockMobile = ({ onClick }: { onClick: Props['onClick'] }) => {
+  const props = { onClick }
+  return (
+    <Stack sx={styles.dock$mobile}>
+      <ReactionIcon {...props} reaction={'like'} />
+      <ReactionIcon {...props} reaction={'heart'} />
+      <ReactionIcon {...props} reaction={'lfg'} />
+      <ReactionIcon {...props} reaction={'fire'} />
+      <ReactionIcon {...props} reaction={'watching'} />
+      <ReactionIcon {...props} reaction={'haha'} />
+      <ReactionIcon {...props} reaction={'salute'} />
+      <ReactionIcon {...props} reaction={'hugs'} />
+      <ReactionIcon {...props} reaction={'angry'} />
+    </Stack>
+  )
+}
+
+const ReactionDockMotion = ({ onClick }: { onClick: Props['onClick'] }) => {
   const mouseX = useMotionValue(250)
   const props = { mouseX, onClick }
   return (
     <div {...css.props(styles.dock)} onMouseMove={(e) => mouseX.set(e.pageX)}>
-      <ReactionIcon reaction='like' {...props} />
-      <ReactionIcon reaction='lfg' {...props} />
-      <ReactionIcon reaction='fire' {...props} />
-      <ReactionIcon reaction='watching' {...props} />
-      <ReactionIcon reaction='haha' {...props} />
-      <ReactionIcon reaction='salute' {...props} />
-      <ReactionIcon reaction='hugs' {...props} />
-      <ReactionIcon reaction='angry' {...props} />
+      <ReactionIconMotion reaction='like' {...props} />
+      <ReactionIconMotion reaction='heart' {...props} />
+      <ReactionIconMotion reaction='lfg' {...props} />
+      <ReactionIconMotion reaction='fire' {...props} />
+      <ReactionIconMotion reaction='watching' {...props} />
+      <ReactionIconMotion reaction='haha' {...props} />
+      <ReactionIconMotion reaction='salute' {...props} />
+      <ReactionIconMotion reaction='hugs' {...props} />
+      <ReactionIconMotion reaction='angry' {...props} />
     </div>
   )
 }
@@ -96,7 +134,7 @@ export const ReactionPicker = memo(function ReactionPicker(props: Props) {
         forwardProps
         onClose={() => onClose?.()}
         contentRenderer={(content) => (
-          <ReactionDock
+          <ReactionDockMobile
             onClick={(e) => {
               content.close()
               onClick(e)
@@ -119,7 +157,7 @@ export const ReactionPicker = memo(function ReactionPicker(props: Props) {
       placement='top-start'
       enterDelay={500}
       content={(props) => (
-        <ReactionDock
+        <ReactionDockMotion
           onClick={(e) => {
             props.close()
             onClick(e)
@@ -134,7 +172,7 @@ export const ReactionPicker = memo(function ReactionPicker(props: Props) {
 const styles = css.create({
   dock: {
     borderRadius: shape.full,
-    width: 340,
+    width: 420,
     height: 50,
     fontSize: 28,
     display: 'flex',
@@ -144,10 +182,26 @@ const styles = css.create({
     backgroundColor: palette.surfaceContainerLowest,
     boxShadow: elevation.shadows4,
   },
+  dock$mobile: {
+    width: 390,
+    minHeight: 50,
+    display: 'flex',
+    flexDirection: 'row',
+    fontSize: 24,
+    boxShadow: elevation.shadows4,
+    backgroundColor: palette.surfaceContainerLowest,
+    borderRadius: shape.xl,
+    paddingInline: spacing.padding1,
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+  },
   reaction: {
     position: 'relative',
     userSelect: 'none',
     cursor: 'pointer',
+  },
+  reaction$mobile: {
+    padding: 16,
   },
   title: {
     position: 'absolute',
