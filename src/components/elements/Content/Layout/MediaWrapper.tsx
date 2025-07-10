@@ -9,7 +9,7 @@ import { css, html } from 'react-strict-dom'
 type Props = {
   children: React.ReactNode
   src: string
-  size?: 'sm' | 'md'
+  size?: keyof typeof MAX_BOUNDS
   fixedHeight?: number
   disablePadding?: boolean
 }
@@ -22,6 +22,10 @@ const MAX_BOUNDS = {
   md: {
     maxWidth: 460,
     maxHeight: 480,
+  },
+  lg: {
+    maxWidth: 540,
+    maxHeight: 560,
   },
 } as const
 
@@ -78,7 +82,7 @@ const styles = css.create({
   root: {
     marginBlock: spacing.margin2,
     maxWidth: {
-      default: 425,
+      default: 560,
       [MOBILE]: 'calc(100vw - 60px)',
     },
   },
@@ -88,6 +92,9 @@ const styles = css.create({
   },
   padding: {
     paddingLeft: spacing.padding2,
+  },
+  size$lg: {
+    maxHeight: MAX_BOUNDS.lg.maxHeight,
   },
   size$md: {
     maxHeight: MAX_BOUNDS.md.maxHeight,

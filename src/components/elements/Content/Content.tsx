@@ -43,7 +43,7 @@ export const Content = observer(function Content(props: Props) {
     <>
       {note.metadata.contentSchema?.content.map((node, index) => {
         const Wrapper = wrapper?.(node) || React.Fragment
-        const size = dense ? 'sm' : 'md'
+        const size = dense ? 'md' : 'lg'
         return (
           <Wrapper key={node.type + index}>
             <>
