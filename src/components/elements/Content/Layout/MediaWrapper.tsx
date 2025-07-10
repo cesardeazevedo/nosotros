@@ -52,6 +52,7 @@ export const MediaWrapper = observer(function MediaWrapper(props: Props) {
   const dim = note.metadata.imeta?.[src]?.dim
   const width = mediaStore.dims.get(src)?.[0] || dim?.width
   const height = mediaStore.dims.get(src)?.[1] || dim?.height
+  const hasError = mediaStore.hasError(src)
   const adjusted =
     width && height ? adjustDimensions(width, height, MAX_BOUNDS[size].maxWidth, MAX_BOUNDS[size].maxWidth) : null
   return (
@@ -63,6 +64,7 @@ export const MediaWrapper = observer(function MediaWrapper(props: Props) {
           dense && styles.root$dense,
           adjusted ? styles.bounds(adjusted.width, adjusted.height) : styles[`size$${size}`],
           !!fixedHeight && styles.fixedHeight(fixedHeight),
+          hasError && styles.error,
         ]}>
         {children}
       </html.div>
@@ -92,6 +94,10 @@ const styles = css.create({
   },
   size$sm: {
     maxHeight: MAX_BOUNDS.sm.maxHeight,
+  },
+  error: {
+    // width: 'auto',
+    // height: 'auto',
   },
   fixedHeight: (height: number) => ({ height }),
   bounds: (width: number, height: number) => ({ width, height }),
