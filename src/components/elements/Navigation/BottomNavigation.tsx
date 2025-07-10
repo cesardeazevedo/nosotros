@@ -51,7 +51,7 @@ export const BottomNavigation = observer(function BottomNavigation() {
     }
   }
 
-  const nprofile = user?.nprofile || (encodeSafe(() => nip19.nprofileEncode({ pubkey: pubkey || '' })))
+  const nprofile = user?.nprofile || encodeSafe(() => nip19.nprofileEncode({ pubkey: pubkey || '' }))
 
   return (
     <>
@@ -72,7 +72,9 @@ export const BottomNavigation = observer(function BottomNavigation() {
               <Tab active={isActive} sx={styles.tab} icon={<IconPhoto />} activeIcon={<IconPhoto />} />
             )}
           </Link>
-          <Link to='/articles' onClick={handleResetScroll('/articles')}>{({ isActive }) => <Tab active={isActive} sx={styles.tab} icon={<IconNews />} />}</Link>
+          <Link to='/articles' onClick={handleResetScroll('/articles')}>
+            {({ isActive }) => <Tab active={isActive} sx={styles.tab} icon={<IconNews />} />}
+          </Link>
           {!pubkey && (
             <Link to='/explore/relays'>
               {({ isActive }) => <Tab active={isActive} sx={styles.tab} icon={<IconServerBolt />} />}
@@ -90,10 +92,7 @@ export const BottomNavigation = observer(function BottomNavigation() {
             </Link>
           )}
           {pubkey && nprofile && (
-            <Link
-              to='/$nostr'
-              params={{ nostr: nprofile }}
-              onClick={handleResetScroll('/' + nprofile)}>
+            <Link to='/$nostr' params={{ nostr: nprofile }} onClick={handleResetScroll('/' + nprofile)}>
               {({ isActive }) => (
                 <Tab active={isActive} sx={styles.tab} icon={<IconUser />} activeIcon={<IconUser />} />
               )}

@@ -75,15 +75,15 @@ export class UploadStore {
           const imetaQueryable =
             responses.length === 1
               ? [
-                responses[0].response.tags.find((x) => x[0] === 'm') || [],
-                responses[0].response.tags.find((x) => x[0] === 'x') || [],
-              ]
+                  responses[0].response.tags.find((x) => x[0] === 'm') || [],
+                  responses[0].response.tags.find((x) => x[0] === 'x') || [],
+                ]
               : []
           return [
             ...imetas,
             ...imetaQueryable,
             ['alt', `This image was publish on nosotros.app ${responses[0].response.url}`],
-          ].filter(x => x.length >= 2)
+          ].filter((x) => x.length >= 2)
         }),
       ),
     )
