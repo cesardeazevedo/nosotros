@@ -16,12 +16,12 @@ type Props = {
 
 const MAX_BOUNDS = {
   sm: {
-    maxWidth: 320,
-    maxHeight: 400,
+    maxWidth: 390,
+    maxHeight: 410,
   },
   md: {
-    maxWidth: 440,
-    maxHeight: 460,
+    maxWidth: 460,
+    maxHeight: 480,
   },
 } as const
 
