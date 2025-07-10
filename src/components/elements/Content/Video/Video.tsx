@@ -6,6 +6,7 @@ import { observer } from 'mobx-react-lite'
 import { useMemo } from 'react'
 import { css } from 'react-strict-dom'
 import { BlurContainer } from '../../Layouts/BlurContainer'
+import { useGlobalSettings } from '@/hooks/useRootStore'
 
 type Props = {
   src: string
@@ -18,17 +19,19 @@ type Props = {
 }
 
 export const Video = observer(function Video(props: Props) {
-  const { src, controls = true, muted = false, loop = false, autoPlay = false, preload = 'metadata', sx } = props
+  const { src, controls = true, muted = false, loop = false, preload = 'metadata', sx } = props
   const { note } = useNoteContext()
   const extension = useMemo(() => new URL(src).pathname.split('.').pop(), [src])
   const media = useMediaStore(src, note.metadata.imeta)
+  const settings = useGlobalSettings()
+  const autoPlay = props.autoPlay ?? settings.autoPlay
   return (
     <BlurContainer>
       {({ blurStyles }) => (
         <video
           {...css.props([styles.video, blurStyles, sx])}
           loop={loop}
-          muted={muted}
+          muted={autoPlay ? true : muted}
           autoPlay={autoPlay}
           preload={preload}
           controls={controls}
