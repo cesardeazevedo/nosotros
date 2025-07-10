@@ -14,7 +14,7 @@ import ParagraphExtension from '@tiptap/extension-paragraph'
 import Placeholder from '@tiptap/extension-placeholder'
 import TextExtension from '@tiptap/extension-text'
 import { ReactNodeViewRenderer } from '@tiptap/react'
-import { NostrExtension } from 'nostr-editor'
+import { NostrExtension, editorProps } from 'nostr-editor'
 import { ImageNodeViewWrapper } from '../../Content/Image/ImageNodeViewWrapper'
 import { NAddrEditor } from '../../Content/NAddr/NAddrEditor'
 import { VideoNodeViewWrapper } from '../../Content/Video/VideoNodeViewWrapper'
@@ -31,6 +31,7 @@ type Settings = {
 
 export function createEditor(store: EditorStore, settings: Settings) {
   return new Editor({
+    editorProps,
     extensions: [
       TextExtension,
       DocumentExtension,
