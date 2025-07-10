@@ -6,7 +6,7 @@ import { useMobile } from './useMobile'
 export function useAppVisibility() {
   const router = useRouter()
   const isMobile = useMobile()
-  const resetAfterSeconds = isMobile ? 30 : 1800
+  const resetAfterSeconds = isMobile ? 30 : 3600
   const backgroundAt = useRef<number | null>(null)
 
   useEffect(() => {
