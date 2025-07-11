@@ -8,7 +8,7 @@ import type { stateTheme } from './state.stylex'
 import type { typeFaceTheme } from './typeFace.stylex'
 import type { typeScaleTheme } from './typeScale.stylex'
 
-export type ThemeKeys = 'auto' | 'light' | 'dark' | 'black' | 'solarized'
+export type ThemeKeys = 'light' | 'dark'
 
 export type Theme = {
   key: ThemeKeys

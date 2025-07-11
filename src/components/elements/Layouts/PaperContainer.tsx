@@ -1,7 +1,9 @@
 import { Paper } from '@/components/ui/Paper/Paper'
+import { useIsDarkTheme } from '@/hooks/useTheme'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
-import React, { forwardRef } from 'react'
+import { observer } from 'mobx-react-lite'
+import React from 'react'
 import { css } from 'react-strict-dom'
 
 type Props = {
@@ -10,15 +12,16 @@ type Props = {
   children?: React.ReactNode
 }
 
-export const PaperContainer = forwardRef<HTMLDivElement, Props>((props, ref) => {
+export const PaperContainer = observer(function PaperContainer(props: Props) {
   const { children, maxWidth = 'md', topRadius = true, ...rest } = props
+  const isDark = useIsDarkTheme()
   return (
     <Paper
-      surface='surfaceContainerLowest'
       {...rest}
-      elevation={1}
-      sx={[styles.root, styles[maxWidth], !topRadius && styles.resetTopRadius]}
-      ref={ref}>
+      outlined={isDark}
+      elevation={isDark ? 0 : 1}
+      surface='surfaceContainerLowest'
+      sx={[styles.root, styles[maxWidth], !topRadius && styles.resetTopRadius]}>
       {children}
     </Paper>
   )

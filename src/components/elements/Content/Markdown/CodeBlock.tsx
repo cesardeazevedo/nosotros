@@ -1,7 +1,6 @@
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { SxProps } from '@/components/ui/types'
-import { useMediaQuery } from '@/hooks/useMediaQuery'
-import { useGlobalSettings } from '@/hooks/useRootStore'
+import { useIsDarkTheme } from '@/hooks/useTheme'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
@@ -18,10 +17,7 @@ type Props = {
 
 export const CodeBlock = (props: Props) => {
   const refPre = useRef<HTMLDivElement | null>(null)
-  const isSystemDark = useMediaQuery('(prefers-color-scheme: dark)')
-  const theme = useGlobalSettings().theme
-  const isAuto = theme === 'auto'
-  const isDark = (isAuto && isSystemDark) || theme === 'dark'
+  const isDark = useIsDarkTheme()
 
   const { node } = props
   const { language } = props.node.attrs

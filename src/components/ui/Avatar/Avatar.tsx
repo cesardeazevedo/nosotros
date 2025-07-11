@@ -88,6 +88,8 @@ export const Avatar = (props: Props) => {
         <Skeleton variant='circular' animation='wave' sx={[sizes[size], styles.loading]} />
       ) : hasImageNotFailing ? (
         <html.img
+          loading='lazy'
+          fetchPriority='low'
           style={styles.img}
           src={src}
           srcSet={srcSet}

@@ -22,7 +22,7 @@ export const SearchDialog = observer(() => {
   }
 
   return (
-    <DialogSheet surface='surfaceContainerLowest' open={open} onClose={handleClose} maxWidth='sm' sx={styles.dialog}>
+    <DialogSheet open={open} onClose={handleClose} maxWidth='sm' sx={styles.dialog}>
       <Search
         suggestQuery
         suggestRelays

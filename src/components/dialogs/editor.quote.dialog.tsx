@@ -44,12 +44,7 @@ export const EditorQuoteDialog = observer(function EditorQuoteDialog() {
   }, [quoting, store?.editor])
 
   return (
-    <DialogSheet
-      maxWidth='sm'
-      sx={styles.dialog}
-      surface='surfaceContainerLowest'
-      open={!!quoting}
-      onClose={handleClose}>
+    <DialogSheet maxWidth='sm' sx={styles.dialog} open={!!quoting} onClose={handleClose}>
       {quoting && (
         <>
           <RemoveScroll>
