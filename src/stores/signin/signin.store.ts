@@ -182,7 +182,6 @@ export const signinStore = makeAutoObservable({
     try {
       const [, res] = await signer.signer.connect()
       const [, { result: pubkey }] = await signer.signer.getPublicKey()
-      console.log('PUBKEY???', pubkey, signer)
       auth.login({
         pubkey,
         signer: {

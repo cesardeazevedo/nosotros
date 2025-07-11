@@ -1,5 +1,5 @@
 import { Kind } from '@/constants/kinds'
-import { RELAY_1, RELAY_OUTBOX_1 } from '@/constants/testRelays'
+import { RELAY_1, RELAY_FALLBACK_1, RELAY_OUTBOX_1 } from '@/constants/testRelays'
 import { fakeEvent } from '@/utils/faker'
 import { test } from '@/utils/fixtures'
 import { subscribeSpyTo } from '@hirez_io/observer-spy'
@@ -22,6 +22,7 @@ test('assert subscribeFollows', async ({ createMockRelay }) => {
     fakeEvent({ kind: Kind.RelayList, pubkey: '3' }),
   ])
   const relayOutbox = createMockRelay(RELAY_OUTBOX_1, [])
+  const relayFallback = createMockRelay(RELAY_FALLBACK_1, [])
 
   const $ = subscribeFollows('1', { relays: [RELAY_1] })
 
@@ -29,6 +30,7 @@ test('assert subscribeFollows', async ({ createMockRelay }) => {
   await spy.onComplete()
   await relay.close()
   await relayOutbox.close()
+  await relayFallback.close()
 
   expect(relay.received).toStrictEqual([
     ['REQ', '1', { kinds: [3], authors: ['1'] }],

@@ -121,6 +121,17 @@ export const SidebarMenu = observer(function SidebarMenu() {
       {root.recents.list.length !== 0 && <Divider />}
       <html.div style={styles.wrapper}>
         <SidebarMenuRelays />
+        <Link to='/settings'>
+          {({ isActive }) => (
+            <MenuItem
+              interactive
+              selected={isActive}
+              leadingIcon={isActive ? <IconSettingsFilled {...iconProps} /> : <IconSettings {...iconProps} />}
+              label='Settings'
+              onClick={() => context.setPane(false)}
+            />
+          )}
+        </Link>
         <br />
         <Link to='.' search={{ compose: true }}>
           <Fab flat size='sm' variant='primary' icon={<IconPencil />} label='Create note' fullWidth />
@@ -129,17 +140,6 @@ export const SidebarMenu = observer(function SidebarMenu() {
         <br />
         {isMobile && (
           <>
-            <Link to='/settings'>
-              {({ isActive }) => (
-                <MenuItem
-                  interactive
-                  selected={isActive}
-                  leadingIcon={isActive ? <IconSettingsFilled {...iconProps} /> : <IconSettings {...iconProps} />}
-                  label='Settings'
-                  onClick={() => context.setPane(false)}
-                />
-              )}
-            </Link>
             <SidebarMenuLogout />
           </>
         )}

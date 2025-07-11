@@ -12,7 +12,6 @@ import { EMPTY, bufferTime, filter, finalize, map, merge, mergeMap, mergeWith, s
 import type { FeedStore } from '../feeds/feed.store'
 import { toStream } from '../helpers/toStream'
 import { rootStore } from '../root.store'
-import type { NostrEvent } from '@/core/types'
 
 function subscribeFeedScope(feed: FeedStore, ctx: NostrContext, pagination: PaginationSubject) {
   const { scope, options } = feed

@@ -9,19 +9,23 @@ import { css, html } from 'react-strict-dom'
 type Props = {
   children: React.ReactNode
   src: string
-  size?: 'sm' | 'md'
+  size?: keyof typeof MAX_BOUNDS
   fixedHeight?: number
   disablePadding?: boolean
 }
 
 const MAX_BOUNDS = {
   sm: {
-    maxWidth: 320,
-    maxHeight: 400,
+    maxWidth: 390,
+    maxHeight: 410,
   },
   md: {
-    maxWidth: 440,
-    maxHeight: 460,
+    maxWidth: 460,
+    maxHeight: 480,
+  },
+  lg: {
+    maxWidth: 540,
+    maxHeight: 560,
   },
 } as const
 
@@ -52,6 +56,7 @@ export const MediaWrapper = observer(function MediaWrapper(props: Props) {
   const dim = note.metadata.imeta?.[src]?.dim
   const width = mediaStore.dims.get(src)?.[0] || dim?.width
   const height = mediaStore.dims.get(src)?.[1] || dim?.height
+  const hasError = mediaStore.hasError(src)
   const adjusted =
     width && height ? adjustDimensions(width, height, MAX_BOUNDS[size].maxWidth, MAX_BOUNDS[size].maxWidth) : null
   return (
@@ -63,6 +68,7 @@ export const MediaWrapper = observer(function MediaWrapper(props: Props) {
           dense && styles.root$dense,
           adjusted ? styles.bounds(adjusted.width, adjusted.height) : styles[`size$${size}`],
           !!fixedHeight && styles.fixedHeight(fixedHeight),
+          hasError && styles.error,
         ]}>
         {children}
       </html.div>
@@ -76,7 +82,7 @@ const styles = css.create({
   root: {
     marginBlock: spacing.margin2,
     maxWidth: {
-      default: 425,
+      default: 560,
       [MOBILE]: 'calc(100vw - 60px)',
     },
   },
@@ -87,11 +93,18 @@ const styles = css.create({
   padding: {
     paddingLeft: spacing.padding2,
   },
+  size$lg: {
+    maxHeight: MAX_BOUNDS.lg.maxHeight,
+  },
   size$md: {
     maxHeight: MAX_BOUNDS.md.maxHeight,
   },
   size$sm: {
     maxHeight: MAX_BOUNDS.sm.maxHeight,
+  },
+  error: {
+    // width: 'auto',
+    // height: 'auto',
   },
   fixedHeight: (height: number) => ({ height }),
   bounds: (width: number, height: number) => ({ width, height }),

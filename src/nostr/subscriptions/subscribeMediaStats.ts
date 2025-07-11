@@ -20,7 +20,6 @@ import { metadataSymbol } from '../types'
 
 function fromImageMetadata(src: string) {
   const img = new Image()
-  // Shouldn't really use rootStore here for works for now
   img.src = `${import.meta.env.VITE_IMGPROXY_URL}/_/feed_img/plain/${src}`
   return fromEvent(img, 'load').pipe(
     take(1),

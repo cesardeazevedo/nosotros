@@ -1,5 +1,5 @@
 import { Kind } from '@/constants/kinds'
-import { RELAY_1, RELAY_2, RELAY_OUTBOX_1 } from '@/constants/testRelays'
+import { RELAY_1, RELAY_2, RELAY_FALLBACK_1, RELAY_OUTBOX_1 } from '@/constants/testRelays'
 import { PaginationSubject } from '@/core/PaginationSubject'
 import { fakeEvent } from '@/utils/faker'
 import { test } from '@/utils/fixtures'
@@ -15,6 +15,7 @@ test('subscribeFeedFollowing', async ({ createMockRelay }) => {
   const relayOutbox = createMockRelay(RELAY_OUTBOX_1, [
     fakeEvent({ kind: Kind.RelayList, pubkey: '3', tags: [['r', RELAY_2, 'write']] }),
   ])
+  const relayFallback = createMockRelay(RELAY_FALLBACK_1, [])
 
   const relay = createMockRelay(RELAY_1, [follows, note1, note2])
   const relay2 = createMockRelay(RELAY_2, [note3])
@@ -36,6 +37,7 @@ test('subscribeFeedFollowing', async ({ createMockRelay }) => {
   await relay.close()
   await relay2.close()
   await relayOutbox.close()
+  await relayFallback.close()
 
   expect(relay.received).toStrictEqual([
     ['REQ', '1', { kinds: [3], authors: ['1'] }],

@@ -370,8 +370,9 @@ export const notificationsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/notifications',
   preload: true,
-  staleTime: 0,
-  gcTime: 0,
+  gcTime: Infinity,
+  staleTime: Infinity,
+  preloadStaleTime: Infinity,
   beforeLoad: (options) => {
     const { pubkey } = options.context.rootStore.auth
     if (!pubkey) {

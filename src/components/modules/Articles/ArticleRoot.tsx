@@ -54,7 +54,12 @@ export const ArticleRoot = observer(function ArticleRoot(props: Props) {
                 </Stack>
                 {dense && <PostActions />}
               </Stack>
-              {image && <html.img src={globalSettings.getImgProxyUrl('feed_img', image)} style={[styles.image, isMobile && styles.image$mobile]} />}
+              {image && (
+                <html.img
+                  src={globalSettings.getImgProxyUrl('feed_img', image)}
+                  style={[styles.image, isMobile && styles.image$mobile]}
+                />
+              )}
             </Stack>
           </ContentProvider>
         </LinkNAddress>
