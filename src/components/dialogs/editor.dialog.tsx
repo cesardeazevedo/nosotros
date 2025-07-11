@@ -34,7 +34,7 @@ export const EditorDialog = observer(function EditorDialog() {
   }, [store?.editor])
 
   return (
-    <DialogSheet maxWidth='sm' sx={styles.dialog} surface='surfaceContainerLowest' open={open} onClose={handleClose}>
+    <DialogSheet maxWidth='sm' sx={styles.dialog} open={open} onClose={handleClose}>
       {store && <Editor initialOpen store={store} onDiscard={handleClose} sx={styles.editor} />}
     </DialogSheet>
   )

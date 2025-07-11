@@ -56,8 +56,16 @@ export const ArticleRoot = observer(function ArticleRoot(props: Props) {
               </Stack>
               {image && (
                 <html.img
+                  loading='lazy'
+                  fetchPriority='low'
                   src={globalSettings.getImgProxyUrl('feed_img', image)}
                   style={[styles.image, isMobile && styles.image$mobile]}
+                  onError={(e: { target: HTMLImageElement }) => {
+                    setTimeout(() => {
+                      const img = e.target
+                      img.src = image
+                    }, 1000)
+                  }}
                 />
               )}
             </Stack>

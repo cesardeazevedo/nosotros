@@ -43,7 +43,7 @@ function MobileDialog(props: Props) {
 }
 
 export const DialogSheet = (props: Props) => {
-  const { children, surface = 'surfaceContainerLowest' } = props
+  const { children, surface = 'surfaceContainerLow' } = props
   const isMobile = useMobile()
   return (
     <>

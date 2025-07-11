@@ -24,13 +24,13 @@ const darkTheme = css.createTheme(palette, {
   errorContainer: colors.red7,
   onErrorContainer: colors.red0,
 
-  surface: '#02040a',
+  surface: '#000000',
   onSurface: '#fff',
   onSurfaceVariant: colors.gray6,
 
-  surfaceContainerLowest: colors.gray11,
-  surfaceContainerLow: colors.gray10,
-  surfaceContainer: colors.gray9,
+  surfaceContainerLowest: '#000',
+  surfaceContainerLow: colors.gray11,
+  surfaceContainer: colors.gray10,
   surfaceContainerHigh: colors.gray8,
   surfaceContainerHighest: colors.gray7,
 
