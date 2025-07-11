@@ -1,5 +1,5 @@
 import { Kind } from '@/constants/kinds'
-import { RELAY_1, RELAY_OUTBOX_1 } from '@/constants/testRelays'
+import { RELAY_1, RELAY_FALLBACK_1, RELAY_OUTBOX_1 } from '@/constants/testRelays'
 import { fakeEvent } from '@/utils/faker'
 import { test } from '@/utils/fixtures'
 import { subscribeSpyTo } from '@hirez_io/observer-spy'
@@ -24,11 +24,13 @@ describe('publishFollowList', () => {
     const relayOutbox = createMockRelay(RELAY_OUTBOX_1, [
       fakeEvent({ kind: Kind.RelayList, pubkey, tags: [['r', RELAY_1, 'write']] }),
     ])
+    const relayFallback = createMockRelay(RELAY_FALLBACK_1, [])
     const $ = publishFollowList(pubkey, 'p', ['p5'], { signer })
     const spy = subscribeSpyTo($)
     await spy.onComplete()
     await relay1.close()
     await relayOutbox.close()
+    await relayFallback.close()
     expect(relay1.received).toStrictEqual([
       ['REQ', '1', { kinds: [Kind.Follows], authors: [pubkey] }],
       ['CLOSE', '1'],
@@ -70,11 +72,13 @@ describe('publishFollowList', () => {
     const relayOutbox = createMockRelay(RELAY_OUTBOX_1, [
       fakeEvent({ kind: Kind.RelayList, pubkey, tags: [['r', RELAY_1, 'write']] }),
     ])
+    const relayFallback = createMockRelay(RELAY_FALLBACK_1, [])
     const $ = publishFollowList(pubkey, 'p', ['p4'], { signer })
     const spy = subscribeSpyTo($)
     await spy.onComplete()
     await relay1.close()
     await relayOutbox.close()
+    await relayFallback.close()
     expect(relay1.received).toStrictEqual([
       ['REQ', '1', { kinds: [Kind.Follows], authors: [pubkey] }],
       ['CLOSE', '1'],
@@ -114,11 +118,13 @@ describe('publishFollowList', () => {
     const relayOutbox = createMockRelay(RELAY_OUTBOX_1, [
       fakeEvent({ kind: Kind.RelayList, pubkey, tags: [['r', RELAY_1, 'write']] }),
     ])
+    const relayFallback = createMockRelay(RELAY_FALLBACK_1, [])
     const $ = publishFollowList(pubkey, 'p', ['p2', 'p3', 'p4', 'p5', 'p6', 'p7', 'p8'], { signer })
     const spy = subscribeSpyTo($)
     await spy.onComplete()
     await relay1.close()
     await relayOutbox.close()
+    await relayFallback.close()
     expect(relay1.received).toStrictEqual([
       ['REQ', '1', { kinds: [Kind.Follows], authors: [pubkey] }],
       ['CLOSE', '1'],
