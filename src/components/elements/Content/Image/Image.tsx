@@ -15,6 +15,7 @@ import { css, html } from 'react-strict-dom'
 import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDOMProps'
 import { dialogStore } from 'stores/ui/dialogs.store'
 import { BlurContainer } from '../../Layouts/BlurContainer'
+import { ContentLink } from '../Link/Link'
 
 type Props = {
   src: string
@@ -48,16 +49,19 @@ export const Image = observer(function Image(props: Props) {
       {({ blurStyles }) => (
         <>
           {hasError && (
-            <Stack gap={1} horizontal={false} sx={styles.fallback} align='center' justify='center'>
-              <IconPhotoOff size={40} strokeWidth='1.0' />
-              {src}
-            </Stack>
+            <ContentLink href={src} underline={false} sx={styles.fallbackLink}>
+              <Stack gap={1} horizontal={false} sx={styles.fallback} align='center' justify='center'>
+                <IconPhotoOff size={40} strokeWidth='1.0' />
+                {src}
+              </Stack>
+            </ContentLink>
           )}
           {!hasError && (
             <html.img
               style={[styles.img, blurStyles, sx]}
               src={proxy ? globalSettings.getImgProxyUrl('feed_img', src) : src}
               onClick={handleClick}
+              onError={() => mediaStore.addError(src)}
               {...rest}
               {...media}
             />
@@ -85,13 +89,18 @@ const styles = css.create({
     },
   },
   fallback: {
-    width: 180,
-    height: 200,
+    width: '100%',
+    height: '100%',
     textAlign: 'center',
     wordBreak: 'break-all',
+    userSelect: 'all',
     paddingInline: spacing.padding1,
     backgroundColor: palette.surfaceContainer,
     color: palette.onSurfaceVariant,
     borderRadius: shape.lg,
+  },
+  fallbackLink: {
+    display: 'block',
+    height: '100%',
   },
 })

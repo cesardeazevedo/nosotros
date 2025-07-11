@@ -15,12 +15,13 @@ type Props = {
   underline?: boolean
   shrink?: boolean
   children?: React.ReactNode | string
+  sx?: SxProps
 }
 
 export const ContentLink = (props: Props) => {
   const { href, underline = true, shrink = true } = props
   const isLongLink = (href?.length || 0) > 36
-  const sx = [styles.root, underline && styles.root$underline, shrink && styles.shrink] as SxProps
+  const sx = [styles.root, underline && styles.root$underline, shrink && styles.shrink, props.sx] as SxProps
   const content = (
     <html.a href={href} target='_blank' rel='noopener noreferrer' style={sx}>
       {props.children}

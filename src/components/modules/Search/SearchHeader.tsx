@@ -13,21 +13,22 @@ type Props = {
 export const SearchHeader = (props: Props) => {
   const { module, updateSearchParams = true } = props
   const searchRef = useRef<HTMLInputElement>(null)
-  const onChange = useSearchChange(updateSearchParams, module?.feed)
+  const { query, onSubmit, onChange } = useSearchChange(updateSearchParams, module?.feed)
   return (
     <Stack sx={styles.root} justify='space-between'>
-      <SearchField
-        ref={searchRef}
-        placeholder='Search on nostr'
-        defaultValue={module?.feed.filter.search}
-        onChange={(e) => onChange(e.target.value)}
-      />
+      <form action={onSubmit} {...css.props(styles.form)}>
+        <SearchField ref={searchRef} placeholder='Search on nostr' defaultValue={query} onChange={onChange} />
+      </form>
     </Stack>
   )
 }
 
 const styles = css.create({
   root: {
-    height: 40,
+    height: 48,
+    width: '100%',
+  },
+  form: {
+    width: '100%',
   },
 })

@@ -1,6 +1,5 @@
 import { Chip } from '@/components/ui/Chip/Chip'
 import { Divider } from '@/components/ui/Divider/Divider'
-import { SearchField } from '@/components/ui/Search/Search'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { Kind } from '@/constants/kinds'
@@ -9,11 +8,10 @@ import { spacing } from '@/themes/spacing.stylex'
 import type { IconProps } from '@tabler/icons-react'
 import { IconArticle, IconMessage2, IconPhoto, IconUser } from '@tabler/icons-react'
 import { observer } from 'mobx-react-lite'
-import { useRef } from 'react'
 import { css, html } from 'react-strict-dom'
 import { FeedSettingsRelays } from '../Feed/settings/FeedSettingsRelays'
 import { FeedSettingsSafety } from '../Feed/settings/FeedSettingsSafety'
-import { useSearchChange } from './hooks/useSearchChange'
+import { SearchHeader } from './SearchHeader'
 
 const iconProps: IconProps = {
   size: 18,
@@ -27,18 +25,11 @@ type Props = {
 
 export const SearchSettings = observer(function SearchSettings(props: Props) {
   const { module, renderSearchField = true } = props
-  const searchRef = useRef<HTMLInputElement>(null)
-  const onChange = useSearchChange(true)
   return (
     <>
       {renderSearchField && (
-        <Stack sx={styles.header} justify='space-between'>
-          <SearchField
-            ref={searchRef}
-            placeholder='Search on nostr'
-            defaultValue={module?.feed.filter.search}
-            onChange={(e) => onChange(e.target.value)}
-          />
+        <Stack sx={styles.header} justify='stretch'>
+          <SearchHeader module={module} />
         </Stack>
       )}
       <html.div style={styles.root}>

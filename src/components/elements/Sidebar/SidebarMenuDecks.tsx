@@ -9,13 +9,17 @@ import { observer } from 'mobx-react-lite'
 import { css, html } from 'react-strict-dom'
 import { SidebarSubheader } from './SidebarSubheader'
 
-export const SidebarMenuDecks = observer(function SidebarMenuDecks() {
+type Props = {
+  expanded?: boolean
+}
+
+export const SidebarMenuDecks = observer(function SidebarMenuDecks(props: Props) {
   const rootStore = useRootStore()
   const match = useMatchRoute()
   const { decks } = rootStore
   return (
     <Expandable
-      initiallyExpanded={!!match({ to: '/deck/$id' })}
+      initiallyExpanded={props.expanded ?? !!match({ to: '/deck/$id' })}
       trigger={(triggerProps) => (
         <SidebarSubheader {...triggerProps} label={'Decks'} onCreateClick={() => dialogStore.toggleDeck(true)} />
       )}>

@@ -24,6 +24,7 @@ export const GlobalSettingsModel = t
   .model('GlobalSettings', {
     lang: Languages,
     theme: ThemeKeysEnum,
+    autoPlay: t.optional(t.boolean, true),
     imgproxy: t.optional(t.string, import.meta.env.VITE_IMGPROXY_URL),
     defaultEmoji: t.optional(t.string, ''),
     defaultUploadType: t.optional(t.string, 'nip96'),

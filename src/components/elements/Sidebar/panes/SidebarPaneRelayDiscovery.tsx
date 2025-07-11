@@ -42,7 +42,7 @@ export const SidebarPaneRelayDiscovery = (props: Props) => {
             <Stack horizontal={false} grow>
               <RelayDiscoveryHeader collapsed module={module} grow horizontal={false} justify='stretch'>
                 <Link to='/explore/relays' onClick={() => context.setPane(false)}>
-                  <IconButton size='sm'>
+                  <IconButton size='md'>
                     <IconLayoutSidebarLeftExpand size={22} />
                   </IconButton>
                 </Link>

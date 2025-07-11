@@ -1,5 +1,5 @@
 import { SettingsClientTag } from '@/components/modules/Settings/SettingsClientTag'
-import { SettingsContent } from '@/components/modules/Settings/SettingsContent'
+import { SettingsScrollLoader } from '@/components/modules/Settings/SettingsScrollLoader'
 import { SettingsMaxRelaysOutbox } from '@/components/modules/Settings/SettingsMaxRelaysOutbox'
 import { SettingsMediaStorage } from '@/components/modules/Settings/SettingsMediaStorage'
 import { SettingsNIP05 } from '@/components/modules/Settings/SettingsNIP05'
@@ -9,6 +9,7 @@ import { Stack } from '@/components/ui/Stack/Stack'
 import { spacing } from '@/themes/spacing.stylex'
 import { css } from 'react-strict-dom'
 import { SettingsRelayAuth } from './SettingsRelaysAuth'
+import { SettingsContent } from './SettingsContent'
 
 export const SettingsPreferencesRoute = () => {
   return (
@@ -24,6 +25,12 @@ export const SettingsPreferencesRoute = () => {
         <SettingsMaxRelaysOutbox />
         <br />
         <SettingsRelayAuth />
+        <br />
+        <SettingsScrollLoader />
+      </Stack>
+      <Stack horizontal={false} gap={1}>
+        <SettingsSubHeader>Content Settings</SettingsSubHeader>
+        <SettingsContent />
       </Stack>
       <Stack horizontal={false} gap={1}>
         <SettingsSubHeader>Post Settings</SettingsSubHeader>
@@ -32,10 +39,6 @@ export const SettingsPreferencesRoute = () => {
       <Stack horizontal={false} gap={1} align='flex-start' justify='flex-start'>
         <SettingsSubHeader>Upload Settings</SettingsSubHeader>
         <SettingsMediaStorage />
-      </Stack>
-      <Stack horizontal={false} gap={1}>
-        <SettingsSubHeader>Content Settings</SettingsSubHeader>
-        <SettingsContent />
       </Stack>
     </Stack>
   )
