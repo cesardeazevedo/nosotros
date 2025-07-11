@@ -27,7 +27,7 @@ export const EditorReplyDialog = observer(function EditorReplyDialog() {
   const note = useNoteStoreFromId(id)
 
   return (
-    <DialogSheet maxWidth='sm' sx={styles.dialog} surface='surfaceContainerLow' open={!!replying} onClose={handleClose}>
+    <DialogSheet maxWidth='sm' sx={styles.dialog} open={!!replying} onClose={handleClose}>
       {replying && (
         <>
           <RemoveScroll>
