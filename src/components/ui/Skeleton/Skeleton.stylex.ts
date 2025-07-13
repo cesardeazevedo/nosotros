@@ -7,7 +7,7 @@ const vars = {
 
   // container
   containerShape: shape.xl,
-  containerColor: palette.surfaceContainerLow,
+  containerColor: palette.surfaceContainer,
   // &:error
   containerColor$error: palette.errorContainer,
 
