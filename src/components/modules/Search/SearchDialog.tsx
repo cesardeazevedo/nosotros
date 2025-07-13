@@ -11,7 +11,7 @@ import { observer } from 'mobx-react-lite'
 import { nip19 } from 'nostr-tools'
 import { css } from 'react-strict-dom'
 
-export const SearchDialog = observer(() => {
+export const SearchDialog = observer(function SearchDialog() {
   const open = !!dialogStore.search
   const isMobile = useMobile()
   const navigate = useNavigate()
@@ -28,6 +28,7 @@ export const SearchDialog = observer(() => {
         suggestRelays
         sx={styles.maxHeight}
         placeholder='Search on nostr'
+        onCancel={handleClose}
         onSelect={(item) => {
           switch (item.type) {
             case 'query': {
