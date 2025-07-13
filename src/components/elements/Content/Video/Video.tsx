@@ -2,9 +2,10 @@ import { useNoteContext } from '@/components/providers/NoteProvider'
 import type { SxProps } from '@/components/ui/types'
 import { useMediaStore } from '@/hooks/useMediaStore'
 import { useGlobalSettings } from '@/hooks/useRootStore'
+import { mediaStore } from '@/stores/media/media.store'
 import { shape } from '@/themes/shape.stylex'
 import { observer } from 'mobx-react-lite'
-import { useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { css } from 'react-strict-dom'
 import { BlurContainer } from '../../Layouts/BlurContainer'
 
@@ -26,15 +27,38 @@ export const Video = observer(function Video(props: Props) {
   const media = useMediaStore(src, note.metadata.imeta)
   const settings = useGlobalSettings()
   const autoPlay = props.autoPlay ?? settings.autoPlay
+
+  useEffect(() => {
+    const video = ref.current
+    if (!video) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && mediaStore.currentVideo !== video) {
+          mediaStore.setVideo(video, autoPlay)
+        }
+      },
+      { threshold: 1 },
+    )
+    observer.observe(video)
+
+    return () => {
+      observer.disconnect()
+      mediaStore.removeVideo(video)
+    }
+  }, [media, autoPlay])
+
   return (
     <BlurContainer>
       {({ blurStyles }) => (
         <video
           {...css.props([styles.video, blurStyles, sx])}
+          playsInline
+          webkit-playsinline
           ref={ref}
           loop={loop}
           muted={autoPlay ? true : muted}
-          autoPlay={autoPlay}
+          autoPlay={false}
           preload={preload}
           controls={controls}
           onClick={(e) => {
