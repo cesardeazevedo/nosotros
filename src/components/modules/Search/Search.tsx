@@ -11,10 +11,11 @@ import { css } from 'react-strict-dom'
 type Props = Omit<SearchContentProps, 'query' | 'ref'> & {
   placeholder?: string
   trailing?: ReactNode
+  onCancel?: () => void
 }
 
 export const Search = (props: Props) => {
-  const { sx, placeholder, trailing, onSelect, ...rest } = props
+  const { sx, placeholder, trailing, onCancel, onSelect, ...rest } = props
   const [query, setQuery] = useState('')
 
   const searchRef = useRef<OnKeyDownRef>(null)
@@ -35,7 +36,10 @@ export const Search = (props: Props) => {
             placeholder={placeholder || 'Search Users'}
             trailing={trailing}
             onKeyDown={(event) => searchRef.current?.onKeyDown({ event })}
-            onCancel={() => setQuery('')}
+            onCancel={() => {
+              setQuery('')
+              onCancel?.()
+            }}
             onChange={(e) => setQuery(e.target.value)}
           />
         </Stack>

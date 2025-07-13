@@ -80,8 +80,12 @@ export const SidebarMenuWelcome = () => {
       )}
       <Stack horizontal={false} gap={0.5} sx={styles.wrapper}>
         <SidebarMenuRelays />
-        <Link to='/settings'>
-          <MenuItem onClick={() => {}} leadingIcon={<IconSettings {...iconProps} />} label='Settings' />
+        <Link to='/settings' resetScroll>
+          <MenuItem
+            onClick={() => context.setPane(false)}
+            leadingIcon={<IconSettings {...iconProps} />}
+            label='Settings'
+          />
         </Link>
       </Stack>
     </Stack>
