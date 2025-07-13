@@ -1,4 +1,5 @@
 import { Paper } from '@/components/ui/Paper/Paper'
+import { useMobile } from '@/hooks/useMobile'
 import { useIsDarkTheme } from '@/hooks/useTheme'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
@@ -14,11 +15,12 @@ type Props = {
 
 export const PaperContainer = observer(function PaperContainer(props: Props) {
   const { children, maxWidth = 'md', topRadius = true, ...rest } = props
+  const isMobile = useMobile()
   const isDark = useIsDarkTheme()
   return (
     <Paper
       {...rest}
-      outlined={isDark}
+      outlined={isDark && !isMobile}
       elevation={isDark ? 0 : 1}
       surface='surfaceContainerLowest'
       sx={[styles.root, styles[maxWidth], !topRadius && styles.resetTopRadius]}>
