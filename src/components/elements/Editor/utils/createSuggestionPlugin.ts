@@ -25,7 +25,7 @@ export function createSuggestionPlugin(editor: Editor) {
 
       const attrs: Partial<NProfileAttributes> = {
         pubkey: props.pubkey,
-        relays: userStore.get(props.pubkey)?.relays,
+        relays: userStore.get(props.pubkey)?.relays.slice(0, 2),
       }
       attrs.bech32 = nip19.nprofileEncode(attrs as nip19.ProfilePointer)
 
