@@ -1,3 +1,4 @@
+import type { Metadata } from '@/nostr/types'
 import type { Kind } from 'constants/kinds'
 import type { NostrEvent, NostrFilter } from 'core/types'
 import type { RelayInformation } from 'nostr-tools/nip11'
@@ -26,17 +27,11 @@ export interface RelayInfoStore {
   insert(url: string, data: RelayInfoDB): Promise<RelayInfoDB>
 }
 
-export interface MetadataStore {
-  query<T extends MetadataDB>(id: string): Promise<T | undefined>
-  insert<T extends MetadataDB>(data: T): Promise<T>
-}
-
 export interface DB {
   seen: SeenStore
   event: EventStore
   relayStats: RelayStatsStore
   relayInfo: RelayInfoStore
-  metadata: MetadataStore
   clearDB(): Promise<void>
 }
 
@@ -57,9 +52,9 @@ export interface TagDB {
 }
 
 export interface SeenDB {
-  kind: Kind
   eventId: string
   relay: string
+  created_at: number
 }
 
 export interface RelayInfoDB extends RelayInformation {
@@ -88,4 +83,8 @@ export interface Nip05DB {
   pubkey: string
   relays: string[]
   timestamp: number
+}
+
+export type Nip05Stored = Nip05DB & {
+  relays: string
 }

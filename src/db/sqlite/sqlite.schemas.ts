@@ -1,0 +1,81 @@
+import type { Database } from '@sqlite.org/sqlite-wasm'
+import sqlite3InitModule from '@sqlite.org/sqlite-wasm'
+
+function build(db: Database) {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS events (
+      id TEXT(64) PRIMARY KEY,
+      kind INTEGER NOT NULL,
+      pubkey TEXT(64) NOT NULL,
+      created_at INTEGER NOT NULL,
+      content TEXT,
+      tags TEXT NOT NULL,
+      sig TEXT(128) NOT NULL,
+      metadata TEXT NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_events_kind_pubkey_created_at ON events(kind, pubkey, created_at DESC);
+
+    CREATE TABLE IF NOT EXISTS tags (
+      eventId TEXT(64) NOT NULL,
+      tag TEXT NOT NULL,
+      value TEXT NOT NULL,
+      kind INTEGER NOT NULL,
+      pubkey TEXT(64) NOT NULL,
+      created_at INTEGER NOT NULL,
+      PRIMARY KEY (eventId, tag, value),
+      FOREIGN KEY (eventId) REFERENCES events(id) ON DELETE CASCADE
+    );
+    CREATE INDEX IF NOT EXISTS idx_tags_kind_tag_value_created_at ON tags(kind, tag, value, pubkey, created_at DESC);
+
+    CREATE TABLE IF NOT EXISTS seen (
+      eventId TEXT NOT NULL,
+      relay TEXT NOT NULL,
+      created_at INT NOT NULL,
+      PRIMARY KEY (eventId, relay)
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_seen_eventId_relay ON seen(eventId, relay, created_at DESC);
+
+    CREATE TABLE IF NOT EXISTS relayInfo (
+      url TEXT PRIMARY KEY,
+      data TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS relayStats (
+      url TEXT PRIMARY KEY,
+      data TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS nip05 (
+      nip05 TEXT PRIMARY KEY,
+      pubkey TEXT NOT NULL,
+      relays TEXT NOT NULL,
+      timestamp INTEGER NOT NULL
+    );
+  `)
+}
+
+export async function initializeSQLite(name: string = 'nosotrosdb.sqlite3', tracing = true) {
+  try {
+    console.log('Loading and initializing SQLite3 module...')
+    const sqlite3 = await sqlite3InitModule({
+      print: console.log,
+      printErr: console.error,
+    })
+    const flags = tracing ? 'ct' : 'c'
+    const db = 'opfs' in sqlite3 ? new sqlite3.oo1.OpfsDb(`/${name}`, flags) : new sqlite3.oo1.DB(`/${name}`, flags)
+    if (tracing) {
+      console.log(
+        'opfs' in sqlite3
+          ? `OPFS is available, created persisted database at ${db.filename}`
+          : `OPFS is not available, created transient database ${db.filename}`,
+      )
+    }
+    build(db)
+    return db
+  } catch (err) {
+    const error = err as Error
+    const msg = `Initialization error: ${error.message}`
+    console.error(msg)
+    return Promise.reject(msg)
+  }
+}
