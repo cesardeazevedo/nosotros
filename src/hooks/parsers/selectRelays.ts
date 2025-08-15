@@ -20,6 +20,6 @@ export function selectRelays(data: UserRelay[], ctx: NostrContext, stats?: Recor
       const events2 = stats2?.events || 0
       return events2 - events1
     })
-    .slice(0, 2)
+    .slice(0, ctx.maxRelaysPerUser || 2)
   return res
 }

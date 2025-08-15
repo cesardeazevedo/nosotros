@@ -23,7 +23,7 @@ describe('parseComment', () => {
     expect(rest).toStrictEqual({
       imeta: {},
       mentionedNotes: [],
-      mentionedAuthors: [],
+      mentionedAuthors: ['pubkey1'],
       relayHints: {
         authors: { pubkey1: [RELAY_1] },
         ids: { id_1_root: [RELAY_1], id_1_reply_1: [RELAY_2] },
@@ -54,7 +54,7 @@ describe('parseComment', () => {
     expect(rest).toStrictEqual({
       imeta: {},
       mentionedNotes: [],
-      mentionedAuthors: [],
+      mentionedAuthors: ['pubkey1'],
       relayHints: {
         authors: { pubkey1: [RELAY_1] },
         ids: { id_1_root: [RELAY_1, RELAY_2] },
