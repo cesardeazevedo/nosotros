@@ -1,9 +1,11 @@
+import { useDecks } from '@/components/modules/Deck/hooks/useDeck'
 import { NotificationBadge } from '@/components/modules/Notifications/NotificationBadge'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import type { SxProps } from '@/components/ui/types'
-import { useCurrentPubkey, useCurrentUser, useGlobalSettings, useRootStore } from '@/hooks/useRootStore'
+import { useCurrentPubkey, useCurrentUser } from '@/hooks/useAuth'
+import { useToggleSettings } from '@/hooks/useSettings'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
@@ -19,8 +21,7 @@ import {
   IconWorldBolt,
 } from '@tabler/icons-react'
 import { Link, useMatchRoute } from '@tanstack/react-router'
-import { observer } from 'mobx-react-lite'
-import { useContext, type RefObject } from 'react'
+import { memo, useContext, type RefObject } from 'react'
 import { css } from 'react-strict-dom'
 import { IconButtonSearch } from '../Buttons/IconButtonSearch'
 import { IconHome } from '../Icons/IconHome'
@@ -33,13 +34,13 @@ type Props = {
   sx?: SxProps
 }
 
-export const SidebarCollapsed = observer(function SidebarCollapsed(props: Props) {
-  const global = useGlobalSettings()
-  const { decks } = useRootStore()
+export const SidebarCollapsed = memo(function SidebarCollapsed(props: Props) {
   const user = useCurrentUser()
+  const decks = useDecks()
   const pubkey = useCurrentPubkey()
   const match = useMatchRoute()
   const context = useContext(SidebarContext)
+  const toggleSettings = useToggleSettings()
   const iconProps = {
     size: 26,
     strokeWidth: '1.6',
@@ -60,7 +61,7 @@ export const SidebarCollapsed = observer(function SidebarCollapsed(props: Props)
           sx={styles.iconButton}
           onClick={() => {
             context.setPane(false)
-            global.toggle('sidebarCollapsed', false)
+            toggleSettings('sidebarCollapsed')
           }}>
           <IconLayoutSidebarLeftExpandFilled {...iconProps} />
         </IconButton>
@@ -142,7 +143,7 @@ export const SidebarCollapsed = observer(function SidebarCollapsed(props: Props)
           DECKS
         </Text>
         <Stack horizontal={false} sx={styles.decks} gap={0.5}>
-          {decks.list.map((deck) => (
+          {decks?.map((deck) => (
             <Link key={deck.id} to='/deck/$id' params={{ id: deck.id }} onClick={() => context.setPane(false)}>
               {({ isActive }) => <IconButton selected={isActive} toggle sx={styles.deckIconButton} icon={deck.icon} />}
             </Link>

@@ -1,10 +1,9 @@
 import { ContentProvider } from '@/components/providers/ContentProvider'
-import { userStore } from '@/stores/users/users.store'
+import { useUserState } from '@/hooks/state/useUser'
 import { palette } from '@/themes/palette.stylex'
 import { LinkProfile } from 'components/elements/Links/LinkProfile'
 import { UserPopover } from 'components/elements/User/UserPopover'
-import { observer } from 'mobx-react-lite'
-import { nip19 } from 'nostr-tools'
+import { memo } from 'react'
 import { css } from 'react-strict-dom'
 import { UserAvatar } from '../../User/UserAvatar'
 
@@ -12,10 +11,9 @@ type Props = {
   pubkey: string
 }
 
-export const NProfile = observer(function NProfile(props: Props) {
+export const NProfile = memo(function NProfile(props: Props) {
   const { pubkey } = props
-  const user = userStore.get(pubkey)
-  const name = user?.displayName || nip19.npubEncode(pubkey).slice(0, 12) + '...'
+  const user = useUserState(pubkey)
   return (
     <>
       <UserPopover pubkey={pubkey}>
@@ -23,7 +21,7 @@ export const NProfile = observer(function NProfile(props: Props) {
           <ContentProvider value={{ disablePopover: true, disableLink: true }}>
             <UserAvatar pubkey={pubkey} size='xs' sx={styles.avatar} />
           </ContentProvider>
-          {name}
+          {user.displayName}
         </LinkProfile>
       </UserPopover>
     </>

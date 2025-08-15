@@ -7,6 +7,7 @@ import { css, html } from 'react-strict-dom'
 import { Skeleton } from '../Skeleton/Skeleton'
 import type { SxProps } from '../types'
 import { avatarTokens } from './Avatar.stylex'
+import { palette } from '@/themes/palette.stylex'
 
 type AvatarVariant = 'rounded' | 'squared'
 
@@ -93,7 +94,7 @@ export const Avatar = (props: Props) => {
           style={styles.img}
           src={src}
           srcSet={srcSet}
-          crossOrigin={crossOrigin}
+          crossOrigin={'anonymous'}
           referrerPolicy={referrerPolicy}
         />
       ) : children ? (
@@ -144,6 +145,7 @@ const styles = css.create({
     userSelect: 'none',
     color: avatarTokens.labelTextColor,
     textTransform: 'uppercase',
+    backgroundColor: palette.surfaceContainerLowest,
     flexShrink: 0,
     flexGrow: 0,
   },

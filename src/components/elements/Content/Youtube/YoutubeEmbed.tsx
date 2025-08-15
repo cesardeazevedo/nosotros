@@ -1,9 +1,9 @@
 import { Button } from '@/components/ui/Button/Button'
 import { Text } from '@/components/ui/Text/Text'
-import { useGlobalSettings } from '@/hooks/useRootStore'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
+import { getImgProxyUrl } from '@/utils/imgproxy'
 import { IconPlayerPlayFilled } from '@tabler/icons-react'
 import { useMemo, useState } from 'react'
 import { css, html } from 'react-strict-dom'
@@ -18,7 +18,6 @@ type Props = {
 export const YoutubeEmbed = (props: Props) => {
   const { src } = props
   const [open, setOpen] = useState(false)
-  const globalSettings = useGlobalSettings()
 
   const embedId = useMemo(() => src.match(REGEX_VIDEO_ID)?.[1].replace('/', ''), [src])
 
@@ -30,11 +29,7 @@ export const YoutubeEmbed = (props: Props) => {
       {embedId ? (
         <html.div style={styles.content}>
           {!open && (
-            <html.img
-              style={[styles.img]}
-              src={globalSettings.getImgProxyUrl('feed_img', posterUrl)}
-              onClick={() => setOpen(true)}
-            />
+            <html.img style={[styles.img]} src={getImgProxyUrl('feed_img', posterUrl)} onClick={() => setOpen(true)} />
           )}
           {open && <iframe {...css.props(styles.iframe)} src={iframeSrc} width={400} height={280} />}
           {!open && (

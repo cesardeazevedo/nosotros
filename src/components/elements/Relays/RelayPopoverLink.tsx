@@ -4,12 +4,10 @@ import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { TooltipRich } from '@/components/ui/TooltipRich/TooltipRich'
 import { formatRelayUrl, prettyRelayUrl } from '@/core/helpers/formatRelayUrl'
-import { enqueueRelayInfo } from '@/nostr/nip11'
-import { relaysStore } from '@/stores/relays/relays.store'
+import { useRelayInfo } from '@/hooks/query/useRelayInfo'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import { observer } from 'mobx-react-lite'
-import { useEffect } from 'react'
+import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 import { LinkRelayFeed } from '../Links/LinkRelayFeed'
 import { RelayChip } from './RelayChip'
@@ -20,14 +18,10 @@ type Props = {
   children: React.ReactNode
 }
 
-const PopoverContent = observer(function PopoverContent(props: { url: string }) {
+const PopoverContent = memo(function PopoverContent(props: { url: string }) {
   const { url } = props
   const pretty = prettyRelayUrl(url)
-  const info = relaysStore.getInfo(url)
-
-  useEffect(() => {
-    enqueueRelayInfo(url)
-  }, [url])
+  const { data: info } = useRelayInfo(url)
 
   return (
     <Paper elevation={2} surface='surfaceContainerLow' sx={styles.root}>
@@ -55,7 +49,7 @@ const PopoverContent = observer(function PopoverContent(props: { url: string }) 
   )
 })
 
-export const RelayPopoverLink = observer(function RelayPopoverLink(props: Props) {
+export const RelayPopoverLink = memo(function RelayPopoverLink(props: Props) {
   const url = formatRelayUrl(props.url)
   return (
     <TooltipRich cursor='dot' content={() => <PopoverContent url={url} />} placement='bottom-start'>

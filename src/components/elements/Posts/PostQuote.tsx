@@ -1,10 +1,10 @@
 import { ContentProvider, useContentContext } from '@/components/providers/ContentProvider'
 import { NoteProvider } from '@/components/providers/NoteProvider'
-import { useNoteStore } from '@/hooks/useNoteStore'
-import type { NostrEventMetadata } from '@/nostr/types'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import { useNoteState } from '@/hooks/state/useNote'
+import { useNevent } from '@/hooks/useEventUtils'
 import { spacing } from '@/themes/spacing.stylex'
-import { observer } from 'mobx-react-lite'
-import React from 'react'
+import React, { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 import { LinkNEvent } from '../Links/LinkNEvent'
 import { PostActions } from './PostActions/PostActions'
@@ -12,20 +12,21 @@ import { PostContent } from './PostContent'
 import { PostUserHeader } from './PostUserHeader'
 
 type Props = {
-  event: NostrEventMetadata
+  event: NostrEventDB
   header?: React.ReactNode
 }
 
-export const PostQuote = observer(function PostQuote(props: Props) {
+export const PostQuote = memo(function PostQuote(props: Props) {
   const { event, header } = props
-  const note = useNoteStore(event)
+  const note = useNoteState(event)
   const { blured } = useContentContext()
+  const nevent = useNevent(event)
   return (
-    <LinkNEvent nevent={note.event.nevent}>
-      <NoteProvider value={{ note }}>
+    <LinkNEvent nevent={nevent}>
+      <NoteProvider value={{ event, note }}>
         <ContentProvider value={{ blured, dense: true, disableLink: true }}>
           <html.div style={styles.root}>
-            {header || <PostUserHeader sx={styles.header} dense />}
+            {header || <PostUserHeader dense sx={styles.header} event={event} />}
             <PostContent initialExpanded />
             <PostActions sx={styles.actions} />
           </html.div>

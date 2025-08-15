@@ -1,17 +1,17 @@
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
-import { relaysStore } from '@/stores/relays/relays.store'
+import { useRelay } from '@/hooks/useRelays'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconAntennaBars1, IconAntennaBars5 } from '@tabler/icons-react'
-import { observer } from 'mobx-react-lite'
+import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 
 type Props = {
   url: string
 }
 
-export const RelayConnectedIcon = observer(function RelayConnectedIcon(props: Props) {
+export const RelayConnectedIcon = memo(function RelayConnectedIcon(props: Props) {
   const { url } = props
-  const relay = relaysStore.getByUrl(url)
+  const relay = useRelay(url)
   const active = !!relay
   const connected = relay?.connected || false
   if (active) {

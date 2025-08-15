@@ -7,14 +7,12 @@ import { listItemTokens } from '@/components/ui/ListItem/ListItem.stylex'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import type { SxProps } from '@/components/ui/types'
-import type { User } from '@/stores/users/user'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconSearch, IconServerBolt } from '@tabler/icons-react'
-import { observer } from 'mobx-react-lite'
 import type { ReactNode, Ref } from 'react'
-import React, { useCallback, useImperativeHandle, useRef, useState } from 'react'
+import React, { memo, useCallback, useImperativeHandle, useState } from 'react'
 import { css, html } from 'react-strict-dom'
 import type { SearchItem } from './hooks/useSearchSuggestions'
 import { useSearchSuggestions } from './hooks/useSearchSuggestions'
@@ -39,7 +37,7 @@ export type Props = {
   onSelect?: (item: SearchItem) => void
 }
 
-export const SearchContent = observer(function SearchContent(props: Props) {
+export const SearchContent = memo(function SearchContent(props: Props) {
   const {
     ref,
     query = '',
@@ -54,7 +52,7 @@ export const SearchContent = observer(function SearchContent(props: Props) {
   } = props
 
   const [selectedIndex, setSelectedIndex] = useState(initialSelected)
-  const searchRef = useRef<{ users: User[] } | null>(null)
+  // const searchRef = useRef<{ users: User[] } | null>(null)
 
   const handleKeyUp = useCallback(() => {
     setSelectedIndex((prev) => (prev + limit - 1) % limit)
@@ -68,7 +66,7 @@ export const SearchContent = observer(function SearchContent(props: Props) {
     (item: SearchItem) => {
       onSelect?.(item)
     },
-    [props, searchRef],
+    [props],
   )
 
   useImperativeHandle(ref, () => ({

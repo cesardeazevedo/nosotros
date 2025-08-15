@@ -118,8 +118,8 @@ const styles = css.create({
     transform: {
       default: 'unset',
       ':is([data-pattern^="enterExit"])': 'scaleY(0.75)',
-      ':is([data-pattern^="enterExitOffScreen-top"])': 'translateY(-130%)',
-      ':is([data-pattern^="enterExitOffScreen-bottom"])': 'translateY(130%)',
+      ':is([data-pattern^="enterExitOffScreen-top"])': 'translateY(-50%)',
+      ':is([data-pattern^="enterExitOffScreen-bottom"])': 'translateY(50%)',
     },
   },
   transition$open: {
@@ -132,8 +132,9 @@ const styles = css.create({
     transitionProperty: {
       default: 'opacity',
       ':is([data-pattern^="enterExit"])': 'opacity, transform',
+      ':is([data-pattern^="enterExitOffScreen"])': 'opacity, transform',
     },
-    transitionDuration: duration.short2,
+    transitionDuration: duration.short4,
     transitionTimingFunction: easing.emphasizedDecelerate,
   },
   transition$open$horizontal: {
@@ -155,13 +156,14 @@ const styles = css.create({
     transform: {
       default: 'unset',
       ':is([data-pattern^="enterExit"])': 'scale(0.5)',
-      ':is([data-pattern^="enterExitOffScreen"])': 'translate(-100% -100%)',
+      // ':is([data-pattern^="enterExitOffScreen"])': 'translate(-100%, -100%)',
     },
     transitionProperty: {
       default: 'opacity',
       ':is([data-pattern^="enterExit"])': 'opacity, transform',
+      ':is([data-pattern^="enterExitOffScreen"])': 'opacity, transform',
     },
-    transitionDuration: duration.short2,
+    transitionDuration: duration.short3,
     transitionTimingFunction: easing.emphasizedAccelerate,
   },
   transition$close$horizontal: {
@@ -176,8 +178,8 @@ const styles = css.create({
     transform: {
       default: 'unset',
       ':is([data-pattern^="enterExit"])': 'scaleY(0.75)',
-      ':is([data-pattern^="enterExitOffScreen-top"])': 'translateY(-130%)',
-      ':is([data-pattern^="enterExitOffScreen-bottom"])': 'translateY(130%)',
+      ':is([data-pattern^="enterExitOffScreen-top"])': 'translateY(-50%)',
+      ':is([data-pattern^="enterExitOffScreen-bottom"])': 'translateY(50%)',
     },
   },
 })

@@ -1,3 +1,4 @@
+import { submitNostrConnectAtom } from '@/atoms/signin.atoms'
 import { CircularProgress } from '@/components/ui/Progress/CircularProgress'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
@@ -6,38 +7,39 @@ import { APP_NAME } from '@/constants/app'
 import { DEFAULT_NOSTR_CONNECT_RELAY } from '@/constants/relays'
 import { NIP46RemoteSigner } from '@/core/signers/nip46.signer'
 import { useGoBack } from '@/hooks/useNavigations'
-import { signinStore } from '@/stores/signin/signin.store'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { typeScale } from '@/themes/typeScale.stylex'
-import { observer } from 'mobx-react-lite'
+import { useSetAtom } from 'jotai'
 import { useObservable, useSubscription } from 'observable-hooks'
 import { QRCodeCanvas } from 'qrcode.react'
 import { useRef, useState } from 'react'
 import { css, html } from 'react-strict-dom'
-import { mergeMap, tap } from 'rxjs'
+import { from, mergeMap, tap } from 'rxjs'
 import type { CopyButtonRef } from '../Buttons/CopyIconButton'
 import { SignInHeader } from './SignInHeader'
 
-export const SignInNostrConnect = observer(function SignInNostrConnect() {
+export const SignInNostrConnect = () => {
   const ref = useRef<CopyButtonRef | null>(null)
   const goBack = useGoBack()
+  const submitNostrConnect = useSetAtom(submitNostrConnectAtom)
 
-  const relay = 'wss://relay.nsec.app'
+  const relay = DEFAULT_NOSTR_CONNECT_RELAY
   const [signer] = useState(
-    new NIP46RemoteSigner({
-      method: { method: 'nostrconnect', relay },
-      name: APP_NAME,
-    }),
+    () =>
+      new NIP46RemoteSigner({
+        method: { method: 'nostrconnect', relay },
+        name: APP_NAME,
+      }),
   )
 
-  const sub = useObservable(() =>
+  const sub$ = useObservable(() =>
     signer.connected$.pipe(
-      mergeMap(() => signinStore.submitNostrConnect(signer, relay)),
+      mergeMap(() => from(submitNostrConnect({ signer, relay }))),
       tap(() => goBack()),
     ),
   )
-  useSubscription(sub)
+  useSubscription(sub$)
 
   const url = signer.getNostrconnect()
 
@@ -51,14 +53,14 @@ export const SignInNostrConnect = observer(function SignInNostrConnect() {
         <html.div style={styles.qrcode}>
           <QRCodeCanvas width={500} height={500} size={220} value={url} onClick={ref.current?.copy} />
         </html.div>
-        <TextField fullWidth defaultValue={DEFAULT_NOSTR_CONNECT_RELAY} label='Connection Relay' />
+        <TextField fullWidth defaultValue={relay} label='Connection Relay' />
         <Text sx={styles.url} size='sm'>
           {url}
         </Text>
       </Stack>
     </Stack>
   )
-})
+}
 
 const styles = css.create({
   root: {

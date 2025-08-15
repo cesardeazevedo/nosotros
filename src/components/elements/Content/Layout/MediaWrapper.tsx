@@ -1,9 +1,9 @@
+import { mediaDimsAtom, mediaErrorSelector } from '@/atoms/media.atoms'
 import { useContentContext } from '@/components/providers/ContentProvider'
 import { useNoteContext } from '@/components/providers/NoteProvider'
-import { mediaStore } from '@/stores/media/media.store'
 import { spacing } from '@/themes/spacing.stylex'
-import { observer } from 'mobx-react-lite'
-import React from 'react'
+import { useAtomValue } from 'jotai'
+import React, { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 
 type Props = {
@@ -49,14 +49,15 @@ function adjustDimensions(
 // Handles width and height for Image and Video components if imeta tag is present
 // it defaults to max-width and max-height if they are not. This component also abstract lots ofduplicated
 // duplicated styles on Image and Video components, making a lot easier to work with
-export const MediaWrapper = observer(function MediaWrapper(props: Props) {
+export const MediaWrapper = memo(function MediaWrapper(props: Props) {
   const { src, size = 'md', fixedHeight, disablePadding = false, children } = props
   const { note } = useNoteContext()
   const { dense } = useContentContext()
-  const dim = note.metadata.imeta?.[src]?.dim
-  const width = mediaStore.dims.get(src)?.[0] || dim?.width
-  const height = mediaStore.dims.get(src)?.[1] || dim?.height
-  const hasError = mediaStore.hasError(src)
+  const dim = note.metadata?.imeta?.[src]?.dim
+  const dims = useAtomValue(mediaDimsAtom)
+  const width = dims.get(src)?.[0] || dim?.width
+  const height = dims.get(src)?.[1] || dim?.height
+  const hasError = useAtomValue(mediaErrorSelector(src))
   const adjusted =
     width && height ? adjustDimensions(width, height, MAX_BOUNDS[size].maxWidth, MAX_BOUNDS[size].maxWidth) : null
   return (
@@ -80,6 +81,8 @@ const MOBILE = '@media (max-width: 599.95px)'
 
 const styles = css.create({
   root: {
+    width: '100%',
+    height: '100%',
     marginBlock: spacing.margin2,
     maxWidth: {
       default: 560,

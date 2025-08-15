@@ -5,7 +5,6 @@ import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 
 export const EditorZapSplits = memo(function EditorZapSplits() {
-  // const store = useEditorSelector()
   return (
     <>
       <html.div style={styles.root}>

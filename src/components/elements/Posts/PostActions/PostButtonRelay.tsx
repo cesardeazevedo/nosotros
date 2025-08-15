@@ -4,13 +4,12 @@ import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 import { IconServerBolt } from '@tabler/icons-react'
 import { useMobile } from 'hooks/useMobile'
-import { observer } from 'mobx-react-lite'
-import { useCallback } from 'react'
+import { memo, useCallback } from 'react'
 import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDOMProps'
 import { ButtonContainer } from './PostButtonContainer'
 import { iconProps } from './utils'
 
-export const ButtonRelays = observer(function ButtonRelays() {
+export const ButtonRelays = memo(function ButtonRelays() {
   const { dense } = useContentContext()
   const { note } = useNoteContext()
   const isMobile = useMobile()
@@ -19,7 +18,7 @@ export const ButtonRelays = observer(function ButtonRelays() {
     (e: StrictClickEvent) => {
       e.preventDefault()
       e.stopPropagation()
-      note.toggleBroadcast()
+      note.actions.toggleBroadcast()
     },
     [isMobile],
   )
@@ -29,12 +28,10 @@ export const ButtonRelays = observer(function ButtonRelays() {
       cursor='arrow'
       key={isMobile.toString()}
       enterDelay={0}
-      text={
-        <div>Seen on {note.event.seenOn?.map((relay) => <div key={relay}>{relay.replace('wss://', '')}</div>)}</div>
-      }>
-      <ButtonContainer value={note.event.seenOn?.length || 0} aria-label='Seen on relays'>
+      text={<div>Seen on {note.seenOn?.map((relay) => <div key={relay}>{relay.replace('wss://', '')}</div>)}</div>}>
+      <ButtonContainer value={note.seenOn?.length || 0} aria-label='Seen on relays'>
         <IconButton
-          toggle={note.broadcastOpen}
+          toggle={note.state.broadcastOpen}
           size={dense ? 'sm' : 'md'}
           onClick={handleClick}
           icon={

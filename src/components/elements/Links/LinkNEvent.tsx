@@ -1,66 +1,54 @@
+import { useDeckAddNextColumn } from '@/components/modules/Deck/hooks/useDeck'
 import { useContentContext } from '@/components/providers/ContentProvider'
-import { useRootStore } from '@/hooks/useRootStore'
-import { createNEventModule } from '@/stores/modules/module.helpers'
-import { seenStore } from '@/stores/seen/seen.store'
+import { createEventModule } from '@/hooks/modules/createEventModule'
 import { decodeNIP19 } from '@/utils/nip19'
 import { Link, useRouter } from '@tanstack/react-router'
-import { observer, useLocalObservable } from 'mobx-react-lite'
 import { nip19 } from 'nostr-tools'
 import type { NEvent, Note } from 'nostr-tools/nip19'
-import React, { useCallback, useContext } from 'react'
-import { css } from 'react-strict-dom'
-import { DeckContext } from '../../modules/Deck/DeckContext'
+import React, { memo, useMemo } from 'react'
+import { css, html } from 'react-strict-dom'
 
 export type Props = {
-  nevent?: NEvent | Note
+  nevent?: NEvent | Note | string | undefined
   children: React.ReactNode
   underline?: boolean
-  replaceOnDeck?: boolean
 }
 
-export const LinkNEvent = observer(function LinkNEvent(props: Props) {
-  const { underline, replaceOnDeck = false, ...rest } = props
-  const router = useRouter()
-  const root = useRootStore()
-  const { index } = useContext(DeckContext)
+export const LinkNEvent = memo(function LinkNEvent(props: Props) {
+  const { underline, nevent: neventProp, ...rest } = props
   const { disableLink } = useContentContext()
-  const isDeck = index !== undefined
 
-  // Some quotes might be note1
-  const nevent = useLocalObservable(() => ({
-    get value() {
-      const { nevent } = props
-      if (nevent && (nevent.startsWith('note1') || nevent.startsWith('nostr:note1'))) {
-        const decoded = decodeNIP19(nevent)
-        if (decoded?.type === 'note') {
-          return nip19.neventEncode({
+  const router = useRouter()
+
+  // Swap note1 to nevent as note1 was deprecated
+  const nevent = useMemo(() => {
+    if (neventProp) {
+      const isNote1 = neventProp.startsWith('note1') || neventProp.startsWith('nostr:note1')
+      if (isNote1) {
+        const decoded = decodeNIP19(neventProp)
+        if (decoded && decoded.type === 'note') {
+          const encoded = nip19.neventEncode({
             id: decoded.data,
-            relays: seenStore.get(decoded.data),
+            relays: [],
           })
+          return encoded
         }
       }
-      return nevent
-    },
-  })).value
-
-  const handleClickDeck = useCallback(() => {
-    if (nevent) {
-      const decoded = decodeNIP19(nevent)
-      if (decoded?.type === 'nevent') {
-        root.decks.selected.add(createNEventModule(decoded.data), (index || 0) + (replaceOnDeck ? 0 : 1), replaceOnDeck)
-      }
+      return neventProp
     }
-  }, [nevent, index])
+  }, [neventProp])
+
+  const deck = useDeckAddNextColumn(() => createEventModule(nevent))
 
   if (disableLink || !nevent) {
     return props.children
   }
 
-  if (isDeck) {
+  if (deck.isDeck) {
     return (
-      <a onClick={handleClickDeck} {...rest} {...css.props([styles.cursor, underline && styles.underline])}>
+      <html.a onClick={deck.add} {...rest} style={[styles.cursor, underline && styles.underline]}>
         {props.children}
-      </a>
+      </html.a>
     )
   }
 
@@ -70,6 +58,10 @@ export const LinkNEvent = observer(function LinkNEvent(props: Props) {
       state={{ from: router.latestLocation.pathname } as never}
       {...rest}
       {...css.props([underline && styles.underline])}
+      onClick={(e) => {
+        // e.stopPropagation()
+        // e.preventDefault()
+      }}
       params={{ nostr: nevent }}>
       {props.children}
     </Link>

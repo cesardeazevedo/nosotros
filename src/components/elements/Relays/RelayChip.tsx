@@ -2,10 +2,9 @@ import { Chip } from '@/components/ui/Chip/Chip'
 import { chipTokens } from '@/components/ui/Chip/Chip.stylex'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 import { prettyRelayUrl } from '@/core/helpers/formatRelayUrl'
-import { relaysStore } from '@/stores/relays/relays.store'
+import { useRelay } from '@/hooks/useRelays'
 import { spacing } from '@/themes/spacing.stylex'
-import { observer } from 'mobx-react-lite'
-import React from 'react'
+import React, { memo } from 'react'
 import { css } from 'react-strict-dom'
 import { RelayConnectedIcon } from './RelayConnectedIcon'
 import { RelayIcon } from './RelayIcon'
@@ -21,9 +20,10 @@ type Props = {
   onDelete?: () => void
 }
 
-export const RelayChip = observer(function RelayChip(props: Props) {
+export const RelayChip = memo(function RelayChip(props: Props) {
   const { url, icon, trailingIcon, selected, onlyRelayIcon, renderDisconnectedIcon = true, onClick, onDelete } = props
   const formatted = prettyRelayUrl(url)
+  const relay = useRelay(url)
   return (
     <Chip
       variant='filter'
@@ -33,9 +33,7 @@ export const RelayChip = observer(function RelayChip(props: Props) {
       onClick={onClick}
       label={formatted?.length > 24 ? <Tooltip text={url}>{formatted}</Tooltip> : formatted}
       trailingIcon={
-        trailingIcon || (!relaysStore.getByUrl(url)?.connected && !renderDisconnectedIcon) ? null : (
-          <RelayConnectedIcon url={url} />
-        )
+        trailingIcon || (!relay?.connected && !renderDisconnectedIcon) ? null : <RelayConnectedIcon url={url} />
       }
       onDelete={onDelete}
     />

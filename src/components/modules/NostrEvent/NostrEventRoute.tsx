@@ -2,24 +2,24 @@ import { NostrEventRoot } from '@/components/elements/Event/NostrEventRoot'
 import { PostLoading } from '@/components/elements/Posts/PostLoading'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Stack } from '@/components/ui/Stack/Stack'
+import { useEventFromNIP19 } from '@/hooks/query/useQueryBase'
 import { useMobile } from '@/hooks/useMobile'
 import { useGoBack } from '@/hooks/useNavigations'
-import { useNoteStoreFromId } from '@/hooks/useNoteStore'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconChevronLeft } from '@tabler/icons-react'
 import { CenteredContainer } from 'components/elements/Layouts/CenteredContainer'
-import { observer } from 'mobx-react-lite'
+import { memo } from 'react'
 import { css } from 'react-strict-dom'
 import { PaperContainer } from '../../elements/Layouts/PaperContainer'
 
 export type Props = {
-  id: string
+  nip19: string
 }
 
-export const NostrEventRoute = observer(function NostrEventRoute(props: Props) {
-  const { id } = props
+export const NostrEventRoute = memo(function NostrEventRoute(props: Props) {
+  const { nip19 } = props
   const isMobile = useMobile()
-  const note = useNoteStoreFromId(id)
+  const note = useEventFromNIP19(nip19)
   const goBack = useGoBack()
 
   return (
@@ -30,8 +30,8 @@ export const NostrEventRoute = observer(function NostrEventRoute(props: Props) {
         </Stack>
       )}
       <PaperContainer>
-        {!note && <PostLoading rows={1} />}
-        {note && <NostrEventRoot open event={note.event.event} />}
+        {!note.data && <PostLoading rows={1} />}
+        {note.data && <NostrEventRoot open event={note.data} />}
       </PaperContainer>
     </CenteredContainer>
   )

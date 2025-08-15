@@ -1,3 +1,5 @@
+import { statsDialogAtom } from '@/atoms/dialog.atoms'
+import { enqueueToastAtom } from '@/atoms/toaster.atoms'
 import { useContentContext } from '@/components/providers/ContentProvider'
 import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Divider } from '@/components/ui/Divider/Divider'
@@ -5,20 +7,19 @@ import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { MenuList } from '@/components/ui/MenuList/MenuList'
 import { Popover } from '@/components/ui/Popover/Popover'
+import type { NoteState } from '@/hooks/state/useNote'
+import { useUserState } from '@/hooks/state/useUser'
 import { READ } from '@/nostr/types'
-import type { Note } from '@/stores/notes/note'
-import { dialogStore } from '@/stores/ui/dialogs.store'
-import { toastStore } from '@/stores/ui/toast.store'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconCopy, IconDotsVertical, IconInfoSquareRounded, IconLink, IconQuote, IconShare3 } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
-import { observer } from 'mobx-react-lite'
-import { useCallback } from 'react'
+import { useSetAtom } from 'jotai'
+import { memo, useCallback } from 'react'
 import { css } from 'react-strict-dom'
 import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDOMProps'
 
 type PropsOptions = {
-  note: Note
+  note: NoteState
   onCopyIdClick: (e: StrictClickEvent) => void
   onCopyAuthorIdClick: (e: StrictClickEvent) => void
   onCopyLinkClick: (e: StrictClickEvent) => void
@@ -27,7 +28,7 @@ type PropsOptions = {
 
 const iconProps = { size: 20 }
 
-const Options = observer(function Options(props: PropsOptions) {
+const Options = memo(function Options(props: PropsOptions) {
   const { note } = props
   return (
     <>
@@ -59,9 +60,11 @@ const Options = observer(function Options(props: PropsOptions) {
   )
 })
 
-export const PostOptions = observer(function PostOptions() {
+export const PostOptions = memo(function PostOptions() {
   const { dense } = useContentContext()
   const { note } = useNoteContext()
+  const enqueueToast = useSetAtom(enqueueToastAtom)
+  const setStatsDialog = useSetAtom(statsDialogAtom)
 
   const handleCopy = useCallback(
     (value: string | undefined) => {
@@ -72,7 +75,7 @@ export const PostOptions = observer(function PostOptions() {
           const type = 'text/plain'
           const blob = new Blob([value], { type })
           window.navigator.clipboard.write([new ClipboardItem({ [type]: blob })]).then(() => {
-            toastStore.enqueue('Copied', { duration: 4000 })
+            enqueueToast({ component: 'Copied', duration: 4000 })
           })
         }
       }
@@ -80,8 +83,9 @@ export const PostOptions = observer(function PostOptions() {
     [note],
   )
 
-  const nevent = note?.event.nevent
+  const nevent = note?.nip19
   const link = window.location.origin + '/' + nevent
+  const user = useUserState(note.event.pubkey)
 
   return (
     <Popover
@@ -92,12 +96,12 @@ export const PostOptions = observer(function PostOptions() {
           <Options
             note={note}
             onCopyIdClick={handleCopy(nevent)}
-            onCopyAuthorIdClick={handleCopy(note?.user?.nprofile)}
+            onCopyAuthorIdClick={handleCopy(user?.nprofile)}
             onCopyLinkClick={handleCopy(link)}
             onDetailsClick={(e) => {
               e.stopPropagation()
               e.preventDefault()
-              dialogStore.setStats(note.id)
+              setStatsDialog(note.id)
               props.close()
             }}
           />

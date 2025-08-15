@@ -3,10 +3,10 @@ import { Divider } from '@/components/ui/Divider/Divider'
 import { Fab } from '@/components/ui/Fab/Fab'
 import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { Stack } from '@/components/ui/Stack/Stack'
+import { useCurrentPubkey } from '@/hooks/useAuth'
+import { useNprofile } from '@/hooks/useEventUtils'
 import { useMobile } from '@/hooks/useMobile'
-import { useCurrentUser, useRootStore } from '@/hooks/useRootStore'
 import { shape } from '@/themes/shape.stylex'
-import { encodeSafe } from '@/utils/nip19'
 import {
   IconBell,
   IconBellFilled,
@@ -18,11 +18,8 @@ import {
   IconUser,
 } from '@tabler/icons-react'
 import { Link, useMatchRoute } from '@tanstack/react-router'
-import { observer } from 'mobx-react-lite'
-import { nip19 } from 'nostr-tools'
-import { useContext } from 'react'
+import { memo, useContext } from 'react'
 import { css, html } from 'react-strict-dom'
-import { IconPencil } from '../Icons/IconPencil'
 import { SidebarContext } from './SidebarContext'
 import { SidebarMenuDecks } from './SidebarMenuDecks'
 import { SidebarMenuFeeds } from './SidebarMenuFeeds'
@@ -35,9 +32,9 @@ const iconProps = {
   strokeWidth: '1.8',
 }
 
-export const SidebarMenu = observer(function SidebarMenu() {
-  const root = useRootStore()
-  const user = useCurrentUser()
+export const SidebarMenu = memo(function SidebarMenu() {
+  const pubkey = useCurrentPubkey()
+  const nprofile = useNprofile(pubkey)
   const match = useMatchRoute()
   const isMobile = useMobile()
   const context = useContext(SidebarContext)
@@ -92,8 +89,7 @@ export const SidebarMenu = observer(function SidebarMenu() {
         <Link
           to={`/$nostr`}
           params={{
-            nostr: (user?.nprofile ||
-              (user?.pubkey && encodeSafe(() => nip19.nprofileEncode({ pubkey: user.pubkey })))) as string,
+            nostr: nprofile || '',
           }}>
           {({ isActive }) => (
             <MenuItem
@@ -110,7 +106,7 @@ export const SidebarMenu = observer(function SidebarMenu() {
         <>
           <Divider />
           <html.div style={styles.wrapper}>
-            <SidebarMenuDecks />
+            <SidebarMenuDecks expanded />
           </html.div>
         </>
       )}
@@ -118,7 +114,7 @@ export const SidebarMenu = observer(function SidebarMenu() {
       <html.div style={styles.wrapper}>
         <SidebarMenuRecents />
       </html.div>
-      {root.recents.list.length !== 0 && <Divider />}
+      {/* {root.recents.list.length !== 0 && <Divider />} */}
       <html.div style={styles.wrapper}>
         <SidebarMenuRelays />
         <Link to='/settings'>
@@ -134,7 +130,7 @@ export const SidebarMenu = observer(function SidebarMenu() {
         </Link>
         <br />
         <Link to='.' search={{ compose: true }}>
-          <Fab flat size='sm' variant='primary' icon={<IconPencil />} label='Create note' fullWidth />
+          <Fab size='lg' variant='primary' label='Create note' fullWidth />
         </Link>
         <br />
         <br />

@@ -1,26 +1,29 @@
+import type { DeckColumn } from '@/atoms/deck.atoms'
+import { addDeckColumnAtom } from '@/atoms/deck.atoms'
 import type { SearchItem } from '@/components/modules/Search/hooks/useSearchSuggestions'
+import { Divider } from '@/components/ui/Divider/Divider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { List } from '@/components/ui/List/List'
 import { ListItem } from '@/components/ui/ListItem/ListItem'
 import { listItemTokens } from '@/components/ui/ListItem/ListItem.stylex'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
-import { useCurrentPubkey, useRootStore } from '@/hooks/useRootStore'
-import {
-  createArticleModule,
-  createFeedModule,
-  createHomeModule,
-  createMediaModule,
-  createNotificationModule,
-  createNProfileModule,
-  createRelayDiscoveryModule,
-  createRelayFeedModule,
-  createSearchModule,
-  createTagModule,
-} from '@/stores/modules/module.helpers'
-import type { ModulesInstances } from '@/stores/modules/module.store'
+import { createArticlesFeedModule } from '@/hooks/modules/createArticleFeedModule'
+import { createRelayDiscoveryModule } from '@/hooks/modules/createRelayDiscoveryModule'
+import { createRelayFeedModule } from '@/hooks/modules/createRelayFeedModule'
+import { createHomeFeedModule } from '@/hooks/modules/createHomeFeedModule'
+import { createMediaFeedModule } from '@/hooks/modules/createMediaFeedModule'
+import { createNotificationFeedModule } from '@/hooks/modules/createNotificationFeedModule'
+import { createProfileModule } from '@/hooks/modules/createProfileFeedModule'
+import { createSearchFeedModule } from '@/hooks/modules/createSearchFeedModule'
+import { createTagFeedModule } from '@/hooks/modules/createTagFeedModule'
+import { getUserRelays } from '@/hooks/query/useQueryUser'
+import { useCurrentPubkey } from '@/hooks/useAuth'
+import { WRITE } from '@/nostr/types'
+import { deckRoute } from '@/Router'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
+import { encodeSafe } from '@/utils/nip19'
 import {
   IconBell,
   IconChevronLeft,
@@ -33,9 +36,10 @@ import {
   IconUser,
   IconWorldBolt,
 } from '@tabler/icons-react'
-import { observer } from 'mobx-react-lite'
+import { useSetAtom } from 'jotai'
+import { nprofileEncode } from 'nostr-tools/nip19'
 import type { ReactNode } from 'react'
-import { useState } from 'react'
+import { memo, useState } from 'react'
 import { css, html } from 'react-strict-dom'
 import { IconHome } from '../../elements/Icons/IconHome'
 import { FeedHeaderBase } from '../Feed/headers/FeedHeaderBase'
@@ -44,8 +48,7 @@ import { DeckAddProfile } from './DeckAddProfile'
 import { DeckAddRelayFeeds } from './DeckAddRelayFeeds'
 import { DeckAddSearch } from './DeckAddSearch'
 import { DeckAddTags } from './DeckAddTag'
-import { DeckColumn } from './DeckColumn'
-import { Divider } from '@/components/ui/Divider/Divider'
+import { DeckColumnContainer } from './DeckColumnContainer'
 
 type Views = 'profiles' | 'tags' | 'search' | 'relayfeeds' | 'lists'
 
@@ -68,6 +71,9 @@ const getTitle = (view: Views | null) => {
     case 'search': {
       return 'Add a search query'
     }
+    case 'lists': {
+      return 'Add a nostr list'
+    }
     case 'relayfeeds': {
       return 'Add a relay url'
     }
@@ -79,18 +85,18 @@ const getTitle = (view: Views | null) => {
 
 const iconProps = { size: 28, strokeWidth: '1.8' }
 
-export const DeckMenu = observer(function DeckMenu(props: Props) {
+export const DeckMenu = memo(function DeckMenu(props: Props) {
   const [view, setView] = useState<Views | null>(null)
-  // const params = deckRoute.useParams()
-  const deck = useRootStore().decks.selected
+  const { id } = deckRoute.useParams()
+  const addDeckColumn = useSetAtom(addDeckColumnAtom)
   const pubkey = useCurrentPubkey()
 
   const handleBack = () => {
     setView(null)
   }
 
-  const add = (module: ModulesInstances) => {
-    deck.add(module)
+  const add = (column: DeckColumn) => {
+    addDeckColumn({ deckId: id, module: column })
     props.onClose?.()
   }
 
@@ -98,14 +104,26 @@ export const DeckMenu = observer(function DeckMenu(props: Props) {
     switch (item.type) {
       case 'user_relay':
       case 'user': {
-        add(createNProfileModule(item.pubkey))
+        const relays = getUserRelays(item.pubkey, WRITE)
+        const nip19 = encodeSafe(() =>
+          nprofileEncode({
+            pubkey: item.pubkey,
+            relays,
+          }),
+        )
+        if (nip19) {
+          add(createProfileModule({ nip19 }))
+        }
+        break
+      }
+      default: {
         break
       }
     }
   }
 
   return (
-    <DeckColumn size='sm'>
+    <DeckColumnContainer size='sm'>
       <FeedHeaderBase
         onDelete={props.onClose}
         leading={
@@ -128,7 +146,7 @@ export const DeckMenu = observer(function DeckMenu(props: Props) {
                 <IconHome {...iconProps} />
               </IconWrapper>
             }
-            onClick={() => add(createHomeModule(pubkey, Math.random().toString().slice(2)))}
+            onClick={() => add(createHomeFeedModule(pubkey))}
             supportingText={<span>See your home feed timeline</span>}>
             <Text size='lg'>Home feed</Text>
           </ListItem>
@@ -153,7 +171,7 @@ export const DeckMenu = observer(function DeckMenu(props: Props) {
                 <IconBell {...iconProps} />
               </IconWrapper>
             }
-            onClick={() => pubkey && add(createNotificationModule(pubkey))}
+            onClick={() => pubkey && add(createNotificationFeedModule(pubkey))}
             supportingText={<span>Keep up with your notifications</span>}>
             <Text size='lg'>Notifications</Text>
           </ListItem>
@@ -177,7 +195,7 @@ export const DeckMenu = observer(function DeckMenu(props: Props) {
                 <IconNews size={28} strokeWidth={'1.5'} />
               </IconWrapper>
             }
-            onClick={() => add(createArticleModule(pubkey))}
+            onClick={() => add(createArticlesFeedModule(pubkey))}
             supportingText={<span>Search for long-form articles</span>}>
             Articles
           </ListItem>
@@ -189,7 +207,7 @@ export const DeckMenu = observer(function DeckMenu(props: Props) {
                 <IconPhoto {...iconProps} />
               </IconWrapper>
             }
-            onClick={() => add(createMediaModule(pubkey))}
+            onClick={() => add(createMediaFeedModule(pubkey))}
             supportingText={<span>Search for nostr media galaries</span>}>
             Media
           </ListItem>
@@ -244,11 +262,11 @@ export const DeckMenu = observer(function DeckMenu(props: Props) {
         </List>
       )}
       {view === 'profiles' && <DeckAddProfile onSelect={handleAddProfile} />}
-      {view === 'tags' && <DeckAddTags onSelect={(tag) => add(createTagModule(tag))} />}
-      {view === 'search' && <DeckAddSearch onSelect={(query) => add(createSearchModule(query))} />}
-      {view === 'lists' && <DeckAddList onSelect={(snapshot) => add(createFeedModule(snapshot))} />}
-      {view === 'relayfeeds' && <DeckAddRelayFeeds onSelect={(relay) => add(createRelayFeedModule([relay]))} />}
-    </DeckColumn>
+      {view === 'tags' && <DeckAddTags onSelect={(tag) => add(createTagFeedModule(tag))} />}
+      {view === 'search' && <DeckAddSearch onSelect={(query) => add(createSearchFeedModule(query))} />}
+      {view === 'lists' && <DeckAddList onSelect={(module) => add(module)} />}
+      {view === 'relayfeeds' && <DeckAddRelayFeeds onSelect={(relay) => add(createRelayFeedModule(relay))} />}
+    </DeckColumnContainer>
   )
 })
 

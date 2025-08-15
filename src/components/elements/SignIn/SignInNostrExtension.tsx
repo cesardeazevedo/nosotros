@@ -1,28 +1,30 @@
+import { hasExtensionAtom, submitNostrExtensionAtom } from '@/atoms/signin.atoms'
+import { enqueueToastAtom } from '@/atoms/toaster.atoms'
 import { Button } from '@/components/ui/Button/Button'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { useGoBack } from '@/hooks/useNavigations'
-import { signinStore } from '@/stores/signin/signin.store'
-import { toastStore } from '@/stores/ui/toast.store'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import { observer } from 'mobx-react-lite'
-import { useCallback } from 'react'
+import { useAtomValue, useSetAtom } from 'jotai'
+import { memo, useCallback } from 'react'
 import { css } from 'react-strict-dom'
 import { ContentLink } from '../Content/Link/Link'
 import { SignInHeader } from './SignInHeader'
 
-export const SignInNostrExtension = observer(function SignInNostrExtension() {
+export const SignInNostrExtension = memo(function SignInNostrExtension() {
   const goBack = useGoBack()
-  const hasExtension = signinStore.hasExtension.current()
+  const enqueueToast = useSetAtom(enqueueToastAtom)
+  const submitExtension = useSetAtom(submitNostrExtensionAtom)
+  const hasExtension = useAtomValue(hasExtensionAtom)
 
   const handleSubmit = useCallback(async () => {
     try {
-      await signinStore.submitNostrExtension()
+      await submitExtension()
       goBack()
     } catch (err) {
       const error = err as Error
-      toastStore.enqueue(error.message)
+      enqueueToast({ component: error.message })
       goBack()
     }
   }, [])

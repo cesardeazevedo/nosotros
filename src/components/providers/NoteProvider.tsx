@@ -1,8 +1,10 @@
-import type { Note } from '@/stores/notes/note'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import type { NoteState } from '@/hooks/state/useNote'
 import { createContext, useContext } from 'react'
 
 type NoteContextValues = {
-  note: Note
+  note: NoteState
+  event: NostrEventDB
 }
 
 const NoteContext = createContext<NoteContextValues | null>(null)

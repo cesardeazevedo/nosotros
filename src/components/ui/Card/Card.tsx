@@ -60,7 +60,7 @@ const styles = css.create({
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'space-between',
-    borderRadius: cardTokens.containerShape,
+    // borderRadius: cardTokens.containerShape,
     width: '100%',
   },
   actionable: {

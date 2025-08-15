@@ -1,6 +1,5 @@
 import { Chip } from '@/components/ui/Chip/Chip'
-import { observer } from 'mobx-react-lite'
-import React, { useMemo } from 'react'
+import React, { memo, useMemo } from 'react'
 import { RelayConnectedIcon } from './RelayConnectedIcon'
 
 type Props = {
@@ -9,7 +8,7 @@ type Props = {
   onDelete?: () => void
 }
 
-export const RelayInputChip = observer(function RelayInputChip(props: Props) {
+export const RelayInputChip = memo(function RelayInputChip(props: Props) {
   const { url, icon, onDelete } = props
   const formatted = useMemo(() => new URL(url), [url])
   return (

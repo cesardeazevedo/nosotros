@@ -2,13 +2,9 @@ import { Divider } from '@/components/ui/Divider/Divider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { READ, UserRelay, WRITE } from '@/nostr/types'
 import { spacing } from '@/themes/spacing.stylex'
-import { Await } from '@tanstack/react-router'
-import { observer } from 'mobx-react-lite'
-import React, { useMemo } from 'react'
+import React, { memo } from 'react'
 import { css, html } from 'react-strict-dom'
-import { firstValueFrom, timer } from 'rxjs'
 import { RelayFriendsList } from './RelayFriendsList'
-import { RelayFriendsListLoading } from './RelayFriendsListLoading'
 import { RelayJoinButton } from './RelayJoinButton'
 import { RelayUserChip } from './RelayUserChip'
 
@@ -19,9 +15,8 @@ type Props = {
   permission: typeof READ | typeof WRITE
 }
 
-export const RelayUserList = observer(function RelayUserList(props: Props) {
+export const RelayUserList = memo(function RelayUserList(props: Props) {
   const { userRelays = [], isEditing, permission } = props
-  const promise = useMemo(() => firstValueFrom(timer(3100)), [])
   return (
     <Stack horizontal={false} gap={0.5} justify='space-between' sx={styles.root}>
       {userRelays.map((userRelay, index) => (
@@ -29,9 +24,7 @@ export const RelayUserList = observer(function RelayUserList(props: Props) {
           <Stack align='center' justify='space-between' sx={styles.row}>
             <RelayUserChip key={userRelay.relay} userRelay={userRelay} />
             <Stack gap={1} justify='space-between'>
-              <Await promise={promise} fallback={<RelayFriendsListLoading />}>
-                {() => <RelayFriendsList relay={userRelay.relay} />}
-              </Await>
+              <RelayFriendsList url={userRelay.relay} />
               <html.span style={styles.button}>
                 {isEditing && <RelayJoinButton relay={userRelay.relay} permission={permission} />}
                 {/* {!isEditing && <Button variant='filledTonal'>Explore</Button>} */}

@@ -10,7 +10,7 @@ type Props = {
   paper?: boolean
 }
 
-export const DeckColumn = (props: Props) => {
+export const DeckColumnContainer = (props: Props) => {
   const { size = 'md', children, paper = true, sx } = props
   return <html.div style={[styles.root, sizes[size], paper && styles.paper, sx]}>{children}</html.div>
 }

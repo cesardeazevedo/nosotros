@@ -1,4 +1,5 @@
-import type { RelayDiscoveryModule } from '@/stores/modules/relay.discovery.module'
+import type { RelayDiscoveryModule } from '@/hooks/modules/createRelayDiscoveryModule'
+import { useRelayDiscoveryFeed } from '@/hooks/state/useRelayDiscoveryFeed'
 import { DeckScroll } from '../Deck/DeckScroll'
 import { FeedHeaderBase } from '../Feed/headers/FeedHeaderBase'
 import { RelayDiscoveryHeader } from './RelayDiscoveryHeader'
@@ -11,15 +12,16 @@ type Props = {
 
 export const RelayDiscoveryColumn = (props: Props) => {
   const { module } = props
+  const feed = useRelayDiscoveryFeed(module)
   return (
     <>
       <FeedHeaderBase
-        feed={module.feed}
-        leading={<RelayDiscoveryTitle module={module} />}
-        customSettings={<RelayDiscoveryHeader renderTitle={false} module={module} />}
+        feed={feed}
+        leading={<RelayDiscoveryTitle feed={feed} />}
+        customSettings={<RelayDiscoveryHeader renderTitle={false} feed={feed} />}
       />
       <DeckScroll>
-        <RelayDiscoveryList module={module} />
+        <RelayDiscoveryList feed={feed} />
       </DeckScroll>
     </>
   )

@@ -5,39 +5,33 @@ import { Paper } from '@/components/ui/Paper/Paper'
 import { PopoverBase } from '@/components/ui/Popover/PopoverBase'
 import { SearchField } from '@/components/ui/Search/Search'
 import { Stack } from '@/components/ui/Stack/Stack'
-import { useCurrentAccount, useCurrentUser } from '@/hooks/useRootStore'
-import { publishBlossomServer } from '@/nostr/publish/publishBlossomServer'
-import { subscribeBlossomServers } from '@/nostr/subscriptions/subscribeBlossomServers'
-import type { Account } from '@/stores/auth/account.store'
-import { toastStore } from '@/stores/ui/toast.store'
+import { useUserBlossomServers } from '@/hooks/query/useQueryUser'
+import { useCurrentAccount, useCurrentPubkey } from '@/hooks/useAuth'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconPhotoUp, IconPlus } from '@tabler/icons-react'
-import { observer } from 'mobx-react-lite'
-import type { NostrEvent } from 'nostr-tools'
-import { useObservableCallback, useSubscription } from 'observable-hooks'
-import { useRef, useState } from 'react'
+import { memo, useRef, useState } from 'react'
 import { css } from 'react-strict-dom'
-import { catchError, EMPTY, mergeMap, repeat, tap } from 'rxjs'
 
-export const SettingsMediaStorage = observer(function SettingsMediaStorage() {
-  const user = useCurrentUser()
+export const SettingsMediaStorage = memo(function SettingsMediaStorage() {
+  const pubkey = useCurrentPubkey()
   const [open, setOpen] = useState(false)
   const acc = useCurrentAccount()
   const ref = useRef<HTMLInputElement>(null)
 
-  const [submit, submit$] = useObservableCallback<NostrEvent, [string, Account]>((input$) => {
-    return input$.pipe(
-      mergeMap(([url, acc]) => (acc.signer ? publishBlossomServer(url, acc.pubkey, acc.signer.signer) : EMPTY)),
-      mergeMap((event) => subscribeBlossomServers(event.pubkey)),
-      tap(() => setOpen(false)),
-      catchError((error) => {
-        toastStore.enqueue(error.message)
-        return EMPTY
-      }),
-      repeat(),
-    )
-  })
-  useSubscription(submit$)
+  const blossomServerList = useUserBlossomServers<string[]>(pubkey)
+  // const [submit, submit$] = useObservableCallback<NostrEvent, [string, Account]>((input$) => {
+  //   return input$.pipe(
+  //     mergeMap(([url, acc]) => (acc.signer ? publishBlossomServer(url, acc.pubkey, acc.signer.signer) : EMPTY)),
+  //     mergeMap((event) => subscribeBlossomServers(event.pubkey)),
+  //     tap(() => setOpen(false)),
+  //     catchError((error) => {
+  //       toastStore.enqueue(error.message)
+  //       return EMPTY
+  //     }),
+  //     repeat(),
+  //   )
+  // })
+  // useSubscription(submit$)
 
   return (
     <MenuItem
@@ -45,13 +39,13 @@ export const SettingsMediaStorage = observer(function SettingsMediaStorage() {
       label='My Blossom Servers'
       trailingIcon={
         <Stack horizontal={false} gap={1} align='flex-start'>
-          {user?.blossomServerList.map((url) => (
+          {blossomServerList.data?.map((url) => (
             <Stack key={url}>
               <Chip
                 variant='input'
                 icon={<IconPhotoUp size={18} strokeWidth='1.5' />}
                 label={url.replace('https://', '')}
-                onDelete={() => acc && submit([url, acc])}
+                // onDelete={() => acc && submit([url, acc])}
               />
             </Stack>
           ))}
@@ -63,7 +57,10 @@ export const SettingsMediaStorage = observer(function SettingsMediaStorage() {
               <Paper elevation={2} surface='surfaceContainerLow' sx={styles.paper}>
                 <Stack gap={1}>
                   <SearchField ref={ref} sx={styles.search} leading={false} placeholder='https://' />
-                  <Button variant='filled' onClick={() => acc && submit([ref.current?.value || '', acc])}>
+                  <Button
+                    variant='filled'
+                    // onClick={() => acc && submit([ref.current?.value || '', acc])}
+                  >
                     Add
                   </Button>
                 </Stack>

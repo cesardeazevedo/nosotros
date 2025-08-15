@@ -15,22 +15,10 @@ export const Popover = memo(function Popover(props: Props) {
   const handleClose = useCallback(() => setOpen(false), [])
 
   return (
-    <PopoverHoverRender
-      open={open}
-      content={children({
-        opened: open,
-        setRef: null,
-        getProps: () => ({}),
-        close: handleClose,
-        open: handleOpen,
-      } as IPopoverBaseTriggerRendererProps)}>
-      <PopoverBase {...rest} opened={open} onClose={handleClose} closeEvents={{ clickOutside: true }}>
-        {(props) => (
-          <>
-            {typeof children === 'function' ? children({ ...props, open: handleOpen, close: handleClose }) : children}
-          </>
-        )}
-      </PopoverBase>
-    </PopoverHoverRender>
+    <PopoverBase {...rest} opened={open} onClose={handleClose} closeEvents={{ clickOutside: true }}>
+      {(props) => (
+        <>{typeof children === 'function' ? children({ ...props, open: handleOpen, close: handleClose }) : children}</>
+      )}
+    </PopoverBase>
   )
 })

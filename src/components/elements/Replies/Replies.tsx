@@ -1,25 +1,21 @@
 import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { useMobile } from '@/hooks/useMobile'
-import { useCurrentUser } from '@/hooks/useRootStore'
 import { spacing } from '@/themes/spacing.stylex'
-import { observer } from 'mobx-react-lite'
-import { useCallback } from 'react'
+import { memo, useCallback } from 'react'
 import { css, html } from 'react-strict-dom'
 import { RepliesLoadMore } from './RepliesLoadMore'
-import { RepliesMuted } from './RepliesMuted'
 import { RepliesTree } from './RepliesTree'
 
 type Props = {
   onLoadMoreClick?: () => void
 }
 
-export const Replies = observer(function Replies(props: Props) {
-  const user = useCurrentUser()
+export const Replies = memo(function Replies(props: Props) {
   const isMobile = useMobile()
   const { note } = useNoteContext()
 
-  const replies = note.repliesChunk(user)
+  const replies = note.repliesChunk
 
   const handleLoadMore = useCallback(() => {
     if (isMobile && props.onLoadMoreClick) {
@@ -31,8 +27,8 @@ export const Replies = observer(function Replies(props: Props) {
   return (
     <Stack horizontal={false} sx={styles.root} justify='flex-start'>
       <html.div style={styles.root}>
-        {replies.length > 0 && note && <RepliesTree replies={replies} repliesOpen={note.repliesOpen} level={1} />}
-        <RepliesMuted level={0} />
+        {replies.length !== 0 && <RepliesTree replies={replies} repliesOpen={note.state.repliesOpen} level={1} />}
+        {/* <RepliesMuted level={0} /> */}
         <RepliesLoadMore note={note} onClick={handleLoadMore} />
       </html.div>
     </Stack>

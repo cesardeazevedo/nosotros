@@ -1,14 +1,12 @@
 import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Fab } from '@/components/ui/Fab/Fab'
 import { palette } from '@/themes/palette.stylex'
-import { observer } from 'mobx-react-lite'
-import React from 'react'
+import React, { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 import useMeasure from 'react-use-measure'
 
 export type Props = {
   size?: 'xs' | 'sm' | 'md'
-  bubble?: boolean
   initialExpanded?: boolean
   children: React.ReactNode
 }
@@ -19,11 +17,11 @@ const sizes = {
   md: 700,
 }
 
-export const PostContentWrapper = observer(function PostContentWrapper(props: Props) {
+export const PostContentWrapper = memo(function PostContentWrapper(props: Props) {
   const { initialExpanded = false, size = 'md' } = props
   const { note } = useNoteContext()
   const [ref, bounds] = useMeasure({ debounce: 100 })
-  const expanded = initialExpanded || note.contentOpen
+  const expanded = initialExpanded || note.state.contentOpen
   const maxHeight = sizes[size]
   const canExpand = bounds.height >= maxHeight && !expanded
 
@@ -33,7 +31,15 @@ export const PostContentWrapper = observer(function PostContentWrapper(props: Pr
       {canExpand && (
         <html.div style={styles.container}>
           <html.div style={styles.shadow} />
-          <Fab variant='primary' label='View More' onClick={() => note.toggleContent(true)} />
+          <Fab
+            variant='primary'
+            label='View More'
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              note.actions.toggleContent(true)
+            }}
+          />
         </html.div>
       )}
     </html.div>

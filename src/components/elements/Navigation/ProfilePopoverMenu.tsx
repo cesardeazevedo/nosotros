@@ -1,7 +1,7 @@
 import { Divider } from '@/components/ui/Divider/Divider'
 import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { Stack } from '@/components/ui/Stack/Stack'
-import { useCurrentPubkey } from '@/hooks/useRootStore'
+import { useCurrentPubkey } from '@/hooks/useAuth'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconSettings, IconUser } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'

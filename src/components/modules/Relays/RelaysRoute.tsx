@@ -3,24 +3,20 @@ import { RelayMailboxList } from '@/components/elements/Relays/RelayMailboxList'
 import { Button } from '@/components/ui/Button/Button'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
-import { useFollowingUsers } from '@/hooks/useFollowingUsers'
+import { useCurrentPubkey } from '@/hooks/useAuth'
 import { useMobile } from '@/hooks/useMobile'
 import { useResetScroll } from '@/hooks/useResetScroll'
-import { useCurrentPubkey, useCurrentUser } from '@/hooks/useRootStore'
 import { READ, WRITE } from '@/nostr/types'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconPencil } from '@tabler/icons-react'
-import { observer } from 'mobx-react-lite'
-import { useState } from 'react'
+import { memo, useState } from 'react'
 import { css, html } from 'react-strict-dom'
 
-export const RelayRoute = observer(function RelayRoute() {
+export const RelayRoute = memo(function RelayRoute() {
   const [isEditing, setIsEditing] = useState(false)
-  const user = useCurrentUser()
   const pubkey = useCurrentPubkey()
   const mobile = useMobile()
   useResetScroll()
-  useFollowingUsers()
   return (
     <CenteredContainer margin sx={styles.root}>
       <Stack horizontal={false} gap={mobile ? 0 : 4}>
@@ -38,8 +34,8 @@ export const RelayRoute = observer(function RelayRoute() {
               </Button>
             </Stack>
             <Stack horizontal gap={mobile ? 0 : 2} justify='space-between' align='flex-start' wrap>
-              <RelayMailboxList isEditing={isEditing} user={user!} permission={WRITE} />
-              <RelayMailboxList isEditing={isEditing} user={user!} permission={READ} />
+              <RelayMailboxList isEditing={isEditing} pubkey={pubkey} permission={WRITE} />
+              <RelayMailboxList isEditing={isEditing} pubkey={pubkey} permission={READ} />
             </Stack>
           </html.div>
         )}

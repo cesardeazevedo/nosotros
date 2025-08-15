@@ -1,13 +1,14 @@
 import { Content } from 'components/elements/Content/Content'
-import { observer } from 'mobx-react-lite'
 import type { Node } from 'nostr-editor'
-import React from 'react'
+import type { ReactNode } from 'react'
+import React, { memo } from 'react'
 import { BubbleContainer } from '../Content/Layout/Bubble'
 import type { Props as PostContentWrapperProps } from '../Posts/PostContentWrapper'
 import { PostContentWrapper } from '../Posts/PostContentWrapper'
 import { ReplyUserHeader } from './ReplyUserHeader'
 
 type Props = {
+  highlight?: boolean
   size?: PostContentWrapperProps['size']
 }
 
@@ -22,17 +23,19 @@ const NonBubbleNodes = [
   'codeBlock',
 ] as Node['type'][]
 
-export const ReplyContent = observer(function ReplyContent(props: Props) {
-  const { size } = props
+export const ReplyContent = memo(function ReplyContent(props: Props) {
+  const { size, highlight } = props
   return (
-    <PostContentWrapper bubble size={size}>
+    <PostContentWrapper size={size}>
       <Content
         children={(index) => index === 0 && <ReplyUserHeader />}
         wrapper={(node) =>
           NonBubbleNodes.includes(node.type) ||
           (node.type === 'paragraph' && node.content?.length === 1 && node.content[0].type === 'hardBreak') // removes empty paragraphs
             ? React.Fragment
-            : BubbleContainer
+            : (props: { children: ReactNode }) => (
+                <BubbleContainer highlight={highlight}>{props.children}</BubbleContainer>
+              )
         }
       />
     </PostContentWrapper>

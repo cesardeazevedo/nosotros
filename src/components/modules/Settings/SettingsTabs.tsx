@@ -6,7 +6,7 @@ import { Tabs } from '@/components/ui/Tabs/Tabs'
 import { useMobile } from '@/hooks/useMobile'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import { IconDatabase, IconSettings } from '@tabler/icons-react'
+import { IconSettings } from '@tabler/icons-react'
 import { Link, useLocation } from '@tanstack/react-router'
 import { css } from 'react-strict-dom'
 
@@ -18,9 +18,6 @@ export const SettingsTabs = () => {
       <Tabs variant='secondary' anchor={location.pathname} renderLabels={!isMobile}>
         <Link to='/settings'>
           <Tab sx={styles.tab} icon={<IconSettings size={22} />} anchor='/settings' label='Preferences' />
-        </Link>
-        <Link to='/settings/storage'>
-          <Tab sx={styles.tab} icon={<IconDatabase size={22} />} anchor='/settings/storage' label='Storage' />
         </Link>
       </Tabs>
     </Stack>

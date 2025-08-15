@@ -1,28 +1,26 @@
 import { Text } from '@/components/ui/Text/Text'
-import { Kind } from '@/constants/kinds'
-import { useCurrentUser } from '@/hooks/useRootStore'
-import { eventStore } from '@/stores/events/event.store'
-import { observer } from 'mobx-react-lite'
-import { useDeferredValue } from 'react'
+import { useRelayUsers } from '@/hooks/query/useQueryUser'
+import { memo } from 'react'
 import { UsersAvatars } from '../User/UsersAvatars'
 
 type Props = {
-  relay: string
+  url: string
 }
 
-export const RelayFriendsList = observer(function RelayFriendsList(props: Props) {
-  const { relay } = props
-  const user = useCurrentUser()
-  const users = [...(eventStore.getPubkeysByKindTagValue(Kind.RelayList, 'r', relay) || [])]
-  const usersDeffered = useDeferredValue(users)
-  const usersFollowings = usersDeffered.filter((pubkey) => user?.followsPubkey(pubkey))
+export const RelayFriendsList = memo(function RelayFriendsList(props: Props) {
+  const { url: relay } = props
+  const { data: pubkeys = [] } = useRelayUsers(relay)
+
+  if (!pubkeys.length) {
+    return <></>
+  }
 
   return (
     <UsersAvatars
-      pubkeys={usersFollowings}
+      pubkeys={pubkeys}
       description={
         <Text variant='title' size='sm'>
-          {usersFollowings.length} people you follow joined {relay}
+          {pubkeys.length} people you follow joined {relay}
         </Text>
       }
     />

@@ -3,18 +3,20 @@ import { Paper } from '@/components/ui/Paper/Paper'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { TooltipRich } from '@/components/ui/TooltipRich/TooltipRich'
-import { userStore } from '@/stores/users/users.store'
+import { useUserRelays } from '@/hooks/query/useQueryUser'
+import { READ, WRITE } from '@/nostr/types'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconServerBolt } from '@tabler/icons-react'
-import { observer } from 'mobx-react-lite'
+import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 
 type Props = {
   pubkey: string
 }
 
-export const UserRelays = observer(function UserRelays(props: Props) {
-  const user = userStore.get(props.pubkey)
+export const UserRelays = memo(function UserRelays(props: Props) {
+  const inboxRelays = useUserRelays(props.pubkey, READ).data?.map((x) => x.relay)
+  const outboxRelays = useUserRelays(props.pubkey, WRITE).data?.map((x) => x.relay)
   return (
     <TooltipRich
       enterDelay={0}
@@ -29,7 +31,7 @@ export const UserRelays = observer(function UserRelays(props: Props) {
                 Outbox Relays
               </Text>
               <Stack horizontal={false}>
-                {user?.outboxRelays.map(({ relay }) => (
+                {outboxRelays?.map((relay) => (
                   <Text key={relay} size='sm'>
                     {relay.replace('wss://', '')}
                   </Text>
@@ -41,7 +43,7 @@ export const UserRelays = observer(function UserRelays(props: Props) {
                 Inbox Relays
               </Text>
               <Stack horizontal={false}>
-                {user?.inboxRelays.map(({ relay }) => (
+                {inboxRelays?.map((relay) => (
                   <Text key={relay} size='sm'>
                     {relay.replace('wss://', '')}
                   </Text>
@@ -56,7 +58,7 @@ export const UserRelays = observer(function UserRelays(props: Props) {
         variant='outlined'
         icon={<IconServerBolt size={20} strokeWidth='1.5' />}
         onClick={() => open()}>
-        {user?.relays.length || ''}
+        {(inboxRelays?.length || 0) + (outboxRelays?.length || 0)}
       </Button>
     </TooltipRich>
   )

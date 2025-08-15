@@ -1,3 +1,5 @@
+import { enqueueToastAtom } from '@/atoms/toaster.atoms'
+import { updateZapRequestAtom, zapRequestAtom } from '@/atoms/zapRequest.atoms'
 import { ContentProvider } from '@/components/providers/ContentProvider'
 import { Button } from '@/components/ui/Button/Button'
 import { Chip } from '@/components/ui/Chip/Chip'
@@ -5,22 +7,22 @@ import { CircularProgress } from '@/components/ui/Progress/CircularProgress'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { TextField } from '@/components/ui/TextField/TextField'
-import { useNoteStoreFromId } from '@/hooks/useNoteStore'
-import { useCurrentAccount, useCurrentSigner, useCurrentUser } from '@/hooks/useRootStore'
-import { toastStore } from '@/stores/ui/toast.store'
-import type { User } from '@/stores/users/user'
-import { createZapRequestStore } from '@/stores/zaps/zap.request.store'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import { useNoteState } from '@/hooks/state/useNote'
+import type { UserState } from '@/hooks/state/useUser'
+import { useUserState } from '@/hooks/state/useUser'
+import { useCurrentAccount, useCurrentSigner, useCurrentUser } from '@/hooks/useAuth'
 import { spacing } from '@/themes/spacing.stylex'
 import { bech32, utf8 } from '@scure/base'
 import { IconAlertCircleFilled, IconBolt } from '@tabler/icons-react'
 import { useNavigate, useRouter } from '@tanstack/react-router'
-import { observer } from 'mobx-react-lite'
+import { useAtomValue, useSetAtom } from 'jotai'
+import type { NostrEvent } from 'nostr-tools'
 import { nip19 } from 'nostr-tools'
-import type { EventPointer } from 'nostr-tools/nip19'
 import { Bech32MaxSize } from 'nostr-tools/nip19'
 import { getZapEndpoint, makeZapRequest } from 'nostr-tools/nip57'
 import { useObservableState } from 'observable-hooks'
-import { useMemo } from 'react'
+import { memo } from 'react'
 import { css } from 'react-strict-dom'
 import { catchError, filter, first, from, map, mergeMap, of, startWith, tap, throwError } from 'rxjs'
 import { fromFetch } from 'rxjs/fetch'
@@ -28,27 +30,32 @@ import { UserAvatar } from '../User/UserAvatar'
 import { UserName } from '../User/UserName'
 import { ZapChipAmount } from './ZapChipAmount'
 
-type Props = EventPointer
+type Props = {
+  event: NostrEventDB
+}
 
 const formatter = new Intl.NumberFormat()
 
-export const ZapRequest = observer(function ZapRequest(props: Props) {
-  const { id } = props
+export const ZapRequest = memo(function ZapRequest(props: Props) {
+  const { event } = props
   const acc = useCurrentAccount()
   const signer = useCurrentSigner()
-  const store = useMemo(() => createZapRequestStore(), [])
+  const store = useAtomValue(zapRequestAtom)
+  const updateStore = useSetAtom(updateZapRequestAtom)
+  const enqueueToast = useSetAtom(enqueueToastAtom)
 
   const currentUser = useCurrentUser()
   const navigate = useNavigate()
   const router = useRouter()
-  const note = useNoteStoreFromId(id)
-  const zapEnabled = note?.user ? note.user.canReceiveZap : true
+  const note = useNoteState(event)
+  const user = useUserState(event.pubkey)
+  const zapEnabled = note?.user ? user.canReceiveZap : true
 
-  const [pending, onSubmit] = useObservableState<boolean, User | undefined>((input$) => {
+  const [pending, onSubmit] = useObservableState<boolean, UserState | undefined>((input$) => {
     return input$.pipe(
       filter((x) => !!x),
       mergeMap((user) => {
-        return from(getZapEndpoint(user.event)).pipe(
+        return from(getZapEndpoint(user.event as unknown as NostrEvent)).pipe(
           mergeMap((callback) => {
             if (!callback) return throwError(() => new Error('Error when getting zap endpoint'))
             if (!acc?.pubkey || !signer) return throwError(() => new Error('Not authenticated'))
@@ -58,8 +65,8 @@ export const ZapRequest = observer(function ZapRequest(props: Props) {
             const relays = [...(currentUser?.relays || []), ...user.relays]
 
             const zapEvent = makeZapRequest({
-              profile: user.event.pubkey,
-              event: id,
+              profile: user.pubkey!, // TODO: get this type right
+              event: event.id,
               amount,
               comment,
               relays,
@@ -91,7 +98,7 @@ export const ZapRequest = observer(function ZapRequest(props: Props) {
                   search: {
                     invoice: response.pr,
                     nevent: nip19.neventEncode({
-                      id,
+                      id: event.id,
                       author: user.pubkey,
                       relays,
                     }),
@@ -107,7 +114,7 @@ export const ZapRequest = observer(function ZapRequest(props: Props) {
           startWith(true),
           catchError((res) => {
             const error = res as Error
-            toastStore.enqueue(error.message, { duration: 5000 })
+            enqueueToast({ component: error.message, duration: 5000 })
             return of(false)
           }),
         )
@@ -120,12 +127,12 @@ export const ZapRequest = observer(function ZapRequest(props: Props) {
       <Stack horizontal={false} align='center' gap={2}>
         <IconBolt size={38} fill='currentColor' strokeOpacity='0' />
         <ContentProvider value={{ disableLink: true, disablePopover: true }}>
-          <UserAvatar pubkey={note?.user?.pubkey} size='xl' sx={styles.avatar} />
+          {user.pubkey && <UserAvatar pubkey={user.pubkey} size='xl' sx={styles.avatar} />}
           <Stack gap={0.5}>
             <Text variant='title' size='lg' sx={styles.title}>
               Zap{' '}
             </Text>{' '}
-            {note?.user && <UserName size='lg' variant='title' pubkey={note.user.pubkey} />}
+            {user.pubkey && <UserName size='lg' variant='title' pubkey={user.pubkey} />}
           </Stack>
         </ContentProvider>
         {/* {note && ( */}
@@ -147,15 +154,20 @@ export const ZapRequest = observer(function ZapRequest(props: Props) {
           Amount in sats
         </Text>
         <Stack sx={styles.chips} wrap justify='center'>
-          <ZapChipAmount store={store} amount={21} />
-          <ZapChipAmount store={store} amount={1000} />
-          <ZapChipAmount store={store} amount={5000} />
-          <ZapChipAmount store={store} amount={10000} />
-          <ZapChipAmount store={store} amount={50000} />
-          <ZapChipAmount store={store} amount={100000} />
-          <Chip selected={store.custom.value} variant='filter' label='Custom' onClick={() => store.custom.toggle()} />
+          <ZapChipAmount amount={21} />
+          <ZapChipAmount amount={1000} />
+          <ZapChipAmount amount={5000} />
+          <ZapChipAmount amount={10000} />
+          <ZapChipAmount amount={50000} />
+          <ZapChipAmount amount={100000} />
+          <Chip
+            selected={store.custom}
+            variant='filter'
+            label='Custom'
+            onClick={() => updateStore({ custom: !store.custom })}
+          />
         </Stack>
-        {store.custom.value && (
+        {store.custom && (
           <TextField
             type='number'
             shrink
@@ -164,7 +176,7 @@ export const ZapRequest = observer(function ZapRequest(props: Props) {
             label='Custom amount'
             placeholder='21000'
             sx={styles.custom}
-            onChange={(e) => store.setAmount(parseInt(e.target.value))}
+            onChange={(e) => updateStore({ amount: parseInt(e.target.value) })}
             onKeyDown={(e) => {
               if (e.key === '.') {
                 // @ts-ignore
@@ -179,11 +191,11 @@ export const ZapRequest = observer(function ZapRequest(props: Props) {
           label='Comment'
           placeholder='Add a zap comment'
           sx={styles.comment}
-          onChange={(e) => store.setComment(e.target.value)}
+          onChange={(e) => updateStore({ comment: e.target.value })}
         />
       </Stack>
       <br />
-      <Button disabled={pending} fullWidth variant='filled' sx={styles.button} onClick={() => onSubmit(note?.user)}>
+      <Button disabled={pending} fullWidth variant='filled' sx={styles.button} onClick={() => onSubmit(user)}>
         <Stack gap={1} justify='center'>
           {pending && <CircularProgress size='xs' />}
           {pending ? 'Generating Invoice...' : `Zap ${formatter.format(store.amount)} sats`}
