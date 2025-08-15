@@ -48,7 +48,7 @@ export const DialogSheet = (props: Props) => {
   return (
     <>
       {isMobile && <MobileDialog {...props} />}
-      {!isMobile && props.open && (
+      {!isMobile && (
         <Dialog {...props} trapFocus={false}>
           {surface ? (
             <DialogContent shape='lg' surface={surface} maxWidth={props.maxWidth}>

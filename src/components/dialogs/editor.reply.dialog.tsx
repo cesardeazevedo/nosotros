@@ -1,17 +1,13 @@
-import { useNoteStoreFromId } from '@/hooks/useNoteStore'
 import { spacing } from '@/themes/spacing.stylex'
 import { decodeNIP19 } from '@/utils/nip19'
 import { useMatch, useNavigate } from '@tanstack/react-router'
 import { DialogSheet } from 'components/elements/Layouts/Dialog'
-import { observer } from 'mobx-react-lite'
-import { useCallback } from 'react'
+import { memo, useCallback } from 'react'
 import { RemoveScroll } from 'react-remove-scroll'
 import { css, html } from 'react-strict-dom'
-import { Editor } from '../elements/Editor/Editor'
-import { RepliesThread } from '../elements/Replies/RepliesThread'
 import { Divider } from '../ui/Divider/Divider'
 
-export const EditorReplyDialog = observer(function EditorReplyDialog() {
+export const EditorReplyDialog = memo(function EditorReplyDialog() {
   const navigate = useNavigate()
   const replying = useMatch({
     from: '__root__',
@@ -24,7 +20,6 @@ export const EditorReplyDialog = observer(function EditorReplyDialog() {
 
   const decoded = decodeNIP19(replying || '')
   const id = decoded?.type === 'nevent' ? decoded?.data.id : undefined
-  const note = useNoteStoreFromId(id)
 
   return (
     <DialogSheet maxWidth='sm' sx={styles.dialog} open={!!replying} onClose={handleClose}>
@@ -32,18 +27,18 @@ export const EditorReplyDialog = observer(function EditorReplyDialog() {
         <>
           <RemoveScroll>
             <html.div style={styles.root}>
-              {note && (
-                <RepliesThread
-                  event={note.event.event}
-                  renderReplies={false}
-                  renderParents={false}
-                  renderEditor={false}
-                />
-              )}
+              {/* {note && ( */}
+              {/*   <RepliesThread */}
+              {/*     event={note.event.event} */}
+              {/*     renderReplies={false} */}
+              {/*     renderParents={false} */}
+              {/*     renderEditor={false} */}
+              {/*   /> */}
+              {/* )} */}
             </html.div>
           </RemoveScroll>
           <Divider />
-          {note && <Editor renderBubble initialOpen store={note.editor} />}
+          {/* {note && <Editor renderBubble initialOpen store={note.editor} />} */}
         </>
       )}
     </DialogSheet>
