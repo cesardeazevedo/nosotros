@@ -1,13 +1,11 @@
 import { UserHeader } from '@/components/elements/User/UserHeader'
-import type { NProfileModule } from '@/stores/modules/nprofile.module'
-import { observer } from 'mobx-react-lite'
+import { memo } from 'react'
 import { FeedHeaderBase } from './FeedHeaderBase'
 
 type Props = {
-  module: NProfileModule
+  pubkey: string
 }
 
-export const FeedHeaderNprofile = observer(function FeedHeaderNprofile(props: Props) {
-  const { module } = props
-  return <FeedHeaderBase leading={<UserHeader pubkey={module.pubkey} />} />
+export const FeedHeaderNprofile = memo(function FeedHeaderNprofile(props: Props) {
+  return <FeedHeaderBase leading={<UserHeader pubkey={props.pubkey} />} />
 })
