@@ -1,7 +1,6 @@
 import { decode } from 'light-bolt11-decoder'
 import type { NostrEvent } from 'nostr-tools'
-import type { Metadata } from '../types'
-import { parseTags } from './parseTags'
+import type { Metadata } from '../../nostr/types'
 
 const BOLT11_KEYS = ['coin_network', 'amount', 'separator', 'timestamp', 'expiry', 'payment_hash', 'description']
 
@@ -47,8 +46,7 @@ export function parseBolt11(lnbc: string) {
 }
 
 export function parseZapEvent(event: NostrEvent): Metadata {
-  const tags = parseTags(event.tags)
-  const lnbc = tags.bolt11?.[0][1]
+  const lnbc = event.tags.find((tag) => tag[0] === 'bolt11')?.[1]
   return {
     bolt11: lnbc ? parseBolt11(lnbc) : {},
   }

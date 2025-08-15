@@ -1,11 +1,13 @@
+import { RELAY_SELECTION_IGNORE } from '@/constants/relays'
 import type { RelayStatsDB } from '@/db/types'
-import type { NostrContext } from '../context'
-import { pool } from '../pool'
+import type { NostrContext } from '../../nostr/context'
+import { pool } from '../../nostr/pool'
 import type { UserRelay } from './parseRelayList'
 
 export function selectRelays(data: UserRelay[], ctx: NostrContext, stats?: Record<string, RelayStatsDB>) {
-  return data
+  const res = data
     .filter((data) => !pool.blacklisted?.has(data.relay))
+    .filter((data) => !RELAY_SELECTION_IGNORE.includes(data.relay))
     .filter((data) => !ctx.ignoreRelays?.includes(data.relay))
     .filter((data) => data.relay.startsWith('wss://'))
     .filter((data) => {
@@ -18,5 +20,6 @@ export function selectRelays(data: UserRelay[], ctx: NostrContext, stats?: Recor
       const events2 = stats2?.events || 0
       return events2 - events1
     })
-    .slice(0, ctx.maxRelaysPerUser || 10)
+    .slice(0, 2)
+  return res
 }

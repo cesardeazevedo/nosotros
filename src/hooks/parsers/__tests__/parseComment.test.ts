@@ -19,7 +19,7 @@ describe('parseComment', () => {
       ],
     })
 
-    const { contentSchema, tags, ...rest } = parseComment(event)
+    const { contentSchema, ...rest } = parseComment(event)
     expect(rest).toStrictEqual({
       imeta: {},
       mentionedNotes: [],
@@ -50,7 +50,7 @@ describe('parseComment', () => {
       ],
     })
 
-    const { contentSchema, tags, ...rest } = parseComment(event)
+    const { contentSchema, ...rest } = parseComment(event)
     expect(rest).toStrictEqual({
       imeta: {},
       mentionedNotes: [],

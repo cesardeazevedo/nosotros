@@ -1,6 +1,6 @@
 import { formatRelayUrl } from '@/core/helpers/formatRelayUrl'
 import type { NostrEvent } from 'nostr-tools'
-import type { Metadata } from '../types'
+import type { Metadata } from '../../nostr/types'
 
 export type UserRelay = {
   pubkey: string
@@ -12,7 +12,7 @@ export const READ = 1 << 0
 export const WRITE = 1 << 1
 export const PERMISSIONS = { READ, WRITE }
 
-export function parseRelayList(event: NostrEvent): Metadata {
+export function parseRelayList(event: Pick<NostrEvent, 'pubkey' | 'tags'>): Metadata {
   const { tags, pubkey } = event
   const grouped = tags
     .filter((tag) => tag[0] === 'r')
@@ -33,10 +33,8 @@ export function parseRelayList(event: NostrEvent): Metadata {
       }
     }, {})
 
-  const relayList = Object.values(grouped)
-
   return {
-    relayList,
+    relayList: Object.values(grouped),
   }
 }
 
@@ -53,18 +51,16 @@ export function parseRelayListToTags(relayList: UserRelay[]) {
   )
 }
 
-export function addPermission(relayList: UserRelay[], userRelay: UserRelay) {
+export function addPermission(relayList: UserRelay[], data: UserRelay) {
   return relayList
-    .map((relay) =>
-      relay.relay === userRelay.relay ? { ...relay, permission: relay.permission | userRelay.permission } : relay,
-    )
-    .concat(relayList.some((relay) => relay.relay === userRelay.relay) ? [] : [userRelay])
+    .map((relay) => (relay.relay === data.relay ? { ...relay, permission: relay.permission | data.permission } : relay))
+    .concat(relayList.some((relay) => relay.relay === data.relay) ? [] : [data])
 }
 
-export function revokePermission(relayList: UserRelay[], userRelay: UserRelay) {
+export function revokePermission(relayList: UserRelay[], data: UserRelay) {
   return relayList
     .map((relay) =>
-      relay.relay === userRelay.relay ? { ...relay, permission: relay.permission & ~userRelay.permission } : relay,
+      relay.relay === data.relay ? { ...relay, permission: relay.permission & ~data.permission } : relay,
     )
-    .filter((relay) => relay.relay !== userRelay.relay || relay.permission !== 0)
+    .filter((relay) => relay.relay !== data.relay || relay.permission !== 0)
 }

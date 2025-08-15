@@ -1,21 +1,20 @@
 import type { NostrEvent } from '@/core/types'
 import { welshmanToProseMirror } from '@/utils/welshmanToProsemirror'
 import { parse } from '@welshman/content'
-import type { Metadata } from '../types'
-import { getHintsFromNIP19 } from './getHintsFromNIP19'
+import type { Metadata } from '../../nostr/types'
 import { getMentionedAuthors } from './getMentionedAuthors'
 import { getMentionedNotes } from './getMentionedNotes'
 import { parseImeta } from './parseImeta'
-import { type ParsedTags } from './parseTags'
+import { parseRelayHintsFromNIP19 } from './parseRelayHints'
 
-export function parseContent(event: NostrEvent, tags: ParsedTags): Metadata {
+export function parseContent(event: NostrEvent): Metadata {
   const imeta = parseImeta(event.tags)
   const parsed = parse({ content: event.content, tags: event.tags })
   const { contentSchema, nprofiles, nevents, naddresses } = welshmanToProseMirror(parsed)
 
-  const relayHints = getHintsFromNIP19(nevents, nprofiles, naddresses)
-  const mentionedNotes = getMentionedNotes(tags, nevents, naddresses)
-  const mentionedAuthors = getMentionedAuthors(tags, nprofiles, nevents, naddresses)
+  const relayHints = parseRelayHintsFromNIP19(nevents, nprofiles, naddresses)
+  const mentionedNotes = getMentionedNotes(event.tags, nevents, naddresses)
+  const mentionedAuthors = getMentionedAuthors(event.tags, nprofiles, nevents, naddresses)
 
   return {
     imeta,
