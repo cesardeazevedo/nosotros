@@ -1,4 +1,4 @@
-import { parseEventMetadata } from '@/nostr/operators/parseEventMetadata'
+import { parseEventMetadata } from '@/hooks/parsers/parseEventMetadata'
 import type { Filter, NostrEvent } from 'nostr-tools'
 import type { Nip05DB, RelayInfoDB, RelayStatsDB, SeenDB } from '../types'
 import type { NostrEventDB } from './sqlite.types'

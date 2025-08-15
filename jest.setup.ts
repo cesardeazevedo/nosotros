@@ -1,4 +1,3 @@
-import { db } from '@/nostr/db'
 import { vi } from 'vitest'
 
 // https://github.com/vitest-dev/vitest/issues/4043#issuecomment-1905172846
@@ -31,6 +30,3 @@ vi.mock('nostr-tools', async () => {
 
 vi.mock('constants/relays')
 vi.mock('nostr/operators/verifyWorker')
-
-// Reset Indexeddb
-beforeEach(() => db.clearDB())

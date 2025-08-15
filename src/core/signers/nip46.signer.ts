@@ -194,7 +194,7 @@ export class NIP46RemoteSigner implements Signer<NIP46RemoteSignerOptions> {
     const relay = pool.get(bunker.relay) || new Relay(bunker.relay)
 
     return of(sub).pipe(
-      subscribe(relay, undefined, false),
+      subscribe(relay, false),
 
       mergeMap(async ([, event]) => {
         const pubkey = bunker.pubkey || event.pubkey
@@ -263,7 +263,12 @@ export class NIP46RemoteSigner implements Signer<NIP46RemoteSignerOptions> {
         mergeMap((bunker) => {
           return this.options.remotePubkey ? this.send('sign_event', [JSON.stringify(event)], bunker) : EMPTY
         }),
-        map(([, res]) => JSON.parse(res.result) as NostrEvent),
+        map(([, res]) => {
+          if (res.result) {
+            return JSON.parse(res.result) as NostrEvent
+          }
+          throw new Error(res.error)
+        }),
         verify(),
       ),
     )

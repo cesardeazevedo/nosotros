@@ -1,4 +1,3 @@
-import type { Metadata } from '@/nostr/types'
 import type { Kind } from 'constants/kinds'
 import type { NostrEvent, NostrFilter } from 'core/types'
 import type { RelayInformation } from 'nostr-tools/nip11'
