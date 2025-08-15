@@ -3,15 +3,15 @@ import { RouteContainer } from '@/components/elements/Layouts/RouteContainer'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Tab } from '@/components/ui/Tab/Tab'
 import { Text } from '@/components/ui/Text/Text'
+import { useCurrentPubkey } from '@/hooks/useAuth'
 import { useLG } from '@/hooks/useMobile'
 import { useResetScroll } from '@/hooks/useResetScroll'
-import { useCurrentPubkey } from '@/hooks/useRootStore'
 import { spacing } from '@/themes/spacing.stylex'
 import { Link, Outlet } from '@tanstack/react-router'
-import { observer } from 'mobx-react-lite'
+import { memo } from 'react'
 import { css } from 'react-strict-dom'
 
-export const ListsRoute = observer(function ListsRoute() {
+export const ListsRoute = memo(function ListsRoute() {
   const isLG = useLG()
   const pubkey = useCurrentPubkey()
   useResetScroll()

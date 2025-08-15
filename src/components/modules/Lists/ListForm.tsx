@@ -4,18 +4,19 @@ import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { TextField } from '@/components/ui/TextField/TextField'
 import { Kind } from '@/constants/kinds'
-import { useCurrentPubkey, useCurrentSigner } from '@/hooks/useRootStore'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import { usePublishEventMutation } from '@/hooks/mutations/usePublishEventMutation'
+import { useCurrentPubkey, useCurrentSigner } from '@/hooks/useAuth'
 import { publish } from '@/nostr/publish/publish'
-import type { Event } from '@/stores/events/event'
 import { spacing } from '@/themes/spacing.stylex'
+import type { UnsignedEvent } from 'nostr-tools'
 import { useActionState, useRef } from 'react'
 import { css } from 'react-strict-dom'
-import { defaultIfEmpty, delay, firstValueFrom } from 'rxjs'
 import { FollowSetForm } from './FollowSets/FollowSetForm'
 import { RelaySetForm } from './RelaySets/RelaySetForm'
 
 type Props = (
-  | { isEditing: true; event: Event }
+  | { isEditing: true; event: NostrEventDB }
   | { isEditing: false; kind: Kind.StarterPack | Kind.FollowSets | Kind.RelaySets }
 ) & {
   onClose?: () => void
@@ -39,21 +40,33 @@ export const ListForm = (props: Props) => {
   const pubkey = useCurrentPubkey()
   const signer = useCurrentSigner()
 
-  const [error, submit, isPending] = useActionState(async (_: unknown, formData: FormData) => {
+  // That's bad, we need to split this component into 2 for create and update
+  const title = 'event' in props ? props.event.tags.find((x) => x[0] === 'title')?.[1] : ''
+  const description = 'event' in props ? props.event.tags.find((x) => x[0] === 'description')?.[1] : ''
+  const dTag = 'event' in props ? props.event.tags.find((x) => x[0] === 'dTag')?.[1] : ''
+
+  const { isPending, mutateAsync } = usePublishEventMutation<UnsignedEvent>({
+    mutationFn:
+      ({ signer }) =>
+      (newEvent) => {
+        return publish(newEvent, { signer })
+      },
+  })
+
+  const [error, submit] = useActionState(async (_: unknown, formData: FormData) => {
     const title = formData.get('title')?.toString()
     const tags = ref.current?.getTags() || []
     if (!title) return 'title required' as string
     if (!signer || !pubkey) return 'signin required' as string
 
     const uuid = window.crypto.randomUUID().replace(/-/g, '').slice(0, 21)
-    const d = isEditing ? props.event.getTag('d') || uuid : uuid
     const newEvent = {
       kind,
-      content: isEditing ? props.event.event.content : '',
+      content: isEditing ? props.event.content : '',
       pubkey,
-      tags: [['title', title], ['d', d], ...tags],
-    }
-    await firstValueFrom(publish(newEvent, { signer }).pipe(defaultIfEmpty(null), delay(1000)))
+      tags: [['title', title], ['d', dTag || uuid], ...tags],
+    } as UnsignedEvent
+    await mutateAsync(newEvent)
     onClose?.()
   }, null)
 
@@ -69,7 +82,7 @@ export const ListForm = (props: Props) => {
         <Stack sx={styles.content} horizontal={false} gap={2}>
           <TextField
             error={!!error}
-            defaultValue={isEditing ? props.event.getTag('title') : ''}
+            defaultValue={isEditing ? title : ''}
             shrink
             fullWidth
             label='Name'
@@ -77,7 +90,7 @@ export const ListForm = (props: Props) => {
             placeholder='Give a name to your list'
           />
           <TextField
-            defaultValue={isEditing ? props.event.getTag('description') : ''}
+            defaultValue={isEditing ? description : ''}
             shrink
             fullWidth
             multiline
