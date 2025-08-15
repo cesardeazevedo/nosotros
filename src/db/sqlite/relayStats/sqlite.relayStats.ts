@@ -1,5 +1,4 @@
 import type { RelayStatsDB } from '@/db/types'
-import type { RelayStatsDBMap } from '@/nostr/db/queryRelayStats'
 import type { Database } from '@sqlite.org/sqlite-wasm'
 import { InsertBatcher } from '../batcher'
 import type { RelayStatsStored } from '../sqlite.types'
@@ -20,9 +19,7 @@ export class SqliteRelayStats {
     }
     const sql = `SELECT * FROM relayStats ${conditions.join(' AND ')}`
     const res = db.selectObjects(sql, urls) as unknown as RelayStatsStored[]
-    return res
-      .map((stat) => ({ ...stat, ...JSON.parse(stat.data) }) as RelayStatsDB)
-      .reduce((acc, stat) => ({ ...acc, [stat.url]: stat }), {} as RelayStatsDBMap)
+    return res.map((stat) => ({ url: stat.url, ...JSON.parse(stat.data) }) as RelayStatsDB)
   }
 
   insert(relayStats: RelayStatsDB) {

@@ -12,7 +12,7 @@ export class SqliteSeen {
   }
 
   query(db: Database, id: string): SeenDB[] | undefined {
-    const sql = `SELECT * FROM seen WHERE eventId = ? LIMIT 1`
+    const sql = `SELECT * FROM seen WHERE eventId = ?`
     const res = db.selectObjects(sql, [id])
     return res as unknown as SeenDB[]
   }

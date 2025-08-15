@@ -1,7 +1,6 @@
-import type { RelayStatsDBMap } from '@/nostr/db/queryRelayStats'
 import { parseEventMetadata } from '@/nostr/operators/parseEventMetadata'
 import type { Filter, NostrEvent } from 'nostr-tools'
-import type { Nip05DB, RelayInfoDB, RelayStatsDB } from '../types'
+import type { Nip05DB, RelayInfoDB, RelayStatsDB, SeenDB } from '../types'
 import type { NostrEventDB } from './sqlite.types'
 import { type SqliteMessageResponse, type SqliteMessages } from './sqlite.types'
 
@@ -41,8 +40,7 @@ export class SqliteStorage {
   }
 
   async queryEvents(filter: Filter) {
-    const res = await this.send<NostrEventDB[]>({ method: 'queryEvent', params: filter })
-    return res
+    return await this.send<NostrEventDB[]>({ method: 'queryEvent', params: filter })
   }
 
   async insertEvent(event: NostrEvent) {
@@ -55,8 +53,14 @@ export class SqliteStorage {
   }
 
   async getRawEventById(id: string) {
-    const res = await this.send<NostrEvent>({ method: 'getRawEventById', params: id })
-    return res
+    return await this.send<NostrEvent>({ method: 'getRawEventById', params: id })
+  }
+
+  async querySeen(eventId: string) {
+    return await this.send<SeenDB[]>({
+      method: 'querySeen',
+      params: eventId,
+    })
   }
 
   async insertSeen(relay: string, event: NostrEvent) {
@@ -71,7 +75,7 @@ export class SqliteStorage {
   }
 
   async queryRelayStats(relays: string[]) {
-    return await this.send<RelayStatsDBMap>({
+    return await this.send<RelayStatsDB[]>({
       method: 'queryRelayStats',
       params: relays,
     })
