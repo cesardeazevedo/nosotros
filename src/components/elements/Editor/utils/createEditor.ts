@@ -2,9 +2,7 @@ import { NEventEditor } from '@/components/elements/Content/NEvent/NEventEditor'
 import { NProfileEditor } from '@/components/elements/Content/NProfile/NProfileEditor'
 import { TweetEditor } from '@/components/elements/Content/Tweet/TweetEditor'
 import { YoutubeEditor } from '@/components/elements/Content/Youtube/YoutubeEditor'
-import type { EditorStore } from '@/stores/editor/editor.store'
 import type { NodeViewProps } from '@tiptap/core'
-import { Editor } from '@tiptap/core'
 import DocumentExtension from '@tiptap/extension-document'
 import DropCursorExtension from '@tiptap/extension-dropcursor'
 import GapcursorExtension from '@tiptap/extension-gapcursor'
@@ -13,8 +11,10 @@ import HistoryExtension from '@tiptap/extension-history'
 import ParagraphExtension from '@tiptap/extension-paragraph'
 import Placeholder from '@tiptap/extension-placeholder'
 import TextExtension from '@tiptap/extension-text'
+import type { UseEditorOptions } from '@tiptap/react'
 import { ReactNodeViewRenderer } from '@tiptap/react'
 import { NostrExtension, editorProps } from 'nostr-editor'
+import type { EventTemplate, NostrEvent } from 'nostr-tools'
 import { ImageNodeViewWrapper } from '../../Content/Image/ImageNodeViewWrapper'
 import { NAddrEditor } from '../../Content/NAddr/NAddrEditor'
 import { VideoNodeViewWrapper } from '../../Content/Video/VideoNodeViewWrapper'
@@ -24,13 +24,18 @@ const addNodeView = (Component: React.ComponentType<NodeViewProps>) => ({
   addNodeView: () => ReactNodeViewRenderer(Component),
 })
 
-type Settings = {
+type Options = {
+  sign: (unsigned: EventTemplate) => Promise<NostrEvent>
+  placeholder: () => string
   defaultUploadUrl: string
   defaultUploadType: string
+  onUploadStart: () => void
+  onUploadDrop: () => void
+  onUploadComplete: () => void
 }
 
-export function createEditor(store: EditorStore, settings: Settings) {
-  return new Editor({
+export function createEditor(options: Options): UseEditorOptions {
+  return {
     editorProps,
     extensions: [
       TextExtension,
@@ -40,14 +45,14 @@ export function createEditor(store: EditorStore, settings: Settings) {
       HistoryExtension,
       DropCursorExtension,
       GapcursorExtension,
-      Placeholder.configure({ placeholder: store.placeholder }),
+      Placeholder.configure({ placeholder: options.placeholder }),
       NostrExtension.configure({
         link: {
           openOnClick: false,
         },
         image: {
-          defaultUploadUrl: settings.defaultUploadUrl || 'https://nostr.build',
-          defaultUploadType: (settings.defaultUploadType || 'nip96') as 'nip96' | 'blossom',
+          defaultUploadUrl: options.defaultUploadUrl || 'https://nostr.build',
+          defaultUploadType: (options.defaultUploadType || 'nip96') as 'nip96' | 'blossom',
         },
         video: {
           defaultUploadUrl: 'https://nostr.build',
@@ -55,15 +60,15 @@ export function createEditor(store: EditorStore, settings: Settings) {
         },
         fileUpload: {
           immediateUpload: false,
-          sign: (event) => store.sign(event),
+          sign: (event) => options.sign(event),
           onStart() {
-            store.isUploading.toggle(true)
+            options.onUploadStart()
           },
           onDrop() {
-            store.editor?.commands.focus()
+            options.onUploadDrop()
           },
           onComplete() {
-            store.isUploading.toggle(false)
+            options.onUploadComplete()
           },
         },
         extend: {
@@ -82,8 +87,5 @@ export function createEditor(store: EditorStore, settings: Settings) {
         },
       }),
     ],
-    onUpdate({ editor }) {
-      store.onUpdate(editor)
-    },
-  })
+  }
 }
