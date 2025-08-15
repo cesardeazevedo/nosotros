@@ -4,10 +4,7 @@ import { hintsToRelayFilters } from '../hintsToRelayFilters'
 
 describe('hintsToRelayFilters', () => {
   test('assert authors', () => {
-    const filters = [
-      { kinds: [0], authors: ['1', '2', '3', '4'] },
-      { kinds: [1], authors: ['1', '2', '3', '4'] },
-    ]
+    const filters = { kinds: [0, 1], authors: ['1', '2', '3', '4'] }
     const hints = {
       authors: {
         '1': [RELAY_1, RELAY_2],
@@ -20,30 +17,19 @@ describe('hintsToRelayFilters', () => {
     const res = hintsToRelayFilters(filters, hints)
 
     expect(res).toStrictEqual([
-      ['wss://relay1.com', [{ kinds: [0], authors: ['1'] }]],
-      ['wss://relay2.com', [{ kinds: [0], authors: ['1'] }]],
-      ['wss://relay3.com', [{ kinds: [0], authors: ['2'] }]],
-      ['wss://relay4.com', [{ kinds: [0], authors: ['2'] }]],
-      ['wss://relay2.com', [{ kinds: [0], authors: ['3'] }]],
-      ['wss://relay3.com', [{ kinds: [0], authors: ['3'] }]],
-      ['wss://relay1.com', [{ kinds: [0], authors: ['4'] }]],
-      ['wss://relay4.com', [{ kinds: [0], authors: ['4'] }]],
-      ['wss://relay1.com', [{ kinds: [1], authors: ['1'] }]],
-      ['wss://relay2.com', [{ kinds: [1], authors: ['1'] }]],
-      ['wss://relay3.com', [{ kinds: [1], authors: ['2'] }]],
-      ['wss://relay4.com', [{ kinds: [1], authors: ['2'] }]],
-      ['wss://relay2.com', [{ kinds: [1], authors: ['3'] }]],
-      ['wss://relay3.com', [{ kinds: [1], authors: ['3'] }]],
-      ['wss://relay1.com', [{ kinds: [1], authors: ['4'] }]],
-      ['wss://relay4.com', [{ kinds: [1], authors: ['4'] }]],
+      ['wss://relay1.com', { kinds: [0, 1], authors: ['1'] }],
+      ['wss://relay2.com', { kinds: [0, 1], authors: ['1'] }],
+      ['wss://relay3.com', { kinds: [0, 1], authors: ['2'] }],
+      ['wss://relay4.com', { kinds: [0, 1], authors: ['2'] }],
+      ['wss://relay2.com', { kinds: [0, 1], authors: ['3'] }],
+      ['wss://relay3.com', { kinds: [0, 1], authors: ['3'] }],
+      ['wss://relay1.com', { kinds: [0, 1], authors: ['4'] }],
+      ['wss://relay4.com', { kinds: [0, 1], authors: ['4'] }],
     ])
   })
 
   test('assert ids', () => {
-    const filters = [
-      { kinds: [0], ids: ['1', '2', '3', '4'] },
-      { kinds: [1], ids: ['1', '2', '3', '4'] },
-    ]
+    const filters = { kinds: [0, 1], ids: ['1', '2', '3', '4'] }
     const hints = {
       ids: {
         '1': [RELAY_1, RELAY_2],
@@ -54,35 +40,24 @@ describe('hintsToRelayFilters', () => {
     } as RelayHints
 
     const res = hintsToRelayFilters(filters, hints)
-
     expect(res).toStrictEqual([
-      ['wss://relay1.com', [{ kinds: [0], ids: ['1'] }]],
-      ['wss://relay2.com', [{ kinds: [0], ids: ['1'] }]],
-      ['wss://relay3.com', [{ kinds: [0], ids: ['2'] }]],
-      ['wss://relay4.com', [{ kinds: [0], ids: ['2'] }]],
-      ['wss://relay2.com', [{ kinds: [0], ids: ['3'] }]],
-      ['wss://relay3.com', [{ kinds: [0], ids: ['3'] }]],
-      ['wss://relay1.com', [{ kinds: [0], ids: ['4'] }]],
-      ['wss://relay4.com', [{ kinds: [0], ids: ['4'] }]],
-      ['wss://relay1.com', [{ kinds: [1], ids: ['1'] }]],
-      ['wss://relay2.com', [{ kinds: [1], ids: ['1'] }]],
-      ['wss://relay3.com', [{ kinds: [1], ids: ['2'] }]],
-      ['wss://relay4.com', [{ kinds: [1], ids: ['2'] }]],
-      ['wss://relay2.com', [{ kinds: [1], ids: ['3'] }]],
-      ['wss://relay3.com', [{ kinds: [1], ids: ['3'] }]],
-      ['wss://relay1.com', [{ kinds: [1], ids: ['4'] }]],
-      ['wss://relay4.com', [{ kinds: [1], ids: ['4'] }]],
+      ['wss://relay1.com', { kinds: [0, 1], ids: ['1'] }],
+      ['wss://relay2.com', { kinds: [0, 1], ids: ['1'] }],
+      ['wss://relay3.com', { kinds: [0, 1], ids: ['2'] }],
+      ['wss://relay4.com', { kinds: [0, 1], ids: ['2'] }],
+      ['wss://relay2.com', { kinds: [0, 1], ids: ['3'] }],
+      ['wss://relay3.com', { kinds: [0, 1], ids: ['3'] }],
+      ['wss://relay1.com', { kinds: [0, 1], ids: ['4'] }],
+      ['wss://relay4.com', { kinds: [0, 1], ids: ['4'] }],
     ])
   })
 
   test('assert addressable events', () => {
-    const filters = [
-      {
-        '#d': ['123'],
-        authors: ['p1'],
-        kinds: [39000],
-      },
-    ]
+    const filters = {
+      '#d': ['123'],
+      authors: ['p1'],
+      kinds: [39000],
+    }
     const hints = {
       ids: {
         '39000:p1:123': ['wss://relay1.com'],
@@ -92,13 +67,11 @@ describe('hintsToRelayFilters', () => {
     expect(res).toStrictEqual([
       [
         'wss://relay1.com',
-        [
-          {
-            '#d': ['123'],
-            authors: ['p1'],
-            kinds: [39000],
-          },
-        ],
+        {
+          '#d': ['123'],
+          authors: ['p1'],
+          kinds: [39000],
+        },
       ],
     ])
   })
