@@ -124,7 +124,7 @@ export function useFeedState(options: FeedModule & { select?: (data: InfiniteEve
     blured,
     setBlured,
     paginate: () => paginate(),
-    addRelay: (relay: string) => {},
-    removeRelay: (relay: string) => {},
+    addRelay: () => {},
+    removeRelay: () => {},
   }
 }

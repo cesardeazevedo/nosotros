@@ -1,4 +1,4 @@
-import { RELAY_1, RELAY_2, RELAY_3, RELAY_4 } from '@/constants/testRelays'
+import { RELAY_1, RELAY_2, RELAY_3 } from '@/constants/testRelays'
 import { NostrSubscriptionBuilder } from '@/core/NostrSubscriptionBuilder'
 import { test } from '@/utils/fixtures'
 import { subscribeSpyTo } from '@hirez_io/observer-spy'

@@ -58,6 +58,7 @@ class WrappedBuffer {
 function decodeVarInt(buf) {
   let res = 0
 
+  // eslint-disable-next-line no-constant-condition
   while (1) {
     if (buf.length === 0) throw Error('parse ends prematurely')
     const byte = buf.shift()
@@ -100,6 +101,7 @@ class Accumulator {
 
     if (typeof window === 'undefined') {
       // node.js
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const crypto = require('crypto')
       this.sha256 = async (slice) => new Uint8Array(crypto.createHash('sha256').update(slice).digest())
     } else {
@@ -218,7 +220,7 @@ class NegentropyStorageVector {
     const out = new Accumulator()
     out.setToZero()
 
-    this.iterate(begin, end, (item, i) => {
+    this.iterate(begin, end, (item) => {
       out.add(item.id)
       return true
     })

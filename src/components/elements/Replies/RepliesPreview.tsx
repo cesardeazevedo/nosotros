@@ -1,6 +1,5 @@
 import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
-import { useCurrentUser } from '@/hooks/useAuth'
 import { spacing } from '@/themes/spacing.stylex'
 import { useRouteContext } from '@tanstack/react-router'
 import type { DecodeResult } from 'nostr-tools/nip19'
@@ -29,7 +28,6 @@ function getPubkey(decoded: DecodeResult | undefined) {
 export const RepliesPreview = function RepliesPreview(props: Props) {
   const { onLoadMoreClick } = props
   const { note } = useNoteContext()
-  const currentUser = useCurrentUser()
   const context = useRouteContext({ strict: false })
 
   const replies = note.getRepliesPreviewUser(getPubkey(context.decoded))

@@ -18,11 +18,6 @@ export type SearchItem =
   | { type: 'query'; query: string }
   | { type: 'relay'; relay: string }
 
-function useSearchOnRelays(options: SearchOptions) {
-  // TODO
-  return []
-}
-
 function useSearchFollowingUsers(options: SearchOptions) {
   const { query, limit } = options
   const pubkey = useCurrentPubkey()
@@ -45,7 +40,7 @@ function useSearchFollowingUsers(options: SearchOptions) {
 }
 
 export function useSearchSuggestions(options: SearchOptions) {
-  const usersRelay = useSearchOnRelays(options)
+  // const usersRelay = useSearchOnRelays(options)
   const usersFollowing = useSearchFollowingUsers(options)
   const querySuggestion =
     options.suggestQuery !== false && options.query ? { type: 'query', query: options.query } : undefined

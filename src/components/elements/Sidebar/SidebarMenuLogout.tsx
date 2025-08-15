@@ -1,6 +1,6 @@
 import type { Props as MenuItemProps } from '@/components/ui/MenuItem/MenuItem'
 import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
-import { useAuth, useLogout } from '@/hooks/useAuth'
+import { useLogout } from '@/hooks/useAuth'
 import { IconLogout } from '@tabler/icons-react'
 import { useNavigate } from '@tanstack/react-router'
 import { useContext } from 'react'

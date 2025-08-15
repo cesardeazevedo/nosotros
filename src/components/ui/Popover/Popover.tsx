@@ -1,7 +1,6 @@
 import { memo, useCallback, useState } from 'react'
 import { PopoverBase } from './PopoverBase'
 import type { IPopoverBaseProps, IPopoverBaseTriggerRendererProps } from './PopoverBase.types'
-import { PopoverHoverRender } from './PopoverHoverRender'
 
 type Props = Omit<IPopoverBaseProps, 'children'> & {
   children: (props: IPopoverBaseTriggerRendererProps) => React.ReactNode

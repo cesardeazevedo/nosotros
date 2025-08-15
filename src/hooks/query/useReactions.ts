@@ -7,7 +7,6 @@ import { useMemo } from 'react'
 import { queryKeys } from './queryKeys'
 import type { CustomQueryOptions } from './useQueryBase'
 import { eventQueryOptions } from './useQueryBase'
-import { mergeRelayHints } from '@/core/mergers/mergeRelayHints'
 
 export function eventReactionsQueryOptions<Selector>(event: NostrEventDB, options?: CustomQueryOptions<Selector>) {
   const address = eventAddress(event)

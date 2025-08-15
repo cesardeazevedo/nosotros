@@ -6,7 +6,7 @@ import { PopoverBase } from '@/components/ui/Popover/PopoverBase'
 import { SearchField } from '@/components/ui/Search/Search'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { useUserBlossomServers } from '@/hooks/query/useQueryUser'
-import { useCurrentAccount, useCurrentPubkey } from '@/hooks/useAuth'
+import { useCurrentPubkey } from '@/hooks/useAuth'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconPhotoUp, IconPlus } from '@tabler/icons-react'
 import { memo, useRef, useState } from 'react'
@@ -15,23 +15,9 @@ import { css } from 'react-strict-dom'
 export const SettingsMediaStorage = memo(function SettingsMediaStorage() {
   const pubkey = useCurrentPubkey()
   const [open, setOpen] = useState(false)
-  const acc = useCurrentAccount()
   const ref = useRef<HTMLInputElement>(null)
 
   const blossomServerList = useUserBlossomServers<string[]>(pubkey)
-  // const [submit, submit$] = useObservableCallback<NostrEvent, [string, Account]>((input$) => {
-  //   return input$.pipe(
-  //     mergeMap(([url, acc]) => (acc.signer ? publishBlossomServer(url, acc.pubkey, acc.signer.signer) : EMPTY)),
-  //     mergeMap((event) => subscribeBlossomServers(event.pubkey)),
-  //     tap(() => setOpen(false)),
-  //     catchError((error) => {
-  //       toastStore.enqueue(error.message)
-  //       return EMPTY
-  //     }),
-  //     repeat(),
-  //   )
-  // })
-  // useSubscription(submit$)
 
   return (
     <MenuItem

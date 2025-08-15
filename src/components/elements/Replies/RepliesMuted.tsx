@@ -7,12 +7,7 @@ import { IconVolumeOff } from '@tabler/icons-react'
 import { useState } from 'react'
 import { css } from 'react-strict-dom'
 
-type Props = {
-  level: number
-}
-
-export const RepliesMuted = function RepliesMuted(props: Props) {
-  const { level } = props
+export const RepliesMuted = function RepliesMuted() {
   const { note } = useNoteContext()
   const [openMuted, setOpenMuted] = useState(false)
   const replies = note.repliesMuted

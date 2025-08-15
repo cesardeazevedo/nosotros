@@ -1,13 +1,13 @@
 import type { RelayInformation } from 'nostr-tools/nip11'
 import type { Observable } from 'rxjs'
-import { BehaviorSubject, catchError, EMPTY, filter, map, mergeMap, of, shareReplay, Subject, tap } from 'rxjs'
+import { BehaviorSubject, catchError, EMPTY, filter, map, mergeMap, of, shareReplay, Subject } from 'rxjs'
 import { webSocket, type WebSocketSubject } from 'rxjs/webSocket'
 import { formatRelayUrl } from './helpers/formatRelayUrl'
+import { hasNegentropy } from './helpers/hasNegentropy'
 import { ofAuth } from './operators/ofAuth'
 import { ofAuthOk } from './operators/ofAuthOk'
 import { ofNotice } from './operators/ofNotice'
 import type { MessageReceived } from './types'
-import { hasNegentropy } from './helpers/hasNegentropy'
 
 type RelayOptions = {
   info$: Observable<RelayInformation | null>

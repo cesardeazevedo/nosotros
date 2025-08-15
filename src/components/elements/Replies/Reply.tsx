@@ -5,10 +5,9 @@ import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { useNoteState } from '@/hooks/state/useNote'
-import { useNevent } from '@/hooks/useEventUtils'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import { Link, useNavigate, useRouter } from '@tanstack/react-router'
+import { useNavigate, useRouter } from '@tanstack/react-router'
 import { BubbleContainer } from 'components/elements/Content/Layout/Bubble'
 import { UserAvatar } from 'components/elements/User/UserAvatar'
 import { UserName } from 'components/elements/User/UserName'
@@ -100,7 +99,7 @@ export const Reply = memo(function Reply(props: Props) {
               )}
             </>
           )}
-          <RepliesMuted level={level} />
+          <RepliesMuted />
         </html.div>
       </ContentProvider>
     </NoteProvider>

@@ -67,10 +67,7 @@ export const NotificationItem = memo(function NotificationItem(props: Props) {
   const lastSeen = useAtomValue(selectedLastSeenAtom)?.notifications || 0
   const updateLastSeen = useSetAtom(updateLastSeenAtom)
 
-  // const lastSeen = useMemo(() => acc?.lastSeen?.notifications || Infinity, [])
   const unseen = event.created_at > lastSeen && lastSeen !== 0
-
-  const linkId = type === 'reply' || type === 'mention' ? event.id : related
 
   const headImage = useEventHeadImage(event)
 
