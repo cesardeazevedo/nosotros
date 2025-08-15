@@ -8,7 +8,6 @@ import type {
   IPopoverBaseProps,
   IRendererPropsWithForwardedProps,
 } from '../Popover/PopoverBase.types'
-import { PopoverHoverRender } from '../Popover/PopoverHoverRender'
 import { tooltipTokens } from '../Tooltip/Tooltip.stylex'
 
 type Props = Omit<IPopoverBaseProps, 'children' | 'contentRenderer'> & {
@@ -32,41 +31,39 @@ export const TooltipRich = memo(function TooltipRich(props: Props) {
     ...other
   } = props
   return (
-    <PopoverHoverRender content={children}>
-      <FloatingDelayGroup delay={enterDelay} timeoutMs={0}>
-        <PopoverBase
-          {...other}
-          placement={placement}
-          role='tooltip'
-          contentRenderer={(props) => {
-            return (
-              <>
-                {props.renderCursor({ ...css.props(styles.cursor) })}
-                {content(props)}
-              </>
-            )
-          }}
-          cursor={cursor}
-          forwardProps
-          openEvents={{
-            click: !!persistent,
-            hover: !persistent,
-            focus: !persistent,
-            ...other.openEvents,
-          }}
-          closeEvents={{
-            clickOutside: !persistent,
-            focusOut: !persistent,
-            escapeKey: false,
-          }}>
-          {(renderProps) => (
-            <html.span {...renderProps.getProps()} ref={renderProps.setRef}>
-              {children}
-            </html.span>
-          )}
-        </PopoverBase>
-      </FloatingDelayGroup>
-    </PopoverHoverRender>
+    <FloatingDelayGroup delay={enterDelay} timeoutMs={0}>
+      <PopoverBase
+        {...other}
+        placement={placement}
+        role='tooltip'
+        contentRenderer={(props) => {
+          return (
+            <>
+              {props.renderCursor({ ...css.props(styles.cursor) })}
+              {content(props)}
+            </>
+          )
+        }}
+        cursor={cursor}
+        forwardProps
+        openEvents={{
+          click: !!persistent,
+          hover: !persistent,
+          focus: !persistent,
+          ...other.openEvents,
+        }}
+        closeEvents={{
+          clickOutside: !persistent,
+          focusOut: !persistent,
+          escapeKey: false,
+        }}>
+        {(renderProps) => (
+          <html.span {...renderProps.getProps()} ref={renderProps.setRef}>
+            {children}
+          </html.span>
+        )}
+      </PopoverBase>
+    </FloatingDelayGroup>
   )
 })
 

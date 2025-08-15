@@ -8,19 +8,19 @@ import { MenuList } from '@/components/ui/MenuList/MenuList'
 import { Popover } from '@/components/ui/Popover/Popover'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
-import type { RelayDiscoveryModule } from '@/stores/modules/relay.discovery.module'
+import type { RelayDiscoveryFeed } from '@/hooks/state/useRelayDiscoveryFeed'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconChevronDown } from '@tabler/icons-react'
-import { observer } from 'mobx-react-lite'
+import { memo } from 'react'
 import { css } from 'react-strict-dom'
 
 type Props = {
-  module: RelayDiscoveryModule
+  feed: RelayDiscoveryFeed
 }
 
-export const RelayDiscoveryMonitorSelect = observer(function RelayDiscoveryMonitorSelect(props: Props) {
-  const { module } = props
+export const RelayDiscoveryMonitorSelect = memo(function RelayDiscoveryMonitorSelect(props: Props) {
+  const { feed } = props
   return (
     <ContentProvider value={{ disablePopover: true, disableLink: true }}>
       <Popover
@@ -28,20 +28,20 @@ export const RelayDiscoveryMonitorSelect = observer(function RelayDiscoveryMonit
         contentRenderer={({ close }) => (
           <MenuList outlined surface='surfaceContainerLow'>
             <Stack horizontal={false} gap={0.5}>
-              {module.listMonitors.map((monitor) => (
+              {feed.listMonitors.map((monitor) => (
                 <MenuItem
                   key={monitor}
                   label={
                     <Stack gap={1}>
                       <UserName size='md' pubkey={monitor} />
                       <Text variant='title' size='sm'>
-                        ({module.getTotal(monitor)})
+                        ({feed.getTotal()})
                       </Text>
                     </Stack>
                   }
                   supportingText={<UserNIP05 pubkey={monitor} />}
                   onClick={() => {
-                    module.select(monitor)
+                    feed.select(monitor)
                     close()
                   }}
                 />
@@ -53,7 +53,7 @@ export const RelayDiscoveryMonitorSelect = observer(function RelayDiscoveryMonit
           <Button variant='filledTonal' sx={styles.monitor} ref={setRef} {...getProps()} onClick={open}>
             <Stack gap={1}>
               <IconChevronDown size={18} />
-              {module.selected && <UserHeader size='md' pubkey={module.selected} renderAvatar={false} />}
+              {feed.selected && <UserHeader size='md' pubkey={feed.selected} renderAvatar={false} />}
             </Stack>
           </Button>
         )}

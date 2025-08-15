@@ -1,11 +1,11 @@
+import { removeCurrentVideoAtom, setCurrentVideoAtom } from '@/atoms/media.atoms'
 import { useNoteContext } from '@/components/providers/NoteProvider'
 import type { SxProps } from '@/components/ui/types'
 import { useMediaStore } from '@/hooks/useMediaStore'
-import { useGlobalSettings } from '@/hooks/useRootStore'
-import { mediaStore } from '@/stores/media/media.store'
+import { useSettings } from '@/hooks/useSettings'
 import { shape } from '@/themes/shape.stylex'
-import { observer } from 'mobx-react-lite'
-import { useEffect, useMemo, useRef } from 'react'
+import { useSetAtom } from 'jotai'
+import { memo, useEffect, useMemo, useRef } from 'react'
 import { css } from 'react-strict-dom'
 import { BlurContainer } from '../../Layouts/BlurContainer'
 
@@ -19,23 +19,28 @@ type Props = {
   sx?: SxProps
 }
 
-export const Video = observer(function Video(props: Props) {
+export const Video = memo(function Video(props: Props) {
   const { src, controls = true, muted = false, loop = false, preload = 'metadata', sx } = props
   const { note } = useNoteContext()
   const ref = useRef<HTMLVideoElement>(null)
   const extension = useMemo(() => new URL(src).pathname.split('.').pop(), [src])
-  const media = useMediaStore(src, note.metadata.imeta)
-  const settings = useGlobalSettings()
+
+  const setVideo = useSetAtom(setCurrentVideoAtom)
+  const removeVideo = useSetAtom(removeCurrentVideoAtom)
+  const media = useMediaStore(src, note.metadata?.imeta)
+  const settings = useSettings()
   const autoPlay = props.autoPlay ?? settings.autoPlay
 
   useEffect(() => {
     const video = ref.current
-    if (!video) return
+    if (!video) {
+      return
+    }
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && mediaStore.currentVideo !== video) {
-          mediaStore.setVideo(video, autoPlay)
+        if (entry.isIntersecting && video) {
+          setVideo({ video, autoPlay })
         }
       },
       { threshold: 1 },
@@ -44,17 +49,18 @@ export const Video = observer(function Video(props: Props) {
 
     return () => {
       observer.disconnect()
-      mediaStore.removeVideo(video)
+      removeVideo(video)
     }
-  }, [media, autoPlay])
+  }, [media, autoPlay, setVideo, removeVideo])
 
   return (
     <BlurContainer>
       {({ blurStyles }) => (
         <video
           {...css.props([styles.video, blurStyles, sx])}
+          crossOrigin='anonymous'
           playsInline
-          webkit-playsinline
+          webkit-playsinline='true'
           ref={ref}
           loop={loop}
           muted={autoPlay ? true : muted}
@@ -83,8 +89,10 @@ const styles = css.create({
     borderRadius: shape.lg,
     backgroundColor: '#000',
     objectFit: 'cover',
-    width: '100%',
-    height: '100%',
+    width: 'inherit',
+    height: 'inherit',
+    maxHeight: 'inherit',
+    maxWidth: 'inherit',
     transition: 'transform 150ms ease',
     ':active': {
       transform: 'scale(0.985)',

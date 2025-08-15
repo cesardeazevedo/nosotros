@@ -2,14 +2,13 @@ import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import type { SxProps } from '@/components/ui/types'
-import { useCurrentPubkey } from '@/hooks/useRootStore'
-import { relaysStore } from '@/stores/relays/relays.store'
+import { useCurrentPubkey } from '@/hooks/useAuth'
+import { useActiveRelays, useConnectedRelays } from '@/hooks/useRelays'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconServerBolt, IconWorldBolt } from '@tabler/icons-react'
 import { Link, useMatchRoute } from '@tanstack/react-router'
-import { observer } from 'mobx-react-lite'
-import { useContext } from 'react'
+import { memo, useContext } from 'react'
 import { css } from 'react-strict-dom'
 import { SidebarContext } from './SidebarContext'
 import { SidebarSubheader } from './SidebarSubheader'
@@ -23,11 +22,12 @@ const iconProps = {
   strokeWidth: '1.6',
 }
 
-export const SidebarMenuRelays = observer(function SidebarMenuRelays(props: Props) {
+export const SidebarMenuRelays = memo(function SidebarMenuRelays(props: Props) {
   const pubkey = useCurrentPubkey()
   const match = useMatchRoute()
   const context = useContext(SidebarContext)
-  const activeRelays = relaysStore.connected.length
+  const activeRelays = useActiveRelays().length || ''
+  const connected = useConnectedRelays().length || ''
   const isRelayDiscovery = context.pane === '/explore/relays' || !!match({ to: '/explore/relays' })
   return (
     <>
@@ -42,9 +42,9 @@ export const SidebarMenuRelays = observer(function SidebarMenuRelays(props: Prop
               label={
                 <>
                   Active Relays{' '}
-                  {activeRelays ? (
+                  {connected ? (
                     <Text size='md' sx={styles.gray}>
-                      ({activeRelays})
+                      ({connected} / {activeRelays})
                     </Text>
                   ) : (
                     ''

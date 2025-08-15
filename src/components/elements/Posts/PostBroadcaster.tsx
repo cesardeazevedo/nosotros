@@ -3,13 +3,12 @@ import { Divider } from '@/components/ui/Divider/Divider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { spacing } from '@/themes/spacing.stylex'
-import { observer } from 'mobx-react-lite'
+import { memo } from 'react'
 import { css } from 'react-strict-dom'
 import { RelayChip } from '../Relays/RelayChip'
 
-export const PostBroadcaster = observer(function PostBroadcaster() {
+export const PostBroadcaster = memo(function PostBroadcaster() {
   const { note } = useNoteContext()
-  const seens = note.event.seenOn
 
   return (
     <Stack horizontal={false}>
@@ -20,7 +19,7 @@ export const PostBroadcaster = observer(function PostBroadcaster() {
             Seen on relays
           </Text>
           <Stack horizontal wrap gap={0.5}>
-            {seens?.map((url) => <RelayChip selected key={url} url={url} />)}
+            {note.seenOn?.map((url) => <RelayChip selected key={url} url={url} />)}
           </Stack>
         </Stack>
       </Stack>

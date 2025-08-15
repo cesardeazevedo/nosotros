@@ -1,15 +1,16 @@
 import type { RelayInformation } from 'nostr-tools/nip11'
 import type { Observable } from 'rxjs'
-import { catchError, EMPTY, filter, map, Subject } from 'rxjs'
+import { BehaviorSubject, catchError, EMPTY, filter, map, mergeMap, of, shareReplay, Subject } from 'rxjs'
 import { webSocket, type WebSocketSubject } from 'rxjs/webSocket'
 import { formatRelayUrl } from './helpers/formatRelayUrl'
+import { hasNegentropy } from './helpers/hasNegentropy'
 import { ofAuth } from './operators/ofAuth'
 import { ofAuthOk } from './operators/ofAuthOk'
 import { ofNotice } from './operators/ofNotice'
 import type { MessageReceived } from './types'
 
 type RelayOptions = {
-  info$: Observable<RelayInformation>
+  info$: Observable<RelayInformation | null>
 }
 
 export class Relay {
@@ -24,8 +25,10 @@ export class Relay {
   open$ = new Subject()
   close$ = new Subject()
   closing$ = new Subject()
+  negentropy = new BehaviorSubject(false)
+  negentropy$: Observable<boolean>
 
-  info$: Observable<RelayInformation> | undefined
+  info$: Observable<RelayInformation | null>
 
   constructor(url: string, options?: RelayOptions) {
     this.url = formatRelayUrl(url)
@@ -37,10 +40,11 @@ export class Relay {
       closingObserver: this.closing$,
     })
 
-    this.message$ = this.websocket$.asObservable().pipe(
+    this.message$ = this.websocket$.pipe(
       // filter out bad data by some relays
       filter((msg) => Array.isArray(msg) && typeof msg[0] === 'string'),
       catchError(() => EMPTY),
+      shareReplay(),
     )
 
     this.auth$ = this.message$.pipe(
@@ -58,6 +62,14 @@ export class Relay {
       map((msg) => [this.url, msg[1]]),
     )
 
-    this.info$ = options?.info$
+    this.info$ = options?.info$.pipe(catchError(() => of(null))) || of(null)
+
+    this.negentropy$ = this.info$.pipe(
+      mergeMap((info) => {
+        this.negentropy.next(!!info && hasNegentropy(info))
+        return this.negentropy
+      }),
+      shareReplay(2),
+    )
   }
 }

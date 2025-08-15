@@ -1,7 +1,7 @@
 import themes from '@/themes/colors'
 import { type ThemeKeys } from '@/themes/types'
 import { useMediaQuery } from './useMediaQuery'
-import { useGlobalSettings } from './useRootStore'
+import { useSettings } from './useSettings'
 
 export function useThemePalette() {
   const theme = useCurrentTheme()
@@ -10,7 +10,7 @@ export function useThemePalette() {
 
 export function useCurrentTheme(): ThemeKeys {
   const isSystemDark = useMediaQuery('(prefers-color-scheme: dark)')
-  const settingsTheme = useGlobalSettings().theme
+  const settingsTheme = useSettings().theme
   return settingsTheme === 'auto' ? (isSystemDark ? 'dark' : 'light') : settingsTheme
 }
 

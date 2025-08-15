@@ -14,11 +14,11 @@ const vars = {
   // animation
   animationTargetColor: palette.inverseSurface,
   // &:pulse
-  animationMaxOpacity$pulse: '0.12',
+  animationMaxOpacity$pulse: '0.06',
   animationDuration$pulse: '2s',
   animationDelay$pulse: '0.5s',
   // &:wave
-  animationMaxOpacity$wave: '0.08',
+  animationMaxOpacity$wave: '0.06',
   animationDuration$wave: '2s',
   animationDelay$wave: '0.5s',
 }

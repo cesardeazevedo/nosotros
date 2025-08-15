@@ -20,16 +20,14 @@ export const DeckAddTags = (props: Props) => {
   }, [])
 
   return (
-    <>
-      <form action={submit}>
-        <Stack grow gap={0.5} sx={styles.header}>
-          <SearchField name='value' leading={<IconHash size={20} style={{ opacity: 0.5 }} />} />
-          <Button variant='filled' type='submit' sx={styles.button}>
-            Add
-          </Button>
-        </Stack>
-      </form>
-    </>
+    <form action={submit}>
+      <Stack grow gap={0.5} sx={styles.header}>
+        <SearchField name='value' leading={<IconHash size={20} style={{ opacity: 0.5 }} />} />
+        <Button variant='filled' type='submit' sx={styles.button}>
+          Add
+        </Button>
+      </Stack>
+    </form>
   )
 }
 

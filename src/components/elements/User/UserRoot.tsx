@@ -1,21 +1,21 @@
 import { FollowButton } from '@/components/modules/Follows/FollowButton'
 import { ContentProvider } from '@/components/providers/ContentProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
-import type { NostrEventMetadata } from '@/nostr/types'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { spacing } from '@/themes/spacing.stylex'
-import { observer } from 'mobx-react-lite'
+import { memo } from 'react'
 import { css } from 'react-strict-dom'
 import { LinkProfile } from '../Links/LinkProfile'
 import { UserContentAbout } from './UserContentAbout'
 import { UserHeader } from './UserHeader'
 
 type Props = {
-  event: NostrEventMetadata
+  event: NostrEventDB
 }
 
 const maxHeight = 220
 
-export const UserRoot = observer(function UserRoot(props: Props) {
+export const UserRoot = memo(function UserRoot(props: Props) {
   const { event } = props
   const { pubkey } = event
   return (

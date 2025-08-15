@@ -3,18 +3,31 @@ import { useContentContext } from '@/components/providers/ContentProvider'
 import type { Props as StackProps } from '@/components/ui/Stack/Stack'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { SxProps } from '@/components/ui/types'
-import { useCurrentPubkey } from '@/hooks/useRootStore'
-import type { EditorStore } from '@/stores/editor/editor.store'
-import { toastStore } from '@/stores/ui/toast.store'
+import { usePublishEventMutation } from '@/hooks/mutations/usePublishEventMutation'
+import { useCurrentPubkey } from '@/hooks/useAuth'
+import { publish } from '@/nostr/publish/publish'
 import { spacing } from '@/themes/spacing.stylex'
 import { UserAvatar } from 'components/elements/User/UserAvatar'
-import { observer } from 'mobx-react-lite'
+import type { EventTemplate, NostrEvent } from 'nostr-tools'
 import { useObservableState } from 'observable-hooks'
-import { useEffect } from 'react'
+import { memo, useEffect } from 'react'
 import { css } from 'react-strict-dom'
-import { concat, concatMap, defer, endWith, from, map, mergeMap, startWith, takeUntil, tap } from 'rxjs'
+import {
+  catchError,
+  concat,
+  concatMap,
+  defer,
+  EMPTY,
+  endWith,
+  filter,
+  from,
+  map,
+  mergeMap,
+  of,
+  startWith,
+  takeUntil,
+} from 'rxjs'
 import { BubbleContainer } from '../Content/Layout/Bubble'
-import { ToastEventPublished } from '../Toasts/ToastEventPublished'
 import { EditorContainer } from './EditorContainer'
 import { EditorExpandables } from './EditorExpandables'
 import { EditorHeader } from './EditorHeader'
@@ -22,38 +35,60 @@ import { EditorPlaceholder } from './EditorPlaceholder'
 import { EditorSubmit } from './EditorSubmit'
 import { EditorToolbar } from './EditorToolbar'
 import { EditorActionsPopover } from './EditorToolbarPopover'
+import { useEditorSelector } from './hooks/useEditor'
 import { cancel$, countDown$ } from './utils/countDown'
 
-type Props = {
-  store: EditorStore
+export type Props = {
+  sx?: SxProps
   initialOpen?: boolean
   renderDiscard?: boolean
   renderBubble?: boolean
-  sx?: SxProps
+  floatToolbar?: boolean
+  onSuccess?: (event: NostrEvent) => void
   onDiscard?: () => void
 }
 
-export const Editor = observer(function Editor(props: Props) {
-  const { store, initialOpen, renderDiscard = true, renderBubble = false, sx, onDiscard } = props
+export const Editor = memo(function Editor(props: Props) {
+  const {
+    initialOpen,
+    renderDiscard = true,
+    renderBubble = false,
+    floatToolbar = renderBubble,
+    sx,
+    onDiscard,
+    onSuccess,
+  } = props
   const { dense } = useContentContext()
   const pubkey = useCurrentPubkey()
 
-  useEffect(() => {
-    store.open.toggle(initialOpen)
-    if (initialOpen && !('ontouchstart' in window)) {
-      store.focus()
-    }
-  }, [])
+  const state = useEditorSelector((editor) => editor)
 
-  const [submitState, submit] = useObservableState<string | number | boolean, EditorStore>((input$) => {
+  const { mutateAsync } = usePublishEventMutation({
+    mutationFn:
+      ({ signer, pubkey }) =>
+      () =>
+        state.event ? publish({ ...state.event, pubkey }, { relays: state.allRelays, signer }) : EMPTY,
+    onSuccess,
+  })
+
+  const isEmpty = state.event ? state.event.content === '' : true
+
+  useEffect(() => {
+    state.toggle('open', initialOpen)
+    // Annoying and weird mobile issue with tiptap
+    if (initialOpen && !('ontouchstart' in window)) {
+      focus()
+    }
+  }, [initialOpen])
+
+  const [submitState, submit] = useObservableState<string | number | boolean, EventTemplate | null>((input$) => {
     return input$.pipe(
-      concatMap((store) => {
+      filter(Boolean),
+      concatMap((event) => {
         const submit$ = defer(() => {
-          return from(store.uploader!.start()).pipe(
-            mergeMap(() => store.submit(store.rawEvent)),
-            tap((event) => {
-              toastStore.enqueue(<ToastEventPublished event={event} eventLabel={store.title} />, { duration: 10000 })
-            }),
+          return from(state.upload()).pipe(
+            mergeMap(() => mutateAsync(event)),
+            catchError(() => of(false)),
             map(() => false),
             startWith(0),
           )
@@ -65,35 +100,30 @@ export const Editor = observer(function Editor(props: Props) {
 
   const Container = renderBubble ? BubbleContainer : Stack
   const ContainerProps = renderBubble
-    ? { sx: styles.bubble }
+    ? { sx: styles.bubble, highlight: !state.open }
     : ({ horizontal: false, align: 'stretch', justify: 'center', grow: true } as StackProps)
 
-  const EditorActions = renderBubble ? EditorActionsPopover : EditorToolbar
+  const EditorActions = floatToolbar ? EditorActionsPopover : EditorToolbar
 
   return (
     <>
-      <EditorContainer open={store.open.value} onClick={() => store.setOpen()} renderBubble={renderBubble} sx={sx}>
-        <UserAvatar size='md' pubkey={pubkey} />
+      <EditorContainer open={state.open} onClick={() => state?.setOpen()} renderBubble={renderBubble} sx={sx}>
+        {pubkey && <UserAvatar size='md' pubkey={pubkey} />}
         <Container {...ContainerProps} sx={styles.wrapper}>
           <Stack horizontal={false} grow>
             <Stack sx={[styles.content, dense && styles.content$dense]} gap={2} align='stretch'>
               <Stack horizontal={false} sx={styles.wrapper}>
-                <EditorHeader store={store} />
-                {store.open.value ? (
-                  <EditorTiptap key='editor' dense={dense} store={store} placeholder={store.placeholder} />
-                ) : (
-                  <EditorPlaceholder placeholder={store.placeholder} />
-                )}
+                <EditorHeader />
+                {state.open ? <EditorTiptap key='editor' dense={dense} /> : <EditorPlaceholder />}
               </Stack>
             </Stack>
-            {store.open.value && (
-              <EditorActions store={store}>
+            {state.open && (
+              <EditorActions>
                 <EditorSubmit
-                  store={store}
                   state={submitState}
-                  disabled={store.isEmpty || store.isUploading.value}
+                  disabled={isEmpty || state.isUploading}
                   renderDiscard={renderDiscard}
-                  onSubmit={() => submit(store)}
+                  onSubmit={() => submit(state.event)}
                   onDiscard={onDiscard}
                 />
               </EditorActions>
@@ -101,7 +131,7 @@ export const Editor = observer(function Editor(props: Props) {
           </Stack>
         </Container>
       </EditorContainer>
-      {!renderBubble && <EditorExpandables store={store} />}
+      {!floatToolbar && <EditorExpandables />}
     </>
   )
 })

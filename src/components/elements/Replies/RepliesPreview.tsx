@@ -1,6 +1,5 @@
 import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
-import { useCurrentUser } from '@/hooks/useRootStore'
 import { spacing } from '@/themes/spacing.stylex'
 import { useRouteContext } from '@tanstack/react-router'
 import type { DecodeResult } from 'nostr-tools/nip19'
@@ -29,12 +28,11 @@ function getPubkey(decoded: DecodeResult | undefined) {
 export const RepliesPreview = function RepliesPreview(props: Props) {
   const { onLoadMoreClick } = props
   const { note } = useNoteContext()
-  const currentUser = useCurrentUser()
   const context = useRouteContext({ strict: false })
 
-  const replies = note.getRepliesPreviewUser(currentUser, getPubkey(context.decoded))
+  const replies = note.getRepliesPreviewUser(getPubkey(context.decoded))
 
-  if (note.repliesOpen !== null || replies.length === 0) {
+  if (note.state.repliesOpen !== null || replies.length === 0) {
     return null
   }
 
@@ -42,7 +40,7 @@ export const RepliesPreview = function RepliesPreview(props: Props) {
     <>
       <Stack horizontal={false} sx={styles.root} justify='flex-start'>
         <html.div style={styles.repliesWrapper}>
-          {replies && <RepliesTree nested={false} replies={replies} repliesOpen={note.repliesOpen} level={1} />}
+          {replies && <RepliesTree nested={false} replies={replies} repliesOpen={note.state.repliesOpen} level={1} />}
           <RepliesLoadMore note={note} onClick={onLoadMoreClick} disabled={false} />
         </html.div>
       </Stack>

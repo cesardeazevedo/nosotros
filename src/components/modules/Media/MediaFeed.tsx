@@ -4,30 +4,28 @@ import { PostMediaLoading } from '@/components/elements/Media/MediaLoading'
 import { PostLoading } from '@/components/elements/Posts/PostLoading'
 import { FeedList } from '@/components/modules/Feed/FeedList'
 import { Stack } from '@/components/ui/Stack/Stack'
-import type { MediaModule } from '@/stores/modules/media.module'
-import { observer, Observer } from 'mobx-react-lite'
-import type { ReactNode } from 'react'
+import type { MediaFeedState } from '@/hooks/state/useMediaFeed'
+import { memo, useCallback, type ReactNode } from 'react'
 import { css } from 'react-strict-dom'
 
 type Props = {
   header?: ReactNode
   column?: boolean
-  module: MediaModule
+  feed: MediaFeedState
 }
 
-export const MediaFeed = observer(function MediaFeed(props: Props) {
-  const { header, module, column } = props
-  const feed = module.feed
+export const MediaFeed = memo(function MediaFeed(props: Props) {
+  const { header, feed, column } = props
   return (
     <FeedList
+      key={feed.layout}
       column={column}
       feed={feed}
       header={header}
-      divider={module.layout === 'row'}
       onScrollEnd={feed.paginate}
-      renderNewPostsIndicator={module.layout === 'row'}
+      renderNewPostsIndicator={feed.layout === 'row'}
       wrapper={(children) =>
-        module.layout === 'grid' ? (
+        feed.layout === 'grid' ? (
           <Stack wrap gap={0.5} justify='flex-start' sx={styles.grid}>
             {children}
           </Stack>
@@ -35,12 +33,11 @@ export const MediaFeed = observer(function MediaFeed(props: Props) {
           children
         )
       }
-      render={(event) => (
-        <Observer>
-          {() => <>{module.layout === 'row' ? <NostrEventFeedItem event={event} /> : <MediaCell event={event} />}</>}
-        </Observer>
+      render={useCallback(
+        (event) => (feed.layout === 'row' ? <NostrEventFeedItem event={event} /> : <MediaCell event={event} />),
+        [feed.layout],
       )}
-      footer={module.layout === 'row' ? <PostLoading rows={4} /> : <PostMediaLoading rows={3} />}
+      footer={feed.layout === 'row' ? <PostLoading rows={4} /> : <PostMediaLoading rows={3} />}
     />
   )
 })
@@ -49,7 +46,7 @@ const styles = css.create({
   grid: {
     '::after': {
       content: '""',
-      flex: '0 0 calc((100% - 0rem) / 3)',
+      flex: '0 0 calc(100% / 3)',
     },
   },
 })

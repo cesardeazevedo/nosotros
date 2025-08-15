@@ -5,30 +5,28 @@ import { Popover } from '@/components/ui/Popover/Popover'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
-import { useCurrentUser, useGlobalSettings } from '@/hooks/useRootStore'
-import type { EditorStore } from '@/stores/editor/editor.store'
+import { useUserBlossomServers } from '@/hooks/query/useQueryUser'
+import { useCurrentPubkey } from '@/hooks/useAuth'
+import { useSetSettings, useSettings } from '@/hooks/useSettings'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconBug, IconChevronDown } from '@tabler/icons-react'
-import { observer } from 'mobx-react-lite'
-import { useMemo } from 'react'
+import { memo, useMemo } from 'react'
 import { css } from 'react-strict-dom'
-
-type Props = {
-  store: EditorStore
-}
+import { useEditorSelector } from './hooks/useEditor'
 
 const nip96urls = ['nostr.build', 'nostrcheck.me', 'nostrage.com']
 
-export const EditorSettingsUpload = observer(function EditorSettingsUpload(props: Props) {
-  const { store } = props
-  const user = useCurrentUser()
-  const globalSettings = useGlobalSettings()
-  const selectedUrl = globalSettings.defaultUploadUrl
+export const EditorSettingsUpload = memo(function EditorSettingsUpload() {
+  const editor = useEditorSelector((editor) => editor.editor)
+  const pubkey = useCurrentPubkey()
+  const blossomServerList = useUserBlossomServers(pubkey)
+  const settings = useSettings()
+  const setSettings = useSetSettings()
+  const selectedUrl = settings.defaultUploadUrl
 
   const onUpdate = (uploadType: string, uploadUrl: string) => {
-    const { editor } = store
-    globalSettings.set('defaultUploadType', uploadType)
-    globalSettings.set('defaultUploadUrl', uploadUrl)
+    setSettings({ defaultUploadType: uploadType })
+    setSettings({ defaultUploadUrl: uploadUrl })
     // Update existing images
     if (editor) {
       const tr = editor.state.tr
@@ -57,12 +55,12 @@ export const EditorSettingsUpload = observer(function EditorSettingsUpload(props
       placement='bottom-end'
       contentRenderer={({ close }) => (
         <MenuList surface='surfaceContainerLowest'>
-          {user?.blossomServerList && (
+          {blossomServerList.data && (
             <>
               <Stack sx={styles.subheader}>
                 <Text>Blossom Servers</Text>
               </Stack>
-              {user.blossomServerList.map((url) => {
+              {blossomServerList.data.map((url) => {
                 let formatted
                 try {
                   formatted = new URL(url)

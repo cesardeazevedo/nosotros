@@ -1,27 +1,35 @@
 import { SearchField } from '@/components/ui/Search/Search'
 import { Stack } from '@/components/ui/Stack/Stack'
-import type { FeedModule } from '@/stores/modules/feed.module'
-import { useRef } from 'react'
+import type { FeedSearch } from '@/hooks/state/useSearchFeed'
+import { memo, useActionState } from 'react'
 import { css } from 'react-strict-dom'
-import { useSearchChange } from './hooks/useSearchChange'
 
 type Props = {
-  module?: FeedModule
-  updateSearchParams?: boolean
+  feed: FeedSearch
+  onSubmit?: (search: string) => void
 }
 
-export const SearchHeader = (props: Props) => {
-  const { module, updateSearchParams = true } = props
-  const searchRef = useRef<HTMLInputElement>(null)
-  const { query, onSubmit, onChange } = useSearchChange(updateSearchParams, module?.feed)
+export const SearchHeader = memo(function SearchHeader(props: Props) {
+  const { feed, onSubmit } = props
+
+  const [, submit] = useActionState((_: unknown, formData: FormData) => {
+    const search = formData.get('searchInput')?.toString()
+    if (search) {
+      console.log('SUBMIT?', search)
+      feed.setFilter({ ...feed.filter, search })
+      onSubmit?.(search)
+    }
+    return null
+  }, [])
+
   return (
     <Stack sx={styles.root} justify='space-between'>
-      <form action={onSubmit} {...css.props(styles.form)}>
-        <SearchField ref={searchRef} placeholder='Search on nostr' defaultValue={query} onChange={onChange} />
+      <form action={submit} {...css.props(styles.form)}>
+        <SearchField name='searchInput' placeholder='Search on nostr' defaultValue={feed.filter.search} />
       </form>
     </Stack>
   )
-}
+})
 
 const styles = css.create({
   root: {

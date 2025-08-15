@@ -1,34 +1,29 @@
 import { RelayListRowLoading } from '@/components/elements/Relays/RelayListRowLoading'
 import { Button } from '@/components/ui/Button/Button'
 import { Stack } from '@/components/ui/Stack/Stack'
-import type { RelayDiscoveryModule } from '@/stores/modules/relay.discovery.module'
+import type { RelayDiscoveryFeed } from '@/hooks/state/useRelayDiscoveryFeed'
 import { spacing } from '@/themes/spacing.stylex'
-import { observer } from 'mobx-react-lite'
+import { memo } from 'react'
 import { css } from 'react-strict-dom'
 import { RelayDiscoveryRow } from './RelayDiscoveryRow'
 
 type Props = {
-  module: RelayDiscoveryModule
+  feed: RelayDiscoveryFeed
 }
 
-export const RelayDiscoveryList = observer(function RelayDiscoveryList(props: Props) {
-  const { module } = props
+export const RelayDiscoveryList = memo(function RelayDiscoveryList(props: Props) {
+  const { feed } = props
   return (
     <>
       <Stack horizontal={false}>
-        {module.sortedByUsers.length === 0 ? (
+        {feed.list.length === 0 ? (
           <RelayListRowLoading />
         ) : (
-          <>
-            {module.list.map((event) => (
-              <RelayDiscoveryRow table={false} key={event.id} event={event.event} />
-            ))}
-          </>
+          feed.list.map((event) => <RelayDiscoveryRow table={false} key={event.id} event={event} />)
         )}
         <Stack sx={styles.footer} justify='center'>
-          <Button variant='filledTonal' sx={styles.button} onClick={() => module.feed.paginate()}>
+          <Button variant='filledTonal' sx={styles.button} onClick={() => feed.paginate()}>
             Load More
-            {module.left ? ` (${module.left})` : ''}
           </Button>
         </Stack>
       </Stack>

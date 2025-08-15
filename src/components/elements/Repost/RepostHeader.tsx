@@ -1,9 +1,11 @@
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
-import type { NostrEventMetadata } from '@/nostr/types'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import { useRepostedEvent } from '@/hooks/query/useQueryBase'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconArrowForward } from '@tabler/icons-react'
+import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 import { PostHeaderDate } from '../Posts/PostHeaderDate'
 import { PostOptions } from '../Posts/PostOptions'
@@ -11,11 +13,12 @@ import { PostUserHeader } from '../Posts/PostUserHeader'
 import { UserHeader } from '../User/UserHeader'
 
 type Props = {
-  event: NostrEventMetadata
+  event: NostrEventDB
 }
 
-export const RepostHeader = (props: Props) => {
+export const RepostHeader = memo(function RepostHeader(props: Props) {
   const { event } = props
+  const { data } = useRepostedEvent(event)
   return (
     <Stack horizontal justify='space-between' sx={styles.root}>
       <Stack horizontal={false} sx={styles.content}>
@@ -29,17 +32,25 @@ export const RepostHeader = (props: Props) => {
           size='sm'>
           <PostHeaderDate date={event.created_at} />
         </UserHeader>
-        <PostUserHeader dense align='center' sx={styles.bottom} userAvatarProps={{ sx: styles.avatar }} />
+        {data && (
+          <PostUserHeader
+            dense
+            event={event}
+            align='center'
+            sx={styles.bottom}
+            userAvatarProps={{ sx: styles.avatar }}
+          />
+        )}
         <Tooltip placement='bottom' text='Reposted'>
           <html.span style={styles.icon}>
             <IconArrowForward size={20} strokeWidth='1.8' />
           </html.span>
         </Tooltip>
       </Stack>
-      <PostOptions />
+      {data && <PostOptions />}
     </Stack>
   )
-}
+})
 
 const styles = css.create({
   root: {

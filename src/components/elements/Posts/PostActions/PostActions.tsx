@@ -3,7 +3,7 @@ import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { SxProps } from '@/components/ui/types'
 import { useMobile } from '@/hooks/useMobile'
-import { observer } from 'mobx-react-lite'
+import { memo } from 'react'
 import { css } from 'react-strict-dom'
 import { PostOptions } from '../PostOptions'
 import { ButtonReaction } from './PostButtonReaction'
@@ -19,7 +19,7 @@ type Props = {
   sx?: SxProps
 }
 
-export const PostActions = observer(function PostActions(props: Props) {
+export const PostActions = memo(function PostActions(props: Props) {
   const { renderRelays = true, renderOptions = false, sx } = props
   const { dense } = useContentContext()
   const { note } = useNoteContext()
@@ -31,7 +31,7 @@ export const PostActions = observer(function PostActions(props: Props) {
       <ButtonRepost />
       <ButtonReply
         value={note.repliesTotal}
-        selected={note.repliesOpen || note.isReplying || false}
+        selected={(note.state.repliesOpen && note.metadata?.isRoot) || note.state.isReplying || false}
         onClick={props.onReplyClick}
       />
       <ButtonZap />

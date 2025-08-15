@@ -1,15 +1,16 @@
 import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { Switch } from '@/components/ui/Switch/Switch'
-import { useGlobalSettings } from '@/hooks/useRootStore'
-import { observer } from 'mobx-react-lite'
+import { useSettings, useToggleSettings } from '@/hooks/useSettings'
+import { memo } from 'react'
 
-export const SettingsClientTag = observer(function SettingsClientTag() {
-  const settings = useGlobalSettings()
+export const SettingsClientTag = memo(function SettingsClientTag() {
+  const settings = useSettings()
+  const toggle = useToggleSettings()
   return (
     <MenuItem
       label='Add Client Tag'
       supportingText='Allow other users to see you are using nosotros.app'
-      trailing={<Switch checked={settings.clientTag} onChange={() => settings.toggle('clientTag')} />}
+      trailing={<Switch checked={settings.clientTag} onChange={() => toggle('clientTag')} />}
     />
   )
 })

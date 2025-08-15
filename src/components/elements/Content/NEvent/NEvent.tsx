@@ -1,32 +1,34 @@
 import { ContentProvider, useContentContext } from '@/components/providers/ContentProvider'
 import { Paper } from '@/components/ui/Paper/Paper'
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
-import { eventStore } from '@/stores/events/event.store'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import { useEventFromNIP19 } from '@/hooks/query/useQueryBase'
 import { duration } from '@/themes/duration.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import { observer } from 'mobx-react-lite'
 import type { NEventAttributes } from 'nostr-editor'
+import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 import { NostrEventQuote } from '../../Event/NostrEventQuote'
 
 type Props = {
   pointer: NEventAttributes
+  event?: NostrEventDB
 }
 
-export const NEvent = observer(function NEvent(props: Props) {
+export const NEvent = memo(function NEvent(props: Props) {
   const { pointer } = props
   const { dense, disableLink } = useContentContext()
-  const event = eventStore.get(pointer.id)
+  const event = useEventFromNIP19(pointer.bech32)
   return (
     <html.div style={[styles.root, dense && styles.root$dense]}>
-      {!event && (
+      {!event.data && (
         <Skeleton variant='rectangular' animation='wave' sx={[styles.skeleton, dense && styles.skeleton$dense]} />
       )}
-      {event && (
+      {event.data && (
         <ContentProvider value={{ dense: true, disableLink }}>
           <Paper outlined sx={styles.content}>
-            <NostrEventQuote event={event.event} />
+            <NostrEventQuote event={event.data} />
           </Paper>
         </ContentProvider>
       )}
@@ -62,7 +64,7 @@ const styles = css.create({
     minWidth: 340,
     height: 80,
     borderRadius: shape.lg,
-    zIndex: 50,
+    zIndex: 20,
   },
   skeleton$dense: {
     paddingInline: 0,

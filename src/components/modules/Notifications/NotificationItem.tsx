@@ -1,18 +1,20 @@
+import { selectedLastSeenAtom, updateLastSeenAtom } from '@/atoms/lastSeen.atoms'
 import { ContentProvider } from '@/components/providers/ContentProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
+import { Kind } from '@/constants/kinds'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import { useNoteState } from '@/hooks/state/useNote'
+import { useCurrentAccount } from '@/hooks/useAuth'
+import { useEventHeadImage, useEventLastTag, useEventTag } from '@/hooks/useEventUtils'
 import { useMobile } from '@/hooks/useMobile'
-import { useNoteStoreFromId } from '@/hooks/useNoteStore'
-import { useCurrentAccount } from '@/hooks/useRootStore'
-import type { NostrEventMetadata } from '@/nostr/types'
-import { Notification } from '@/stores/notifications/notification'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { fallbackEmoji } from '@/utils/utils'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconAt, IconBolt, IconHeartFilled, IconMessage, IconShare3 } from '@tabler/icons-react'
-import { observer } from 'mobx-react-lite'
-import { useEffect, useMemo, useState } from 'react'
+import { useAtomValue, useSetAtom } from 'jotai'
+import { memo, useEffect } from 'react'
 import { css, html } from 'react-strict-dom'
 import { LinkNEvent } from '../../elements/Links/LinkNEvent'
 import { PostHeaderDate } from '../../elements/Posts/PostHeaderDate'
@@ -22,27 +24,56 @@ import { NotificationContent } from './NotificationContent'
 import { NotificationMedia } from './NotificationMedia'
 
 type Props = {
-  event: NostrEventMetadata
+  event: NostrEventDB
   owner?: string
 }
 
 const formatter = new Intl.NumberFormat()
 
-export const NotificationItem = observer(function NotificationItem(props: Props) {
-  const { event, owner } = props
-  const acc = useCurrentAccount()
-  const [notification] = useState(new Notification(event))
-  const { type, author: pubkey } = notification
+function getNotificationType(event: NostrEventDB) {
+  switch (event.kind) {
+    case Kind.Article:
+    case Kind.Comment:
+    case Kind.Text: {
+      return event.metadata?.isRoot ? 'mention' : 'reply'
+    }
+    case Kind.Reaction: {
+      return 'reaction'
+    }
+    case Kind.Repost: {
+      return 'repost'
+    }
+    case Kind.ZapReceipt: {
+      return 'zap'
+    }
+  }
+}
 
+export const NotificationItem = memo(function NotificationItem(props: Props) {
+  const { event, owner } = props
+
+  const acc = useCurrentAccount()
+  const note = useNoteState(event)
   const mobile = useMobile()
-  const lastSeen = useMemo(() => acc?.lastSeen.notification || Infinity, [])
-  const linkId = type === 'reply' || type === 'mention' ? notification.id : notification.related
-  const note = useNoteStoreFromId(linkId)
-  const unseen = notification.created_at > lastSeen && lastSeen !== 0
+
+  const type = getNotificationType(event)
+  const related = useEventLastTag(event, 'e')
+
+  const zapper = useEventTag(event, 'P')
+  const zapAmount = event.metadata?.bolt11?.amount?.value || '0'
+
+  const author = type === 'zap' ? zapper : event.pubkey
+
+  const lastSeen = useAtomValue(selectedLastSeenAtom)?.notifications || 0
+  const updateLastSeen = useSetAtom(updateLastSeenAtom)
+
+  const unseen = event.created_at > lastSeen && lastSeen !== 0
+
+  const headImage = useEventHeadImage(event)
 
   useEffect(() => {
     if (owner === acc?.pubkey) {
-      acc?.setLastSeenNotification(event.created_at)
+      updateLastSeen('notifications', event.created_at)
     }
   }, [owner, event])
 
@@ -55,19 +86,19 @@ export const NotificationItem = observer(function NotificationItem(props: Props)
             <Stack horizontal={false} align='center' sx={styles.zapIcon}>
               <IconBolt fill='currentColor' size={28} strokeWidth='1.5' />
               <Text size='lg' sx={styles.zapAmount}>
-                {formatter.format(parseInt(notification.zapAmount) / 1000)}
+                {formatter.format(parseInt(zapAmount) / 1000)}
               </Text>
             </Stack>
           </>
         )}
         {type === 'reaction' && (
           <>
-            {notification.event.content === '❤️' ? (
+            {event.content === '❤️' ? (
               <html.span style={styles.heartIcon}>
                 <IconHeartFilled />
               </html.span>
             ) : (
-              <html.span style={styles.reactionIcon}>{fallbackEmoji(notification.event.content)}</html.span>
+              <html.span style={styles.reactionIcon}>{fallbackEmoji(event.content)}</html.span>
             )}
           </>
         )}
@@ -80,20 +111,20 @@ export const NotificationItem = observer(function NotificationItem(props: Props)
         {type === 'repost' && <IconShare3 fill='currentColor' size={28} strokeWidth='1.5' />}
       </Stack>
       <Stack gap={2} justify='flex-start' align='flex-start' grow>
-        <UserAvatar pubkey={pubkey} />
-        <LinkNEvent nevent={note?.event.nevent}>
+        <UserAvatar pubkey={event.pubkey} />
+        <LinkNEvent nevent={note?.nip19 as string}>
           <ContentProvider value={{ disableLink: true }}>
             <Stack sx={styles.content} wrap grow>
-              <UserName pubkey={pubkey} sx={styles.username} />{' '}
+              {author && <UserName pubkey={author} sx={styles.username} />}{' '}
               {type === 'zap' && (
                 <>
                   <Text size='md'>zapped to your note:</Text>
-                  <NotificationContent id={notification.related} />
+                  <NotificationContent id={related} />
                 </>
               )}
               {type === 'reaction' && (
                 <>
-                  <Text size='md'>reacted to your note:</Text> <NotificationContent id={notification.related} />
+                  <Text size='md'>reacted to your note:</Text> <NotificationContent id={related} />
                 </>
               )}
               {type === 'reply' && (
@@ -102,12 +133,12 @@ export const NotificationItem = observer(function NotificationItem(props: Props)
                     replied to {note?.event.pubkey === acc?.pubkey ? 'your note' : 'a note you were mentioned'}
                     {': '}
                   </Text>{' '}
-                  <NotificationContent id={notification.id} />
+                  <NotificationContent id={event.id} />
                 </>
               )}
               {type === 'mention' && (
                 <>
-                  <Text size='md'>mentioned you in a note:</Text> <NotificationContent id={notification.id} />
+                  <Text size='md'>mentioned you in a note:</Text> <NotificationContent id={event.id} />
                 </>
               )}
               {type === 'repost' && (
@@ -115,16 +146,16 @@ export const NotificationItem = observer(function NotificationItem(props: Props)
                   <Text size='md'>
                     reposted {note?.event.pubkey === acc?.pubkey ? 'your note' : 'a note you were mentioned'}
                   </Text>{' '}
-                  <NotificationContent id={notification.related} />
+                  <NotificationContent id={related} />
                 </>
               )}
-              <PostHeaderDate dateStyle='long' date={notification.event.created_at} />
+              <PostHeaderDate dateStyle='long' date={event.created_at} />
             </Stack>
           </ContentProvider>
         </LinkNEvent>
       </Stack>
-      {!mobile && note?.headImage && (
-        <html.div style={styles.trailing}>{note && <NotificationMedia note={note} />}</html.div>
+      {!mobile && headImage && (
+        <html.div style={styles.trailing}>{note && <NotificationMedia event={event} />}</html.div>
       )}
     </Stack>
   )
@@ -136,9 +167,11 @@ const styles = css.create({
     paddingBlock: spacing.padding1,
     paddingInline: spacing.padding2,
     minHeight: 50,
+    borderBottom: '1px solid',
+    borderBottomColor: palette.outlineVariant,
     backgroundColor: {
       default: 'transparent',
-      ':hover': 'rgba(125, 125, 125, 0.03)',
+      ':hover': 'rgba(125, 125, 125, 0.08)',
     },
   },
   root$unseen: {

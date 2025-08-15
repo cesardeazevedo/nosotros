@@ -1,4 +1,4 @@
-import { decodeNIP19 } from '@/utils/nip19'
+import { useEventFromNIP19 } from '@/hooks/query/useQueryBase'
 import { useMatch, useNavigate } from '@tanstack/react-router'
 import { useCallback } from 'react'
 import { DialogSheet } from '../elements/Layouts/Dialog'
@@ -15,12 +15,11 @@ export const ZapDialog = () => {
     navigate({ to: '.', search: ({ zap, ...rest }) => rest })
   }, [])
 
-  const decoded = decodeNIP19(nevent || '')
-  const event = decoded?.type === 'nevent' ? decoded.data : null
+  const event = useEventFromNIP19(nevent || '')
 
   return (
     <DialogSheet maxWidth='xs' open={!!nevent} onClose={handleClose}>
-      {event && <ZapRequest {...event} />}
+      {event.data && <ZapRequest event={event.data} />}
     </DialogSheet>
   )
 }

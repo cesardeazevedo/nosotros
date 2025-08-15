@@ -1,14 +1,14 @@
 import { Kind } from '@/constants/kinds'
 import { formatRelayUrl } from '@/core/helpers/formatRelayUrl'
 import type { Signer } from '@/core/signers/signer'
+import { subscribeLastEvent } from '@/hooks/subscriptions/subscribeLast'
 import { mergeMap } from 'rxjs'
-import { subscribeLast } from '../subscriptions/subscribeLast'
-import { WRITE } from '../types'
 import { publish } from './publish'
 
 export function publishBlossomServer(url: string, pubkey: string, signer: Signer) {
   const formattedUrl = formatRelayUrl(url)
-  return subscribeLast({ kinds: [Kind.BlossomServerList], authors: [pubkey] }, { pubkey, permission: WRITE }).pipe(
+  const filter = { kinds: [Kind.BlossomServerList], authors: [pubkey] }
+  return subscribeLastEvent({}, filter).pipe(
     mergeMap((event) => {
       const exists = event?.tags?.find((x) => x[1] === url) || false
       const newEvent = {

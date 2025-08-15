@@ -1,13 +1,16 @@
+import { closeImageDialogAtom } from '@/atoms/dialog.atoms'
+import { useEvent } from '@/hooks/query/useQueryBase'
 import { useBlurhash } from '@/hooks/useBlurhash'
+import { useImetaList } from '@/hooks/useEventUtils'
 import { useMobile } from '@/hooks/useMobile'
-import type { Note } from '@/stores/notes/note'
 import { duration } from '@/themes/duration.stylex'
 import { palette } from '@/themes/palette.stylex'
+import { getImgProxyUrl } from '@/utils/imgproxy'
 import { IconChevronLeft, IconChevronRight, IconX } from '@tabler/icons-react'
-import { observer } from 'mobx-react-lite'
-import { useEffect, useMemo, useState } from 'react'
+import { useSetAtom } from 'jotai'
+import { memo, useEffect, useMemo, useState } from 'react'
 import { css } from 'react-strict-dom'
-import { dialogStore } from 'stores/ui/dialogs.store'
+import { useDialogControl } from '../../hooks/useDialogs'
 import { buttonTokens } from '../ui/Button/Button.stylex'
 import { Dialog } from '../ui/Dialog/Dialog'
 import { IconButton } from '../ui/IconButton/IconButton'
@@ -57,7 +60,7 @@ const Img = (props: { src: string; blurhash?: string; dim?: { width: number; hei
       )}
       <img
         {...adjustedDims}
-        src={src}
+        src={getImgProxyUrl('feed_img', src)}
         {...css.props([styles.img, isMobile && styles.img$mobile])}
         onLoad={() => setLoaded(true)}
       />
@@ -65,10 +68,12 @@ const Img = (props: { src: string; blurhash?: string; dim?: { width: number; hei
   )
 }
 
-const ImageNavigation = (props: { src: string; note: Note }) => {
-  const { note } = props
+const ImageNavigation = (props: { src: string; id: string }) => {
+  const { id } = props
+  const event = useEvent(id)
   const isMobile = useMobile()
-  const list = note.imetaList
+  const list = useImetaList(event.data)
+  const closeImage = useSetAtom(closeImageDialogAtom)
   const isMultiple = list.length > 1
   const [index, setSelectedItem] = useState(list.findIndex(([, src]) => src === props.src || 0))
   const src = list[index]?.[1] || props.src
@@ -111,7 +116,7 @@ const ImageNavigation = (props: { src: string; note: Note }) => {
       <IconButton
         variant='filledTonal'
         sx={styles.close}
-        onClick={dialogStore.closeImage}
+        onClick={closeImage}
         icon={<IconX strokeWidth='1.2' size={24} />}
       />
       {isMultiple && !isMobile && (
@@ -139,15 +144,15 @@ const ImageNavigation = (props: { src: string; note: Note }) => {
   )
 }
 
-export const ImagesDialog = observer(function ImagesDialog() {
-  const dialog = dialogStore.image
+export const ImagesDialog = memo(function ImagesDialog() {
+  const [dialog, onClose] = useDialogControl('image')
   return (
     <Dialog
       sx={styles.root}
-      open={Boolean(dialog)}
-      onClose={dialogStore.closeImage}
+      open={!!dialog}
+      onClose={onClose}
       slotProps={{ floatingTransition: { sx: styles.floating } }}>
-      {dialog && <ImageNavigation src={dialog.src} note={dialog.note} />}
+      {dialog && <ImageNavigation src={dialog.src} id={dialog.eventId} />}
     </Dialog>
   )
 })

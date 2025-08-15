@@ -1,6 +1,6 @@
 import type { SxProps } from '@/components/ui/types'
 import { palette } from '@/themes/palette.stylex'
-import type { ReactNode } from '@tanstack/react-router'
+import type { ReactNode } from 'react'
 import { css, html } from 'react-strict-dom'
 
 type Props = {

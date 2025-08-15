@@ -2,9 +2,7 @@ import { ContentProvider } from '@/components/providers/ContentProvider'
 import { Paper } from '@/components/ui/Paper/Paper'
 import { PopoverBase } from '@/components/ui/Popover/PopoverBase'
 import { Stack } from '@/components/ui/Stack/Stack'
-import type { EditorStore } from '@/stores/editor/editor.store'
-import { observer } from 'mobx-react-lite'
-import type { ReactNode } from 'react'
+import { memo, type ReactNode } from 'react'
 import { css } from 'react-strict-dom'
 import { EditorBroadcaster } from './EditorBroadcaster'
 import { EditorSettings } from './EditorSettings'
@@ -14,59 +12,64 @@ import { EditorButtonBroadcast } from './Toolbar/EditorButtonBroadcast'
 import { EditorButtonReactions } from './Toolbar/EditorButtonReactions'
 import { EditorButtonSettings } from './Toolbar/EditorButtonSettings'
 import { EditorButtonZapSplits } from './Toolbar/EditorButtonZapSplit'
+import { useEditorSelector } from './hooks/useEditor'
+import { spacing } from '@/themes/spacing.stylex'
 
 type Props = {
-  store: EditorStore
   children?: ReactNode
 }
 
-export const EditorActionsPopover = observer(function EditorActionsPopover(props: Props) {
-  const { store, children } = props
+export const EditorActionsPopover = memo(function EditorActionsPopover(props: Props) {
+  const { children } = props
+  const section = useEditorSelector((editor) => editor.section)
+  const openSection = useEditorSelector((editor) => editor.openSection)
 
   return (
     <Stack horizontal justify='space-between' sx={styles.root}>
       <ContentProvider value={{ dense: true }}>
         <Stack gap={0.5}>
-          <EditorButtonAddMedia store={store} />
+          <EditorButtonAddMedia />
           <PopoverBase
             cursor='arrow'
-            opened={store.section === 'broadcast'}
-            onClose={() => store.openSection('broadcast')}
+            opened={section === 'broadcast'}
+            onClose={() => openSection('broadcast')}
             placement='bottom-start'
             contentRenderer={() => (
               <Paper elevation={2} surface='surfaceContainerLow' sx={styles.wrapper}>
-                <EditorBroadcaster store={store} />
+                <EditorBroadcaster />
               </Paper>
             )}>
-            {({ getProps, setRef }) => <EditorButtonBroadcast {...getProps()} ref={setRef} store={store} />}
+            {({ getProps, setRef }) => <EditorButtonBroadcast {...getProps()} ref={setRef} />}
           </PopoverBase>
 
-          <EditorButtonReactions store={store} />
+          <EditorButtonReactions />
 
           <PopoverBase
             cursor='arrow'
-            opened={store.section === 'zaps'}
-            onClose={() => store.openSection('zaps')}
+            opened={section === 'zaps'}
+            onClose={() => openSection('zaps')}
             placement='bottom-start'
             contentRenderer={() => (
               <Paper elevation={2} surface='surfaceContainerLow' sx={styles.wrapper}>
-                <EditorZapSplits store={store} />
+                <EditorZapSplits />
               </Paper>
             )}>
-            {({ getProps, setRef }) => <EditorButtonZapSplits {...getProps()} ref={setRef} store={store} />}
+            {/* @ts-ignore */}
+            {({ getProps, setRef }) => <EditorButtonZapSplits {...getProps()} ref={setRef} />}
           </PopoverBase>
 
           <PopoverBase
             cursor='arrow'
-            opened={store.section === 'settings'}
-            onClose={() => store.openSection('settings')}
+            opened={section === 'settings'}
+            onClose={() => openSection('settings')}
             placement='bottom-start'
             contentRenderer={() => (
               <Paper elevation={2} surface='surfaceContainerLow' sx={styles.wrapper}>
-                <EditorSettings store={store} />
+                <EditorSettings />
               </Paper>
             )}>
-            {({ getProps, setRef }) => <EditorButtonSettings {...getProps()} ref={setRef} store={store} />}
+            {/* @ts-ignore */}
+            {({ getProps, setRef }) => <EditorButtonSettings {...getProps()} ref={setRef} />}
           </PopoverBase>
         </Stack>
       </ContentProvider>
@@ -79,6 +82,7 @@ const styles = css.create({
   root: {
     width: '100%',
     alignItems: 'flex-end',
+    paddingTop: spacing.padding1,
   },
   wrapper: {
     maxWidth: 490,

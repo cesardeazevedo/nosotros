@@ -13,19 +13,35 @@ type Props = {
   onSelect: (tag: string) => void
 }
 
+const normalizeWebSocketUrl = (value: string) => {
+  let v = value.trim()
+  if (!/^wss?:\/\//i.test(v)) {
+    v = 'wss://' + v
+  }
+  return v
+}
+
 export const DeckAddRelayFeeds = (props: Props) => {
-  const [, submit] = useActionState((_: unknown, formData: FormData) => {
-    const tag = formData.get('value')?.toString()
-    if (tag) {
-      props.onSelect(tag)
+  const [error, submit] = useActionState((_: string | null, formData: FormData) => {
+    const value = formData.get('value')?.toString().trim() || ''
+
+    const normalized = normalizeWebSocketUrl(value)
+    try {
+      const u = new URL(normalized)
+      if (u.protocol === 'ws:' || u.protocol === 'wss:') {
+        props.onSelect(normalized)
+      }
+    } catch {
+      return 'Enter a valid ws:// or wss:// URL'
     }
+
     return null
-  }, [])
+  }, null)
 
   return (
     <>
       <form action={submit}>
-        <html.div style={styles.header}>
+        <Stack sx={styles.header}>
           <Stack grow gap={0.5}>
             <SearchField
               name='value'
@@ -36,7 +52,8 @@ export const DeckAddRelayFeeds = (props: Props) => {
               Add
             </Button>
           </Stack>
-        </html.div>
+        </Stack>
+        {error && <html.div style={styles.error}>{error}</html.div>}
       </form>
     </>
   )
@@ -60,5 +77,10 @@ const styles = css.create({
   },
   button: {
     height: 50,
+  },
+  error: {
+    color: palette.error,
+    fontSize: typeScale.bodySize$sm,
+    paddingInline: spacing['padding0.5'],
   },
 })

@@ -1,20 +1,23 @@
 import { Divider } from '@/components/ui/Divider/Divider'
 import { Stack } from '@/components/ui/Stack/Stack'
-import type { MediaModule } from '@/stores/modules/media.module'
+import type { MediaFeedModule } from '@/hooks/modules/createMediaFeedModule'
+import { useMediaFeedState } from '@/hooks/state/useMediaFeed'
+import { memo } from 'react'
 import { MediaFeed } from './MediaFeed'
 import { MediaHeader } from './MediaHeader'
 
 type Props = {
-  module: MediaModule
+  module: MediaFeedModule
 }
 
-export const MediaColumn = (props: Props) => {
+export const MediaColumn = memo(function MediaColumn(props: Props) {
   const { module } = props
+  const feed = useMediaFeedState(module)
   return (
     <Stack horizontal={false}>
-      <MediaHeader module={module} />
+      <MediaHeader feed={feed} />
       <Divider />
-      <MediaFeed column module={module} />
+      <MediaFeed column feed={feed} />
     </Stack>
   )
-}
+})

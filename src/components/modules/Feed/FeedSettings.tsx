@@ -3,10 +3,10 @@ import { Divider } from '@/components/ui/Divider/Divider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { Kind } from '@/constants/kinds'
-import type { FeedStore } from '@/stores/feeds/feed.store'
+import type { FeedState } from '@/hooks/state/useFeed'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconArticle, IconMessage2, IconPhoto, IconShare3 } from '@tabler/icons-react'
-import { observer } from 'mobx-react-lite'
+import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 import { FeedSettingsRelays } from './settings/FeedSettingsRelays'
 import { FeedSettingsSafety } from './settings/FeedSettingsSafety'
@@ -17,11 +17,11 @@ const iconProps = {
 }
 
 export type Props = {
-  feed: FeedStore
+  feed: FeedState
   renderRelaySettings?: boolean
 }
 
-export const FeedSettings = observer(function FeedSettings(props: Props) {
+export const FeedSettings = memo(function FeedSettings(props: Props) {
   const { feed, renderRelaySettings = false } = props
   return (
     <html.div style={styles.root}>

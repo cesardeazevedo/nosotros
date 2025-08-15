@@ -1,50 +1,51 @@
+import { toggleQRCodeDialogAtom } from '@/atoms/dialog.atoms'
 import { ContentProvider } from '@/components/providers/ContentProvider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
-import { useCurrentUser } from '@/hooks/useRootStore'
+import { useNprofile } from '@/hooks/useEventUtils'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconX } from '@tabler/icons-react'
-import { observer } from 'mobx-react-lite'
-import { nip19 } from 'nostr-tools'
+import { useSetAtom } from 'jotai'
 import { QRCodeCanvas } from 'qrcode.react'
-import { useMemo } from 'react'
+import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
-import { dialogStore } from 'stores/ui/dialogs.store'
-import { encodeSafe } from 'utils/nip19'
 import { UserAvatar } from '../User/UserAvatar'
 import { UserName } from '../User/UserName'
 import { UserNIP05 } from '../User/UserNIP05'
 
-export const QRCode = observer(function QRCode() {
-  const user = useCurrentUser()
-  const npub = useMemo(() => encodeSafe(() => nip19.npubEncode(user?.pubkey || '')), [user])
+type Props = {
+  pubkey: string
+}
+
+export const QRCode = memo(function QRCode(props: Props) {
+  const { pubkey } = props
+  const nprofile = useNprofile(pubkey)
+  const toggleQRCode = useSetAtom(toggleQRCodeDialogAtom)
   return (
     <html.div style={styles.root}>
-      <IconButton sx={styles.close} onClick={() => dialogStore.toggleQRCode(false)} icon={<IconX />} />
+      <IconButton sx={styles.close} onClick={() => toggleQRCode(false)} icon={<IconX />} />
       <Stack horizontal={false} gap={2} sx={styles.content}>
-        {user && (
-          <ContentProvider value={{ disablePopover: true, disableLink: true }}>
-            <Stack horizontal={false} gap={2} align='center' justify='center'>
-              <UserAvatar pubkey={user.pubkey} size='xl' sx={styles.avatar} />
-              <Stack horizontal={false} align='center'>
-                <UserName variant='title' size='lg' pubkey={user?.pubkey}></UserName>
-                <UserNIP05 pubkey={user?.pubkey} />
-              </Stack>
+        <ContentProvider value={{ disablePopover: true, disableLink: true }}>
+          <Stack horizontal={false} gap={2} align='center' justify='center'>
+            <UserAvatar pubkey={pubkey} size='xl' sx={styles.avatar} />
+            <Stack horizontal={false} align='center'>
+              <UserName variant='title' size='lg' pubkey={pubkey}></UserName>
+              <UserNIP05 pubkey={pubkey} />
             </Stack>
-          </ContentProvider>
-        )}
-        {npub ? (
+          </Stack>
+        </ContentProvider>
+        {nprofile ? (
           <html.div style={styles.qrcode}>
-            <QRCodeCanvas value={npub} size={200} />
+            <QRCodeCanvas value={nprofile} size={200} />
           </html.div>
         ) : (
           <Skeleton variant='rectangular' animation='wave' sx={styles.loading} />
         )}
         <Text size='lg' sx={styles.npub}>
-          {npub}
+          {nprofile}
         </Text>
         <Text variant='title' size='sm'>
           Follow me on Nostr

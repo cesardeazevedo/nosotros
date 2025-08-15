@@ -1,0 +1,216 @@
+import type { Kind } from '@/constants/kinds'
+import { FALLBACK_RELAYS } from '@/constants/relays'
+import { mergeRelayHints } from '@/core/mergers/mergeRelayHints'
+import type { RelayHints } from '@/core/types'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import type { NostrContext } from '@/nostr/context'
+import { parseEventMetadata } from '@/hooks/parsers/parseEventMetadata'
+import { decodeNIP19, decodeRelays, decodeToFilter, nip19ToRelayHints } from '@/utils/nip19'
+import type { UseQueryOptions } from '@tanstack/react-query'
+import { keepPreviousData, queryOptions, useQuery } from '@tanstack/react-query'
+import type { Filter } from 'nostr-tools'
+import { firstValueFrom, shareReplay } from 'rxjs'
+import { batcher } from '../batchers'
+import { subscribeCacheFirst } from '../subscriptions/subscribeCacheFirst'
+import { setEventData } from './queryUtils'
+import { pointerToQueryKey, queryKeys } from './queryKeys'
+
+export type UseQueryOptionsWithFilter<Selector = NostrEventDB[]> = UseQueryOptions<NostrEventDB[], Error, Selector> & {
+  filter: Filter
+  ctx?: NostrContext
+}
+
+export type CustomQueryOptions<Selector = NostrEventDB[]> = Omit<
+  UseQueryOptionsWithFilter<Selector>,
+  'queryKey' | 'filter'
+>
+
+export function createEventQueryOptions<Selector = NostrEventDB[]>(options: UseQueryOptionsWithFilter<Selector>) {
+  const { filter, ctx = {}, ...opts } = options
+  return queryOptions<NostrEventDB[], Error, Selector>({
+    queryFn: async () => {
+      const res = await firstValueFrom(subscribeCacheFirst(ctx, filter).pipe(shareReplay()))
+      // This will populate all events into react query cache individually
+      res.forEach(setEventData)
+      return res
+    },
+    ...opts,
+  })
+}
+
+export function eventQueryOptions<Selector>(options: UseQueryOptionsWithFilter<Selector>) {
+  return createEventQueryOptions({
+    ...options,
+    ctx: {
+      network: 'CACHE_FIRST_BATCH',
+      batcher,
+      ...options.ctx,
+    },
+  })
+}
+
+/**
+ * For replaceable events we use STALE_WHILE_REVALIDATE_BATCH instead of CACHE_FIRST
+ * as we don't know if there's a new replceable event in the relay
+ */
+export function replaceableEventQueryOptions<Selector = NostrEventDB>(
+  kind: Kind,
+  pubkey: string,
+  options?: CustomQueryOptions<Selector>,
+) {
+  return createEventQueryOptions<Selector>({
+    filter: {
+      kinds: [kind],
+      authors: [pubkey],
+    },
+    queryKey: queryKeys.replaceable(kind, pubkey),
+    ctx: {
+      network: 'STALE_WHILE_REVALIDATE_BATCH',
+      batcher,
+      ...options?.ctx,
+    },
+    select: (events) => events[0] as Selector,
+    ...options,
+  })
+}
+
+export function addressableEventQueryOptions<Selector = NostrEventDB>(
+  kind: Kind,
+  pubkey: string,
+  d: string,
+  options?: CustomQueryOptions<Selector>,
+) {
+  return createEventQueryOptions<Selector>({
+    filter: {
+      kinds: [kind],
+      authors: [pubkey],
+      '#d': [d],
+    },
+    queryKey: queryKeys.addressable(kind, pubkey, d),
+    ctx: {
+      network: 'STALE_WHILE_REVALIDATE_BATCH',
+      batcher,
+      ...options?.ctx,
+    },
+    select: (events) => events[0] as Selector,
+    ...options,
+  })
+}
+
+export function eventFromNIP19QueryOptions(nip19: string, relayHints?: RelayHints) {
+  const decoded = decodeNIP19(nip19.replace('nostr:', ''))
+  const filter = decodeToFilter(decoded)!
+  const relays = decodeRelays(decoded)
+
+  return eventQueryOptions({
+    queryKey: pointerToQueryKey(decoded),
+    filter,
+    ctx: {
+      relays: [...relays, ...FALLBACK_RELAYS],
+      relayHints: mergeRelayHints([relayHints || {}, nip19ToRelayHints(decoded)]),
+    },
+    select: (events) => events[0],
+  })
+}
+
+export function useEvent(id: string = '', ctx?: NostrContext) {
+  return useQuery(
+    eventQueryOptions({
+      queryKey: queryKeys.event(id),
+      filter: { ids: [id] },
+      enabled: !!id,
+      placeholderData: keepPreviousData,
+      ctx,
+      select: (events) => events[0],
+    }),
+  )
+}
+
+export function useEventAddress(kind: Kind, pubkey: string, identifier: string, relayHints?: RelayHints) {
+  return useQuery(
+    eventQueryOptions({
+      queryKey: queryKeys.addressable(kind, pubkey, identifier),
+      filter: { kinds: [kind], authors: [pubkey], '#d': [identifier] },
+      ctx: {
+        relays: FALLBACK_RELAYS,
+        relayHints,
+      },
+      select: (events) => events[0],
+    }),
+  )
+}
+
+export function useEventFromNIP19(nip19: string, relayHints?: RelayHints) {
+  const decoded = decodeNIP19(nip19.replace('nostr:', ''))
+  const filter = decoded ? decodeToFilter(decoded) : undefined
+
+  return useQuery({
+    ...eventFromNIP19QueryOptions(nip19, relayHints),
+    enabled: !!nip19 && !!filter,
+    placeholderData: keepPreviousData,
+  })
+}
+
+export function useRepostedEvent(event: NostrEventDB) {
+  const id = event.metadata?.mentionedNotes?.[0] || ''
+  return useQuery(
+    eventQueryOptions({
+      queryKey: queryKeys.event(id),
+      filter: { ids: [id] },
+      ctx: {
+        relays: FALLBACK_RELAYS,
+        relayHints: {
+          ...event.metadata?.relayHints,
+          ids: {
+            [id]: [event.pubkey],
+          },
+        },
+      },
+      enabled: !!id,
+      initialData:
+        event.content && event.content !== '{}' ? [parseEventMetadata(JSON.parse(event.content || '{}'))] : undefined,
+      select: (events) => events[0],
+    }),
+  )
+}
+
+export function useReplaceableEvent<Selector = NostrEventDB>(
+  kind: Kind,
+  pubkey: string,
+  options?: CustomQueryOptions<Selector>,
+) {
+  return useQuery(replaceableEventQueryOptions<Selector>(kind, pubkey, options))
+}
+
+export function useAddressableEvent(kind: Kind, pubkey: string, identifier: string) {
+  return useQuery(
+    createEventQueryOptions({
+      queryKey: queryKeys.addressable(kind, pubkey, identifier),
+      filter: {
+        kinds: [kind],
+        authors: [pubkey],
+        '#d': [identifier],
+      },
+    }),
+  )
+}
+
+export function useParentEvent(event: NostrEventDB) {
+  const parentId = event.metadata?.parentId
+  return useEvent(parentId, {
+    relayHints: mergeRelayHints([
+      parentId ? { ids: { [parentId]: FALLBACK_RELAYS } } : {},
+      event.metadata?.relayHints || {},
+    ]),
+  })
+}
+
+export function useRootEvent(event: NostrEventDB) {
+  const rootId = event.metadata?.rootId
+  return useEvent(rootId, {
+    relayHints: mergeRelayHints([
+      rootId ? { ids: { [rootId]: FALLBACK_RELAYS } } : {},
+      event.metadata?.relayHints || {},
+    ]),
+  })
+}

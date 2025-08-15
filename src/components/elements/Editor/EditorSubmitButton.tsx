@@ -1,6 +1,6 @@
 import { useContentContext } from '@/components/providers/ContentProvider'
 import { Button } from '@/components/ui/Button/Button'
-import { useCurrentPubkey } from '@/hooks/useRootStore'
+import { useCurrentPubkey } from '@/hooks/useAuth'
 import { css } from 'react-strict-dom'
 import { LinkSignIn } from '../Links/LinkSignIn'
 import { cancel$ } from './utils/countDown'

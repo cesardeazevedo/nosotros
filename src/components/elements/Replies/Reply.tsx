@@ -3,9 +3,8 @@ import { NoteProvider } from '@/components/providers/NoteProvider'
 import { Button } from '@/components/ui/Button/Button'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { Stack } from '@/components/ui/Stack/Stack'
-import { useNoteStore } from '@/hooks/useNoteStore'
-import { useCurrentUser } from '@/hooks/useRootStore'
-import type { Event } from '@/stores/events/event'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import { useNoteState } from '@/hooks/state/useNote'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { useNavigate, useRouter } from '@tanstack/react-router'
@@ -13,34 +12,33 @@ import { BubbleContainer } from 'components/elements/Content/Layout/Bubble'
 import { UserAvatar } from 'components/elements/User/UserAvatar'
 import { UserName } from 'components/elements/User/UserName'
 import { useMobile } from 'hooks/useMobile'
-import { observer } from 'mobx-react-lite'
-import { useCallback, useState } from 'react'
+import { memo, useCallback, useRef, useState } from 'react'
 import { css, html } from 'react-strict-dom'
-import { Editor } from '../Editor/Editor'
-import { useNoteVisibility } from '../Posts/hooks/useNoteVisibility'
+import { EditorProvider } from '../Editor/EditorProvider'
 import { PostActions } from '../Posts/PostActions/PostActions'
 import { RepliesMuted } from './RepliesMuted'
 import { RepliesTree } from './RepliesTree'
 import { ReplyContent } from './ReplyContent'
+import { ReplyLink } from './ReplyLink'
 
 type Props = {
-  event: Event
+  event: NostrEventDB
   nested?: boolean
   repliesOpen: boolean | null
   level?: number
 }
 
-export const Reply = observer(function Reply(props: Props) {
+export const Reply = memo(function Reply(props: Props) {
   const { event, level = 0, repliesOpen, nested = true } = props
-  const note = useNoteStore(event.event)
+  const note = useNoteState(event)
   const navigate = useNavigate()
   const router = useRouter()
   const isMobile = useMobile()
   const collapsedLevel = isMobile ? 5 : 6
   const [open, setOpen] = useState(level < collapsedLevel)
-  const [ref] = useNoteVisibility(event.event)
-  const user = useCurrentUser()
+  const ref = useRef(null)
   const { blured } = useContentContext()
+  const nevent = note.nip19
 
   const handleOpen = useCallback(() => {
     setOpen(!open)
@@ -49,7 +47,7 @@ export const Reply = observer(function Reply(props: Props) {
   const handleOpenNestedDialog = useCallback(() => {
     navigate({
       to: '/$nostr',
-      params: { nostr: note.event.nevent as string },
+      params: { nostr: nevent as string },
       state: { from: router.latestLocation.pathname } as never,
     })
   }, [note, router])
@@ -59,11 +57,13 @@ export const Reply = observer(function Reply(props: Props) {
     return
   }
 
+  const hasReplies = note.replies.data?.length !== 0
+
   return (
-    <NoteProvider value={{ note }}>
+    <NoteProvider value={{ event, note }}>
       <ContentProvider value={{ blured, dense: true }}>
         <html.div style={[styles.root, level > 1 && styles.root$deep]} ref={ref}>
-          {open && <html.span style={styles.verticalLineContainer} onClick={handleOpen} />}
+          {open && hasReplies && <html.span style={styles.verticalLineContainer} onClick={handleOpen} />}
           {!open && (
             <ContentProvider value={{ blured, dense: true, disableLink: true }}>
               <Stack align='flex-start' gap={1} onClick={level < collapsedLevel ? handleOpen : handleOpenNestedDialog}>
@@ -80,29 +80,26 @@ export const Reply = observer(function Reply(props: Props) {
               <Stack align='flex-start' gap={1} sx={styles.wrapper}>
                 {level !== 1 && <html.div style={styles.anchor} />}
                 <UserAvatar pubkey={event.pubkey} />
-                <ReplyContent />
+                <ReplyLink nevent={nevent}>
+                  <ReplyContent />
+                </ReplyLink>
               </Stack>
               <html.div style={styles.actions}>
                 <Stack>
-                  <PostActions renderOptions onReplyClick={() => note.toggleReplying()} />
+                  <PostActions renderOptions onReplyClick={() => note.actions.toggleReplying()} />
                 </Stack>
-                <Expandable expanded={note.isReplying} trigger={() => <></>}>
-                  {note.isReplying && (
-                    <Editor sx={styles.editor} initialOpen renderBubble renderDiscard={false} store={note.editor} />
+                <Expandable expanded={note.state.isReplying} trigger={() => <></>}>
+                  {note.state.isReplying && (
+                    <EditorProvider sx={styles.editor} initialOpen renderBubble renderDiscard={false} parent={event} />
                   )}
                 </Expandable>
               </html.div>
               {nested && (
-                <RepliesTree
-                  replies={note.repliesSorted(user)}
-                  repliesOpen={repliesOpen}
-                  level={level + 1}
-                  nested={nested}
-                />
+                <RepliesTree replies={note.repliesSorted} repliesOpen={repliesOpen} level={level + 1} nested={nested} />
               )}
             </>
           )}
-          <RepliesMuted level={level} />
+          <RepliesMuted />
         </html.div>
       </ContentProvider>
     </NoteProvider>
@@ -130,7 +127,7 @@ const styles = css.create({
       position: 'relative',
       top: 0,
       left: 6,
-      width: 2,
+      width: 3,
       borderRadius: 4,
       height: '100%',
       pointerEvents: 'none',
@@ -151,8 +148,8 @@ const styles = css.create({
     top: 6,
     width: 16,
     height: 16,
-    borderLeft: '2px solid',
-    borderBottom: '2px solid',
+    borderLeft: '3px solid',
+    borderBottom: '3px solid',
     borderLeftColor: palette.outlineVariant,
     borderBottomColor: palette.outlineVariant,
     borderBottomLeftRadius: 12,

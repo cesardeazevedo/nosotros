@@ -1,17 +1,16 @@
 import { Text } from '@/components/ui/Text/Text'
-import { userStore } from '@/stores/users/users.store'
-import { observer } from 'mobx-react-lite'
+import { useUserState } from '@/hooks/state/useUser'
 import type { ContentSchema } from 'nostr-editor'
-import React from 'react'
+import React, { memo } from 'react'
 import { TextContent } from '../Content/Text'
 
 type Props = {
   pubkey: string
 }
 
-export const UserContentAbout = observer(function UserContentAbout(props: Props) {
+export const UserContentAbout = memo(function UserContentAbout(props: Props) {
   const { pubkey } = props
-  const user = userStore.get(pubkey)
+  const user = useUserState(pubkey)
   const schema = user?.metadata?.aboutParsed as ContentSchema
   return (
     <>

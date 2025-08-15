@@ -1,67 +1,70 @@
-import { useRootStore } from '@/hooks/useRootStore'
-import type { HomeModule } from '@/stores/modules/home.module'
-import type { MediaModule } from '@/stores/modules/media.module'
-import type { ModulesInstances } from '@/stores/modules/module.store'
-import { observer } from 'mobx-react-lite'
-import { ArticlesHeader } from '../Articles/ArticlesHeader'
-import { FeedHeader } from '../Feed/FeedHeader'
-import { FeedHeaderFollowSet } from '../Feed/headers/FeedHeaderFollowSet'
-import { FeedHeaderRelaySets } from '../Feed/headers/FeedHeaderRelaySets'
+import type { DeckColumn } from '@/atoms/deck.atoms'
+import type { EventModule } from '@/hooks/modules/createEventModule'
+import type { MediaFeedModule } from '@/hooks/modules/createMediaFeedModule'
+import type { NotificationFeedModule } from '@/hooks/modules/createNotificationFeedModule'
+import { memo } from 'react'
+import { ArticlesColumn } from '../Articles/ArticlesColumn'
 import { HomeColumn } from '../Home/HomeColumn'
+import { ListColumn } from '../Lists/ListColumn'
+import { ListsColumn } from '../Lists/ListsColumn'
 import { MediaColumn } from '../Media/MediaColumn'
 import { NostrEventColumn } from '../NostrEvent/NostrEventColumn'
 import { NotificationColumn } from '../Notifications/NotificationColumn'
 import { NProfileColumn } from '../NProfile/NProfileColumn'
 import { RelayDiscoveryColumn } from '../RelayDiscovery/RelayDiscoveryColumn'
+import { RelayFeedColumn } from '../RelayFeed/RelayFeedColumn'
 import { SearchColumn } from '../Search/SearchColumn'
 import { TagColumn } from '../Tag/TagColumn'
-import { DeckColumn } from './DeckColumn'
-import { DeckColumnFeed } from './DeckColumnFeed'
-import { DeckContext, deckContextvalues } from './DeckContext'
+import { DeckColumnContainer } from './DeckColumnContainer'
+import { DeckColumnContext } from './DeckContext'
+import { useDeck } from './hooks/useDeck'
 
 type Props = {
-  module: ModulesInstances
+  column: DeckColumn
 }
 
 const DeckModule = (props: Props) => {
-  const { module } = props
-  switch (module.type) {
+  const { column } = props
+  switch (column.type) {
     case 'home': {
-      return <HomeColumn module={module as HomeModule} />
+      return <HomeColumn feedModule={column} />
     }
-    case 'nprofile': {
-      return <NProfileColumn module={module} />
+    case 'profile': {
+      return <NProfileColumn feedModule={column} />
     }
     case 'media': {
-      return <MediaColumn module={module as MediaModule} />
+      return <MediaColumn module={column as MediaFeedModule} />
     }
-    case 'notifications': {
-      return <NotificationColumn module={module} />
+    case 'inbox': {
+      return <NotificationColumn module={column as NotificationFeedModule} />
     }
     case 'tags': {
-      return <TagColumn module={module} />
+      return <TagColumn module={column} />
     }
     case 'articles': {
-      return <DeckColumnFeed feed={module.feed} header={<ArticlesHeader />} />
+      return <ArticlesColumn module={column} />
     }
     case 'search': {
-      return <SearchColumn module={module} />
+      return <SearchColumn module={column} />
     }
     case 'event': {
-      return <NostrEventColumn module={module} />
+      return <NostrEventColumn module={column as EventModule} />
     }
     case 'relaydiscovery': {
-      return <RelayDiscoveryColumn module={module} />
+      return <RelayDiscoveryColumn module={column} />
     }
     case 'relayfeed': {
-      return <DeckColumnFeed feed={module.feed} header={<FeedHeader module={module} />} />
+      return <RelayFeedColumn module={column} />
     }
-    case 'relaysets': {
-      return <DeckColumnFeed feed={module.feed} header={<FeedHeaderRelaySets feed={module.feed} />} />
+    case 'lists': {
+      return <ListsColumn module={column} />
     }
-    case 'starterpack':
+    // case 'relaysets': {
+    //   return <DeckColumnFeed module={column} header={<FeedHeaderRelaySets feed={module.feed} />} />
+    // }
+    // case 'starterpack':
     case 'followset': {
-      return <DeckColumnFeed feed={module.feed} header={<FeedHeaderFollowSet feed={module.feed} />} />
+      return <ListColumn module={column} />
     }
     default: {
       break
@@ -69,18 +72,17 @@ const DeckModule = (props: Props) => {
   }
 }
 
-export const DeckList = observer(function DeckList() {
-  const root = useRootStore()
+export const DeckList = memo(function DeckList() {
+  const deck = useDeck()
   return (
     <>
-      {root.decks.selected.list.map((module, index) => {
-        const key = `${module.type}:${module.id}`
+      {deck?.columns.map((column, index) => {
         return (
-          <DeckColumn key={key}>
-            <DeckContext.Provider value={{ ...deckContextvalues, module, index }}>
-              <DeckModule module={module} />
-            </DeckContext.Provider>
-          </DeckColumn>
+          <DeckColumnContainer key={column.id}>
+            <DeckColumnContext.Provider value={{ index, ...column }}>
+              <DeckModule column={column} />
+            </DeckColumnContext.Provider>
+          </DeckColumnContainer>
         )
       })}
     </>

@@ -4,11 +4,13 @@ import { Stack } from '@/components/ui/Stack/Stack'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconCheck, IconCopy } from '@tabler/icons-react'
 import { AnimatePresence, motion, MotionConfig } from 'framer-motion'
-import { forwardRef, useCallback, useImperativeHandle, useState } from 'react'
+import type { Ref } from 'react'
+import { useCallback, useImperativeHandle, useState } from 'react'
 import { css, html } from 'react-strict-dom'
 
 type Props = {
   title?: string
+  ref?: Ref<CopyButtonRef>
   text: string | undefined
 } & Partial<ButtonProps>
 
@@ -21,8 +23,8 @@ const variants = {
   hidden: { opacity: 0, scale: 0.8 },
 }
 
-export const CopyButton = forwardRef<CopyButtonRef, Props>((props, ref) => {
-  const { text, title = 'Copy text', ...rest } = props
+export const CopyButton = (props: Props) => {
+  const { ref, text, title = 'Copy text', ...rest } = props
   const [copied, setCopied] = useState(false)
 
   const handleCopy = useCallback(() => {
@@ -65,7 +67,7 @@ export const CopyButton = forwardRef<CopyButtonRef, Props>((props, ref) => {
       </Button>
     </html.div>
   )
-})
+}
 
 const styles = css.create({
   copied: {

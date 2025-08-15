@@ -1,16 +1,14 @@
 import type { RelayHints } from '@/core/types'
 import type { ContentSchema, IMetaTags } from 'nostr-editor'
-import type { NostrEvent } from 'nostr-tools'
-import type { UserRelay } from './helpers/parseRelayList'
-import type { ParsedTags } from './helpers/parseTags'
-import type { UserSchema } from './helpers/parseUser'
-import type { Bolt11 } from './helpers/parseZap'
+import type { UserRelay } from '../hooks/parsers/parseRelayList'
+import type { UserSchema } from '../hooks/parsers/parseUser'
+import type { Bolt11 } from '../hooks/parsers/parseZap'
 
-export * from './helpers/parseRelayList'
+export * from '../hooks/parsers/parseRelayList'
 
 export const metadataSymbol = Symbol('metadata')
 
-export type MetadataSymbol<T> = { [metadataSymbol]: T }
+export type MetadataSymbol<T> = { metadata: T }
 
 export type Metadata = {
   imeta?: IMetaTags
@@ -24,7 +22,4 @@ export type Metadata = {
   bolt11?: Bolt11
   relayList?: UserRelay[]
   relayHints?: Partial<RelayHints>
-  tags?: ParsedTags
 }
-
-export type NostrEventMetadata = NostrEvent & MetadataSymbol<Metadata>

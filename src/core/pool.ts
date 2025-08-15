@@ -1,4 +1,3 @@
-import { LRUCache } from 'lru-cache'
 import { distinct, mergeAll, mergeMap, of, ReplaySubject } from 'rxjs'
 import { formatRelayUrl } from './helpers/formatRelayUrl'
 import { Relay } from './Relay'
@@ -11,10 +10,7 @@ type Options = {
 
 export class Pool {
   relays = new Map<string, Relay>()
-  blacklisted = new LRUCache({
-    ttl: 30000,
-    ttlAutopurge: true,
-  })
+  blacklisted = new Set<string>()
 
   private relaysSubject = new ReplaySubject<Relay>()
   relays$ = this.relaysSubject.asObservable()
@@ -68,7 +64,7 @@ export class Pool {
   }
 
   blacklist(url: string) {
-    this.blacklisted.set(url, true)
+    this.blacklisted.add(url)
   }
 
   get(url: string): Relay | undefined {

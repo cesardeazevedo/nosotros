@@ -1,10 +1,10 @@
 import { Button } from '@/components/ui/Button/Button'
 import { Stack } from '@/components/ui/Stack/Stack'
-import { useCurrentPubkey, useGlobalSettings } from '@/hooks/useRootStore'
+import { useCurrentPubkey } from '@/hooks/useAuth'
+import { useSettings } from '@/hooks/useSettings'
 import { spacing } from '@/themes/spacing.stylex'
 import { useMatchRoute } from '@tanstack/react-router'
-import { observer } from 'mobx-react-lite'
-import React, { useState } from 'react'
+import React, { memo, useState } from 'react'
 import { css, html } from 'react-strict-dom'
 import { LinkSignIn } from '../Links/LinkSignIn'
 import { ProfilePopover } from '../Navigation/ProfilePopover'
@@ -21,13 +21,14 @@ type Props = {
   children: React.ReactNode
 }
 
-export const SidebarLayout = observer(function SidebarLayout(props: Props) {
+export const SidebarLayout = memo(function SidebarLayout(props: Props) {
+  'use no memo' // causing issue with useMatchRoute not updating https://github.com/TanStack/router/issues/4499
   const match = useMatchRoute()
-  const global = useGlobalSettings()
+  const settings = useSettings()
   const isDeck = match({ to: '/deck/$id' })
   const pubkey = useCurrentPubkey()
   const [pane, setPane] = useState<Panes>(false)
-  const sidebarCollapsed = global.sidebarCollapsed || pane !== false
+  const sidebarCollapsed = settings.sidebarCollapsed || pane !== false
   return (
     <SidebarContext.Provider
       value={{
@@ -43,17 +44,19 @@ export const SidebarLayout = observer(function SidebarLayout(props: Props) {
         <SidebarTransition open={pane === '/lists'}>
           {(sx, ref) => <SidebarPaneLists ref={ref} sx={sx} />}
         </SidebarTransition>
-        <SidebarTransition open={pane === '/notifications'}>
-          {(sx, ref) => <SidebarPaneNotifications ref={ref} sx={sx} />}
-        </SidebarTransition>
+        {pubkey && (
+          <SidebarTransition open={pane === '/notifications'}>
+            {(sx, ref) => <SidebarPaneNotifications ref={ref} sx={sx} pubkey={pubkey} />}
+          </SidebarTransition>
+        )}
         <SidebarTransition open={pane === '/explore/relays'}>
           {(sx, ref) => <SidebarPaneRelayDiscovery ref={ref} sx={sx} />}
         </SidebarTransition>
         <html.main
           style={[
-            !isDeck && !global.sidebarCollapsed && styles.main,
+            !isDeck && !settings.sidebarCollapsed && styles.main,
             isDeck && styles.main$deck,
-            isDeck && !global.sidebarCollapsed && styles.main$deck$expanded,
+            isDeck && !settings.sidebarCollapsed && styles.main$deck$expanded,
           ]}>
           <html.div style={styles.trailing}>
             <Stack gap={1}>

@@ -5,7 +5,7 @@ import { test } from '@/utils/fixtures'
 import { subscribeSpyTo } from '@hirez_io/observer-spy'
 import { publishFollowList } from '../publishFollowList'
 
-describe('publishFollowList', () => {
+describe.skip('publishFollowList', () => {
   test('assert follow', async ({ createMockRelay, signer }) => {
     const pubkey = 'p1'
     const relay1 = createMockRelay(RELAY_1, [

@@ -4,12 +4,14 @@ import { RelayDiscoveryList } from '@/components/modules/RelayDiscovery/RelayDis
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { SxProps } from '@/components/ui/types'
+import { createRelayDiscoveryModule } from '@/hooks/modules/createRelayDiscoveryModule'
+import { useRelayDiscoveryFeed } from '@/hooks/state/useRelayDiscoveryFeed'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconLayoutSidebarLeftExpand } from '@tabler/icons-react'
-import { Link, useRouter, useRouterState } from '@tanstack/react-router'
-import { useContext, useEffect, type RefObject } from 'react'
+import { Link } from '@tanstack/react-router'
+import { useContext, type RefObject } from 'react'
 import { css } from 'react-strict-dom'
 import { SidebarContext } from '../SidebarContext'
 
@@ -19,41 +21,25 @@ type Props = {
 }
 
 export const SidebarPaneRelayDiscovery = (props: Props) => {
-  const router = useRouter()
   const context = useContext(SidebarContext)
+  const feed = useRelayDiscoveryFeed(createRelayDiscoveryModule())
 
-  useEffect(() => {
-    router.preloadRoute({ to: '/explore/relays' })
-  }, [])
-
-  const module = useRouterState({
-    select: (state) => {
-      const match =
-        state.cachedMatches.find((x) => x.routeId === '/explore/relays') ||
-        state.matches.find((x) => x.routeId === '/explore/relays')
-      return match?.loaderData?.module
-    },
-  })
   return (
     <Stack horizontal={false} ref={props.ref} justify='flex-start' sx={[styles.root, props.sx]}>
-      {module && (
-        <>
-          <Stack horizontal sx={styles.settings}>
-            <Stack horizontal={false} grow>
-              <RelayDiscoveryHeader collapsed module={module} grow horizontal={false} justify='stretch'>
-                <Link to='/explore/relays' onClick={() => context.setPane(false)}>
-                  <IconButton size='md'>
-                    <IconLayoutSidebarLeftExpand size={22} />
-                  </IconButton>
-                </Link>
-              </RelayDiscoveryHeader>
-            </Stack>
-          </Stack>
-          <DeckScroll>
-            <RelayDiscoveryList module={module} />
-          </DeckScroll>
-        </>
-      )}
+      <Stack horizontal sx={styles.settings}>
+        <Stack horizontal={false} grow>
+          <RelayDiscoveryHeader collapsed grow horizontal={false} justify='stretch' feed={feed}>
+            <Link to='/explore/relays' onClick={() => context.setPane(false)}>
+              <IconButton size='md'>
+                <IconLayoutSidebarLeftExpand size={22} />
+              </IconButton>
+            </Link>
+          </RelayDiscoveryHeader>
+        </Stack>
+      </Stack>
+      <DeckScroll>
+        <RelayDiscoveryList feed={feed} />
+      </DeckScroll>
     </Stack>
   )
 }

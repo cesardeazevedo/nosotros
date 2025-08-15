@@ -1,18 +1,21 @@
+import { authRelaysAtom } from '@/atoms/relay.atoms'
+import { authWhitelistAtom, toggleAuthRelayAtom } from '@/atoms/relayAuth.atoms'
 import { RelayChip } from '@/components/elements/Relays/RelayChip'
 import { RelaySelectPopover } from '@/components/elements/Relays/RelaySelectPopover'
 import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Switch } from '@/components/ui/Switch/Switch'
 import { dedupe } from '@/core/helpers/dedupe'
-import { useRootStore } from '@/hooks/useRootStore'
-import { relaysStore } from '@/stores/relays/relays.store'
 import { spacing } from '@/themes/spacing.stylex'
-import { observer } from 'mobx-react-lite'
+import { useAtomValue, useSetAtom } from 'jotai'
+import { memo } from 'react'
 import { css } from 'react-strict-dom'
 
-export const SettingsRelayAuth = observer(function SettingsRelayAuth() {
-  const root = useRootStore()
-  const relays = dedupe([...relaysStore.auths.keys(), ...root.globalContext.authWhitelist])
+export const SettingsRelayAuth = memo(function SettingsRelayAuth() {
+  const authRelays = useAtomValue(authRelaysAtom)
+  const toggleAuthRelay = useSetAtom(toggleAuthRelayAtom)
+  const authWhitelist = useAtomValue(authWhitelistAtom)
+  const relays = dedupe([...authRelays.map((x) => x[0]), ...authWhitelist])
   return (
     <MenuItem
       sx={styles.root}
@@ -23,13 +26,10 @@ export const SettingsRelayAuth = observer(function SettingsRelayAuth() {
           {relays.map((url) => (
             <Stack key={url} gap={1}>
               <RelayChip url={url} />
-              <Switch
-                checked={root.globalContext.authWhitelist.includes(url)}
-                onChange={() => root.globalContext.toggleAuthRelay(url)}
-              />
+              <Switch checked={authWhitelist.includes(url)} onChange={() => toggleAuthRelay(url)} />
             </Stack>
           ))}
-          <RelaySelectPopover onSubmit={(url) => root.globalContext.toggleAuthRelay(url)} />
+          <RelaySelectPopover onSubmit={(url) => toggleAuthRelay(url)} />
         </Stack>
       }
     />

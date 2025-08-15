@@ -1,4 +1,3 @@
-import { hasEventInCache, setCache } from '@/nostr/cache'
 import type { NostrEvent } from 'nostr-tools'
 import { filter, from, fromEvent, map, mergeMap, of, shareReplay, take, takeUntil } from 'rxjs'
 
@@ -15,10 +14,12 @@ const workerMessage = from(workers).pipe(
 let counter = 0
 const getWorker = () => workers[counter++ % workers.length]
 
+const cache = new Set<string>()
+
 export function verifyWorker() {
   return mergeMap((event: NostrEvent) => {
-    if (!hasEventInCache(event)) {
-      setCache(event, true)
+    if (!cache.has(event.id)) {
+      cache.add(event.id)
       getWorker().postMessage(event)
       return workerMessage.pipe(
         filter((event) => event.data),
