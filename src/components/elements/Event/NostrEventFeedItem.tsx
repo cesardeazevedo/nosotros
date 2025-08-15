@@ -1,18 +1,21 @@
 import { ArticleRoot } from '@/components/modules/Articles/ArticleRoot'
+import { FollowSetCard } from '@/components/modules/Lists/FollowSets/FollowSetCard'
+import { Divider } from '@/components/ui/Divider/Divider'
 import { Kind } from '@/constants/kinds'
-import type { NostrEventMetadata } from '@/nostr/types'
-import { observer } from 'mobx-react-lite'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import { memo } from 'react'
 import { PostRoot } from '../Posts/Post'
 import { RepostRoot } from '../Repost/Repost'
+import { Threads } from '../Threads/Threads'
 import { UserRoot } from '../User/UserRoot'
 import { ZapReceiptRoot } from '../Zaps/ZapReceipt'
 import { NostrEventUnsupported } from './NostrEventUnsupported'
 
 type Props = {
-  event: NostrEventMetadata
+  event: NostrEventDB
 }
 
-export const NostrEventFeedItem = observer(function NostrEventFeedItem(props: Props) {
+export const NostrEventFeedItem = memo(function NostrEventFeedItem(props: Props) {
   const { event } = props
 
   switch (event.kind) {
@@ -20,10 +23,17 @@ export const NostrEventFeedItem = observer(function NostrEventFeedItem(props: Pr
       return <UserRoot event={event} />
     }
     case Kind.Text: {
-      return <PostRoot event={event} />
+      return event.metadata?.isRoot ? (
+        <PostRoot event={event} />
+      ) : (
+        <>
+          <Threads event={event} maxLevel={2} />
+          <Divider />
+        </>
+      )
     }
     case Kind.Article: {
-      return <ArticleRoot event={event} />
+      return <ArticleRoot border event={event} />
     }
     case Kind.Repost: {
       return <RepostRoot event={event} />
@@ -33,6 +43,9 @@ export const NostrEventFeedItem = observer(function NostrEventFeedItem(props: Pr
     }
     case Kind.ZapReceipt: {
       return <ZapReceiptRoot event={event} />
+    }
+    case Kind.FollowSets: {
+      return <FollowSetCard event={event} />
     }
     default: {
       console.log('Unhandled item to render', event)

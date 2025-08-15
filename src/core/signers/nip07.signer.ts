@@ -24,22 +24,22 @@ export class NIP07Signer implements Signer {
     }
   }
 
-  async getPublicKey() {
+  getPublicKey = async () => {
     invariant(this.nostr, errorMsg)
     return await this.nostr.getPublicKey()
   }
 
-  async sign(event: UnsignedEvent) {
+  sign = async (event: UnsignedEvent) => {
     invariant(this.nostr, errorMsg)
     return await this.nostr.signEvent(event)
   }
 
-  encrypt(pubkey: string, msg: string) {
+  encrypt = (pubkey: string, msg: string) => {
     invariant(this.nostr, errorMsg)
     return Promise.resolve(this.nostr.nip44.decrypt(pubkey, msg))
   }
 
-  decrypt(pubkey: string, msg: string) {
+  decrypt = (pubkey: string, msg: string) => {
     invariant(this.nostr, errorMsg)
     return Promise.resolve(this.nostr.nip44.decrypt(pubkey, msg))
   }

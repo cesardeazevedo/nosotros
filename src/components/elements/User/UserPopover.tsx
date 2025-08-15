@@ -5,7 +5,6 @@ import { Stack } from '@/components/ui/Stack/Stack'
 import { TooltipRich } from '@/components/ui/TooltipRich/TooltipRich'
 import { spacing } from '@/themes/spacing.stylex'
 import { useMobile } from 'hooks/useMobile'
-import { Observer } from 'mobx-react-lite'
 import React from 'react'
 import { css, html } from 'react-strict-dom'
 import { UserAvatar } from './UserAvatar'
@@ -35,31 +34,27 @@ export const UserPopover = function UserPopover(props: Props) {
       placement='bottom-start'
       cursor='dot'
       content={() => (
-        <Observer>
-          {() => (
-            <ContentProvider value={{ disablePopover: true }}>
-              <Paper elevation={4} shape='lg' surface='surfaceContainerLow' sx={styles.root}>
-                <Stack justify='space-between' sx={styles.header}>
-                  <UserAvatar size='lg' pubkey={pubkey} />
-                  <Stack gap={0.5}>
-                    <UserRelays pubkey={pubkey} />
-                    <FollowButton pubkey={pubkey} />
-                  </Stack>
-                </Stack>
-                <br />
-                <Stack horizontal={false} gap={2}>
-                  <Stack horizontal={false} sx={styles.content}>
-                    <UserName pubkey={pubkey} />
-                    <UserNIP05 pubkey={pubkey} />
-                  </Stack>
-                  <html.span style={styles.scroller}>
-                    <UserContentAbout pubkey={pubkey} />
-                  </html.span>
-                </Stack>
-              </Paper>
-            </ContentProvider>
-          )}
-        </Observer>
+        <ContentProvider value={{ disablePopover: true }}>
+          <Paper elevation={4} shape='lg' surface='surfaceContainerLow' sx={styles.root}>
+            <Stack justify='space-between' sx={styles.header}>
+              <UserAvatar size='lg' pubkey={pubkey} />
+              <Stack gap={0.5}>
+                <UserRelays pubkey={pubkey} />
+                <FollowButton pubkey={pubkey} />
+              </Stack>
+            </Stack>
+            <br />
+            <Stack horizontal={false} gap={2}>
+              <Stack horizontal={false} sx={styles.content}>
+                <UserName pubkey={pubkey} />
+                <UserNIP05 pubkey={pubkey} />
+              </Stack>
+              <html.span style={styles.scroller}>
+                <UserContentAbout pubkey={pubkey} />
+              </html.span>
+            </Stack>
+          </Paper>
+        </ContentProvider>
       )}>
       {props.children}
     </TooltipRich>

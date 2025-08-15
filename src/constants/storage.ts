@@ -1,0 +1,5 @@
+export const STORAGE_AUTH_KEY = 'auth'
+export const STORAGE_SETTINGS_KEY = 'settings'
+export const STORAGE_DECK_KEY = 'decks'
+export const STORAGE_LAST_SEEN_KEY = 'lastseen'
+export const STORAGE_RECENT_KEY = 'recents'

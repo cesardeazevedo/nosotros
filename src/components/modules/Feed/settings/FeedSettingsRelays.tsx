@@ -2,17 +2,17 @@ import { RelayInputChip } from '@/components/elements/Relays/RelayInputChip'
 import { RelaySelectPopover } from '@/components/elements/Relays/RelaySelectPopover'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
-import type { FeedStore } from '@/stores/feeds/feed.store'
+import type { FeedState } from '@/hooks/state/useFeed'
 import { spacing } from '@/themes/spacing.stylex'
-import { observer } from 'mobx-react-lite'
+import { memo } from 'react'
 import { css } from 'react-strict-dom'
 
 type Props = {
-  feed: FeedStore
+  feed: FeedState
   name?: string
 }
 
-export const FeedSettingsRelays = observer(function FeedSettingsRelays(props: Props) {
+export const FeedSettingsRelays = memo(function FeedSettingsRelays(props: Props) {
   const { feed, name } = props
   return (
     <Stack horizontal={false} gap={0.5}>
@@ -20,10 +20,10 @@ export const FeedSettingsRelays = observer(function FeedSettingsRelays(props: Pr
         {name || 'Relays'}
       </Text>
       <Stack gap={0.5} wrap>
-        {feed.context.relays?.map((relay) => (
-          <RelayInputChip key={relay} url={relay} onDelete={() => feed.context.removeRelay(relay)} />
+        {feed.options.ctx.relays?.map((relay) => (
+          <RelayInputChip key={relay} url={relay} onDelete={() => feed.removeRelay(relay)} />
         ))}
-        <RelaySelectPopover label={`Add ${name || 'relay'}`} onSubmit={(relay) => feed.context.addRelay(relay)} />
+        <RelaySelectPopover label={`Add ${name || 'relay'}`} onSubmit={(relay) => feed.addRelay(relay)} />
       </Stack>
     </Stack>
   )

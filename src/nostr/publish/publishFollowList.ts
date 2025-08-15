@@ -1,18 +1,15 @@
 import { Kind } from '@/constants/kinds'
-import type { PublisherOptions } from '@/core/NostrPublish'
+import { subscribeLastEvent } from '@/hooks/subscriptions/subscribeLast'
 import { EMPTY, mergeMap } from 'rxjs'
-import { cacheReplaceablePrune } from '../cache'
-import { isAuthorTag } from '../helpers/parseTags'
-import { subscribeLast } from '../subscriptions/subscribeLast'
-import { WRITE } from '../types'
+import { isAuthorTag } from '../../hooks/parsers/parseTags'
+import type { LocalPublisherOptions } from './publish'
 import { publish } from './publish'
 
 const kinds = [Kind.Follows]
 
-export function publishFollowList(pubkey: string, tag: 'p', related: string[], options: PublisherOptions) {
+export function publishFollowList(pubkey: string, tag: 'p', related: string[], options: LocalPublisherOptions) {
   const filter = { kinds, authors: [pubkey] }
-  cacheReplaceablePrune.delete([Kind.Follows, pubkey].join(':'))
-  return subscribeLast(filter, { pubkey, permission: WRITE }).pipe(
+  return subscribeLastEvent({}, filter).pipe(
     mergeMap((event) => {
       if (!event) return EMPTY // Couldn't find last follows list of the user
 

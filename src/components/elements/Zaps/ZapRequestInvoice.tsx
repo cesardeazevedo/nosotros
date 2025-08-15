@@ -3,10 +3,10 @@ import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { CircularProgress } from '@/components/ui/Progress/CircularProgress'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
+import { Kind } from '@/constants/kinds'
+import { subscribeRemote } from '@/hooks/subscriptions/subscribeCacheFirst'
 import { useGoBack } from '@/hooks/useNavigations'
-import { useRootContext } from '@/hooks/useRootStore'
-import { parseBolt11 } from '@/nostr/helpers/parseZap'
-import { waitForZapReceipt } from '@/nostr/subscriptions/waitForZapReceipt'
+import { parseBolt11 } from '@/hooks/parsers/parseZap'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
@@ -20,7 +20,7 @@ import { useObservableState } from 'observable-hooks'
 import { QRCodeCanvas } from 'qrcode.react'
 import { useMemo, useRef } from 'react'
 import { css, html } from 'react-strict-dom'
-import { first, map } from 'rxjs'
+import { filter, identity, map, mergeMap, take } from 'rxjs'
 import { CopyButton } from '../Buttons/CopyButton'
 import type { CopyButtonRef } from '../Buttons/CopyIconButton'
 
@@ -39,7 +39,6 @@ const variants = {
 export const ZapRequestInvoice = (props: Props) => {
   const { event, invoice } = props
 
-  const context = useRootContext()
   const copyButtonRef = useRef<CopyButtonRef | null>(null)
   const goBack = useGoBack()
   const navigate = useNavigate()
@@ -62,8 +61,13 @@ export const ZapRequestInvoice = (props: Props) => {
   // }, [])
 
   const [paid] = useObservableState<boolean>(() => {
-    return waitForZapReceipt(event.id, invoice, { ...context, relays: event.relays }).pipe(
-      first(),
+    return subscribeRemote({ relays: event.relays }, { kinds: [Kind.ZapReceipt] }).pipe(
+      mergeMap(identity),
+      filter((event) => {
+        // Make sure the zap receipt is the one we are looking for
+        return event.tags.find((tag) => tag[0] === 'bolt11')?.[1] === invoice
+      }),
+      take(1),
       map(() => true),
     )
   })
@@ -95,7 +99,7 @@ export const ZapRequestInvoice = (props: Props) => {
                   </Stack>
                   <Stack>
                     <Text variant='label' size='lg' sx={styles.amount}>
-                      Amount: {formatter.format(parseInt(amount) / 1000)} SATS
+                      Amount: {amount ? formatter.format(parseInt(amount) / 1000) : '-'} SATS
                     </Text>
                   </Stack>
                   <Button

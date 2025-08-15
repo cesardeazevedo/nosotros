@@ -1,17 +1,15 @@
 import { useContentContext } from '@/components/providers/ContentProvider'
 import { Button } from '@/components/ui/Button/Button'
 import { Stack } from '@/components/ui/Stack/Stack'
-import { useCurrentPubkey } from '@/hooks/useRootStore'
-import type { EditorStore } from '@/stores/editor/editor.store'
-import { observer } from 'mobx-react-lite'
-import { useCallback } from 'react'
+import { useCurrentPubkey } from '@/hooks/useAuth'
+import { memo, useCallback } from 'react'
 import { css } from 'react-strict-dom'
 import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDOMProps'
 import { LinkSignIn } from '../Links/LinkSignIn'
+import { useEditorSelector } from './hooks/useEditor'
 import { cancel$ } from './utils/countDown'
 
 type Props = {
-  store: EditorStore
   renderDiscard?: boolean
   onSubmit: () => void
   onDiscard?: () => void
@@ -19,17 +17,19 @@ type Props = {
   state: number | string | boolean
 }
 
-export const EditorSubmit = observer(function EditorSubmit(props: Props) {
-  const { store, state, disabled, renderDiscard, onSubmit, onDiscard } = props
+export const EditorSubmit = memo(function EditorSubmit(props: Props) {
+  const { state, disabled, renderDiscard, onSubmit, onDiscard } = props
   const { dense } = useContentContext()
   const pubkey = useCurrentPubkey()
 
+  const reset = useEditorSelector((editor) => editor.reset)
+  const isReply = useEditorSelector((editor) => !!editor.parent)
   const isCountDown = typeof state === 'number'
 
   const handleDiscard = useCallback((event: StrictClickEvent) => {
     event.stopPropagation()
     event.preventDefault()
-    store.reset()
+    reset()
     onDiscard?.()
   }, [])
 
@@ -53,7 +53,15 @@ export const EditorSubmit = observer(function EditorSubmit(props: Props) {
           sx={[dense && styles.button$dense]}
           variant='filled'
           onClick={() => (isCountDown ? cancel$.next() : onSubmit())}>
-          {isCountDown ? (state === 0 ? 'Posting' : `Posting in ${state} (cancel)`) : 'Post'}
+          {isCountDown
+            ? state === 0
+              ? isReply
+                ? 'Replying'
+                : 'Posting'
+              : `${isReply ? 'Replying' : 'Posting'} in ${state} (cancel)`
+            : isReply
+              ? 'Reply'
+              : 'Post'}
         </Button>
       )}
     </Stack>

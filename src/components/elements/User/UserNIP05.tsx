@@ -1,21 +1,21 @@
 import { Text } from '@/components/ui/Text/Text'
-import { userStore } from '@/stores/users/users.store'
-import { observer } from 'mobx-react-lite'
+import { useUserState } from '@/hooks/state/useUser'
+import { memo } from 'react'
 import { css } from 'react-strict-dom'
 
 type Props = {
-  pubkey?: string
+  pubkey: string
 }
 
-export const UserNIP05 = observer(function UserNIP05(props: Props) {
+export const UserNIP05 = memo(function UserNIP05(props: Props) {
   const { pubkey } = props
-  const user = userStore.get(pubkey)
-  if (!user?.nip05) {
+  const user = useUserState(pubkey)
+  if (!user.metadata?.nip05) {
     return
   }
   return (
     <Text variant='label' size='sm' sx={styles.root}>
-      {user.nip05}
+      {user.metadata?.nip05}
     </Text>
   )
 })

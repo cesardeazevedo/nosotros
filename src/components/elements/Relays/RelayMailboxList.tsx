@@ -3,15 +3,13 @@ import { Divider } from '@/components/ui/Divider/Divider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { formatRelayUrl } from '@/core/helpers/formatRelayUrl'
-import type { READ } from '@/nostr/types'
-import { WRITE } from '@/nostr/types'
-import type { User } from '@/stores/users/user'
+import { useUserRelays } from '@/hooks/query/useQueryUser'
+import { READ, WRITE } from '@/nostr/types'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { typeScale } from '@/themes/typeScale.stylex'
-import { observer } from 'mobx-react-lite'
-import { useCallback, useState } from 'react'
+import { memo, useCallback, useState } from 'react'
 import { css, html } from 'react-strict-dom'
 import type { StrictReactDOMInputProps } from 'react-strict-dom/dist/types/StrictReactDOMInputProps'
 import { PaperContainer } from '../Layouts/PaperContainer'
@@ -21,22 +19,26 @@ import { usePublishRelayList } from './relay.hooks'
 
 type Props = {
   isEditing?: boolean
-  user: User | undefined
+  pubkey: string
   permission: typeof READ | typeof WRITE
 }
 
-export const RelayMailboxList = observer(function RelayMailboxList(props: Props) {
-  const { user, permission, isEditing } = props
+export const RelayMailboxList = memo(function RelayMailboxList(props: Props) {
+  const { pubkey, permission, isEditing } = props
   const label = permission === WRITE ? 'Outbox' : 'Inbox'
   const description =
     permission === WRITE
       ? 'These are the relays you are writing notes to'
       : 'These are the relays where others will reply or tag you'
-  const relays = (permission === WRITE ? user?.outboxRelays : user?.inboxRelays) || []
+
+  const inboxRelays = useUserRelays(pubkey, READ).data || []
+  const outboxRelays = useUserRelays(pubkey, WRITE).data || []
+  const relays = (permission === WRITE ? outboxRelays : inboxRelays) || []
 
   const [input, setInput] = useState('')
-  const [pending, onSubmit] = usePublishRelayList()
   const [error, setError] = useState<string | false>(false)
+
+  const { mutate, isPending } = usePublishRelayList()
 
   // replace this with react 19 stuff
   const handleSubmit = useCallback(() => {
@@ -46,7 +48,7 @@ export const RelayMailboxList = observer(function RelayMailboxList(props: Props)
         return
       }
       const url = new URL(input)
-      onSubmit([{ relay: formatRelayUrl(url.href), permission, pubkey: user?.pubkey || '' }, false])
+      mutate([{ relay: formatRelayUrl(url.href), permission, pubkey }, false])
       setInput('')
       setError(false)
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -90,7 +92,7 @@ export const RelayMailboxList = observer(function RelayMailboxList(props: Props)
                   onChange={(e: StrictReactDOMInputProps['onChange']) => setInput(e.target.value)}
                 />
               </Stack>
-              <Button disabled={pending} onClick={handleSubmit} variant='filled' sx={styles.button}>
+              <Button disabled={isPending} onClick={handleSubmit} variant='filled' sx={styles.button}>
                 Add
               </Button>
             </Stack>

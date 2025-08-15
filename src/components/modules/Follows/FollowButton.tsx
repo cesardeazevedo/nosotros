@@ -2,9 +2,8 @@ import { Button } from '@/components/ui/Button/Button'
 import { CircularProgress } from '@/components/ui/Progress/CircularProgress'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { SxProps } from '@/components/ui/types'
-import { useCurrentAccount, useCurrentUser } from '@/hooks/useRootStore'
-import { observer } from 'mobx-react-lite'
-import { useState } from 'react'
+import { useCurrentUser } from '@/hooks/useAuth'
+import { memo, useState } from 'react'
 import { css, html } from 'react-strict-dom'
 import { useFollowSubmit } from './hooks/useFollowSubmit'
 
@@ -13,12 +12,11 @@ type Props = {
   sx?: SxProps
 }
 
-export const FollowButton = observer(function FollowButton(props: Props) {
+export const FollowButton = memo(function FollowButton(props: Props) {
   const { pubkey, sx } = props
   const [hover, setHover] = useState(false)
-  const acc = useCurrentAccount()
   const currentUser = useCurrentUser()
-  const [pending, onSubmit] = useFollowSubmit([pubkey])
+  const { isPending, mutate } = useFollowSubmit([pubkey])
 
   const isFollowing = currentUser?.followsPubkey(pubkey)
 
@@ -33,20 +31,20 @@ export const FollowButton = observer(function FollowButton(props: Props) {
         <html.div onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
           <Button
             sx={[styles.root, sx]}
-            disabled={pending}
+            disabled={isPending}
             variant={hover ? 'danger' : 'outlined'}
-            onClick={() => acc && onSubmit(acc)}>
+            onClick={() => mutate()}>
             <Stack gap={1}>
-              {pending && <CircularProgress size='xs' />}
+              {isPending && <CircularProgress size='xs' />}
               {hover ? 'Unfollow' : 'Following'}
             </Stack>
           </Button>
         </html.div>
       ) : (
-        <Button sx={[styles.root, sx]} disabled={pending} variant='filled' onClick={() => acc && onSubmit(acc)}>
+        <Button sx={[styles.root, sx]} disabled={isPending} variant='filled' onClick={() => mutate()}>
           <Stack gap={1}>
-            {pending && <CircularProgress size='xs' />}
-            {pending ? 'Following' : 'Follow'}
+            {isPending && <CircularProgress size='xs' />}
+            {isPending ? 'Following' : 'Follow'}
           </Stack>
         </Button>
       )}

@@ -1,44 +1,45 @@
+import { addMediaErrorAtom, mediaErrorsAtom } from '@/atoms/media.atoms'
+import { FollowButton } from '@/components/modules/Follows/FollowButton'
 import { ContentProvider } from '@/components/providers/ContentProvider'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
-import { useGlobalSettings } from '@/hooks/useRootStore'
-import { mediaStore } from '@/stores/media/media.store'
-import { userStore } from '@/stores/users/users.store'
+import { useUserState } from '@/hooks/state/useUser'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import { observer } from 'mobx-react-lite'
+import { getImgProxyUrl } from '@/utils/imgproxy'
+import { useAtomValue, useSetAtom } from 'jotai'
+import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 import { UserAvatar } from './UserAvatar'
 import { UserContentAbout } from './UserContentAbout'
 import { UserRelays } from './UserRelays'
-import { FollowButton } from '@/components/modules/Follows/FollowButton'
 
 type Props = {
   pubkey: string
 }
 
-export const UserProfileBanner = observer(function UserProfileBanner(props: { src: string }) {
+export const UserProfileBanner = function UserProfileBanner(props: { src: string }) {
   const { src } = props
-  const globalSettings = useGlobalSettings()
+  const addError = useSetAtom(addMediaErrorAtom)
   return (
     <img
-      key={globalSettings.getImgProxyUrl('user_avatar', src)}
+      src={getImgProxyUrl('feed_img', src)}
       style={{ objectFit: 'cover', width: '100%', height: '100%' }}
-      src={src}
-      onError={() => mediaStore.addError(src)}
+      onError={() => addError(src)}
     />
   )
-})
+}
 
-export const UserProfileHeader = observer(function UserProfileHeader(props: Props) {
+export const UserProfileHeader = memo(function UserProfileHeader(props: Props) {
   const { pubkey } = props
-  const user = userStore.get(pubkey)
+  const user = useUserState(pubkey)
   const { banner, nip05 } = user?.metadata || {}
+  const hasError = useAtomValue(mediaErrorsAtom).has(banner || '')
   return (
     <>
       <html.div style={styles.header}>
-        {banner && banner.startsWith('http') && !mediaStore.hasError(banner) ? (
+        {banner && banner.startsWith('http') && !hasError ? (
           <UserProfileBanner src={banner} />
         ) : (
           <html.div style={styles.bannerFallback} />

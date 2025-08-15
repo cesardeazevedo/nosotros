@@ -1,13 +1,13 @@
 import { Paper } from '@/components/ui/Paper/Paper'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconAlertCircleFilled } from '@tabler/icons-react'
-import type { NostrEvent } from 'nostr-tools'
 import { css } from 'react-strict-dom'
 
 type Props = {
-  event?: NostrEvent
+  event?: NostrEventDB
 }
 
 export const NostrEventUnsupported = (props: Props) => {

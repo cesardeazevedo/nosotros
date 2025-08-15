@@ -1,9 +1,8 @@
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { SxProps } from '@/components/ui/types'
-import { useCurrentPubkey } from '@/hooks/useRootStore'
+import { useCurrentPubkey } from '@/hooks/useAuth'
 import { palette } from '@/themes/palette.stylex'
-import { observer } from 'mobx-react-lite'
-import type { RefObject } from 'react'
+import { memo, type RefObject } from 'react'
 import { css, html } from 'react-strict-dom'
 import { Stats } from '../Footer/Stats'
 import { SidebarHeader } from './SidebarHeader'
@@ -15,7 +14,7 @@ type Props = {
   sx?: SxProps
 }
 
-export const Sidebar = observer(function Sidebar(props: Props) {
+export const Sidebar = memo(function Sidebar(props: Props) {
   const isLogged = !!useCurrentPubkey()
   return (
     <html.aside ref={props.ref} style={[styles.sidebar, props.sx]}>

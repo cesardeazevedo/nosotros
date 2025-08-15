@@ -1,19 +1,19 @@
+import { openImageDialogAtom } from '@/atoms/dialog.atoms'
+import { addMediaErrorAtom, mediaErrorsAtom } from '@/atoms/media.atoms'
 import { useContentContext } from '@/components/providers/ContentProvider'
 import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { SxProps } from '@/components/ui/types'
 import { useMediaStore } from '@/hooks/useMediaStore'
-import { useGlobalSettings } from '@/hooks/useRootStore'
-import { mediaStore } from '@/stores/media/media.store'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
+import { getImgProxyUrl } from '@/utils/imgproxy'
 import { IconPhotoOff } from '@tabler/icons-react'
-import { observer } from 'mobx-react-lite'
-import { useCallback } from 'react'
+import { useAtomValue, useSetAtom } from 'jotai'
+import { memo, useCallback } from 'react'
 import { css, html } from 'react-strict-dom'
 import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDOMProps'
-import { dialogStore } from 'stores/ui/dialogs.store'
 import { BlurContainer } from '../../Layouts/BlurContainer'
 import { ContentLink } from '../Link/Link'
 
@@ -25,23 +25,24 @@ type Props = {
   sx?: SxProps
 }
 
-export const Image = observer(function Image(props: Props) {
+export const Image = memo(function Image(props: Props) {
   const { src, proxy = true, sx, onClick, ...rest } = props
   const { disableLink } = useContentContext()
   const { note } = useNoteContext()
-  const globalSettings = useGlobalSettings()
-  const hasError = mediaStore.hasError(src)
-  const media = useMediaStore(src, note.metadata.imeta)
+  const pushImage = useSetAtom(openImageDialogAtom)
+  const hasError = useAtomValue(mediaErrorsAtom).has(src)
+  const addError = useSetAtom(addMediaErrorAtom)
+  const media = useMediaStore(src, note.metadata?.imeta)
 
   const handleClick = useCallback(
     (e: StrictClickEvent) => {
       e.preventDefault()
       e.stopPropagation()
       if (!hasError && note) {
-        return onClick ? onClick() : dialogStore.pushImage(note, src)
+        return onClick ? onClick() : pushImage({ eventId: note.id, src })
       }
     },
-    [src, note, disableLink, hasError],
+    [src, note, disableLink, hasError, pushImage],
   )
 
   return (
@@ -58,10 +59,11 @@ export const Image = observer(function Image(props: Props) {
           )}
           {!hasError && (
             <html.img
+              crossOrigin='use-credentials'
               style={[styles.img, blurStyles, sx]}
-              src={proxy ? globalSettings.getImgProxyUrl('feed_img', src) : src}
+              src={proxy ? getImgProxyUrl('feed_img', src) : src}
               onClick={handleClick}
-              onError={() => mediaStore.addError(src)}
+              onError={() => addError(src)}
               {...rest}
               {...media}
             />
@@ -75,10 +77,10 @@ export const Image = observer(function Image(props: Props) {
 const styles = css.create({
   img: {
     objectFit: 'cover',
-    width: '100%',
-    height: '100%',
-    maxWidth: '100%',
-    maxHeight: '100%',
+    width: 'inherit',
+    height: 'inherit',
+    maxWidth: 'inherit',
+    maxHeight: 'inherit',
     userSelect: 'none',
     cursor: 'pointer',
     backgroundColor: palette.surfaceContainerLow,

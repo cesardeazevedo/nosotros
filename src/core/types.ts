@@ -28,8 +28,16 @@ export type MessageReceivedEvent = [RelayToClient.EVENT, string, NostrEvent]
 export type MessageReceivedEose = [RelayToClient.EOSE, string]
 export type MessageReceivedOK = [RelayToClient.OK, string, boolean, string]
 export type MessageReceivedAuth = [RelayToClient.AUTH, string]
+export type MessageReceivedNotice = [RelayToClient.NOTICE, string]
+export type MessageReceivedNegError = [RelayToClient.NEG_ERR, string]
 
-export type MessageReceived = MessageReceivedEvent | MessageReceivedEose | MessageReceivedOK | MessageReceivedAuth
+export type MessageReceived =
+  | MessageReceivedEvent
+  | MessageReceivedEose
+  | MessageReceivedOK
+  | MessageReceivedAuth
+  | MessageReceivedNotice
+  | MessageReceivedNegError
 
 export type RelayHints = {
   authors?: Record<string, string[]>

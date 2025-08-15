@@ -4,31 +4,26 @@ import { Search } from '@/components/modules/Search/Search'
 import { SearchFooterDetails } from '@/components/modules/Search/SearchFooterDetails'
 import { Kind } from '@/constants/kinds'
 import { useMobile } from '@/hooks/useMobile'
-import { dialogStore } from '@/stores/ui/dialogs.store'
-import { userStore } from '@/stores/users/users.store'
 import { useNavigate } from '@tanstack/react-router'
-import { observer } from 'mobx-react-lite'
 import { nip19 } from 'nostr-tools'
+import { memo } from 'react'
 import { css } from 'react-strict-dom'
+import { useDialogControl } from '../../../hooks/useDialogs'
 
-export const SearchDialog = observer(function SearchDialog() {
-  const open = !!dialogStore.search
+export const SearchDialog = memo(function SearchDialog() {
+  const [open, onClose] = useDialogControl('search')
   const isMobile = useMobile()
   const navigate = useNavigate()
   useSearchShortcuts()
 
-  const handleClose = () => {
-    dialogStore.toggleSearch(false)
-  }
-
   return (
-    <DialogSheet open={open} onClose={handleClose} maxWidth='sm' sx={styles.dialog}>
+    <DialogSheet open={open} onClose={onClose} maxWidth='sm' sx={styles.dialog}>
       <Search
         suggestQuery
         suggestRelays
         sx={styles.maxHeight}
         placeholder='Search on nostr'
-        onCancel={handleClose}
+        onCancel={onClose}
         onSelect={(item) => {
           switch (item.type) {
             case 'query': {
@@ -49,15 +44,16 @@ export const SearchDialog = observer(function SearchDialog() {
             }
             case 'user_relay':
             case 'user': {
-              const user = userStore.get(item.pubkey)
+              const nostr = nip19.nprofileEncode({ pubkey: item.pubkey })
               navigate({
                 to: '/$nostr',
-                params: { nostr: user?.nprofile ? user.nprofile : nip19.nprofileEncode({ pubkey: item.pubkey }) },
+                params: { nostr },
+                // params: { nostr: user?.nprofile ? user.nprofile : nip19.nprofileEncode({ pubkey: item.pubkey }) },
               })
               break
             }
           }
-          handleClose()
+          onClose()
         }}
       />
       {!isMobile && <SearchFooterDetails />}

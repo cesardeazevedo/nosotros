@@ -1,23 +1,19 @@
-import { useAppVisibility } from '@/hooks/useAppVisibility'
+import { useCurrentPubkey } from '@/hooks/useAuth'
 import { useMobile } from '@/hooks/useMobile'
-import { useNostrSync } from '@/hooks/useNostrSync'
-import { useOnline } from '@/hooks/useOnline'
 import { useRelayAuthenticator } from '@/hooks/useRelayAuthenticator'
-import { useCurrentPubkey } from '@/hooks/useRootStore'
-import { Outlet } from '@tanstack/react-router'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { Outlet, useRouteContext, useRouter } from '@tanstack/react-router'
 import { Dialogs } from 'components/modules/DialogsModule'
+import { memo } from 'react'
 import { Header } from '../Header/Header'
 import { BottomNavigation } from '../Navigation/BottomNavigation'
 import { SidebarLayout } from '../Sidebar/SidebarLayout'
 import { Toaster } from './Toaster'
 
-export const RootLayout = () => {
+export const RootLayout = memo(function RootLayout() {
   const isMobile = useMobile()
-  const pubkey = useCurrentPubkey()
-  useNostrSync(pubkey)
+  const context = useRouteContext({ from: '__root__' })
   useRelayAuthenticator()
-  useOnline()
-  useAppVisibility()
 
   return (
     <>
@@ -34,6 +30,12 @@ export const RootLayout = () => {
       )}
       <BottomNavigation />
       <Toaster />
+      {import.meta.env.DEV && (
+        <div style={{ fontSize: '125%' }}>
+          <ReactQueryDevtools client={context.queryClient} />
+        </div>
+      )}
+      {/* <TanStackRouterDevtools router={router} /> */}
     </>
   )
-}
+})

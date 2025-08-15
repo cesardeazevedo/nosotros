@@ -4,8 +4,8 @@ import { Text } from '@/components/ui/Text/Text'
 import { useGoBack, useNostrRoute } from '@/hooks/useNavigations'
 import { IconChevronLeft } from '@tabler/icons-react'
 import { useMatch } from '@tanstack/react-router'
-import { observer } from 'mobx-react-lite'
 import type { DecodeResult } from 'nostr-tools/nip19'
+import { memo } from 'react'
 import { css } from 'react-strict-dom'
 import { UserAvatar } from '../User/UserAvatar'
 import { UserName } from '../User/UserName'
@@ -24,7 +24,7 @@ const getPubkey = (decoded?: DecodeResult) => {
   }
 }
 
-export const NavigationHeader = observer(function NavigationHeader() {
+export const NavigationHeader = memo(function NavigationHeader() {
   useMatch({ from: '__root__' })
   const nostrRoute = useNostrRoute()
   const goBack = useGoBack()

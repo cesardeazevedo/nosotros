@@ -1,22 +1,17 @@
-import { useNoteVisibility } from '@/components/elements/Posts/hooks/useNoteVisibility'
 import { ArticleHeadline } from '@/components/modules/Articles/ArticleHeadline'
-import { useContentContext } from '@/components/providers/ContentProvider'
 import { NoteProvider } from '@/components/providers/NoteProvider'
+import { Divider } from '@/components/ui/Divider/Divider'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { Kind } from '@/constants/kinds'
-import { useMobile } from '@/hooks/useMobile'
-import { useNoteStore } from '@/hooks/useNoteStore'
-import { useRootContext } from '@/hooks/useRootStore'
-import { subscribeNoteStats } from '@/nostr/subscriptions/subscribeNoteStats'
-import type { NostrEventMetadata } from '@/nostr/types'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import { useNoteState } from '@/hooks/state/useNote'
 import { duration } from '@/themes/duration.stylex'
 import { easing } from '@/themes/easing.stylex'
+import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import { useRouter } from '@tanstack/react-router'
-import { observer } from 'mobx-react-lite'
-import { useCallback } from 'react'
+import { memo, useCallback } from 'react'
 import { css, html } from 'react-strict-dom'
-import { Editor } from '../Editor/Editor'
+import { EditorProvider } from '../Editor/EditorProvider'
 import { Replies } from '../Replies/Replies'
 import { RepliesPreview } from '../Replies/RepliesPreview'
 import { PostActions } from './PostActions/PostActions'
@@ -26,55 +21,44 @@ import { PostHeader } from './PostHeader'
 import { PostLink } from './PostLink'
 
 type Props = {
-  open?: boolean
-  event: NostrEventMetadata
+  event: NostrEventDB
   header?: React.ReactNode
+  open?: boolean
 }
 
-export const PostRoot = observer(function PostRoot(props: Props) {
-  const { event, header, open = false } = props
-  const isMobile = useMobile()
-  const router = useRouter()
-  const [ref] = useNoteVisibility(event)
-  const context = useRootContext()
-  const contentContext = useContentContext()
-  const note = useNoteStore(event, open)
+export const PostRoot = memo(function PostRoot(props: Props) {
+  const { event, header, open } = props
+  const note = useNoteState(event, { repliesOpen: open, forceSync: open })
 
   const handleRepliesClick = useCallback(() => {
-    note.toggleReplies()
-    note.setRepliesStatus('LOADING')
-    subscribeNoteStats(note.event.event, context, {}).subscribe({
-      complete: () => {
-        note.setRepliesStatus('LOADED')
-      },
-    })
-  }, [router.latestLocation.pathname, isMobile, note])
+    note.actions.toggleReplies()
+  }, [])
 
   const handleLoadMore = useCallback(() => {
-    if (note?.repliesOpen) {
-      note.paginate()
+    if (note?.state.repliesOpen) {
+      // note.paginate()
     } else {
       handleRepliesClick()
     }
   }, [note])
 
   return (
-    <NoteProvider value={{ ...contentContext, note }}>
-      <html.article style={styles.root} ref={ref}>
+    <NoteProvider value={{ event, note }}>
+      <html.article style={styles.root} ref={note.ref}>
         <PostLink note={note} onClick={handleRepliesClick}>
-          {note.event.event.kind === Kind.Article && <ArticleHeadline />}
-          {header || <PostHeader />}
+          {note.event.kind === Kind.Article && <ArticleHeadline />}
+          {header || <PostHeader event={event} />}
           <PostContent />
           <PostActions onReplyClick={handleRepliesClick} />
-          {note.repliesOpen === null && <RepliesPreview onLoadMoreClick={handleRepliesClick} />}
+          {note.state.repliesOpen === null && <RepliesPreview onLoadMoreClick={handleRepliesClick} />}
         </PostLink>
-        <Expandable expanded={note.broadcastOpen}>
+        <Expandable expanded={note.state.broadcastOpen}>
           <PostBroadcaster />
         </Expandable>
-        {note.repliesOpen && (
+        {note.state.repliesOpen && (
           <>
-            {/* <Divider /> */}
-            <Editor sx={styles.editor} renderBubble initialOpen store={note.editor} />
+            <Divider />
+            <EditorProvider sx={styles.editor} parent={event} renderBubble initialOpen />
             <Replies onLoadMoreClick={handleLoadMore} />
           </>
         )}
@@ -93,6 +77,8 @@ const styles = css.create({
     animation: fadeIn,
     animationTimingFunction: easing.emphasizedDecelerate,
     animationDuration: duration.long3,
+    borderBottom: '1px solid',
+    borderBottomColor: palette.outlineVariant,
   },
   editor: {
     padding: spacing.padding2,

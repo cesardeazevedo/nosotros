@@ -1,27 +1,23 @@
 import { Button } from '@/components/ui/Button/Button'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
-import type { EditorStore } from '@/stores/editor/editor.store'
 import { spacing } from '@/themes/spacing.stylex'
-import { observer } from 'mobx-react-lite'
+import { memo } from 'react'
 import { css } from 'react-strict-dom'
 import { RelayInputChip } from '../Relays/RelayInputChip'
 import { RelaySelectPopover } from '../Relays/RelaySelectPopover'
 import { UserChip } from '../User/UserChip'
+import { useEditorSelector } from './hooks/useEditor'
 
-type Props = {
-  store: EditorStore
-}
-
-export const EditorBroadcaster = observer(function EditorBroadcaster(props: Props) {
-  const { store } = props
+export const EditorBroadcaster = memo(function EditorBroadcaster() {
+  const state = useEditorSelector((editor) => editor)
   return (
     <Stack horizontal={false} justify='flex-start' sx={styles.root}>
       <Stack horizontal sx={styles.header} justify='space-between'>
         <Text variant='title' size='lg'>
           Broadcaster
         </Text>
-        <Button variant='filledTonal' disabled={!store.broadcastDirt.value} onClick={() => store.resetBroadcaster()}>
+        <Button variant='filledTonal' disabled={!state.broadcastDirt} onClick={() => state.resetBroadcaster()}>
           Reset
         </Button>
       </Stack>
@@ -38,8 +34,8 @@ export const EditorBroadcaster = observer(function EditorBroadcaster(props: Prop
           <Stack horizontal wrap gap={0.5}>
             <Stack align='flex-start' wrap={false} gap={1} horizontal={false}>
               <Stack wrap gap={0.5}>
-                {store.mentions.map((pubkey) => (
-                  <UserChip key={pubkey} pubkey={pubkey} onDelete={() => store.excludeMention(pubkey)} />
+                {state.mentions.map((pubkey) => (
+                  <UserChip key={pubkey} pubkey={pubkey} onDelete={() => state.excludeMention(pubkey)} />
                 ))}
               </Stack>
             </Stack>
@@ -55,10 +51,10 @@ export const EditorBroadcaster = observer(function EditorBroadcaster(props: Prop
             </Text>
           </Stack>
           <Stack horizontal wrap gap={0.5}>
-            {store.myOutboxRelays.map(({ relay }) => (
-              <RelayInputChip key={relay} url={relay} onDelete={() => store.excludeRelay(relay)} />
+            {state.myOutboxRelays.map((relay) => (
+              <RelayInputChip key={relay} url={relay} onDelete={() => state.excludeRelay(relay)} />
             ))}
-            <RelaySelectPopover label='Add relay' onSubmit={(relay) => store.includeRelay(relay)} />
+            <RelaySelectPopover label='Add relay' onSubmit={(relay) => state.includeRelay(relay)} />
           </Stack>
         </Stack>
       </Stack>

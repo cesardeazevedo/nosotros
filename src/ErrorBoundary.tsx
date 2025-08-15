@@ -1,4 +1,4 @@
-import { db } from '@/nostr/db'
+import { dbSqlite } from '@/nostr/db'
 import { IconTrashXFilled } from '@tabler/icons-react'
 import { CenteredContainer } from 'components/elements/Layouts/CenteredContainer'
 import { PaperContainer } from 'components/elements/Layouts/PaperContainer'
@@ -7,19 +7,16 @@ import { css } from 'react-strict-dom'
 import { Button } from './components/ui/Button/Button'
 import { Stack } from './components/ui/Stack/Stack'
 import { Text } from './components/ui/Text/Text'
-import { useRootStore } from './hooks/useRootStore'
 import { palette } from './themes/palette.stylex'
 import { spacing } from './themes/spacing.stylex'
 
 export const ErrorBoundary = () => {
   const [cleaning, setCleaning] = useState(false)
-  const rootStore = useRootStore()
 
   const handleClick = useCallback(async () => {
     setCleaning(true)
-    await db.clearDB()
+    await dbSqlite.clearDB()
     setCleaning(false)
-    rootStore.reset()
   }, [])
 
   return (
@@ -30,7 +27,7 @@ export const ErrorBoundary = () => {
             Error
           </Text>
           <Text variant='body' size='lg'>
-            {`An error occurred during the content render. To fix this, try clearing the browser's cache and local IndexedDB
+            {`An error occurred during the content render. To fix this, try clearing the browser's cache and local Database
         by clicking the button below.`}
             <br /> {`It's safe and might help resolve the issue below.`}
           </Text>

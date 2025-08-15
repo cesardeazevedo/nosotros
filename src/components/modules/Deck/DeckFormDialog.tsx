@@ -1,13 +1,13 @@
-import { dialogStore } from '@/stores/ui/dialogs.store'
-import { observer } from 'mobx-react-lite'
+import { memo } from 'react'
 import { DialogSheet } from '../../elements/Layouts/Dialog'
+import { useDialogControl } from '../../../hooks/useDialogs'
 import { DeckForm } from './DeckForm'
 
-export const DeckFormDialog = observer(() => {
-  const handleClose = () => dialogStore.toggleDeck(false)
+export const DeckFormDialog = memo(function DeckFormDialog() {
+  const [open, onClose] = useDialogControl('createDeck')
   return (
-    <DialogSheet maxWidth='xs' open={dialogStore.createDeck} onClose={handleClose}>
-      <DeckForm onCancel={handleClose} />
+    <DialogSheet maxWidth='xs' open={open} onClose={onClose}>
+      <DeckForm onCancel={onClose} />
     </DialogSheet>
   )
 })

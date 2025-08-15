@@ -1,32 +1,32 @@
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Stack } from '@/components/ui/Stack/Stack'
-import { signinStore } from '@/stores/signin/signin.store'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconChevronLeft } from '@tabler/icons-react'
-import { observer } from 'mobx-react-lite'
 import React from 'react'
 import { css } from 'react-strict-dom'
+import { useAtomValue, useSetAtom } from 'jotai'
+import { pageAtom, backToSelectAtom } from '@/atoms/signin.atoms'
 
-type Props = {
-  children: React.ReactNode
-}
+type Props = { children: React.ReactNode }
 
-export const SignInHeader = observer((props: Props) => {
-  const { children } = props
+export const SignInHeader = (props: Props) => {
+  const page = useAtomValue(pageAtom)
+  const back = useSetAtom(backToSelectAtom)
+
   return (
     <Stack align='center' gap={1} justify='center' sx={styles.root}>
-      {!signinStore.matches('SELECT') && (
+      {page !== 'SELECT' && (
         <IconButton
           size='sm'
-          onClick={() => signinStore.back()}
+          onClick={() => back()}
           icon={<IconChevronLeft size={28} strokeWidth='2.5' />}
           sx={styles.back}
         />
       )}
-      {children}
+      {props.children}
     </Stack>
   )
-})
+}
 
 const styles = css.create({
   root: {

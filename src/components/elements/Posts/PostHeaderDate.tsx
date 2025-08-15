@@ -4,24 +4,20 @@ import type { SxProps } from '@/components/ui/types'
 import { useRelativeDate } from '@/hooks/useRelativeDate'
 import { palette } from '@/themes/palette.stylex'
 import type { StringUnitLength } from 'luxon'
-import type { NEvent } from 'nostr-tools/nip19'
-import { useContext } from 'react'
+import { memo } from 'react'
 import { css } from 'react-strict-dom'
-import { DeckContext } from '../../modules/Deck/DeckContext'
 import { LinkNEvent } from '../Links/LinkNEvent'
 
 type Props = {
-  date: number
-  nevent?: NEvent
   sx?: SxProps
+  date: number
+  nevent?: string
   dateStyle?: StringUnitLength
 }
 
-export const PostHeaderDate = function PostHeaderDate(props: Props) {
-  const { date, nevent, sx, dateStyle } = props
+export const PostHeaderDate = memo(function PostHeaderDate(props: Props) {
+  const { nevent, date, sx, dateStyle } = props
   const [shortDate, fullDate] = useRelativeDate(date, dateStyle)
-  const column = useContext(DeckContext)
-  const replaceOnDeck = column.module?.type === 'event'
   const content = (
     <Tooltip text={fullDate}>
       <Text size='sm' sx={[styles.root, sx]}>
@@ -35,11 +31,11 @@ export const PostHeaderDate = function PostHeaderDate(props: Props) {
   }
 
   return (
-    <LinkNEvent underline nevent={nevent} replaceOnDeck={replaceOnDeck}>
+    <LinkNEvent underline nevent={nevent}>
       {content}
     </LinkNEvent>
   )
-}
+})
 
 const styles = css.create({
   root: {

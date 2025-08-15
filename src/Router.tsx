@@ -1,79 +1,56 @@
+import { type QueryClient } from '@tanstack/react-query'
 import { createRootRouteWithContext, createRoute, createRouter, redirect } from '@tanstack/react-router'
 import { z } from 'zod'
-import { HeaderBase } from './components/elements/Layouts/HeaderBase'
+import { selectedPubkeyAtom } from './atoms/auth.atoms'
+import { decksAtom } from './atoms/deck.atoms'
+import { addRecentAtom } from './atoms/recent.atoms'
+import { store } from './atoms/store'
 import { RootLayout } from './components/elements/Layouts/RootLayout'
-import { RouteContainer } from './components/elements/Layouts/RouteContainer'
-import { RelayListRowLoading } from './components/elements/Relays/RelayListRowLoading'
-import { RelayTableRowLoading } from './components/elements/Relays/RelayTableRowLoading'
-import { ArticlesPending } from './components/modules/Articles/ArticlesPending'
 import { ArticlesRoute } from './components/modules/Articles/ArticlesRoute'
 import { DeckRoute } from './components/modules/Deck/DeckRoute'
 import { EditorRoute } from './components/modules/Editor/EditorRoute'
 import { Feed } from './components/modules/Feed/Feed'
 import { FeedHeader } from './components/modules/Feed/FeedHeader'
 import { FeedHeadline } from './components/modules/Feed/FeedHeadline'
-import { FeedPending } from './components/modules/Feed/FeedPending'
 import { FeedRoute } from './components/modules/Feed/FeedRoute'
 import { FeedHeaderBase } from './components/modules/Feed/headers/FeedHeaderBase'
-import { HomePending } from './components/modules/Home/HomePending'
 import { HomeRoute } from './components/modules/Home/HomeRoute'
-import { FollowSetRoute } from './components/modules/Lists/FollowSets/FollowSetRoute'
-import { ListsPending } from './components/modules/Lists/ListPending'
+import { FollowSetList } from './components/modules/Lists/FollowSets/FollowSetList'
 import { ListsRoute } from './components/modules/Lists/ListRoute'
-import { RelaySetsRoute } from './components/modules/Lists/RelaySets/RelaySetRoute'
-import { StarterPackRoute } from './components/modules/Lists/StarterPacks/StarterPackRoute'
-import { MediaPending } from './components/modules/Media/MediaPending'
+import { RelaySetList } from './components/modules/Lists/RelaySets/RelaySetList'
+import { StarterPackList } from './components/modules/Lists/StarterPacks/StarterPackList'
 import { MediaRoute } from './components/modules/Media/MediaRoute'
 import { NostrEventPending } from './components/modules/NostrEvent/NostrEventLoading'
 import { NostrEventRoute } from './components/modules/NostrEvent/NostrEventRoute'
-import { NotificationPending } from './components/modules/Notifications/NotificationPending'
 import { NotificationRoute } from './components/modules/Notifications/NotificationRoute'
 import { NProfileLoading } from './components/modules/NProfile/NProfileLoading'
 import { NProfileRoute } from './components/modules/NProfile/NProfileRoute'
 import { RelayActiveRoute } from './components/modules/RelayActive/RelayActiveRoute'
-import { RelayDiscoveryHeader } from './components/modules/RelayDiscovery/RelayDiscoveryHeader'
-import { RelayDiscoveryList } from './components/modules/RelayDiscovery/RelayDiscoveryList'
-import { RelayDiscoveryTable } from './components/modules/RelayDiscovery/RelayDiscoveryTable'
+import { RelayDiscoveryRoute } from './components/modules/RelayDiscovery/RelayDiscoveryRoute'
 import { RelayRoute } from './components/modules/Relays/RelaysRoute'
-import { SearchSettings } from './components/modules/Search/SearchSettings'
+import { SearchRoute } from './components/modules/Search/SearchRoute'
 import { SettingsPreferencesRoute } from './components/modules/Settings/SettingsPreferenceRoute'
 import { SettingsRoute } from './components/modules/Settings/SettingsRoute'
-import { SettingsStorageRoute } from './components/modules/Settings/SettingsStorageRoute'
 import { TagHeader } from './components/modules/Tag/TagHeader'
 import { Kind } from './constants/kinds'
 import type { NostrFilter } from './core/types'
 import { ErrorBoundary } from './ErrorBoundary'
-import { useMobile } from './hooks/useMobile'
+import { loadThreads } from './hooks/loaders/loadThreads'
+import { createProfileModule } from './hooks/modules/createProfileFeedModule'
+import { createTagFeedModule } from './hooks/modules/createTagFeedModule'
+import { queryClient } from './hooks/query/queryClient'
+import type { FeedModule, FeedScope } from './hooks/query/useQueryFeeds'
+import { useFeedState } from './hooks/state/useFeed'
 import { useResetScroll } from './hooks/useResetScroll'
 import type { NostrContext } from './nostr/context'
-import { subscribeSync } from './nostr/subscriptions/subscribeSync'
 import { READ, WRITE } from './nostr/types'
-import { FeedScope } from './stores/feeds/feed.store'
-import {
-  createArticleModule,
-  createFeedModule,
-  createHomeModule,
-  createMediaModule,
-  createNAddressModule,
-  createNEventModule,
-  createNoteModule,
-  createNotificationModule,
-  createNProfileModule,
-  createRelayDiscoveryModule,
-  createSearchModule,
-  createTagModule,
-} from './stores/modules/module.helpers'
-import type { NProfileModule } from './stores/modules/nprofile.module'
-import { NProfileModuleModel } from './stores/modules/nprofile.module'
-import { rootStore, type RootStore } from './stores/root.store'
-import { subscribeDeckColums } from './stores/subscriptions/subscribeDeckColumns'
-import { startFeedStream, subscribeFeedStore } from './stores/subscriptions/subscribeFeedStore'
-import { subscribeLists } from './stores/subscriptions/subscribeLists'
-import { subscribeNostrModule } from './stores/subscriptions/subscribeNostrModule'
-import { subscribeRelayDiscoveryModule } from './stores/subscriptions/subscribeRelayDiscoveryModule'
 import { decodeNIP19 } from './utils/nip19'
 
-const rootRoute = createRootRouteWithContext<{ rootStore: RootStore }>()({
+type RouteContext = {
+  queryClient: QueryClient
+}
+
+const rootRoute = createRootRouteWithContext<RouteContext>()({
   component: RootLayout,
   errorComponent: ErrorBoundary,
   validateSearch: z.object({
@@ -91,14 +68,13 @@ const rootRoute = createRootRouteWithContext<{ rootStore: RootStore }>()({
 export const homeRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
-  loader: (options) => {
-    const { pubkey } = options.context.rootStore.auth
-    const module = createHomeModule(pubkey)
-    const subscription = startFeedStream(module).subscribe()
-    return { module, subscription }
-  },
-  pendingComponent: HomePending,
   component: HomeRoute,
+})
+
+export const homeRepliesRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/replies',
+  component: () => <HomeRoute replies />,
 })
 
 const zNumberArray = z.union([z.number(), z.array(z.number())]).optional()
@@ -217,9 +193,7 @@ export const feedRoute = createRoute({
     // feed filters
     scope: search.scope,
     blured: search.blured,
-    includeRoot: search.includeRoot,
     includeReplies: search.includeReplies,
-    includeParents: search.includeParents,
     type: search.type,
   }),
   loader: (options) => {
@@ -227,11 +201,11 @@ export const feedRoute = createRoute({
     const {
       kind,
       author,
-      limit,
+      limit = 50,
       search,
       until,
       since,
-      scope,
+      scope = 'self',
       type = 'feed',
       blured,
       relay,
@@ -239,9 +213,7 @@ export const feedRoute = createRoute({
       outbox = true,
       pubkey,
       permission,
-      includeRoot = true,
       includeReplies = true,
-      includeParents = false,
     } = deps
 
     const filter = {} as NostrFilter
@@ -294,21 +266,24 @@ export const feedRoute = createRoute({
       filter['#K'] = [deps.K].flat()
     }
 
-    const context: NostrContext = { batcher: 'eager' }
+    const ctx: NostrContext = {}
     if (relay) {
-      context.relays = [relay].flat()
+      ctx.relays = [relay].flat()
+      ctx.network = 'REMOTE_ONLY'
+      // We don't want negentropy for relay feeds
+      ctx.negentropy = false
     }
     if (relaySets) {
-      context.relaySets = [relaySets].flat()
+      ctx.relaySets = [relaySets].flat()
     }
     if (outbox) {
-      context.outbox = true
+      ctx.outbox = true
     }
     if (pubkey) {
-      context.pubkey = pubkey
+      ctx.pubkey = pubkey
     }
     if (permission) {
-      context.permission =
+      ctx.permission =
         permission === 'read'
           ? READ
           : permission === 'write'
@@ -317,31 +292,22 @@ export const feedRoute = createRoute({
               ? READ | WRITE
               : undefined
     }
-    const module = createFeedModule({
+    const id = 'custom_' + JSON.stringify(filter)
+    return {
+      id,
       type,
-      feed: {
-        scope: FeedScope.is(scope) ? scope : 'self',
-        filter,
-        blured,
-        context,
-        options: {
-          includeRoot,
-          includeReplies,
-          includeParents,
-        },
-      },
-    })
-    const subscription = subscribeFeedStore(module.feed).subscribe()
-    return { module, subscription }
-  },
-  pendingComponent: () => {
-    return <FeedPending />
+      replies: includeReplies,
+      filter,
+      blured,
+      scope: scope as FeedScope,
+      queryKey: ['feed', id, JSON.stringify(filter)],
+      ctx,
+    } as FeedModule
   },
   component: () => {
-    const { module } = feedRoute.useLoaderData()
-    return (
-      <FeedRoute module={module} headline={<FeedHeadline module={module} />} header={<FeedHeader module={module} />} />
-    )
+    const feedOptions = feedRoute.useLoaderData()
+    const feed = useFeedState(feedOptions)
+    return <FeedRoute feed={feed} headline={<FeedHeadline feed={feed} />} header={<FeedHeader feed={feed} />} />
   },
 })
 
@@ -350,19 +316,11 @@ export const deckRoute = createRoute({
   path: '/deck/$id',
   beforeLoad: (options) => {
     const { id } = options.params
-    const { decks } = options.context.rootStore
-    decks.select(id)
-  },
-  loader: (options) => {
-    const { id } = options.params
-    const { decks } = options.context.rootStore
-    const module = decks.decks.get(id)
-    if (module) {
-      const subscription = subscribeDeckColums(module).subscribe()
-      return { module, subscription }
+    const decks = store.get(decksAtom)
+    if (!(id in decks)) {
+      throw redirect({ to: '/deck/$id', params: { id: 'default' } })
     }
   },
-  pendingComponent: DeckRoute,
   component: DeckRoute,
 })
 
@@ -373,46 +331,26 @@ export const notificationsRoute = createRoute({
   gcTime: Infinity,
   staleTime: Infinity,
   preloadStaleTime: Infinity,
-  beforeLoad: (options) => {
-    const { pubkey } = options.context.rootStore.auth
+  preloadGcTime: Infinity,
+  beforeLoad: () => {
+    const pubkey = store.get(selectedPubkeyAtom)
     if (!pubkey) {
       throw redirect({ to: '/', search: { sign_in: true }, replace: true })
     }
     return { pubkey }
   },
-  loader: (options) => {
-    const { pubkey } = options.context
-    const module = createNotificationModule(pubkey)
-    const subscription = subscribeFeedStore(module.feed, { buffer: 1500 }).subscribe()
-    return { module, subscription }
-  },
-  pendingComponent: NotificationPending,
   component: NotificationRoute,
 })
 
 export const mediaRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/media',
-  loader: (options) => {
-    const { pubkey } = options.context.rootStore.auth
-    const module = createMediaModule(pubkey)
-    const subscription = subscribeFeedStore(module.feed).subscribe()
-    return { module, subscription }
-  },
-  pendingComponent: MediaPending,
   component: MediaRoute,
 })
 
 export const articleRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/articles',
-  loader: (options) => {
-    const { pubkey } = options.context.rootStore.auth
-    const module = createArticleModule(pubkey)
-    const subscription = subscribeFeedStore(module.feed).subscribe()
-    return { module, subscription }
-  },
-  pendingComponent: ArticlesPending,
   component: ArticlesRoute,
 })
 
@@ -429,55 +367,42 @@ export const nostrRoute = createRoute({
     const decoded = decodeNIP19(options.params.nostr)
     return { decoded }
   },
-  loader: (options) => {
-    const { decoded, rootStore } = options.context
-    let module
-    let subscription
+  loader: async (options) => {
+    const { nostr } = options.params
+    const { decoded, queryClient } = options.context
     switch (decoded?.type) {
       case 'npub': {
-        module = createNProfileModule(decoded.data)
-        subscription = subscribeSync(decoded.data, [Kind.Metadata, Kind.Follows], rootStore.globalContext).subscribe()
         break
       }
       case 'nprofile': {
-        module = createNProfileModule(decoded.data.pubkey, decoded.data.relays)
-        subscription = subscribeSync(
-          decoded.data.pubkey,
-          [Kind.Metadata, Kind.Follows],
-          rootStore.globalContext,
-        ).subscribe()
-        break
-      }
-      case 'nevent': {
-        module = createNEventModule(decoded.data)
-        subscription = subscribeNostrModule(module).subscribe()
         break
       }
       case 'note': {
-        module = createNoteModule(decoded.data)
-        subscription = subscribeNostrModule(module).subscribe()
+        await loadThreads(queryClient, nostr)
+        break
+      }
+      case 'nevent': {
+        await loadThreads(queryClient, nostr)
         break
       }
       case 'naddr': {
-        module = createNAddressModule(decoded.data)
-        subscription = subscribeNostrModule(module).subscribe()
+        await loadThreads(queryClient, nostr)
         break
       }
       default: {
         break
       }
     }
-    return { module, subscription }
   },
   onEnter(options) {
-    const { decoded, rootStore } = options.context
+    const { decoded } = options.context
     switch (decoded?.type) {
       case 'npub': {
-        rootStore.recents.add(decoded.data, 'profile')
+        store.set(addRecentAtom, { id: decoded.data, type: 'profile' })
         break
       }
       case 'nprofile': {
-        rootStore.recents.add(decoded.data.pubkey, 'profile')
+        store.set(addRecentAtom, { id: decoded.data.pubkey, type: 'profile' })
         break
       }
     }
@@ -498,6 +423,7 @@ export const nostrRoute = createRoute({
   },
   component: function NostrRoute() {
     const { decoded } = nostrRoute.useRouteContext()
+    const { nostr } = nostrRoute.useParams()
     useResetScroll()
     switch (decoded?.type) {
       case 'npub':
@@ -505,14 +431,10 @@ export const nostrRoute = createRoute({
       case 'nprofile': {
         return <NProfileRoute pubkey={decoded.data.pubkey} />
       }
-      case 'note': {
-        return <NostrEventRoute id={decoded.data} />
-      }
-      case 'nevent': {
-        return <NostrEventRoute id={decoded.data.id} />
-      }
+      case 'note':
+      case 'nevent':
       case 'naddr': {
-        return <NostrEventRoute id={[decoded.data.kind, decoded.data.pubkey, decoded.data.identifier].join(':')} />
+        return <NostrEventRoute nip19={nostr} />
       }
       default: {
         return null
@@ -522,100 +444,77 @@ export const nostrRoute = createRoute({
   errorComponent: ErrorBoundary,
 })
 
-const getNProfileModule = async (options: { parentMatchPromise: Promise<{ loaderData?: { module: unknown } }> }) => {
-  return (await options.parentMatchPromise).loaderData?.module as NProfileModule
-}
-
 const nprofileIndexRoute = createRoute({
   getParentRoute: () => nostrRoute,
   path: '/',
-  loader: async (options) => {
-    const module = await getNProfileModule(options)
-    const subscription = subscribeFeedStore(module.feeds.notes).subscribe()
-    return { module, subscription }
-  },
+  // beforeLoad: ({ context }) => {
+  //   switch (context.decoded?.type) {
+  //     case 'nprofile': {
+  //       return { pubkey: context.decoded.data.pubkey }
+  //     }
+  //     case 'npub': {
+  //       return { pubkey: context.decoded.data }
+  //     }
+  //     default: {
+  //       return { pubkey: '' }
+  //     }
+  //   }
+  // },
   component: function NProfileIndexRoute() {
-    const { module } = nostrRoute.useLoaderData()
-    if (NProfileModuleModel.is(module)) {
-      return <Feed feed={module.feeds.notes} />
-    }
+    // const { pubkey } = nprofileIndexRoute.useRouteContext()
+    const { nostr } = nprofileIndexRoute.useParams()
+    const feed = useFeedState(createProfileModule({ nip19: nostr }))
+    return <Feed feed={feed} />
   },
 })
 
 const nprofileRepliesRoute = createRoute({
   getParentRoute: () => nostrRoute,
-  path: 'replies',
-  loader: async (options) => {
-    const module = await getNProfileModule(options)
-    const subscription = subscribeFeedStore(module.feeds.replies).subscribe()
-    return { module, subscription }
-  },
+  path: '/replies',
   component: function NProfileReplieRoute() {
-    const { module } = nostrRoute.useLoaderData()
-    if (NProfileModuleModel.is(module)) {
-      return <Feed feed={module.feeds.replies} />
-    }
+    const { nostr } = nprofileRepliesRoute.useParams()
+    const feed = useFeedState(createProfileModule({ nip19: nostr, includeReplies: true }))
+    return <Feed feed={feed} />
   },
 })
 
 const nprofileMediaRoute = createRoute({
   getParentRoute: () => nostrRoute,
   path: 'media',
-  loader: async (options) => {
-    const module = await getNProfileModule(options)
-    const subscription = subscribeFeedStore(module.feeds.media).subscribe()
-    return { module, subscription }
-  },
   component: function NProfileMediaRoute() {
-    const { module } = nostrRoute.useLoaderData()
-    if (NProfileModuleModel.is(module)) {
-      return <Feed feed={module.feeds.media} />
-    }
+    const { nostr } = nprofileMediaRoute.useParams()
+    const feed = useFeedState(createProfileModule({ nip19: nostr, filter: { kinds: [Kind.Media] } }))
+    return <Feed feed={feed} />
   },
 })
 
 const nprofileArticlesRoute = createRoute({
   getParentRoute: () => nostrRoute,
   path: 'articles',
-  loader: async (options) => {
-    const module = await getNProfileModule(options)
-    const subscription = subscribeFeedStore(module.feeds.articles).subscribe()
-    return { module, subscription }
-  },
   component: function NProfileArticleRoute() {
-    const { module } = nostrRoute.useLoaderData()
-    if (NProfileModuleModel.is(module)) {
-      return <Feed feed={module.feeds.articles} />
-    }
+    const { nostr } = nprofileArticlesRoute.useParams()
+    const feed = useFeedState(createProfileModule({ nip19: nostr, filter: { kinds: [Kind.Article] } }))
+    return <Feed feed={feed} />
   },
 })
 
 const tagsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/tag/$tag',
-  loader: (options) => {
-    const { tag } = options.params
-    const module = createTagModule(tag)
-    const subscription = subscribeFeedStore(module.feed).subscribe()
-    return { module, subscription }
-  },
-  pendingComponent: () => {
-    const { tag } = tagsRoute.useParams()
-    return <FeedPending header={<FeedHeaderBase leading={<TagHeader tags={[tag]} />} />} />
-  },
   component: function () {
-    const { module } = tagsRoute.useLoaderData()
+    const params = tagsRoute.useParams()
+    const feed = useFeedState(createTagFeedModule(params.tag))
     useResetScroll()
     return (
       <FeedRoute
-        module={module}
-        header={<FeedHeaderBase feed={module.feed} renderRelaySettings leading={<TagHeader module={module} />} />}
+        feed={feed}
+        header={<FeedHeaderBase feed={feed} renderRelaySettings leading={<TagHeader feed={feed} />} />}
       />
     )
   },
 })
 
-const searchRoute = createRoute({
+export const searchRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/search',
   validateSearch: z.object({ q: z.string().optional() }),
@@ -625,53 +524,31 @@ const searchRoute = createRoute({
       throw redirect({ to: '/', replace: true })
     }
   },
-  loader: (options) => {
-    const { q: query = '' } = options.deps
-    const module = createSearchModule(query)
-    const subscription = subscribeFeedStore(module.feed).subscribe()
-    return { module, subscription, query }
-  },
-  pendingComponent: () => {
-    return <FeedPending header={<SearchSettings />} />
-  },
-  component: function SearchRoute() {
-    const { module } = searchRoute.useLoaderData()
-    return <FeedRoute module={module} header={<SearchSettings module={module} />} />
-  },
+  component: SearchRoute,
 })
 
 const listsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/lists',
-  loader: () => {
-    const subscription = subscribeLists().subscribe()
-    return { module: undefined, subscription }
-  },
-  pendingComponent: ListsPending,
   component: ListsRoute,
 })
 
 const starterPackRoute = createRoute({
   getParentRoute: () => listsRoute,
   path: '/',
-  component: StarterPackRoute,
+  component: StarterPackList,
 })
 
 const followSetsRoute = createRoute({
   getParentRoute: () => listsRoute,
   path: '/followsets',
-  component: FollowSetRoute,
+  component: FollowSetList,
 })
 
 const relaySetsRoute = createRoute({
   getParentRoute: () => listsRoute,
   path: '/relaysets',
-  loader: () => {
-    const subscription = subscribeLists().subscribe()
-    return { module: undefined, subscription }
-  },
-  pendingComponent: ListsPending,
-  component: RelaySetsRoute,
+  component: RelaySetList,
 })
 
 const relaysRoute = createRoute({
@@ -679,7 +556,7 @@ const relaysRoute = createRoute({
   path: '/relays',
   component: RelayRoute,
 })
-
+//
 const relayActiveRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/relays/active',
@@ -689,29 +566,7 @@ const relayActiveRoute = createRoute({
 const relayDiscoveryRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/explore/relays',
-  loader: () => {
-    const module = createRelayDiscoveryModule()
-    const subscription = subscribeRelayDiscoveryModule(module).subscribe()
-    return { module, subscription }
-  },
-  pendingComponent: function () {
-    const isMobile = useMobile()
-    return (
-      <RouteContainer maxWidth='lg' header={<HeaderBase label='Relay Discovery' />}>
-        {isMobile ? <RelayListRowLoading /> : <RelayTableRowLoading />}
-      </RouteContainer>
-    )
-  },
-  component: function () {
-    const { module } = relayDiscoveryRoute.useLoaderData()
-    const isMobile = useMobile()
-    useResetScroll()
-    return (
-      <RouteContainer maxWidth='lg' header={<RelayDiscoveryHeader module={module} />}>
-        {isMobile ? <RelayDiscoveryList module={module} /> : <RelayDiscoveryTable module={module} />}
-      </RouteContainer>
-    )
-  },
+  component: RelayDiscoveryRoute,
 })
 
 const settingsRoute = createRoute({
@@ -726,14 +581,9 @@ const settingsPreferenceRoute = createRoute({
   component: SettingsPreferencesRoute,
 })
 
-const settingsStorageRoute = createRoute({
-  getParentRoute: () => settingsRoute,
-  path: '/storage',
-  component: SettingsStorageRoute,
-})
-
 export const routeTree = rootRoute.addChildren([
   homeRoute,
+  homeRepliesRoute,
   feedRoute,
   nostrRoute.addChildren([nprofileIndexRoute, nprofileRepliesRoute, nprofileMediaRoute, nprofileArticlesRoute]),
   deckRoute,
@@ -747,7 +597,7 @@ export const routeTree = rootRoute.addChildren([
   relaysRoute,
   relayActiveRoute,
   relayDiscoveryRoute,
-  settingsRoute.addChildren([settingsPreferenceRoute, settingsStorageRoute]),
+  settingsRoute.addChildren([settingsPreferenceRoute]),
 ])
 
 export const router = createRouter({
@@ -756,8 +606,9 @@ export const router = createRouter({
   defaultPreload: false,
   defaultPendingMinMs: 0,
   scrollRestoration: false,
+  defaultPendingMs: 0,
   context: {
-    rootStore,
+    queryClient,
   },
 })
 

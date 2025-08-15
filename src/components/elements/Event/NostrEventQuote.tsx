@@ -1,16 +1,16 @@
 import { ArticleRoot } from '@/components/modules/Articles/ArticleRoot'
 import { Kind } from '@/constants/kinds'
-import type { NostrEventMetadata } from '@/nostr/types'
-import { observer } from 'mobx-react-lite'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import { memo } from 'react'
 import { PostQuote } from '../Posts/PostQuote'
 import { ZapReceiptRoot } from '../Zaps/ZapReceipt'
 import { NostrEventUnsupported } from './NostrEventUnsupported'
 
 type Props = {
-  event: NostrEventMetadata
+  event: NostrEventDB
 }
 
-export const NostrEventQuote = observer(function NostrEventQuote(props: Props) {
+export const NostrEventQuote = memo(function NostrEventQuote(props: Props) {
   const { event } = props
   switch (event.kind) {
     case Kind.Article: {

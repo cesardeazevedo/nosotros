@@ -1,26 +1,31 @@
+import { toggleQRCodeDialogAtom } from '@/atoms/dialog.atoms'
+import { addMediaErrorAtom, mediaErrorsAtom } from '@/atoms/media.atoms'
 import { ContentProvider } from '@/components/providers/ContentProvider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Paper } from '@/components/ui/Paper/Paper'
 import { Popover } from '@/components/ui/Popover/Popover'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
-import { useCurrentPubkey, useCurrentUser } from '@/hooks/useRootStore'
-import { mediaStore } from '@/stores/media/media.store'
+import { useCurrentPubkey, useCurrentUser } from '@/hooks/useAuth'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
+import { getImgProxyUrl } from '@/utils/imgproxy'
 import { IconQrcode } from '@tabler/icons-react'
-import { observer } from 'mobx-react-lite'
+import { useAtomValue, useSetAtom } from 'jotai'
+import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
-import { dialogStore } from 'stores/ui/dialogs.store'
 import { UserAvatar } from '../User/UserAvatar'
 import { UserName } from '../User/UserName'
 import { ProfilePopoverMenu } from './ProfilePopoverMenu'
 
-export const ProfilePopover = observer(function ProfilePopover() {
+export const ProfilePopover = memo(function ProfilePopover() {
   const user = useCurrentUser()
   const pubkey = useCurrentPubkey()
-  const banner = user?.metadata.banner
+  const addError = useSetAtom(addMediaErrorAtom)
+  const toggleQRCode = useSetAtom(toggleQRCodeDialogAtom)
+  const banner = user?.metadata?.banner
+  const hasError = useAtomValue(mediaErrorsAtom).has(banner || '')
   return (
     <ContentProvider value={{ disablePopover: true }}>
       <Popover
@@ -28,17 +33,21 @@ export const ProfilePopover = observer(function ProfilePopover() {
         placement='bottom-end'
         contentRenderer={(props) => (
           <Paper elevation={2} shape='lg' surface='surfaceContainerLow' sx={styles.root}>
-            {!banner || mediaStore.hasError(banner) ? (
+            {!banner || hasError ? (
               <html.div style={[styles.image, styles.image$fallback]} />
             ) : (
-              <html.img src={banner} style={styles.image} onError={() => banner && mediaStore.addError(banner)} />
+              <html.img
+                src={getImgProxyUrl('feed_img', banner)}
+                style={styles.image}
+                onError={() => banner && addError(banner)}
+              />
             )}
             <Stack sx={styles.header} justify='space-between'>
               <ContentProvider value={{ disableLink: true }}>{pubkey && <UserName pubkey={pubkey} />}</ContentProvider>
               <Tooltip cursor='arrow' placement='bottom' text='Use the QR Code to scan your npub on your mobile device'>
                 <IconButton
                   onClick={() => {
-                    dialogStore.toggleQRCode()
+                    toggleQRCode()
                     props.close()
                   }}
                   icon={<IconQrcode strokeWidth='1.5' />}
@@ -51,7 +60,7 @@ export const ProfilePopover = observer(function ProfilePopover() {
         {({ getProps, setRef, open }) => (
           <div onClick={open} {...getProps()} ref={setRef}>
             <ContentProvider value={{ disableLink: true, disablePopover: true }}>
-              <UserAvatar pubkey={user?.pubkey} />
+              {user.pubkey && <UserAvatar pubkey={user.pubkey} />}
             </ContentProvider>
           </div>
         )}

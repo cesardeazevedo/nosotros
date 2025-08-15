@@ -3,8 +3,7 @@ import { useMobile } from '@/hooks/useMobile'
 import { useIsDarkTheme } from '@/hooks/useTheme'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
-import { observer } from 'mobx-react-lite'
-import React from 'react'
+import React, { memo } from 'react'
 import { css } from 'react-strict-dom'
 
 type Props = {
@@ -13,7 +12,7 @@ type Props = {
   children?: React.ReactNode
 }
 
-export const PaperContainer = observer(function PaperContainer(props: Props) {
+export const PaperContainer = memo(function PaperContainer(props: Props) {
   const { children, maxWidth = 'md', topRadius = true, ...rest } = props
   const isMobile = useMobile()
   const isDark = useIsDarkTheme()

@@ -3,11 +3,11 @@ import { Chip } from '@/components/ui/Chip/Chip'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
-import type { MediaModule } from '@/stores/modules/media.module'
+import type { MediaFeedState } from '@/hooks/state/useMediaFeed'
 import { spacing } from '@/themes/spacing.stylex'
 import type { IconProps } from '@tabler/icons-react'
 import { IconBlur } from '@tabler/icons-react'
-import { observer } from 'mobx-react-lite'
+import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 
 const iconProps: IconProps = {
@@ -16,11 +16,11 @@ const iconProps: IconProps = {
 }
 
 type Props = {
-  module: MediaModule
+  feed: MediaFeedState
 }
 
-export const MediaSettings = observer(function MediaSettings(props: Props) {
-  const { module } = props
+export const MediaSettings = memo(function MediaSettings(props: Props) {
+  const { feed } = props
   return (
     <html.div style={styles.root}>
       <Divider />
@@ -28,17 +28,17 @@ export const MediaSettings = observer(function MediaSettings(props: Props) {
         <Text variant='label' size='lg' sx={styles.label}>
           Feed Layout
         </Text>
-        <MediaFeedLayoutButtons module={module} />
+        <MediaFeedLayoutButtons feed={feed} />
         <Text variant='label' size='lg' sx={styles.label}>
           Safety
         </Text>
         <Stack gap={0.5} wrap>
           <Chip
-            selected={module.feed.blured}
+            selected={feed.blured}
             variant='filter'
             icon={<IconBlur {...iconProps} />}
             label='Blur Images'
-            onClick={() => module.feed.toggle('blured')}
+            onClick={() => feed.setBlured((prev) => !prev)}
           />
         </Stack>
       </Stack>

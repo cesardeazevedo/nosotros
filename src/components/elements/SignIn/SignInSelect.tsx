@@ -1,3 +1,4 @@
+import { goToAtom, hasExtensionAtom, submitNostrExtensionAtom } from '@/atoms/signin.atoms'
 import { Button } from '@/components/ui/Button/Button'
 import { buttonTokens } from '@/components/ui/Button/Button.stylex'
 import { Card } from '@/components/ui/Card/Card'
@@ -7,19 +8,22 @@ import { chipTokens } from '@/components/ui/Chip/Chip.stylex'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { useGoBack } from '@/hooks/useNavigations'
-import { signinStore } from '@/stores/signin/signin.store'
 import { spacing } from '@/themes/spacing.stylex'
 import { typeScale } from '@/themes/typeScale.stylex'
 import { IconChevronRight, IconExternalLink, IconEye } from '@tabler/icons-react'
 import { useNavigate } from '@tanstack/react-router'
-import { observer } from 'mobx-react-lite'
+import { useAtomValue, useSetAtom } from 'jotai'
 import { NstartModal } from 'nstart-modal'
 import { css } from 'react-strict-dom'
 import { SignInHeader } from './SignInHeader'
 
-export const SignInSelect = observer(function SignInSelect() {
+export const SignInSelect = () => {
   const goBack = useGoBack()
   const navigate = useNavigate()
+
+  const goTo = useSetAtom(goToAtom)
+  const submitWithExtension = useSetAtom(submitNostrExtensionAtom)
+  const hasExtension = useAtomValue(hasExtensionAtom)
 
   const handleSignUpClick = () => {
     const wizard = new NstartModal({
@@ -31,10 +35,7 @@ export const SignInSelect = observer(function SignInSelect() {
       aac: false, // avoidNcryptsec
       arr: ['wss://nos.lol', 'wss://nostr.mom', 'wss://relay.damus.io'],
       awr: ['wss://nos.lol', 'wss://nostr.mom', 'wss://relay.damus.io'],
-      onComplete: async (result) => {
-        if (result.nostrLogin.startsWith('bunker://')) {
-          await signinStore.submitBunker(result.nostrLogin)
-        }
+      onComplete: async () => {
         navigate({ to: '/', search: {}, replace: true })
       },
     })
@@ -51,11 +52,7 @@ export const SignInSelect = observer(function SignInSelect() {
         </SignInHeader>
         <Stack horizontal={false} gap={4} align='center' justify='flex-start' sx={styles.content}>
           <Stack horizontal={false} gap={1} align='center'>
-            <Card
-              variant='filled'
-              surface='surfaceContainer'
-              sx={styles.card}
-              onClick={() => signinStore.goTo('READ_ONLY')}>
+            <Card variant='filled' surface='surfaceContainer' sx={styles.card} onClick={() => goTo('READ_ONLY')}>
               <Stack align='center'>
                 <CardContent grow>
                   <CardTitle
@@ -72,16 +69,22 @@ export const SignInSelect = observer(function SignInSelect() {
                 </CardContent>
               </Stack>
             </Card>
+
             <Card
               variant='filled'
               surface='surfaceContainer'
               sx={styles.card}
               onClick={async () => {
-                if (signinStore.hasExtension.current()) {
-                  await signinStore.submitNostrExtension()
-                  goBack()
+                if (hasExtension) {
+                  try {
+                    await submitWithExtension()
+                    goBack()
+                    return
+                  } catch {
+                    // fall through to extension page
+                  }
                 }
-                signinStore.goTo('NOSTR_EXTENSION')
+                goTo('NOSTR_EXTENSION')
               }}>
               <Stack grow justify='space-between'>
                 <CardContent>
@@ -92,11 +95,8 @@ export const SignInSelect = observer(function SignInSelect() {
                 </CardContent>
               </Stack>
             </Card>
-            <Card
-              variant='filled'
-              surface='surfaceContainer'
-              sx={styles.card}
-              onClick={() => signinStore.goTo('REMOTE_SIGN')}>
+
+            <Card variant='filled' surface='surfaceContainer' sx={styles.card} onClick={() => goTo('REMOTE_SIGN')}>
               <CardContent grow>
                 <CardTitle
                   headline={
@@ -137,7 +137,7 @@ export const SignInSelect = observer(function SignInSelect() {
       </Stack>
     </>
   )
-})
+}
 
 const styles = css.create({
   card: {

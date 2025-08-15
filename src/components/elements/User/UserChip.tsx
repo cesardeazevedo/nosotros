@@ -1,6 +1,6 @@
 import { Chip } from '@/components/ui/Chip/Chip'
-import { userStore } from '@/stores/users/users.store'
-import { observer } from 'mobx-react-lite'
+import { useUserState } from '@/hooks/state/useUser'
+import { memo } from 'react'
 import { UserAvatar } from './UserAvatar'
 
 type Props = {
@@ -8,9 +8,9 @@ type Props = {
   onDelete: () => void
 }
 
-export const UserChip = observer((props: Props) => {
+export const UserChip = memo((props: Props) => {
   const { pubkey, onDelete } = props
-  const user = userStore.get(pubkey)
+  const user = useUserState(pubkey)
   return (
     <Chip
       variant='input'

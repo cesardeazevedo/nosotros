@@ -1,19 +1,10 @@
-import { Text } from '@/components/ui/Text/Text'
-import type { EditorStore } from '@/stores/editor/editor.store'
-import { spacing } from '@/themes/spacing.stylex'
-import { observer } from 'mobx-react-lite'
-import { css, html } from 'react-strict-dom'
 import { Stack } from '@/components/ui/Stack/Stack'
-import { UserChip } from '../User/UserChip'
-import { Slider } from '@/components/ui/Slider/Slider'
-import { Button } from '@/components/ui/Button/Button'
+import { Text } from '@/components/ui/Text/Text'
+import { spacing } from '@/themes/spacing.stylex'
+import { memo } from 'react'
+import { css, html } from 'react-strict-dom'
 
-type Props = {
-  store: EditorStore
-}
-
-export const EditorZapSplits = observer(function EditorZapSplits(props: Props) {
-  const { store } = props
+export const EditorZapSplits = memo(function EditorZapSplits() {
   return (
     <>
       <html.div style={styles.root}>
@@ -26,30 +17,30 @@ export const EditorZapSplits = observer(function EditorZapSplits(props: Props) {
               Split zaps with the people you are mentioning.
             </Text>
           </Stack>
-          <Button variant='filledTonal' onClick={() => store.resetZapSplits()}>
-            Reset
-          </Button>
+          {/* <Button variant='filledTonal' onClick={() => store.resetZapSplits()}> */}
+          {/*   Reset */}
+          {/* </Button> */}
         </Stack>
         <html.div style={styles.content}>
           <>
             <Stack align='stretch' wrap={false} horizontal={false}>
-              {store.zapSplitsList.map(([pubkey, value]) => (
-                <Stack grow key={pubkey} horizontal justify='space-between' gap={0.5}>
-                  <UserChip key={pubkey} pubkey={pubkey} onDelete={() => store.excludeMentionZap(pubkey)} />
-                  <Stack sx={styles.slider} gap={1}>
-                    <Text size='lg' sx={styles.value}>
-                      {value}%
-                    </Text>
-                    <Slider
-                      onChange={(value) => store.updateZapSplit(pubkey, value)}
-                      value={value}
-                      step={1}
-                      min={0}
-                      max={100}
-                    />
-                  </Stack>
-                </Stack>
-              ))}
+              {/* {store.zapSplitsList.map(([pubkey, value]) => ( */}
+              {/*   <Stack grow key={pubkey} horizontal justify='space-between' gap={0.5}> */}
+              {/*     <UserChip key={pubkey} pubkey={pubkey} onDelete={() => store.excludeMentionZap(pubkey)} /> */}
+              {/*     <Stack sx={styles.slider} gap={1}> */}
+              {/*       <Text size='lg' sx={styles.value}> */}
+              {/*         {value}% */}
+              {/*       </Text> */}
+              {/*       <Slider */}
+              {/*         onChange={(value) => store.updateZapSplit(pubkey, value)} */}
+              {/*         value={value} */}
+              {/*         step={1} */}
+              {/*         min={0} */}
+              {/*         max={100} */}
+              {/*       /> */}
+              {/*     </Stack> */}
+              {/*   </Stack> */}
+              {/* ))} */}
             </Stack>
           </>
         </html.div>

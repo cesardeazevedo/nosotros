@@ -1,38 +1,24 @@
 import { Anchored } from '@/components/ui/Anchored/Anchored'
 import { Badge } from '@/components/ui/Badge/Badge'
-import { useCurrentAccount } from '@/hooks/useRootStore'
-import { useRouter, useRouterState } from '@tanstack/react-router'
-import { observer } from 'mobx-react-lite'
-import React, { useEffect } from 'react'
+import { useUnseenNotificationsCount } from '@/hooks/state/useNotificationFeed'
+import { useCurrentPubkey } from '@/hooks/useAuth'
+import type React from 'react'
+import { memo } from 'react'
 
 type Props = {
   children: React.ReactNode
 }
 
-export const NotificationBadge = observer(function NotificationBadge(props: Props) {
-  const router = useRouter()
-  const account = useCurrentAccount()
-  const module = useRouterState({
-    select: (state) => {
-      const match = state.cachedMatches.find((x) => x.routeId === '/notifications')
-      return match?.loaderData?.module
-    },
-  })
-
-  useEffect(() => {
-    async function preload() {
-      try {
-        if (router.latestLocation.pathname !== '/notifications') {
-          await router.preloadRoute({ to: '/notifications' })
-        }
-      } catch (error) {
-        console.log(error)
-      }
-    }
-    preload()
-  }, [router])
-
-  const value = module?.feed.unseen(account?.lastSeen.notification || 0).length || 0
-
+const NotificationBadgeInternal = memo(function NotificationBadgeInternal(props: Props & { pubkey: string }) {
+  const value = useUnseenNotificationsCount(props.pubkey)
   return <Anchored content={<Badge maxValue={999} value={value} />}>{props.children}</Anchored>
+})
+
+export const NotificationBadge = memo(function NotificationBadge(props: Props) {
+  const pubkey = useCurrentPubkey()
+  return pubkey ? (
+    <NotificationBadgeInternal pubkey={pubkey}>{props.children}</NotificationBadgeInternal>
+  ) : (
+    props.children
+  )
 })

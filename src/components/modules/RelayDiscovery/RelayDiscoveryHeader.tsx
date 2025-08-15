@@ -1,25 +1,22 @@
 import { Divider } from '@/components/ui/Divider/Divider'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
-import { SearchField } from '@/components/ui/Search/Search'
 import type { Props as StackProps } from '@/components/ui/Stack/Stack'
 import { Stack } from '@/components/ui/Stack/Stack'
+import type { RelayDiscoveryFeed } from '@/hooks/state/useRelayDiscoveryFeed'
 import { useMobile } from '@/hooks/useMobile'
-import type { RelayDiscoveryModule } from '@/stores/modules/relay.discovery.module'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconSettings, IconSettingsFilled } from '@tabler/icons-react'
-import { observer } from 'mobx-react-lite'
 import type { ReactNode } from 'react'
-import { useState } from 'react'
+import { memo, useState } from 'react'
 import { css } from 'react-strict-dom'
 import { RelayDiscoveryMonitorSelect } from './RelayDiscoveryMonitorSelect'
 import { RelayDiscoveryTitle } from './RelayDiscoveryTitle'
 
 type Props = StackProps & {
-  module: RelayDiscoveryModule
+  feed: RelayDiscoveryFeed
   collapsed?: boolean
-  renderSearch?: boolean
   renderTitle?: boolean
   children?: ReactNode
 }
@@ -29,23 +26,20 @@ const iconProps = {
   strokeWidth: '1.5',
 }
 
-export const RelayDiscoveryHeader = observer(function RelayDiscoveryHeader(props: Props) {
-  const { module, renderTitle = true, renderSearch = true, collapsed = false, children, ...rest } = props
+export const RelayDiscoveryHeader = memo(function RelayDiscoveryHeader(props: Props) {
+  const { feed, renderTitle = true, collapsed = false, children, ...rest } = props
   const isMobile = useMobile()
   const isCollapsed = isMobile || collapsed
   const [expanded, setExpanded] = useState(false)
   const filters = (
     <Stack gap={0.5} {...rest}>
-      {renderSearch && (
-        <SearchField placeholder='Search relays' sx={styles.search} onChange={(e) => module.setQuery(e.target.value)} />
-      )}
-      {module.selected && <RelayDiscoveryMonitorSelect module={module} />}
+      {feed.selected && <RelayDiscoveryMonitorSelect feed={feed} />}
     </Stack>
   )
   return (
     <>
       <Stack gap={0.5} grow sx={styles.header} justify='space-between'>
-        {renderTitle && <RelayDiscoveryTitle module={module} />}
+        {renderTitle && <RelayDiscoveryTitle feed={feed} />}
         {!isCollapsed && filters}
         {isCollapsed && (
           <>

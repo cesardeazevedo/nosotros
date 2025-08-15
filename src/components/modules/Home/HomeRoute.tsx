@@ -1,30 +1,31 @@
 import { RouteContainer } from '@/components/elements/Layouts/RouteContainer'
+import { createHomeFeedModule } from '@/hooks/modules/createHomeFeedModule'
+import { useFeedState } from '@/hooks/state/useFeed'
+import { useCurrentPubkey } from '@/hooks/useAuth'
 import { useResetScroll } from '@/hooks/useResetScroll'
-import { homeRoute } from '@/Router'
-import { useRouter } from '@tanstack/react-router'
-import { reaction } from 'mobx'
-import { observer } from 'mobx-react-lite'
-import { useEffect } from 'react'
+import { useNavigate } from '@tanstack/react-router'
+import { memo } from 'react'
 import { Feed } from '../Feed/Feed'
 import { HomeHeader } from './HomeHeader'
 
-export const HomeRoute = observer(function HomeRoute() {
-  const router = useRouter()
-  const { rootStore } = homeRoute.useRouteContext()
-  const { module } = homeRoute.useLoaderData()
+type Props = {
+  replies?: boolean
+}
+
+export const HomeRoute = memo(function HomeRoute(props: Props) {
+  const navigate = useNavigate()
+  const pubkey = useCurrentPubkey()
+  const feed = useFeedState({ ...createHomeFeedModule(pubkey), includeReplies: props.replies })
+
+  const handleChangeTabs = (anchor: string | undefined) => {
+    navigate({ to: anchor === 'replies' ? '/replies' : '/' })
+  }
+
   useResetScroll()
 
-  useEffect(() => {
-    const disposer = reaction(
-      () => [rootStore.auth.pubkey],
-      () => router.invalidate(),
-    )
-    return () => disposer()
-  }, [])
-
   return (
-    <RouteContainer header={<HomeHeader module={module} />}>
-      <Feed feed={module.feed} />
+    <RouteContainer header={<HomeHeader feed={feed} onChangeTabs={handleChangeTabs} />}>
+      <Feed feed={feed} />
     </RouteContainer>
   )
 })

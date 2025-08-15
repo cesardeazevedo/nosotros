@@ -1,5 +1,6 @@
 import type { Props as NProfileSuggestionProps } from '@/components/elements/Content/NProfile/NProfileSuggestion'
-import { userStore } from '@/stores/users/users.store'
+import { getUserRelaysFromCache } from '@/hooks/query/useQueryUser'
+import { WRITE } from '@/nostr/types'
 import type { Editor } from '@tiptap/react'
 import { ReactRenderer } from '@tiptap/react'
 import Suggestion, { SuggestionPluginKey } from '@tiptap/suggestion'
@@ -25,7 +26,9 @@ export function createSuggestionPlugin(editor: Editor) {
 
       const attrs: Partial<NProfileAttributes> = {
         pubkey: props.pubkey,
-        relays: userStore.get(props.pubkey)?.relays.slice(0, 2),
+        relays: getUserRelaysFromCache(props.pubkey, WRITE)
+          .map((x) => x.relay)
+          .slice(0, 4),
       }
       attrs.bech32 = nip19.nprofileEncode(attrs as nip19.ProfilePointer)
 

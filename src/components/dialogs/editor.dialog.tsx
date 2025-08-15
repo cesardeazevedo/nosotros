@@ -1,14 +1,16 @@
-import { createEditorStore } from '@/stores/editor/editor.store'
 import { spacing } from '@/themes/spacing.stylex'
 import { useMatch, useNavigate } from '@tanstack/react-router'
 import { DialogSheet } from 'components/elements/Layouts/Dialog'
 import { useGoBack } from 'hooks/useNavigations'
-import { observer } from 'mobx-react-lite'
-import { useCallback, useEffect, useMemo } from 'react'
+import { memo, useCallback } from 'react'
 import { css } from 'react-strict-dom'
-import { Editor } from '../elements/Editor/Editor'
+import { EditorProvider } from '../elements/Editor/EditorProvider'
+import { Button } from '../ui/Button/Button'
+import { Divider } from '../ui/Divider/Divider'
+import { Stack } from '../ui/Stack/Stack'
+import { Text } from '../ui/Text/Text'
 
-export const EditorDialog = observer(function EditorDialog() {
+export const EditorDialog = memo(function EditorDialog() {
   const open = useMatch({
     from: '__root__',
     select: (x) => !!x.search.compose,
@@ -21,21 +23,21 @@ export const EditorDialog = observer(function EditorDialog() {
     navigate({ to: '.', search: ({ compose, ...rest }) => rest })
   }, [goBack])
 
-  const store = useMemo(() => {
-    return open ? createEditorStore({ onPublish: () => handleClose() }) : null
-  }, [open])
-
-  useEffect(() => {
-    setTimeout(() => {
-      if (store?.editor) {
-        store?.editor.commands.focus('start')
-      }
-    })
-  }, [store?.editor])
-
   return (
     <DialogSheet maxWidth='sm' sx={styles.dialog} open={open} onClose={handleClose}>
-      {store && <Editor initialOpen store={store} onDiscard={handleClose} sx={styles.editor} />}
+      <Stack sx={styles.header} align='center' justify='space-between'>
+        <Button onClick={handleClose}>Cancel</Button>
+        <Stack grow align='center' justify='center'>
+          <strong>
+            <Text variant='title' size='lg'>
+              New Post
+            </Text>
+          </strong>
+        </Stack>
+        <div style={{ width: 50 }} />
+      </Stack>
+      <Divider />
+      <EditorProvider initialOpen floatToolbar onDiscard={handleClose} sx={styles.editor} />
     </DialogSheet>
   )
 })
@@ -43,13 +45,11 @@ export const EditorDialog = observer(function EditorDialog() {
 const styles = css.create({
   dialog: {
     padding: spacing.padding1,
-    placeItems: 'baseline center',
-    paddingTop: {
-      default: '10%',
-      ['@media (max-width: 960px)']: 0,
-    },
   },
   editor: {
-    minHeight: 240,
+    minHeight: 260,
+  },
+  header: {
+    padding: spacing.padding1,
   },
 })

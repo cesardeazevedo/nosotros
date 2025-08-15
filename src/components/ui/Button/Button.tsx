@@ -121,6 +121,9 @@ const styles = css.create({
   label: {
     position: 'relative',
     whiteSpace: 'nowrap',
+    maxWidth: 300,
+    textOverflow: 'ellipsis',
+    overflow: 'hidden',
     color: {
       default: buttonTokens.labelTextColor,
       ':is([data-focused])': buttonTokens.labelTextColor$focus,

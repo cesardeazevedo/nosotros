@@ -16,7 +16,7 @@ export const Paragraph = (props: Props) => {
   const { dense } = useContentContext()
   return (
     <html.div style={[styles.container, dense && styles.container$dense]}>
-      <TextContent shrinkLink={note.event.event.kind !== Kind.Article} node={node} />
+      <TextContent shrinkLink={note.event.kind !== Kind.Article} node={node} />
     </html.div>
   )
 }

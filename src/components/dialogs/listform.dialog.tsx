@@ -1,11 +1,10 @@
-import { dialogStore } from '@/stores/ui/dialogs.store'
-import { observer } from 'mobx-react-lite'
+import { memo } from 'react'
 import { DialogSheet } from '../elements/Layouts/Dialog'
+import { useDialogControl } from '../../hooks/useDialogs'
 import { ListForm } from '../modules/Lists/ListForm'
 
-export const ListFormDialog = observer(function ListFormDialog() {
-  const value = dialogStore.listForm
-  const onClose = () => dialogStore.setListForm(false)
+export const ListFormDialog = memo(function ListFormDialog() {
+  const [value, onClose] = useDialogControl('listForm')
   return (
     <>
       <DialogSheet maxWidth='xs' open={!!value} onClose={onClose}>

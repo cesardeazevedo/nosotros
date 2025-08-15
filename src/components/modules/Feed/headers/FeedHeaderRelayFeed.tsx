@@ -1,13 +1,15 @@
 import { RelayChip } from '@/components/elements/Relays/RelayChip'
-import type { FeedStore } from '@/stores/feeds/feed.store'
-import { observer } from 'mobx-react-lite'
+import type { FeedState } from '@/hooks/state/useFeed'
+import { memo } from 'react'
 import { FeedHeaderBase } from './FeedHeaderBase'
 
 type Props = {
-  feed: FeedStore
+  feed: FeedState
 }
 
-export const FeedHeaderRelayFeed = observer(function FeedHeaderRelayFeed(props: Props) {
+export const FeedHeaderRelayFeed = memo(function FeedHeaderRelayFeed(props: Props) {
   const { feed } = props
-  return <FeedHeaderBase leading={feed.context.relays && <RelayChip url={feed.context.relays?.[0]} />} feed={feed} />
+  return (
+    <FeedHeaderBase leading={feed.options.ctx.relays && <RelayChip url={feed.options.ctx.relays?.[0]} />} feed={feed} />
+  )
 })

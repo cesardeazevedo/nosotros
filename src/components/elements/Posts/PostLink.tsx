@@ -1,30 +1,35 @@
+import { useDeckAddNextColumn } from '@/components/modules/Deck/hooks/useDeck'
+import { createEventModule } from '@/hooks/modules/createEventModule'
+import type { NoteState } from '@/hooks/state/useNote'
 import { useMobile } from '@/hooks/useMobile'
-import type { Note } from '@/stores/notes/note'
 import { useMatch, useNavigate, useRouter } from '@tanstack/react-router'
-import { observer } from 'mobx-react-lite'
-import type { NAddr, NEvent } from 'nostr-tools/nip19'
-import { useCallback, useRef, type ReactNode } from 'react'
+import { memo, useCallback, type ReactNode } from 'react'
 import { css, html } from 'react-strict-dom'
 import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDOMProps'
 
 type Props = {
-  note: Note
+  note: NoteState
   children: ReactNode
   onClick?: () => void
 }
 
-export const PostLink = observer(function postList(props: Props) {
+export const PostLink = memo(function postList(props: Props) {
   const { note, children, onClick } = props
-  const ref = useRef<HTMLDivElement>(null)
   const context = useMatch({ from: '/$nostr', shouldThrow: false })?.context
   const mobile = useMobile()
   const router = useRouter()
   const navigate = useNavigate()
+  const deck = useDeckAddNextColumn(() => createEventModule(note.nip19))
   const isCurrentNote = context?.decoded?.type === 'nevent' ? context?.decoded.data.id === note.id : false
-  const isActive = isCurrentNote || note.repliesOpen === true
+  const isActive = isCurrentNote || note.state.repliesOpen === true
 
   const handleClick = useCallback(
     (e: StrictClickEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      if (deck.isDeck) {
+        return deck.add(e)
+      }
       const element = 'target' in e ? (e.target as HTMLElement) : null
       const isLink = !!element?.closest('a')
       const isButton = !!element?.closest('button')
@@ -32,21 +37,21 @@ export const PostLink = observer(function postList(props: Props) {
         return
       }
       if (!mobile) {
-        note.toggleContent(true)
+        note.actions.toggleContent(true)
         onClick?.()
       } else {
         navigate({
           to: '/$nostr',
-          params: { nostr: note.event.isAddressable ? (note.event.naddress as NAddr) : (note.event.nevent as NEvent) },
+          params: { nostr: note.nip19 as string },
           state: { from: router.latestLocation.pathname } as never,
         })
       }
     },
-    [note],
+    [note, deck],
   )
 
   return (
-    <html.div ref={ref} onClick={!isActive ? handleClick : undefined} style={[styles.root, !isActive && styles.action]}>
+    <html.div onClick={!isActive ? handleClick : undefined} style={[styles.root, !isActive && styles.action]}>
       {children}
     </html.div>
   )
@@ -60,7 +65,7 @@ const styles = css.create({
     cursor: 'pointer',
     backgroundColor: {
       default: 'transparent',
-      ':hover': 'rgba(125, 125, 125, 0.03)',
+      ':hover': 'rgba(125, 125, 125, 0.06)',
     },
   },
 })

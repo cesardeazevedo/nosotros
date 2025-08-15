@@ -1,16 +1,15 @@
 import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { Text } from '@/components/ui/Text/Text'
-import { useCurrentUser } from '@/hooks/useRootStore'
+import { useCurrentUser } from '@/hooks/useAuth'
 import { palette } from '@/themes/palette.stylex'
 import { Link } from '@tanstack/react-router'
-import { Observer, observer } from 'mobx-react-lite'
-import { useContext } from 'react'
+import { memo, useContext } from 'react'
 import { css } from 'react-strict-dom'
 import { IconHome } from '../Icons/IconHome'
 import { IconHomeFilled } from '../Icons/IconHomeFilled'
 import { SidebarContext } from './SidebarContext'
 
-export const SidebarMenuFeeds = observer(function SidebarMenuFeeds() {
+export const SidebarMenuFeeds = memo(function SidebarMenuFeeds() {
   const context = useContext(SidebarContext)
   const handleClickHome = () => {
     setTimeout(() => {
@@ -33,14 +32,9 @@ export const SidebarMenuFeeds = observer(function SidebarMenuFeeds() {
           onClick={() => context.setPane(false)}
           leadingIcon={isActive ? <IconHomeFilled /> : <IconHome {...iconProps} />}
           label={
-            <Observer>
-              {() => (
-                <>
-                  Following{' '}
-                  {user?.totalFollows ? <Text size='md' sx={styles.gray}>{`(${user.totalFollows})`}</Text> : ''}
-                </>
-              )}
-            </Observer>
+            <>
+              Following {user?.totalFollows ? <Text size='md' sx={styles.gray}>{`(${user.totalFollows})`}</Text> : ''}
+            </>
           }
         />
       )}
