@@ -149,7 +149,10 @@ export default defineConfig(({ mode }) => {
           sourcemap: true,
           maximumFileSizeToCacheInBytes: 2800000,
           globPatterns: ['**/*.{js,css,svg,ico}'],
-          globIgnores: ['assets/clarity-*.js'], // this file from shiki is crashing for some reason
+          globIgnores: [
+            'assets/clarity-*.js', // this file from shiki is crashing for some reason
+            'assets/*worker*.js',
+          ],
           cleanupOutdatedCaches: true,
           clientsClaim: true,
           skipWaiting: true,
