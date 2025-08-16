@@ -59,7 +59,6 @@ export const Image = memo(function Image(props: Props) {
           )}
           {!hasError && (
             <html.img
-              crossOrigin='use-credentials'
               style={[styles.img, blurStyles, sx]}
               src={proxy ? getImgProxyUrl('feed_img', src) : src}
               onClick={handleClick}

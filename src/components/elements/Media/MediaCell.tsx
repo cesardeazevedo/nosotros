@@ -43,7 +43,6 @@ const MediaCellItem = memo(function MediaCellItem(props: {
       </html.div>
       {!hasError && type === 'image' && (
         <html.img
-          crossOrigin='anonymous'
           onClick={() => pushImage({ eventId: event.id, src })}
           onError={() => addError(src)}
           src={getImgProxyUrl('feed_img', src)}
