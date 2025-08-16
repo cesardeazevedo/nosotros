@@ -148,7 +148,7 @@ export default defineConfig(({ mode }) => {
         workbox: {
           sourcemap: true,
           maximumFileSizeToCacheInBytes: 2800000,
-          globPatterns: ['**/*.{js,css,svg,html,ico}'],
+          globPatterns: ['**/*.{js,css,svg,ico}'],
           globIgnores: ['assets/clarity-*.js'], // this file from shiki is crashing for some reason
           cleanupOutdatedCaches: true,
           clientsClaim: true,
