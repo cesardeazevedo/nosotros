@@ -1,3 +1,4 @@
+import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { typeFace } from '@/themes/typeFace.stylex'
 import { typeScale } from '@/themes/typeScale.stylex'
@@ -7,7 +8,6 @@ import { css, html } from 'react-strict-dom'
 import { Skeleton } from '../Skeleton/Skeleton'
 import type { SxProps } from '../types'
 import { avatarTokens } from './Avatar.stylex'
-import { palette } from '@/themes/palette.stylex'
 
 type AvatarVariant = 'rounded' | 'squared'
 
@@ -17,7 +17,6 @@ export type Props = {
   src?: string
   srcSet?: string
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
-  crossOrigin?: null | ('anonymous' | 'use-credentials')
   referrerPolicy?:
     | null
     | (
@@ -34,7 +33,7 @@ export type Props = {
   fallbackRandomColor?: string
 }
 
-function useLoaded({ crossOrigin, referrerPolicy, src, srcSet }: Props) {
+function useLoaded({ referrerPolicy, src, srcSet }: Props) {
   const [loaded, setLoaded] = useState<false | 'loaded' | 'error'>(false)
 
   useEffect(() => {
@@ -59,7 +58,6 @@ function useLoaded({ crossOrigin, referrerPolicy, src, srcSet }: Props) {
       }
       setLoaded('error')
     }
-    image.crossOrigin = crossOrigin || null
     if (referrerPolicy) {
       image.referrerPolicy = referrerPolicy
     }
@@ -73,14 +71,14 @@ function useLoaded({ crossOrigin, referrerPolicy, src, srcSet }: Props) {
     return () => {
       active = false
     }
-  }, [crossOrigin, referrerPolicy, src, srcSet])
+  }, [referrerPolicy, src, srcSet])
 
   return loaded
 }
 
 export const Avatar = (props: Props) => {
-  const { variant = 'rounded', size = 'md', src, srcSet, crossOrigin, referrerPolicy, children, sx } = props
-  const loaded = useLoaded({ src, srcSet, crossOrigin, referrerPolicy })
+  const { variant = 'rounded', size = 'md', src, srcSet, referrerPolicy, children, sx } = props
+  const loaded = useLoaded({ src, srcSet, referrerPolicy })
   const hasImage = !!src || !!srcSet
   const hasImageNotFailing = hasImage && loaded !== 'error'
   return (
@@ -94,7 +92,6 @@ export const Avatar = (props: Props) => {
           style={styles.img}
           src={src}
           srcSet={srcSet}
-          crossOrigin={'anonymous'}
           referrerPolicy={referrerPolicy}
         />
       ) : children ? (
