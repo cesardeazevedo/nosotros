@@ -10,7 +10,7 @@ export function useThemePalette() {
 
 export function useCurrentTheme(): ThemeKeys {
   const isSystemDark = useMediaQuery('(prefers-color-scheme: dark)')
-  const settingsTheme = useSettings().theme
+  const settingsTheme = useSettings().theme || 'auto'
   return settingsTheme === 'auto' ? (isSystemDark ? 'dark' : 'light') : settingsTheme
 }
 
