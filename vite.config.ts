@@ -152,6 +152,7 @@ export default defineConfig(({ mode }) => {
           globIgnores: [
             'assets/clarity-*.js', // this file from shiki is crashing for some reason
             'assets/*worker*.js',
+            'assets/sqlite3-opfs*.js',
           ],
           cleanupOutdatedCaches: true,
           clientsClaim: true,
