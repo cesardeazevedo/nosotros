@@ -24,30 +24,21 @@ export const addMediaErrorAtom = atom(null, (get, set, src: string) => {
   set(mediaErrorsAtom, next)
 })
 
-export const setCurrentVideoAtom = atom(
-  null,
-  async (get, set, args: { video: HTMLVideoElement; autoPlay: boolean }) => {
-    const prev = get(currentVideoAtom)
+export const setCurrentVideoAtom = atom(null, async (get, set, args: { video: HTMLVideoElement; play: boolean }) => {
+  const prev = get(currentVideoAtom)
 
-    if (prev && prev !== args.video) {
-      try {
-        prev.pause()
-      } catch {
-        // no-op
-      }
-    }
+  set(currentVideoAtom, args.video)
 
-    set(currentVideoAtom, args.video)
+  if (prev && prev !== args.video) {
+    prev.pause()
+  }
 
-    if (args.autoPlay) {
-      try {
-        await args.video.play()
-      } catch {
-        // autoplay might be blocked; ignore
-      }
-    }
-  },
-)
+  if (args.play) {
+    await args.video.play().catch(() => {})
+  } else {
+    args.video.pause()
+  }
+})
 
 export const removeCurrentVideoAtom = atom(null, (get, set, video: HTMLVideoElement) => {
   const curr = get(currentVideoAtom)

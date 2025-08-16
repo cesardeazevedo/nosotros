@@ -1,10 +1,10 @@
-import { removeCurrentVideoAtom, setCurrentVideoAtom } from '@/atoms/media.atoms'
+import { currentVideoAtom, removeCurrentVideoAtom, setCurrentVideoAtom } from '@/atoms/media.atoms'
 import { useNoteContext } from '@/components/providers/NoteProvider'
 import type { SxProps } from '@/components/ui/types'
 import { useMediaStore } from '@/hooks/useMediaStore'
 import { useSettings } from '@/hooks/useSettings'
 import { shape } from '@/themes/shape.stylex'
-import { useSetAtom } from 'jotai'
+import { useAtomValue, useSetAtom } from 'jotai'
 import { memo, useEffect, useMemo, useRef } from 'react'
 import { css } from 'react-strict-dom'
 import { BlurContainer } from '../../Layouts/BlurContainer'
@@ -27,6 +27,7 @@ export const Video = memo(function Video(props: Props) {
 
   const setVideo = useSetAtom(setCurrentVideoAtom)
   const removeVideo = useSetAtom(removeCurrentVideoAtom)
+  const currentVideo = useAtomValue(currentVideoAtom)
   const media = useMediaStore(src, note.metadata?.imeta)
   const settings = useSettings()
   const autoPlay = props.autoPlay ?? settings.autoPlay
@@ -39,11 +40,11 @@ export const Video = memo(function Video(props: Props) {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && video) {
-          setVideo({ video, autoPlay })
+        if (entry.isIntersecting && currentVideo !== video) {
+          setVideo({ video, play: autoPlay })
         }
       },
-      { threshold: 1 },
+      { threshold: 0.7 },
     )
     observer.observe(video)
 
@@ -51,7 +52,7 @@ export const Video = memo(function Video(props: Props) {
       observer.disconnect()
       removeVideo(video)
     }
-  }, [media, autoPlay, setVideo, removeVideo])
+  }, [autoPlay, setVideo, removeVideo])
 
   return (
     <BlurContainer>
@@ -72,7 +73,7 @@ export const Video = memo(function Video(props: Props) {
             e.stopPropagation()
             const video = ref.current
             if (video) {
-              return video.paused ? video.play() : video.pause()
+              setVideo({ video, play: video.paused })
             }
           }}
           src={src}
