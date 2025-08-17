@@ -1,7 +1,11 @@
+import type { NostrSubscriptionBuilder } from '@/core/NostrSubscriptionBuilder'
 import type { NostrEvent } from 'nostr-tools'
 import { filter, from, fromEvent, map, mergeMap, of, shareReplay, take, takeUntil } from 'rxjs'
 
 const workers = [
+  new Worker(new URL('../workers/verify.worker.ts', import.meta.url), { type: 'module' }),
+  new Worker(new URL('../workers/verify.worker.ts', import.meta.url), { type: 'module' }),
+  new Worker(new URL('../workers/verify.worker.ts', import.meta.url), { type: 'module' }),
   new Worker(new URL('../workers/verify.worker.ts', import.meta.url), { type: 'module' }),
   new Worker(new URL('../workers/verify.worker.ts', import.meta.url), { type: 'module' }),
 ]
@@ -16,9 +20,9 @@ const getWorker = () => workers[counter++ % workers.length]
 
 const cache = new Set<string>()
 
-export function verifyWorker() {
+export function verifyWorker(sub: NostrSubscriptionBuilder) {
   return mergeMap((event: NostrEvent) => {
-    if (!cache.has(event.id)) {
+    if (!cache.has(event.id) && !sub.events.has(event.id)) {
       cache.add(event.id)
       getWorker().postMessage(event)
       return workerMessage.pipe(
