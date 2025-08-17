@@ -3,21 +3,15 @@ import { palette } from '@/themes/palette.stylex'
 import { scale } from '@/themes/scale.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import type { ReactNode } from 'react'
-import React, { forwardRef, useCallback, useContext, useEffect, useRef } from 'react'
+import React, { useCallback, useContext, useEffect, useRef } from 'react'
 import { css, html } from 'react-strict-dom'
-import type { StrictClickEvent, StrictReactDOMProps } from 'react-strict-dom/dist/types/StrictReactDOMProps'
+import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDOMProps'
 import { Anchored } from '../Anchored/Anchored'
-import { Elevation } from '../Elevation/Elevation'
-import { FocusRing } from '../FocusRing/FocusRing'
-import { focusRingTokens } from '../FocusRing/FocusRing.stylex'
-import { dataProps } from '../helpers/dataProps'
-import { mergeRefs } from '../helpers/mergeRefs'
-import { useVisualState } from '../hooks/useVisualState'
-import { Ripple } from '../Ripple/Ripple'
+import { Button } from '../Button/Button'
 import { TabsContext } from '../Tabs/Tabs'
 import type { SxProps } from '../types'
-import { tabStateTokens, tabTokens } from './Tab.stylex'
+import { tabTokens } from './Tab.stylex'
+import { mergeRefs } from '../helpers/mergeRefs'
 
 export type TabVariant = 'primary' | 'secondary'
 
@@ -29,146 +23,118 @@ type Props = {
   variant?: TabVariant
   icon?: React.ReactNode
   activeIcon?: React.ReactNode
-  badge?: ReactNode
-  onClick?: StrictReactDOMProps['onClick']
+  badge?: React.ReactNode
+  onClick?: (e: StrictClickEvent) => void
   disabled?: boolean
+  ref?: React.Ref<HTMLButtonElement>
 }
 
-export const Tab = forwardRef<HTMLButtonElement, Props>((props, ref) => {
-  const { sx, anchor, activeIcon, icon, label, badge, onClick } = props
-
-  const tabsContext = useContext(TabsContext)
-  const variant = props.variant ?? tabsContext?.variant ?? 'primary'
-  const disabled = props.disabled ?? tabsContext?.disabled
-
-  const { visualState, setRef } = useVisualState(undefined, { disabled })
-
-  const active = !disabled
-    ? tabsContext
-      ? tabsContext.anchor !== undefined && tabsContext.anchor === anchor
-      : props.active || false
+export const Tab = (props: Props) => {
+  const { sx, anchor, activeIcon, icon, label, badge, onClick, ref, disabled } = props
+  const tabs = useContext(TabsContext)
+  const variant: TabVariant = props.variant ?? tabs?.variant ?? 'primary'
+  const isDisabled = disabled ?? tabs?.disabled ?? false
+  const isActive = !isDisabled
+    ? tabs
+      ? tabs.anchor !== undefined && tabs.anchor === anchor
+      : (props.active ?? false)
     : false
 
-  const actionRef = useRef<HTMLButtonElement | null>(null)
-  const indicatorRef = useRef<HTMLDivElement>(null)
-  const refs = mergeRefs([ref, setRef, actionRef])
-
-  const stacked = variant === 'primary'
-  // This deviates from material specification to look nicer
-  const fullWidthIndicator = false
-  // const fullWidthIndicator = variant === 'secondary'
+  const buttonRef = useRef<HTMLButtonElement | null>(null)
+  const indicatorRef = useRef<HTMLDivElement | null>(null)
+  const refs = mergeRefs([ref, buttonRef, indicatorRef])
 
   const handleClick = useCallback(
-    (event: StrictClickEvent) => {
-      tabsContext?.onChange(anchor)
-      onClick?.(event)
+    (e: StrictClickEvent) => {
+      tabs?.onChange(anchor)
+      onClick?.(e)
     },
-    [tabsContext],
+    [tabs, anchor, onClick],
   )
 
   useEffect(() => {
-    const activeTab = actionRef.current
-    const indicator = indicatorRef.current
-    if (tabsContext && active && activeTab && indicator) {
-      tabsContext.onTabActivated(activeTab, indicator)
+    if (tabs && isActive && buttonRef.current && indicatorRef.current) {
+      tabs.onTabActivated(buttonRef.current, indicatorRef.current)
     }
-  }, [active, anchor, tabsContext])
+  }, [tabs, isActive, anchor])
 
-  const hasIcon = active ? !!activeIcon || !!icon : !!icon
-  const hasAnchoredBadge = !!badge && !disabled && (variant === 'primary' || !label)
-  const hasInlineBadge = !!badge && !disabled && !!label && (variant === 'secondary' || !hasIcon)
+  const stacked = variant === 'primary'
+  const fullWidthIndicator = false
+  const hasIcon = isActive ? !!activeIcon || !!icon : !!icon
+  const hasAnchoredBadge = !!badge && !isDisabled && (variant === 'primary' || !label)
+  const hasInlineBadge = !!badge && !isDisabled && !!label && (variant === 'secondary' || !hasIcon)
 
-  const renderAnchoredBadge = (content: React.ReactNode) => {
-    return hasAnchoredBadge ? (
+  const withBadge = (content: React.ReactNode) =>
+    hasAnchoredBadge ? (
       <Anchored position='top-end' content={badge}>
         {content}
       </Anchored>
     ) : (
       content
     )
-  }
 
   return (
-    <html.button
-      style={[styles.root, variants[variant], sx]}
+    <Button
+      ref={refs}
+      as='button'
       role='tab'
       aria-controls={anchor}
-      aria-selected={active}
+      aria-selected={isActive}
+      disabled={isDisabled}
+      variant='text'
       onClick={handleClick}
-      ref={refs}
-      {...(active ? dataProps(visualState) : {})}>
-      <Elevation />
-      <Ripple element={actionRef} visualState={visualState} />
-      <FocusRing sx={styles.focusRing} element={actionRef} visualState={visualState} />
+      sx={[styles.root, variants[variant], isActive && styles.active, sx]}>
       <html.div style={[styles.content, stacked && styles.content$stacked]}>
         {hasIcon &&
-          renderAnchoredBadge(
-            <html.div aria-hidden style={[styles.icon, active && styles.icon$active, disabled && styles.icon$disabled]}>
-              {active ? activeIcon || icon : icon}
+          withBadge(
+            <html.div
+              aria-hidden
+              style={[styles.icon, isActive && styles.icon$active, isDisabled && styles.icon$disabled]}>
+              {isActive ? activeIcon || icon : icon}
             </html.div>,
           )}
         {label && (
           <html.div style={styles.labelContainer}>
-            <html.div style={[styles.label, active && styles.label$active, disabled && styles.label$disabled]}>
+            <html.div style={[styles.label, isActive && styles.label$active, isDisabled && styles.label$disabled]}>
               {label}
             </html.div>
             {hasInlineBadge && badge}
           </html.div>
         )}
         {!fullWidthIndicator && (
-          <html.div style={[styles.indicator, active && styles.indicator$active]} ref={indicatorRef} />
+          <html.div style={[styles.indicator, isActive && styles.indicator$active]} ref={indicatorRef} />
         )}
       </html.div>
       {fullWidthIndicator && (
-        <html.div style={[styles.indicator, active && styles.indicator$active]} ref={indicatorRef} />
+        <html.div style={[styles.indicator, isActive && styles.indicator$active]} ref={indicatorRef} />
       )}
-    </html.button>
+    </Button>
   )
-})
+}
 
 const variants = css.create({
   primary: {
     [tabTokens.activeIndicatorHeight]: outline.md,
     [tabTokens.activeIndicatorShape]: `calc(3px * ${scale.scale}) calc(3px * ${scale.scale}) 0 0`,
-
-    [tabTokens.activeStateLayerColor$hover]: palette.primary,
-    [tabTokens.activeStateLayerOpacity$hover]: tabTokens.stateLayerOpacity$hover,
-    [tabTokens.activeStateLayerColor$pressed]: palette.primary,
-    [tabTokens.activeStateLayerOpacity$pressed]: tabTokens.stateLayerOpacity$pressed,
-
     [tabTokens.containerShape]: shape.full,
     [tabTokens.containerHeight$withIconAndLabelText]: '64px',
-
     [tabTokens.activeIconColor]: palette.primary,
-    [tabTokens.activeIconColor$focus]: palette.primary,
     [tabTokens.activeIconColor$hover]: palette.primary,
     [tabTokens.activeIconColor$pressed]: palette.primary,
-
     [tabTokens.activeLabelTextColor]: palette.primary,
-    [tabTokens.activeLabelTextColor$focus]: palette.primary,
     [tabTokens.activeLabelTextColor$hover]: palette.primary,
     [tabTokens.activeLabelTextColor$pressed]: palette.primary,
   },
   secondary: {
     [tabTokens.activeIndicatorHeight]: '2px',
     [tabTokens.activeIndicatorShape]: '0px',
-
     [tabTokens.containerShape]: shape.full,
     [tabTokens.activeLabelTextColor]: palette.onSurface,
-
     [tabTokens.activeIconColor]: tabTokens.iconColor,
-    [tabTokens.activeIconColor$focus]: tabTokens.iconColor$focus,
     [tabTokens.activeIconColor$hover]: tabTokens.iconColor$hover,
     [tabTokens.activeIconColor$pressed]: tabTokens.iconColor$pressed,
-
-    [tabTokens.activeLabelTextColor$focus]: tabTokens.labelTextColor$focus,
     [tabTokens.activeLabelTextColor$hover]: tabTokens.labelTextColor$hover,
     [tabTokens.activeLabelTextColor$pressed]: tabTokens.labelTextColor$pressed,
-
-    [tabTokens.activeStateLayerColor$hover]: tabTokens.stateLayerColor$hover,
-    [tabTokens.activeStateLayerOpacity$hover]: tabTokens.stateLayerOpacity$hover,
-    [tabTokens.activeStateLayerColor$pressed]: tabTokens.stateLayerColor$pressed,
-    [tabTokens.activeStateLayerOpacity$pressed]: tabTokens.stateLayerOpacity$pressed,
   },
 })
 
@@ -177,46 +143,21 @@ const styles = css.create({
     flexGrow: 1,
     flexShrink: 1,
     flexBasis: '0%',
-    display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
-    outline: 'none',
     paddingTop: 0,
     paddingBottom: 0,
     paddingLeft: spacing.padding2,
     paddingRight: spacing.padding2,
     marginInline: spacing['margin0.5'],
     position: 'relative',
-    WebkitTapHighlightColor: 'transparent',
     verticalAlign: 'middle',
     userSelect: 'none',
     whiteSpace: 'nowrap',
-    //cursor: 'pointer',
-    // cursor: {
-    //   default: 'default',
-    //   ':is([data-hovered])': 'pointer',
-    // },
     borderRadius: tabTokens.containerShape,
-    borderStyle: 'unset',
-    backgroundColor: 'unset',
     textDecoration: 'none',
-    paddingBlock: 0,
-    [tabStateTokens.stateLayerColor$hover]: tabTokens.stateLayerColor$hover,
-    [tabStateTokens.stateLayerOpacity$hover]: tabTokens.stateLayerOpacity$hover,
-    [tabStateTokens.stateLayerColor$pressed]: tabTokens.stateLayerColor$pressed,
-    [tabStateTokens.stateLayerOpacity$pressed]: tabTokens.stateLayerOpacity$pressed,
   },
-  disabled: {
-    cursor: 'default',
-    pointerEvents: 'none',
-    [tabStateTokens.elevation]: tabTokens.containerElevation$disabled,
-  },
-  active: {
-    [tabStateTokens.stateLayerColor$hover]: tabTokens.activeStateLayerColor$hover,
-    [tabStateTokens.stateLayerOpacity$hover]: tabTokens.activeStateLayerOpacity$hover,
-    [tabStateTokens.stateLayerColor$pressed]: tabTokens.activeStateLayerColor$pressed,
-    [tabStateTokens.stateLayerOpacity$pressed]: tabTokens.activeStateLayerOpacity$pressed,
-  },
+  active: {},
   labelContainer: {
     display: 'flex',
     gap: 4,
@@ -228,36 +169,14 @@ const styles = css.create({
     fontWeight: tabTokens.labelTextWeight,
     lineHeight: tabTokens.labelTextLineHeight,
     letterSpacing: tabTokens.labelTextLetterSpacing,
-
-    color: {
-      default: tabTokens.labelTextColor,
-      ':is([data-focused])': tabTokens.labelTextColor$focus,
-      ':is([data-hovered])': tabTokens.labelTextColor$hover,
-      ':is([data-pressed])': tabTokens.labelTextColor$pressed,
-    },
+    color: tabTokens.labelTextColor,
   },
   label$active: {
-    color: {
-      default: tabTokens.activeLabelTextColor,
-      ':is([data-focused])': tabTokens.activeLabelTextColor$focus,
-      ':is([data-hovered])': tabTokens.activeLabelTextColor$hover,
-      ':is([data-pressed])': tabTokens.activeLabelTextColor$pressed,
-    },
+    color: tabTokens.activeLabelTextColor,
   },
   label$disabled: {
     color: tabTokens.labelTextColor$disabled,
     opacity: tabTokens.labelTextOpacity$disabled,
-  },
-  background: {
-    backgroundColor: tabTokens.containerColor,
-    inset: 0,
-    position: 'absolute',
-    zIndex: -1,
-    borderRadius: 'inherit',
-  },
-  background$disabled: {
-    backgroundColor: tabTokens.containerColor$disabled,
-    opacity: tabTokens.containerOpacity$disabled,
   },
   content: {
     position: 'relative',
@@ -273,9 +192,6 @@ const styles = css.create({
     flexDirection: 'column',
     gap: spacing['padding0.5'],
   },
-  content$stacked$hasIcon$hasLabel: {
-    height: tabTokens.containerHeight$withIconAndLabelText,
-  },
   indicator: {
     position: 'absolute',
     transformOrigin: 'left bottom',
@@ -283,7 +199,6 @@ const styles = css.create({
     borderRadius: tabTokens.activeIndicatorShape,
     height: tabTokens.activeIndicatorHeight,
     inset: 'auto 0 0 0',
-    // hidden unless the tab is selected
     opacity: 0,
   },
   indicator$active: {
@@ -292,32 +207,15 @@ const styles = css.create({
   icon: {
     display: 'inline-flex',
     position: 'relative',
-    writingMode: 'horizontal-tb',
-    // fontSize: tabTokens.iconSize,
-    // width: tabTokens.iconSize,
-    // height: tabTokens.iconSize,
-    color: {
-      default: tabTokens.iconColor,
-      ':is([data-focused])': tabTokens.iconColor$focus,
-      ':is([data-hovered])': tabTokens.iconColor$hover,
-      ':is([data-pressed])': tabTokens.iconColor$pressed,
-    },
     alignItems: 'center',
     justifyContent: 'center',
+    color: tabTokens.iconColor,
   },
   icon$disabled: {
     color: tabTokens.iconColor$disabled,
     opacity: tabTokens.iconOpacity$disabled,
   },
   icon$active: {
-    color: {
-      default: tabTokens.activeIconColor,
-      ':is([data-focused])': tabTokens.activeIconColor$focus,
-      ':is([data-hovered])': tabTokens.activeIconColor$hover,
-      ':is([data-pressed])': tabTokens.activeIconColor$pressed,
-    },
-  },
-  focusRing: {
-    [focusRingTokens.shape]: tabTokens.containerShape,
+    color: tabTokens.activeIconColor,
   },
 })

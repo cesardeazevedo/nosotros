@@ -1,146 +1,215 @@
+import { duration } from '@/themes/duration.stylex'
+import { easing } from '@/themes/easing.stylex'
 import { elevation } from '@/themes/elevation.stylex'
 import { palette } from '@/themes/palette.stylex'
-import { spacing } from '@/themes/spacing.stylex'
-import { state } from '@/themes/state.stylex'
 import type { UserAuthoredStyles } from '@stylexjs/stylex/lib/StyleXTypes'
-import React, { forwardRef } from 'react'
+import React from 'react'
 import { css, html } from 'react-strict-dom'
-import type { Props as ButtonBaseProps } from '../ButtonBase/ButtonBase'
-import { ButtonBase } from '../ButtonBase/ButtonBase'
-import { Elevation } from '../Elevation/Elevation'
-import { elevationTokens } from '../Elevation/Elevation.stylex'
-import { rippleTokens } from '../Ripple/Ripple.stylex'
+import type { StrictReactDOMButtonProps } from 'react-strict-dom/dist/types/StrictReactDOMButtonProps'
+import { focusRing } from '../FocusRing/FocusRing.stylex'
+import type { SxProps } from '../types'
 import { buttonTokens } from './Button.stylex'
 
 type ButtonVariant = 'elevated' | 'filled' | 'filledTonal' | 'outlined' | 'text' | 'danger'
+type ButtonElement = 'button' | 'div'
 
-export interface Props extends ButtonBaseProps {
+export type Props = StrictReactDOMButtonProps & {
+  as?: ButtonElement
   variant?: ButtonVariant | false
-  icon?: React.ReactNode
-  trailingIcon?: React.ReactNode
   fullWidth?: boolean
+  sx?: SxProps
+  ref?: React.Ref<HTMLButtonElement & HTMLDivElement>
 }
 
-export const Button = forwardRef<HTMLButtonElement, Props>(function Button(props, ref) {
-  const { variant = 'text', children, icon, trailingIcon, disabled = false, sx, fullWidth, ...rest } = props
-  const outlined = variant === 'outlined'
-  const elevation = variant === 'elevated'
+export const Button = (props: Props) => {
+  const { as = 'button', variant = 'text', disabled = false, fullWidth, sx, children, tabIndex, ref, ...rest } = props
+
+  const Component = as === 'div' ? html.div : html.button
   return (
-    <ButtonBase
+    <Component
       ref={ref}
-      sx={[styles.root, variant && variants[variant], fullWidth && styles.fullWidth, sx]}
+      role='button'
+      tabIndex={tabIndex ?? (disabled ? -1 : 0)}
       disabled={disabled}
-      outlined={outlined}
+      style={[
+        styles.root,
+        focusRing.focusable,
+        variants[variant || 'text'],
+        variant === 'outlined' && styles.outlinedBorder,
+        fullWidth && styles.fullWidth,
+        sx,
+      ]}
       {...rest}>
-      {elevation && <Elevation sx={styles.elevation} />}
-      {icon && <html.div style={[styles.icon, disabled && styles.label$disabled]}>{icon}</html.div>}
-      {children && <html.span style={[styles.label, disabled && styles.label$disabled]}>{children}</html.span>}
-      {trailingIcon && <html.div style={[styles.icon, disabled && styles.label$disabled]}>{trailingIcon}</html.div>}
-    </ButtonBase>
+      {children}
+    </Component>
   )
-})
+}
 
 const variants = css.create({
   text: {
     [buttonTokens.labelTextColor]: palette.primary,
+    [buttonTokens.labelTextColor$hover]: palette.primary,
+    [buttonTokens.labelTextColor$pressed]: palette.primary,
+    [buttonTokens.labelTextColor$focus]: palette.primary,
+    [buttonTokens.labelTextColor$disabled]: palette.onSurface,
+    [buttonTokens.labelTextOpacity$disabled]: 0.38,
+    [buttonTokens.containerColor]: 'transparent',
+    [buttonTokens.containerColor$hover]: palette.surfaceContainerHigh,
+    [buttonTokens.containerColor$pressed]: palette.surfaceContainerHighest,
+    [buttonTokens.containerColor$disabled]: 'transparent',
+    [buttonTokens.containerElevation]: elevation.shadows0,
+    [buttonTokens.outlineColor]: 'transparent',
+    [buttonTokens.outlineColor$disabled]: palette.outlineVariant,
   },
   elevated: {
     [buttonTokens.labelTextColor]: palette.onSurface,
+    [buttonTokens.labelTextColor$hover]: 'red',
+    [buttonTokens.labelTextColor$pressed]: palette.onSurface,
+    [buttonTokens.labelTextColor$focus]: palette.onSurface,
+    [buttonTokens.labelTextColor$disabled]: palette.onSurface,
+    [buttonTokens.labelTextOpacity$disabled]: 0.38,
     [buttonTokens.containerColor]: palette.surfaceContainerLow,
-    [buttonTokens.containerColor$disabled]: palette.onSurface,
-    [buttonTokens.containerOpacity$disabled]: state.containerOpacity$disabled,
+    [buttonTokens.containerColor$hover]: 'blue',
+    [buttonTokens.containerColor$pressed]: palette.surfaceContainerHigh,
+    [buttonTokens.containerColor$disabled]: palette.surfaceContainerHigh,
     [buttonTokens.containerElevation]: {
-      default: elevation.shadows2,
-      ':is([data-focused])': elevation.shadows0,
-      ':is([data-hovered])': elevation.shadows4,
-      ':is([data-pressed])': elevation.shadows1,
+      default: elevation.shadows1,
+      ':hover': elevation.shadows2,
+      ':active': elevation.shadows1,
+      ':disabled': elevation.shadows0,
     },
+    [buttonTokens.outlineColor]: 'transparent',
+    [buttonTokens.outlineColor$disabled]: palette.outlineVariant,
   },
   filled: {
-    [rippleTokens.color$hover]: palette.onPrimary,
     [buttonTokens.containerColor]: palette.primary,
-    [buttonTokens.containerColor$disabled]: palette.onSurface,
-    [buttonTokens.containerOpacity$disabled]: state.containerOpacity$disabled,
+    [buttonTokens.containerColor$hover]: palette.primaryFixedDim,
+    [buttonTokens.containerColor$pressed]: palette.primary,
+    [buttonTokens.containerColor$disabled]: palette.surfaceContainerHigh,
     [buttonTokens.labelTextColor]: palette.onPrimary,
+    [buttonTokens.labelTextColor$hover]: palette.onPrimary,
+    [buttonTokens.labelTextColor$pressed]: palette.onPrimary,
+    [buttonTokens.labelTextColor$focus]: palette.onPrimary,
+    [buttonTokens.labelTextColor$disabled]: palette.onSurface,
+    [buttonTokens.labelTextOpacity$disabled]: 0.38,
     [buttonTokens.containerElevation]: {
       default: elevation.shadows0,
-      ':is([data-focused])': elevation.shadows0,
-      ':is([data-hovered])': elevation.shadows2,
-      ':is([data-pressed])': elevation.shadows0,
+      ':hover': elevation.shadows1,
+      ':active': elevation.shadows0,
+      ':disabled': elevation.shadows0,
     },
+    [buttonTokens.outlineColor]: 'transparent',
+    [buttonTokens.outlineColor$disabled]: palette.outlineVariant,
   },
   filledTonal: {
-    [rippleTokens.color$hover]: palette.onSecondaryContainer,
     [buttonTokens.labelTextColor]: palette.onSecondaryContainer,
+    [buttonTokens.labelTextColor$hover]: palette.onSecondaryContainer,
+    [buttonTokens.labelTextColor$pressed]: palette.onSecondaryContainer,
+    [buttonTokens.labelTextColor$focus]: palette.onSecondaryContainer,
+    [buttonTokens.labelTextColor$disabled]: palette.onSurface,
+    [buttonTokens.labelTextOpacity$disabled]: 0.38,
     [buttonTokens.containerColor]: palette.surfaceContainer,
-    [buttonTokens.containerColor$disabled]: palette.onSurface,
-    [buttonTokens.containerOpacity$disabled]: state.containerOpacity$disabled,
-    [buttonTokens.containerElevation]: {
-      default: elevation.shadows0,
-      ':is([data-focused])': elevation.shadows0,
-      ':is([data-hovered])': elevation.shadows2,
-      ':is([data-pressed])': elevation.shadows0,
-    },
+    [buttonTokens.containerColor$hover]: palette.surfaceContainerHigh,
+    [buttonTokens.containerColor$pressed]: palette.surfaceContainerHighest,
+    [buttonTokens.containerColor$disabled]: palette.surfaceContainerHigh,
+    [buttonTokens.containerElevation]: elevation.shadows0,
+    [buttonTokens.outlineColor]: 'transparent',
+    [buttonTokens.outlineColor$disabled]: palette.outlineVariant,
   },
   outlined: {
     [buttonTokens.labelTextColor]: palette.primary,
+    [buttonTokens.labelTextColor$hover]: palette.primary,
+    [buttonTokens.labelTextColor$pressed]: palette.primary,
+    [buttonTokens.labelTextColor$focus]: palette.primary,
+    [buttonTokens.labelTextColor$disabled]: palette.onSurface,
+    [buttonTokens.labelTextOpacity$disabled]: 0.38,
+    [buttonTokens.containerColor]: 'transparent',
+    [buttonTokens.containerColor$hover]: palette.surfaceContainerHigh,
+    [buttonTokens.containerColor$pressed]: palette.surfaceContainerHighest,
+    [buttonTokens.containerColor$disabled]: 'transparent',
+    [buttonTokens.containerElevation]: elevation.shadows0,
+    [buttonTokens.outlineColor]: palette.outline,
+    [buttonTokens.outlineColor$disabled]: palette.outlineVariant,
   },
   danger: {
-    [buttonTokens.containerColor$disabled]: palette.onSurface,
-    [buttonTokens.containerOpacity$disabled]: state.containerOpacity$disabled,
     [buttonTokens.labelTextColor]: palette.onErrorContainer,
+    [buttonTokens.labelTextColor$hover]: palette.onError,
+    [buttonTokens.labelTextColor$pressed]: palette.onError,
+    [buttonTokens.labelTextColor$focus]: palette.onError,
+    [buttonTokens.labelTextColor$disabled]: palette.onSurface,
+    [buttonTokens.labelTextOpacity$disabled]: 0.38,
     [buttonTokens.containerColor]: palette.errorContainer,
+    [buttonTokens.containerColor$hover]: palette.error,
+    [buttonTokens.containerColor$pressed]: palette.errorContainer,
+    [buttonTokens.containerColor$disabled]: palette.surfaceContainerHigh,
+    [buttonTokens.containerElevation]: elevation.shadows0,
+    [buttonTokens.outlineColor]: 'transparent',
+    [buttonTokens.outlineColor$disabled]: palette.outlineVariant,
   },
 } as Record<ButtonVariant, UserAuthoredStyles>)
 
 const styles = css.create({
   root: {
-    alignContent: 'center',
-    borderRadius: buttonTokens.containerShape,
-    cursor: 'pointer',
-    display: 'inline-flex',
-    outline: 'none',
-    justifyContent: 'center',
-    alignItems: 'center',
-    justifyItems: 'center',
     position: 'relative',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    whiteSpace: 'nowrap',
+    gap: 8,
+    minWidth: buttonTokens.containerMinWidth,
+    height: buttonTokens.containerHeight,
+    paddingInlineStart: buttonTokens.leadingSpace,
+    paddingInlineEnd: buttonTokens.trailingSpace,
+    border: 0,
+    borderRadius: buttonTokens.containerShape,
     fontFamily: buttonTokens.labelTextFont,
     fontSize: buttonTokens.labelTextSize,
-    fontWeight: buttonTokens.labelTextWeight,
     lineHeight: buttonTokens.labelTextLineHeight,
+    fontWeight: buttonTokens.labelTextWeight,
     letterSpacing: buttonTokens.labelTextLetterSpacing,
-    gap: spacing.padding1,
-    paddingInlineStart: buttonTokens.leadingSpace,
-    paddingInlineEnd: buttonTokens.leadingSpace,
-    minHeight: buttonTokens.containerHeight,
-    // minWidth: buttonTokens.containerMinWidth,
-  },
-  elevation: {
-    [elevationTokens.boxShadow]: buttonTokens.containerElevation,
-  },
-  label: {
-    position: 'relative',
-    whiteSpace: 'nowrap',
-    maxWidth: 300,
-    textOverflow: 'ellipsis',
-    overflow: 'hidden',
+    backgroundColor: {
+      default: buttonTokens.containerColor,
+      ':hover': buttonTokens.containerColor$hover,
+      ':active': buttonTokens.containerColor$pressed,
+      ':disabled': buttonTokens.containerColor$disabled,
+    },
     color: {
       default: buttonTokens.labelTextColor,
-      ':is([data-focused])': buttonTokens.labelTextColor$focus,
-      ':is([data-hovered])': buttonTokens.labelTextColor$hover,
-      ':is([data-pressed])': buttonTokens.labelTextColor$pressed,
+      ':hover': buttonTokens.labelTextColor$hover,
+      ':active': buttonTokens.labelTextColor$pressed,
+      ':focus-visible': buttonTokens.labelTextColor$focus,
+      ':disabled': buttonTokens.labelTextColor$disabled,
+    },
+    opacity: {
+      default: 1,
+      ':disabled': 0.58,
+    },
+    boxShadow: {
+      default: buttonTokens.containerElevation,
+      ':hover': buttonTokens.containerElevation,
+      ':active': buttonTokens.containerElevation,
+      ':disabled': elevation.shadows0,
+    },
+    transitionProperty: 'background-color, box-shadow, color, outline-color, outline-offset, outline-width',
+    transitionDuration: duration.short3,
+    transitionTimingFunction: easing.emphasized,
+    cursor: {
+      default: 'pointer',
+      ':disabled': 'default',
+    },
+    pointerEvents: {
+      default: 'inherit',
+      ':disabled': 'none',
+    },
+    borderStyle: 'solid',
+    borderColor: {
+      default: buttonTokens.outlineColor,
+      ':disabled': buttonTokens.outlineColor$disabled,
     },
   },
-  label$disabled: {
-    color: buttonTokens.labelTextColor$disabled,
-    opacity: buttonTokens.labelTextOpacity$disabled,
+  outlinedBorder: {
+    borderWidth: 1,
   },
-  icon: {
-    position: 'relative',
-    display: 'inline-flex',
-    color: buttonTokens.labelTextColor,
-  },
-  iconDisabled: {},
   fullWidth: {
     display: 'flex',
     width: '100%',

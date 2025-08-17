@@ -23,10 +23,8 @@ export const MenuItem = forwardRef<HTMLElement, Props>((props, ref) => {
     <Menu trigger={() => <MenuNestedItem label={label} {...other} />}>{children}</Menu>
   ) : (
     <ListItem
-      role='menuitem'
       tabIndex={isActive ? 0 : -1}
       {...other}
-      interactive={!!other.onClick}
       onClick={(event) => {
         other.onClick?.(event)
         if (!keepOpenOnClick) {

@@ -1,30 +1,23 @@
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { typeScale } from '@/themes/typeScale.stylex'
-import { useMergeRefs } from '@floating-ui/react'
-import type { AriaRole } from 'react'
-import React, { forwardRef, useRef } from 'react'
+import React from 'react'
 import { css, html } from 'react-strict-dom'
 import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDOMProps'
-import { dataProps } from '../helpers/dataProps'
-import type { IVisualState } from '../hooks/useRipple'
-import { useVisualState } from '../hooks/useVisualState'
-import { Ripple } from '../Ripple/Ripple'
+import { Button } from '../Button/Button'
 import type { SxProps } from '../types'
-import { listItemTokens } from './ListItem.stylex'
+
+type Size = 'sm' | 'md'
+type Variant = 'standard' | 'danger'
 
 export type Props = {
   sx?: SxProps
-  variant?: 'standard' | 'danger'
+  variant?: Variant
   disabled?: boolean
   selected?: boolean
-  role?: AriaRole
   tabIndex?: -1 | 0
-  interactive?: boolean
-  visualState?: IVisualState
   leading?: React.ReactNode
   leadingIcon?: React.ReactNode
-  leadingImage?: string
   trailing?: React.ReactNode
   trailingIcon?: React.ReactNode
   onClick?: (e: StrictClickEvent) => void
@@ -33,186 +26,158 @@ export type Props = {
   children?: React.ReactNode
   overline?: React.ReactNode
   supportingText?: React.ReactNode
-  size?: 'sm' | 'md'
+  size?: Size
   noFocusRing?: boolean
+  ref?: React.Ref<HTMLButtonElement & HTMLDivElement>
 }
 
-export const ListItem = forwardRef<HTMLElement, Props>((props, ref) => {
+export const ListItem = (props: Props) => {
   const {
     sx,
     variant = 'standard',
     disabled,
-    //leading,
-    leadingIcon,
-    leadingImage,
-    trailing,
-    trailingIcon,
-    interactive,
+    selected,
     onClick,
     onMouseDown,
     onMouseOver,
-    size: sizeProp = 'md',
+    size = 'md',
+    leading,
+    leadingIcon,
+    trailing,
+    trailingIcon,
     children,
-    supportingText,
     overline,
+    supportingText,
+    tabIndex,
+    ref,
+    ...rest
   } = props
 
-  const isInteractive = !!interactive
-  const selected = !disabled && props.selected
-  const adaptedSize = sizeProp
-
-  const actionRef = useRef<HTMLButtonElement>(null)
-  const { visualState, setRef } = useVisualState(props.visualState, { disabled })
-
-  const refs = useMergeRefs([ref, setRef, actionRef])
-
-  const hasLeading = !!leadingIcon || leadingImage
-  const hasTrailing = !!trailingIcon || trailing
+  const hasLeading = !!leading || !!leadingIcon
+  const hasTrailing = !!trailing || !!trailingIcon
 
   return (
-    <html.div
+    <Button
+      ref={ref}
+      as='button'
+      role='listitem'
+      type='button'
+      tabIndex={tabIndex ?? (disabled ? -1 : 0)}
+      disabled={disabled}
+      variant='text'
       onClick={onClick}
-      onMouseOver={onMouseOver}
       onMouseDown={onMouseDown}
-      style={[
+      onMouseOver={onMouseOver}
+      sx={[
         styles.root,
+        sizes[size],
         variants[variant],
-        sizes[adaptedSize],
-        interactive && styles.root$interactive,
-        selected && styles.root$selected,
-        disabled && styles.root$disabled,
+        selected && (variant === 'danger' ? styles.selected$danger : styles.selected),
+        disabled && styles.disabled,
         sx,
       ]}
-      {...dataProps(visualState)}
-      ref={refs}>
-      <html.div style={styles.container}>
-        {/* <html.div */}
-        {/*   style={[styles.background, selected && styles.background$selected, disabled && styles.background$disabled]} */}
-        {/* /> */}
-        {isInteractive && (
-          <Ripple
-            visualState={visualState}
-            sx={[styles.ripple, selected && styles.ripple$selected, disabled && styles.ripple$disabled]}
-            element={actionRef}
-          />
-        )}
-      </html.div>
-      {hasLeading && (
-        <html.div style={styles.leading}>
-          {leadingIcon && <html.span style={styles.leadingIcon}>{leadingIcon}</html.span>}
-        </html.div>
-      )}
-      <html.div style={styles.content}>
+      {...rest}>
+      {hasLeading && <html.span style={styles.leadingIcon}>{leading ?? leadingIcon}</html.span>}
+      <html.span style={styles.content}>
         {overline && <html.span style={styles.overline}>{overline}</html.span>}
-        <html.span style={styles.text}>{children}</html.span>
-        {supportingText && <html.span style={styles.supportingText}>{supportingText}</html.span>}
-      </html.div>
+        <html.span style={styles.label}>{children}</html.span>
+        {supportingText && <html.span style={styles.supporting}>{supportingText}</html.span>}
+      </html.span>
       {hasTrailing && (
-        <html.div style={styles.trailing}>
-          {trailingIcon ? <html.span style={styles.trailing$icon}>{trailingIcon}</html.span> : trailing}
-        </html.div>
+        <html.span style={styles.trailing}>
+          {trailingIcon ? <html.span style={styles.trailingIcon}>{trailingIcon}</html.span> : trailing}
+        </html.span>
       )}
-    </html.div>
+    </Button>
   )
-})
+}
 
 const variants = css.create({
-  standard: {
-    [listItemTokens.containerColor]: 'transparent',
-    [listItemTokens.selectedContainerColor]: palette.surfaceContainer,
-    [listItemTokens.selectedContainerOpacity]: '1',
-    [listItemTokens.textColor]: palette.onSurface,
-  },
+  standard: { color: palette.onSurface },
   danger: {
-    [listItemTokens.containerColor]: 'transparent',
-    [listItemTokens.selectedContainerColor]: palette.errorContainer,
-    [listItemTokens.selectedContainerOpacity]: '1',
-    [listItemTokens.textColor]: palette.error,
-    [listItemTokens.textColor$disabled]: palette.error,
+    color: palette.error,
+    ':hover': {
+      color: palette.onErrorContainer,
+    },
+    ':active': {
+      color: palette.onError,
+    },
   },
 })
 
 const sizes = css.create({
   sm: {
-    [listItemTokens.containerMinHeight]: listItemTokens.containerMinHeight$sm,
-    [listItemTokens.leadingSpace]: listItemTokens.leadingSpace$sm,
-    [listItemTokens.trailingSpace]: listItemTokens.trailingSpace$sm,
+    minHeight: 40,
+    paddingInlineStart: spacing.padding2,
+    paddingInlineEnd: spacing.padding2,
   },
   md: {
-    [listItemTokens.containerMinHeight]: listItemTokens.containerMinHeight$md,
+    minHeight: 48,
+    paddingInlineStart: spacing.padding3,
+    paddingInlineEnd: spacing.padding3,
   },
 })
 
 const styles = css.create({
   root: {
     display: 'flex',
-    position: 'relative',
     alignItems: 'center',
-    // height: '100%',
     gap: spacing.padding2,
-    borderRadius: 'inherit',
-    minHeight: listItemTokens.containerMinHeight,
-    WebkitTapHighlightColor: 'transparent',
-    paddingInlineStart: listItemTokens.leadingSpace,
-    paddingInlineEnd: listItemTokens.trailingSpace,
-  },
-  root$interactive: {
+    height: 'unset',
+    width: '100%',
+    textAlign: 'left',
     cursor: 'pointer',
   },
-  root$selected: {},
-  root$disabled: {
+  selected: {
+    backgroundColor: palette.surfaceContainer,
+    ':hover': {
+      backgroundColor: palette.surfaceContainerHigh,
+    },
+    ':active': {
+      backgroundColor: palette.surfaceContainerHighest,
+    },
+  },
+  selected$danger: {
+    backgroundColor: palette.errorContainer,
+    ':hover': {
+      backgroundColor: palette.error,
+    },
+    ':active': {
+      backgroundColor: palette.onError,
+    },
+  },
+  disabled: {
+    opacity: 0.38,
     cursor: 'default',
     pointerEvents: 'none',
-    [listItemTokens.textColor]: listItemTokens.textColor$disabled,
-    [listItemTokens.textOpacity]: listItemTokens.textOpacity$disabled,
   },
-  leading: {
-    position: 'relative',
-    color: listItemTokens.textColor,
-    opacity: listItemTokens.textOpacity,
-  },
-  leadingIcon: {},
-  trailing: {
-    position: 'relative',
-    color: listItemTokens.textColor,
-    opacity: listItemTokens.textOpacity,
-  },
-  trailing$icon: {},
-  container: {
-    inset: 0,
-    position: 'absolute',
-    borderRadius: 'inherit',
+  leadingIcon: {
+    display: 'inline-flex',
+    flexShrink: 0,
   },
   content: {
-    position: 'relative',
     display: 'flex',
-    flexGrow: 1,
     flexDirection: 'column',
-    alignItems: 'flex-start',
-    textAlign: 'left',
-    color: listItemTokens.textColor,
-    opacity: listItemTokens.textOpacity,
+    flex: 1,
+    overflow: 'hidden',
   },
-  text: {
+  label: {
     overflow: 'hidden',
     textOverflow: 'ellipsis',
-    fontFamily: typeScale.bodyFont$lg,
+    whiteSpace: 'nowrap',
     fontSize: typeScale.bodySize$lg,
-    fontWeight: typeScale.titleWeight$md,
     lineHeight: typeScale.bodyLineHeight$lg,
-    letterSpacing: typeScale.bodyLetterSpacing$lg,
+    fontWeight: typeScale.titleWeight$md,
   },
-  supportingText: {
+  supporting: {
     textAlign: 'left',
     maxWidth: 290,
-    textOverflow: 'ellipsis',
-    overflowX: 'auto',
-    color: palette.onSurfaceVariant,
-    fontFamily: typeScale.bodyFont$sm,
-    fontSize: typeScale.bodySize$sm,
-    fontWeight: typeScale.bodyWeight$sm,
-    lineHeight: typeScale.bodyLineHeight$sm,
-    letterSpacing: typeScale.bodyLetterSpacing$sm,
+    whiteSpace: 'pre-wrap',
+    fontFamily: typeScale.bodyFont$md,
+    fontSize: typeScale.bodySize$md,
+    fontWeight: typeScale.bodyWeight$md,
+    lineHeight: typeScale.bodyLineHeight$md,
+    letterSpacing: typeScale.bodyLetterSpacing$md,
   },
   overline: {
     color: palette.onSurfaceVariant,
@@ -222,11 +187,13 @@ const styles = css.create({
     lineHeight: typeScale.labelLineHeight$sm,
     letterSpacing: typeScale.labelLetterSpacing$sm,
   },
-  ripple: {
-    borderRadius: listItemTokens.containerShape,
+  trailing: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    marginInlineStart: 'auto',
+    flexShrink: 0,
   },
-  ripple$selected: {
-    backgroundColor: listItemTokens.selectedContainerColor,
+  trailingIcon: {
+    display: 'inline-flex',
   },
-  ripple$disabled: {},
 })
