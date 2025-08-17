@@ -4,9 +4,7 @@ import type { Props as TextProps } from '@/components/ui/Text/Text'
 import { Text } from '@/components/ui/Text/Text'
 import { useUserState } from '@/hooks/state/useUser'
 import { useCurrentUser } from '@/hooks/useAuth'
-import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
-import { spacing } from '@/themes/spacing.stylex'
 import { encodeSafe } from '@/utils/nip19'
 import { IconUserCheck } from '@tabler/icons-react'
 import { nip19 } from 'nostr-tools'
@@ -60,9 +58,7 @@ export const UserName = memo(function UserName(props: Props) {
         </LinkProfile>
       </UserPopover>
       {currentUser?.followsPubkey(user?.pubkey) && (
-        <html.div style={styles.followingIndicator}>
-          <IconUserCheck size={14} strokeWidth='2.0' />
-        </html.div>
+        <IconUserCheck size={14} strokeWidth='2.2' {...css.props(styles.followingIndicator)} />
       )}
       {children}
     </Stack>
@@ -85,10 +81,8 @@ const styles = css.create({
     maxWidth: 280,
   },
   followingIndicator: {
-    backgroundColor: palette.surfaceContainerHigh,
-    opacity: 0.77,
-    paddingBlock: 2,
-    paddingInline: spacing['padding0.5'],
+    backgroundColor: 'rgba(125, 125, 125, 0.14)',
+    width: 24,
     borderRadius: shape.sm,
   },
   trunkPubkey: {

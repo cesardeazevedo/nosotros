@@ -4,9 +4,9 @@ import { CircularProgress } from '@/components/ui/Progress/CircularProgress'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { Kind } from '@/constants/kinds'
-import { subscribeRemote } from '@/hooks/subscriptions/subscribeCacheFirst'
-import { useGoBack } from '@/hooks/useNavigations'
 import { parseBolt11 } from '@/hooks/parsers/parseZap'
+import { subscribeRemote } from '@/hooks/subscriptions/subscribeStrategy'
+import { useGoBack } from '@/hooks/useNavigations'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
@@ -147,7 +147,8 @@ export const ZapRequestInvoice = (props: Props) => {
                 <Stack horizontal={false} gap={1}>
                   <CopyButton fullWidth text={invoice} title='Copy Invoice' ref={copyButtonRef} />
                   <a href={`lightning:${invoice}`}>
-                    <Button fullWidth variant='filled' sx={styles.button} icon={<IconWallet strokeWidth='1.5' />}>
+                    <Button fullWidth variant='filled' sx={styles.button}>
+                      <IconWallet strokeWidth='1.5' />
                       Open Wallet
                     </Button>
                   </a>

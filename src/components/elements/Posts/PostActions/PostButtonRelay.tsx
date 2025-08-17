@@ -28,7 +28,12 @@ export const ButtonRelays = memo(function ButtonRelays() {
       cursor='arrow'
       key={isMobile.toString()}
       enterDelay={0}
-      text={<div>Seen on {note.seenOn?.map((relay) => <div key={relay}>{relay.replace('wss://', '')}</div>)}</div>}>
+      text={
+        <div style={{ whiteSpace: 'pre-wrap' }}>
+          Seen on{'\n'}
+          {note.seenOn?.map((relay) => relay.replace('wss://', '')).join('\n')}
+        </div>
+      }>
       <ButtonContainer value={note.seenOn?.length || 0} aria-label='Seen on relays'>
         <IconButton
           toggle={note.state.broadcastOpen}

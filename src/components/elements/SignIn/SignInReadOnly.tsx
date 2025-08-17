@@ -131,11 +131,8 @@ export const SignInReadOnly = memo(function SignInForm() {
             />
             {error && <Text>{error}</Text>}
             {errorMsg && <Text>{errorMsg}</Text>}
-            <Button
-              variant='outlined'
-              sx={styles.button}
-              onClick={handleClipboard}
-              icon={<IconClipboardCopy size={18} strokeWidth='1.2' style={{ marginLeft: -20 }} />}>
+            <Button variant='outlined' sx={styles.button} onClick={handleClipboard}>
+              <IconClipboardCopy size={18} strokeWidth='1.2' style={{ marginLeft: -20 }} />
               Paste
             </Button>
           </Stack>

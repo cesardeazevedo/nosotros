@@ -112,8 +112,9 @@ export const PostOptions = memo(function PostOptions() {
           {...getProps()}
           ref={setRef}
           onClick={(e) => {
-            open()
             e.preventDefault()
+            e.stopPropagation()
+            open()
           }}
           size={dense ? 'sm' : 'md'}
           icon={<IconDotsVertical stroke='currentColor' strokeWidth='2.0' size={dense ? 18 : 20} />}

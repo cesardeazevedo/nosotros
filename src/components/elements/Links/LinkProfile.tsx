@@ -21,7 +21,7 @@ export const LinkProfile = memo(function LinkProfile(props: Props) {
   const nprofile = useNprofile(pubkey)
 
   const deck = useDeckAddNextColumn(() => createProfileModule({ nip19: nprofile }))
-  const allStyles = [styles.cursor, underline && styles.underline, sx]
+  const allStyles = [styles.cursor, underline && !disableLink && styles.underline, sx]
 
   if (disableLink || !nprofile) {
     return <html.span style={allStyles}>{children}</html.span>

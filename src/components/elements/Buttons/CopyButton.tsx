@@ -1,6 +1,6 @@
-import type { Props as ButtonProps } from '@/components/ui/Button/Button'
 import { Button } from '@/components/ui/Button/Button'
 import { Stack } from '@/components/ui/Stack/Stack'
+import type { SxProps } from '@/components/ui/types'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconCheck, IconCopy } from '@tabler/icons-react'
 import { AnimatePresence, motion, MotionConfig } from 'framer-motion'
@@ -9,10 +9,12 @@ import { useCallback, useImperativeHandle, useState } from 'react'
 import { css, html } from 'react-strict-dom'
 
 type Props = {
+  fullWidth?: boolean
+  sx?: SxProps
   title?: string
-  ref?: Ref<CopyButtonRef>
+  ref?: Ref<CopyButtonRef | undefined>
   text: string | undefined
-} & Partial<ButtonProps>
+}
 
 type CopyButtonRef = {
   copy: () => void

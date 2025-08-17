@@ -70,7 +70,6 @@ export const EditorSettingsUpload = memo(function EditorSettingsUpload() {
                 }
                 return (
                   <MenuItem
-                    interactive
                     key={url}
                     label={formatted.host}
                     onClick={() => {
@@ -87,7 +86,6 @@ export const EditorSettingsUpload = memo(function EditorSettingsUpload() {
           </Stack>
           {nip96urls.map((url) => (
             <MenuItem
-              interactive
               key={url}
               label={url}
               onClick={() => {

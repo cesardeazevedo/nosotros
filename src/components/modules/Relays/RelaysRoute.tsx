@@ -26,10 +26,8 @@ export const RelayRoute = memo(function RelayRoute() {
               <Text variant='display' size='sm'>
                 Mailbox Relays
               </Text>
-              <Button
-                onClick={() => setIsEditing((prev) => !prev)}
-                icon={!isEditing && <IconPencil size={18} />}
-                variant={isEditing ? 'danger' : 'filled'}>
+              <Button onClick={() => setIsEditing((prev) => !prev)} variant={isEditing ? 'danger' : 'filled'}>
+                {!isEditing && <IconPencil size={18} />}
                 {isEditing ? 'Cancel' : 'Edit'}
               </Button>
             </Stack>

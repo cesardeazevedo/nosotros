@@ -1,4 +1,4 @@
-import { recentsAtom } from '@/atoms/recent.atoms'
+import { recentsAtom, removeRecentAtom } from '@/atoms/recent.atoms'
 import { ContentProvider } from '@/components/providers/ContentProvider'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
@@ -11,7 +11,7 @@ import { spacing } from '@/themes/spacing.stylex'
 import { encodeSafe } from '@/utils/nip19'
 import { IconX } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
-import { useAtomValue } from 'jotai'
+import { useAtomValue, useSetAtom } from 'jotai'
 import { nip19 } from 'nostr-tools'
 import { memo } from 'react'
 import { css } from 'react-strict-dom'
@@ -23,6 +23,7 @@ const RecentProfileRow = (props: { recent: { id: string } }) => {
   const { recent } = props
   const pubkey = recent.id
   const user = useUserState(pubkey)
+  const remove = useSetAtom(removeRecentAtom)
   const nprofile = user?.nprofile || encodeSafe(() => nip19.nprofileEncode({ pubkey }))
   return (
     <Link to={`/$nostr`} params={{ nostr: nprofile as string }}>
@@ -42,7 +43,7 @@ const RecentProfileRow = (props: { recent: { id: string } }) => {
                 onClick={(e) => {
                   e.preventDefault()
                   e.stopPropagation()
-                  // root.recents.remove(recent.id)
+                  remove(recent.id)
                 }}>
                 <IconX size={18} strokeWidth='1.5' />
               </IconButton>

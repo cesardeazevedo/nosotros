@@ -15,12 +15,8 @@ export const DeckNew = () => {
       <DeckColumnContainer paper={false} sx={styles.noborder}>
         <Stack horizontal={false} align='center' justify='center' sx={styles.root} gap={4}>
           <Stack horizontal={false} align='center' gap={4}>
-            <Button
-              disabled={open}
-              variant='filled'
-              sx={styles.button}
-              icon={<IconNewSection />}
-              onClick={() => setOpen(true)}>
+            <Button disabled={open} variant='filled' sx={styles.button} onClick={() => setOpen(true)}>
+              <IconNewSection />
               Add Column
             </Button>
           </Stack>

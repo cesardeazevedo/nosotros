@@ -43,7 +43,7 @@ const darkTheme = css.createTheme(palette, {
 
   primaryFixed: colors.gray12,
   onPrimaryFixed: colors.gray0,
-  primaryFixedDim: colors.gray10,
+  primaryFixedDim: colors.gray2,
 
   secondaryFixed: colors.gray0,
   onSecondaryFixed: colors.gray12,

@@ -18,7 +18,6 @@ export const SidebarMenuLogout = (props: Props) => {
   const navigate = useNavigate()
   return (
     <MenuItem
-      interactive
       size={size}
       leadingIcon={<IconLogout strokeWidth='1.8' />}
       label='Log out'

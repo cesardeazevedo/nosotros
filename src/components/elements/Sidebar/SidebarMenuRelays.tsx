@@ -11,7 +11,6 @@ import { Link, useMatchRoute } from '@tanstack/react-router'
 import { memo, useContext } from 'react'
 import { css } from 'react-strict-dom'
 import { SidebarContext } from './SidebarContext'
-import { SidebarSubheader } from './SidebarSubheader'
 
 type Props = {
   sx?: SxProps
@@ -31,8 +30,10 @@ export const SidebarMenuRelays = memo(function SidebarMenuRelays(props: Props) {
   const isRelayDiscovery = context.pane === '/explore/relays' || !!match({ to: '/explore/relays' })
   return (
     <>
-      <SidebarSubheader label='Relays' />
-      <Stack horizontal={false} gap={0.5}>
+      <Text size='md' sx={styles.label}>
+        Relays
+      </Text>
+      <Stack horizontal={false} gap={0.5} sx={styles.content}>
         <Link tabIndex={-1} to='/relays/active'>
           {({ isActive }) => (
             <MenuItem
@@ -81,13 +82,7 @@ export const SidebarMenuRelays = memo(function SidebarMenuRelays(props: Props) {
 
 const styles = css.create({
   content: {
-    paddingInline: spacing.padding2,
-    paddingBlock: spacing.padding1,
-  },
-  description: {
-    paddingInline: spacing['padding0.5'],
-    paddingRight: spacing.padding4,
-    paddingBottom: spacing.padding1,
+    marginTop: spacing.margin1,
   },
   gray: {
     color: palette.onSurfaceVariant,
@@ -95,5 +90,10 @@ const styles = css.create({
   },
   menuItem: {
     marginLeft: spacing.margin2,
+  },
+  label: {
+    margin: spacing.margin2,
+    color: palette.onSurfaceVariant,
+    fontWeight: 500,
   },
 })

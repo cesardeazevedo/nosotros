@@ -4,7 +4,15 @@ import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { useMobile } from '@/hooks/useMobile'
 import { shape } from '@/themes/shape.stylex'
-import { IconBell, IconListDetails, IconNews, IconPhoto, IconPhotoFilled, IconSettings } from '@tabler/icons-react'
+import {
+  IconArticle,
+  IconArticleFilled,
+  IconBell,
+  IconListDetails,
+  IconPhoto,
+  IconPhotoFilled,
+  IconSettings,
+} from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
 import { useContext } from 'react'
 import { css, html } from 'react-strict-dom'
@@ -28,7 +36,8 @@ export const SidebarMenuWelcome = () => {
     <Stack horizontal={false} sx={styles.root} gap={1}>
       <Stack horizontal={false} gap={0.5} sx={styles.wrapper}>
         <LinkSignIn>
-          <Button sx={styles.button} fullWidth variant='filled' icon={<IconNostr />}>
+          <Button sx={styles.button} fullWidth variant='filled'>
+            <IconNostr />
             Join Nostr
           </Button>
         </LinkSignIn>
@@ -58,7 +67,7 @@ export const SidebarMenuWelcome = () => {
             <MenuItem
               selected={isActive}
               onClick={() => context.setPane(false)}
-              leadingIcon={<IconNews {...iconProps} />}
+              leadingIcon={isActive ? <IconArticleFilled {...iconProps} /> : <IconArticle {...iconProps} />}
               label='Articles'
             />
           )}

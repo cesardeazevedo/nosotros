@@ -10,12 +10,14 @@ import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import {
+  IconArticle,
+  IconArticleFilled,
   IconBell,
   IconBellFilled,
   IconLayoutSidebarLeftExpandFilled,
   IconListDetails,
-  IconNews,
   IconPhoto,
+  IconPhotoFilled,
   IconUser,
   IconUserFilled,
   IconWorldBolt,
@@ -100,7 +102,7 @@ export const SidebarCollapsed = memo(function SidebarCollapsed(props: Props) {
               selected={isActive && isNoPane}
               toggle
               sx={styles.iconButton}
-              icon={<IconPhoto {...iconProps} />}
+              icon={isActive ? <IconPhotoFilled {...iconProps} /> : <IconPhoto {...iconProps} />}
               onClick={() => context.setPane(false)}
             />
           )}
@@ -111,14 +113,13 @@ export const SidebarCollapsed = memo(function SidebarCollapsed(props: Props) {
               selected={isActive && isNoPane}
               toggle
               sx={styles.iconButton}
-              icon={<IconNews {...iconProps} strokeWidth={1.4} />}
+              icon={isActive ? <IconArticleFilled {...iconProps} /> : <IconArticle {...iconProps} />}
               onClick={() => context.setPane(false)}
             />
           )}
         </Link>
         <IconButton
           toggle
-          disabled={!pubkey}
           selected={context.pane === '/lists' || !!match({ to: '/lists' })}
           sx={styles.iconButton}
           icon={<IconListDetails {...iconProps} strokeWidth={1.4} />}

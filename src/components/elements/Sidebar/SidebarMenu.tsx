@@ -8,11 +8,13 @@ import { useNprofile } from '@/hooks/useEventUtils'
 import { useMobile } from '@/hooks/useMobile'
 import { shape } from '@/themes/shape.stylex'
 import {
+  IconArticle,
+  IconArticleFilled,
   IconBell,
   IconBellFilled,
   IconListDetails,
-  IconNews,
   IconPhoto,
+  IconPhotoFilled,
   IconSettings,
   IconSettingsFilled,
   IconUser,
@@ -46,7 +48,7 @@ export const SidebarMenu = memo(function SidebarMenu() {
       <Stack horizontal={false} gap={0.5} sx={styles.wrapper}>
         <SidebarMenuFeeds />
         <MenuItem
-          interactive
+          disabled={!pubkey}
           selected={isNotification}
           leadingIcon={
             <NotificationBadge>
@@ -60,10 +62,9 @@ export const SidebarMenu = memo(function SidebarMenu() {
         <Link to='/media'>
           {({ isActive }) => (
             <MenuItem
-              interactive
               label='Media'
               selected={isActive}
-              leadingIcon={<IconPhoto {...iconProps} />}
+              leadingIcon={isActive ? <IconPhotoFilled {...iconProps} /> : <IconPhoto {...iconProps} />}
               onClick={() => context.setPane(false)}
             />
           )}
@@ -71,16 +72,14 @@ export const SidebarMenu = memo(function SidebarMenu() {
         <Link to='/articles'>
           {({ isActive }) => (
             <MenuItem
-              interactive
               selected={isActive}
-              leadingIcon={<IconNews {...iconProps} />}
+              leadingIcon={isActive ? <IconArticleFilled {...iconProps} /> : <IconArticle {...iconProps} />}
               label='Articles'
               onClick={() => context.setPane(false)}
             />
           )}
         </Link>
         <MenuItem
-          interactive
           selected={context.pane === '/lists'}
           onClick={() => context.setPane('/lists')}
           leadingIcon={<IconListDetails {...iconProps} />}
@@ -93,7 +92,6 @@ export const SidebarMenu = memo(function SidebarMenu() {
           }}>
           {({ isActive }) => (
             <MenuItem
-              interactive
               selected={isActive}
               leadingIcon={<IconUser {...iconProps} />}
               label='Profile'
@@ -120,7 +118,6 @@ export const SidebarMenu = memo(function SidebarMenu() {
         <Link to='/settings'>
           {({ isActive }) => (
             <MenuItem
-              interactive
               selected={isActive}
               leadingIcon={isActive ? <IconSettingsFilled {...iconProps} /> : <IconSettings {...iconProps} />}
               label='Settings'

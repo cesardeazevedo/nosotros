@@ -87,7 +87,7 @@ export const EditorMedia = memo(function EditorMedia(props: Props) {
   return (
     <>
       <EditorContainer open={state.open} onClick={() => state.setOpen()}>
-        {pubkey && <UserAvatar size='md' pubkey={pubkey} />}
+        {pubkey && <UserAvatar pubkey={pubkey} />}
         <Stack horizontal={false} align='stretch' justify={'center'} grow sx={styles.content}>
           <Stack sx={[styles.content, dense && styles.content$dense]} gap={2} align='flex-start'>
             <Stack horizontal={false} sx={styles.wrapper}>
