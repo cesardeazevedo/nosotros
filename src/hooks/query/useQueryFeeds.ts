@@ -3,12 +3,23 @@ import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import type { NostrContext } from '@/nostr/context'
 import type { InfiniteData, UseInfiniteQueryOptions } from '@tanstack/react-query'
 import { infiniteQueryOptions } from '@tanstack/react-query'
-import { concatMap, firstValueFrom, ignoreElements, mergeMap, mergeWith, of, shareReplay, tap, timer } from 'rxjs'
+import {
+  concatMap,
+  EMPTY,
+  firstValueFrom,
+  ignoreElements,
+  mergeMap,
+  mergeWith,
+  of,
+  shareReplay,
+  tap,
+  timer,
+} from 'rxjs'
 import type { Module } from '../modules/module'
 import { subscribeFeed } from '../subscriptions/subscribeFeed'
 import { subscribeLive } from '../subscriptions/subscribeLive'
-import { setEventData } from './queryUtils'
 import { queryClient } from './queryClient'
+import { setEventData } from './queryUtils'
 
 export type FeedScope = 'self' | 'following' | 'sets_p' | 'sets_e' | 'followers' | 'network' | 'global' | 'wot'
 
@@ -16,6 +27,7 @@ export type FeedModule = Module & {
   scope: FeedScope
   live?: boolean
   blured?: boolean
+  pageSize?: number
   includeReplies?: boolean
 }
 
@@ -63,9 +75,23 @@ export function createFeedQueryOptions(
 
           if (feedEmpty && res.length === 0 && network !== 'REMOTE_ONLY') {
             // Feed is empty, fetch the database again
-            return timer(4500).pipe(
+            return timer(3500).pipe(
               mergeMap(() => {
                 return subscribeFeed({ ...options.ctx, network: 'CACHE_ONLY' }, options.scope, filter)
+              }),
+            )
+          } else if (!feedEmpty && isFirstPage && network !== 'CACHE_ONLY') {
+            return timer(1500).pipe(
+              mergeMap(() => {
+                const data = queryClient.getQueryData(options.queryKey) as InfiniteEvents | undefined
+                const ids = new Set(data?.pages.flat().map((x) => x.id))
+                const top = data?.pages[0][0].created_at || 0
+                res
+                  .filter((x) => !ids.has(x.id) && x.created_at > top)
+                  .forEach((x) => {
+                    options.onStream?.(x)
+                  })
+                return EMPTY
               }),
             )
           }
