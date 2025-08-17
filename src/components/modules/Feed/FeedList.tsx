@@ -20,7 +20,10 @@ export const FeedList = memo(function FeedList(props: Props) {
   const { feed, render, onScrollEnd, column, renderNewPostsIndicator = true } = props
   const ref = useRef<HTMLDivElement>(null)
 
-  const list = useMemo(() => feed.query.data?.pages.flat() || [], [feed.query.data?.pages])
+  const list = useMemo(
+    () => feed.query.data?.pages.flat().slice(0, feed.pageSize) || [],
+    [feed.query.data?.pages, feed.pageSize],
+  )
 
   useLayoutEffect(() => {
     if (!column) {

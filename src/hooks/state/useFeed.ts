@@ -16,10 +16,14 @@ export function useFeedState(options: FeedModule & { select?: (data: InfiniteEve
   const [blured, setBlured] = useState(options.blured ?? false)
   const [buffer, setBuffer] = useState<NostrEventDB[]>([])
   const [bufferReplies, setBufferReplies] = useState<NostrEventDB[]>([])
+  const [pageSize, setPageSize] = useState(options.pageSize || 10)
 
   // In case the filter was updated from the router
   if (!strictDeepEqual(filter, options.filter)) {
     setFilter(options.filter)
+  }
+  if (replies !== options.includeReplies) {
+    setReplies(options.includeReplies)
   }
 
   const queryClient = useQueryClient()
@@ -33,7 +37,10 @@ export function useFeedState(options: FeedModule & { select?: (data: InfiniteEve
               page.filter((event) => {
                 switch (event.kind) {
                   case Kind.Text: {
-                    return replies ? !event.metadata?.isRoot : event.metadata?.isRoot
+                    if (replies !== undefined) {
+                      return replies ? !event.metadata?.isRoot : event.metadata?.isRoot
+                    }
+                    return true
                   }
                   case Kind.Repost: {
                     return !replies
@@ -64,8 +71,9 @@ export function useFeedState(options: FeedModule & { select?: (data: InfiniteEve
 
   const flush = () => {
     queryClient.setQueryData(queryKey, (older: InfiniteEvents | undefined) => {
+      const ids = new Set(older?.pages.flat().map((x) => x.id))
       const bufferData = replies ? bufferReplies : buffer
-      const sorted = bufferData.sort((a, b) => b.created_at - a.created_at)
+      const sorted = bufferData.filter((x) => !ids.has(x.id)).sort((a, b) => b.created_at - a.created_at)
       return {
         pageParams: older?.pageParams || { limit: filter.limit },
         pages: [[...sorted, ...(older?.pages?.[0] || [])], ...(older?.pages?.slice(1) || [])],
@@ -97,10 +105,16 @@ export function useFeedState(options: FeedModule & { select?: (data: InfiniteEve
 
   const resetFilter = useCallback(() => setFilter(options.filter), [options.filter])
 
-  const [paginate, paginate$] = useObservableCallback<void, void>((input$) => {
+  const [paginate, paginate$] = useObservableCallback<[number, InfiniteEvents | undefined]>((input$) => {
     return input$.pipe(
-      throttleTime(1500, undefined, { leading: true, trailing: true }),
-      tap(() => query.fetchNextPage()),
+      throttleTime(1200, undefined, { leading: true, trailing: true }),
+      tap(([pageSize, data]) => {
+        if (pageSize < (data?.pages.flat().length || 0)) {
+          setPageSize(pageSize + 10)
+        } else {
+          query.fetchNextPage()
+        }
+      }),
     )
   })
   useSubscription(paginate$)
@@ -123,7 +137,9 @@ export function useFeedState(options: FeedModule & { select?: (data: InfiniteEve
     resetFilter,
     blured,
     setBlured,
-    paginate: () => paginate(),
+    pageSize,
+    setPageSize,
+    paginate: () => paginate([pageSize, query.data]),
     addRelay: () => {},
     removeRelay: () => {},
   }
