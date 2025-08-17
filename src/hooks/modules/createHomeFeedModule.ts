@@ -3,8 +3,12 @@ import { RECOMMENDED_PUBKEYS } from '@/constants/recommended'
 import { DateTime } from 'luxon'
 import { queryKeys } from '../query/queryKeys'
 import type { FeedModule } from '../query/useQueryFeeds'
+import { createRelayFeedModule } from './createRelayFeedModule'
 
 export function createHomeFeedModule(pubkey?: string): FeedModule {
+  if (!pubkey) {
+    return createRelayFeedModule('wss://nostr.wine')
+  }
   const id = pubkey ? `home_${pubkey}` : 'guest'
   const filter = {
     kinds: [Kind.Text, Kind.Repost],
