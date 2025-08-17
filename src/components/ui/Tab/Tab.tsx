@@ -8,10 +8,10 @@ import { css, html } from 'react-strict-dom'
 import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDOMProps'
 import { Anchored } from '../Anchored/Anchored'
 import { Button } from '../Button/Button'
+import { mergeRefs } from '../helpers/mergeRefs'
 import { TabsContext } from '../Tabs/Tabs'
 import type { SxProps } from '../types'
 import { tabTokens } from './Tab.stylex'
-import { mergeRefs } from '../helpers/mergeRefs'
 
 export type TabVariant = 'primary' | 'secondary'
 
@@ -42,7 +42,7 @@ export const Tab = (props: Props) => {
 
   const buttonRef = useRef<HTMLButtonElement | null>(null)
   const indicatorRef = useRef<HTMLDivElement | null>(null)
-  const refs = mergeRefs([ref, buttonRef, indicatorRef])
+  const refs = mergeRefs([ref, buttonRef])
 
   const handleClick = useCallback(
     (e: StrictClickEvent) => {
