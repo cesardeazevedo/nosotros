@@ -1,9 +1,11 @@
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import type { FeedState } from '@/hooks/state/useFeed'
+import { spacing } from '@/themes/spacing.stylex'
 import type { BaseSyntheticEvent } from 'react'
 import React, { memo, useCallback, useLayoutEffect, useMemo, useRef } from 'react'
 import { css, html } from 'react-strict-dom'
 import { FeedNewPosts } from './FeedNewPosts'
+import { PullToRefreshWrapper } from './FeedPullToRefresh'
 
 export type Props = {
   feed: FeedState
@@ -19,6 +21,10 @@ export type Props = {
 export const FeedList = memo(function FeedList(props: Props) {
   const { feed, render, onScrollEnd, column, renderNewPostsIndicator = true } = props
   const ref = useRef<HTMLDivElement>(null)
+  const pullRefreshProps = {
+    queryKey: feed.queryKey,
+    onRefresh: feed.resetBuffers,
+  }
 
   const list = useMemo(
     () => feed.query.data?.pages.flat().slice(0, feed.pageSize) || [],
@@ -59,25 +65,32 @@ export const FeedList = memo(function FeedList(props: Props) {
       <html.div style={styles.column} ref={ref} onScroll={handleScrollColumn}>
         {props.header}
         {!props.wrapper && renderNewPostsIndicator && <FeedNewPosts ref={ref} feed={feed} />}
-        {props.wrapper
-          ? props.wrapper(
+        {props.wrapper ? (
+          <PullToRefreshWrapper {...pullRefreshProps}>
+            {props.wrapper(
               <>
                 {renderNewPostsIndicator && <FeedNewPosts ref={ref} feed={feed} />}
                 {content}
               </>,
-            )
-          : content}
-        {props.footer}
+            )}
+            {props.footer}
+          </PullToRefreshWrapper>
+        ) : (
+          <PullToRefreshWrapper {...pullRefreshProps}>
+            {content}
+            {props.footer}
+          </PullToRefreshWrapper>
+        )}
       </html.div>
     )
   }
   return (
-    <>
+    <PullToRefreshWrapper {...pullRefreshProps}>
       {props.header}
       <FeedNewPosts feed={feed} />
       {props.wrapper ? props.wrapper(<>{content}</>) : content}
       {props.footer}
-    </>
+    </PullToRefreshWrapper>
   )
 })
 
@@ -86,5 +99,8 @@ const styles = css.create({
     position: 'relative',
     height: '95vh',
     overflow: 'scroll',
+  },
+  refreshing: {
+    paddingBlock: spacing.padding2,
   },
 })

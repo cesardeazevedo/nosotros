@@ -27,7 +27,7 @@ export function useFeedState(options: FeedModule & { select?: (data: InfiniteEve
   }
 
   const queryClient = useQueryClient()
-  const queryKey = queryKeys.feed(options.id, filter, options.ctx)
+  const queryKey = queryKeys.feed(options.id, filter)
   const query = useInfiniteQuery(
     createFeedQueryOptions({
       select: useCallback(
@@ -91,6 +91,17 @@ export function useFeedState(options: FeedModule & { select?: (data: InfiniteEve
   const bufferPubkeys = useMemo(() => buffer.slice(0, 3).map((event) => event.pubkey), [buffer])
   const bufferPubkeysReplies = useMemo(() => bufferReplies.slice(0, 3).map((event) => event.pubkey), [bufferReplies])
 
+  const resetBuffers = useCallback(() => {
+    if (replies === true) {
+      setBufferReplies([])
+    } else if (replies === false) {
+      setBuffer([])
+    } else {
+      setBuffer([])
+      setBufferReplies([])
+    }
+  }, [replies])
+
   const hasKind = useCallback((kind: Kind) => filter.kinds?.includes(kind), [filter])
   const toggleKind = useCallback(
     (kind: Kind) =>
@@ -121,6 +132,7 @@ export function useFeedState(options: FeedModule & { select?: (data: InfiniteEve
 
   return {
     query,
+    queryKey,
     options,
     filter,
     type: options.type,
@@ -135,6 +147,7 @@ export function useFeedState(options: FeedModule & { select?: (data: InfiniteEve
     hasKind,
     toggleKind,
     resetFilter,
+    resetBuffers,
     blured,
     setBlured,
     pageSize,
