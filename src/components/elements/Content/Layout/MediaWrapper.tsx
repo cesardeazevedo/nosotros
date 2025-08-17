@@ -1,6 +1,7 @@
-import { mediaDimsAtom, mediaErrorSelector } from '@/atoms/media.atoms'
+import { mediaDimsAtom } from '@/atoms/media.atoms'
 import { useContentContext } from '@/components/providers/ContentProvider'
 import { useNoteContext } from '@/components/providers/NoteProvider'
+import { Kind } from '@/constants/kinds'
 import { spacing } from '@/themes/spacing.stylex'
 import { useAtomValue } from 'jotai'
 import React, { memo } from 'react'
@@ -46,69 +47,47 @@ function adjustDimensions(
   }
 }
 
-// Handles width and height for Image and Video components if imeta tag is present
-// it defaults to max-width and max-height if they are not. This component also abstract lots ofduplicated
-// duplicated styles on Image and Video components, making a lot easier to work with
 export const MediaWrapper = memo(function MediaWrapper(props: Props) {
-  const { src, size = 'md', fixedHeight, disablePadding = false, children } = props
+  const { src, size = 'md', children } = props
   const { note } = useNoteContext()
   const { dense } = useContentContext()
   const dim = note.metadata?.imeta?.[src]?.dim
   const dims = useAtomValue(mediaDimsAtom)
   const width = dims.get(src)?.[0] || dim?.width
   const height = dims.get(src)?.[1] || dim?.height
-  const hasError = useAtomValue(mediaErrorSelector(src))
   const adjusted =
-    width && height ? adjustDimensions(width, height, MAX_BOUNDS[size].maxWidth, MAX_BOUNDS[size].maxWidth) : null
+    width && height && note.event.kind === Kind.Media
+      ? adjustDimensions(width, height, MAX_BOUNDS[size].maxWidth, MAX_BOUNDS[size].maxWidth)
+      : null
+
   return (
-    <>
-      <html.div
-        style={[
-          styles.root,
-          !disablePadding && styles.padding,
-          dense && styles.root$dense,
-          adjusted ? styles.bounds(adjusted.width, adjusted.height) : styles[`size$${size}`],
-          !!fixedHeight && styles.fixedHeight(fixedHeight),
-          hasError && styles.error,
-        ]}>
-        {children}
-      </html.div>
-    </>
+    <html.div
+      style={[
+        styles.padding,
+        dense && styles.root$dense,
+        adjusted ? styles.bounds(adjusted.width, adjusted.height) : null,
+      ]}>
+      {children}
+    </html.div>
   )
 })
 
-const MOBILE = '@media (max-width: 599.95px)'
-
 const styles = css.create({
   root: {
-    width: '100%',
-    height: '100%',
     marginBlock: spacing.margin2,
-    maxWidth: {
-      default: 560,
-      [MOBILE]: 'calc(100vw - 60px)',
-    },
+    maxInlineSize: '100%',
+    maxBlockSize: 'fit-content',
+    overflow: 'hidden',
   },
   root$dense: {
     marginBlock: spacing.margin1,
     paddingLeft: 0,
+    paddingRight: 0,
   },
   padding: {
+    marginBlock: spacing.margin2,
     paddingLeft: spacing.padding2,
+    paddingRight: spacing.padding2,
   },
-  size$lg: {
-    maxHeight: MAX_BOUNDS.lg.maxHeight,
-  },
-  size$md: {
-    maxHeight: MAX_BOUNDS.md.maxHeight,
-  },
-  size$sm: {
-    maxHeight: MAX_BOUNDS.sm.maxHeight,
-  },
-  error: {
-    // width: 'auto',
-    // height: 'auto',
-  },
-  fixedHeight: (height: number) => ({ height }),
   bounds: (width: number, height: number) => ({ width, height }),
 })

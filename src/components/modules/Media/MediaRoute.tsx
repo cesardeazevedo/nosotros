@@ -5,14 +5,12 @@ import { Kind } from '@/constants/kinds'
 import { createMediaFeedModule } from '@/hooks/modules/createMediaFeedModule'
 import { useMediaFeedState } from '@/hooks/state/useMediaFeed'
 import { useCurrentPubkey } from '@/hooks/useAuth'
-import { useResetScroll } from '@/hooks/useResetScroll'
 import { MediaFeed } from './MediaFeed'
 import { MediaHeader } from './MediaHeader'
 
 export const MediaRoute = () => {
   const pubkey = useCurrentPubkey()
   const feed = useMediaFeedState(createMediaFeedModule(pubkey))
-  useResetScroll()
   return (
     <RouteContainer header={<MediaHeader feed={feed} />}>
       <EditorProvider kind={Kind.Media} queryKey={feed.options.queryKey} initialOpen={false} />

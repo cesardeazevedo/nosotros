@@ -4,7 +4,6 @@ import { useContentContext } from '@/components/providers/ContentProvider'
 import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { SxProps } from '@/components/ui/types'
-import { useMediaStore } from '@/hooks/useMediaStore'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
@@ -32,7 +31,6 @@ export const Image = memo(function Image(props: Props) {
   const pushImage = useSetAtom(openImageDialogAtom)
   const hasError = useAtomValue(mediaErrorsAtom).has(src)
   const addError = useSetAtom(addMediaErrorAtom)
-  const media = useMediaStore(src, note.metadata?.imeta)
 
   const handleClick = useCallback(
     (e: StrictClickEvent) => {
@@ -64,7 +62,6 @@ export const Image = memo(function Image(props: Props) {
               onClick={handleClick}
               onError={() => addError(src)}
               {...rest}
-              {...media}
             />
           )}
         </>
@@ -75,19 +72,15 @@ export const Image = memo(function Image(props: Props) {
 
 const styles = css.create({
   img: {
-    objectFit: 'cover',
-    width: 'inherit',
-    height: 'inherit',
-    maxWidth: 'inherit',
-    maxHeight: 'inherit',
-    userSelect: 'none',
+    display: 'block',
+    blockSize: 'auto',
+    marginBlock: spacing.margin1,
+    maxHeight: 500,
     cursor: 'pointer',
     backgroundColor: palette.surfaceContainerLow,
     borderRadius: shape.xl,
     transition: 'transform 150ms ease',
-    ':active': {
-      transform: 'scale(0.985)',
-    },
+    ':active': { transform: 'scale(0.985)' },
   },
   fallback: {
     width: '100%',

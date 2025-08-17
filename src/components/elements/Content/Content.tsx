@@ -50,11 +50,9 @@ export const Content = memo(function Content(props: Props) {
               {node.type === 'heading' && <Heading node={node} />}
               {node.type === 'paragraph' && <Paragraph node={node} />}
               {renderMedia && isImageNode(event.kind, node) && (
-                <>
-                  <MediaWrapper size={size} src={node.attrs.src}>
-                    <Image src={node.attrs!.src} />
-                  </MediaWrapper>
-                </>
+                <MediaWrapper size={size} src={node.attrs.src}>
+                  <Image src={node.attrs!.src} />
+                </MediaWrapper>
               )}
               {renderMedia && isVideoNode(event.kind, node) && (
                 <MediaWrapper size={size} src={node.attrs.src}>

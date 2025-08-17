@@ -87,13 +87,14 @@ export const Video = memo(function Video(props: Props) {
 
 const styles = css.create({
   video: {
-    borderRadius: shape.lg,
+    display: 'block',
+    blockSize: 'auto',
+    inlineSize: '100%',
+    maxInlineSize: '100%',
+    width: 'fit-content',
+    maxHeight: 500,
     backgroundColor: '#000',
-    objectFit: 'cover',
-    width: 'inherit',
-    height: 'inherit',
-    maxHeight: 'inherit',
-    maxWidth: 'inherit',
+    borderRadius: shape.lg,
     transition: 'transform 150ms ease',
     ':active': {
       transform: 'scale(0.985)',
