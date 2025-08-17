@@ -15,6 +15,7 @@ export function createSearchFeedModule(search: string): FeedModule {
     type: 'search',
     queryKey: queryKeys.feed(id, filter),
     filter,
+    includeReplies: undefined,
     ctx: {
       network: 'REMOTE_ONLY',
       relays: SEARCH_RELAYS,

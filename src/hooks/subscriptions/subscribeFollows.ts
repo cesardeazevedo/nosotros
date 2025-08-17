@@ -5,7 +5,7 @@ import type { NostrContext } from '@/nostr/context'
 import { defaultIfEmpty, from, identity, map, mergeMap } from 'rxjs'
 import { queryClient } from '../query/queryClient'
 import { replaceableEventQueryOptions } from '../query/useQueryBase'
-import { subscribeCacheFirst } from './subscribeCacheFirst'
+import { subscribeStrategy } from './subscribeStrategy'
 
 export async function subscribeFollows(pubkey: string) {
   const res = await queryClient.fetchQuery(replaceableEventQueryOptions(Kind.Follows, pubkey))
@@ -20,7 +20,7 @@ export function subscribeFeedFollowing(ctx: NostrContext, filter: NostrFilter, d
     // Follow list couldn't be found
     defaultIfEmpty(RECOMMENDED_PUBKEYS),
     mergeMap((authors) => {
-      return subscribeCacheFirst(ctx, { ...filter, authors }, { ...dbFilter, authors, limit: 30 })
+      return subscribeStrategy(ctx, { ...filter, authors }, { ...dbFilter, authors, limit: 30 })
     }),
   )
 }

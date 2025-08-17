@@ -1,5 +1,5 @@
 import { ArticleRoot } from '@/components/modules/Articles/ArticleRoot'
-import { FollowSetCard } from '@/components/modules/Lists/FollowSets/FollowSetCard'
+import { FollowSetItem } from '@/components/modules/Lists/FollowSets/FollowSetItem'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { Kind } from '@/constants/kinds'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
@@ -45,7 +45,7 @@ export const NostrEventFeedItem = memo(function NostrEventFeedItem(props: Props)
       return <ZapReceiptRoot event={event} />
     }
     case Kind.FollowSets: {
-      return <FollowSetCard event={event} />
+      return <FollowSetItem event={event} />
     }
     default: {
       console.log('Unhandled item to render', event)

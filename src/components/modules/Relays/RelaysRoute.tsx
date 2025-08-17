@@ -5,7 +5,6 @@ import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { useCurrentPubkey } from '@/hooks/useAuth'
 import { useMobile } from '@/hooks/useMobile'
-import { useResetScroll } from '@/hooks/useResetScroll'
 import { READ, WRITE } from '@/nostr/types'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconPencil } from '@tabler/icons-react'
@@ -16,7 +15,6 @@ export const RelayRoute = memo(function RelayRoute() {
   const [isEditing, setIsEditing] = useState(false)
   const pubkey = useCurrentPubkey()
   const mobile = useMobile()
-  useResetScroll()
   return (
     <CenteredContainer margin sx={styles.root}>
       <Stack horizontal={false} gap={mobile ? 0 : 4}>

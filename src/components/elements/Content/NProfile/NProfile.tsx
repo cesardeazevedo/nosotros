@@ -15,16 +15,14 @@ export const NProfile = memo(function NProfile(props: Props) {
   const { pubkey } = props
   const user = useUserState(pubkey)
   return (
-    <>
-      <UserPopover pubkey={pubkey}>
-        <LinkProfile underline pubkey={pubkey} sx={styles.link}>
-          <ContentProvider value={{ disablePopover: true, disableLink: true }}>
-            <UserAvatar pubkey={pubkey} size='xs' sx={styles.avatar} />
-          </ContentProvider>
-          {user.displayName}
-        </LinkProfile>
-      </UserPopover>
-    </>
+    <UserPopover pubkey={pubkey}>
+      <LinkProfile underline pubkey={pubkey} sx={styles.link}>
+        <ContentProvider value={{ disablePopover: true, disableLink: true }}>
+          <UserAvatar pubkey={pubkey} size='xxs' sx={styles.avatar} />
+        </ContentProvider>
+        {user.displayName}
+      </LinkProfile>
+    </UserPopover>
   )
 })
 
@@ -54,9 +52,7 @@ const styles = css.create({
   avatar: {
     position: 'relative',
     display: 'inline-block',
-    width: 16,
-    height: 16,
-    top: 2,
+    top: -1,
     marginRight: 2,
   },
 })

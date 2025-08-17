@@ -3,7 +3,7 @@ import type { FeedModule } from '@/hooks/query/useQueryFeeds'
 import { useFeedState } from '@/hooks/state/useFeed'
 import { DeckColumnFeed } from '../Deck/DeckColumnFeed'
 import { FeedHeader } from '../Feed/FeedHeader'
-import { FollowSetCard } from './FollowSets/FollowSetCard'
+import { FollowSetItem } from './FollowSets/FollowSetItem'
 import { RelaySetItem } from './RelaySets/RelaySetItem'
 
 type Props = {
@@ -22,7 +22,7 @@ export const ListsColumn = (props: Props) => {
             return <RelaySetItem event={event} />
           }
           case Kind.FollowSets: {
-            return <FollowSetCard event={event} />
+            return <FollowSetItem event={event} />
           }
         }
       }}

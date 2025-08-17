@@ -139,7 +139,6 @@ export const DeckMenu = memo(function DeckMenu(props: Props) {
       {!view && (
         <List sx={styles.list}>
           <ListItem
-            interactive
             sx={styles.item}
             leadingIcon={
               <IconWrapper>
@@ -151,7 +150,6 @@ export const DeckMenu = memo(function DeckMenu(props: Props) {
             <Text size='lg'>Home feed</Text>
           </ListItem>
           <ListItem
-            interactive
             sx={styles.item}
             leadingIcon={
               <IconWrapper>
@@ -163,7 +161,6 @@ export const DeckMenu = memo(function DeckMenu(props: Props) {
             Profiles
           </ListItem>
           <ListItem
-            interactive
             disabled={!pubkey}
             sx={styles.item}
             leadingIcon={
@@ -176,7 +173,6 @@ export const DeckMenu = memo(function DeckMenu(props: Props) {
             <Text size='lg'>Notifications</Text>
           </ListItem>
           <ListItem
-            interactive
             sx={styles.item}
             leadingIcon={
               <IconWrapper>
@@ -188,7 +184,6 @@ export const DeckMenu = memo(function DeckMenu(props: Props) {
             <Text size='lg'>Search</Text>
           </ListItem>
           <ListItem
-            interactive
             sx={styles.item}
             leadingIcon={
               <IconWrapper>
@@ -200,7 +195,6 @@ export const DeckMenu = memo(function DeckMenu(props: Props) {
             Articles
           </ListItem>
           <ListItem
-            interactive
             sx={styles.item}
             leadingIcon={
               <IconWrapper>
@@ -212,7 +206,6 @@ export const DeckMenu = memo(function DeckMenu(props: Props) {
             Media
           </ListItem>
           <ListItem
-            interactive
             sx={styles.item}
             onClick={() => setView('tags')}
             leadingIcon={
@@ -224,7 +217,6 @@ export const DeckMenu = memo(function DeckMenu(props: Props) {
             <Text size='lg'>Tag</Text>
           </ListItem>
           <ListItem
-            interactive
             sx={styles.item}
             onClick={() => setView('lists')}
             leadingIcon={
@@ -236,7 +228,6 @@ export const DeckMenu = memo(function DeckMenu(props: Props) {
             <Text size='lg'>Lists</Text>
           </ListItem>
           <ListItem
-            interactive
             sx={styles.item}
             leadingIcon={
               <IconWrapper>
@@ -248,7 +239,6 @@ export const DeckMenu = memo(function DeckMenu(props: Props) {
             <Text size='lg'>Relay Feeds</Text>
           </ListItem>
           <ListItem
-            interactive
             sx={styles.item}
             leadingIcon={
               <IconWrapper>

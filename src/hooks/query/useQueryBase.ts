@@ -3,17 +3,17 @@ import { FALLBACK_RELAYS } from '@/constants/relays'
 import { mergeRelayHints } from '@/core/mergers/mergeRelayHints'
 import type { RelayHints } from '@/core/types'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
-import type { NostrContext } from '@/nostr/context'
 import { parseEventMetadata } from '@/hooks/parsers/parseEventMetadata'
+import type { NostrContext } from '@/nostr/context'
 import { decodeNIP19, decodeRelays, decodeToFilter, nip19ToRelayHints } from '@/utils/nip19'
 import type { UseQueryOptions } from '@tanstack/react-query'
 import { keepPreviousData, queryOptions, useQuery } from '@tanstack/react-query'
 import type { Filter } from 'nostr-tools'
 import { firstValueFrom, shareReplay } from 'rxjs'
 import { batcher } from '../batchers'
-import { subscribeCacheFirst } from '../subscriptions/subscribeCacheFirst'
-import { setEventData } from './queryUtils'
+import { subscribeStrategy } from '../subscriptions/subscribeStrategy'
 import { pointerToQueryKey, queryKeys } from './queryKeys'
+import { setEventData } from './queryUtils'
 
 export type UseQueryOptionsWithFilter<Selector = NostrEventDB[]> = UseQueryOptions<NostrEventDB[], Error, Selector> & {
   filter: Filter
@@ -29,7 +29,7 @@ export function createEventQueryOptions<Selector = NostrEventDB[]>(options: UseQ
   const { filter, ctx = {}, ...opts } = options
   return queryOptions<NostrEventDB[], Error, Selector>({
     queryFn: async () => {
-      const res = await firstValueFrom(subscribeCacheFirst(ctx, filter).pipe(shareReplay()))
+      const res = await firstValueFrom(subscribeStrategy(ctx, filter).pipe(shareReplay()))
       // This will populate all events into react query cache individually
       res.forEach(setEventData)
       return res

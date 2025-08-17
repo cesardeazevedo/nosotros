@@ -112,9 +112,13 @@ export function nip19ToRelayHints(decoded?: nip19.DecodeResult): RelayHints {
 
 export function eventAddress(event: NostrEvent) {
   if (isParameterizedReplaceableKind(event.kind)) {
-    const dTag = event.tags.find((tag) => tag[0] === 'd')?.[1]
+    const dTag = getDTag(event)
     if (dTag) {
       return [event.kind, event.pubkey, dTag].join(':')
     }
   }
+}
+
+export function getDTag(event: NostrEvent) {
+  return event.tags.find((tag) => tag[0] === 'd')?.[1]
 }

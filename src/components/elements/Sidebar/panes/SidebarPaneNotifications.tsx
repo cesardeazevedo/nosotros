@@ -21,7 +21,7 @@ type Props = {
 
 export const SidebarPaneNotifications = memo(function SidebarPaneNotifications(props: Props) {
   const context = useContext(SidebarContext)
-  const feed = useNotificationFeedState(createNotificationFeedModule(props.pubkey))
+  const feed = useNotificationFeedState({ ...createNotificationFeedModule(props.pubkey), pageSize: 20 })
   return (
     <Stack horizontal={false} ref={props.ref} sx={[styles.root, props.sx]}>
       <Link resetScroll to='/notifications' onClick={() => context.setPane(false)}>

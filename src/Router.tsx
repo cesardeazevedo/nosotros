@@ -41,7 +41,6 @@ import { createTagFeedModule } from './hooks/modules/createTagFeedModule'
 import { queryClient } from './hooks/query/queryClient'
 import type { FeedModule, FeedScope } from './hooks/query/useQueryFeeds'
 import { useFeedState } from './hooks/state/useFeed'
-import { useResetScroll } from './hooks/useResetScroll'
 import type { NostrContext } from './nostr/context'
 import { READ, WRITE } from './nostr/types'
 import { decodeNIP19 } from './utils/nip19'
@@ -73,7 +72,7 @@ export const homeRoute = createRoute({
 
 export const homeRepliesRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/replies',
+  path: '/threads',
   component: () => <HomeRoute replies />,
 })
 
@@ -84,7 +83,6 @@ export const feedRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/feed',
   validateSearch: z.object({
-    // context
     pubkey: z.string().optional(),
     permission: z
       .preprocess(
@@ -424,7 +422,6 @@ export const nostrRoute = createRoute({
   component: function NostrRoute() {
     const { decoded } = nostrRoute.useRouteContext()
     const { nostr } = nostrRoute.useParams()
-    useResetScroll()
     switch (decoded?.type) {
       case 'npub':
         return <NProfileRoute pubkey={decoded.data} />
@@ -447,21 +444,7 @@ export const nostrRoute = createRoute({
 const nprofileIndexRoute = createRoute({
   getParentRoute: () => nostrRoute,
   path: '/',
-  // beforeLoad: ({ context }) => {
-  //   switch (context.decoded?.type) {
-  //     case 'nprofile': {
-  //       return { pubkey: context.decoded.data.pubkey }
-  //     }
-  //     case 'npub': {
-  //       return { pubkey: context.decoded.data }
-  //     }
-  //     default: {
-  //       return { pubkey: '' }
-  //     }
-  //   }
-  // },
   component: function NProfileIndexRoute() {
-    // const { pubkey } = nprofileIndexRoute.useRouteContext()
     const { nostr } = nprofileIndexRoute.useParams()
     const feed = useFeedState(createProfileModule({ nip19: nostr }))
     return <Feed feed={feed} />
@@ -504,7 +487,6 @@ const tagsRoute = createRoute({
   component: function () {
     const params = tagsRoute.useParams()
     const feed = useFeedState(createTagFeedModule(params.tag))
-    useResetScroll()
     return (
       <FeedRoute
         feed={feed}

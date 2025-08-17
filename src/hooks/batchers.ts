@@ -1,7 +1,7 @@
 import { OUTBOX_RELAYS } from '@/constants/relays'
 import { SubscriptionBatcher } from '@/core/SubscriptionBatcher'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
-import { subscribeRemote } from './subscriptions/subscribeCacheFirst'
+import { subscribeRemote } from './subscriptions/subscribeStrategy'
 
 export const batcher = new SubscriptionBatcher<NostrEventDB>((filter, relayHints, cached) =>
   subscribeRemote(

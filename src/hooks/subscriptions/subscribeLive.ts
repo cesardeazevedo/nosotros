@@ -1,6 +1,6 @@
 import type { NostrFilter } from '@/core/types'
 import type { NostrContext } from '@/nostr/context'
-import { delay, EMPTY, identity, mergeMap, filter as rxFilter, tap } from 'rxjs'
+import { delay, EMPTY, identity, mergeMap, filter as rxFilter } from 'rxjs'
 import { queryClient } from '../query/queryClient'
 import type { FeedModule, InfiniteEvents } from '../query/useQueryFeeds'
 import { subscribeFeed } from './subscribeFeed'
@@ -30,6 +30,5 @@ export function subscribeLive(ctx: NostrContext, filter: NostrFilter, options: F
       const top = data?.pages[0][0].created_at || 0
       return event.created_at > top
     }),
-    tap((x) => console.log('STREAM', x)),
   )
 }

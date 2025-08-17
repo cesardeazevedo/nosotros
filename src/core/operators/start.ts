@@ -11,7 +11,7 @@ import { subscribeNeg } from './subscribeNeg'
 export function start(pool: Pool): OperatorFunction<NostrSubscriptionBuilder, [string, NostrEvent]> {
   return mergeMap((sub) => {
     return sub.relayFilters.pipe(
-      bufferTime(1200),
+      bufferTime(800),
 
       filter((items) => items.length > 0),
 

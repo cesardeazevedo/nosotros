@@ -31,12 +31,8 @@ export const ErrorBoundary = () => {
         by clicking the button below.`}
             <br /> {`It's safe and might help resolve the issue below.`}
           </Text>
-          <Button
-            variant='filled'
-            onClick={handleClick}
-            disabled={cleaning}
-            sx={styles.button}
-            icon={<>{!cleaning && <IconTrashXFilled size={18} style={{ marginRight: 8 }} />}</>}>
+          <Button variant='filled' onClick={handleClick} disabled={cleaning} sx={styles.button}>
+            <>{!cleaning && <IconTrashXFilled size={18} style={{ marginRight: 8 }} />}</>
             {cleaning ? 'Cleaning' : 'Clear Database'}
           </Button>
         </Stack>

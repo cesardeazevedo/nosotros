@@ -2,14 +2,14 @@ import type { NostrFilter } from '@/core/types'
 import type { NostrContext } from '@/nostr/context'
 import { EMPTY } from 'rxjs'
 import type { FeedScope } from '../query/useQueryFeeds'
-import { subscribeCacheFirst } from './subscribeCacheFirst'
 import { subscribeFeedListSetsE, subscribeFeedListSetsP } from './subscribeFeedListSets'
 import { subscribeFeedFollowing } from './subscribeFollows'
+import { subscribeStrategy } from './subscribeStrategy'
 
 export function subscribeFeed(ctx: NostrContext, scope: FeedScope, filter: NostrFilter) {
   switch (scope) {
     case 'self': {
-      return subscribeCacheFirst(ctx, filter)
+      return subscribeStrategy(ctx, filter)
     }
     case 'following': {
       return subscribeFeedFollowing(ctx, filter)

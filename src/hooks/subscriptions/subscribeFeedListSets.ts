@@ -4,7 +4,7 @@ import { from, identity, mergeMap } from 'rxjs'
 import invariant from 'tiny-invariant'
 import { queryClient } from '../query/queryClient'
 import { addressableEventQueryOptions } from '../query/useQueryBase'
-import { subscribeCacheFirst } from './subscribeCacheFirst'
+import { subscribeStrategy } from './subscribeStrategy'
 
 function fetchList(filter: NostrFilter) {
   const pubkey = filter.authors?.[0]
@@ -23,7 +23,7 @@ export function subscribeFeedListSetsP(ctx: NostrContext, filter: NostrFilter) {
       const authors = event.tags.filter((x) => x[0] === 'p').map((x) => x[1]) || []
       const { '#d': _, kinds: allKinds, ...rest } = filter
       const [, ...kinds] = allKinds || []
-      return subscribeCacheFirst(ctx, { ...rest, kinds, authors })
+      return subscribeStrategy(ctx, { ...rest, kinds, authors })
     }),
   )
 }
@@ -38,7 +38,7 @@ export function subscribeFeedListSetsE(ctx: NostrContext, filter: NostrFilter) {
           ...ids.reduce((acc, id) => ({ ...acc, [id]: [event.pubkey] }), {}),
         },
       }
-      return subscribeCacheFirst({ ...ctx, relayHints }, { ids })
+      return subscribeStrategy({ ...ctx, relayHints }, { ids })
     }),
   )
 }
