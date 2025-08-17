@@ -1,10 +1,11 @@
 import type { Kind } from '@/constants/kinds'
 import type { NostrFilter } from '@/core/types'
+import { getDTag } from '@/utils/nip19'
 import type { BindableValue, Database } from '@sqlite.org/sqlite-wasm'
 import type { NostrEvent } from 'nostr-tools'
 import { isParameterizedReplaceableKind, isReplaceableKind } from 'nostr-tools/kinds'
 import { InsertBatcher } from '../batcher'
-import type { NostrEventDB, NostrEventStored } from '../sqlite.types'
+import type { NostrEventDB, NostrEventExists, NostrEventStored } from '../sqlite.types'
 
 export class SqliteEventStore {
   batcher: InsertBatcher<NostrEventDB>
@@ -37,26 +38,27 @@ export class SqliteEventStore {
   }
 
   getById(db: Database, id: string) {
-    const query = `SELECT id FROM events WHERE id = ? LIMIT 1`
-    return db.selectValue(query, [id]) as NostrEventDB | undefined
+    const query = `SELECT id, created_at FROM events WHERE id = ? LIMIT 1`
+    return db.selectObject(query, [id]) as NostrEventExists | undefined
   }
 
-  private getReplaceable(db: Database, kind: Kind, pubkey: string) {
-    const query = `SELECT id FROM events WHERE kind = ? AND pubkey = ? LIMIT 1`
-    return db.selectValue(query, [kind, pubkey]) as NostrEventDB | undefined
+  getReplaceable(db: Database, kind: Kind, pubkey: string) {
+    const query = `SELECT id, created_at FROM events WHERE kind = ? AND pubkey = ? LIMIT 1`
+    return db.selectObject(query, [kind, pubkey]) as NostrEventExists | undefined
   }
 
-  private getAddressable(db: Database, kind: Kind, pubkey: string, dTag: string) {
+  getAddressable(db: Database, kind: Kind, pubkey: string, dTag: string) {
     const query = `
-      SELECT eventId FROM tags
+      SELECT e.id, e.created_at FROM tags
+      INNER JOIN events e on e.id = tags.eventId
       WHERE
-          kind = ? AND
-          tag = 'd' AND
-          value = ? AND
-          pubkey = ?
+          tags.kind = ? AND
+          tags.tag = 'd' AND
+          tags.pubkey = ? AND
+          tags.value = ?
       LIMIT 1
       `
-    return db.selectValue(query, [kind, pubkey, dTag]) as NostrEventDB | undefined
+    return db.selectObject(query, [kind, pubkey, dTag]) as NostrEventExists | undefined
   }
 
   /**
@@ -169,7 +171,7 @@ export class SqliteEventStore {
     this.batcher.next(event)
   }
 
-  private insertEvent(db: Database, event: NostrEventDB) {
+  insertEvent(db: Database, event: NostrEventDB) {
     if (isReplaceableKind(event.kind)) {
       const found = this.getReplaceable(db, event.kind, event.pubkey)
       if (found) {
@@ -182,7 +184,7 @@ export class SqliteEventStore {
     }
 
     if (isParameterizedReplaceableKind(event.kind)) {
-      const dTag = event.tags.find((tag) => tag[0] === 'd')?.[1]
+      const dTag = getDTag(event)
       if (!dTag) {
         return false
       }

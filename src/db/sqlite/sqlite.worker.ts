@@ -40,13 +40,18 @@ async function onMessage(e: MessageEvent) {
       break
     }
     case 'exists': {
-      const events = store.event.exists(db, msg.params)
-      postMessage(msg, events)
+      const res = store.event.getById(db, msg.params)
+      postMessage(msg, res)
       break
     }
-    case 'getById': {
-      const events = store.event.getById(db, msg.params)
-      postMessage(msg, events)
+    case 'existsReplaceable': {
+      const res = store.event.getReplaceable(db, ...msg.params)
+      postMessage(msg, res)
+      break
+    }
+    case 'existsAddressable': {
+      const res = store.event.getAddressable(db, ...msg.params)
+      postMessage(msg, res)
       break
     }
     case 'getRawEventById': {

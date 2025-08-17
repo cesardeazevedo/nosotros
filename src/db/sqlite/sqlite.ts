@@ -1,7 +1,9 @@
 import { parseEventMetadata } from '@/hooks/parsers/parseEventMetadata'
+import { getDTag } from '@/utils/nip19'
 import type { Filter, NostrEvent } from 'nostr-tools'
+import { isParameterizedReplaceableKind, isReplaceableKind } from 'nostr-tools/kinds'
 import type { Nip05DB, RelayInfoDB, RelayStatsDB, SeenDB } from '../types'
-import type { NostrEventDB } from './sqlite.types'
+import type { NostrEventDB, NostrEventExists } from './sqlite.types'
 import { type SqliteMessageResponse, type SqliteMessages } from './sqlite.types'
 
 type Resolvers = {
@@ -24,7 +26,7 @@ export class SqliteStorage {
         if ('error' in res) {
           resolvers.reject(res.error)
         } else {
-          resolvers.resolve(res.result)
+          resolvers.resolve(res.result || [])
         }
       }
     }
@@ -43,13 +45,25 @@ export class SqliteStorage {
     return await this.send<NostrEventDB[]>({ method: 'queryEvent', params: filter })
   }
 
-  async insertEvent(event: NostrEvent) {
-    const exists = await this.send<string>({ method: 'exists', params: event })
-    if (!exists) {
-      const eventMetadata = parseEventMetadata(event)
-      this.send({ method: 'insertEvent', params: eventMetadata })
-      return eventMetadata
+  async exists(event: NostrEvent) {
+    if (isReplaceableKind(event.kind)) {
+      return await this.send<NostrEventExists>({ method: 'existsReplaceable', params: [event.kind, event.pubkey] })
+    } else if (isParameterizedReplaceableKind(event.kind)) {
+      const dTag = getDTag(event)
+      if (dTag) {
+        return await this.send<NostrEventExists>({
+          method: 'existsAddressable',
+          params: [event.kind, event.pubkey, dTag],
+        })
+      }
     }
+    return await this.send<NostrEventExists>({ method: 'exists', params: event.id })
+  }
+
+  async insertEvent(event: NostrEvent) {
+    const eventMetadata = parseEventMetadata(event)
+    this.send({ method: 'insertEvent', params: eventMetadata })
+    return eventMetadata
   }
 
   async getRawEventById(id: string) {

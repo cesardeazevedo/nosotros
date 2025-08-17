@@ -3,6 +3,7 @@ import type { NostrContext } from '@/nostr/context'
 import type { Metadata } from '@/nostr/types'
 import type { NostrEvent } from 'nostr-tools'
 import type { Nip05DB, RelayStatsDB, SeenDB } from '../types'
+import type { Kind } from '@/constants/kinds'
 
 export type NostrEventStored = Omit<NostrEvent, 'tags'> & {
   tags: string
@@ -12,6 +13,11 @@ export type NostrEventStored = Omit<NostrEvent, 'tags'> & {
 export type NostrEventDB = Omit<NostrEvent, 'tags'> & {
   tags: string[][]
   metadata: Metadata | null
+}
+
+export type NostrEventExists = {
+  id: string
+  created_at: number
 }
 
 export type RelayStatsStored = {
@@ -31,8 +37,9 @@ export type SqliteUsersRelaysResponse = [eventId: string, pubkey: string, create
 
 export type SqliteMessages =
   | { method: 'initialize' }
-  | { method: 'exists'; params: NostrEvent }
-  | { method: 'getById'; params: string }
+  | { method: 'exists'; params: string }
+  | { method: 'existsReplaceable'; params: [Kind, string] }
+  | { method: 'existsAddressable'; params: [Kind, string, string] }
   | { method: 'getRawEventById'; params: string }
   | { method: 'queryEvent'; params: NostrFilter }
   | { method: 'insertEvent'; params: NostrEventDB }
