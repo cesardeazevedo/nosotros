@@ -2,6 +2,7 @@ import type { DeckColumn } from '@/atoms/deck.atoms'
 import type { EventModule } from '@/hooks/modules/createEventModule'
 import type { MediaFeedModule } from '@/hooks/modules/createMediaFeedModule'
 import type { NotificationFeedModule } from '@/hooks/modules/createNotificationFeedModule'
+import type { ProfileModule } from '@/hooks/modules/createProfileFeedModule'
 import { memo } from 'react'
 import { ArticlesColumn } from '../Articles/ArticlesColumn'
 import { HomeColumn } from '../Home/HomeColumn'
@@ -30,7 +31,7 @@ const DeckModule = (props: Props) => {
       return <HomeColumn feedModule={column} />
     }
     case 'profile': {
-      return <NProfileColumn feedModule={column} />
+      return <NProfileColumn module={column as ProfileModule} />
     }
     case 'media': {
       return <MediaColumn module={column as MediaFeedModule} />

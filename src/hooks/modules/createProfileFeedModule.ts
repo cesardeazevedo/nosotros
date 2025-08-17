@@ -11,7 +11,7 @@ export type ProfileModule = FeedModule & {
 
 export function createProfileModule(
   options: Partial<Pick<ProfileModule, 'nip19' | 'filter' | 'includeReplies'>>,
-): FeedModule {
+): ProfileModule {
   invariant(options.nip19, 'nip19 required')
   const decoded = decodeNIP19(options.nip19)
   const filter = {
@@ -21,6 +21,7 @@ export function createProfileModule(
   }
   return {
     id: options.nip19,
+    nip19: options.nip19,
     type: 'profile',
     queryKey: queryKeys.feed(options.nip19, filter),
     filter,
