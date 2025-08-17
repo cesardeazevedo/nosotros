@@ -4,7 +4,7 @@ import { useFeedState } from '@/hooks/state/useFeed'
 import { DeckColumnFeed } from '../Deck/DeckColumnFeed'
 import { FeedHeader } from '../Feed/FeedHeader'
 import { FollowSetCard } from './FollowSets/FollowSetCard'
-import { RelaySetCard } from './RelaySets/RelaySetCard'
+import { RelaySetItem } from './RelaySets/RelaySetItem'
 
 type Props = {
   module: FeedModule
@@ -19,7 +19,7 @@ export const ListsColumn = (props: Props) => {
       render={(event) => {
         switch (event.kind) {
           case Kind.RelaySets: {
-            return <RelaySetCard event={event} />
+            return <RelaySetItem event={event} />
           }
           case Kind.FollowSets: {
             return <FollowSetCard event={event} />

@@ -5,7 +5,7 @@ import { useCurrentPubkey } from '@/hooks/useAuth'
 import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 import { Feed } from '../../Feed/Feed'
-import { FollowSetCard } from './FollowSetCard'
+import { FollowSetItem } from './FollowSetItem'
 
 type Props = {
   dense?: boolean
@@ -19,7 +19,7 @@ export const FollowSetList = memo(function FollowSetList(props: Props) {
     <Feed
       wrapper={(children) => <html.div style={[styles.root, dense && styles.root$dense]}>{children}</html.div>}
       feed={feed}
-      render={(event) => <FollowSetCard event={event} />}
+      render={(event) => <FollowSetItem event={event} />}
     />
   )
 })

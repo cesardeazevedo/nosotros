@@ -5,7 +5,7 @@ import { useCurrentPubkey } from '@/hooks/useAuth'
 import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 import { Feed } from '../../Feed/Feed'
-import { RelaySetCard } from './RelaySetCard'
+import { RelaySetItem } from './RelaySetItem'
 
 type Props = {
   dense?: boolean
@@ -19,7 +19,7 @@ export const RelaySetList = memo(function RelaySetList(props: Props) {
     <Feed
       wrapper={(children) => <html.div style={[styles.root, dense && styles.root$dense]}>{children}</html.div>}
       feed={feed}
-      render={(event) => <RelaySetCard event={event} />}
+      render={(event) => <RelaySetItem event={event} />}
     />
   )
 })

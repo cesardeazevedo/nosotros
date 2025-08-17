@@ -1,59 +1,58 @@
 import { PostHeaderDate } from '@/components/elements/Posts/PostHeaderDate'
 import { UserHeader } from '@/components/elements/User/UserHeader'
-import { UsersAvatars } from '@/components/elements/User/UsersAvatars'
-import { CardContent } from '@/components/ui/Card/CardContent'
-import { CardTitle } from '@/components/ui/Card/CardTitle'
 import { Stack } from '@/components/ui/Stack/Stack'
+import { Text } from '@/components/ui/Text/Text'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { useEventTag, useEventTags } from '@/hooks/useEventUtils'
 import { useSM } from '@/hooks/useMobile'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
+import { IconServerBolt } from '@tabler/icons-react'
 import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
-import { FollowSetLink } from './FollowSetLink'
+import { RelaySetLink } from './RelaySetLink'
 
 type Props = {
   event: NostrEventDB
 }
 
-export const FollowSetCard = memo(function FollowSetCard(props: Props) {
+export const RelaySetItem = memo(function RelaySetItem(props: Props) {
   const { event } = props
   const isMobile = useSM()
   const title = useEventTag(event, 'title')
   const description = useEventTag(event, 'description')
   const d = useEventTag(event, 'd')
-  const pubkeys = useEventTags(event, 'p') || []
+  const relays = useEventTags(event, 'relay') || []
   return (
     <Stack key={event.id} sx={[styles.root, isMobile && styles.root$mobile]}>
-      <FollowSetLink event={event}>
+      <RelaySetLink event={event} sx={styles.link}>
         <Stack horizontal={false}>
-          <CardTitle
-            headline={
-              <Stack gap={1}>
-                <UserHeader dense size='sm' pubkey={event.pubkey} />
-                <PostHeaderDate date={event.created_at} dateStyle='long' />
-              </Stack>
-            }
-          />
-          <CardContent align='flex-start' sx={styles.content}>
-            <CardTitle
-              headline={title || <html.span style={styles.gray}>#{d?.slice(0, 20)}</html.span>}
-              supportingText={description}
-            />
-            <Stack gap={3}>
-              <UsersAvatars pubkeys={pubkeys} />
+          <Stack gap={1}>
+            <UserHeader dense size='md' pubkey={event.pubkey} userAvatarProps={{ size: 'md' }} />
+            <PostHeaderDate date={event.created_at} dateStyle='long' />
+          </Stack>
+          <Stack align='flex-start' sx={styles.content}>
+            <Stack horizontal={false} grow>
+              {title || <html.span style={styles.gray}>#{d?.slice(0, 20)}</html.span>}
+              {description}
             </Stack>
-          </CardContent>
+            <Stack gap={2}>
+              <Text variant='title' size='sm'>
+                <Stack gap={1} justify='space-between'>
+                  <IconServerBolt size={18} />
+                  {relays?.length}
+                </Stack>
+              </Text>
+            </Stack>
+          </Stack>
         </Stack>
-      </FollowSetLink>
+      </RelaySetLink>
     </Stack>
   )
 })
 
 const styles = css.create({
   root: {
-    cursor: 'pointer',
     paddingBlock: spacing.padding2,
     paddingInline: spacing.padding2,
     borderLeft: '1px solid',
@@ -73,5 +72,8 @@ const styles = css.create({
   },
   gray: {
     color: palette.onSurfaceVariant,
+  },
+  link: {
+    width: '100%',
   },
 })
