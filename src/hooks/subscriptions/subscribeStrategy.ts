@@ -17,7 +17,7 @@ export function subscribeRemote(ctx: NostrContext, filter: Filter, cached?: Nost
   )
 }
 
-export function subscribeCacheFirst(ctx: NostrContext, filter: NostrFilter, dbFilter = filter) {
+export function subscribeStrategy(ctx: NostrContext, filter: NostrFilter, dbFilter = filter) {
   switch (ctx.network) {
     case 'CACHE_FIRST': {
       return from(dbSqlite.queryEvents(dbFilter)).pipe(
