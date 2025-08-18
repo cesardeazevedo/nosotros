@@ -1,7 +1,8 @@
-import { useContentContext } from '@/components/providers/ContentProvider'
+import { ContentProvider, useContentContext } from '@/components/providers/ContentProvider'
 import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Kind } from '@/constants/kinds'
 import { getMimeFromExtension } from '@/hooks/parsers/parseImeta'
+import { useEventTag } from '@/hooks/useEventUtils'
 import type { ImageNode, Node, VideoNode } from 'nostr-editor'
 import React, { memo } from 'react'
 import { Image } from './Image/Image'
@@ -38,8 +39,9 @@ export const Content = memo(function Content(props: Props) {
   const { wrapper, children, renderMedia = true } = props
   const { event } = useNoteContext()
   const { dense } = useContentContext()
+  const nsfw = useEventTag(event, 'content-warning')
   return (
-    <>
+    <ContentProvider value={{ blured: !!nsfw }}>
       {event.metadata?.contentSchema?.content.map((node, index) => {
         const Wrapper = wrapper?.(node) || React.Fragment
         const size = dense ? 'md' : 'lg'
@@ -76,6 +78,6 @@ export const Content = memo(function Content(props: Props) {
           </Wrapper>
         )
       })}
-    </>
+    </ContentProvider>
   )
 })
