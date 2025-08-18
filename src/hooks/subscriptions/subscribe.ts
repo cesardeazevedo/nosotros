@@ -10,6 +10,7 @@ import { verifyWorker } from '@/nostr/operators/verifyWorker'
 import { pool } from '@/nostr/pool'
 import type { Observable } from 'rxjs'
 import { filter, from, map, mergeMap, mergeWith, of, tap } from 'rxjs'
+import { setSeenData } from '../query/useSeen'
 import { subscribeAfterAuth } from './subscribeAfterAuth'
 
 export function subscribe(sub: NostrSubscriptionBuilder, ctx: NostrContext): Observable<NostrEventDB> {
@@ -19,6 +20,7 @@ export function subscribe(sub: NostrSubscriptionBuilder, ctx: NostrContext): Obs
     start(pool),
 
     tap(([relay, event]) => {
+      setSeenData(event.id, relay)
       if (ctx.network !== 'REMOTE_ONLY' && [Kind.Text, Kind.Comment, Kind.Repost, Kind.Article].includes(event.kind)) {
         dbSqlite.insertSeen(relay, event)
       }
