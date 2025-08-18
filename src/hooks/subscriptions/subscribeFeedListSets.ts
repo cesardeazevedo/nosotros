@@ -42,3 +42,15 @@ export function subscribeFeedListSetsE(ctx: NostrContext, filter: NostrFilter) {
     }),
   )
 }
+
+export function subscribeFeedListRelaySets(ctx: NostrContext, filter: NostrFilter) {
+  return from(fetchList(filter)).pipe(
+    mergeMap(identity),
+    mergeMap((event) => {
+      const relays = event.tags.filter((tag) => tag[0] === 'relay').map((tag) => tag[1])
+      const { '#d': _, kinds: allKinds, authors, ...rest } = filter
+      const [, ...kinds] = allKinds || []
+      return subscribeStrategy({ ...ctx, network: 'REMOTE_ONLY', relays }, { ...rest, kinds })
+    }),
+  )
+}

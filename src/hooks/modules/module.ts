@@ -14,6 +14,7 @@ export type ModuleType =
   | 'articles'
   | 'relaysets'
   | 'relayfeed'
+  | 'relayfavorites'
   | 'relaydiscovery'
   | 'followset'
   | 'starterpack'

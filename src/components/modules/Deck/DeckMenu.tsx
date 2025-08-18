@@ -9,12 +9,12 @@ import { listItemTokens } from '@/components/ui/ListItem/ListItem.stylex'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { createArticlesFeedModule } from '@/hooks/modules/createArticleFeedModule'
-import { createRelayDiscoveryModule } from '@/hooks/modules/createRelayDiscoveryModule'
-import { createRelayFeedModule } from '@/hooks/modules/createRelayFeedModule'
 import { createHomeFeedModule } from '@/hooks/modules/createHomeFeedModule'
 import { createMediaFeedModule } from '@/hooks/modules/createMediaFeedModule'
 import { createNotificationFeedModule } from '@/hooks/modules/createNotificationFeedModule'
 import { createProfileModule } from '@/hooks/modules/createProfileFeedModule'
+import { createRelayDiscoveryModule } from '@/hooks/modules/createRelayDiscoveryModule'
+import { createRelayFeedModule } from '@/hooks/modules/createRelayFeedModule'
 import { createSearchFeedModule } from '@/hooks/modules/createSearchFeedModule'
 import { createTagFeedModule } from '@/hooks/modules/createTagFeedModule'
 import { getUserRelays } from '@/hooks/query/useQueryUser'
@@ -254,7 +254,7 @@ export const DeckMenu = memo(function DeckMenu(props: Props) {
       {view === 'profiles' && <DeckAddProfile onSelect={handleAddProfile} />}
       {view === 'tags' && <DeckAddTags onSelect={(tag) => add(createTagFeedModule(tag))} />}
       {view === 'search' && <DeckAddSearch onSelect={(query) => add(createSearchFeedModule(query))} />}
-      {view === 'lists' && <DeckAddList onSelect={(module) => add(module)} />}
+      {view === 'lists' && <DeckAddList />}
       {view === 'relayfeeds' && <DeckAddRelayFeeds onSelect={(relay) => add(createRelayFeedModule(relay))} />}
     </DeckColumnContainer>
   )

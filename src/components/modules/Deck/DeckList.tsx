@@ -60,10 +60,8 @@ const DeckModule = (props: Props) => {
     case 'lists': {
       return <ListsColumn module={column} />
     }
-    // case 'relaysets': {
-    //   return <DeckColumnFeed module={column} header={<FeedHeaderRelaySets feed={module.feed} />} />
-    // }
-    // case 'starterpack':
+    case 'relaysets':
+    case 'starterpack':
     case 'followset': {
       return <ListColumn module={column} />
     }

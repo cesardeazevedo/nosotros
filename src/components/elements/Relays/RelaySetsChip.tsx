@@ -5,8 +5,7 @@ import { Paper } from '@/components/ui/Paper/Paper'
 import { Popover } from '@/components/ui/Popover/Popover'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
-import { Kind } from '@/constants/kinds'
-import { useEventAddress } from '@/hooks/query/useQueryBase'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { useEventTag, useEventTags } from '@/hooks/useEventUtils'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
@@ -17,16 +16,14 @@ import { css } from 'react-strict-dom'
 import { RelayChip } from './RelayChip'
 
 type Props = {
-  relaySet: string
+  event: NostrEventDB
 }
 
 export const RelaySetsChip = memo(function RelaySetsChip(props: Props) {
-  const { relaySet } = props
-  const [pubkey, dTag] = relaySet.split(':')
+  const { event } = props
   const setListFormDialog = useSetAtom(setListFormDialogAtom)
-  const event = useEventAddress(Kind.RelaySets, pubkey, dTag)
-  const label = useEventTag(event.data, 'title')
-  const relays = useEventTags(event.data, 'relay')
+  const label = useEventTag(event, 'title')
+  const relays = useEventTags(event, 'relay')
   const total = relays.length
   return (
     <Popover
@@ -41,7 +38,7 @@ export const RelaySetsChip = memo(function RelaySetsChip(props: Props) {
                 variant='filled'
                 onClick={() => {
                   props.close()
-                  return event.data && setListFormDialog(event.data)
+                  return event && setListFormDialog(event)
                 }}>
                 Edit
               </Button>

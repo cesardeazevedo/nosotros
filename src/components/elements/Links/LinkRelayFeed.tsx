@@ -4,24 +4,23 @@ import { Kind } from '@/constants/kinds'
 import { createRelayFeedModule } from '@/hooks/modules/createRelayFeedModule'
 import type { LinkProps } from '@tanstack/react-router'
 import { Link, useRouter } from '@tanstack/react-router'
-import React, { memo } from 'react'
+import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 
 type Props = Omit<LinkProps, 'to' | 'search'> & {
   url: string
-  children: React.ReactNode
   sx?: SxProps
 }
 
 export const LinkRelayFeed = memo(function LinkRelayFeed(props: Props) {
-  const { url, target = '_self', sx } = props
+  const { url, target = '_self', sx, children } = props
   const router = useRouter()
   const deck = useDeckAddNextColumn(() => createRelayFeedModule(url))
 
   if (deck.isDeck) {
     return (
       <html.a {...css.props(sx)} onClick={deck.add}>
-        {props.children}
+        {typeof children === 'function' ? children({ isActive: false, isTransitioning: false }) : children}
       </html.a>
     )
   }

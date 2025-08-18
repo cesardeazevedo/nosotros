@@ -2,7 +2,7 @@ import type { NostrFilter } from '@/core/types'
 import type { NostrContext } from '@/nostr/context'
 import { EMPTY } from 'rxjs'
 import type { FeedScope } from '../query/useQueryFeeds'
-import { subscribeFeedListSetsE, subscribeFeedListSetsP } from './subscribeFeedListSets'
+import { subscribeFeedListRelaySets, subscribeFeedListSetsE, subscribeFeedListSetsP } from './subscribeFeedListSets'
 import { subscribeFeedFollowing } from './subscribeFollows'
 import { subscribeStrategy } from './subscribeStrategy'
 
@@ -19,6 +19,9 @@ export function subscribeFeed(ctx: NostrContext, scope: FeedScope, filter: Nostr
     }
     case 'sets_e': {
       return subscribeFeedListSetsE(ctx, filter)
+    }
+    case 'relay_sets': {
+      return subscribeFeedListRelaySets(ctx, filter)
     }
     case 'followers':
     case 'wot':
