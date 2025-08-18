@@ -1,22 +1,28 @@
 import { STORAGE_SETTINGS_KEY } from '@/constants/storage'
 import { atom } from 'jotai'
-import { atomWithStorage } from 'jotai/utils'
+import { atomWithStorage, createJSONStorage, unstable_withStorageValidator as withStorageValidator } from 'jotai/utils'
+import { z } from 'zod'
 
-export type Settings = {
-  lang: 'en' | 'pt'
-  theme: 'light' | 'dark' | 'auto'
-  nip05: boolean
-  autoPlay: boolean
-  defaultEmoji: string
-  defaultUploadType: string
-  defaultUploadUrl: string
-  sidebarCollapsed: boolean
-  recentsCollapsed: boolean
-  maxRelaysPerUser: number
-  clientTag: boolean
-}
+export const settingsSchema = z
+  .object({
+    lang: z.enum(['en', 'pt']),
+    theme: z.enum(['light', 'dark', 'auto']),
+    nip05: z.boolean(),
+    autoPlay: z.boolean(),
+    defaultEmoji: z.string(),
+    defaultUploadType: z.string(),
+    defaultUploadUrl: z.string().url(),
+    sidebarCollapsed: z.boolean(),
+    sidebarRelaysCollapsed: z.boolean(),
+    recentsCollapsed: z.boolean(),
+    maxRelaysPerUser: z.number().int().nonnegative(),
+    clientTag: z.boolean(),
+  })
+  .strict()
 
-const DEFAULT_SETTINGS: Settings = {
+export type Settings = z.infer<typeof settingsSchema>
+
+export const DEFAULT_SETTINGS: Settings = {
   lang: 'en',
   theme: 'auto',
   nip05: true,
@@ -25,14 +31,20 @@ const DEFAULT_SETTINGS: Settings = {
   defaultUploadType: 'nip96',
   defaultUploadUrl: 'https://nostr.build',
   sidebarCollapsed: false,
+  sidebarRelaysCollapsed: false,
   recentsCollapsed: false,
   maxRelaysPerUser: 2,
   clientTag: true,
 }
 
-export const settingsAtom = atomWithStorage<Settings>(STORAGE_SETTINGS_KEY, DEFAULT_SETTINGS, undefined, {
-  getOnInit: true,
-})
+const isSettings = (value: unknown): value is Settings => settingsSchema.safeParse(value).success
+
+export const settingsAtom = atomWithStorage<Settings>(
+  STORAGE_SETTINGS_KEY,
+  DEFAULT_SETTINGS,
+  withStorageValidator(isSettings)(createJSONStorage()),
+  { getOnInit: true },
+)
 
 export const setSettingsAtom = atom(null, (get, set, patch: Partial<Settings>) => {
   const curr = get(settingsAtom)
