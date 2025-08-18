@@ -92,7 +92,7 @@ const styles = css.create({
     marginLeft: spacing.margin2,
   },
   label: {
-    margin: spacing.margin2,
+    marginLeft: spacing.margin1,
     color: palette.onSurfaceVariant,
     fontWeight: 500,
   },

@@ -39,6 +39,7 @@ const RecentProfileRow = (props: { recent: { id: string } }) => {
             trailingIcon={
               <IconButton
                 size='sm'
+                as='div'
                 sx={visibleOnHoverStyle.item}
                 onClick={(e) => {
                   e.preventDefault()
@@ -82,8 +83,8 @@ export const SidebarMenuRecents = memo(function SidebarMenuRecents() {
 
 const styles = css.create({
   content: {
-    maxHeight: 218,
-    overflowY: 'auto',
+    // maxHeight: 218,
+    // overflowY: 'auto',
     marginTop: spacing['padding0.5'],
   },
   name: {
