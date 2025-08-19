@@ -1,9 +1,10 @@
 import { Kind } from '@/constants/kinds'
+import { SEARCH_RELAYS } from '@/constants/relays'
 import { isAuthorTag } from '@/hooks/parsers/parseTags'
-import { replaceableEventQueryOptions } from '@/hooks/query/useQueryBase'
+import { createEventQueryOptions, replaceableEventQueryOptions } from '@/hooks/query/useQueryBase'
 import { useUserFollows } from '@/hooks/query/useQueryUser'
 import { useCurrentPubkey } from '@/hooks/useAuth'
-import { useQueries } from '@tanstack/react-query'
+import { useQueries, useQuery } from '@tanstack/react-query'
 
 type SearchOptions = {
   query: string
@@ -17,6 +18,24 @@ export type SearchItem =
   | { type: 'user_relay'; pubkey: string }
   | { type: 'query'; query: string }
   | { type: 'relay'; relay: string }
+
+function useSearchOnRelays(options: SearchOptions) {
+  return useQuery(
+    createEventQueryOptions({
+      queryKey: ['search', options.query],
+      filter: {
+        kinds: [Kind.Metadata],
+        search: options.query,
+        limit: 15,
+      },
+      enabled: !!options.query,
+      ctx: {
+        network: 'REMOTE_ONLY',
+        relays: SEARCH_RELAYS,
+      },
+    }),
+  )
+}
 
 function useSearchFollowingUsers(options: SearchOptions) {
   const { query, limit } = options
@@ -40,7 +59,7 @@ function useSearchFollowingUsers(options: SearchOptions) {
 }
 
 export function useSearchSuggestions(options: SearchOptions) {
-  // const usersRelay = useSearchOnRelays(options)
+  const usersRelay = useSearchOnRelays(options)
   const usersFollowing = useSearchFollowingUsers(options)
   const querySuggestion =
     options.suggestQuery !== false && options.query ? { type: 'query', query: options.query } : undefined
@@ -56,6 +75,6 @@ export function useSearchSuggestions(options: SearchOptions) {
     querySuggestion,
     relaySuggestion,
     ...usersFollowing.data.filter((x) => !!x).map((user) => ({ type: 'user' as const, pubkey: user.pubkey })),
-    // ...usersRelay.map((x) => ({ type: 'user_relay' as const, pubkey: x.pubkey })),
+    ...(usersRelay.data?.map((x) => ({ type: 'user_relay' as const, pubkey: x.pubkey })) || []),
   ].filter((x) => !!x) as SearchItem[]
 }
