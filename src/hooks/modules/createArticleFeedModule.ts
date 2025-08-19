@@ -1,21 +1,44 @@
 import { Kind } from '@/constants/kinds'
-import { RECOMMENDED_PUBKEYS } from '@/constants/recommended'
+import type { NostrFilter } from '@/core/types'
 import { queryKeys } from '../query/queryKeys'
 import type { FeedModule } from '../query/useQueryFeeds'
 
-export function createArticlesFeedModule(pubkey?: string): FeedModule {
-  const id = pubkey ? `articles_${pubkey}` : 'recommended_articles'
-  const filter = {
+export type ArticlesFeedModule = FeedModule & {
+  type: 'articles'
+}
+
+export function createArticlesFeedModule(pubkey?: string): ArticlesFeedModule {
+  if (pubkey) {
+    const name = `articles_${pubkey}`
+    const filter: NostrFilter = {
+      kinds: [Kind.Article],
+      authors: [pubkey],
+      limit: 50,
+    }
+    return {
+      id: name,
+      type: 'articles',
+      queryKey: queryKeys.feed(name, filter),
+      filter,
+      ctx: {},
+      scope: 'following',
+    }
+  }
+  const name = 'recommended_articles'
+  const filter: NostrFilter = {
     kinds: [Kind.Article],
-    authors: pubkey ? [pubkey] : RECOMMENDED_PUBKEYS,
-    limit: 20,
+    limit: 50,
   }
   return {
-    id,
+    id: name,
     type: 'articles',
-    queryKey: queryKeys.feed(id, filter),
+    queryKey: queryKeys.feed(name, filter),
     filter,
-    ctx: {},
-    scope: pubkey ? 'following' : 'self',
+    ctx: {
+      outbox: false,
+      negentropy: false,
+      relays: ['wss://nostr.wine'],
+    },
+    scope: 'self',
   }
 }
