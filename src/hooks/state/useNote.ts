@@ -64,8 +64,6 @@ export function useNoteState(event: NostrEventDB, options?: NoteOptions) {
     initialInView: false,
   })
 
-  const isReply = !event.metadata?.isRoot
-
   const [state, actions] = useMethods(createMethods, {
     isReplying: false,
     broadcastOpen: false,
