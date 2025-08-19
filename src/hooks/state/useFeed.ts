@@ -5,7 +5,7 @@ import type { NostrContext } from '@/nostr/context'
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import { strictDeepEqual } from 'fast-equals'
 import { useObservable, useObservableCallback, useSubscription } from 'observable-hooks'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { EMPTY, finalize, ignoreElements, switchMap, tap, throttleTime } from 'rxjs'
 import { queryKeys } from '../query/queryKeys'
 import { setEventData } from '../query/queryUtils'
@@ -117,6 +117,10 @@ export function useFeedState(options: FeedModule & { select?: (data: InfiniteEve
       setBuffer([])
     }
   }
+
+  useEffect(() => {
+    flush()
+  }, [replies])
 
   const bufferTotal = useMemo(() => buffer.length, [buffer])
   const bufferTotalReplies = useMemo(() => bufferReplies.length, [bufferReplies])
