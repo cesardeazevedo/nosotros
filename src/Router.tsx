@@ -563,6 +563,12 @@ const settingsPreferenceRoute = createRoute({
   component: SettingsPreferencesRoute,
 })
 
+const settingsStorageRoute = createRoute({
+  getParentRoute: () => settingsRoute,
+  path: '/storage',
+  component: SettingsStorageRoute,
+})
+
 export const routeTree = rootRoute.addChildren([
   homeRoute,
   homeRepliesRoute,
@@ -579,7 +585,7 @@ export const routeTree = rootRoute.addChildren([
   relaysRoute,
   relayActiveRoute,
   relayDiscoveryRoute,
-  settingsRoute.addChildren([settingsPreferenceRoute]),
+  settingsRoute.addChildren([settingsPreferenceRoute, settingsStorageRoute]),
 ])
 
 export const router = createRouter({

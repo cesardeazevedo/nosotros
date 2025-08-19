@@ -12,8 +12,8 @@ import { SettingsRelayAuth } from './SettingsRelaysAuth'
 
 export const SettingsPreferencesRoute = () => {
   return (
-    <Stack horizontal={false} gap={4} sx={styles.root} align='flex-start'>
-      <Stack horizontal={false} gap={1}>
+    <Stack horizontal={false} gap={4} sx={styles.root} align='stretch'>
+      <Stack horizontal={false} gap={1} align='flex-start'>
         <SettingsSubHeader>Theme</SettingsSubHeader>
         <SettingsTheme />
       </Stack>
@@ -51,6 +51,5 @@ const styles = css.create({
   },
   menu: {
     width: '100%',
-    // maxWidth: 500,
   },
 })
