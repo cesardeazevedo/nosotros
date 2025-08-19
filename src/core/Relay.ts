@@ -1,6 +1,6 @@
 import type { RelayInformation } from 'nostr-tools/nip11'
 import type { Observable } from 'rxjs'
-import { BehaviorSubject, catchError, EMPTY, filter, map, mergeMap, of, shareReplay, Subject } from 'rxjs'
+import { BehaviorSubject, catchError, EMPTY, filter, map, mergeMap, of, ReplaySubject, shareReplay } from 'rxjs'
 import { webSocket, type WebSocketSubject } from 'rxjs/webSocket'
 import { formatRelayUrl } from './helpers/formatRelayUrl'
 import { hasNegentropy } from './helpers/hasNegentropy'
@@ -22,9 +22,9 @@ export class Relay {
   authOk$: Observable<[url: string, challenge: string]>
   notice$: Observable<[url: string, msg: string]>
 
-  open$ = new Subject()
-  close$ = new Subject()
-  closing$ = new Subject()
+  open$ = new ReplaySubject()
+  close$ = new ReplaySubject()
+  closing$ = new ReplaySubject()
   negentropy = new BehaviorSubject(false)
   negentropy$: Observable<boolean>
 
