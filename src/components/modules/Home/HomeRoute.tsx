@@ -20,7 +20,7 @@ export const HomeRoute = memo(function HomeRoute(props: Props) {
       ...createHomeFeedModule(pubkey),
       includeReplies: replies,
     }
-  }, [replies])
+  }, [pubkey, replies])
   const feed = useFeedState(module)
 
   const handleChangeTabs = (anchor: string | undefined) => {

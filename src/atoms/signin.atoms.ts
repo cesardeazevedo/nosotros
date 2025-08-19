@@ -9,6 +9,7 @@ import { bytesToHex } from '@noble/hashes/utils'
 import { atom } from 'jotai'
 import { nip19, type NostrEvent, type UnsignedEvent } from 'nostr-tools'
 import { loginAtom } from './auth.atoms'
+import { pool } from '@/nostr/pool'
 
 export const PAGES = {
   SELECT: 0,
@@ -149,7 +150,7 @@ export const submitBunkerAtom = atom(null, async (_, set, bunkerUrl: string) => 
       },
     }
 
-    const signer = new NIP46RemoteSigner(params)
+    const signer = new NIP46RemoteSigner(pool, params)
 
     await signer.connect()
     const [, { result: pubkey }] = await signer.getPublicKey()

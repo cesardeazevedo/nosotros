@@ -9,8 +9,6 @@ import { subscribeRelayStats } from '../hooks/subscriptions/subscribeRelayStats'
 export const pool = new Pool({
   blacklist: [],
 
-  allowLocalConnection: false,
-
   open(url) {
     const relay = new Relay(url, { info$: from(queryClient.fetchQuery(relayInfoQueryOptions(url))) })
     subscribeRelayStats(relay)

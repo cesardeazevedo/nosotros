@@ -83,6 +83,7 @@ export const SignInSelect = () => {
               Remote signer
             </ListItem>
             <ListItem
+              onClick={() => {}}
               supportingText='nsec is not supported, we do not recommend, never put your nsec'
               sx={[styles.item, styles.item$disabled]}>
               Private Key (nsec) 🙅

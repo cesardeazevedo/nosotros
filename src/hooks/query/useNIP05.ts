@@ -50,7 +50,7 @@ export function nip05QueryOptions(nip05: string = ''): UseQueryOptions<Nip05DB |
 
 export function useNip05(pubkey: string, nip05: string | undefined) {
   return useQuery({
-    ...nip05QueryOptions(nip05),
+    ...nip05QueryOptions(nip05 || ''),
     select: (res) => {
       return res ? res.pubkey === pubkey : undefined
     },

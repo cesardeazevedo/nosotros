@@ -114,20 +114,22 @@ export const SidebarMenu = memo(function SidebarMenu() {
           leadingIcon={<IconListDetails {...iconProps} />}
           label='Lists'
         />
-        <Link
-          to={`/$nostr`}
-          params={{
-            nostr: nprofile || '',
-          }}>
-          {({ isActive }) => (
-            <MenuItem
-              selected={isActive}
-              leadingIcon={<IconUser {...iconProps} />}
-              label='Profile'
-              onClick={() => context.setPane(false)}
-            />
-          )}
-        </Link>
+        {pubkey && (
+          <Link
+            to={`/$nostr`}
+            params={{
+              nostr: nprofile || '',
+            }}>
+            {({ isActive }) => (
+              <MenuItem
+                selected={isActive}
+                leadingIcon={<IconUser {...iconProps} />}
+                label='Profile'
+                onClick={() => context.setPane(false)}
+              />
+            )}
+          </Link>
+        )}
       </Stack>
       <Divider />
       <Stack horizontal={false} sx={styles.wrapper}>

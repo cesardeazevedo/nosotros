@@ -5,6 +5,7 @@ import { atom } from 'jotai'
 import { observe } from 'jotai-effect'
 import { atomWithReset, atomWithStorage } from 'jotai/utils'
 import { store } from './store'
+import { pool } from '@/nostr/pool'
 
 type SignerConfig = { name: 'nip07' } | { name: 'nip46'; params: Omit<NIP46RemoteSignerOptions, 'auth'> } | null
 
@@ -48,7 +49,7 @@ observe((get, set) => {
         break
       }
       case 'nip46': {
-        set(signerAtom, new NIP46RemoteSigner(account.signer.params))
+        set(signerAtom, new NIP46RemoteSigner(pool, account.signer.params))
         break
       }
     }
