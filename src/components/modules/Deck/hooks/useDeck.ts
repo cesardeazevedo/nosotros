@@ -23,44 +23,54 @@ export function useDeckColumn() {
 
 const REPLACEABLE_COLUMNS = ['event', 'relayfeed']
 
+const isReplaceableType = (type?: string) => {
+  return !!type && REPLACEABLE_COLUMNS.includes(type as (typeof REPLACEABLE_COLUMNS)[number])
+}
+
+const shouldReplaceCurrent = (currentType: string, incomingType: string) => {
+  if (currentType === 'relayfeed' && incomingType === 'event') {
+    return false
+  }
+  return isReplaceableType(currentType) && isReplaceableType(incomingType)
+}
+
 export function useDeckAddNextColumn(createModule: () => DeckColumn) {
+  const deckId = useParams({ from: '/deck/$id', shouldThrow: false })?.id
+  const inDeckRoute = !!deckId
+
   const deck = useDeck()
-  const deckId = deck!.id
   const addDeckColumn = useSetAtom(addDeckColumnAtom)
   const setDeckNewPane = useSetAtom(deckNewPane)
   const column = useDeckColumn()
 
-  if (deck && column) {
-    return {
-      isDeck: true,
-      add: (e: StrictClickEvent) => {
-        e.preventDefault()
-        e.stopPropagation()
-        const module = createModule()
+  if (!inDeckRoute) {
+    return { isDeck: false } as const
+  }
 
-        if (e.metaKey) {
-          addDeckColumn({ deckId, module })
-          return
-        }
+  return {
+    isDeck: true,
+    add: (e: StrictClickEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
 
-        if (REPLACEABLE_COLUMNS.includes(column.type) && REPLACEABLE_COLUMNS.includes(module.type)) {
-          addDeckColumn({ deckId, module, index: column.index, replace: true })
-          return
-        }
+      const module = createModule()
 
+      if (e.metaKey) {
+        addDeckColumn({ deckId: deck.id, module })
+      } else if (column && shouldReplaceCurrent(column.type, module.type)) {
+        addDeckColumn({ deckId: deck.id, module, index: column.index, replace: true })
+      } else if (column) {
         const nextIndex = column.index + 1
         const next = deck.columns[nextIndex]
-        // const isIncomingEvent = module.type === 'event'
-        const isNextEvent = REPLACEABLE_COLUMNS.includes(next?.type)
-        const replaceNext = isNextEvent
-        // const replaceNext = isIncomingEvent && isNextEvent
+        const replaceNext = isReplaceableType(next?.type)
+        addDeckColumn({ deckId: deck.id, module, index: nextIndex, replace: replaceNext })
+      } else {
+        addDeckColumn({ deckId: deck.id, module, index: deck.columns.length })
+      }
 
-        addDeckColumn({ deckId, module, index: nextIndex, replace: replaceNext })
-        setDeckNewPane(false)
-      },
-    } as const
-  }
-  return { isDeck: false } as const
+      setDeckNewPane(false)
+    },
+  } as const
 }
 
 export function useRemoveDeckColumn(id: string | undefined) {
