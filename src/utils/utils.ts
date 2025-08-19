@@ -23,3 +23,25 @@ export const compactArray = (x: Array<Array<string | undefined>>): string[][] =>
       return filtered.slice(0, lastNonEmptyIndex + 1)
     })
 }
+
+export function compactObject<T>(input: T) {
+  if (input === null || typeof input !== 'object' || Array.isArray(input)) {
+    return input
+  }
+
+  const result: Record<string, unknown> = {}
+
+  for (const [key, value] of Object.entries(input as Record<string, unknown>)) {
+    if (value === undefined) {
+      continue
+    }
+    if (Array.isArray(value) && value.length === 0) {
+      continue
+    }
+    if (typeof value === 'object' && value !== null && !Array.isArray(value) && Object.keys(value).length === 0) {
+      continue
+    }
+    result[key] = value
+  }
+  return result as T
+}

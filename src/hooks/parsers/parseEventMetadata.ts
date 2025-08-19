@@ -1,6 +1,8 @@
 import { Kind } from '@/constants/kinds'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import { compactObject } from '@/utils/utils'
 import type { NostrEvent } from 'nostr-tools'
+import { parseRelayList, type Metadata } from '../../nostr/types'
 import { parseArticle } from './parseArticle'
 import { parseComment } from './parseComment'
 import { parseMedia } from './parseMedia'
@@ -8,7 +10,6 @@ import { parseNote } from './parseNote'
 import { parseRepost } from './parseRepost'
 import { parseUser } from './parseUser'
 import { parseZapEvent } from './parseZap'
-import { parseRelayList, type Metadata } from '../../nostr/types'
 
 export function parseMetadata(event: NostrEvent): Metadata | null {
   switch (event.kind) {
@@ -36,6 +37,6 @@ export function parseMetadata(event: NostrEvent): Metadata | null {
 export function parseEventMetadata(event: NostrEvent): NostrEventDB {
   return {
     ...event,
-    metadata: parseMetadata(event),
+    metadata: compactObject(parseMetadata(event)),
   }
 }
