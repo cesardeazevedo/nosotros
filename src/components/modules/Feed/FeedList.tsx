@@ -62,26 +62,25 @@ export const FeedList = memo(function FeedList(props: Props) {
 
   if (column) {
     return (
-      <html.div style={styles.column} ref={ref} onScroll={handleScrollColumn}>
-        {props.header}
-        {!props.wrapper && renderNewPostsIndicator && <FeedNewPosts ref={ref} feed={feed} />}
-        {props.wrapper ? (
-          <PullToRefreshWrapper {...pullRefreshProps}>
-            {props.wrapper(
-              <>
-                {renderNewPostsIndicator && <FeedNewPosts ref={ref} feed={feed} />}
-                {content}
-              </>,
-            )}
-            {props.footer}
-          </PullToRefreshWrapper>
-        ) : (
-          <PullToRefreshWrapper {...pullRefreshProps}>
-            {content}
-            {props.footer}
-          </PullToRefreshWrapper>
-        )}
-      </html.div>
+      <PullToRefreshWrapper {...pullRefreshProps}>
+        <html.div style={styles.column} ref={ref} onScroll={handleScrollColumn}>
+          {props.header}
+          {!props.wrapper && renderNewPostsIndicator && <FeedNewPosts ref={ref} feed={feed} />}
+          {props.wrapper ? (
+            <>
+              {props.wrapper(
+                <>
+                  {renderNewPostsIndicator && <FeedNewPosts ref={ref} feed={feed} />}
+                  {content}
+                </>,
+              )}
+            </>
+          ) : (
+            content
+          )}
+          {props.footer}
+        </html.div>
+      </PullToRefreshWrapper>
     )
   }
   return (
