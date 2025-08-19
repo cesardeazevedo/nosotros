@@ -11,8 +11,8 @@ import { eventQueryOptions } from './useQueryBase'
 
 export function eventRepliesQueryOptions(event: NostrEventDB, options?: CustomQueryOptions) {
   const address = eventAddress(event)
-  const id = address || event.id
-  const tagFilter = address ? { '#a': [address] } : { '#e': [event.id] }
+  const id = address || event.metadata?.rootId || event.id
+  const tagFilter = address ? { '#a': [address] } : { '#e': [event.metadata?.rootId || event.id] }
   return eventQueryOptions({
     queryKey: queryKeys.tag(address ? 'a' : 'e', [id], Kind.Text),
     filter: {
@@ -35,7 +35,6 @@ export function eventRepliesQueryOptions(event: NostrEventDB, options?: CustomQu
 
 export function eventRepliesByIdQueryOptions(id: string, options?: CustomQueryOptions) {
   return eventQueryOptions({
-    // queryKey: queryKeys.allReplies(id),
     queryKey: queryKeys.tag('e', [id], Kind.Text),
     filter: {
       kinds: [Kind.Text, Kind.Comment],
