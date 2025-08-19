@@ -63,7 +63,24 @@ export const resetSigninAtom = atom(null, (_get, set) => {
   set(submittingAtom, false)
 })
 
-export const hasExtensionAtom = atom<boolean>(typeof window !== 'undefined' && 'nostr' in window)
+export const hasExtensionAtom = atom(false)
+
+hasExtensionAtom.onMount = (set) => {
+  const detect = () => {
+    if (typeof window === 'undefined') return false
+    return 'nostr' in window
+  }
+
+  set(detect())
+
+  const timer = setTimeout(() => {
+    set(detect())
+  }, 2000)
+
+  return () => {
+    clearTimeout(timer)
+  }
+}
 
 export const slideDirectionAtom = atom((get) => {
   const current = get(pageAtom)
