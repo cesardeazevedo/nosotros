@@ -63,7 +63,7 @@ const styles = css.create({
     color: 'white',
   },
   root$secondary: {
-    backgroundColor: palette.surfaceContainerHigh,
+    backgroundColor: palette.surfaceContainerHighest,
     color: palette.onSurface,
   },
   root$dot: {

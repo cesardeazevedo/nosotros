@@ -11,10 +11,11 @@ import { memo, useState } from 'react'
 type Props = {
   limit?: number
   sx?: SxProps
+  allowDeckLink?: boolean
 }
 
 export const RelayFavoritesList = memo(function RelayFavoritesList(props: Props) {
-  const { limit, sx } = props
+  const { limit, sx, allowDeckLink = true } = props
   const favorites = useRelayFavorites()
   const [expanded, setExpanded] = useState(false)
 
@@ -24,7 +25,7 @@ export const RelayFavoritesList = memo(function RelayFavoritesList(props: Props)
   return (
     <Stack horizontal={false} gap={0.5} sx={sx}>
       {items.map((relay) => (
-        <LinkRelayFeed key={relay} url={relay}>
+        <LinkRelayFeed key={relay} url={relay} allowDeckLink={allowDeckLink}>
           {({ isActive }) => (
             <MenuItem
               interactive

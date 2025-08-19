@@ -30,27 +30,19 @@ export const PostRoot = memo(function PostRoot(props: Props) {
   const { event, header, open } = props
   const note = useNoteState(event, { repliesOpen: open, forceSync: open })
 
-  const handleRepliesClick = useCallback(() => {
+  const openReplies = useCallback(() => {
     note.actions.toggleReplies()
   }, [])
-
-  const handleLoadMore = useCallback(() => {
-    if (note?.state.repliesOpen) {
-      // note.paginate()
-    } else {
-      handleRepliesClick()
-    }
-  }, [note])
 
   return (
     <NoteProvider value={{ event, note }}>
       <html.article style={styles.root} ref={note.ref}>
-        <PostLink note={note} onClick={handleRepliesClick}>
+        <PostLink note={note} onClick={openReplies}>
           {note.event.kind === Kind.Article && <ArticleHeadline />}
           {header || <PostHeader event={event} />}
           <PostContent />
-          <PostActions onReplyClick={handleRepliesClick} />
-          {note.state.repliesOpen === null && <RepliesPreview onLoadMoreClick={handleRepliesClick} />}
+          <PostActions onReplyClick={openReplies} />
+          {note.state.repliesOpen === null && <RepliesPreview onLoadMoreClick={openReplies} />}
         </PostLink>
         <Expandable expanded={note.state.broadcastOpen}>
           <PostBroadcaster />
@@ -59,7 +51,7 @@ export const PostRoot = memo(function PostRoot(props: Props) {
           <>
             <Divider />
             <EditorProvider sx={styles.editor} parent={event} renderBubble initialOpen />
-            <Replies onLoadMoreClick={handleLoadMore} />
+            <Replies />
           </>
         )}
       </html.article>

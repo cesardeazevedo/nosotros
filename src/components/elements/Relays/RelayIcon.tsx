@@ -26,7 +26,7 @@ export const RelayIcon = memo(function RelayIcon(props: Props) {
           <UserAvatar size={size} pubkey={info?.pubkey} sx={sx} />
         </ContentProvider>
       ) : (
-        <></>
+        <Avatar size={size} src='/user.jpg'></Avatar>
       )}
     </>
   )

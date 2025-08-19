@@ -37,14 +37,12 @@ export const RepliesPreview = function RepliesPreview(props: Props) {
   }
 
   return (
-    <>
-      <Stack horizontal={false} sx={styles.root} justify='flex-start'>
-        <html.div style={styles.repliesWrapper}>
-          {replies && <RepliesTree nested={false} replies={replies} repliesOpen={note.state.repliesOpen} level={1} />}
-          <RepliesLoadMore note={note} onClick={onLoadMoreClick} disabled={false} />
-        </html.div>
-      </Stack>
-    </>
+    <Stack horizontal={false} sx={styles.root} justify='flex-start'>
+      <html.div style={styles.repliesWrapper}>
+        {replies && <RepliesTree nested={false} replies={replies} repliesOpen={note.state.repliesOpen} level={1} />}
+        <RepliesLoadMore note={note} onClick={onLoadMoreClick} disabled={false} />
+      </html.div>
+    </Stack>
   )
 }
 

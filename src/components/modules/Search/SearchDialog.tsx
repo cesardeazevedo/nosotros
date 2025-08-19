@@ -36,7 +36,7 @@ export const SearchDialog = memo(function SearchDialog() {
                 search: {
                   kind: Kind.Text,
                   type: 'relayfeed',
-                  limit: 30,
+                  limit: 50,
                   relay: item.relay,
                 },
               })

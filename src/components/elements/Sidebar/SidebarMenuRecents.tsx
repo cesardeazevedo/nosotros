@@ -83,8 +83,6 @@ export const SidebarMenuRecents = memo(function SidebarMenuRecents() {
 
 const styles = css.create({
   content: {
-    // maxHeight: 218,
-    // overflowY: 'auto',
     marginTop: spacing['padding0.5'],
   },
   name: {

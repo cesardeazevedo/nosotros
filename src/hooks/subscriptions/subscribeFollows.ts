@@ -20,7 +20,7 @@ export function subscribeFeedFollowing(ctx: NostrContext, filter: NostrFilter, d
     // Follow list couldn't be found
     defaultIfEmpty(RECOMMENDED_PUBKEYS),
     mergeMap((authors) => {
-      return subscribeStrategy(ctx, { ...filter, authors }, { ...dbFilter, authors, limit: 30 })
+      return subscribeStrategy(ctx, { ...filter, authors }, { ...dbFilter, authors })
     }),
   )
 }

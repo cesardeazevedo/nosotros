@@ -27,7 +27,9 @@ export const FollowSetChip = memo(function FollowSetChip(props: Props) {
   const setListFormDialog = useSetAtom(setListFormDialogAtom)
   const pubkey = useCurrentPubkey()
   const pubkeys = useEventTags(event, 'p')
-  const title = useEventTag(event, 'title') + ` (${pubkeys?.length || ''})`
+  const dTag = useEventTag(event, 'd')
+  const titleTag = useEventTag(event, 'title')
+  const title = (titleTag || dTag) + ` (${pubkeys?.length || ''})`
 
   return (
     <PopoverBase

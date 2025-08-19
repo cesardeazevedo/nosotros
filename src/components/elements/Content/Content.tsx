@@ -38,10 +38,10 @@ const isImageNode = (kind: Kind, node: Node): node is ImageNode => {
 export const Content = memo(function Content(props: Props) {
   const { wrapper, children, renderMedia = true } = props
   const { event } = useNoteContext()
-  const { dense } = useContentContext()
+  const { dense, blured } = useContentContext()
   const nsfw = useEventTag(event, 'content-warning')
   return (
-    <ContentProvider value={{ blured: !!nsfw }}>
+    <ContentProvider value={{ blured: !!nsfw || blured }}>
       {event.metadata?.contentSchema?.content.map((node, index) => {
         const Wrapper = wrapper?.(node) || React.Fragment
         const size = dense ? 'md' : 'lg'

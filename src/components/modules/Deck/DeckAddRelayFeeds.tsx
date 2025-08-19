@@ -8,6 +8,8 @@ import { typeScale } from '@/themes/typeScale.stylex'
 import { IconServerBolt } from '@tabler/icons-react'
 import { useActionState } from 'react'
 import { css, html } from 'react-strict-dom'
+import { RelayFavoritesList } from '../RelayFavorites/RelayFavoritesList'
+import { DeckScroll } from './DeckScroll'
 
 type Props = {
   onSelect: (tag: string) => void
@@ -55,6 +57,11 @@ export const DeckAddRelayFeeds = (props: Props) => {
         </Stack>
         {error && <html.div style={styles.error}>{error}</html.div>}
       </form>
+      <DeckScroll>
+        <Stack horizontal={false} sx={styles.content}>
+          <RelayFavoritesList />
+        </Stack>
+      </DeckScroll>
     </>
   )
 }
@@ -74,6 +81,9 @@ const styles = css.create({
     paddingBlock: spacing.padding2,
     width: '100%',
     height: '100%',
+  },
+  content: {
+    padding: spacing.padding1,
   },
   button: {
     height: 50,

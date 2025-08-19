@@ -90,7 +90,7 @@ const styles = css.create({
     overflow: 'hidden',
     cursor: 'default',
     color: 'transparent',
-    zIndex: skeletonTokens.zIndex,
+    // zIndex: skeletonTokens.zIndex,
     '::before': {
       content: '',
       display: 'block',

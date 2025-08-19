@@ -126,7 +126,7 @@ export const PostOptions = memo(function PostOptions() {
 
 const styles = css.create({
   menu: {
-    width: 200,
+    width: 230,
   },
   label: {
     marginLeft: spacing.margin2,

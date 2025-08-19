@@ -1,9 +1,9 @@
 import { Divider } from '@/components/ui/Divider/Divider'
-import { Stack } from '@/components/ui/Stack/Stack'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import type { FeedState } from '@/hooks/state/useFeed'
 import React, { memo } from 'react'
 import { Feed } from '../Feed/Feed'
+import { DeckScroll } from './DeckScroll'
 
 type Props = {
   feed: FeedState
@@ -18,10 +18,10 @@ type Props = {
 export const DeckColumnFeed = memo(function DeckColumnFeed(props: Props) {
   const { feed, header, loading, wrapper, renderDivider = true, render } = props
   return (
-    <Stack horizontal={false}>
+    <DeckScroll>
       {header}
       {renderDivider && <Divider />}
       <Feed column feed={feed} loading={loading} wrapper={wrapper} render={render} />
-    </Stack>
+    </DeckScroll>
   )
 })

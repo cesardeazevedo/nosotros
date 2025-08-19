@@ -98,7 +98,6 @@ export const selectFilesForUploadAtom = atom(null, (get, set) => {
 export const uploadFilesAtom = atom(null, async (get, set) => {
   const files = get(filesAtom)
   const signer = get(signerAtom)
-  console.log('???', signer)
   invariant(signer, 'No signer found')
   return await lastValueFrom(
     from(files).pipe(

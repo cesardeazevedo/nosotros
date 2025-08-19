@@ -37,7 +37,7 @@ export const FeedNewPosts = memo(function FeedNewPosts(props: Props) {
       }),
       map((position) => position > 250),
       switchMap((isVisible) => {
-        return of(isVisible).pipe(delay(isVisible ? 7000 : 0))
+        return of(isVisible).pipe(delay(isVisible ? 5500 : 0))
       }),
       startWith(false),
     )
@@ -103,12 +103,17 @@ const styles = css.create({
     alignSelf: 'center',
     zIndex: 100,
     height: 0,
+    right: 0,
+    left: {
+      default: 0,
+      '@media (max-width: 1920px)': 315,
+    },
   },
   floating$deck: {
     position: 'sticky',
     margin: 'auto',
     textAlign: 'center',
-    top: 32,
+    top: 84,
     left: 0,
     right: 0,
     height: 0,

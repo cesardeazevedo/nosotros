@@ -4,7 +4,6 @@ import { RelayChip } from '@/components/elements/Relays/RelayChip'
 import { Button } from '@/components/ui/Button/Button'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { Stack } from '@/components/ui/Stack/Stack'
-import { Text } from '@/components/ui/Text/Text'
 import { formatRelayUrl } from '@/core/helpers/formatRelayUrl'
 import type { NostrContext } from '@/nostr/context'
 import { spacing } from '@/themes/spacing.stylex'
@@ -46,10 +45,6 @@ export const FeedAuthNotice = (props: Props) => {
 
   return (
     <>
-      <Stack horizontal sx={styles.row} gap={2} justify='space-between'>
-        <Text variant='title'>Relays authentication</Text>
-      </Stack>
-      <Divider />
       {relaysNeedingAuth.map((relay) => (
         <React.Fragment key={relay}>
           <Stack horizontal sx={styles.row} gap={2} justify='space-between'>

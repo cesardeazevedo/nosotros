@@ -1,12 +1,11 @@
 import type { SxProps } from '@/components/ui/types'
-import { Kind } from '@/constants/kinds'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { createListFeedModule } from '@/hooks/modules/createListFeedModule'
 import type { FeedModule } from '@/hooks/query/useQueryFeeds'
 import { useEventTag } from '@/hooks/useEventUtils'
 import type { LinkProps } from '@tanstack/react-router'
 import { Link } from '@tanstack/react-router'
-import type { ReactNode } from 'react'
+import { useMemo, type ReactNode } from 'react'
 import { css, html } from 'react-strict-dom'
 import { useDeckAddNextColumn } from '../../Deck/hooks/useDeck'
 
@@ -21,7 +20,8 @@ export const RelaySetLink = (props: Props) => {
   const { event, onClick, sx, children, ...rest } = props
   const d = useEventTag(event, 'd')
   const relaySets = [event.pubkey, d].join(':')
-  const deck = useDeckAddNextColumn(() => createListFeedModule(event, 'relay_sets'))
+  const module = useMemo(() => createListFeedModule(event, 'relay_sets'), [event])
+  const deck = useDeckAddNextColumn(() => module)
 
   if (deck.isDeck) {
     return (
@@ -35,8 +35,8 @@ export const RelaySetLink = (props: Props) => {
       to='/feed'
       search={{
         relaySets,
-        limit: 30,
-        kind: [Kind.Text, Kind.Repost],
+        limit: module.filter.limit,
+        kind: module.filter.kinds,
         type: 'relaysets',
       }}
       {...css.props(sx)}

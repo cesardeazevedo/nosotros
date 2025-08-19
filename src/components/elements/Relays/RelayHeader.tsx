@@ -54,7 +54,7 @@ export const RelayHeader = memo(function RelayHeader(props: Props) {
           </Text>
         </Stack>
         <Stack grow justify='space-between'>
-          {relay?.pubkey && (
+          {relay?.pubkey ? (
             <Stack grow sx={styles.contact} horizontal={false}>
               <Text variant='title' size='sm'>
                 Owner
@@ -63,6 +63,8 @@ export const RelayHeader = memo(function RelayHeader(props: Props) {
                 <UserHeader pubkey={relay.pubkey} userAvatarProps={{ size: 'sm' }} />
               </Stack>
             </Stack>
+          ) : (
+            <Stack />
           )}
           <Stack sx={styles.contact} horizontal={false} gap={2}>
             <Text variant='title' size='sm'>

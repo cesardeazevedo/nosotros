@@ -25,7 +25,7 @@ export const YoutubeEmbed = (props: Props) => {
   const posterUrl = `https://i.ytimg.com/vi/${embedId}/hqdefault.jpg`
 
   return (
-    <html.div>
+    <>
       {embedId ? (
         <html.div style={styles.content}>
           {!open && (
@@ -46,7 +46,7 @@ export const YoutubeEmbed = (props: Props) => {
           </ContentLink>
         </Text>
       )}
-    </html.div>
+    </>
   )
 }
 

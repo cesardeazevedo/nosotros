@@ -1,11 +1,10 @@
 import type { SxProps } from '@/components/ui/types'
-import { Kind } from '@/constants/kinds'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { createListFeedModule } from '@/hooks/modules/createListFeedModule'
 import { useEventTag } from '@/hooks/useEventUtils'
 import { Link } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
-import { memo } from 'react'
+import { memo, useMemo } from 'react'
 import { css, html } from 'react-strict-dom'
 import { useDeckAddNextColumn } from '../../Deck/hooks/useDeck'
 
@@ -18,9 +17,9 @@ type Props = {
 
 export const FollowSetLink = memo(function FollowSetLink(props: Props) {
   const { event, children, onClick, sx, ...rest } = props
-  const kinds = [Kind.FollowSets, Kind.Text, Kind.Repost]
   const d = useEventTag(event, 'd') || ''
-  const deck = useDeckAddNextColumn(() => createListFeedModule(event))
+  const module = useMemo(() => createListFeedModule(event), [event])
+  const deck = useDeckAddNextColumn(() => module)
 
   if (deck.isDeck) {
     return (
@@ -38,8 +37,8 @@ export const FollowSetLink = memo(function FollowSetLink(props: Props) {
         author: event.pubkey,
         d,
         type: 'followset',
-        kind: kinds,
-        limit: 20,
+        kind: module.filter.kinds,
+        limit: module.filter.limit,
       }}
       disabled={!!onClick}
       {...css.props(sx)}
