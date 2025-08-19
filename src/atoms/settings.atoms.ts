@@ -33,7 +33,7 @@ export const DEFAULT_SETTINGS: Settings = {
   sidebarCollapsed: false,
   sidebarRelaysCollapsed: false,
   recentsCollapsed: false,
-  maxRelaysPerUser: 2,
+  maxRelaysPerUser: 3,
   clientTag: true,
 }
 

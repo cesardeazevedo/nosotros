@@ -11,15 +11,15 @@ export const SettingsMaxRelaysOutbox = memo(function SettingsMaxRelaysOutbox() {
   const set = useSetSettings()
   return (
     <MenuItem
-      label={'Max relays per person when query'}
-      supportingText={'The number of relays to query per person when outbox is enabled'}
+      label={'Max relays per person'}
+      supportingText={'The number of relays to query per person for the outbox model'}
       trailing={
         <Stack gap={2} sx={styles.wrapper} justify='flex-end'>
           <Slider
             value={settings.maxRelaysPerUser}
             onChange={(value) => set({ maxRelaysPerUser: value })}
             min={1}
-            max={8}
+            max={14}
           />
           <Text variant='title' size='md'>
             {settings.maxRelaysPerUser}

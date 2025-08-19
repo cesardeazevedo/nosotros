@@ -14,6 +14,8 @@ import { batcher } from '../batchers'
 import { subscribeStrategy } from '../subscriptions/subscribeStrategy'
 import { pointerToQueryKey, queryKeys } from './queryKeys'
 import { setEventData } from './queryUtils'
+import { store } from '@/atoms/store'
+import { settingsAtom } from '@/atoms/settings.atoms'
 
 export type UseQueryOptionsWithFilter<Selector = NostrEventDB[]> = UseQueryOptions<NostrEventDB[], Error, Selector> & {
   filter: Filter
@@ -29,7 +31,8 @@ export function createEventQueryOptions<Selector = NostrEventDB[]>(options: UseQ
   const { filter, ctx = {}, ...opts } = options
   return queryOptions<NostrEventDB[], Error, Selector>({
     queryFn: async () => {
-      const res = await firstValueFrom(subscribeStrategy(ctx, filter).pipe(shareReplay()))
+      const { maxRelaysPerUser } = store.get(settingsAtom)
+      const res = await firstValueFrom(subscribeStrategy({ ...ctx, maxRelaysPerUser }, filter).pipe(shareReplay()))
       // This will populate all events into react query cache individually
       res.forEach(setEventData)
       return res
