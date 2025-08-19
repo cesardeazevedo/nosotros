@@ -265,7 +265,7 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
     return [...mentionsInboxRelays, ...myOutboxRelays].filter((relay) => !state.excludedRelays.has(relay))
   }, [mentionsInboxRelays, myOutboxRelays, state.excludedRelays])
 
-  const setFeedData = useCallback(
+  const setEventCache = useCallback(
     (event: NostrEvent) => {
       if (queryKey) {
         queryClient.setQueryData(queryKey, (data: InfiniteEvents) => {
@@ -275,7 +275,8 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
           } as InfiniteEvents
         })
       } else if (parent) {
-        queryClient.setQueryData(queryKeys.tag('e', [parent.id], parent.kind), (events: NostrEventDB[] = []) => [
+        const rootId = parent.metadata?.rootId || parent.id
+        queryClient.setQueryData(queryKeys.tag('e', [rootId], parent.kind), (events: NostrEventDB[] = []) => [
           ...events,
           event,
         ])
@@ -286,7 +287,7 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
 
   const onSuccess = (event: NostrEvent) => {
     reset()
-    setFeedData(event)
+    setEventCache(event)
     store.set(enqueueToastAtom, {
       component: <ToastEventPublished event={event} eventLabel={parent ? 'Comment' : 'Note'} />,
       duration: 10000,
