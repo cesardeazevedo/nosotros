@@ -34,8 +34,8 @@ export function useReplyTags(event: NostrEventDB | undefined) {
   const userHeadRelay = userRelays.data?.[0]?.relay || ''
 
   const rootEvent = useEvent(event?.metadata?.rootId).data
-  const rootEventHeadRelay = useSeen(event?.metadata?.rootId || '').data?.[0].relay || ''
-  const rootUserHeadRelay = useUserRelays(rootEvent?.pubkey, WRITE)?.data?.[0].relay || ''
+  const rootEventHeadRelay = useSeen(event?.metadata?.rootId || '').data?.[0]?.relay || ''
+  const rootUserHeadRelay = useUserRelays(rootEvent?.pubkey, WRITE)?.data?.[0]?.relay || ''
 
   if (event) {
     switch (event.kind) {
