@@ -90,7 +90,7 @@ export const Reply = memo(function Reply(props: Props) {
                 </Stack>
                 <Expandable expanded={note.state.isReplying} trigger={() => <></>}>
                   {note.state.isReplying && (
-                    <EditorProvider sx={styles.editor} initialOpen renderBubble renderDiscard={false} parent={event} />
+                    <EditorProvider sx={styles.editor} initialOpen renderBubble parent={event} />
                   )}
                 </Expandable>
               </html.div>
