@@ -37,7 +37,6 @@ export class Pool {
     relay.websocket$.subscribe({
       error: () => {
         this.delete(url)
-        this.blacklist(url)
       },
       complete: () => {
         this.delete(url)
