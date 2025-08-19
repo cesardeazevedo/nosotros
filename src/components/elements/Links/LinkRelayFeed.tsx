@@ -10,10 +10,11 @@ type Props = Omit<LinkProps, 'to' | 'search'> & {
   url: string
   sx?: SxProps
   allowDeckLink?: boolean
+  onClick?: () => void
 }
 
 export const LinkRelayFeed = memo(function LinkRelayFeed(props: Props) {
-  const { url, target = '_self', sx, children, allowDeckLink = true } = props
+  const { url, target = '_self', sx, children, allowDeckLink = true, onClick } = props
   const router = useRouter()
   const module = useMemo(() => createRelayFeedModule(url), [url])
   const deck = useDeckAddNextColumn(() => module)
@@ -32,6 +33,7 @@ export const LinkRelayFeed = memo(function LinkRelayFeed(props: Props) {
       target={target}
       search={{ relay: url, kind: module.filter.kinds, limit: module.filter.limit, type: 'relayfeed' }}
       state={{ from: router.latestLocation.pathname } as never}
+      onClick={onClick}
       {...css.props(sx)}>
       {props.children}
     </Link>
