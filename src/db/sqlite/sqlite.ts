@@ -19,15 +19,17 @@ export class SqliteStorage {
     this.requests = new Map()
     this.worker = new Worker(new URL('./sqlite.worker.ts', import.meta.url), { type: 'module' })
     this.worker.onmessage = (e) => {
-      const res = JSON.parse(e.data) as SqliteMessageResponse<unknown> & { id: string }
+      const raw = e.data
+      const res = (typeof raw === 'string' ? JSON.parse(raw) : raw) as SqliteMessageResponse<unknown> & { id: string }
       const resolvers = this.requests.get(res.id)
-      if (resolvers) {
-        this.requests.delete(res.id)
-        if ('error' in res) {
-          resolvers.reject(res.error)
-        } else {
-          resolvers.resolve(res.result || [])
-        }
+      if (!resolvers) {
+        return
+      }
+      this.requests.delete(res.id)
+      if ('error' in res) {
+        resolvers.reject(res.error)
+      } else {
+        resolvers.resolve(res.result)
       }
     }
   }
@@ -120,7 +122,7 @@ export class SqliteStorage {
   }
 
   async queryNip05(handles: string[]) {
-    return await this.send<Nip05DB>({
+    return await this.send<Nip05DB[]>({
       method: 'queryNip05',
       params: handles,
     })
@@ -133,7 +135,23 @@ export class SqliteStorage {
     })
   }
 
-  clearDB(): Promise<void> {
-    throw new Error('Method not implemented.')
+  async countEvents() {
+    return this.send<number>({ method: 'countEvents' })
+  }
+
+  async countTags() {
+    return this.send<number>({ method: 'countTags' })
+  }
+
+  async dbSizeBytes() {
+    return this.send<number>({ method: 'dbSize ' })
+  }
+
+  async exportDB() {
+    return await this.send<Uint8Array<ArrayBufferLike>>({ method: 'exportDB' })
+  }
+
+  async deleteDB() {
+    await this.send({ method: 'deleteDB' })
   }
 }

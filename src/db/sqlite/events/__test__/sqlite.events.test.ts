@@ -22,7 +22,7 @@ function selectTags() {
 
 describe('SqliteEventStore.insertEvent', () => {
   beforeAll(async () => {
-    db = await initializeSQLite('test.sqlite3', false)
+    db = (await initializeSQLite('test.sqlite3', false)).db
     db.exec('PRAGMA foreign_keys = ON;')
     store = new SqliteEventStore(Promise.resolve(db))
   })
@@ -32,7 +32,7 @@ describe('SqliteEventStore.insertEvent', () => {
     db.exec('DELETE FROM events;')
   })
 
-  test('inserts plain event + tags', () => {
+  test.only('inserts plain event + tags', () => {
     const e = fakeEventMeta({
       id: 'id1',
       kind: Kind.Text,
