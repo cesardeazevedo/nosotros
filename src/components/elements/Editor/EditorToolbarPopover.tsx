@@ -44,19 +44,18 @@ export const EditorActionsPopover = memo(function EditorActionsPopover(props: Pr
 
           <EditorButtonReactions />
 
-          <PopoverBase
-            cursor='arrow'
-            opened={section === 'zaps'}
-            onClose={() => openSection('zaps')}
-            placement='bottom-start'
-            contentRenderer={() => (
-              <Paper elevation={2} surface='surfaceContainerLow' sx={styles.wrapper}>
-                <EditorZapSplits />
-              </Paper>
-            )}>
-            {/* @ts-ignore */}
-            {({ getProps, setRef }) => <EditorButtonZapSplits {...getProps()} ref={setRef} />}
-          </PopoverBase>
+          {/* <PopoverBase */}
+          {/*   cursor='arrow' */}
+          {/*   opened={section === 'zaps'} */}
+          {/*   onClose={() => openSection('zaps')} */}
+          {/*   placement='bottom-start' */}
+          {/*   contentRenderer={() => ( */}
+          {/*     <Paper elevation={2} surface='surfaceContainerLow' sx={styles.wrapper}> */}
+          {/*       <EditorZapSplits /> */}
+          {/*     </Paper> */}
+          {/*   )}> */}
+          {/*   {({ getProps, setRef }) => <EditorButtonZapSplits {...getProps()} ref={setRef} />} */}
+          {/* </PopoverBase> */}
 
           <PopoverBase
             cursor='arrow'

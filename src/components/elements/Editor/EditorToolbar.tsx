@@ -1,13 +1,12 @@
 import { useContentContext } from '@/components/providers/ContentProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
+import { spacing } from '@/themes/spacing.stylex'
 import { memo, type ReactNode } from 'react'
 import { css } from 'react-strict-dom'
 import { EditorButtonAddMedia } from './Toolbar/EditorButtonAddMedia'
 import { EditorButtonBroadcast } from './Toolbar/EditorButtonBroadcast'
 import { EditorButtonReactions } from './Toolbar/EditorButtonReactions'
 import { EditorButtonSettings } from './Toolbar/EditorButtonSettings'
-import { EditorButtonZapSplits } from './Toolbar/EditorButtonZapSplit'
-import { spacing } from '@/themes/spacing.stylex'
 
 type Props = {
   children?: ReactNode
@@ -24,7 +23,7 @@ export const EditorToolbar = memo(function EditorToolbar(props: Props) {
         {renderAddMedia && <EditorButtonAddMedia />}
         <EditorButtonBroadcast />
         <EditorButtonReactions />
-        <EditorButtonZapSplits />
+        {/* <EditorButtonZapSplits /> */}
         {/* <EditorButtonPow dense={dense} store={store} /> */}
         <EditorButtonSettings />
       </Stack>
