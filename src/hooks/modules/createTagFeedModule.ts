@@ -8,7 +8,7 @@ export function createTagFeedModule(tag: string): FeedModule {
   const filter = {
     kinds: [Kind.Text],
     '#t': [tag],
-    limit: 20,
+    limit: 100,
   }
   return {
     id,

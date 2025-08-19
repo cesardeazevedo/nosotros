@@ -12,7 +12,7 @@ export function createNotificationFeedModule(pubkey: string): NotificationFeedMo
   const filter = {
     kinds: [Kind.Text, Kind.Comment, Kind.Repost, Kind.Reaction, Kind.ZapReceipt],
     '#p': [pubkey],
-    limit: 30,
+    limit: 50,
   }
   return {
     id,
