@@ -60,7 +60,7 @@ const Img = (props: { src: string; blurhash?: string; dim?: { width: number; hei
       )}
       <img
         {...adjustedDims}
-        src={getImgProxyUrl('feed_img', src)}
+        src={getImgProxyUrl('high_res', src)}
         {...css.props([styles.img, isMobile && styles.img$mobile])}
         onLoad={() => setLoaded(true)}
       />
