@@ -6,18 +6,23 @@ import { queryClient } from './queryClient'
 import { queryKeys } from './queryKeys'
 
 async function populateRelayInfo() {
-  const relayInfos = await dbSqlite.queryRelayInfo([])
-  relayInfos.forEach((info) => queryClient.setQueryData(queryKeys.relayInfo(info.url), info))
+  const res = await dbSqlite.queryRelayInfo([])
+  res.forEach((info) => queryClient.setQueryData(queryKeys.relayInfo(info.url), info))
 }
 
 async function populateRelayStats() {
-  const relayStats = await dbSqlite.queryRelayStats([])
-  queryClient.setQueryData(queryKeys.allRelayStats(), relayStats)
-  Object.values(relayStats).forEach((stats) => queryClient.setQueryData(queryKeys.relayStats(stats.url), stats))
+  const res = await dbSqlite.queryRelayStats([])
+  queryClient.setQueryData(queryKeys.allRelayStats(), res)
+  Object.values(res).forEach((stats) => queryClient.setQueryData(queryKeys.relayStats(stats.url), stats))
+}
+
+async function populateNIP05() {
+  const res = await dbSqlite.queryNip05([])
+  Object.values(res).forEach((data) => queryClient.setQueryData(queryKeys.nip05(data.nip05), data))
 }
 
 export async function prepopulate() {
-  return Promise.all([populateRelayInfo(), populateRelayStats()])
+  return Promise.all([populateRelayInfo(), populateRelayStats(), populateNIP05()])
 }
 
 export function setEventData(event: NostrEventDB) {

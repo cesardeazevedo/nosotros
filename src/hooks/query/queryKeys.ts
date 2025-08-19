@@ -14,7 +14,6 @@ export const queryKeys = {
   relayStats: (relay: string) => ['relayStats', relay],
   relayUsers: (relay: string) => ['relayUsers', relay],
   allRelayStats: () => ['relayStats'],
-  allReplies: (id: string) => ['replies', id],
 
   feed: (name: string, filter: NostrFilter, ctx?: NostrContext) => {
     return ['feed', name, filter.kinds, filter.search, ctx?.relays].filter(Boolean)
