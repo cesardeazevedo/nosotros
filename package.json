@@ -1,7 +1,7 @@
 {
   "name": "nosotros",
   "private": true,
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "author": "César Dias <cesardeazevedo@outlook.com>",
   "repository": "https://github.com/cesardeazevedo/nosotros",
@@ -31,7 +31,7 @@
     "@tanstack/react-query": "^5.83.0",
     "@tanstack/react-query-devtools": "^5.83.0",
     "@tanstack/react-query-persist-client": "^5.83.0",
-    "@tanstack/react-router": "1.130.12",
+    "@tanstack/react-router": "1.131.26",
     "@tiptap/core": "^2.11.0",
     "@tiptap/extension-document": "^2.11.0",
     "@tiptap/extension-dropcursor": "^2.11.0",
