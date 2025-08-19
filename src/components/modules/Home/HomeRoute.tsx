@@ -3,7 +3,7 @@ import { createHomeFeedModule } from '@/hooks/modules/createHomeFeedModule'
 import { useFeedState } from '@/hooks/state/useFeed'
 import { useCurrentPubkey } from '@/hooks/useAuth'
 import { useNavigate } from '@tanstack/react-router'
-import { memo } from 'react'
+import { memo, useMemo } from 'react'
 import { Feed } from '../Feed/Feed'
 import { HomeHeader } from './HomeHeader'
 
@@ -15,7 +15,13 @@ export const HomeRoute = memo(function HomeRoute(props: Props) {
   const { replies = false } = props
   const navigate = useNavigate()
   const pubkey = useCurrentPubkey()
-  const feed = useFeedState({ ...createHomeFeedModule(pubkey), includeReplies: replies })
+  const module = useMemo(() => {
+    return {
+      ...createHomeFeedModule(pubkey),
+      includeReplies: replies,
+    }
+  }, [replies])
+  const feed = useFeedState(module)
 
   const handleChangeTabs = (anchor: string | undefined) => {
     navigate({ to: anchor === 'replies' ? '/threads' : '/' })

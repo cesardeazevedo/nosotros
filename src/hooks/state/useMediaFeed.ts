@@ -4,10 +4,10 @@ import { useFeedState } from './useFeed'
 
 export type MediaFeedState = ReturnType<typeof useMediaFeedState>
 
-export function useMediaFeedState(feedOptions: MediaFeedModule) {
-  const [layout, setLayout] = useState(feedOptions.layout)
+export function useMediaFeedState(module: MediaFeedModule) {
+  const [layout, setLayout] = useState(module.layout)
 
-  const feed = useFeedState(feedOptions)
+  const feed = useFeedState(module)
 
   return {
     ...feed,

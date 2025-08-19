@@ -5,6 +5,5 @@ export type FeedSearch = ReturnType<typeof useSearchFeed>
 
 export function useSearchFeed(search: string = '') {
   const options = createSearchFeedModule(search)
-  const feed = useFeedState(options)
-  return feed
+  return useFeedState(options)
 }

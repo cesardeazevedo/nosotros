@@ -7,7 +7,8 @@ import { useFeedState } from '../state/useFeed'
 const ignoreRelays = new Set(RELAY_SELECTION_IGNORE)
 
 export function useRelayFavorites() {
-  const feed = useFeedState(createRelayFavoriteModule())
+  const module = useMemo(() => createRelayFavoriteModule(), [])
+  const feed = useFeedState(module)
 
   return useMemo(() => {
     const events = feed.query.data?.pages.flat() ?? []
