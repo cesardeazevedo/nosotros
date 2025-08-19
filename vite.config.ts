@@ -19,30 +19,6 @@ export default defineConfig(({ mode }) => {
       host: true,
       port: 8000,
       hmr: false,
-      proxy: {
-        '/proxy': {
-          target: 'https://imgproxy.nosotros.app',
-          changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/proxy/, ''),
-        },
-      },
-      headers: {
-        'Cross-Origin-Opener-Policy': 'same-origin',
-        'Cross-Origin-Embedder-Policy': 'require-corp',
-      },
-    },
-    preview: {
-      proxy: {
-        '/proxy': {
-          target: 'https://imgproxy.nosotros.app',
-          changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/proxy/, ''),
-        },
-      },
-      headers: {
-        'Cross-Origin-Opener-Policy': 'same-origin',
-        'Cross-Origin-Embedder-Policy': 'require-corp',
-      },
     },
     optimizeDeps: {
       exclude: ['@sqlite.org/sqlite-wasm'],
