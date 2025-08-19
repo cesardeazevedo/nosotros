@@ -1,33 +1,71 @@
 import { Kind } from '@/constants/kinds'
+import type { NostrFilter } from '@/core/types'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import type { NostrContext } from '@/nostr/context'
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import { strictDeepEqual } from 'fast-equals'
-import { useObservableCallback, useSubscription } from 'observable-hooks'
+import { useObservable, useObservableCallback, useSubscription } from 'observable-hooks'
 import { useCallback, useMemo, useState } from 'react'
-import { tap, throttleTime } from 'rxjs'
+import { EMPTY, finalize, ignoreElements, switchMap, tap, throttleTime } from 'rxjs'
 import { queryKeys } from '../query/queryKeys'
+import { setEventData } from '../query/queryUtils'
+import type { FeedScope } from '../query/useQueryFeeds'
 import { createFeedQueryOptions, type FeedModule, type InfiniteEvents } from '../query/useQueryFeeds'
+import { subscribeLive } from '../subscriptions/subscribeLive'
 
 export type FeedState = ReturnType<typeof useFeedState>
 
 export function useFeedState(options: FeedModule & { select?: (data: InfiniteEvents) => InfiniteEvents }) {
   const [filter, setFilter] = useState(options.filter)
-  const [replies, setReplies] = useState<boolean | undefined>(options.includeReplies ?? false)
+  const [prevFilter, setPrevFilter] = useState(options.filter)
+  const [replies, setReplies] = useState<boolean | undefined>(options.includeReplies)
+  const [prevReplies, setPrevReplies] = useState<boolean | undefined>(options.includeReplies)
+
   const [blured, setBlured] = useState(options.blured ?? false)
   const [buffer, setBuffer] = useState<NostrEventDB[]>([])
   const [bufferReplies, setBufferReplies] = useState<NostrEventDB[]>([])
   const [pageSize, setPageSize] = useState(options.pageSize || 10)
 
-  // In case the filter was updated from the router
-  if (!strictDeepEqual(filter, options.filter)) {
+  if (!strictDeepEqual(prevFilter, options.filter)) {
+    setPrevFilter(filter)
     setFilter(options.filter)
   }
-  if (replies !== options.includeReplies) {
+  if (prevReplies !== options.includeReplies) {
+    setPrevReplies(replies)
     setReplies(options.includeReplies)
   }
 
+  const sub = useObservable<void, [NostrContext, FeedScope, NostrFilter]>(
+    (input$) =>
+      input$.pipe(
+        switchMap(([ctx, scope, filter]) => {
+          if (options.live !== false) {
+            return subscribeLive(ctx, scope, filter).pipe(
+              tap((event) => {
+                setEventData(event)
+                onStream(event)
+              }),
+              ignoreElements(),
+              finalize(() => flush()),
+            )
+          }
+          return EMPTY
+        }),
+      ),
+    [options.ctx, options.scope, filter],
+  )
+  useSubscription(sub)
+
+  const onStream = useCallback((event: NostrEventDB) => {
+    if (event.metadata?.isRoot) {
+      setBuffer((events) => [...events, event])
+    } else {
+      setBufferReplies((events) => [...events, event])
+    }
+  }, [])
+
   const queryClient = useQueryClient()
-  const queryKey = queryKeys.feed(options.id, filter)
+  const queryKey = queryKeys.feed(options.id, filter, options.ctx)
   const query = useInfiniteQuery(
     createFeedQueryOptions({
       select: useCallback(
@@ -59,13 +97,7 @@ export function useFeedState(options: FeedModule & { select?: (data: InfiniteEve
       ...options,
       filter,
       queryKey,
-      onStream: (event) => {
-        if (event.metadata?.isRoot) {
-          setBuffer((events) => [...events, event])
-        } else {
-          setBufferReplies((events) => [...events, event])
-        }
-      },
+      onStream,
     }),
   )
 

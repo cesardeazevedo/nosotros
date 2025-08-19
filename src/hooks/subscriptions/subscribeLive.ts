@@ -1,14 +1,13 @@
 import type { NostrFilter } from '@/core/types'
 import type { NostrContext } from '@/nostr/context'
-import { delay, EMPTY, identity, mergeMap, filter as rxFilter } from 'rxjs'
-import { queryClient } from '../query/queryClient'
-import type { FeedModule, InfiniteEvents } from '../query/useQueryFeeds'
+import { delay, identity, mergeMap, filter as rxFilter } from 'rxjs'
+import type { FeedScope } from '../query/useQueryFeeds'
 import { subscribeFeed } from './subscribeFeed'
+import { store } from '@/atoms/store'
+import { settingsAtom } from '@/atoms/settings.atoms'
 
-export function subscribeLive(ctx: NostrContext, filter: NostrFilter, options: FeedModule) {
-  if (options.live === false || 'until' in filter) {
-    return EMPTY
-  }
+export function subscribeLive(ctx: NostrContext, scope: FeedScope, filter: NostrFilter) {
+  const now = Date.now() / 10000
   return subscribeFeed(
     {
       ...ctx,
@@ -16,8 +15,9 @@ export function subscribeLive(ctx: NostrContext, filter: NostrFilter, options: F
       negentropy: false,
       subId: 'live',
       network: 'REMOTE_ONLY',
+      maxRelaysPerUser: store.get(settingsAtom).maxRelaysPerUser,
     },
-    options.scope,
+    scope,
     {
       ...filter,
       since: parseInt((Date.now() / 1000).toString()),
@@ -25,10 +25,6 @@ export function subscribeLive(ctx: NostrContext, filter: NostrFilter, options: F
   ).pipe(
     delay(1000),
     mergeMap(identity),
-    rxFilter((event) => {
-      const data = queryClient.getQueryData(options.queryKey) as InfiniteEvents | undefined
-      const top = data?.pages[0][0].created_at || 0
-      return event.created_at > top
-    }),
+    rxFilter((event) => event.created_at > now),
   )
 }
