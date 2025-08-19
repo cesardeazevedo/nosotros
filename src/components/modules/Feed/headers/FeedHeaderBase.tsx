@@ -23,11 +23,12 @@ type Props = HeaderBaseProps &
     feed?: FeedState
     customSettings?: ReactNode
     onDelete?: () => void
+    renderSetting?: boolean
   }
 
 export const FeedHeaderBase = memo(function FeedHeaderBase(props: Props) {
   const [expanded, setExpanded] = useState(false)
-  const { feed, customSettings, renderRelaySettings, onDelete, ...rest } = props
+  const { feed, customSettings, renderRelaySettings, onDelete, renderSetting = true, ...rest } = props
   const column = useDeckColumn()
   const isDeck = !!column
   const removeDeckColumn = useRemoveDeckColumn(column?.id)
@@ -55,7 +56,9 @@ export const FeedHeaderBase = memo(function FeedHeaderBase(props: Props) {
         </Stack>
       </HeaderBase>
       <Expandable expanded={expanded}>
-        {feed && (customSettings || <FeedSettings feed={feed} renderRelaySettings={renderRelaySettings} />)}
+        {feed &&
+          renderSetting &&
+          (customSettings || <FeedSettings feed={feed} renderRelaySettings={renderRelaySettings} />)}
         {isDeck && (
           <>
             <Divider />

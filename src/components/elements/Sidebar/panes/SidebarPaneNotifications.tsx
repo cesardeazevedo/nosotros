@@ -9,7 +9,7 @@ import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { Link } from '@tanstack/react-router'
-import { memo, useContext, type RefObject } from 'react'
+import { memo, useContext, useMemo, type RefObject } from 'react'
 import { css } from 'react-strict-dom'
 import { SidebarContext } from '../SidebarContext'
 
@@ -21,7 +21,8 @@ type Props = {
 
 export const SidebarPaneNotifications = memo(function SidebarPaneNotifications(props: Props) {
   const context = useContext(SidebarContext)
-  const feed = useNotificationFeedState({ ...createNotificationFeedModule(props.pubkey), pageSize: 20 })
+  const module = useMemo(() => ({ ...createNotificationFeedModule(props.pubkey), pageSize: 20 }), [props.pubkey])
+  const feed = useNotificationFeedState(module)
   return (
     <Stack horizontal={false} ref={props.ref} sx={[styles.root, props.sx]}>
       <Link resetScroll to='/notifications' onClick={() => context.setPane(false)}>

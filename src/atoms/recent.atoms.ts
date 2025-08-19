@@ -11,7 +11,7 @@ export const recentsAtom = atomWithStorage<RecentItem[]>(STORAGE_KEY, [])
 
 export const addRecentAtom = atom(null, (get, set, item: RecentItem) => {
   const current = get(recentsAtom)
-  const withoutId = current.filter((item) => item.id !== item.id)
+  const withoutId = current.filter((prev) => prev.id !== item.id)
 
   set(recentsAtom, [item, ...withoutId].slice(0, MAX_ITEMS))
 })

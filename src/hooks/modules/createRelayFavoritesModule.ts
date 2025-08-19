@@ -5,7 +5,7 @@ import { queryKeys } from '../query/queryKeys'
 import type { FeedModule } from '../query/useQueryFeeds'
 
 export function createRelayFavoriteModule(): FeedModule {
-  const id = 'relay_favoritoes'
+  const id = 'relay_favorites'
   const filter: NostrFilter = {
     kinds: [Kind.RelayFavorites],
     authors: RECOMMENDED_PUBKEYS,

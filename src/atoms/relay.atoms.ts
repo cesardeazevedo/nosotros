@@ -45,6 +45,5 @@ export function setRelayConnected(url: string, value: boolean) {
 }
 
 export function setRelayAuth(url: string, challenge: string | false) {
-  console.log('AUTH', url, challenge)
   upsert(url, { auth: challenge })
 }

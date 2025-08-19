@@ -11,7 +11,7 @@ export const SidebarRelayFavorites = () => {
       expanded={!open}
       onChange={() => toggle('sidebarRelaysCollapsed')}
       trigger={(triggerProps) => <SidebarSubheader {...triggerProps} label='Relay Feeds' />}>
-      <RelayFavoritesList limit={8} />
+      <RelayFavoritesList limit={8} allowDeckLink={false} />
     </Expandable>
   )
 }

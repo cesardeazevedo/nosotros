@@ -28,7 +28,6 @@ export const ThreadItem = memo(function ThreadItem(props: Props) {
   const { event } = note
   const ref = useRef<HTMLDivElement>(null)
   const context = useMatch({ from: '/$nostr', shouldThrow: false })?.context
-  // todo: handle deck
   const deck = useDeckColumn()
   const isCurrentNote =
     (deck?.type === 'event' && deck.filter.ids?.[0] === event.id) ||

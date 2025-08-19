@@ -1,17 +1,26 @@
 import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
+import { useMobile } from '@/hooks/useMobile'
 import { spacing } from '@/themes/spacing.stylex'
 import { memo, useCallback } from 'react'
 import { css, html } from 'react-strict-dom'
 import { RepliesLoadMore } from './RepliesLoadMore'
 import { RepliesTree } from './RepliesTree'
 
-export const Replies = memo(function Replies() {
+type Props = {
+  onLoadMoreClick?: () => void
+}
+
+export const Replies = memo(function Replies(props: Props) {
+  const isMobile = useMobile()
   const { note } = useNoteContext()
 
   const replies = note.repliesChunk
 
   const handleLoadMore = useCallback(() => {
+    if (isMobile && props.onLoadMoreClick) {
+      return props.onLoadMoreClick()
+    }
     note.paginate()
   }, [])
 

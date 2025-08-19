@@ -11,7 +11,7 @@ import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconLayoutSidebarLeftExpand } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
-import { useContext, type RefObject } from 'react'
+import { useContext, useMemo, type RefObject } from 'react'
 import { css } from 'react-strict-dom'
 import { SidebarContext } from '../SidebarContext'
 
@@ -22,7 +22,8 @@ type Props = {
 
 export const SidebarPaneRelayDiscovery = (props: Props) => {
   const context = useContext(SidebarContext)
-  const feed = useRelayDiscoveryFeed(createRelayDiscoveryModule())
+  const module = useMemo(() => createRelayDiscoveryModule(), [])
+  const feed = useRelayDiscoveryFeed(module)
 
   return (
     <Stack horizontal={false} ref={props.ref} justify='flex-start' sx={[styles.root, props.sx]}>

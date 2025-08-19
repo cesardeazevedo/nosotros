@@ -15,7 +15,7 @@ export const ErrorBoundary = () => {
 
   const handleClick = useCallback(async () => {
     setCleaning(true)
-    await dbSqlite.clearDB()
+    await dbSqlite.deleteDB()
     setCleaning(false)
   }, [])
 

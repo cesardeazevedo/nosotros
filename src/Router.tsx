@@ -1,5 +1,6 @@
 import { type QueryClient } from '@tanstack/react-query'
 import { createRootRouteWithContext, createRoute, createRouter, redirect } from '@tanstack/react-router'
+import { useMemo } from 'react'
 import { z } from 'zod'
 import { selectedPubkeyAtom } from './atoms/auth.atoms'
 import { decksAtom } from './atoms/deck.atoms'
@@ -31,6 +32,7 @@ import { RelayRoute } from './components/modules/Relays/RelaysRoute'
 import { SearchRoute } from './components/modules/Search/SearchRoute'
 import { SettingsPreferencesRoute } from './components/modules/Settings/SettingsPreferenceRoute'
 import { SettingsRoute } from './components/modules/Settings/SettingsRoute'
+import { SettingsStorageRoute } from './components/modules/Settings/SettingsStorage'
 import { TagHeader } from './components/modules/Tag/TagHeader'
 import { Kind } from './constants/kinds'
 import type { NostrFilter } from './core/types'
@@ -39,6 +41,7 @@ import { loadThreads } from './hooks/loaders/loadThreads'
 import { createProfileModule } from './hooks/modules/createProfileFeedModule'
 import { createTagFeedModule } from './hooks/modules/createTagFeedModule'
 import { queryClient } from './hooks/query/queryClient'
+import { queryKeys } from './hooks/query/queryKeys'
 import type { FeedModule, FeedScope } from './hooks/query/useQueryFeeds'
 import { useFeedState } from './hooks/state/useFeed'
 import type { NostrContext } from './nostr/context'
@@ -211,7 +214,7 @@ export const feedRoute = createRoute({
       outbox = true,
       pubkey,
       permission,
-      includeReplies = true,
+      includeReplies = false,
     } = deps
 
     const filter = {} as NostrFilter
@@ -294,17 +297,17 @@ export const feedRoute = createRoute({
     return {
       id,
       type,
-      replies: includeReplies,
+      includeReplies,
       filter,
       blured,
       scope: scope as FeedScope,
-      queryKey: ['feed', id, JSON.stringify(filter)],
+      queryKey: queryKeys.feed(id, filter, ctx),
       ctx,
     } as FeedModule
   },
   component: () => {
-    const feedOptions = feedRoute.useLoaderData()
-    const feed = useFeedState(feedOptions)
+    const module = feedRoute.useLoaderData()
+    const feed = useFeedState(module)
     return <FeedRoute feed={feed} headline={<FeedHeadline feed={feed} />} header={<FeedHeader feed={feed} />} />
   },
 })
@@ -446,7 +449,8 @@ const nprofileIndexRoute = createRoute({
   path: '/',
   component: function NProfileIndexRoute() {
     const { nostr } = nprofileIndexRoute.useParams()
-    const feed = useFeedState(createProfileModule({ nip19: nostr }))
+    const module = useMemo(() => createProfileModule({ nip19: nostr, includeReplies: false }), [nostr])
+    const feed = useFeedState(module)
     return <Feed feed={feed} />
   },
 })
@@ -456,7 +460,8 @@ const nprofileRepliesRoute = createRoute({
   path: '/replies',
   component: function NProfileReplieRoute() {
     const { nostr } = nprofileRepliesRoute.useParams()
-    const feed = useFeedState(createProfileModule({ nip19: nostr, includeReplies: true }))
+    const module = useMemo(() => createProfileModule({ nip19: nostr, includeReplies: true }), [nostr])
+    const feed = useFeedState(module)
     return <Feed feed={feed} />
   },
 })
@@ -466,7 +471,8 @@ const nprofileMediaRoute = createRoute({
   path: 'media',
   component: function NProfileMediaRoute() {
     const { nostr } = nprofileMediaRoute.useParams()
-    const feed = useFeedState(createProfileModule({ nip19: nostr, filter: { kinds: [Kind.Media] } }))
+    const module = useMemo(() => createProfileModule({ nip19: nostr, filter: { kinds: [Kind.Media] } }), [nostr])
+    const feed = useFeedState(module)
     return <Feed feed={feed} />
   },
 })
@@ -476,7 +482,8 @@ const nprofileArticlesRoute = createRoute({
   path: 'articles',
   component: function NProfileArticleRoute() {
     const { nostr } = nprofileArticlesRoute.useParams()
-    const feed = useFeedState(createProfileModule({ nip19: nostr, filter: { kinds: [Kind.Article] } }))
+    const module = useMemo(() => createProfileModule({ nip19: nostr, filter: { kinds: [Kind.Article] } }), [nostr])
+    const feed = useFeedState(module)
     return <Feed feed={feed} />
   },
 })

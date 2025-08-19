@@ -15,6 +15,7 @@ export type Props = {
   variant?: Variant
   disabled?: boolean
   selected?: boolean
+  interactive?: boolean
   tabIndex?: -1 | 0
   leading?: React.ReactNode
   leadingIcon?: React.ReactNode
@@ -45,6 +46,7 @@ export const ListItem = (props: Props) => {
     leadingIcon,
     trailing,
     trailingIcon,
+    interactive,
     children,
     overline,
     supportingText,
@@ -55,28 +57,20 @@ export const ListItem = (props: Props) => {
 
   const hasLeading = !!leading || !!leadingIcon
   const hasTrailing = !!trailing || !!trailingIcon
+  const isInteractive = interactive || typeof onClick === 'function'
 
-  return (
-    <Button
-      ref={ref}
-      as='button'
-      role='listitem'
-      type='button'
-      tabIndex={tabIndex ?? (disabled ? -1 : 0)}
-      disabled={disabled}
-      variant='text'
-      onClick={onClick}
-      onMouseDown={onMouseDown}
-      onMouseOver={onMouseOver}
-      sx={[
-        styles.root,
-        sizes[size],
-        variants[variant],
-        selected && (variant === 'danger' ? styles.selected$danger : styles.selected),
-        disabled && styles.disabled,
-        sx,
-      ]}
-      {...rest}>
+  const itemStyles = [
+    styles.root,
+    sizes[size],
+    variants[variant],
+    selected && (variant === 'danger' ? styles.selected$danger : styles.selected),
+    disabled && styles.disabled,
+    !isInteractive && styles.nonInteractive,
+    sx,
+  ]
+
+  const content = (
+    <>
       {hasLeading && <html.span style={styles.leadingIcon}>{leading ?? leadingIcon}</html.span>}
       <html.span style={styles.content}>
         {overline && <html.span style={styles.overline}>{overline}</html.span>}
@@ -88,12 +82,40 @@ export const ListItem = (props: Props) => {
           {trailingIcon ? <html.span style={styles.trailingIcon}>{trailingIcon}</html.span> : trailing}
         </html.span>
       )}
-    </Button>
+    </>
+  )
+
+  if (isInteractive) {
+    return (
+      <Button
+        ref={ref}
+        as='button'
+        role='listitem'
+        type='button'
+        tabIndex={tabIndex ?? (disabled ? -1 : 0)}
+        disabled={disabled}
+        variant='text'
+        onClick={onClick}
+        onMouseDown={onMouseDown}
+        onMouseOver={onMouseOver}
+        sx={itemStyles}
+        {...rest}>
+        {content}
+      </Button>
+    )
+  }
+
+  return (
+    <html.div ref={ref as React.Ref<HTMLDivElement>} role='listitem' style={itemStyles} {...rest}>
+      {content}
+    </html.div>
   )
 }
 
 const variants = css.create({
-  standard: { color: palette.onSurface },
+  standard: {
+    color: palette.onSurface,
+  },
   danger: {
     color: palette.error,
     ':hover': {
@@ -126,7 +148,9 @@ const styles = css.create({
     height: 'unset',
     width: '100%',
     textAlign: 'left',
-    cursor: 'pointer',
+  },
+  nonInteractive: {
+    cursor: 'inherit',
   },
   selected: {
     backgroundColor: palette.surfaceContainer,
@@ -166,7 +190,7 @@ const styles = css.create({
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
     fontSize: typeScale.bodySize$lg,
-    lineHeight: typeScale.bodyLineHeight$lg,
+    lineHeight: typeScale.titleLineHeight$md,
     fontWeight: typeScale.titleWeight$md,
   },
   supporting: {

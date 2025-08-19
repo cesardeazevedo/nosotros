@@ -241,11 +241,9 @@ export const submitReadOnlyAtom = atom(null, (_, set, pubkey: string) => {
 })
 
 export const submitNostrAddressAtom = atom(null, async (_get, set, address: string) => {
-  const [name] = address.split('@')
-
   try {
     const data = await queryClient.fetchQuery(nip05QueryOptions(address))
-    const pubkey = data.names?.[name]
+    const pubkey = data?.pubkey
 
     if (!pubkey) {
       throw new Error('Pubkey not found on remote server')
