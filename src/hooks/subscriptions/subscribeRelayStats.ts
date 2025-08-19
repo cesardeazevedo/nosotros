@@ -47,7 +47,7 @@ export function subscribeRelayStats(relay: Relay) {
             tap((msg) => {
               updateStats((prev) => ({
                 ...prev,
-                notices: [...(prev?.notices || []), msg[1]],
+                notices: [...(prev?.notices || []), msg[1]].slice(0, 5),
               }))
             }),
           ),
