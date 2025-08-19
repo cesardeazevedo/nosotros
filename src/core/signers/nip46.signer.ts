@@ -9,7 +9,7 @@ import { NostrSubscription } from '../NostrSubscription'
 import { broadcast } from '../operators/broadcast'
 import { subscribe } from '../operators/subscribe'
 import { verify } from '../operators/verify'
-import { Pool } from '../pool'
+import type { Pool } from '../pool'
 import { Relay } from '../Relay'
 import { type NostrFilter } from '../types'
 import { NIP01Signer } from './nip01.signer'
@@ -104,8 +104,6 @@ function parseBunkerUrl(input: string) {
   } as BunkerPointer
 }
 
-const pool = new Pool({ allowLocalConnection: true })
-
 export class NIP46RemoteSigner implements Signer<NIP46RemoteSignerOptions> {
   name = 'nip46'
 
@@ -119,7 +117,10 @@ export class NIP46RemoteSigner implements Signer<NIP46RemoteSignerOptions> {
   bunker$: Observable<BunkerPointer>
   connected$: Observable<BunkerPubkey>
 
-  constructor(options: NIP46RemoteSignerOptions) {
+  constructor(
+    private pool: Pool,
+    options: NIP46RemoteSignerOptions,
+  ) {
     this.options = options
     this.secret = options.secret || Math.random().toString(36).slice(-7)
     this.clientSigner = new NIP01Signer(options.clientSecret)
@@ -191,7 +192,7 @@ export class NIP46RemoteSigner implements Signer<NIP46RemoteSignerOptions> {
     }
 
     const sub = new NostrSubscription(subFilter)
-    const relay = pool.get(bunker.relay) || new Relay(bunker.relay)
+    const relay = this.pool.get(bunker.relay) || new Relay(bunker.relay)
 
     return of(sub).pipe(
       subscribe(relay, false),
@@ -222,7 +223,7 @@ export class NIP46RemoteSigner implements Signer<NIP46RemoteSignerOptions> {
         } as UnsignedEvent
 
         const publisher = new NostrPublisher(event, { signer: this.clientSigner, relays: of([bunker.relay]) })
-        return of(publisher).pipe(broadcast(pool))
+        return of(publisher).pipe(broadcast(this.pool))
       }),
       mergeMap(() => {
         return this.events$.pipe(
