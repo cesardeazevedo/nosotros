@@ -46,9 +46,9 @@ export const NotificationSettings = memo(function NotificationSettings(props: Pr
           <Chip
             label='Replies'
             variant='filter'
-            selected={feed.options.includeReplies}
+            selected={feed.includeReplies}
             icon={<IconMessage {...iconProps} />}
-            onClick={() => feed.setReplies((prev) => !prev)}
+            onClick={() => feed.setIncludeReplies((prev) => !prev)}
           />
           <Chip
             selected={feed.includeMentions}
@@ -64,13 +64,13 @@ export const NotificationSettings = memo(function NotificationSettings(props: Pr
             icon={<IconBolt {...iconProps} />}
             onClick={() => feed.toggleKind(Kind.ZapReceipt)}
           />
-          <Chip
-            selected={feed.includeMuted}
-            label='Muted'
-            variant='filter'
-            icon={<IconVolumeOff {...iconProps} />}
-            onClick={() => feed.setIncludeMuted((prev) => !prev)}
-          />
+          {/* <Chip */}
+          {/*   selected={feed.includeMuted} */}
+          {/*   label='Muted' */}
+          {/*   variant='filter' */}
+          {/*   icon={<IconVolumeOff {...iconProps} />} */}
+          {/*   onClick={() => feed.setIncludeMuted((prev) => !prev)} */}
+          {/* /> */}
         </Stack>
         <Stack>
           <Chip label='Reset' variant='assist' onClick={() => feed.resetFilter()} />

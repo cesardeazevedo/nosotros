@@ -10,10 +10,12 @@ export type NotificationFeedState = ReturnType<typeof useNotificationFeedState>
 export function useNotificationFeedState(options: NotificationFeedModule) {
   const [includeMuted, setIncludeMuted] = useState(options.includeMuted)
   const [includeMentions, setIncludeMentions] = useState(options.includeMentions)
+  const [includeReplies, setIncludeReplies] = useState(options.includeReplies ?? false)
 
   const module = useMemo(() => {
     return {
       ...options,
+      includeReplies,
       ctx: {
         subId: 'notification',
       },
@@ -24,7 +26,7 @@ export function useNotificationFeedState(options: NotificationFeedModule) {
               if (includeMentions === false && event.metadata?.isRoot) return false
               // TODO
               // if (includeMuted === false && !!user?.isEventMuted(event.id)) return false
-              if (options.includeReplies === false && event.kind === 1 && !event.metadata?.isRoot) return false
+              if (includeReplies === false && event.kind === 1 && !event.metadata?.isRoot) return false
               return true
             }),
           ),
@@ -32,16 +34,18 @@ export function useNotificationFeedState(options: NotificationFeedModule) {
         }
       },
     }
-  }, [options])
+  }, [options, includeReplies, includeMentions, includeMuted])
 
   const feed = useFeedState(module)
 
   return {
     ...feed,
+    includeReplies,
     includeMuted,
     includeMentions,
     setIncludeMuted,
     setIncludeMentions,
+    setIncludeReplies,
   }
 }
 
