@@ -1,12 +1,14 @@
 import { selectedLastSeenAtom, updateLastSeenAtom } from '@/atoms/lastSeen.atoms'
 import { ContentProvider } from '@/components/providers/ContentProvider'
+import { NoteProvider } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { Kind } from '@/constants/kinds'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import { useEvent } from '@/hooks/query/useQueryBase'
 import { useNoteState } from '@/hooks/state/useNote'
 import { useCurrentAccount } from '@/hooks/useAuth'
-import { useEventHeadImage, useEventLastTag, useEventTag } from '@/hooks/useEventUtils'
+import { useEventHeadImage, useEventLastTag, useEventTag, useNevent } from '@/hooks/useEventUtils'
 import { useMobile } from '@/hooks/useMobile'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
@@ -58,6 +60,10 @@ export const NotificationItem = memo(function NotificationItem(props: Props) {
 
   const type = getNotificationType(event)
   const related = useEventLastTag(event, 'e')
+  const relatedEvent = useEvent(related)
+  const relatedNevent = useNevent(relatedEvent.data)
+
+  const linkNevent = type === 'reply' || type === 'mention' ? note.nip19 : relatedNevent
 
   const zapper = useEventTag(event, 'P')
   const zapAmount = event.metadata?.bolt11?.amount?.value || '0'
@@ -113,41 +119,42 @@ export const NotificationItem = memo(function NotificationItem(props: Props) {
       </Stack>
       <Stack gap={2} justify='flex-start' align='flex-start' grow>
         <UserAvatar pubkey={event.pubkey} />
-        <LinkNEvent nevent={note?.nip19 as string}>
+        <LinkNEvent nevent={linkNevent}>
           <ContentProvider value={{ disableLink: true }}>
             <Stack sx={styles.content} wrap grow>
               {author && <UserName pubkey={author} sx={styles.username} />}{' '}
               {type === 'zap' && (
                 <>
                   <Text size='md'>zapped to your note:</Text>
-                  <NotificationContent id={related} />
+                  {relatedEvent.data && <NotificationContent event={relatedEvent.data} />}
                 </>
               )}
               {type === 'reaction' && (
                 <>
-                  <Text size='md'>reacted to your note:</Text> <NotificationContent id={related} />
+                  <Text size='md'>reacted to your note:</Text>{' '}
+                  {relatedEvent.data && <NotificationContent event={relatedEvent.data} />}
                 </>
               )}
               {type === 'reply' && (
                 <>
                   <Text size='md'>
-                    replied to {note?.event.pubkey === acc?.pubkey ? 'your note' : 'a note you were mentioned'}
+                    replied to {event.pubkey === acc?.pubkey ? 'your note' : 'a note you were mentioned'}
                     {': '}
                   </Text>{' '}
-                  <NotificationContent id={event.id} />
+                  <NotificationContent event={event} />
                 </>
               )}
               {type === 'mention' && (
                 <>
-                  <Text size='md'>mentioned you in a note:</Text> <NotificationContent id={event.id} />
+                  <Text size='md'>mentioned you in a note:</Text> <NotificationContent event={event} />
                 </>
               )}
               {type === 'repost' && (
                 <>
                   <Text size='md'>
-                    reposted {note?.event.pubkey === acc?.pubkey ? 'your note' : 'a note you were mentioned'}
+                    reposted {event.pubkey === acc?.pubkey ? 'your note' : 'a note you were mentioned'}
                   </Text>{' '}
-                  <NotificationContent id={related} />
+                  {relatedEvent.data && <NotificationContent event={relatedEvent.data} />}
                 </>
               )}
               <PostHeaderDate dateStyle='long' date={event.created_at} />

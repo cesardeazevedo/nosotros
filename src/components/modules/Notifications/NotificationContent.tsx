@@ -1,34 +1,36 @@
+import { NoteProvider } from '@/components/providers/NoteProvider'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import { useNoteState } from '@/hooks/state/useNote'
 import React, { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 import { NEventInline } from '../../elements/Content/NEvent/NEventInline'
 import { TextContent } from '../../elements/Content/Text'
-import { useEvent } from '@/hooks/query/useQueryBase'
 
 type Props = {
-  id: string | undefined
+  event: NostrEventDB
 }
 
 export const NotificationContent = memo(function NotificationContent(props: Props) {
-  const event = useEvent(props.id)
-  if (!event.data) {
-    return
-  }
+  const { event } = props
+  const note = useNoteState(event)
   return (
-    <html.div style={styles.root}>
-      {event.data.metadata?.contentSchema?.content.map((node, index) => (
-        <React.Fragment key={node.type + index}>
-          {node.type === 'heading' && <TextContent hardBreak={false} node={node} />}
-          {node.type === 'paragraph' && <TextContent size='md' hardBreak={false} node={node} />}
-          {node.type === 'image' && <></>}
-          {node.type === 'video' && node.attrs.src}
-          {node.type === 'nevent' && <NEventInline attrs={node.attrs} />}
-          {node.type === 'naddr' && node.attrs.bech32.slice(0, 10)}
-          {node.type === 'tweet' && node.attrs.src}
-          {node.type === 'youtube' && node.attrs.src}
-          {node.type === 'bolt11' && node.attrs.lnbc.slice(0, 10)}
-        </React.Fragment>
-      ))}
-    </html.div>
+    <NoteProvider value={{ note, event }}>
+      <html.div style={styles.root}>
+        {event.metadata?.contentSchema?.content.map((node, index) => (
+          <React.Fragment key={node.type + index}>
+            {node.type === 'heading' && <TextContent hardBreak={false} node={node} />}
+            {node.type === 'paragraph' && <TextContent size='md' hardBreak={false} node={node} />}
+            {node.type === 'image' && <></>}
+            {node.type === 'video' && node.attrs.src}
+            {node.type === 'nevent' && <NEventInline attrs={node.attrs} />}
+            {node.type === 'naddr' && node.attrs.bech32.slice(0, 10)}
+            {node.type === 'tweet' && node.attrs.src}
+            {node.type === 'youtube' && node.attrs.src}
+            {node.type === 'bolt11' && node.attrs.lnbc.slice(0, 10)}
+          </React.Fragment>
+        ))}
+      </html.div>
+    </NoteProvider>
   )
 })
 
