@@ -15,7 +15,7 @@ export const PERMISSIONS = { READ, WRITE }
 export function parseRelayList(event: Pick<NostrEvent, 'pubkey' | 'tags'>): Metadata {
   const { tags, pubkey } = event
   const grouped = tags
-    .filter((tag) => tag[0] === 'r')
+    .filter((tag) => tag[0] === 'r' || tag[0] === 'relay')
     .reduce<Record<string, UserRelay>>((acc, tag) => {
       const [, url, perm] = tag
       const relay = formatRelayUrl(url)
