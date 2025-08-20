@@ -1,6 +1,5 @@
 import { selectedLastSeenAtom, updateLastSeenAtom } from '@/atoms/lastSeen.atoms'
 import { ContentProvider } from '@/components/providers/ContentProvider'
-import { NoteProvider } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { Kind } from '@/constants/kinds'
@@ -16,7 +15,7 @@ import { fallbackEmoji } from '@/utils/utils'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconAt, IconBolt, IconHeartFilled, IconMessage, IconShare3 } from '@tabler/icons-react'
 import { useAtomValue, useSetAtom } from 'jotai'
-import { memo, useEffect, useMemo } from 'react'
+import { memo, useEffect, useRef } from 'react'
 import { css, html } from 'react-strict-dom'
 import { LinkNEvent } from '../../elements/Links/LinkNEvent'
 import { PostHeaderDate } from '../../elements/Posts/PostHeaderDate'
@@ -71,10 +70,11 @@ export const NotificationItem = memo(function NotificationItem(props: Props) {
   const author = type === 'zap' ? zapper : event.pubkey
 
   const lastSeen = useAtomValue(selectedLastSeenAtom)?.notifications || 0
-  const lastSeenValue = useMemo(() => lastSeen, [])
+  const lastSeenRef = useRef<number>(lastSeen)
+  const lastSeenValue = lastSeenRef.current
   const updateLastSeen = useSetAtom(updateLastSeenAtom)
 
-  const unseen = event.created_at > lastSeenValue && lastSeen !== 0
+  const unseen = event.created_at > lastSeenValue && lastSeenValue !== 0
 
   const headImage = useEventHeadImage(event)
 
