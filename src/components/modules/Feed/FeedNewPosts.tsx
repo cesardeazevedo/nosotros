@@ -38,7 +38,7 @@ export const FeedNewPosts = memo(function FeedNewPosts(props: Props) {
       }),
       map((position) => position > 250),
       switchMap((isVisible) => {
-        return of(isVisible).pipe(delay(isVisible ? 500 : 0))
+        return of(isVisible).pipe(delay(isVisible ? 5000 : 0))
       }),
       startWith(false),
     )
@@ -114,7 +114,10 @@ const styles = css.create({
     left: 0,
   },
   floating$sidebar: {
-    left: 315,
+    left: {
+      default: 0,
+      '@media (max-width: 1920px)': 315,
+    },
   },
   floating$deck: {
     position: 'sticky',
