@@ -1,3 +1,5 @@
+import { settingsAtom } from '@/atoms/settings.atoms'
+import { store } from '@/atoms/store'
 import type { Kind } from '@/constants/kinds'
 import { FALLBACK_RELAYS } from '@/constants/relays'
 import { mergeRelayHints } from '@/core/mergers/mergeRelayHints'
@@ -9,13 +11,12 @@ import { decodeNIP19, decodeRelays, decodeToFilter, nip19ToRelayHints } from '@/
 import type { UseQueryOptions } from '@tanstack/react-query'
 import { keepPreviousData, queryOptions, useQuery } from '@tanstack/react-query'
 import type { Filter } from 'nostr-tools'
-import { firstValueFrom, shareReplay } from 'rxjs'
+import { defaultIfEmpty, finalize, firstValueFrom, shareReplay, tap } from 'rxjs'
 import { batcher } from '../batchers'
 import { subscribeStrategy } from '../subscriptions/subscribeStrategy'
+import { queryClient } from './queryClient'
 import { pointerToQueryKey, queryKeys } from './queryKeys'
 import { setEventData } from './queryUtils'
-import { store } from '@/atoms/store'
-import { settingsAtom } from '@/atoms/settings.atoms'
 
 export type UseQueryOptionsWithFilter<Selector = NostrEventDB[]> = UseQueryOptions<NostrEventDB[], Error, Selector> & {
   filter: Filter
@@ -32,10 +33,21 @@ export function createEventQueryOptions<Selector = NostrEventDB[]>(options: UseQ
   return queryOptions<NostrEventDB[], Error, Selector>({
     queryFn: async () => {
       const { maxRelaysPerUser } = store.get(settingsAtom)
-      const res = await firstValueFrom(subscribeStrategy({ ...ctx, maxRelaysPerUser }, filter).pipe(shareReplay()))
-      // This will populate all events into react query cache individually
-      res.forEach(setEventData)
-      return res
+      return await firstValueFrom(
+        subscribeStrategy({ ...ctx, maxRelaysPerUser }, filter).pipe(
+          tap((res) => res.forEach(setEventData)),
+          tap((res) => {
+            if (res) {
+              queryClient.setQueryData(opts.queryKey, (old: NostrEventDB[] = []) => {
+                const ids = new Set(old.map((x) => x.id))
+                return [...old, ...res.filter((x) => !ids.has(x.id))]
+              })
+            }
+          }),
+          shareReplay(),
+          defaultIfEmpty([]),
+        ),
+      )
     },
     ...opts,
   })
