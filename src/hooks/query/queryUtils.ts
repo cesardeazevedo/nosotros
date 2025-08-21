@@ -1,3 +1,5 @@
+import { addReplyAtom } from '@/atoms/replies.atoms'
+import { store } from '@/atoms/store'
 import { Kind } from '@/constants/kinds'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { dbSqlite } from '@/nostr/db'
@@ -34,4 +36,6 @@ export function setEventData(event: NostrEventDB) {
   } else {
     queryClient.setQueryData(queryKeys.event(event.id), [event])
   }
+
+  store.set(addReplyAtom, event)
 }
