@@ -6,7 +6,7 @@ import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import { strictDeepEqual } from 'fast-equals'
 import { useObservable, useObservableCallback, useSubscription } from 'observable-hooks'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { EMPTY, finalize, ignoreElements, switchMap, tap, throttleTime } from 'rxjs'
+import { EMPTY, finalize, ignoreElements, switchMap, tap, throttleTime, filter as rxFilter } from 'rxjs'
 import { queryKeys } from '../query/queryKeys'
 import { setEventData } from '../query/queryUtils'
 import type { FeedScope } from '../query/useQueryFeeds'
@@ -155,8 +155,10 @@ export function useFeedState(options: FeedModule & { select?: (data: InfiniteEve
   const [paginate, paginate$] = useObservableCallback<[number, InfiniteEvents | undefined]>((input$) => {
     return input$.pipe(
       throttleTime(1200, undefined, { leading: true, trailing: true }),
+      rxFilter(([, data]) => data?.pages.flat().length !== 0),
       tap(([pageSize, data]) => {
-        if (pageSize < (data?.pages.flat().length || 0)) {
+        const total = data?.pages.flat().length || 0
+        if (pageSize < total) {
           setPageSize(pageSize + 10)
         } else {
           query.fetchNextPage()
