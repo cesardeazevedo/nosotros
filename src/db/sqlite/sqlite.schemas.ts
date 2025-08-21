@@ -1,5 +1,6 @@
 import type { Database, SAHPoolUtil } from '@sqlite.org/sqlite-wasm'
 import sqlite3InitModule from '@sqlite.org/sqlite-wasm'
+import { migrate } from './sqlite.migrations'
 
 function build(db: Database) {
   db.exec(`
@@ -50,6 +51,11 @@ function build(db: Database) {
       relays TEXT NOT NULL,
       timestamp INTEGER NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS migrations (
+      version INTEGER PRIMARY KEY,
+      created_at INTEGER
+    );
   `)
 }
 
@@ -69,9 +75,10 @@ export async function initializeSQLite(name: string = 'nosotrosdb.sqlite3', trac
         const pool = (await sqlite3.installOpfsSAHPoolVfs({})) as SAHPoolUtil
         const db = new pool.OpfsSAHPoolDb(filename)
         if (tracing) {
-          console.log(`Using VFS: opfs-sahpool → ${filename}`)
+          console.log(`Using VFS: opfs-sahpool -> ${filename}`)
         }
         build(db)
+        migrate(db)
         return { db, pool }
       }
     } catch (e) {
@@ -95,6 +102,7 @@ export async function initializeSQLite(name: string = 'nosotrosdb.sqlite3', trac
     }
 
     build(db)
+    migrate(db)
     return { db }
   } catch (err) {
     const error = err as Error
