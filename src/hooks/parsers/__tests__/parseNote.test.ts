@@ -264,23 +264,4 @@ describe('parseNote', () => {
       },
     })
   })
-
-  test('test', () => {
-    const event = fakeEvent({
-      id: '1',
-      content: `hello`,
-      tags: [
-        ['e', '1', '', 'root'],
-        ['p', 'p1'],
-        ['p', 'p2'],
-      ],
-    })
-    const note = parseNote(event)
-    expect(note.relayHints).toStrictEqual({
-      idHints: {
-        ['1']: [event.pubkey, 'p1', 'p2'],
-      },
-    })
-    console.log(note)
-  })
 })

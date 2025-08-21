@@ -43,7 +43,7 @@ export const ZapReceiptProfile = memo(function ZapReceiptProfile(props: Props) {
         {!zapper && (
           <Stack justify='flex-start' gap={2}>
             <Avatar>?</Avatar>
-            <Text size='lg'>Anonoymous</Text>
+            <Text size='lg'>Anonymous</Text>
           </Stack>
         )}
         <Stack horizontal={false} gap={0.5}>

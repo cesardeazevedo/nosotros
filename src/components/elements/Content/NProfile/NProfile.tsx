@@ -44,7 +44,7 @@ const styles = css.create({
     whiteSpace: 'nowrap',
     color: palette.tertiary,
     borderRadius: 6,
-    backgroundColor: palette.surfaceContainer,
+    backgroundColor: palette.surfaceContainerHigh,
     paddingInline: 2,
     paddingTop: 1,
     paddingBottom: 1,

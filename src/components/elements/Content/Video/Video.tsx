@@ -59,7 +59,6 @@ export const Video = memo(function Video(props: Props) {
       {({ blurStyles }) => (
         <video
           {...css.props([styles.video, blurStyles, sx])}
-          crossOrigin='anonymous'
           playsInline
           webkit-playsinline='true'
           ref={ref}
