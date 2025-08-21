@@ -27,17 +27,6 @@ export const EditorSettingsUpload = memo(function EditorSettingsUpload() {
   const onUpdate = (uploadType: string, uploadUrl: string) => {
     setSettings({ defaultUploadType: uploadType })
     setSettings({ defaultUploadUrl: uploadUrl })
-    // Update existing images
-    if (editor) {
-      const tr = editor.state.tr
-      editor.state.doc.descendants((node, pos) => {
-        if (['image', 'video'].includes(node.type.name) && !node.attrs.uploading) {
-          tr.setNodeAttribute(pos, 'uploadType', uploadType)
-          tr.setNodeAttribute(pos, 'uploadUrl', uploadUrl)
-        }
-      })
-      editor.view.dispatch(tr)
-    }
   }
 
   const [url, error] = useMemo(() => {

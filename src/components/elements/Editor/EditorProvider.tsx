@@ -3,6 +3,7 @@ import { enqueueToastAtom } from '@/atoms/toaster.atoms'
 import { Kind } from '@/constants/kinds'
 import { CLIENT_TAG } from '@/constants/tags'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import { isAuthorTag, isQuoteTag } from '@/hooks/parsers/parseTags'
 import { queryKeys } from '@/hooks/query/queryKeys'
 import type { InfiniteEvents } from '@/hooks/query/useQueryFeeds'
 import { useUserRelays, useUsersRelays } from '@/hooks/query/useQueryUser'
@@ -10,7 +11,6 @@ import { useUserMetadata } from '@/hooks/state/useUser'
 import { useCurrentPubkey, useCurrentSigner } from '@/hooks/useAuth'
 import { useMethods } from '@/hooks/useMethods'
 import { useSettings } from '@/hooks/useSettings'
-import { isAuthorTag, isQuoteTag } from '@/hooks/parsers/parseTags'
 import { READ, WRITE } from '@/nostr/types'
 import { compactArray } from '@/utils/utils'
 import { useQueryClient, type QueryKey } from '@tanstack/react-query'
@@ -159,15 +159,17 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
     if (signer && pubkey) {
       try {
         return await signer.sign({ ...event, pubkey })
-      } catch {
+      } catch (error) {
+        methods.toggle('isUploading', false)
         return Promise.reject('Signing rejected')
       }
     }
+    methods.toggle('isUploading', false)
     return Promise.reject('Signer not found')
   }
 
-  const editor = useEditor(
-    kind === Kind.Media
+  const editorProps = useMemo(() => {
+    return kind === Kind.Media
       ? createEditorKind20(placeholder)
       : createEditor({
           sign,
@@ -177,8 +179,10 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
           onUploadStart: () => methods.toggle('isUploading', true),
           onUploadDrop: () => focus(),
           onUploadComplete: () => methods.toggle('isUploading', false),
-        }),
-  )
+        })
+  }, [kind, settings.defaultUploadUrl, settings.defaultUploadType])
+
+  const editor = useEditor(editorProps, [editorProps])
 
   // https://github.com/ueberdosis/tiptap/issues/3383
   useEffect(() => {
@@ -186,10 +190,10 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
     editor?.commands.selectAll()
   }, [editor, placeholder])
 
-  const upload = () => {
+  const upload = useCallback(() => {
     const uploader = editor?.storage?.fileUpload?.uploader as FileUploadStorage['uploader'] | undefined
     return uploader!.start()
-  }
+  }, [editor])
 
   const clear = () => {
     editor?.commands.clearContent()
@@ -224,7 +228,7 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
       ...clientTag,
       ...nsfwTag,
     ])
-  }, [])
+  }, [editor])
 
   const replyTags = useReplyTags(props.parent)
 

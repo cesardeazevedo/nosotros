@@ -3,6 +3,7 @@ import { useDecks } from '@/components/modules/Deck/hooks/useDeck'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { Stack } from '@/components/ui/Stack/Stack'
+import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { Link, useMatchRoute } from '@tanstack/react-router'
 import { useSetAtom } from 'jotai'
@@ -54,7 +55,7 @@ const styles = css.create({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'white',
+    backgroundColor: palette.surfaceContainer,
     borderRadius: 50,
     fontSize: 18,
     width: 28,

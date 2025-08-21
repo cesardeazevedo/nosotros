@@ -19,6 +19,7 @@ export function createHomeFeedModule(pubkey?: string): FeedModule {
   return {
     id,
     type: 'home',
+    includeReplies: false,
     queryKey: queryKeys.feed(id, filter),
     filter,
     ctx: {},
