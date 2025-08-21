@@ -6,7 +6,7 @@ import { Kind } from '@/constants/kinds'
 import type { NotificationFeedState } from '@/hooks/state/useNotificationFeed'
 import { spacing } from '@/themes/spacing.stylex'
 import type { IconProps } from '@tabler/icons-react'
-import { IconAt, IconBolt, IconHeart, IconMessage, IconShare3, IconVolumeOff } from '@tabler/icons-react'
+import { IconAt, IconBolt, IconHeart, IconMessage, IconShare3 } from '@tabler/icons-react'
 import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 

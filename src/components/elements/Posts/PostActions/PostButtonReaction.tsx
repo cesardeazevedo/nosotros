@@ -6,7 +6,6 @@ import { usePublishEventMutation } from '@/hooks/mutations/usePublishEventMutati
 import { useReactionByPubkey } from '@/hooks/query/useReactions'
 import { useCurrentPubkey } from '@/hooks/useAuth'
 import { useMobile } from '@/hooks/useMobile'
-import { dbSqlite } from '@/nostr/db'
 import { publishReaction } from '@/nostr/publish/publishReaction'
 import { fallbackEmoji } from '@/utils/utils'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
