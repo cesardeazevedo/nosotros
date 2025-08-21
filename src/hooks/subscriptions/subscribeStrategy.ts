@@ -4,7 +4,7 @@ import type { NostrContext } from '@/nostr/context'
 import { dbSqlite } from '@/nostr/db'
 import type { NostrEvent } from 'nostr-tools'
 import { matchFilter, type Filter } from 'nostr-tools'
-import { bufferTime, EMPTY, from, identity, map, merge, mergeMap, of, filter as rxFilter } from 'rxjs'
+import { bufferTime, EMPTY, from, identity, map, merge, mergeMap, of, filter as rxFilter, takeUntil, timer } from 'rxjs'
 import invariant from 'tiny-invariant'
 import { createSubscription } from './createSubscription'
 import { subscribe } from './subscribe'
@@ -50,6 +50,7 @@ export function subscribeStrategy(ctx: NostrContext, filter: NostrFilter, dbFilt
                 mergeMap(identity),
                 rxFilter((e: NostrEventDB): e is NostrEventDB => matchFilter(filter, e as unknown as NostrEvent)),
                 map((x) => [x]),
+                takeUntil(timer(3500)),
               ),
             )
           }
@@ -72,6 +73,7 @@ export function subscribeStrategy(ctx: NostrContext, filter: NostrFilter, dbFilt
               mergeMap(identity),
               rxFilter((e: NostrEventDB): e is NostrEventDB => matchFilter(filter, e as unknown as NostrEvent)),
               map((x) => [x]),
+              takeUntil(timer(3500)),
             ),
           )
         }),
