@@ -4,7 +4,7 @@ import { Stack } from '@/components/ui/Stack/Stack'
 import { spacing } from '@/themes/spacing.stylex'
 import type { QueryKey } from '@tanstack/react-query'
 import { useQueryClient } from '@tanstack/react-query'
-import PullToRefresh from 'react-simple-pull-to-refresh'
+import ReactPullToRefresh from 'react-simple-pull-to-refresh'
 import { css } from 'react-strict-dom'
 
 type Props = {
@@ -13,11 +13,11 @@ type Props = {
   onRefresh?: () => void
 }
 
-export const PullToRefreshWrapper = (props: Props) => {
+export const PullToRefresh = (props: Props) => {
   const { queryKey, onRefresh } = props
   const queryClient = useQueryClient()
   return (
-    <PullToRefresh
+    <ReactPullToRefresh
       pullingContent={<></>}
       onRefresh={async () => {
         onRefresh?.()
@@ -34,7 +34,7 @@ export const PullToRefreshWrapper = (props: Props) => {
         </>
       }>
       {props.children}
-    </PullToRefresh>
+    </ReactPullToRefresh>
   )
 }
 

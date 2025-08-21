@@ -68,10 +68,6 @@ export class SqliteStorage {
     return eventMetadata
   }
 
-  async getRawEventById(id: string) {
-    return await this.send<NostrEvent>({ method: 'getRawEventById', params: id })
-  }
-
   async querySeen(eventId: string) {
     return await this.send<SeenDB[]>({
       method: 'querySeen',

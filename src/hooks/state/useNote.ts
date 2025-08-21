@@ -1,12 +1,11 @@
-import { Kind } from '@/constants/kinds'
+import { replyCountAtomFamily } from '@/atoms/replies.atoms'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { useMethods } from '@/hooks/useMethods'
 import type { NostrContext } from '@/nostr/context'
-import { useQueryClient } from '@tanstack/react-query'
+import { useAtomValue } from 'jotai'
 import { isParameterizedReplaceableKind } from 'nostr-tools/kinds'
 import { useCallback, useMemo, useState } from 'react'
 import { useInView } from 'react-intersection-observer'
-import { queryKeys } from '../query/queryKeys'
 import { useEventMetadata } from '../query/useQueryUser'
 import { useReactions } from '../query/useReactions'
 import { useEventReplies } from '../query/useReplies'
@@ -57,8 +56,6 @@ type NoteOptions = {
 }
 
 export function useNoteState(event: NostrEventDB, options?: NoteOptions) {
-  const queryClient = useQueryClient()
-
   const { ref, inView } = useInView({
     threshold: 0.5,
     initialInView: false,
@@ -98,9 +95,9 @@ export function useNoteState(event: NostrEventDB, options?: NoteOptions) {
 
   const replies = useEventReplies(event, {
     enabled: queryOptions.enabled,
-    select: useCallback((events: NostrEventDB[]) => {
+    select: (events: NostrEventDB[]) => {
       return events.filter((e) => e.metadata?.parentId === event.id)
-    }, []),
+    },
   })
 
   const repliesSorted = useMemo(() => {
@@ -141,25 +138,7 @@ export function useNoteState(event: NostrEventDB, options?: NoteOptions) {
     [replies.data, repliesPreview],
   )
 
-  const repliesTotal = useMemo(() => {
-    const getChildren = (parentId: string) => {
-      return queryClient.getQueryData<NostrEventDB[]>(queryKeys.tag('e', [parentId], Kind.Text)) || []
-    }
-    const countFrom = (parentId: string): number => {
-      const children = getChildren(parentId)
-      if (children.length === 0) {
-        return 0
-      }
-      return children.reduce((sum, child) => sum + 1 + countFrom(child.id), 0)
-    }
-    const haveDirect = replies.data && replies.data.length > 0
-    if (!haveDirect) {
-      return 0
-    }
-    return countFrom(event.id)
-  }, [queryClient, event.id, replies.data])
-
-  const repliesLeft = Math.max(0, (replies.data?.length || 0) - limit)
+  const repliesTotal = useAtomValue(replyCountAtomFamily(event.id))
 
   const paginate = useCallback(
     (offset = PAGINATION_SIZE) => {
@@ -203,7 +182,6 @@ export function useNoteState(event: NostrEventDB, options?: NoteOptions) {
     replies,
     repliesSorted,
     repliesChunk,
-    repliesLeft,
     repliesTotal,
     repliesMuted,
     getRepliesPreviewUser,

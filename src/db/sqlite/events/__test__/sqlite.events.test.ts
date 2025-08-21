@@ -32,7 +32,7 @@ describe('SqliteEventStore.insertEvent', () => {
     db.exec('DELETE FROM events;')
   })
 
-  test.only('inserts plain event + tags', () => {
+  test('inserts plain event + tags', () => {
     const e = fakeEventMeta({
       id: 'id1',
       kind: Kind.Text,

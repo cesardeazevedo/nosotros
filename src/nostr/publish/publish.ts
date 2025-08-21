@@ -4,10 +4,12 @@ import type { PublisherOptions } from '@/core/NostrPublish'
 import { NostrPublisher } from '@/core/NostrPublish'
 import { broadcast } from '@/core/operators/broadcast'
 import { setEventData } from '@/hooks/query/queryUtils'
+import { setSeenData } from '@/hooks/query/useSeen'
 import { subscribeEventRelays } from '@/hooks/subscriptions/subscribeOutbox'
 import type { UnsignedEvent } from 'nostr-tools'
 import { connect, ignoreElements, map, merge, mergeMap, of, shareReplay, tap, throwError } from 'rxjs'
 import { parseEventMetadata } from '../../hooks/parsers/parseEventMetadata'
+import { dbSqlite } from '../db'
 import { pool } from '../pool'
 
 export type LocalPublisherOptions = Omit<PublisherOptions, 'relays'> & { relays?: string[] }
@@ -34,6 +36,12 @@ export function publish(unsignedEvent: Omit<UnsignedEvent, 'created_at'>, option
         shared$.pipe(
           broadcast(pool),
           tap((res) => store.set(addPublishAtom, res)),
+          tap(([relay, , status, , event]) => {
+            if (status) {
+              dbSqlite.insertSeen(relay, event)
+              setSeenData(event.id, relay)
+            }
+          }),
           // We don't want the actual response from the relays in the main stream
           ignoreElements(),
         ),

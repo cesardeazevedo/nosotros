@@ -19,7 +19,6 @@ export class SqliteEventStore {
   private formatEvent(event: NostrEventStored) {
     return {
       ...event,
-      sig: '',
       tags: JSON.parse(event.tags || '{}'),
       metadata: JSON.parse(event.metadata || '{}'),
     } as NostrEventDB
@@ -59,18 +58,6 @@ export class SqliteEventStore {
       LIMIT 1
       `
     return db.selectObject(query, [kind, pubkey, dTag]) as NostrEventExists | undefined
-  }
-
-  /**
-   * Get raw nostr event with signature and without metadata
-   */
-  getRawEventById(db: Database, id: string) {
-    const query = `SELECT id, kind, pubkey, content, sig, tags FROM events WHERE id = ?`
-    const res = db.selectObject(query, [id]) as unknown as NostrEventStored
-    return {
-      ...res,
-      tags: JSON.parse(res.tags),
-    }
   }
 
   getByIds(db: Database, ids: string[]) {

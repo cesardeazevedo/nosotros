@@ -1,3 +1,4 @@
+import { PullToRefresh } from '@/components/elements/PullToRefresh/PullToRefresh'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import type { FeedState } from '@/hooks/state/useFeed'
 import { spacing } from '@/themes/spacing.stylex'
@@ -5,7 +6,6 @@ import type { BaseSyntheticEvent } from 'react'
 import React, { memo, useCallback, useLayoutEffect, useMemo, useRef } from 'react'
 import { css, html } from 'react-strict-dom'
 import { FeedNewPosts } from './FeedNewPosts'
-import { PullToRefreshWrapper } from './FeedPullToRefresh'
 
 export type Props = {
   feed: FeedState
@@ -62,7 +62,7 @@ export const FeedList = memo(function FeedList(props: Props) {
 
   if (column) {
     return (
-      <PullToRefreshWrapper {...pullRefreshProps}>
+      <PullToRefresh {...pullRefreshProps}>
         <html.div style={styles.column} ref={ref} onScroll={handleScrollColumn}>
           {props.header}
           {!props.wrapper && renderNewPostsIndicator && <FeedNewPosts ref={ref} feed={feed} />}
@@ -80,16 +80,16 @@ export const FeedList = memo(function FeedList(props: Props) {
           )}
           {props.footer}
         </html.div>
-      </PullToRefreshWrapper>
+      </PullToRefresh>
     )
   }
   return (
-    <PullToRefreshWrapper {...pullRefreshProps}>
+    <PullToRefresh {...pullRefreshProps}>
       {props.header}
       <FeedNewPosts feed={feed} />
       {props.wrapper ? props.wrapper(<>{content}</>) : content}
       {props.footer}
-    </PullToRefreshWrapper>
+    </PullToRefresh>
   )
 })
 

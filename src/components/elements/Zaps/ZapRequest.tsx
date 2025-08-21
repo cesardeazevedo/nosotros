@@ -1,5 +1,5 @@
 import { enqueueToastAtom } from '@/atoms/toaster.atoms'
-import { updateZapRequestAtom, zapRequestAtom } from '@/atoms/zapRequest.atoms'
+import { updateZapRequestAtom, zapRequestAtom, type ZapRequest as ZapRequestStore } from '@/atoms/zapRequest.atoms'
 import { ContentProvider } from '@/components/providers/ContentProvider'
 import { Button } from '@/components/ui/Button/Button'
 import { Chip } from '@/components/ui/Chip/Chip'
@@ -51,10 +51,10 @@ export const ZapRequest = memo(function ZapRequest(props: Props) {
   const user = useUserState(event.pubkey)
   const zapEnabled = note?.user ? user.canReceiveZap : true
 
-  const [pending, onSubmit] = useObservableState<boolean, UserState | undefined>((input$) => {
+  const [pending, onSubmit] = useObservableState<boolean, [UserState, ZapRequestStore] | undefined>((input$) => {
     return input$.pipe(
       filter((x) => !!x),
-      mergeMap((user) => {
+      mergeMap(([user, store]) => {
         return from(getZapEndpoint(user.event as unknown as NostrEvent)).pipe(
           mergeMap((callback) => {
             if (!callback) return throwError(() => new Error('Error when getting zap endpoint'))
@@ -195,7 +195,7 @@ export const ZapRequest = memo(function ZapRequest(props: Props) {
         />
       </Stack>
       <br />
-      <Button disabled={pending} fullWidth variant='filled' sx={styles.button} onClick={() => onSubmit(user)}>
+      <Button disabled={pending} fullWidth variant='filled' sx={styles.button} onClick={() => onSubmit([user, store])}>
         <Stack gap={1} justify='center'>
           {pending && <CircularProgress size='xs' />}
           {pending ? 'Generating Invoice...' : `Zap ${formatter.format(store.amount)} sats`}

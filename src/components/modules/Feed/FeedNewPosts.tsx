@@ -6,6 +6,7 @@ import { Fab } from '@/components/ui/Fab/Fab'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { FeedState } from '@/hooks/state/useFeed'
 import { useMobile } from '@/hooks/useMobile'
+import { useSettings } from '@/hooks/useSettings'
 import { duration } from '@/themes/duration.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
@@ -37,7 +38,7 @@ export const FeedNewPosts = memo(function FeedNewPosts(props: Props) {
       }),
       map((position) => position > 250),
       switchMap((isVisible) => {
-        return of(isVisible).pipe(delay(isVisible ? 5500 : 0))
+        return of(isVisible).pipe(delay(isVisible ? 500 : 0))
       }),
       startWith(false),
     )
@@ -51,6 +52,7 @@ export const FeedNewPosts = memo(function FeedNewPosts(props: Props) {
 
   const bufferTotal = feed.replies ? feed.bufferTotalReplies : feed.bufferTotal
   const bufferPubkeys = feed.replies ? feed.bufferPubkeysReplies : feed.bufferPubkeys
+  const sidebarCollapsed = useSettings().sidebarCollapsed
 
   return (
     <>
@@ -67,7 +69,12 @@ export const FeedNewPosts = memo(function FeedNewPosts(props: Props) {
           <Divider />
         </>
       </Expandable>
-      <html.div style={isDeck ? styles.floating$deck : styles.floating}>
+      <html.div
+        key={sidebarCollapsed.toString()}
+        style={[
+          isDeck ? styles.floating$deck : styles.floating,
+          !sidebarCollapsed && !isMobile && styles.floating$sidebar,
+        ]}>
         <Fab
           size='sm'
           variant='primary'
@@ -104,10 +111,10 @@ const styles = css.create({
     zIndex: 100,
     height: 0,
     right: 0,
-    left: {
-      default: 0,
-      '@media (max-width: 1920px)': 315,
-    },
+    left: 0,
+  },
+  floating$sidebar: {
+    left: 315,
   },
   floating$deck: {
     position: 'sticky',

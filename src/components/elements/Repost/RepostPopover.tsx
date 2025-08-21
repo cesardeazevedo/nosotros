@@ -4,12 +4,14 @@ import { MenuList } from '@/components/ui/MenuList/MenuList'
 import { Popover } from '@/components/ui/Popover/Popover'
 import type { IPopoverBaseTriggerRendererProps } from '@/components/ui/Popover/PopoverBase.types'
 import { Kind } from '@/constants/kinds'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { usePublishEventMutation } from '@/hooks/mutations/usePublishEventMutation'
+import { queryKeys } from '@/hooks/query/queryKeys'
 import type { NoteState } from '@/hooks/state/useNote'
-import { dbSqlite } from '@/nostr/db'
 import { publishRepost } from '@/nostr/publish/publishRepost'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconBlockquote, IconShare3 } from '@tabler/icons-react'
+import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
 import { useSetAtom } from 'jotai'
 import type { NostrEvent } from 'nostr-tools'
@@ -28,6 +30,7 @@ type Props = {
 export const RepostPopover = memo(function RepostPopover(props: Props) {
   const { note, children } = props
   const router = useRouter()
+  const queryClient = useQueryClient()
   const enqueueToast = useSetAtom(enqueueToastAtom)
 
   const { isPending, mutate } = usePublishEventMutation<NostrEvent>({
@@ -36,6 +39,9 @@ export const RepostPopover = memo(function RepostPopover(props: Props) {
       (event) =>
         publishRepost(event, { signer }),
     onSuccess: (event) => {
+      queryClient.setQueryData(queryKeys.tag('e', [note.id], Kind.Repost), (old: NostrEventDB[] = []) => {
+        return [...old, event]
+      })
       enqueueToast({ component: <ToastEventPublished event={event} eventLabel='Repost' />, duration: 5_000_000 })
     },
   })
@@ -51,11 +57,10 @@ export const RepostPopover = memo(function RepostPopover(props: Props) {
               disabled={isPending}
               leadingIcon={<IconShare3 size={20} />}
               label={isPending ? 'Reposting...' : 'Repost'}
-              onClick={async (e) => {
+              onClick={(e) => {
                 e.preventDefault()
                 e.stopPropagation()
-                const event = await dbSqlite.getRawEventById(note.event.id)
-                mutate(event)
+                mutate(note.event)
               }}
             />
           )}

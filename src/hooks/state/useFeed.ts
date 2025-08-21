@@ -57,7 +57,7 @@ export function useFeedState(options: FeedModule & { select?: (data: InfiniteEve
   useSubscription(sub)
 
   const onStream = useCallback((event: NostrEventDB) => {
-    if (event.metadata?.isRoot) {
+    if (event.metadata?.isRoot || event.kind !== Kind.Text) {
       setBuffer((events) => [...events, event])
     } else {
       setBufferReplies((events) => [...events, event])

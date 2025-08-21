@@ -1,3 +1,5 @@
+import { addReplyAtom } from '@/atoms/replies.atoms'
+import { store } from '@/atoms/store'
 import { Kind } from '@/constants/kinds'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { dbSqlite } from '@/nostr/db'
@@ -16,13 +18,8 @@ async function populateRelayStats() {
   Object.values(res).forEach((stats) => queryClient.setQueryData(queryKeys.relayStats(stats.url), stats))
 }
 
-async function populateNIP05() {
-  const res = await dbSqlite.queryNip05([])
-  Object.values(res).forEach((data) => queryClient.setQueryData(queryKeys.nip05(data.nip05), data))
-}
-
 export async function prepopulate() {
-  return Promise.all([populateRelayInfo(), populateRelayStats(), populateNIP05()])
+  return Promise.all([populateRelayInfo(), populateRelayStats()])
 }
 
 export function setEventData(event: NostrEventDB) {
@@ -39,4 +36,6 @@ export function setEventData(event: NostrEventDB) {
   } else {
     queryClient.setQueryData(queryKeys.event(event.id), [event])
   }
+
+  store.set(addReplyAtom, event)
 }

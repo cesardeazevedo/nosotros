@@ -15,7 +15,6 @@ export const SearchHeader = memo(function SearchHeader(props: Props) {
   const [, submit] = useActionState((_: unknown, formData: FormData) => {
     const search = formData.get('searchInput')?.toString()
     if (search) {
-      console.log('SUBMIT?', search)
       feed.setFilter({ ...feed.filter, search })
       onSubmit?.(search)
     }

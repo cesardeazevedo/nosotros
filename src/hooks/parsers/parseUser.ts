@@ -39,7 +39,6 @@ export function parseUser(event: NostrEvent): Metadata {
     return { userMetadata }
   } catch (error) {
     console.dir(error)
-    console.log(event.content)
     return {}
   }
 }

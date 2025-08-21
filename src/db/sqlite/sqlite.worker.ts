@@ -75,11 +75,6 @@ async function onMessage(e: MessageEvent) {
       postMessage(msg, res)
       break
     }
-    case 'getRawEventById': {
-      const events = store.event.getRawEventById(db, msg.params)
-      postMessage(msg, events)
-      break
-    }
     case 'queryEvent': {
       const events = store.event.query(db, msg.params)
       postMessage(msg, events)
