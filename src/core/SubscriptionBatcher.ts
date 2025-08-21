@@ -2,7 +2,7 @@ import { mergeFilters } from '@/core/mergers/mergeFilters'
 import type { NostrFilter, RelayHints } from '@/core/types'
 import { type NostrEvent } from 'nostr-tools'
 import type { Observable } from 'rxjs'
-import { Subject, bufferTime, finalize, from, mergeMap, shareReplay } from 'rxjs'
+import { Subject, bufferTime, filter, from, mergeMap, share } from 'rxjs'
 import { mergeRelayHints } from './mergers/mergeRelayHints'
 
 type SubscriptionBatcherOptions = {
@@ -11,8 +11,6 @@ type SubscriptionBatcherOptions = {
 
 export class SubscriptionBatcher<T = NostrEvent> {
   private queue = new Subject<[NostrFilter, RelayHints | undefined, cached: T[] | undefined]>()
-  private done = new Subject<void>()
-  done$ = this.done.asObservable()
   $: Observable<T[]>
 
   constructor(
@@ -22,6 +20,7 @@ export class SubscriptionBatcher<T = NostrEvent> {
     this.queue = new Subject()
     this.$ = this.queue.pipe(
       bufferTime(options?.batcherTime || 800),
+      filter((x) => x.length > 0),
       mergeMap((data) => {
         const filters = mergeFilters(data.map(([filter]) => filter))
         const relayHints = mergeRelayHints(data.map(([, hints]) => hints || {}))
@@ -30,12 +29,10 @@ export class SubscriptionBatcher<T = NostrEvent> {
           .filter(Boolean)
           .flat()
 
-        return from(filters).pipe(
-          mergeMap((filter) => subscriber(filter, relayHints, cached).pipe(finalize(() => this.done.next()))),
-        )
+        return from(filters).pipe(mergeMap((filter) => subscriber(filter, relayHints, cached)))
       }),
 
-      shareReplay(),
+      share(),
     )
     this.$.subscribe()
   }
