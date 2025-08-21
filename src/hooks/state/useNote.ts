@@ -95,9 +95,9 @@ export function useNoteState(event: NostrEventDB, options?: NoteOptions) {
 
   const replies = useEventReplies(event, {
     enabled: queryOptions.enabled,
-    select: useCallback((events: NostrEventDB[]) => {
+    select: (events: NostrEventDB[]) => {
       return events.filter((e) => e.metadata?.parentId === event.id)
-    }, []),
+    },
   })
 
   const repliesSorted = useMemo(() => {

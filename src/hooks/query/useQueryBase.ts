@@ -11,7 +11,7 @@ import { decodeNIP19, decodeRelays, decodeToFilter, nip19ToRelayHints } from '@/
 import type { UseQueryOptions } from '@tanstack/react-query'
 import { keepPreviousData, queryOptions, useQuery } from '@tanstack/react-query'
 import type { Filter } from 'nostr-tools'
-import { defaultIfEmpty, finalize, firstValueFrom, shareReplay, tap } from 'rxjs'
+import { defaultIfEmpty, firstValueFrom, shareReplay, tap } from 'rxjs'
 import { batcher } from '../batchers'
 import { subscribeStrategy } from '../subscriptions/subscribeStrategy'
 import { queryClient } from './queryClient'
