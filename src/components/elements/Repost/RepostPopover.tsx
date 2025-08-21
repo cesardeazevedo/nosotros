@@ -8,7 +8,6 @@ import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { usePublishEventMutation } from '@/hooks/mutations/usePublishEventMutation'
 import { queryKeys } from '@/hooks/query/queryKeys'
 import type { NoteState } from '@/hooks/state/useNote'
-import { dbSqlite } from '@/nostr/db'
 import { publishRepost } from '@/nostr/publish/publishRepost'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconBlockquote, IconShare3 } from '@tabler/icons-react'
@@ -58,11 +57,10 @@ export const RepostPopover = memo(function RepostPopover(props: Props) {
               disabled={isPending}
               leadingIcon={<IconShare3 size={20} />}
               label={isPending ? 'Reposting...' : 'Repost'}
-              onClick={async (e) => {
+              onClick={(e) => {
                 e.preventDefault()
                 e.stopPropagation()
-                const event = await dbSqlite.getRawEventById(note.event.id)
-                mutate(event)
+                mutate(note.event)
               }}
             />
           )}

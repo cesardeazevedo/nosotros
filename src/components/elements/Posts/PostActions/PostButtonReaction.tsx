@@ -55,9 +55,8 @@ export const ButtonReaction = memo(function ButtonReaction() {
     },
   })
 
-  const handleReaction = async (reaction: string) => {
-    const event = await dbSqlite.getRawEventById(note.event.id)
-    mutate([reaction, event])
+  const handleReaction = (reaction: string) => {
+    mutate([reaction, note.event])
   }
 
   return (
