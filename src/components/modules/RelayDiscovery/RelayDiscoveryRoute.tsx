@@ -1,12 +1,14 @@
 import { RouteContainer } from '@/components/elements/Layouts/RouteContainer'
-import { RelayDiscoveryHeader } from './RelayDiscoveryHeader'
+import { createRelayDiscoveryModule } from '@/hooks/modules/createRelayDiscoveryModule'
+import { useRelayDiscoveryFeed } from '@/hooks/state/useRelayDiscoveryFeed'
 import { useMobile } from '@/hooks/useMobile'
+import { useResetScroll } from '@/hooks/useResetScroll'
+import { RelayDiscoveryHeader } from './RelayDiscoveryHeader'
 import { RelayDiscoveryList } from './RelayDiscoveryList'
 import { RelayDiscoveryTable } from './RelayDiscoveryTable'
-import { useRelayDiscoveryFeed } from '@/hooks/state/useRelayDiscoveryFeed'
-import { createRelayDiscoveryModule } from '@/hooks/modules/createRelayDiscoveryModule'
 
 export const RelayDiscoveryRoute = () => {
+  useResetScroll()
   const isMobile = useMobile()
   const feed = useRelayDiscoveryFeed(createRelayDiscoveryModule())
   return (

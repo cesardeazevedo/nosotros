@@ -8,8 +8,10 @@ import { useCurrentPubkey } from '@/hooks/useAuth'
 import { useMemo } from 'react'
 import { MediaFeed } from './MediaFeed'
 import { MediaHeader } from './MediaHeader'
+import { useResetScroll } from '@/hooks/useResetScroll'
 
 export const MediaRoute = () => {
+  useResetScroll()
   const pubkey = useCurrentPubkey()
   const module = useMemo(() => createMediaFeedModule(pubkey), [pubkey])
   const feed = useMediaFeedState(module)

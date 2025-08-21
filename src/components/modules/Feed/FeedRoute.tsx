@@ -4,6 +4,7 @@ import type { FeedState } from '@/hooks/state/useFeed'
 import React, { memo } from 'react'
 import { Feed } from './Feed'
 import { FeedHeaderBase } from './headers/FeedHeaderBase'
+import { useResetScroll } from '@/hooks/useResetScroll'
 
 type Props = {
   feed: FeedState
@@ -14,6 +15,7 @@ type Props = {
 
 export const FeedRoute = memo(function FeedRoute(props: Props) {
   const { feed, headline, header, renderEditor = false } = props
+  useResetScroll()
   return (
     <RouteContainer headline={headline} header={header || <FeedHeaderBase feed={feed} label={'feed'} />}>
       {renderEditor && (

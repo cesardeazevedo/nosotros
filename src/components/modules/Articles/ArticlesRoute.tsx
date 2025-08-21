@@ -5,8 +5,10 @@ import { useCurrentPubkey } from '@/hooks/useAuth'
 import { useMemo } from 'react'
 import { Feed } from '../Feed/Feed'
 import { ArticlesHeader } from './ArticlesHeader'
+import { useResetScroll } from '@/hooks/useResetScroll'
 
 export const ArticlesRoute = () => {
+  useResetScroll()
   const pubkey = useCurrentPubkey()
   const module = useMemo(() => createArticlesFeedModule(pubkey), [pubkey])
   const feed = useFeedState(module)

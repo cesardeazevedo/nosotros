@@ -6,12 +6,14 @@ import { useNavigate } from '@tanstack/react-router'
 import { memo, useMemo } from 'react'
 import { Feed } from '../Feed/Feed'
 import { HomeHeader } from './HomeHeader'
+import { useResetScroll } from '@/hooks/useResetScroll'
 
 type Props = {
   replies?: boolean
 }
 
 export const HomeRoute = memo(function HomeRoute(props: Props) {
+  useResetScroll()
   const { replies = false } = props
   const navigate = useNavigate()
   const pubkey = useCurrentPubkey()
