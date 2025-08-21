@@ -4,6 +4,7 @@ import { Divider } from '@/components/ui/Divider/Divider'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { Kind } from '@/constants/kinds'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import { queryKeys } from '@/hooks/query/queryKeys'
 import { useNoteState } from '@/hooks/state/useNote'
 import { duration } from '@/themes/duration.stylex'
 import { easing } from '@/themes/easing.stylex'
@@ -12,6 +13,7 @@ import { spacing } from '@/themes/spacing.stylex'
 import { memo, useCallback } from 'react'
 import { css, html } from 'react-strict-dom'
 import { EditorProvider } from '../Editor/EditorProvider'
+import { PullToRefresh } from '../PullToRefresh/PullToRefresh'
 import { Replies } from '../Replies/Replies'
 import { RepliesPreview } from '../Replies/RepliesPreview'
 import { PostActions } from './PostActions/PostActions'
@@ -50,8 +52,10 @@ export const PostRoot = memo(function PostRoot(props: Props) {
         {note.state.repliesOpen && (
           <>
             <Divider />
-            <EditorProvider sx={styles.editor} parent={event} renderBubble initialOpen />
-            <Replies />
+            <PullToRefresh queryKey={queryKeys.tag('e', [event.id], Kind.Text)}>
+              <EditorProvider sx={styles.editor} parent={event} renderBubble initialOpen />
+              <Replies />
+            </PullToRefresh>
           </>
         )}
       </html.article>
