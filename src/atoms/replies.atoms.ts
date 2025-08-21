@@ -1,6 +1,6 @@
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { atom } from 'jotai'
 import { atomFamily } from 'jotai/utils'
-import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 
 export const childrenAtomFamily = atomFamily(() => atom<ReadonlySet<string>>(new Set<string>([])))
 
@@ -27,9 +27,11 @@ export const addReplyAtom = atom(null, (get, set, note: NostrEventDB) => {
   }
 })
 
-export const repliesLeftAtomFamily = atomFamily(({ id, limit }: { id: string; limit: number }) =>
-  atom((get) => {
-    const total = get(replyCountAtomFamily(id))
-    return Math.max(0, total - (limit ?? 0))
-  }),
+export const repliesLeftAtomFamily = atomFamily(
+  ({ id, limit }: { id: string; limit: number }) =>
+    atom((get) => {
+      const children = [...get(childrenAtomFamily(id))]
+      return children.slice(limit).reduce((sum, childId) => sum + 1 + get(replyCountAtomFamily(childId)), 0)
+    }),
+  (a, b) => a.id === b.id && a.limit === b.limit,
 )
