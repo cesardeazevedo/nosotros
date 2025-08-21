@@ -5,6 +5,7 @@ import { Stack } from '@/components/ui/Stack/Stack'
 import { useEventFromNIP19 } from '@/hooks/query/useQueryBase'
 import { useMobile } from '@/hooks/useMobile'
 import { useGoBack } from '@/hooks/useNavigations'
+import { useResetScroll } from '@/hooks/useResetScroll'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconChevronLeft } from '@tabler/icons-react'
 import { CenteredContainer } from 'components/elements/Layouts/CenteredContainer'
@@ -21,6 +22,7 @@ export const NostrEventRoute = memo(function NostrEventRoute(props: Props) {
   const isMobile = useMobile()
   const note = useEventFromNIP19(nip19)
   const goBack = useGoBack()
+  useResetScroll()
 
   return (
     <CenteredContainer margin>

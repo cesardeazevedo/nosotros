@@ -1,5 +1,6 @@
 import { Stack } from '@/components/ui/Stack/Stack'
 import { useSearchFeed } from '@/hooks/state/useSearchFeed'
+import { useResetScroll } from '@/hooks/useResetScroll'
 import { searchRoute } from '@/Router'
 import { spacing } from '@/themes/spacing.stylex'
 import { useNavigate } from '@tanstack/react-router'
@@ -10,6 +11,7 @@ import { SearchHeader } from './SearchHeader'
 import { SearchSettings } from './SearchSettings'
 
 export const SearchRoute = memo(function SearchRoute() {
+  useResetScroll()
   const { q } = searchRoute.useSearch()
   const navigate = useNavigate()
   const feed = useSearchFeed(q)
