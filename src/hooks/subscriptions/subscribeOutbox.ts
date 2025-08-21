@@ -8,7 +8,7 @@ import { selectRelays } from '@/hooks/parsers/selectRelays'
 import type { NostrContext } from '@/nostr/context'
 import { READ, WRITE } from '@/nostr/types'
 import type { UnsignedEvent } from 'nostr-tools'
-import { defaultIfEmpty, EMPTY, from, identity, map, merge, mergeMap, of, toArray } from 'rxjs'
+import { defaultIfEmpty, distinct, EMPTY, from, identity, map, merge, mergeMap, of, toArray } from 'rxjs'
 import { batcherRelayList } from '../batchers'
 import { queryClient } from '../query/queryClient'
 import { queryKeys } from '../query/queryKeys'
@@ -47,11 +47,6 @@ function subscribeAuthorsRelayList(authors: string[], ctx: NostrContext) {
             }),
           )
         }),
-        // combineLatestWith(fetchRelayStats()),
-        // map(([event, stats]) => {
-        //   const selected = selectRelays(event.metadata?.relayList || [], ctx, stats)
-        //   return [event.pubkey, selected.length ? selected.map((x) => x.relay) : FALLBACK_RELAYS] as const
-        // }),
         defaultIfEmpty([pubkey, FALLBACK_RELAYS] as const),
       ),
     ),
@@ -122,6 +117,7 @@ export function subscribeEventRelays(event: UnsignedEvent, ctx: NostrContext) {
 
   return merge(owner, mentions).pipe(
     map((x) => x[1]),
+    distinct(),
     toArray(),
     mergeMap(identity),
   )
