@@ -8,7 +8,7 @@ import { useCurrentPubkey } from '@/hooks/useAuth'
 import { publish } from '@/nostr/publish/publish'
 import { spacing } from '@/themes/spacing.stylex'
 import { UserAvatar } from 'components/elements/User/UserAvatar'
-import type { EventTemplate, NostrEvent } from 'nostr-tools'
+import type { NostrEvent } from 'nostr-tools'
 import { useObservableState } from 'observable-hooks'
 import { memo, useEffect } from 'react'
 import { css } from 'react-strict-dom'
@@ -32,6 +32,7 @@ import { EditorContainer } from './EditorContainer'
 import { EditorExpandables } from './EditorExpandables'
 import { EditorHeader } from './EditorHeader'
 import { EditorPlaceholder } from './EditorPlaceholder'
+import type { EditorContextType } from './EditorProvider'
 import { EditorSubmit } from './EditorSubmit'
 import { EditorToolbar } from './EditorToolbar'
 import { EditorActionsPopover } from './EditorToolbarPopover'
@@ -81,13 +82,13 @@ export const Editor = memo(function Editor(props: Props) {
     }
   }, [initialOpen])
 
-  const [submitState, submit] = useObservableState<string | number | boolean, EventTemplate | null>((input$) => {
+  const [submitState, submit] = useObservableState<string | number | boolean, EditorContextType | null>((input$) => {
     return input$.pipe(
       filter(Boolean),
-      concatMap((event) => {
+      concatMap((state) => {
         const submit$ = defer(() => {
           return from(state.upload()).pipe(
-            mergeMap(() => mutateAsync(event)),
+            mergeMap(() => mutateAsync(state.event)),
             catchError(() => of(false)),
             map(() => false),
             startWith(0),
@@ -123,7 +124,7 @@ export const Editor = memo(function Editor(props: Props) {
                   state={submitState}
                   disabled={isEmpty || state.isUploading}
                   renderDiscard={renderDiscard}
-                  onSubmit={() => submit(state.event)}
+                  onSubmit={() => submit(state)}
                   onDiscard={onDiscard}
                 />
               </EditorActions>
