@@ -13,7 +13,7 @@ import { useReposts } from '../query/useReposts'
 import { useSeen } from '../query/useSeen'
 import { useZaps } from '../query/useZaps'
 import { useCurrentUser } from '../useAuth'
-import { useNaddress, useNevent } from '../useEventUtils'
+import { useEventDTag, useNaddress, useNevent } from '../useEventUtils'
 
 export type NoteState = ReturnType<typeof useNoteState>
 
@@ -92,11 +92,15 @@ export function useNoteState(event: NostrEventDB, options?: NoteOptions) {
   const currentUser = useCurrentUser()
 
   const { id, metadata } = event
+  const dTag = useEventDTag(event)
+  const address = isParameterizedReplaceableKind(event.kind) ? [event.kind, event.pubkey, dTag].join(':') : undefined
 
   const replies = useEventReplies(event, {
     enabled: queryOptions.enabled,
     select: (events: NostrEventDB[]) => {
-      return events.filter((e) => e.metadata?.parentId === event.id)
+      return events.filter(
+        (e) => e.metadata?.parentId === event.id || (address ? e.metadata?.parentId === address : true),
+      )
     },
   })
 

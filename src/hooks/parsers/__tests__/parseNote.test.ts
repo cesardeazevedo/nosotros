@@ -264,4 +264,11 @@ describe('parseNote', () => {
       },
     })
   })
+
+  test('assert address reply', () => {
+    const note = parse({ id: '1', tags: [['a', '30023:e1:d123', '', 'root']] })
+    expect(note.isRoot).toBe(false)
+    expect(note.parentId).toBe('30023:e1:d123')
+    expect(note.rootId).toBe('30023:e1:d123')
+  })
 })

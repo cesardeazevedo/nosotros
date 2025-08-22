@@ -174,8 +174,6 @@ export const Reply = memo(function Reply(props: Props) {
               )}
             </>
           )}
-
-          <RepliesMuted />
         </html.div>
       </ContentProvider>
     </NoteProvider>

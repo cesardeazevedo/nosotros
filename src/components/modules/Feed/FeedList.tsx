@@ -96,7 +96,7 @@ export const FeedList = memo(function FeedList(props: Props) {
 const styles = css.create({
   column: {
     position: 'relative',
-    height: '95vh',
+    height: 'calc(100vh - 70px)',
     overflow: 'scroll',
   },
   refreshing: {
