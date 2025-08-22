@@ -123,7 +123,19 @@ export function welshmanToProseMirror(welshmanSchema: Parsed[], blockNodesOption
           break
         }
         case ParsedType.Code: {
-          currentParagraph.content.push({ type: 'text', text: node.value, marks: [{ type: 'code' }] })
+          const isBlock = node.raw.startsWith('```')
+          if (isBlock) {
+            pushParagraph()
+            result.content.push({
+              type: 'codeBlock',
+              attrs: {
+                language: '',
+              },
+              content: [{ type: 'text', text: node.value }],
+            })
+          } else {
+            currentParagraph.content.push({ type: 'text', text: node.value, marks: [{ type: 'code' }] })
+          }
           break
         }
         case ParsedType.Newline: {
