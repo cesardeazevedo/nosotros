@@ -1,8 +1,8 @@
+import { mergeRelayHints } from '@/core/mergers/mergeRelayHints'
 import type { NostrEvent } from 'nostr-tools'
 import type { Metadata } from '../../nostr/types'
 import { parseRelayHintsFromTags } from './parseRelayHints'
 import { isAddressTag, isAuthorTag, isEventTag, isMention } from './parseTags'
-import { mergeRelayHints } from '@/core/mergers/mergeRelayHints'
 
 // These are NIP-10 reply marks
 export function parseReplies(event: NostrEvent): Metadata {

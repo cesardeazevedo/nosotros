@@ -39,11 +39,6 @@ export const PullToRefresh = (props: Props) => {
 }
 
 const styles = css.create({
-  column: {
-    position: 'relative',
-    height: '95vh',
-    overflow: 'scroll',
-  },
   refreshing: {
     paddingBlock: spacing.padding2,
   },
