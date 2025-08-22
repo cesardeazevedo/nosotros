@@ -11,7 +11,7 @@ export const NoteStatsDialog = memo(function NoteStatsDialog() {
 
   return (
     <DialogSheet title='Stats' open={!!id} onClose={onClose} maxWidth='sm'>
-      {event.data && <PostStats event={event.data} onClose={close} />}
+      {event.data && <PostStats event={event.data} onClose={onClose} />}
     </DialogSheet>
   )
 })
