@@ -37,5 +37,7 @@ export function setEventData(event: NostrEventDB) {
     queryClient.setQueryData(queryKeys.event(event.id), [event])
   }
 
-  store.set(addReplyAtom, event)
+  if (event.kind === Kind.Text || event.kind === Kind.Comment) {
+    store.set(addReplyAtom, event)
+  }
 }
