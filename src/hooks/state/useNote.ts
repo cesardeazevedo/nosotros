@@ -99,7 +99,7 @@ export function useNoteState(event: NostrEventDB, options?: NoteOptions) {
     enabled: queryOptions.enabled,
     select: (events: NostrEventDB[]) => {
       return events.filter(
-        (e) => e.metadata?.parentId === event.id || (address ? e.metadata?.parentId === address : true),
+        (e) => e.metadata?.parentId === event.id || (address ? e.metadata?.parentId === address : false),
       )
     },
   })

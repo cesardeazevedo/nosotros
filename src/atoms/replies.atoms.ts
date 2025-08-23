@@ -11,17 +11,17 @@ export const replyCountAtomFamily = atomFamily((id: string) =>
   }),
 )
 
-export const addReplyAtom = atom(null, (get, set, note: NostrEventDB) => {
-  const parentId = note.metadata?.parentId
+export const addReplyAtom = atom(null, (get, set, event: NostrEventDB) => {
+  const parentId = event.metadata?.parentId
   if (!parentId) {
     return
   } else {
     const prev = get(childrenAtomFamily(parentId))
-    if (prev.has(note.id)) {
+    if (prev.has(event.id)) {
       return
     } else {
       const next = new Set(prev)
-      next.add(note.id)
+      next.add(event.id)
       set(childrenAtomFamily(parentId), next)
     }
   }
