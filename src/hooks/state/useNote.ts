@@ -12,7 +12,7 @@ import { useEventReplies } from '../query/useReplies'
 import { useReposts } from '../query/useReposts'
 import { useSeen } from '../query/useSeen'
 import { useZaps } from '../query/useZaps'
-import { useCurrentUser } from '../useAuth'
+import { useCurrentPubkey, useCurrentUser } from '../useAuth'
 import { useEventDTag, useNaddress, useNevent } from '../useEventUtils'
 
 export type NoteState = ReturnType<typeof useNoteState>
@@ -70,11 +70,12 @@ export function useNoteState(event: NostrEventDB, options?: NoteOptions) {
   })
 
   const [limit, setLimit] = useState(PAGINATION_SIZE)
+  const currentLoggedPubkey = useCurrentPubkey()
 
   const ctx = {
     relayHints: {
       idHints: {
-        [event.id]: [event.pubkey],
+        [event.id]: [event.pubkey, ...[currentLoggedPubkey ? currentLoggedPubkey : []]],
       },
     },
   } as NostrContext
@@ -99,7 +100,7 @@ export function useNoteState(event: NostrEventDB, options?: NoteOptions) {
     enabled: queryOptions.enabled,
     select: (events: NostrEventDB[]) => {
       return events.filter(
-        (e) => e.metadata?.parentId === event.id || (address ? e.metadata?.parentId === address : true),
+        (e) => e.metadata?.parentId === event.id || (address ? e.metadata?.parentId === address : false),
       )
     },
   })

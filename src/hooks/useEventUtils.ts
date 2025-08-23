@@ -64,7 +64,7 @@ export function useNevent(event: NostrEventDB | undefined) {
           })
         : undefined,
     )
-  }, [event])
+  }, [event, relays])
 }
 
 export function useNprofile(pubkey: string = '') {
@@ -79,7 +79,7 @@ export function useNprofile(pubkey: string = '') {
           relays,
         }),
       ),
-    [pubkey],
+    [pubkey, relays],
   )
 }
 
