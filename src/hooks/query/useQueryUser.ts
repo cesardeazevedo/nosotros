@@ -50,7 +50,7 @@ export function useUserMuteList(pubkey: string, options?: CustomQueryOptions<Nos
   return useReplaceableEvent(Kind.Mutelist, pubkey, options)
 }
 
-function userRelaysQueryOptions(pubkey: string | undefined, permission = READ | WRITE, relay?: string) {
+function userRelaysQueryOptions(pubkey: string | undefined, permission: number) {
   return replaceableEventQueryOptions(Kind.RelayList, pubkey || '', {
     enabled: !!pubkey,
     ctx: {
@@ -60,11 +60,7 @@ function userRelaysQueryOptions(pubkey: string | undefined, permission = READ | 
     select: (events) => {
       return (
         events.flatMap((event) => {
-          return (
-            event.metadata?.relayList
-              ?.filter((userRelay) => (relay ? formatRelayUrl(userRelay.relay) === relay : true))
-              ?.filter((userRelay) => userRelay.permission & permission) || []
-          )
+          return selectRelays(event.metadata?.relayList || [], { permission, maxRelaysPerUser: 20 })
         }) || []
       )
     },
@@ -77,8 +73,8 @@ export function getUserRelaysFromCache(pubkey: string, permission = READ | WRITE
   return raw && options.select ? options.select(raw) : []
 }
 
-export function useUserRelays(pubkey: string | undefined, permission: number, relay?: string) {
-  return useQuery(userRelaysQueryOptions(pubkey, permission, formatRelayUrl(relay)))
+export function useUserRelays(pubkey: string | undefined, permission: number) {
+  return useQuery(userRelaysQueryOptions(pubkey, permission))
 }
 
 export function useRelayUsers(relay: string, permission = READ | WRITE) {
@@ -95,10 +91,10 @@ export function useRelayUsers(relay: string, permission = READ | WRITE) {
   })
 }
 
-export function useUsersRelays(pubkeys: string[], permission: number, relay?: string) {
+export function useUsersRelays(pubkeys: string[], permission: number) {
   return useQueries({
     queries: pubkeys.map((pubkey) => {
-      return userRelaysQueryOptions(pubkey, permission, relay)
+      return userRelaysQueryOptions(pubkey, permission)
     }),
     combine: (results) => {
       const map: Record<string, UserRelay[]> = {}
