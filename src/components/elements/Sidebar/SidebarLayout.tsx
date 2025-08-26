@@ -3,7 +3,7 @@ import { Stack } from '@/components/ui/Stack/Stack'
 import { useCurrentPubkey } from '@/hooks/useAuth'
 import { useSettings } from '@/hooks/useSettings'
 import { spacing } from '@/themes/spacing.stylex'
-import { useMatchRoute } from '@tanstack/react-router'
+import { Link, useMatchRoute } from '@tanstack/react-router'
 import React, { memo, useState } from 'react'
 import { css, html } from 'react-strict-dom'
 import { LinkSignIn } from '../Links/LinkSignIn'
@@ -16,6 +16,7 @@ import { SidebarTransition } from './SidebarTransition'
 import { SidebarPaneLists } from './panes/SidebarPaneLists'
 import { SidebarPaneNotifications } from './panes/SidebarPaneNotifications'
 import { SidebarPaneRelayDiscovery } from './panes/SidebarPaneRelayDiscovery'
+import { Fab } from '@/components/ui/Fab/Fab'
 
 type Props = {
   children: React.ReactNode
@@ -61,7 +62,12 @@ export const SidebarLayout = memo(function SidebarLayout(props: Props) {
           <html.div style={styles.trailing}>
             <Stack gap={1}>
               {pubkey ? (
-                <ProfilePopover />
+                <Stack gap={2}>
+                  <Link to='.' search={{ compose: true }}>
+                    <Button variant='filled'>Create note</Button>
+                  </Link>
+                  <ProfilePopover />
+                </Stack>
               ) : (
                 <LinkSignIn>
                   <Button variant='filled'>Sign In</Button>
