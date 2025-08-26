@@ -10,7 +10,7 @@ export function subscribeAfterAuth(ctx: NostrContext, sub: NostrSubscriptionBuil
       distinct(),
       map((url) => pool.get(url)),
       filter((x) => !!x),
-      mergeMap((relay) => relay.authOk$.pipe(takeUntil(timer(2000)))),
+      mergeMap((relay) => relay.authOk$.pipe(takeUntil(timer(20000)))),
       map(([url]) => createSubscription({ ...ctx, relays: [url] }, sub.filter || {})),
     )
   }
