@@ -6,6 +6,7 @@ import { RepostRoot } from '../Repost/Repost'
 import { Threads } from '../Threads/Threads'
 import { ZapReceiptRoot } from '../Zaps/ZapReceipt'
 import { NostrEventUnsupported } from './NostrEventUnsupported'
+import { PublicMessageRoot } from '../PublicMessage/PublicMessageRoot'
 
 type Props = {
   event: NostrEventDB
@@ -20,11 +21,12 @@ export const NostrEventRoot = memo(function NostrEventRoot(props: Props) {
       return event.metadata?.isRoot ? (
         <PostRoot event={event} open={open} />
       ) : (
-        <Threads event={event} renderRepliesSummary={false} />
+        <Threads event={event} renderRepliesSummary />
       )
     }
+    case Kind.PublicMessage:
     case Kind.Article: {
-      return <PostRoot event={event} open={open} />
+      return <PublicMessageRoot event={event} />
     }
     case Kind.Repost: {
       return <RepostRoot event={event} />

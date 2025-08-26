@@ -9,6 +9,7 @@ export enum Kind {
   Reaction = 7,
   BadgeAward = 8,
   Media = 20,
+  PublicMessage = 24,
   ChannelCreation = 40,
   ChannelMetadata = 41,
   ChannelMessage = 42,

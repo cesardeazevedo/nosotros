@@ -3,7 +3,7 @@ import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { useEvent } from '@/hooks/query/useQueryBase'
 import { useUserRelays } from '@/hooks/query/useQueryUser'
 import { useSeen } from '@/hooks/query/useSeen'
-import { WRITE } from '@/nostr/types'
+import { READ, WRITE } from '@/nostr/types'
 import { compactArray } from '@/utils/utils'
 import type { NostrEvent } from 'nostr-tools'
 import { isParameterizedReplaceableKind } from 'nostr-tools/kinds'
@@ -24,6 +24,12 @@ export function useEditorSection() {
   const section = useEditorSelector((editor) => editor.section)
   const openSection = useEditorSelector((editor) => editor.openSection)
   return { section, openSection }
+}
+
+export function usePublicMessageTags(pubkey: string | undefined) {
+  const userRelays = useUserRelays(pubkey, WRITE)
+  const userHeadRelay = userRelays.data?.[0]?.relay || ''
+  return pubkey ? [['p', pubkey, userHeadRelay]] : []
 }
 
 export function useReplyTags(event: NostrEventDB | undefined) {
@@ -55,6 +61,9 @@ export function useReplyTags(event: NostrEventDB | undefined) {
           ['p', event.pubkey, userHeadRelay],
         ]
         return compactArray(tags)
+      }
+      case Kind.PublicMessage: {
+        return [['p', event.pubkey, userHeadRelay]]
       }
       default: {
         // NIP-22 comments tags

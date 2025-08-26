@@ -42,6 +42,5 @@ const styles = css.create({
     boxOrient: 'vertical',
     WebkitBoxOrient: 'vertical',
     display: '-webkit-box',
-    pointerEvents: 'none',
   },
 })
