@@ -208,6 +208,7 @@ export const NotificationItem = memo(function NotificationItem(props: Props) {
               kind={Kind.PublicMessage}
               pubkey={event.pubkey}
               parent={event}
+              onDiscard={() => setEditorOpen(false)}
               onSuccess={() => setEditorOpen(false)}
             />
             <Divider />
