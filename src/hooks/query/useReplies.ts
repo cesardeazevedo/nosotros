@@ -10,23 +10,25 @@ import type { CustomQueryOptions } from './useQueryBase'
 import { eventQueryOptions } from './useQueryBase'
 
 export function eventRepliesQueryOptions(event: NostrEventDB, options?: CustomQueryOptions) {
+  const isComment = event.kind !== Kind.Text
   const address = eventAddress(event)
-  const id = address || event.metadata?.rootId || event.id
-  const tagFilter = address ? { '#a': [address] } : { '#e': [event.metadata?.rootId || event.id] }
+  const rootId = address || event.metadata?.rootId || event.id
+  const ids = [address, event.metadata?.rootId, event.id].filter((x): x is string => !!x)
+  const noteFilter = isComment ? { '#E': ids } : { '#e': ids }
+  const addressFilter = address ? { '#a': [address] } : {}
+  const filter = { ...noteFilter, ...addressFilter }
   return eventQueryOptions({
-    queryKey: queryKeys.tag(address ? 'a' : 'e', [id], Kind.Text),
+    queryKey: queryKeys.tag(address ? 'a' : 'e', [rootId], Kind.Text),
     filter: {
       kinds: [Kind.Text, Kind.Comment],
-      ...tagFilter,
+      ...filter,
     },
     ctx: {
       network: 'STALE_WHILE_REVALIDATE',
       // inbox relays are broken and no one writes to the author inbox, so we have to rely on big relays
       relays: FALLBACK_RELAYS,
       relayHints: {
-        idHints: {
-          [id]: [event.pubkey],
-        },
+        idHints: ids.reduce((acc, id) => ({ ...acc, [id]: [event.pubkey] }), {}),
       },
     },
     ...options,

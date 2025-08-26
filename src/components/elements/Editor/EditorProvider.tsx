@@ -25,7 +25,7 @@ import { ToastEventPublished } from '../Toasts/ToastEventPublished'
 import type { Props as EditorProps } from './Editor'
 import { Editor } from './Editor'
 import { EditorMedia } from './EditorMedia'
-import { useReplyTags } from './hooks/useEditor'
+import { usePublicMessageTags, useReplyTags } from './hooks/useEditor'
 import { createEditor } from './utils/createEditor'
 import { createEditorKind20 } from './utils/createEditorKind20'
 
@@ -128,11 +128,26 @@ type Props = EditorProps & {
   kind?: Kind
   parent?: NostrEventDB
   queryKey?: QueryKey
+  pubkey?: string
   ref?: Ref<EditorRef | null>
 }
 
+function getPostKindName(kind: Kind | undefined) {
+  switch (kind) {
+    case Kind.Comment: {
+      return 'comment'
+    }
+    case Kind.PublicMessage: {
+      return 'public message'
+    }
+    default: {
+      return 'post'
+    }
+  }
+}
+
 export const EditorProvider = memo(function EditorProvider(props: Props) {
-  const { parent, ref, queryKey, ...rest } = props
+  const { parent, ref, queryKey, pubkey: publicMessagePubkey, ...rest } = props
 
   const settings = useSettings()
   const pubkey = useCurrentPubkey()
@@ -144,12 +159,17 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
 
   const placeholder = useMemo(() => {
     const parentName = parentUser.event ? parentUser.displayName : 'user'
+    if (kind === Kind.PublicMessage) {
+      return `Send a public message to ${parentName}`
+    }
+    const replyName = parent?.kind === Kind.Text ? 'Reply' : 'Comment'
+    const itemName = getPostKindName(parent?.kind)
     return parent
       ? parent.metadata?.isRoot
-        ? `Reply on ${parent.pubkey === pubkey ? 'your' : parentName} post`
-        : `Reply to ${parentName}`
+        ? `${replyName} on ${parent.pubkey === pubkey ? 'your' : parentName} ${itemName}`
+        : `${replyName} on ${parentName} ${itemName}`
       : "What's in your mind?"
-  }, [parent, parentUser.event])
+  }, [kind, parent, parentUser.event])
 
   const placeholderRef = useRef(placeholder)
 
@@ -230,7 +250,8 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
     ])
   }, [editor])
 
-  const replyTags = useReplyTags(props.parent)
+  const replyTags = useReplyTags(parent)
+  const publicMessageTags = usePublicMessageTags(publicMessagePubkey, parent)
 
   const event = useEditorState({
     editor,
@@ -243,10 +264,10 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
           kind,
           content: editor?.getText({ blockSeparator: '\n' }),
           created_at: Math.floor(Date.now() / 1000),
-          tags: [...replyTags, ...getTags()],
+          tags: [...(kind === Kind.PublicMessage ? publicMessageTags : replyTags), ...getTags()],
         } as EventTemplate
       },
-      [replyTags],
+      [kind, replyTags, publicMessageTags],
     ),
   })
 
@@ -280,7 +301,7 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
         })
       } else if (parent) {
         const rootId = parent.metadata?.rootId || parent.id
-        queryClient.setQueryData(queryKeys.tag('e', [rootId], parent.kind), (events: NostrEventDB[] = []) => [
+        queryClient.setQueryData(queryKeys.tag('e', [rootId], Kind.Text), (events: NostrEventDB[] = []) => [
           ...events,
           event,
         ])

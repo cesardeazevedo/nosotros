@@ -25,8 +25,6 @@ export const PostLink = memo(function postList(props: Props) {
 
   const handleClick = useCallback(
     (e: StrictClickEvent) => {
-      e.preventDefault()
-      e.stopPropagation()
       if (deck.isDeck) {
         return deck.add(e)
       }
@@ -36,6 +34,8 @@ export const PostLink = memo(function postList(props: Props) {
       if (isButton || isLink) {
         return
       }
+      e.preventDefault()
+      e.stopPropagation()
       if (!mobile) {
         note.actions.toggleContent(true)
         onClick?.()

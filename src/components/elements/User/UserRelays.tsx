@@ -53,7 +53,7 @@ export const UserRelays = memo(function UserRelays(props: Props) {
           </Stack>
         </Paper>
       )}>
-      <Button sx={styles.button} variant='outlined' onClick={() => open()}>
+      <Button sx={styles.button} variant='outlined'>
         <IconServerBolt size={20} strokeWidth='1.5' />
         {(inboxRelays?.length || 0) + (outboxRelays?.length || 0)}
       </Button>

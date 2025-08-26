@@ -159,15 +159,6 @@ export const SidebarMenu = memo(function SidebarMenu() {
             />
           )}
         </Link>
-        {!!pubkey && (
-          <>
-            <br />
-            <Link to='.' search={{ compose: true }}>
-              <Fab size='lg' variant='primary' label='Create note' fullWidth />
-            </Link>
-            <br />
-          </>
-        )}
         <br />
         {isMobile && <SidebarMenuLogout />}
       </html.div>

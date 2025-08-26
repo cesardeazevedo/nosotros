@@ -62,7 +62,7 @@ export const EditorActionsPopover = memo(function EditorActionsPopover(props: Pr
             placement='bottom-start'
             contentRenderer={() => (
               <Paper elevation={2} surface='surfaceContainerLow' sx={styles.wrapper}>
-                <EditorSettings />
+                <EditorSettings float />
               </Paper>
             )}>
             {/* @ts-ignore */}

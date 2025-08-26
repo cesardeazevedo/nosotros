@@ -57,6 +57,7 @@ export const Image = memo(function Image(props: Props) {
           )}
           {!hasError && (
             <html.img
+              role='button'
               style={[styles.img, blurStyles, sx]}
               src={proxy ? getImgProxyUrl('feed_img', src) : src}
               onClick={handleClick}

@@ -10,6 +10,7 @@ import { spacing } from '@/themes/spacing.stylex'
 import { UserAvatar } from 'components/elements/User/UserAvatar'
 import type { NostrEvent } from 'nostr-tools'
 import { useObservableState } from 'observable-hooks'
+import type { ReactNode } from 'react'
 import { memo, useEffect } from 'react'
 import { css } from 'react-strict-dom'
 import {
@@ -45,6 +46,7 @@ export type Props = {
   renderDiscard?: boolean
   renderBubble?: boolean
   floatToolbar?: boolean
+  headerComponent?: ReactNode
   onSuccess?: (event: NostrEvent) => void
   onDiscard?: () => void
 }
@@ -55,6 +57,7 @@ export const Editor = memo(function Editor(props: Props) {
     renderDiscard = true,
     renderBubble = false,
     floatToolbar = renderBubble,
+    headerComponent,
     sx,
     onDiscard,
     onSuccess,
@@ -115,6 +118,7 @@ export const Editor = memo(function Editor(props: Props) {
             <Stack sx={[styles.content, dense && styles.content$dense]} gap={2} align='stretch'>
               <Stack horizontal={false} sx={styles.wrapper}>
                 <EditorHeader />
+                {headerComponent}
                 {state.open ? <EditorTiptap key='editor' dense={dense} /> : <EditorPlaceholder />}
               </Stack>
             </Stack>

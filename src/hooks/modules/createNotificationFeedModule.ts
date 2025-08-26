@@ -10,7 +10,7 @@ export type NotificationFeedModule = FeedModule & {
 export function createNotificationFeedModule(pubkey: string): NotificationFeedModule {
   const id = `notification_${pubkey}`
   const filter = {
-    kinds: [Kind.Text, Kind.Comment, Kind.Repost, Kind.Reaction, Kind.ZapReceipt],
+    kinds: [Kind.Text, Kind.Comment, Kind.PublicMessage, Kind.Repost, Kind.Reaction, Kind.ZapReceipt],
     '#p': [pubkey],
     limit: 50,
   }

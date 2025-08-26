@@ -15,12 +15,13 @@ import { ButtonZap } from './PostButtonZap'
 type Props = {
   onReplyClick?: () => void
   renderRelays?: boolean
+  renderReply?: boolean
   renderOptions?: boolean
   sx?: SxProps
 }
 
 export const PostActions = memo(function PostActions(props: Props) {
-  const { renderRelays = true, renderOptions = false, sx } = props
+  const { renderReply = true, renderRelays = true, renderOptions = false, sx } = props
   const { dense } = useContentContext()
   const { note } = useNoteContext()
   const mobile = useMobile()
@@ -29,11 +30,13 @@ export const PostActions = memo(function PostActions(props: Props) {
     <Stack horizontal sx={[styles.root, dense && styles.root$dense, sx]} gap={dense ? 0 : mobile ? 0 : 1}>
       <ButtonReaction />
       <ButtonRepost />
-      <ButtonReply
-        value={note.repliesTotal}
-        selected={(note.state.repliesOpen && note.metadata?.isRoot) || note.state.isReplying || false}
-        onClick={props.onReplyClick}
-      />
+      {renderReply && (
+        <ButtonReply
+          value={note.repliesTotal}
+          selected={(note.state.repliesOpen && note.metadata?.isRoot) || note.state.isReplying || false}
+          onClick={props.onReplyClick}
+        />
+      )}
       <ButtonZap />
       {renderRelays && <ButtonRelays />}
       {renderOptions && <PostOptions />}

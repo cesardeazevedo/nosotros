@@ -5,7 +5,7 @@ import { UserAvatar } from './UserAvatar'
 
 type Props = {
   pubkey: string
-  onDelete: () => void
+  onDelete?: () => void
 }
 
 export const UserChip = memo((props: Props) => {

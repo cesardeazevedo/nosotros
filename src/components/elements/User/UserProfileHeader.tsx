@@ -2,15 +2,22 @@ import { addMediaErrorAtom, mediaErrorsAtom } from '@/atoms/media.atoms'
 import { FollowButton } from '@/components/modules/Follows/FollowButton'
 import { ContentProvider } from '@/components/providers/ContentProvider'
 import { Divider } from '@/components/ui/Divider/Divider'
+import { IconButton } from '@/components/ui/IconButton/IconButton'
+import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
+import { MenuList } from '@/components/ui/MenuList/MenuList'
+import { Popover } from '@/components/ui/Popover/Popover'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
+import { Kind } from '@/constants/kinds'
 import { useUserState } from '@/hooks/state/useUser'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { getImgProxyUrl } from '@/utils/imgproxy'
+import { IconDotsVertical, IconMessageCircleFilled } from '@tabler/icons-react'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
+import { LinkBase } from '../Links/LinkBase'
 import { UserAvatar } from './UserAvatar'
 import { UserContentAbout } from './UserContentAbout'
 import { UserRelays } from './UserRelays'
@@ -64,6 +71,24 @@ export const UserProfileHeader = memo(function UserProfileHeader(props: Props) {
         <Stack sx={styles.follow} gap={0.5}>
           <UserRelays pubkey={pubkey} />
           <FollowButton pubkey={pubkey} />
+          <Popover
+            placement='bottom-end'
+            contentRenderer={() => (
+              <MenuList surface='surfaceContainerLow'>
+                <LinkBase search={{ compose_kind: Kind.PublicMessage, compose: true, pubkey }}>
+                  <MenuItem interactive leadingIcon={<IconMessageCircleFilled />} label='Send Public Message' />
+                </LinkBase>
+              </MenuList>
+            )}>
+            {({ getProps, setRef, open }) => (
+              <IconButton
+                {...getProps()}
+                ref={setRef}
+                onClick={() => open()}
+                icon={<IconDotsVertical stroke='currentColor' strokeWidth='2.0' size={20} />}
+              />
+            )}
+          </Popover>
         </Stack>
       </Stack>
     </>

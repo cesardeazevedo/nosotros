@@ -9,7 +9,7 @@ const kinds = [Kind.Follows]
 
 export function publishFollowList(pubkey: string, tag: 'p', related: string[], options: LocalPublisherOptions) {
   const filter = { kinds, authors: [pubkey] }
-  return subscribeLastEvent({}, filter).pipe(
+  return subscribeLastEvent({ network: 'REMOTE_ONLY' }, filter).pipe(
     mergeMap((event) => {
       if (!event) return EMPTY // Couldn't find last follows list of the user
 

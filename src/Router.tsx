@@ -57,10 +57,11 @@ const rootRoute = createRootRouteWithContext<RouteContext>()({
   errorComponent: ErrorBoundary,
   validateSearch: z.object({
     zap: z.string().optional(),
-    stats: z.string().optional(),
     nevent: z.string().optional(),
     invoice: z.string().optional(),
     sign_in: z.boolean().optional(),
+    compose_kind: z.number().optional(),
+    pubkey: z.string().optional(),
     compose: z.boolean().optional(),
     quoting: z.string().optional(),
     replying: z.string().optional(),

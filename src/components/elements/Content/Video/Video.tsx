@@ -60,6 +60,7 @@ export const Video = memo(function Video(props: Props) {
         <video
           {...css.props([styles.video, blurStyles, sx])}
           playsInline
+          role='button'
           webkit-playsinline='true'
           ref={ref}
           loop={loop}
