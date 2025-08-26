@@ -19,7 +19,7 @@ export const EditorDialog = memo(function EditorDialog() {
   })
   const kind = useMatch({
     from: '__root__',
-    select: (x) => x.search.kind || Kind.Text,
+    select: (x) => x.search.compose_kind || Kind.Text,
   })
   const pubkey = useMatch({
     from: '__root__',
