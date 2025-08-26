@@ -25,6 +25,6 @@ export function subscribeLive(ctx: NostrContext, scope: FeedScope, filter: Nostr
   ).pipe(
     delay(1000),
     mergeMap(identity),
-    rxFilter((event) => event.created_at > now),
+    rxFilter((event) => event.created_at > now && event.created_at < (Date.now() + 2000) / 1000),
   )
 }
