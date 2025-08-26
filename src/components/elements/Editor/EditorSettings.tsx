@@ -11,16 +11,17 @@ import { lazy, memo, Suspense, useState } from 'react'
 import { css } from 'react-strict-dom'
 import { EditorSettingsUpload } from './EditorSettingsUpload'
 import { useEditorSelector } from './hooks/useEditor'
+import type { SxProps } from '@/components/ui/types'
+import { shape } from '@/themes/shape.stylex'
 
 const jsonTheme = {
   ...githubDarkTheme,
   '--w-rjv-background-color': '#000',
-  margin: 1,
 }
 
 const JsonView = lazy(() => import('@uiw/react-json-view'))
 
-const EditorJsonView = () => {
+const EditorJsonView = (props: { sx?: SxProps }) => {
   const event = useEditorSelector((editor) => editor.event)
   return (
     event && (
@@ -28,14 +29,18 @@ const EditorJsonView = () => {
         highlightUpdates={false}
         displayDataTypes={false}
         value={event}
-        {...css.props(styles.json)}
+        {...css.props(props.sx)}
         style={{ ...jsonTheme }}
       />
     )
   )
 }
 
-export const EditorSettings = memo(function EditorSettings() {
+type Props = {
+  float?: boolean
+}
+
+export const EditorSettings = memo(function EditorSettings(props: Props) {
   const [jsonOpen, setJsonOpen] = useState(false)
   const toggleSettings = useToggleSettings()
   const toggle = useEditorSelector((editor) => editor.toggle)
@@ -86,7 +91,7 @@ export const EditorSettings = memo(function EditorSettings() {
         <Stack>
           {jsonOpen && (
             <Suspense>
-              <EditorJsonView />
+              <EditorJsonView sx={[styles.json, props.float && styles.json$float]} />
             </Suspense>
           )}
         </Stack>
@@ -116,6 +121,10 @@ const styles = css.create({
     height: 220,
     width: '100%',
     overflowY: 'auto',
+  },
+  json$float: {
+    borderBottomLeftRadius: shape.lg,
+    borderBottomRightRadius: shape.lg,
   },
   label: {
     minWidth: 180,

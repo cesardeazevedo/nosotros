@@ -26,10 +26,18 @@ export function useEditorSection() {
   return { section, openSection }
 }
 
-export function usePublicMessageTags(pubkey: string | undefined) {
+export function usePublicMessageTags(pubkey: string | undefined, event?: NostrEventDB | undefined) {
+  const eventHeadRelay = useSeen(event?.id || '').data?.[0]?.relay || ''
   const userRelays = useUserRelays(pubkey, WRITE)
   const userHeadRelay = userRelays.data?.[0]?.relay || ''
-  return pubkey ? [['p', pubkey, userHeadRelay]] : []
+  if (pubkey) {
+    const tags = [['p', pubkey, userHeadRelay]]
+    if (event) {
+      tags.push(['q', event.id, eventHeadRelay])
+    }
+    return compactArray(tags)
+  }
+  return []
 }
 
 export function useReplyTags(event: NostrEventDB | undefined) {
@@ -61,9 +69,6 @@ export function useReplyTags(event: NostrEventDB | undefined) {
           ['p', event.pubkey, userHeadRelay],
         ]
         return compactArray(tags)
-      }
-      case Kind.PublicMessage: {
-        return [['p', event.pubkey, userHeadRelay]]
       }
       default: {
         // NIP-22 comments tags

@@ -60,7 +60,7 @@ const rootRoute = createRootRouteWithContext<RouteContext>()({
     nevent: z.string().optional(),
     invoice: z.string().optional(),
     sign_in: z.boolean().optional(),
-    kind: z.number().optional(),
+    compose_kind: z.number().optional(),
     pubkey: z.string().optional(),
     compose: z.boolean().optional(),
     quoting: z.string().optional(),

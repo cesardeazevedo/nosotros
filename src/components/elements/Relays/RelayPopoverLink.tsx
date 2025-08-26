@@ -27,7 +27,7 @@ const PopoverContent = memo(function PopoverContent(props: { url: string }) {
     <Paper elevation={2} surface='surfaceContainerLow' sx={styles.root}>
       <Stack gap={2} align='flex-end' justify='space-between'>
         <Stack horizontal={false} gap={1}>
-          <Stack>
+          <Stack gap={2}>
             {info?.icon && <RelayIcon size='md' url={url} />}
             <Text variant='title' size='lg'>
               {info?.name || pretty}
@@ -54,7 +54,7 @@ export const RelayPopoverLink = memo(function RelayPopoverLink(props: Props) {
   return (
     <TooltipRich cursor='dot' content={() => <PopoverContent url={url} />} placement='bottom-start'>
       <html.span style={styles.link}>
-        <RelayIcon size='xs' url={url} sx={styles.avatar} />
+        <RelayIcon size='xxs' url={url} sx={styles.avatar} />
         {props.children}
       </html.span>
     </TooltipRich>
@@ -80,7 +80,7 @@ const styles = css.create({
     display: 'inline-block',
     width: 16,
     height: 16,
-    top: 2,
+    top: -2,
     marginRight: 2,
   },
 })

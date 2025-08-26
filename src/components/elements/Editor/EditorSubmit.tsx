@@ -8,6 +8,7 @@ import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDO
 import { LinkSignIn } from '../Links/LinkSignIn'
 import { useEditorSelector } from './hooks/useEditor'
 import { cancel$ } from './utils/countDown'
+import { Kind } from '@/constants/kinds'
 
 type Props = {
   renderDiscard?: boolean
@@ -23,7 +24,7 @@ export const EditorSubmit = memo(function EditorSubmit(props: Props) {
   const pubkey = useCurrentPubkey()
 
   const reset = useEditorSelector((editor) => editor.reset)
-  const isReply = useEditorSelector((editor) => !!editor.parent)
+  const isReply = useEditorSelector((editor) => !!editor.parent && editor.parent.kind !== Kind.PublicMessage)
   const isCountDown = typeof state === 'number'
 
   const handleDiscard = useCallback((event: StrictClickEvent) => {
@@ -35,7 +36,7 @@ export const EditorSubmit = memo(function EditorSubmit(props: Props) {
 
   return (
     <Stack gap={0.5}>
-      {renderDiscard && (
+      {renderDiscard && !isCountDown && (
         <Button sx={[dense && styles.button$dense]} onClick={handleDiscard}>
           Discard
         </Button>

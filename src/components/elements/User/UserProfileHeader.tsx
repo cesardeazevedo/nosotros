@@ -75,7 +75,7 @@ export const UserProfileHeader = memo(function UserProfileHeader(props: Props) {
             placement='bottom-end'
             contentRenderer={() => (
               <MenuList surface='surfaceContainerLow'>
-                <LinkBase search={{ kind: Kind.PublicMessage, compose: true, pubkey }}>
+                <LinkBase search={{ compose_kind: Kind.PublicMessage, compose: true, pubkey }}>
                   <MenuItem interactive leadingIcon={<IconBubbleTextFilled />} label='Send Public Message' />
                 </LinkBase>
               </MenuList>
