@@ -13,7 +13,7 @@ import { useUserState } from '@/hooks/state/useUser'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { getImgProxyUrl } from '@/utils/imgproxy'
-import { IconBubbleTextFilled, IconDotsVertical } from '@tabler/icons-react'
+import { IconDotsVertical, IconMessageCircleFilled } from '@tabler/icons-react'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
@@ -76,7 +76,7 @@ export const UserProfileHeader = memo(function UserProfileHeader(props: Props) {
             contentRenderer={() => (
               <MenuList surface='surfaceContainerLow'>
                 <LinkBase search={{ compose_kind: Kind.PublicMessage, compose: true, pubkey }}>
-                  <MenuItem interactive leadingIcon={<IconBubbleTextFilled />} label='Send Public Message' />
+                  <MenuItem interactive leadingIcon={<IconMessageCircleFilled />} label='Send Public Message' />
                 </LinkBase>
               </MenuList>
             )}>
