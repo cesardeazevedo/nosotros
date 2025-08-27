@@ -1,33 +1,32 @@
 import { FollowButton } from '@/components/modules/Follows/FollowButton'
 import { ContentProvider } from '@/components/providers/ContentProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
-import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { spacing } from '@/themes/spacing.stylex'
 import { memo } from 'react'
-import { css } from 'react-strict-dom'
+import { html, css } from 'react-strict-dom'
 import { LinkProfile } from '../Links/LinkProfile'
 import { UserContentAbout } from './UserContentAbout'
 import { UserHeader } from './UserHeader'
 
 type Props = {
-  event: NostrEventDB
+  pubkey: string
 }
 
 const maxHeight = 220
 
 export const UserRoot = memo(function UserRoot(props: Props) {
-  const { event } = props
-  const { pubkey } = event
+  const { pubkey } = props
   return (
     <LinkProfile pubkey={pubkey}>
       <ContentProvider value={{ disableLink: true }}>
         <Stack sx={[styles.root, styles.action]} align='flex-start' gap={2}>
-          <Stack grow horizontal={false} sx={styles.content} gap={2}>
+          <Stack grow horizontal={false} sx={styles.content} gap={4}>
             <UserHeader pubkey={pubkey} />
-            <br />
-            <UserContentAbout pubkey={pubkey} />
+            <html.div style={styles.about}>
+              <UserContentAbout pubkey={pubkey} />
+            </html.div>
           </Stack>
-          <FollowButton pubkey={pubkey} />
+          <FollowButton value={pubkey} />
         </Stack>
       </ContentProvider>
     </LinkProfile>
@@ -42,7 +41,7 @@ const styles = css.create({
     cursor: 'pointer',
     backgroundColor: {
       default: 'transparent',
-      ':hover': 'rgba(125, 125, 125, 0.03)',
+      ':hover': 'rgba(125, 125, 125, 0.08)',
     },
   },
   content: {
@@ -52,5 +51,8 @@ const styles = css.create({
     '-webkit-line-clamp': '4',
     textOverflow: 'ellipsis',
     overflow: 'hidden',
+  },
+  about: {
+    marginLeft: spacing.margin7,
   },
 })

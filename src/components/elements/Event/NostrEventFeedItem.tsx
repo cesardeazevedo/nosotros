@@ -1,4 +1,5 @@
 import { ArticleRoot } from '@/components/modules/Articles/ArticleRoot'
+import { FollowEventRoot } from '@/components/modules/Follows/FollowEventRoot'
 import { FollowSetItem } from '@/components/modules/Lists/FollowSets/FollowSetItem'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { Kind } from '@/constants/kinds'
@@ -20,7 +21,7 @@ export const NostrEventFeedItem = memo(function NostrEventFeedItem(props: Props)
 
   switch (event.kind) {
     case Kind.Metadata: {
-      return <UserRoot event={event} />
+      return <UserRoot pubkey={event.pubkey} />
     }
     case Kind.Text: {
       return event.metadata?.isRoot ? (
@@ -31,6 +32,9 @@ export const NostrEventFeedItem = memo(function NostrEventFeedItem(props: Props)
           <Divider />
         </>
       )
+    }
+    case Kind.Follows: {
+      return <FollowEventRoot event={event} />
     }
     case Kind.Article: {
       return <ArticleRoot border event={event} />

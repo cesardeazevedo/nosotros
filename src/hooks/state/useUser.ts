@@ -9,20 +9,24 @@ import { useNprofile } from '../useEventUtils'
 
 export type UserState = ReturnType<typeof useUserState>
 
-export function useUserState(pubkey?: string) {
+type UserStateOptions = {
+  syncFollows?: boolean
+}
+
+export function useUserState(pubkey?: string, options?: UserStateOptions) {
   const currentPubkey = useCurrentPubkey()
   const metadata = useUserMetadata(pubkey)
 
-  const statsOptions = { enabled: currentPubkey === pubkey }
+  const statsOptions = { enabled: currentPubkey === pubkey || !!options?.syncFollows }
 
   const nprofile = useNprofile(pubkey)
   const follows = useUserFollows(pubkey, statsOptions)
 
-  const totalFollows = useMemo(() => follows.data?.tags.filter((tag) => tag[0] === 'p').length || 0, [follows.data])
+  const totalFollowing = useMemo(() => follows.data?.tags.filter((tag) => tag[0] === 'p').length || 0, [follows.data])
 
-  const followsPubkey = useCallback(
-    (otherPubkey?: string) => {
-      return follows.data?.tags.some((tag) => tag[1] === otherPubkey) || false
+  const followsTag = useCallback(
+    (otherPubkey: string | undefined, tagName: string = 'p') => {
+      return follows.data?.tags.some((tag) => tagName === tag[0] && tag[1] === otherPubkey) || false
     },
     [follows.data],
   )
@@ -34,8 +38,8 @@ export function useUserState(pubkey?: string) {
     relays: [],
     mutedNotes: new Set(),
     mutedAuthors: new Set(),
-    followsPubkey,
-    totalFollows,
+    followsTag,
+    totalFollowing,
   }
 }
 
