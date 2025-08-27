@@ -1,5 +1,5 @@
-import { useNoteContext } from '@/components/providers/NoteProvider'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import { useNevent } from '@/hooks/useEventUtils'
 import { UserHeader, type Props as UserHeaderProps } from '../User/UserHeader'
 import { PostHeaderDate } from './PostHeaderDate'
 import { PostPow } from './PostPow'
@@ -10,11 +10,11 @@ type Props = Omit<UserHeaderProps, 'pubkey'> & {
 
 export const PostUserHeader = function PostUserHeader(props: Props) {
   const { event, ...rest } = props
-  const { note } = useNoteContext()
+  const nevent = useNevent(event)
   return (
-    <UserHeader pubkey={note.event.pubkey} {...rest}>
-      <PostPow />
-      <PostHeaderDate nevent={note.nip19} date={event.created_at} />
+    <UserHeader pubkey={event.pubkey} {...rest}>
+      <PostPow event={event} />
+      <PostHeaderDate nevent={nevent} date={event.created_at} />
     </UserHeader>
   )
 }

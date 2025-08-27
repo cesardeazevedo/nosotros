@@ -6,14 +6,14 @@ import { UserName } from '../User/UserName'
 import { UserNIP05 } from '../User/UserNIP05'
 
 export const ReplyUserHeader = memo(function ReplyUserHeader() {
-  const { note } = useNoteContext()
+  const { event } = useNoteContext()
   return (
     <Stack horizontal={false}>
       <Stack gap={1} align='center'>
-        <UserName pubkey={note.event.pubkey} />
-        <PostHeaderDate date={note.event.created_at} />
+        <UserName pubkey={event.pubkey} />
+        <PostHeaderDate date={event.created_at} />
       </Stack>
-      <UserNIP05 pubkey={note.event.pubkey} />
+      <UserNIP05 pubkey={event.pubkey} />
     </Stack>
   )
 })

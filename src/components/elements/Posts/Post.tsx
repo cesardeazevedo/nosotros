@@ -37,24 +37,24 @@ export const PostRoot = memo(function PostRoot(props: Props) {
   }, [])
 
   return (
-    <NoteProvider value={{ event, note }}>
+    <NoteProvider value={{ event }}>
       <html.article style={styles.root} ref={note.ref}>
         <PostLink note={note} onClick={openReplies}>
           {note.event.kind === Kind.Article && <ArticleHeadline />}
           {header || <PostHeader event={event} />}
-          <PostContent />
-          <PostActions onReplyClick={openReplies} />
-          {note.state.repliesOpen === null && <RepliesPreview onLoadMoreClick={openReplies} />}
+          <PostContent note={note} />
+          <PostActions note={note} onReplyClick={openReplies} />
+          {note.state.repliesOpen === null && <RepliesPreview note={note} onLoadMoreClick={openReplies} />}
         </PostLink>
         <Expandable expanded={note.state.broadcastOpen}>
-          <PostBroadcaster />
+          <PostBroadcaster note={note} />
         </Expandable>
         {note.state.repliesOpen && (
           <>
             <Divider />
             <PullToRefresh queryKey={queryKeys.tag('e', [event.id], Kind.Text)}>
               <EditorProvider sx={styles.editor} parent={event} renderBubble initialOpen />
-              <Replies />
+              <Replies note={note} />
             </PullToRefresh>
           </>
         )}

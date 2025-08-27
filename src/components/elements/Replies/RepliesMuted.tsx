@@ -1,14 +1,18 @@
-import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Button } from '@/components/ui/Button/Button'
 import { Stack } from '@/components/ui/Stack/Stack'
+import type { NoteState } from '@/hooks/state/useNote'
 import { spacing } from '@/themes/spacing.stylex'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconVolumeOff } from '@tabler/icons-react'
 import { useState } from 'react'
 import { css } from 'react-strict-dom'
 
-export const RepliesMuted = function RepliesMuted() {
-  const { note } = useNoteContext()
+type Props = {
+  note: NoteState
+}
+
+export const RepliesMuted = function RepliesMuted(props: Props) {
+  const { note } = props
   const [openMuted, setOpenMuted] = useState(false)
   const replies = note.repliesMuted
   return (

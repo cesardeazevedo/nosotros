@@ -9,6 +9,7 @@ import { NostrPublisher } from '@/core/NostrPublish'
 import { broadcast } from '@/core/operators/broadcast'
 import { usePublishEventMutation } from '@/hooks/mutations/usePublishEventMutation'
 import { setSeenData } from '@/hooks/query/useSeen'
+import type { NoteState } from '@/hooks/state/useNote'
 import { dbSqlite } from '@/nostr/db'
 import { pool } from '@/nostr/pool'
 import { spacing } from '@/themes/spacing.stylex'
@@ -21,8 +22,12 @@ import { RelayChip } from '../Relays/RelayChip'
 import { RelaySelectPopover } from '../Relays/RelaySelectPopover'
 import { ToastEventPublished } from '../Toasts/ToastEventPublished'
 
-export const PostBroadcaster = memo(function PostBroadcaster() {
-  const { note } = useNoteContext()
+type Props = {
+  note: NoteState
+}
+
+export const PostBroadcaster = memo(function PostBroadcaster(props: Props) {
+  const { note } = props
   const enqueueToast = useSetAtom(enqueueToastAtom)
 
   const { mutate } = usePublishEventMutation<[NostrEvent, string]>({

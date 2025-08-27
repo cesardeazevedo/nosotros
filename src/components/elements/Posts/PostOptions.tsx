@@ -7,8 +7,9 @@ import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { MenuList } from '@/components/ui/MenuList/MenuList'
 import { Popover } from '@/components/ui/Popover/Popover'
-import type { NoteState } from '@/hooks/state/useNote'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { useUserState } from '@/hooks/state/useUser'
+import { useNevent } from '@/hooks/useEventUtils'
 import { READ } from '@/nostr/types'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconCopy, IconDotsVertical, IconInfoSquareRounded, IconLink, IconQuote, IconShare3 } from '@tabler/icons-react'
@@ -19,7 +20,7 @@ import { css } from 'react-strict-dom'
 import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDOMProps'
 
 type PropsOptions = {
-  note: NoteState
+  event: NostrEventDB
   onCopyIdClick: (e: StrictClickEvent) => void
   onCopyAuthorIdClick: (e: StrictClickEvent) => void
   onCopyLinkClick: (e: StrictClickEvent) => void
@@ -29,13 +30,13 @@ type PropsOptions = {
 const iconProps = { size: 20 }
 
 const Options = memo(function Options(props: PropsOptions) {
-  const { note } = props
+  const { event } = props
   return (
     <>
-      <Link to='/feed' search={{ kind: 1, q: note.id, pubkey: note.event.pubkey, permission: READ, type: 'quotes' }}>
+      <Link to='/feed' search={{ kind: 1, q: event.id, pubkey: event.pubkey, permission: READ, type: 'quotes' }}>
         <MenuItem size='sm' leadingIcon={<IconQuote {...iconProps} />} label='See quotes' onClick={() => {}} />
       </Link>
-      <Link to='/feed' search={{ kind: 6, e: note.id, pubkey: note.event.pubkey, permission: READ, type: 'reposts' }}>
+      <Link to='/feed' search={{ kind: 6, e: event.id, pubkey: event.pubkey, permission: READ, type: 'reposts' }}>
         <MenuItem size='sm' leadingIcon={<IconShare3 {...iconProps} />} label='See reposts' onClick={() => {}} />
       </Link>
       <Divider />
@@ -62,30 +63,27 @@ const Options = memo(function Options(props: PropsOptions) {
 
 export const PostOptions = memo(function PostOptions() {
   const { dense } = useContentContext()
-  const { note } = useNoteContext()
+  const { event } = useNoteContext()
   const enqueueToast = useSetAtom(enqueueToastAtom)
   const setStatsDialog = useSetAtom(statsDialogAtom)
 
-  const handleCopy = useCallback(
-    (value: string | undefined) => {
-      return (e: StrictClickEvent) => {
-        e.stopPropagation()
-        e.preventDefault()
-        if (value) {
-          const type = 'text/plain'
-          const blob = new Blob([value], { type })
-          window.navigator.clipboard.write([new ClipboardItem({ [type]: blob })]).then(() => {
-            enqueueToast({ component: 'Copied', duration: 4000 })
-          })
-        }
+  const handleCopy = useCallback((value: string | undefined) => {
+    return (e: StrictClickEvent) => {
+      e.stopPropagation()
+      e.preventDefault()
+      if (value) {
+        const type = 'text/plain'
+        const blob = new Blob([value], { type })
+        window.navigator.clipboard.write([new ClipboardItem({ [type]: blob })]).then(() => {
+          enqueueToast({ component: 'Copied', duration: 4000 })
+        })
       }
-    },
-    [note],
-  )
+    }
+  }, [])
 
-  const nevent = note?.nip19
+  const nevent = useNevent(event)
   const link = window.location.origin + '/' + nevent
-  const user = useUserState(note.event.pubkey)
+  const user = useUserState(event.pubkey)
 
   return (
     <Popover
@@ -94,14 +92,14 @@ export const PostOptions = memo(function PostOptions() {
       contentRenderer={(props) => (
         <MenuList surface='surfaceContainerLow'>
           <Options
-            note={note}
+            event={event}
             onCopyIdClick={handleCopy(nevent)}
             onCopyAuthorIdClick={handleCopy(user?.nprofile)}
             onCopyLinkClick={handleCopy(link)}
             onDetailsClick={(e) => {
               e.stopPropagation()
               e.preventDefault()
-              setStatsDialog(note.id)
+              setStatsDialog(event.id)
               props.close()
             }}
           />

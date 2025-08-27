@@ -1,5 +1,6 @@
 import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
+import type { NoteState } from '@/hooks/state/useNote'
 import { spacing } from '@/themes/spacing.stylex'
 import { useRouteContext } from '@tanstack/react-router'
 import type { DecodeResult } from 'nostr-tools/nip19'
@@ -8,6 +9,7 @@ import { RepliesLoadMore } from './RepliesLoadMore'
 import { RepliesTree } from './RepliesTree'
 
 type Props = {
+  note: NoteState
   onLoadMoreClick?: () => void
 }
 
@@ -26,8 +28,7 @@ function getPubkey(decoded: DecodeResult | undefined) {
 }
 
 export const RepliesPreview = function RepliesPreview(props: Props) {
-  const { onLoadMoreClick } = props
-  const { note } = useNoteContext()
+  const { note, onLoadMoreClick } = props
   const context = useRouteContext({ strict: false })
 
   const replies = note.getRepliesPreviewUser(getPubkey(context.decoded))

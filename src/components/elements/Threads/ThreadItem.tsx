@@ -54,14 +54,14 @@ export const ThreadItem = memo(function ThreadItem(props: Props) {
             <Stack gap={1}>
               <Stack horizontal={false}>
                 {isCurrentNote ? (
-                  <ReplyContent highlight={false} />
+                  <ReplyContent note={note} highlight={false} />
                 ) : (
                   <ReplyLink nevent={note.nip19}>
-                    <ReplyContent />
+                    <ReplyContent note={note} />
                   </ReplyLink>
                 )}
                 <html.div style={styles.root$actions}>
-                  <PostActions renderOptions onReplyClick={() => note.actions.toggleReplying()} />
+                  <PostActions renderOptions note={note} onReplyClick={() => note.actions.toggleReplying()} />
                 </html.div>
               </Stack>
             </Stack>
@@ -85,6 +85,7 @@ export const ThreadItem = memo(function ThreadItem(props: Props) {
       </ContentProvider>
       {renderReplies && isCurrentNote && (
         <Replies
+          note={note}
           onLoadMoreClick={() => {
             if (note.state.repliesOpen) {
               note.paginate()

@@ -1,3 +1,4 @@
+import type { NoteState } from '@/hooks/state/useNote'
 import { Content } from 'components/elements/Content/Content'
 import type { Node } from 'nostr-editor'
 import type { ReactNode } from 'react'
@@ -8,6 +9,7 @@ import { PostContentWrapper } from '../Posts/PostContentWrapper'
 import { ReplyUserHeader } from './ReplyUserHeader'
 
 type Props = {
+  note: NoteState
   highlight?: boolean
   size?: PostContentWrapperProps['size']
 }
@@ -24,9 +26,9 @@ const NonBubbleNodes = [
 ] as Node['type'][]
 
 export const ReplyContent = memo(function ReplyContent(props: Props) {
-  const { size, highlight } = props
+  const { note, size, highlight } = props
   return (
-    <PostContentWrapper size={size}>
+    <PostContentWrapper note={note} size={size}>
       <Content
         children={(index) => index === 0 && <ReplyUserHeader />}
         wrapper={(node) =>

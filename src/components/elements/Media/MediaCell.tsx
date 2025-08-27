@@ -72,10 +72,10 @@ const MediaCellItem = memo(function MediaCellItem(props: {
 export const MediaCell = memo(function MediaCell(props: Props) {
   const { event } = props
   const imetaList = useImetaList(event)
-  const note = useNoteState(event)
+  useNoteState(event)
   return (
     <>
-      <NoteProvider value={{ event, note }}>
+      <NoteProvider value={{ event }}>
         <ContentProvider value={{ dense: true }}>
           {imetaList.slice(0, 1).map(([type, src]) => (
             <MediaCellItem key={src} type={type} src={src} event={event} />

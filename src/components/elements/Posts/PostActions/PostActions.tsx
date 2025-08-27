@@ -2,6 +2,7 @@ import { useContentContext } from '@/components/providers/ContentProvider'
 import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { SxProps } from '@/components/ui/types'
+import type { NoteState } from '@/hooks/state/useNote'
 import { useMobile } from '@/hooks/useMobile'
 import { memo } from 'react'
 import { css } from 'react-strict-dom'
@@ -13,6 +14,7 @@ import { ButtonRepost } from './PostButtonRepost'
 import { ButtonZap } from './PostButtonZap'
 
 type Props = {
+  note: NoteState
   onReplyClick?: () => void
   renderRelays?: boolean
   renderReply?: boolean
@@ -21,15 +23,14 @@ type Props = {
 }
 
 export const PostActions = memo(function PostActions(props: Props) {
-  const { renderReply = true, renderRelays = true, renderOptions = false, sx } = props
+  const { note, renderReply = true, renderRelays = true, renderOptions = false, sx } = props
   const { dense } = useContentContext()
-  const { note } = useNoteContext()
   const mobile = useMobile()
 
   return (
     <Stack horizontal sx={[styles.root, dense && styles.root$dense, sx]} gap={dense ? 0 : mobile ? 0 : 1}>
-      <ButtonReaction />
-      <ButtonRepost />
+      <ButtonReaction note={note} />
+      <ButtonRepost note={note} />
       {renderReply && (
         <ButtonReply
           value={note.repliesTotal}
@@ -37,8 +38,8 @@ export const PostActions = memo(function PostActions(props: Props) {
           onClick={props.onReplyClick}
         />
       )}
-      <ButtonZap />
-      {renderRelays && <ButtonRelays />}
+      <ButtonZap note={note} />
+      {renderRelays && <ButtonRelays note={note} />}
       {renderOptions && <PostOptions />}
     </Stack>
   )

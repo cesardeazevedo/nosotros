@@ -1,6 +1,5 @@
 import { NoteProvider } from '@/components/providers/NoteProvider'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
-import { useNoteState } from '@/hooks/state/useNote'
 import React, { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 import { NEventInline } from '../../elements/Content/NEvent/NEventInline'
@@ -12,9 +11,8 @@ type Props = {
 
 export const NotificationContent = memo(function NotificationContent(props: Props) {
   const { event } = props
-  const note = useNoteState(event)
   return (
-    <NoteProvider value={{ note, event }}>
+    <NoteProvider value={{ event }}>
       <html.div style={styles.root}>
         {event.metadata?.contentSchema?.content.map((node, index) => (
           <React.Fragment key={node.type + index}>

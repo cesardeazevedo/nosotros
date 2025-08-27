@@ -1,5 +1,5 @@
-import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Fab } from '@/components/ui/Fab/Fab'
+import type { NoteState } from '@/hooks/state/useNote'
 import { palette } from '@/themes/palette.stylex'
 import React, { memo } from 'react'
 import { css, html } from 'react-strict-dom'
@@ -9,6 +9,7 @@ export type Props = {
   size?: 'xs' | 'sm' | 'md'
   initialExpanded?: boolean
   children: React.ReactNode
+  note: NoteState
 }
 
 const sizes = {
@@ -18,8 +19,7 @@ const sizes = {
 }
 
 export const PostContentWrapper = memo(function PostContentWrapper(props: Props) {
-  const { initialExpanded = false, size = 'md' } = props
-  const { note } = useNoteContext()
+  const { note, initialExpanded = false, size = 'md' } = props
   const [ref, bounds] = useMeasure({ debounce: 100 })
   const expanded = initialExpanded || note.state.contentOpen
   const maxHeight = sizes[size]
