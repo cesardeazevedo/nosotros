@@ -12,6 +12,7 @@ import { UserContentAbout } from './UserContentAbout'
 import { UserName } from './UserName'
 import { UserNIP05 } from './UserNIP05'
 import { UserRelays } from './UserRelays'
+import { UserFollowings } from './UserFollowings'
 
 type Props = {
   pubkey: string
@@ -39,8 +40,7 @@ export const UserPopover = function UserPopover(props: Props) {
             <Stack justify='space-between' sx={styles.header}>
               <UserAvatar size='lg' pubkey={pubkey} />
               <Stack gap={0.5}>
-                <UserRelays pubkey={pubkey} />
-                <FollowButton pubkey={pubkey} />
+                <FollowButton value={pubkey} />
               </Stack>
             </Stack>
             <br />
@@ -49,6 +49,11 @@ export const UserPopover = function UserPopover(props: Props) {
                 <UserName pubkey={pubkey} />
                 <UserNIP05 pubkey={pubkey} />
               </Stack>
+              <Stack gap={1} sx={styles.content}>
+                <UserFollowings pubkey={pubkey} />
+                <UserRelays pubkey={pubkey} />
+              </Stack>
+
               <html.span style={styles.scroller}>
                 <UserContentAbout pubkey={pubkey} />
               </html.span>
@@ -63,8 +68,8 @@ export const UserPopover = function UserPopover(props: Props) {
 
 const styles = css.create({
   root: {
-    width: 300,
-    maxHeight: 450,
+    width: 350,
+    maxHeight: 510,
     pointerEvents: 'auto',
   },
   header: {
