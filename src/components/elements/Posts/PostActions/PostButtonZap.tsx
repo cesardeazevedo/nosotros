@@ -1,5 +1,4 @@
 import { useContentContext } from '@/components/providers/ContentProvider'
-import { useNoteContext } from '@/components/providers/NoteProvider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { useZapsByPubkey } from '@/hooks/query/useZaps'
 import type { NoteState } from '@/hooks/state/useNote'

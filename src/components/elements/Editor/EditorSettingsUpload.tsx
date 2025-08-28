@@ -12,12 +12,10 @@ import { spacing } from '@/themes/spacing.stylex'
 import { IconBug, IconChevronDown } from '@tabler/icons-react'
 import { memo, useMemo } from 'react'
 import { css } from 'react-strict-dom'
-import { useEditorSelector } from './hooks/useEditor'
 
 const nip96urls = ['nostr.build', 'nostrcheck.me', 'nostrage.com']
 
 export const EditorSettingsUpload = memo(function EditorSettingsUpload() {
-  const editor = useEditorSelector((editor) => editor.editor)
   const pubkey = useCurrentPubkey()
   const blossomServerList = useUserBlossomServers(pubkey)
   const settings = useSettings()

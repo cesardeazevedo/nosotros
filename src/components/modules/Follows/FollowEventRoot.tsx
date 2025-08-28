@@ -68,7 +68,6 @@ export const FollowEventRoot = (props: Props) => {
     return tags.filter(includeByFilter).toSorted(compareByFollow)
   }, [tags, user, filter, limit])
 
-  const total = tags.length
   const totalUsers = useMemo(() => tags.filter(isAuthorTag).length, [tags])
   const totalTopics = useMemo(() => tags.filter(isTopicTag).length, [tags])
 

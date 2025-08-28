@@ -179,7 +179,7 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
     if (signer && pubkey) {
       try {
         return await signer.sign({ ...event, pubkey })
-      } catch (error) {
+      } catch {
         methods.toggle('isUploading', false)
         return Promise.reject('Signing rejected')
       }

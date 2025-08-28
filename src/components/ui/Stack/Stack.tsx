@@ -1,8 +1,7 @@
-import type { HTMLAttributes } from 'react'
 import React, { forwardRef } from 'react'
 import { css, html } from 'react-strict-dom'
-import type { SxProps } from '../types'
 import type { StrictClickEvent, StrictReactDOMProps } from 'react-strict-dom/dist/types/StrictReactDOMProps'
+import type { SxProps } from '../types'
 
 export type Props = {
   as?: 'div' | 'span' | 'p' | 'header' | 'main' | 'footer' | 'section' | 'article'

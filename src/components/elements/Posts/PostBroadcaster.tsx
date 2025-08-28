@@ -1,7 +1,6 @@
 import { addPublishAtom } from '@/atoms/publish.atoms'
 import { store } from '@/atoms/store'
 import { enqueueToastAtom } from '@/atoms/toaster.atoms'
-import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
