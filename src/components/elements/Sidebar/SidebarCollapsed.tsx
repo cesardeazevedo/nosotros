@@ -18,6 +18,7 @@ import {
   IconListDetails,
   IconPhoto,
   IconPhotoFilled,
+  IconSettings,
   IconUser,
   IconUserFilled,
   IconWorldBolt,
@@ -161,6 +162,13 @@ export const SidebarCollapsed = memo(function SidebarCollapsed(props: Props) {
           onClick={() => context.setPane('/explore/relays')}>
           <IconWorldBolt {...iconProps} />
         </IconButton>
+        <Link to='/settings'>
+          {({ isActive }) => (
+            <IconButton toggle selected={isActive}>
+              <IconSettings {...iconProps} />
+            </IconButton>
+          )}
+        </Link>
         <IconButtonSearch placement='right' sx={styles.iconButton} {...iconProps} />
         <ProfilePopover />
       </Stack>
