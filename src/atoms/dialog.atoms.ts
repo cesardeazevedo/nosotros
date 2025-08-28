@@ -7,7 +7,7 @@ export type DialogImage = { eventId: string; src: string } | false
 export type DialogStats = string | false
 
 export const cameraDialogAtom = atomWithReset(false)
-export const qrcodeDialogAtom = atomWithReset(false)
+export const qrcodeDialogAtom = atomWithReset<string | false>(false)
 export const searchDialogAtom = atomWithReset(false)
 export const createDeckDialogAtom = atomWithReset(false)
 export const statsDialogAtom = atomWithReset<DialogStats>(false)
@@ -18,8 +18,8 @@ export const toggleCameraDialogAtom = atom(null, (get, set, value?: boolean) => 
   set(cameraDialogAtom, value ?? !get(cameraDialogAtom))
 })
 
-export const toggleQRCodeDialogAtom = atom(null, (get, set, value?: boolean) => {
-  set(qrcodeDialogAtom, value ?? !get(qrcodeDialogAtom))
+export const toggleQRCodeDialogAtom = atom(null, (_, set, pubkey: string | false) => {
+  set(qrcodeDialogAtom, pubkey)
 })
 
 export const toggleSearchDialogAtom = atom(null, (get, set, value?: boolean) => {
