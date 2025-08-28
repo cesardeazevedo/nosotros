@@ -1,7 +1,8 @@
+import type { HTMLAttributes } from 'react'
 import React, { forwardRef } from 'react'
 import { css, html } from 'react-strict-dom'
 import type { SxProps } from '../types'
-import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDOMProps'
+import type { StrictClickEvent, StrictReactDOMProps } from 'react-strict-dom/dist/types/StrictReactDOMProps'
 
 export type Props = {
   as?: 'div' | 'span' | 'p' | 'header' | 'main' | 'footer' | 'section' | 'article'
@@ -10,6 +11,7 @@ export type Props = {
   gap?: 0 | 0.5 | 1 | 2 | 3 | 4 | 5
   align?: 'center' | 'flex-start' | 'flex-end' | 'stretch'
   justify?: 'center' | 'flex-start' | 'flex-end' | 'stretch' | 'space-between' | 'space-around' | 'space-evenly'
+  role?: StrictReactDOMProps['role']
   wrap?: boolean
   grow?: boolean
   onClick?: (e: StrictClickEvent) => void
