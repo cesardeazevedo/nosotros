@@ -23,6 +23,7 @@ export const EditorContainer = memo(function EditorContainer(props: Props) {
       justify='space-between'
       gap={renderBubble ? 1 : 2}
       onClick={() => onClick?.()}
+      role='button'
       sx={[styles.root, open && styles.root$open, sx]}>
       <ContentProvider value={{ dense, disableLink: true, disablePopover: true }}>{children}</ContentProvider>
     </Stack>
