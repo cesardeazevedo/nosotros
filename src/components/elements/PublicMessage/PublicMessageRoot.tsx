@@ -15,14 +15,14 @@ export const PublicMessageRoot = (props: Props) => {
   const { event } = props
   const note = useNoteState(event, { repliesOpen: true, forceSync: true })
   return (
-    <NoteProvider value={{ event, note }}>
+    <NoteProvider value={{ event }}>
       <PostHeader event={event} />
-      <PostContent />
-      <PostActions renderReply={false} />
+      <PostContent note={note} />
+      <PostActions renderReply={false} note={note} />
       {note.state.repliesOpen && (
         <>
           <Divider />
-          <Replies />
+          <Replies note={note} />
         </>
       )}
     </NoteProvider>
