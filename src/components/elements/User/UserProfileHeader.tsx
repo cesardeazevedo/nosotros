@@ -1,4 +1,6 @@
+import { toggleQRCodeDialogAtom } from '@/atoms/dialog.atoms'
 import { addMediaErrorAtom, mediaErrorsAtom } from '@/atoms/media.atoms'
+import { enqueueToastAtom } from '@/atoms/toaster.atoms'
 import { FollowButton } from '@/components/modules/Follows/FollowButton'
 import { ContentProvider } from '@/components/providers/ContentProvider'
 import { Divider } from '@/components/ui/Divider/Divider'
@@ -15,15 +17,16 @@ import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { getImgProxyUrl } from '@/utils/imgproxy'
-import { IconAt, IconDotsVertical, IconMessageCircleFilled } from '@tabler/icons-react'
+import { IconBoltFilled, IconCopy, IconDotsVertical, IconQrcode, IconSend, IconShare3 } from '@tabler/icons-react'
 import { useAtomValue, useSetAtom } from 'jotai'
-import { memo } from 'react'
+import { memo, useCallback } from 'react'
 import { css, html } from 'react-strict-dom'
 import { ContentLink } from '../Content/Link/Link'
 import { LinkBase } from '../Links/LinkBase'
 import { UserAvatar } from './UserAvatar'
 import { UserContentAbout } from './UserContentAbout'
 import { UserFollowings } from './UserFollowings'
+import { UserNIP05 } from './UserNIP05'
 import { UserRelays } from './UserRelays'
 
 type Props = {
@@ -47,8 +50,20 @@ export const UserProfileHeader = memo(function UserProfileHeader(props: Props) {
   const user = useUserState(pubkey, { syncFollows: true })
   const currentPubkey = useCurrentPubkey()
   const doesFollowCurrentUser = user.followsTag(currentPubkey)
-  const { banner, nip05 } = user?.metadata || {}
+  const { banner, nip05, lud16 } = user?.metadata || {}
   const hasError = useAtomValue(mediaErrorsAtom).has(banner || '')
+  const toggleQRCodeDialog = useSetAtom(toggleQRCodeDialogAtom)
+  const enqueueToast = useSetAtom(enqueueToastAtom)
+  const handleCopy = useCallback((value: string | undefined) => {
+    if (value) {
+      const type = 'text/plain'
+      const blob = new Blob([value], { type })
+      window.navigator.clipboard.write([new ClipboardItem({ [type]: blob })]).then(() => {
+        enqueueToast({ component: 'Copied', duration: 4000 })
+      })
+    }
+  }, [])
+
   return (
     <>
       <html.div style={styles.header}>
@@ -75,12 +90,11 @@ export const UserProfileHeader = memo(function UserProfileHeader(props: Props) {
                 </Text>
               )}
             </Stack>
-            {nip05 && (
+            {nip05 && <UserNIP05 variant='label' size='lg' pubkey={pubkey} />}
+            {lud16 && (
               <Stack>
-                <IconAt size={14} />
-                <Text variant='label' size='lg'>
-                  {nip05.replace(/^_@/, '')}
-                </Text>
+                <IconBoltFilled size={12} strokeWidth='1.8' />
+                {lud16}
               </Stack>
             )}
           </Stack>
@@ -94,10 +108,29 @@ export const UserProfileHeader = memo(function UserProfileHeader(props: Props) {
         <Stack sx={styles.follow} gap={0.5}>
           <Popover
             placement='bottom-end'
-            contentRenderer={() => (
+            contentRenderer={({ close }) => (
               <MenuList surface='surfaceContainerLow'>
+                <MenuItem
+                  size='sm'
+                  leadingIcon={<IconCopy size={18} />}
+                  onClick={() => {
+                    close()
+                    handleCopy(user.nprofile)
+                  }}
+                  label='Copy User ID'
+                />
+                <MenuItem
+                  size='sm'
+                  leadingIcon={<IconQrcode size={18} />}
+                  onClick={() => {
+                    close()
+                    toggleQRCodeDialog(pubkey)
+                  }}
+                  label='Show QR Code'
+                />
+                <Divider />
                 <LinkBase search={{ compose_kind: Kind.PublicMessage, compose: true, pubkey }}>
-                  <MenuItem interactive leadingIcon={<IconMessageCircleFilled />} label='Send Public Message' />
+                  <MenuItem size='sm' interactive leadingIcon={<IconSend size={18} />} label='Send Public Message' />
                 </LinkBase>
               </MenuList>
             )}>

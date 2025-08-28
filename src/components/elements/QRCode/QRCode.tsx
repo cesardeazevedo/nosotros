@@ -57,9 +57,6 @@ export const QRCode = memo(function QRCode(props: Props) {
         ) : (
           <Skeleton variant='rectangular' animation='wave' sx={styles.loading} />
         )}
-        <Text variant='title' size='lg'>
-          Follow me on Nostr
-        </Text>
         <Text size='lg' sx={styles.npub}>
           {nprofile}
         </Text>
