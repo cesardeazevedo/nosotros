@@ -29,8 +29,9 @@ export const NostrEventRoot = memo(function NostrEventRoot(props: Props) {
       return <FollowEventRoot event={event} />
     }
     case Kind.PublicMessage:
-    case Kind.Article: {
       return <PublicMessageRoot event={event} />
+    case Kind.Article: {
+      return <PostRoot event={event} open={open} />
     }
     case Kind.Repost: {
       return <RepostRoot event={event} />
