@@ -21,14 +21,14 @@ type Props = {
 
 export const Video = memo(function Video(props: Props) {
   const { src, controls = true, muted = false, loop = false, preload = 'metadata', sx } = props
-  const { note } = useNoteContext()
+  const { event } = useNoteContext()
   const ref = useRef<HTMLVideoElement>(null)
   const extension = useMemo(() => new URL(src).pathname.split('.').pop(), [src])
 
   const setVideo = useSetAtom(setCurrentVideoAtom)
   const removeVideo = useSetAtom(removeCurrentVideoAtom)
   const currentVideo = useAtomValue(currentVideoAtom)
-  const media = useMediaStore(src, note.metadata?.imeta)
+  const media = useMediaStore(src, event.metadata?.imeta)
   const settings = useSettings()
   const autoPlay = props.autoPlay ?? settings.autoPlay
 

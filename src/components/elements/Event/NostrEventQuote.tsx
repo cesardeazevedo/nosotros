@@ -1,4 +1,5 @@
 import { ArticleRoot } from '@/components/modules/Articles/ArticleRoot'
+import { FollowEventRoot } from '@/components/modules/Follows/FollowEventRoot'
 import { Kind } from '@/constants/kinds'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { memo } from 'react'
@@ -18,6 +19,9 @@ export const NostrEventQuote = memo(function NostrEventQuote(props: Props) {
     }
     case Kind.Text: {
       return <PostQuote event={event} />
+    }
+    case Kind.Follows: {
+      return <FollowEventRoot event={event} />
     }
     case Kind.Comment: {
       return <PostQuote event={event} />

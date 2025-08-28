@@ -12,11 +12,11 @@ type Props = {
 
 export const Paragraph = (props: Props) => {
   const { node } = props
-  const { note } = useNoteContext()
+  const { event } = useNoteContext()
   const { dense } = useContentContext()
   return (
     <TextContent
-      shrinkLink={note.event.kind !== Kind.Article}
+      shrinkLink={event.kind !== Kind.Article}
       node={node}
       sx={[styles.container, dense && styles.container$dense]}
     />

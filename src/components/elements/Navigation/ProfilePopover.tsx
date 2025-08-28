@@ -23,7 +23,7 @@ export const ProfilePopover = memo(function ProfilePopover() {
   const user = useCurrentUser()
   const pubkey = useCurrentPubkey()
   const addError = useSetAtom(addMediaErrorAtom)
-  const toggleQRCode = useSetAtom(toggleQRCodeDialogAtom)
+  const openQRCode = useSetAtom(toggleQRCodeDialogAtom)
   const banner = user?.metadata?.banner
   const hasError = useAtomValue(mediaErrorsAtom).has(banner || '')
   return (
@@ -47,7 +47,9 @@ export const ProfilePopover = memo(function ProfilePopover() {
               <Tooltip cursor='arrow' placement='bottom' text='Use the QR Code to scan your npub on your mobile device'>
                 <IconButton
                   onClick={() => {
-                    toggleQRCode()
+                    if (pubkey) {
+                      openQRCode(pubkey)
+                    }
                     props.close()
                   }}
                   icon={<IconQrcode strokeWidth='1.5' />}

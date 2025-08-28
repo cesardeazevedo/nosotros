@@ -1,5 +1,6 @@
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
+import { typeScale } from '@/themes/typeScale.stylex'
 import type { BlockQuoteNode } from 'nostr-editor'
 import React from 'react'
 import { css, html } from 'react-strict-dom'
@@ -25,12 +26,15 @@ const styles = css.create({
   root: {
     marginLeft: spacing.margin2,
     marginBlock: spacing.margin2,
+    paddingBlock: spacing.padding1,
     paddingLeft: spacing.padding1,
     paddingRight: spacing.padding4,
-    borderLeft: '6px solid',
-    borderLeftColor: palette.surfaceContainerHighest,
+    borderLeft: '5px solid',
+    borderLeftColor: palette.outlineVariant,
+    backgroundColor: palette.surfaceContainerLow,
+    lineHeight: typeScale.labelLineHeight$sm,
     fontStyle: 'italic',
     color: palette.onSurfaceVariant,
-    opacity: 0.6,
+    opacity: 1,
   },
 })

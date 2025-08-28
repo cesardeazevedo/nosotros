@@ -12,11 +12,10 @@ import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 
 export const ArticleHeadline = memo(function ArticleHeadline() {
-  const { note } = useNoteContext()
+  const { event } = useNoteContext()
   const match = useMatchRoute()
   const isDeck = match({ to: '/deck/$id' })
   const isMobile = useMobile()
-  const { event } = note
   const title = useEventTag(event, 'title')
   const image = useEventTag(event, 'image')
   const summary = useEventTag(event, 'summary')

@@ -16,7 +16,6 @@ import { SidebarTransition } from './SidebarTransition'
 import { SidebarPaneLists } from './panes/SidebarPaneLists'
 import { SidebarPaneNotifications } from './panes/SidebarPaneNotifications'
 import { SidebarPaneRelayDiscovery } from './panes/SidebarPaneRelayDiscovery'
-import { Fab } from '@/components/ui/Fab/Fab'
 
 type Props = {
   children: React.ReactNode

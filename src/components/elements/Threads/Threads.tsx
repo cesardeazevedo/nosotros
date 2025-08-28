@@ -39,7 +39,7 @@ export const Threads = memo(function RepliesThread(props: Props) {
   const root = useRootEvent(event)
 
   return (
-    <NoteProvider value={{ note, event }}>
+    <NoteProvider value={{ event }}>
       {level < maxLevel ? (
         <>
           {!note.metadata?.isRoot ? (
@@ -55,7 +55,7 @@ export const Threads = memo(function RepliesThread(props: Props) {
 
           {renderRepliesSummary && note.repliesTotal > 0 && level === 0 && (
             <html.div style={styles.footer}>
-              <ThreadRepliesSummary />
+              <ThreadRepliesSummary note={note} />
             </html.div>
           )}
         </>
@@ -74,11 +74,11 @@ const ThreadRootLoader = memo(function RepliesThreadRoot(props: Pick<Props, 'eve
   const { event, renderEditor } = props
   const note = useNoteState(event, { repliesOpen: false, forceSync: true })
   return (
-    <NoteProvider value={{ note, event }}>
+    <NoteProvider value={{ event }}>
       <ThreadRoot note={note} renderEditor={renderEditor} />
       <Stack sx={styles.thread} gap={0.5}>
         <IconThread />
-        <ThreadRepliesSummary />
+        <ThreadRepliesSummary note={note} />
       </Stack>
     </NoteProvider>
   )

@@ -1,19 +1,20 @@
 import { useContentContext } from '@/components/providers/ContentProvider'
-import { useNoteContext } from '@/components/providers/NoteProvider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { useZapsByPubkey } from '@/hooks/query/useZaps'
+import type { NoteState } from '@/hooks/state/useNote'
 import { useCurrentPubkey } from '@/hooks/useAuth'
 import { useCurrentTheme } from '@/hooks/useTheme'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconBolt } from '@tabler/icons-react'
 import { useRouter } from '@tanstack/react-router'
+import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 import { LinkBase } from '../../Links/LinkBase'
 import { ButtonContainer, type ContainerProps } from './PostButtonContainer'
 import { iconProps } from './utils'
-import { memo } from 'react'
 
 type Props = {
+  note: NoteState
   onClick?: () => void
 }
 
@@ -41,8 +42,7 @@ function getZapColor(zapAmount: number, palette: (typeof themes)['light'] | (typ
 const formatter = new Intl.NumberFormat()
 
 export const ButtonZap = memo(function ButtonZap(props: Props & ContainerProps) {
-  const { onClick, ...rest } = props
-  const { note } = useNoteContext()
+  const { note, onClick, ...rest } = props
   const { dense, disableLink } = useContentContext()
   const router = useRouter()
   const pubkey = useCurrentPubkey()

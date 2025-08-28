@@ -3,6 +3,7 @@ import { EditorContent as TiptapEditorContent } from '@tiptap/react'
 import { memo, useId } from 'react'
 import { css } from 'react-strict-dom'
 import { useEditorSelector } from './hooks/useEditor'
+import { useMobile } from '@/hooks/useMobile'
 
 type Props = {
   dense?: boolean
@@ -10,6 +11,7 @@ type Props = {
 
 export const EditorTiptap = memo(function EditorTiptap(props: Props) {
   const { dense } = props
+  const mobile = useMobile()
   const id = useId()
   const open = useEditorSelector((editor) => editor.open)
   const editor = useEditorSelector((editor) => editor.editor)
@@ -18,7 +20,12 @@ export const EditorTiptap = memo(function EditorTiptap(props: Props) {
     <TiptapEditorContent
       id={id}
       editor={editor}
-      {...css.props([styles.root, dense && styles.root$dense, !open && styles.root$disabled])}
+      {...css.props([
+        styles.root,
+        mobile && styles.root$mobile,
+        dense && styles.root$dense,
+        !open && styles.root$disabled,
+      ])}
     />
   )
 })
@@ -33,8 +40,11 @@ const styles = css.create({
     paddingTop: spacing.padding1,
     paddingBottom: spacing.padding1,
     paddingRight: spacing.padding2,
-    maxHeight: 700,
+    maxHeight: 'calc(100vh - 400px)',
     overflowY: 'auto',
+  },
+  root$mobile: {
+    maxHeight: 'calc(100vh - 280px)',
   },
   root$disabled: {
     minHeight: 40,

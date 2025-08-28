@@ -14,8 +14,8 @@ import { LinkNEvent } from '../Links/LinkNEvent'
 
 export const ReplyHeader = memo(function ReplyHeader() {
   const { dense } = useContentContext()
-  const { note } = useNoteContext()
-  const parent = useParentEvent(note.event)
+  const { event } = useNoteContext()
+  const parent = useParentEvent(event)
   const parentUser = useUserMetadata(parent.data?.pubkey)
   const nevent = useNevent(parent.data)
   return (

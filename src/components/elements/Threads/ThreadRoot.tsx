@@ -27,9 +27,14 @@ export const ThreadRoot = memo(function ThreadRoot(props: Props) {
           <PostHeader event={note.event} renderOptions={false} />
           <Stack horizontal={false} sx={styles.rootWrapper}>
             <ReplyLink nevent={note.nip19}>
-              <PostContent />
+              <PostContent note={note} />
             </ReplyLink>
-            <PostActions renderOptions onReplyClick={() => note.actions.toggleReplying()} sx={styles.actions} />
+            <PostActions
+              note={note}
+              renderOptions
+              onReplyClick={() => note.actions.toggleReplying()}
+              sx={styles.actions}
+            />
           </Stack>
           {renderEditor && (
             <html.div style={styles.editor}>

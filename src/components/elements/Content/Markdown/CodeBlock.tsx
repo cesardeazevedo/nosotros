@@ -1,3 +1,4 @@
+import { useContentContext } from '@/components/providers/ContentProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { SxProps } from '@/components/ui/types'
 import { useIsDarkTheme } from '@/hooks/useTheme'
@@ -16,6 +17,7 @@ type Props = {
 }
 
 export const CodeBlock = (props: Props) => {
+  const { dense } = useContentContext()
   const refPre = useRef<HTMLDivElement | null>(null)
   const isDark = useIsDarkTheme()
 
@@ -24,7 +26,7 @@ export const CodeBlock = (props: Props) => {
   const code = node.type === 'codeBlock' && node.content[0].type === 'text' ? node.content[0].text.toString() : ''
 
   return (
-    <html.div style={[styles.root, props.sx]}>
+    <html.div style={[styles.root, dense && styles.root$dense, props.sx]}>
       <html.div style={styles.code} ref={refPre}>
         <Stack justify='space-between' sx={styles.header}>
           <div>{language}</div>
@@ -34,6 +36,7 @@ export const CodeBlock = (props: Props) => {
           language={language}
           showLanguage={false}
           addDefaultStyles={false}
+          className={css.props(styles.pre).className}
           theme={isDark ? 'github-dark-high-contrast' : 'github-light-default'}>
           {code}
         </ShikiHighlighter>
@@ -44,8 +47,13 @@ export const CodeBlock = (props: Props) => {
 
 const styles = css.create({
   root: {
-    padding: spacing.padding2,
-    paddingRight: spacing.padding4,
+    maxWidth: 'max-content',
+    paddingBlock: spacing.padding2,
+    paddingInline: spacing.padding2,
+    overflow: 'auto',
+  },
+  root$dense: {
+    paddingInline: 0,
   },
   code: {
     position: 'relative',
@@ -53,6 +61,10 @@ const styles = css.create({
     borderColor: palette.outlineVariant,
     borderRadius: shape.lg,
     overflow: 'hidden',
+  },
+  pre: {
+    wordBreak: 'break-all',
+    whiteSpace: 'normal',
   },
   header: {
     zIndex: 1,

@@ -1,15 +1,19 @@
-import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Button } from '@/components/ui/Button/Button'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { useRepliesPubkeys } from '@/hooks/query/useReplies'
+import type { NoteState } from '@/hooks/state/useNote'
 import { spacing } from '@/themes/spacing.stylex'
 import { memo } from 'react'
 import { css } from 'react-strict-dom'
 import { LinkNEvent } from '../Links/LinkNEvent'
 import { UsersAvatars } from '../User/UsersAvatars'
 
-export const ThreadRepliesSummary = memo(function ThreadRepliesSummary() {
-  const { note } = useNoteContext()
+type Props = {
+  note: NoteState
+}
+
+export const ThreadRepliesSummary = memo(function ThreadRepliesSummary(props: Props) {
+  const { note } = props
   const pubkeys = useRepliesPubkeys(note)
   const total = note.repliesTotal || ''
 

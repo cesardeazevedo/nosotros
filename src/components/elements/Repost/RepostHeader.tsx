@@ -35,7 +35,7 @@ export const RepostHeader = memo(function RepostHeader(props: Props) {
         {data && (
           <PostUserHeader
             dense
-            event={event}
+            event={data}
             align='center'
             sx={styles.bottom}
             userAvatarProps={{ sx: styles.avatar }}

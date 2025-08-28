@@ -49,14 +49,14 @@ function adjustDimensions(
 
 export const MediaWrapper = memo(function MediaWrapper(props: Props) {
   const { src, size = 'md', children } = props
-  const { note } = useNoteContext()
+  const { event } = useNoteContext()
   const { dense } = useContentContext()
-  const dim = note.metadata?.imeta?.[src]?.dim
+  const dim = event.metadata?.imeta?.[src]?.dim
   const dims = useAtomValue(mediaDimsAtom)
   const width = dims.get(src)?.[0] || dim?.width
   const height = dims.get(src)?.[1] || dim?.height
   const adjusted =
-    width && height && note.event.kind === Kind.Media
+    width && height && event.kind === Kind.Media
       ? adjustDimensions(width, height, MAX_BOUNDS[size].maxWidth, MAX_BOUNDS[size].maxWidth)
       : null
 

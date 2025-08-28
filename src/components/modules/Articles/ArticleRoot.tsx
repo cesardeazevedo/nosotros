@@ -34,7 +34,7 @@ export const ArticleRoot = memo(function ArticleRoot(props: Props) {
   const publishedAt = parseInt(useEventTag(event, 'published_at') || event.created_at.toString())
   return (
     <Stack horizontal={false} sx={[styles.root, props.border && styles.root$border]} ref={note.ref}>
-      <NoteProvider value={{ event, note }}>
+      <NoteProvider value={{ event }}>
         <LinkNAddress naddress={note.nip19 as NAddr}>
           <ContentProvider value={{ dense, disableLink: true }}>
             <Stack sx={styles.wrapper} align='center' gap={2}>
@@ -52,7 +52,7 @@ export const ArticleRoot = memo(function ArticleRoot(props: Props) {
                     </Text>
                   )}
                 </Stack>
-                {dense && <PostActions />}
+                {dense && <PostActions note={note} />}
               </Stack>
               {image && (
                 <html.img
@@ -65,7 +65,7 @@ export const ArticleRoot = memo(function ArticleRoot(props: Props) {
             </Stack>
           </ContentProvider>
         </LinkNAddress>
-        {!dense && <PostActions />}
+        {!dense && <PostActions note={note} />}
       </NoteProvider>
     </Stack>
   )

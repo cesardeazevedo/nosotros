@@ -1,7 +1,7 @@
 import { useContentContext } from '@/components/providers/ContentProvider'
-import { useNoteContext } from '@/components/providers/NoteProvider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { useRepostsByPubkey } from '@/hooks/query/useReposts'
+import type { NoteState } from '@/hooks/state/useNote'
 import { useCurrentPubkey } from '@/hooks/useAuth'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconShare3 } from '@tabler/icons-react'
@@ -10,9 +10,13 @@ import { RepostPopover } from '../../Repost/RepostPopover'
 import { ButtonContainer } from './PostButtonContainer'
 import { iconProps } from './utils'
 
-export const ButtonRepost = memo(function ButtonRepost() {
+type Props = {
+  note: NoteState
+}
+
+export const ButtonRepost = memo(function ButtonRepost(props: Props) {
+  const { note } = props
   const { dense } = useContentContext()
-  const { note } = useNoteContext()
   const pubkey = useCurrentPubkey()
   const reposted = useRepostsByPubkey(pubkey, note.event)
 

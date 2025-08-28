@@ -1,9 +1,9 @@
 import { enqueueToastAtom } from '@/atoms/toaster.atoms'
 import { useContentContext } from '@/components/providers/ContentProvider'
-import { useNoteContext } from '@/components/providers/NoteProvider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { usePublishEventMutation } from '@/hooks/mutations/usePublishEventMutation'
 import { useReactionByPubkey } from '@/hooks/query/useReactions'
+import type { NoteState } from '@/hooks/state/useNote'
 import { useCurrentPubkey } from '@/hooks/useAuth'
 import { useMobile } from '@/hooks/useMobile'
 import { publishReaction } from '@/nostr/publish/publishReaction'
@@ -33,9 +33,13 @@ const emojiColors: Record<string, string> = {
   '😡': colors.orange7,
 }
 
-export const ButtonReaction = memo(function ButtonReaction() {
+type Props = {
+  note: NoteState
+}
+
+export const ButtonReaction = memo(function ButtonReaction(props: Props) {
   const [mobileOpen, setMobileOpen] = useState(false)
-  const { note } = useNoteContext()
+  const { note } = props
   const { dense } = useContentContext()
   const enqueueToast = useSetAtom(enqueueToastAtom)
   const pubkey = useCurrentPubkey()

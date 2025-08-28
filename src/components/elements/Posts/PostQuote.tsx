@@ -23,12 +23,12 @@ export const PostQuote = memo(function PostQuote(props: Props) {
   const nevent = useNevent(event)
   return (
     <LinkNEvent nevent={nevent}>
-      <NoteProvider value={{ event, note }}>
+      <NoteProvider value={{ event }}>
         <ContentProvider value={{ blured, dense: true, disableLink: true }}>
           <html.div style={styles.root}>
             {header || <PostUserHeader dense sx={styles.header} event={event} />}
-            <PostContent initialExpanded />
-            <PostActions sx={styles.actions} />
+            <PostContent initialExpanded note={note} />
+            <PostActions note={note} sx={styles.actions} />
           </html.div>
         </ContentProvider>
       </NoteProvider>

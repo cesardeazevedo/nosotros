@@ -1,5 +1,5 @@
-import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
+import type { NoteState } from '@/hooks/state/useNote'
 import { useMobile } from '@/hooks/useMobile'
 import { spacing } from '@/themes/spacing.stylex'
 import { memo, useCallback } from 'react'
@@ -8,12 +8,13 @@ import { RepliesLoadMore } from './RepliesLoadMore'
 import { RepliesTree } from './RepliesTree'
 
 type Props = {
+  note: NoteState
   onLoadMoreClick?: () => void
 }
 
 export const Replies = memo(function Replies(props: Props) {
   const isMobile = useMobile()
-  const { note } = useNoteContext()
+  const { note } = props
 
   const replies = note.repliesChunk
 

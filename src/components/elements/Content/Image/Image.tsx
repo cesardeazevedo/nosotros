@@ -27,7 +27,7 @@ type Props = {
 export const Image = memo(function Image(props: Props) {
   const { src, proxy = true, sx, onClick, ...rest } = props
   const { disableLink } = useContentContext()
-  const { note } = useNoteContext()
+  const { event } = useNoteContext()
   const pushImage = useSetAtom(openImageDialogAtom)
   const hasError = useAtomValue(mediaErrorsAtom).has(src)
   const addError = useSetAtom(addMediaErrorAtom)
@@ -36,11 +36,11 @@ export const Image = memo(function Image(props: Props) {
     (e: StrictClickEvent) => {
       e.preventDefault()
       e.stopPropagation()
-      if (!hasError && note) {
-        return onClick ? onClick() : pushImage({ eventId: note.id, src })
+      if (!hasError && event) {
+        return onClick ? onClick() : pushImage({ eventId: event.id, src })
       }
     },
-    [src, note, disableLink, hasError, pushImage],
+    [src, event, disableLink, hasError, pushImage],
   )
 
   return (

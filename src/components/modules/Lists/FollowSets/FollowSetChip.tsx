@@ -52,7 +52,7 @@ export const FollowSetChip = memo(function FollowSetChip(props: Props) {
                   Edit
                 </Button>
               )}
-              <FollowBulkButton pubkeys={pubkeys} />
+              <FollowBulkButton values={pubkeys} />
             </Stack>
           </Stack>
           <Stack horizontal={false} align='stretch' gap={0.5} sx={styles.maxHeight}>
@@ -61,7 +61,7 @@ export const FollowSetChip = memo(function FollowSetChip(props: Props) {
                 <Stack sx={styles.userHeader}>
                   <UserHeader grow key={pubkey} pubkey={pubkey} userAvatarProps={{ size: 'sm' }} />
                 </Stack>
-                <FollowButton pubkey={pubkey} sx={styles.followButton} />
+                <FollowButton value={pubkey} sx={styles.followButton} />
               </Stack>
             ))}
           </Stack>

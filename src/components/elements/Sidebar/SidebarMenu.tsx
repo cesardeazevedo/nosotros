@@ -1,6 +1,5 @@
 import { NotificationBadge } from '@/components/modules/Notifications/NotificationBadge'
 import { Divider } from '@/components/ui/Divider/Divider'
-import { Fab } from '@/components/ui/Fab/Fab'
 import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
@@ -68,7 +67,7 @@ export const SidebarMenu = memo(function SidebarMenu() {
                 label={
                   <>
                     Following{' '}
-                    {user?.totalFollows ? <Text size='md' sx={styles.gray}>{`(${user.totalFollows})`}</Text> : ''}
+                    {user?.totalFollowing ? <Text size='md' sx={styles.gray}>{`(${user.totalFollowing})`}</Text> : ''}
                   </>
                 }
               />

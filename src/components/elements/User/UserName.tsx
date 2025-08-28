@@ -57,7 +57,7 @@ export const UserName = memo(function UserName(props: Props) {
           </Text>
         </LinkProfile>
       </UserPopover>
-      {currentUser?.followsPubkey(user?.pubkey) && (
+      {currentUser?.followsTag(user?.pubkey) && (
         <IconUserCheck size={14} strokeWidth='2.2' {...css.props(styles.followingIndicator)} />
       )}
       {children}

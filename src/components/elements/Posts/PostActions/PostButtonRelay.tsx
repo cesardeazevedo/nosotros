@@ -1,7 +1,7 @@
 import { useContentContext } from '@/components/providers/ContentProvider'
-import { useNoteContext } from '@/components/providers/NoteProvider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
+import type { NoteState } from '@/hooks/state/useNote'
 import { IconServerBolt } from '@tabler/icons-react'
 import { useMobile } from 'hooks/useMobile'
 import { memo, useCallback } from 'react'
@@ -9,9 +9,13 @@ import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDO
 import { ButtonContainer } from './PostButtonContainer'
 import { iconProps } from './utils'
 
-export const ButtonRelays = memo(function ButtonRelays() {
+type Props = {
+  note: NoteState
+}
+
+export const ButtonRelays = memo(function ButtonRelays(props: Props) {
+  const { note } = props
   const { dense } = useContentContext()
-  const { note } = useNoteContext()
   const isMobile = useMobile()
 
   const handleClick = useCallback(

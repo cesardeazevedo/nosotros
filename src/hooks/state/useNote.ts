@@ -113,7 +113,7 @@ export function useNoteState(event: NostrEventDB, options?: NoteOptions) {
         const isMutedAuthor = currentUser?.mutedAuthors?.has(reply.pubkey)
         return !isMutedEvent && !isMutedAuthor
       })
-      .sort((a) => (currentUser?.followsPubkey(a.pubkey) ? -1 : 1))
+      .sort((a) => (currentUser?.followsTag(a.pubkey) ? -1 : 1))
       .sort((a) => (a.pubkey === currentUser?.pubkey ? -1 : 1))
   }, [replies.data])
 
@@ -129,7 +129,7 @@ export function useNoteState(event: NostrEventDB, options?: NoteOptions) {
   const repliesChunk = useMemo(() => repliesSorted.slice(0, limit), [repliesSorted, limit])
 
   const repliesPreview = useMemo(() => {
-    return replies.data?.filter((event) => currentUser?.followsPubkey(event.pubkey)).slice(0, 2) || []
+    return replies.data?.filter((event) => currentUser?.followsTag(event.pubkey)).slice(0, 2) || []
   }, [replies.data])
 
   // Get preview replies from a single user

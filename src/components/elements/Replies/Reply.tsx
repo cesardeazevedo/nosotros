@@ -116,7 +116,7 @@ export const Reply = memo(function Reply(props: Props) {
   const handleSeeMore = level < collapsedLevel ? handleOpen : handleOpenNestedDialog
 
   return (
-    <NoteProvider value={{ event, note }}>
+    <NoteProvider value={{ event }}>
       <ContentProvider value={{ blured, dense: true }}>
         <html.div
           ref={rootRef}
@@ -148,12 +148,12 @@ export const Reply = memo(function Reply(props: Props) {
                   <UserAvatar pubkey={event.pubkey} />
                 </html.div>
                 <ReplyLink nevent={nevent}>
-                  <ReplyContent />
+                  <ReplyContent note={note} />
                 </ReplyLink>
               </Stack>
               <html.div style={styles.actions}>
                 <Stack>
-                  <PostActions renderOptions onReplyClick={() => note.actions.toggleReplying()} />
+                  <PostActions renderOptions note={note} onReplyClick={() => note.actions.toggleReplying()} />
                 </Stack>
                 <Expandable expanded={note.state.isReplying} trigger={() => <></>}>
                   {note.state.isReplying && (
