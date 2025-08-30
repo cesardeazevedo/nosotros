@@ -1,12 +1,14 @@
 import { ContentProvider } from '@/components/providers/ContentProvider'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { Stack } from '@/components/ui/Stack/Stack'
+import { Kind } from '@/constants/kinds'
 import type { NoteState } from '@/hooks/state/useNote'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 import { EditorProvider } from '../Editor/EditorProvider'
+import { NostrEventUnsupported } from '../Event/NostrEventUnsupported'
 import { PostActions } from '../Posts/PostActions/PostActions'
 import { PostContent } from '../Posts/PostContent'
 import { PostHeader } from '../Posts/PostHeader'
@@ -25,23 +27,29 @@ export const ThreadRoot = memo(function ThreadRoot(props: Props) {
         <html.div style={styles.thread} />
         <Stack horizontal={false} grow>
           <PostHeader event={note.event} renderOptions={false} />
-          <Stack horizontal={false} sx={styles.rootWrapper}>
-            <ReplyLink nevent={note.nip19}>
-              <PostContent note={note} />
-            </ReplyLink>
-            <PostActions
-              note={note}
-              renderOptions
-              onReplyClick={() => note.actions.toggleReplying()}
-              sx={styles.actions}
-            />
-          </Stack>
-          {renderEditor && (
-            <html.div style={styles.editor}>
-              <Expandable expanded={note.state.isReplying || false} trigger={() => <></>}>
-                <EditorProvider renderBubble initialOpen parent={note.event} />
-              </Expandable>
-            </html.div>
+          {![Kind.Text, Kind.Comment, Kind.Article].includes(note.event.kind) ? (
+            <NostrEventUnsupported sx={styles.unsupported} event={note.event} />
+          ) : (
+            <>
+              <Stack horizontal={false} sx={styles.rootWrapper}>
+                <ReplyLink nevent={note.nip19}>
+                  <PostContent note={note} />
+                </ReplyLink>
+                <PostActions
+                  note={note}
+                  renderOptions
+                  onReplyClick={() => note.actions.toggleReplying()}
+                  sx={styles.actions}
+                />
+              </Stack>
+              {renderEditor && (
+                <html.div style={styles.editor}>
+                  <Expandable expanded={note.state.isReplying || false} trigger={() => <></>}>
+                    <EditorProvider renderBubble initialOpen parent={note.event} />
+                  </Expandable>
+                </html.div>
+              )}
+            </>
           )}
         </Stack>
       </Stack>
@@ -81,6 +89,9 @@ const styles = css.create({
       display: 'inline-block',
       backgroundColor: palette.outlineVariant,
     },
+  },
+  unsupported: {
+    marginLeft: spacing.margin6,
   },
   editor: {
     position: 'relative',
