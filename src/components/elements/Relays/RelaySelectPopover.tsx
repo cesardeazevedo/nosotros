@@ -5,11 +5,11 @@ import { PopoverBase } from '@/components/ui/Popover/PopoverBase'
 import { SearchField } from '@/components/ui/Search/Search'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
+import { normalizeRelayUrl } from '@/core/helpers/formatRelayUrl'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconPlus } from '@tabler/icons-react'
-import type { BaseSyntheticEvent } from 'react'
-import React, { useCallback, useState } from 'react'
+import React, { useActionState, useState } from 'react'
 import { css } from 'react-strict-dom'
 
 type Props = {
@@ -21,60 +21,49 @@ type Props = {
 export const RelaySelectPopover = (props: Props) => {
   const { label = 'Add Relay', icon, onSubmit } = props
   const [open, setOpen] = useState(false)
-  const [query, setQuery] = useState('')
-  const [error, setError] = useState('')
-
-  const handleChange = useCallback((e: BaseSyntheticEvent) => {
-    setError('')
-    setQuery(e.target.value)
-  }, [])
-
-  const handleSubmit = useCallback(() => {
+  const [error, submit] = useActionState((_: string | null, formData: FormData) => {
+    const value = formData.get('relay')?.toString().trim() || ''
+    const normalized = normalizeRelayUrl(value)
     try {
-      const url = new URL(query)
+      const url = new URL(normalized)
       onSubmit(url.href)
       setOpen(false)
-    } catch (error) {
-      console.log('error', error)
-      setError('Invalid url')
+    } catch {
+      return 'Enter a valid ws:// or wss:// URL'
     }
-  }, [query])
+
+    return null
+  }, null)
 
   return (
-    <>
-      <PopoverBase
-        opened={open}
-        onClose={() => setOpen(false)}
-        placement='bottom-start'
-        contentRenderer={() => (
-          <Paper elevation={2} surface='surfaceContainerLow' sx={styles.paper}>
+    <PopoverBase
+      opened={open}
+      onClose={() => setOpen(false)}
+      placement='bottom-start'
+      contentRenderer={() => (
+        <Paper elevation={2} surface='surfaceContainerLow' sx={styles.paper}>
+          <form action={submit}>
             <Stack gap={0.5}>
-              <SearchField
-                sx={styles.search}
-                leading={false}
-                placeholder='wss://'
-                onChange={handleChange}
-                onCancel={() => setQuery('')}
-              />
-              <Button variant='filled' onClick={handleSubmit}>
+              <SearchField sx={styles.search} leading={false} placeholder='wss://' name='relay' />
+              <Button variant='filled' type='submit'>
                 Add
               </Button>
             </Stack>
             {error && <Text sx={styles.error}>{error}</Text>}
-          </Paper>
-        )}>
-        {({ setRef, getProps }) => (
-          <Chip
-            ref={setRef}
-            {...getProps()}
-            onClick={() => setOpen(true)}
-            variant='input'
-            label={label}
-            icon={icon || <IconPlus strokeWidth='1.5' size={18} />}
-          />
-        )}
-      </PopoverBase>
-    </>
+          </form>
+        </Paper>
+      )}>
+      {({ setRef, getProps }) => (
+        <Chip
+          ref={setRef}
+          {...getProps()}
+          onClick={() => setOpen(true)}
+          variant='input'
+          label={label}
+          icon={icon || <IconPlus strokeWidth='1.5' size={18} />}
+        />
+      )}
+    </PopoverBase>
   )
 }
 
