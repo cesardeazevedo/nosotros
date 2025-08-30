@@ -1,4 +1,4 @@
-import { ArticleRoot } from '@/components/modules/Articles/ArticleRoot'
+import { ArticleFeedItem } from '@/components/modules/Articles/ArticleFeedItem'
 import { FollowEventRoot } from '@/components/modules/Follows/FollowEventRoot'
 import { FollowSetItem } from '@/components/modules/Lists/FollowSets/FollowSetItem'
 import { Divider } from '@/components/ui/Divider/Divider'
@@ -37,7 +37,7 @@ export const NostrEventFeedItem = memo(function NostrEventFeedItem(props: Props)
       return <FollowEventRoot event={event} />
     }
     case Kind.Article: {
-      return <ArticleRoot border event={event} />
+      return <ArticleFeedItem border event={event} />
     }
     case Kind.Repost: {
       return <RepostRoot event={event} />
