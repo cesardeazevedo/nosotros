@@ -10,7 +10,7 @@ import { batcherRelayList } from '../batchers'
 import { queryClient } from './queryClient'
 import { queryKeys } from './queryKeys'
 import type { CustomQueryOptions } from './useQueryBase'
-import { eventQueryOptions, replaceableEventQueryOptions, useReplaceableEvent } from './useQueryBase'
+import { replaceableEventQueryOptions, useReplaceableEvent } from './useQueryBase'
 
 export function useEventMetadata(pubkey: string | undefined, options?: CustomQueryOptions<NostrEventDB>) {
   return useReplaceableEvent(Kind.Metadata, pubkey || '', {
@@ -20,17 +20,7 @@ export function useEventMetadata(pubkey: string | undefined, options?: CustomQue
 }
 
 export function useUserFollows(pubkey = '', options?: CustomQueryOptions<NostrEventDB>) {
-  return useQuery(
-    eventQueryOptions({
-      queryKey: queryKeys.replaceable(Kind.Follows, pubkey),
-      filter: {
-        kinds: [Kind.Follows],
-        authors: [pubkey],
-      },
-      ...options,
-      select: (events) => events[0],
-    }),
-  )
+  return useQuery(replaceableEventQueryOptions(Kind.Follows, pubkey, options))
 }
 
 export function useUserBlossomServers<Selector = NostrEventDB>(
