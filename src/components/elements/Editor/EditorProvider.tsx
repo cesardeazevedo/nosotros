@@ -126,6 +126,7 @@ export type EditorRef = {
 
 type Props = EditorProps & {
   kind?: Kind
+  relays?: string[]
   parent?: NostrEventDB
   queryKey?: QueryKey
   pubkey?: string
@@ -147,7 +148,7 @@ function getPostKindName(kind: Kind | undefined) {
 }
 
 export const EditorProvider = memo(function EditorProvider(props: Props) {
-  const { parent, ref, queryKey, pubkey: publicMessagePubkey, ...rest } = props
+  const { parent, ref, queryKey, pubkey: publicMessagePubkey, relays, ...rest } = props
 
   const settings = useSettings()
   const pubkey = useCurrentPubkey()
@@ -173,7 +174,10 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
 
   const placeholderRef = useRef(placeholder)
 
-  const [state, methods] = useMethods(createMethods, initialState)
+  const [state, methods] = useMethods(createMethods, {
+    ...initialState,
+    includedRelays: new Set(relays),
+  })
 
   const sign = async (event: EventTemplate) => {
     if (signer && pubkey) {
@@ -287,8 +291,10 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
       .filter((relay) => !state.excludedRelays.has(relay)) || []
 
   const allRelays = useMemo(() => {
-    return [...mentionsInboxRelays, ...myOutboxRelays].filter((relay) => !state.excludedRelays.has(relay))
-  }, [mentionsInboxRelays, myOutboxRelays, state.excludedRelays])
+    return Array.from(new Set([...mentionsInboxRelays, ...state.includedRelays, ...(relays || myOutboxRelays)])).filter(
+      (relay) => !state.excludedRelays.has(relay),
+    )
+  }, [relays, mentionsInboxRelays, myOutboxRelays, state.includedRelays, state.excludedRelays])
 
   const setEventCache = useCallback(
     (event: NostrEvent) => {
