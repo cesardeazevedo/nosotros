@@ -84,7 +84,7 @@ export function useFeedState(options: FeedModule & { select?: (data: InfiniteEve
                     return !replies
                   }
                   default: {
-                    return true
+                    return !replies
                   }
                 }
               }),
