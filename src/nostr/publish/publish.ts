@@ -12,7 +12,10 @@ import { parseEventMetadata } from '../../hooks/parsers/parseEventMetadata'
 import { dbSqlite } from '../db'
 import { pool } from '../pool'
 
-export type LocalPublisherOptions = Omit<PublisherOptions, 'relays'> & { relays?: string[] }
+export type LocalPublisherOptions = Omit<PublisherOptions, 'relays'> & {
+  relays?: string[]
+  includeRelays?: string[]
+}
 
 export function publish(unsignedEvent: Omit<UnsignedEvent, 'created_at'>, options: LocalPublisherOptions = {}) {
   if (!options.signer) {
@@ -27,7 +30,10 @@ export function publish(unsignedEvent: Omit<UnsignedEvent, 'created_at'>, option
 
   const pub = new NostrPublisher(event, {
     ...options,
-    relays: options.relays ? of(options.relays) : subscribeEventRelays(event, { maxRelaysPerUser: 20 }),
+    relays: merge(
+      options.relays ? of(options.relays) : subscribeEventRelays(event, { maxRelaysPerUser: 20 }),
+      of(options.includeRelays || []),
+    ),
   })
 
   return of(pub).pipe(
