@@ -44,7 +44,7 @@ export const RelaySelectPopover = (props: Props) => {
         <Paper elevation={2} surface='surfaceContainerLow' sx={styles.paper}>
           <form action={submit}>
             <Stack gap={0.5}>
-              <SearchField sx={styles.search} leading={false} placeholder='wss://' name='relay' />
+              <SearchField autoFocus={false} sx={styles.search} leading={false} placeholder='wss://' name='relay' />
               <Button variant='filled' type='submit'>
                 Add
               </Button>
