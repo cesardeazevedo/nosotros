@@ -1,3 +1,4 @@
+import { RelayChip } from '@/components/elements/Relays/RelayChip'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import type { FeedState } from '@/hooks/state/useFeed'
@@ -22,6 +23,16 @@ export const FeedHeadline = (props: Props) => {
             Post Interactions
           </Text>
         </HeadlineBase>
+      )
+    }
+    case 'relayfeed': {
+      const relay = feed.options.ctx.relays?.[0]
+      return (
+        relay && (
+          <HeadlineBase>
+            <RelayChip url={relay} />
+          </HeadlineBase>
+        )
       )
     }
     default: {
