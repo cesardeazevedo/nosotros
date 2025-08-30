@@ -11,7 +11,7 @@ import { decodeNIP19, decodeRelays, decodeToFilter, nip19ToRelayHints } from '@/
 import type { UseQueryOptions } from '@tanstack/react-query'
 import { keepPreviousData, queryOptions, useQuery } from '@tanstack/react-query'
 import type { Filter } from 'nostr-tools'
-import { defaultIfEmpty, firstValueFrom, shareReplay, takeUntil, tap, timer } from 'rxjs'
+import { defaultIfEmpty, firstValueFrom, map, shareReplay, takeUntil, tap, timer } from 'rxjs'
 import { batcher } from '../batchers'
 import { subscribeStrategy } from '../subscriptions/subscribeStrategy'
 import { queryClient } from './queryClient'
@@ -33,7 +33,7 @@ export function createEventQueryOptions<Selector = NostrEventDB[]>(options: UseQ
   return queryOptions<NostrEventDB[], Error, Selector>({
     queryFn: async () => {
       const { maxRelaysPerUser } = store.get(settingsAtom)
-      return await firstValueFrom(
+      const res = await firstValueFrom(
         subscribeStrategy({ ...ctx, maxRelaysPerUser }, filter).pipe(
           tap((res) => res.forEach(setEventData)),
           tap((res) => {
@@ -49,6 +49,10 @@ export function createEventQueryOptions<Selector = NostrEventDB[]>(options: UseQ
           defaultIfEmpty([]),
         ),
       )
+      if (!res.length) {
+        return queryClient.getQueryData<NostrEventDB[]>(opts.queryKey) || []
+      }
+      return res
     },
     ...opts,
   })
