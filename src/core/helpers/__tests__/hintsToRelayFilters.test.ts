@@ -17,14 +17,14 @@ describe('hintsToRelayFilters', () => {
     const res = hintsToRelayFilters(filters, hints)
 
     expect(res).toStrictEqual([
-      ['wss://relay1.com', { kinds: [0, 1], authors: ['1'] }],
-      ['wss://relay2.com', { kinds: [0, 1], authors: ['1'] }],
-      ['wss://relay3.com', { kinds: [0, 1], authors: ['2'] }],
-      ['wss://relay4.com', { kinds: [0, 1], authors: ['2'] }],
-      ['wss://relay2.com', { kinds: [0, 1], authors: ['3'] }],
-      ['wss://relay3.com', { kinds: [0, 1], authors: ['3'] }],
-      ['wss://relay1.com', { kinds: [0, 1], authors: ['4'] }],
-      ['wss://relay4.com', { kinds: [0, 1], authors: ['4'] }],
+      [RELAY_1, { kinds: [0, 1], authors: ['1'] }],
+      [RELAY_2, { kinds: [0, 1], authors: ['1'] }],
+      [RELAY_3, { kinds: [0, 1], authors: ['2'] }],
+      [RELAY_4, { kinds: [0, 1], authors: ['2'] }],
+      [RELAY_2, { kinds: [0, 1], authors: ['3'] }],
+      [RELAY_3, { kinds: [0, 1], authors: ['3'] }],
+      [RELAY_1, { kinds: [0, 1], authors: ['4'] }],
+      [RELAY_4, { kinds: [0, 1], authors: ['4'] }],
     ])
   })
 
@@ -41,14 +41,14 @@ describe('hintsToRelayFilters', () => {
 
     const res = hintsToRelayFilters(filters, hints)
     expect(res).toStrictEqual([
-      ['wss://relay1.com', { kinds: [0, 1], ids: ['1'] }],
-      ['wss://relay2.com', { kinds: [0, 1], ids: ['1'] }],
-      ['wss://relay3.com', { kinds: [0, 1], ids: ['2'] }],
-      ['wss://relay4.com', { kinds: [0, 1], ids: ['2'] }],
-      ['wss://relay2.com', { kinds: [0, 1], ids: ['3'] }],
-      ['wss://relay3.com', { kinds: [0, 1], ids: ['3'] }],
-      ['wss://relay1.com', { kinds: [0, 1], ids: ['4'] }],
-      ['wss://relay4.com', { kinds: [0, 1], ids: ['4'] }],
+      [RELAY_1, { kinds: [0, 1], ids: ['1'] }],
+      [RELAY_2, { kinds: [0, 1], ids: ['1'] }],
+      [RELAY_3, { kinds: [0, 1], ids: ['2'] }],
+      [RELAY_4, { kinds: [0, 1], ids: ['2'] }],
+      [RELAY_2, { kinds: [0, 1], ids: ['3'] }],
+      [RELAY_3, { kinds: [0, 1], ids: ['3'] }],
+      [RELAY_1, { kinds: [0, 1], ids: ['4'] }],
+      [RELAY_4, { kinds: [0, 1], ids: ['4'] }],
     ])
   })
 
