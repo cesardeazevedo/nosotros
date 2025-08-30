@@ -88,8 +88,8 @@ const styles = css.create({
   shadow$dark: {
     width: 'calc(100%-2px)',
     opacity: 0.86,
-    left: 0,
-    right: 0,
+    left: 1,
+    right: 1,
     background: `linear-gradient(0deg, rgba(0, 0, 0, 1), 62px, transparent)`,
   },
 })

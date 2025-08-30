@@ -32,10 +32,10 @@ export const PostLink = memo(function postList(props: Props) {
       const isLink = !!element?.closest('a')
       const isButton = !!element?.closest('button')
       if (isButton || isLink) {
+        e.preventDefault()
+        e.stopPropagation()
         return
       }
-      e.preventDefault()
-      e.stopPropagation()
       if (!mobile) {
         note.actions.toggleContent(true)
         onClick?.()
