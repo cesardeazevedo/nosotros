@@ -494,7 +494,8 @@ const tagsRoute = createRoute({
   path: '/tag/$tag',
   component: function () {
     const params = tagsRoute.useParams()
-    const feed = useFeedState(createTagFeedModule(params.tag))
+    const module = useMemo(() => createTagFeedModule(params.tag), [params.tag])
+    const feed = useFeedState(module)
     return (
       <FeedRoute
         feed={feed}
