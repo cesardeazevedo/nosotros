@@ -29,7 +29,6 @@ export const focusRing = css.create({
     outlineWidth: '0px',
     outlineColor: 'transparent',
     outlineOffset: '0px',
-    transitionProperty: 'outline-color, outline-offset, outline-width',
     transitionDuration: duration.short3,
     transitionTimingFunction: easing.emphasized,
     ':focus-visible': {

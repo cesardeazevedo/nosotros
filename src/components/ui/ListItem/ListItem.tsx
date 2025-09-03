@@ -148,6 +148,10 @@ const styles = css.create({
     height: 'unset',
     width: '100%',
     textAlign: 'left',
+    transform: {
+      default: 'scale(1)',
+      ':active': 'scale(0.98)',
+    },
   },
   nonInteractive: {
     cursor: 'inherit',
