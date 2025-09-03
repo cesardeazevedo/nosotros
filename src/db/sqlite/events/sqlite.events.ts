@@ -83,10 +83,18 @@ export class SqliteEventStore {
           conditions.push(`tags.kind IN (${filter.kinds.map(() => '?').join(',')})`)
           params.push(...filter.kinds)
         }
+        if (typeof filter.since === 'number') {
+          conditions.push('tags.created_at >= ?')
+          params.push(filter.since)
+        }
+        if (typeof filter.until === 'number') {
+          conditions.push('tags.created_at <= ?')
+          params.push(filter.until)
+        }
 
         const tagName = key.slice(1)
         const query = `
-          SELECT e.*
+          SELECT distinct e.*
           FROM tags
           INNER JOIN events e on e.id = tags.eventId
           WHERE
@@ -94,8 +102,12 @@ export class SqliteEventStore {
             AND tags.tag = '${tagName}'
             AND tags.value IN (${values.map(() => '?')})
           ORDER BY e.created_at DESC
+          ${filter.limit ? 'LIMIT ?' : ''}
         `
         params.push(...values)
+        if (filter.limit) {
+          params.push(filter.limit)
+        }
         const res = db.selectObjects(query, params)
         return res.map((event) => this.formatEvent(event as NostrEventStored))
       }

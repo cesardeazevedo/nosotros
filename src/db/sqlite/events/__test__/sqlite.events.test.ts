@@ -1,6 +1,6 @@
 import { Kind } from '@/constants/kinds'
 import type { Database } from '@sqlite.org/sqlite-wasm'
-import type { NostrEvent } from 'nostr-tools'
+import { type NostrEvent } from 'nostr-tools'
 import { fakeEventMeta } from 'utils/faker'
 import { initializeSQLite } from '../../sqlite.schemas'
 import { SqliteEventStore } from '../sqlite.events'
@@ -117,5 +117,70 @@ describe('SqliteEventStore.insertEvent', () => {
 
     const tags = selectTags()
     expect(tags.length).toBe(2)
+  })
+})
+
+describe('SqliteEventStore.query', () => {
+  beforeAll(async () => {
+    db = (await initializeSQLite('test.sqlite3', false)).db
+    store = new SqliteEventStore(Promise.resolve(db))
+  })
+
+  beforeEach(() => {
+    db.exec('DELETE FROM tags;')
+    db.exec('DELETE FROM events;')
+  })
+
+  test('assert authors filter', () => {
+    const e1 = fakeEventMeta({ id: '1', kind: Kind.Text, pubkey: 'p1', created_at: 100 })
+    const e2 = fakeEventMeta({ id: '2', kind: Kind.Text, pubkey: 'p2', created_at: 200 })
+    const e3 = fakeEventMeta({ id: '3', kind: Kind.Text, pubkey: 'p1', created_at: 300 })
+
+    store.insertEvent(db, e1)
+    store.insertEvent(db, e2)
+    store.insertEvent(db, e3)
+
+    const results = store.query(db, { authors: ['p1'] })
+
+    expect(results.map((e: NostrEvent) => e.id)).toStrictEqual(['3', '1'])
+  })
+
+  test('assert tags', () => {
+    const e1 = fakeEventMeta({ id: '1', kind: Kind.Text, pubkey: 'p1', created_at: 100, tags: [] })
+    const e2 = fakeEventMeta({ id: '2', kind: Kind.Text, pubkey: 'p2', created_at: 200, tags: [['e', '1']] })
+    const e3 = fakeEventMeta({
+      id: '3',
+      kind: Kind.Text,
+      pubkey: 'p1',
+      created_at: 300,
+      tags: [
+        ['e', '1'],
+        ['e', '2'],
+      ],
+    })
+    const e4 = fakeEventMeta({ id: '4', kind: Kind.Text, pubkey: 'p1', created_at: 400, tags: [['e', '1']] })
+
+    store.insertEvent(db, e1)
+    store.insertEvent(db, e2)
+    store.insertEvent(db, e3)
+    store.insertEvent(db, e4)
+
+    // also assert there is not duplicated events
+    const res = store.query(db, { kinds: [Kind.Text], until: 300, '#e': ['1', '2'] })
+
+    expect(res.map((e: NostrEvent) => e.id)).toStrictEqual(['3', '2'])
+  })
+
+  test('assert tags limit', () => {
+    const e1 = fakeEventMeta({ id: '2', kind: Kind.Text, pubkey: 'p2', created_at: 100, tags: [['e', '1']] })
+    const e2 = fakeEventMeta({ id: '3', kind: Kind.Text, pubkey: 'p2', created_at: 200, tags: [['e', '1']] })
+    const e3 = fakeEventMeta({ id: '4', kind: Kind.Text, pubkey: 'p2', created_at: 300, tags: [['e', '1']] })
+
+    store.insertEvent(db, e1)
+    store.insertEvent(db, e2)
+    store.insertEvent(db, e3)
+
+    const res = store.query(db, { kinds: [Kind.Text], limit: 2, '#e': ['1'] })
+    expect(res.map((e: NostrEvent) => e.id)).toStrictEqual(['4', '3'])
   })
 })
