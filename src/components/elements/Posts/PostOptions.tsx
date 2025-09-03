@@ -8,11 +8,22 @@ import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { MenuList } from '@/components/ui/MenuList/MenuList'
 import { Popover } from '@/components/ui/Popover/Popover'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import { usePublishEventMutation } from '@/hooks/mutations/usePublishEventMutation'
 import { useUserState } from '@/hooks/state/useUser'
+import { useCurrentPubkey } from '@/hooks/useAuth'
 import { useNevent } from '@/hooks/useEventUtils'
+import { publishBookmark } from '@/nostr/publish/publishBookmarks'
 import { READ } from '@/nostr/types'
 import { spacing } from '@/themes/spacing.stylex'
-import { IconCopy, IconDotsVertical, IconInfoSquareRounded, IconLink, IconQuote, IconShare3 } from '@tabler/icons-react'
+import {
+  IconBookmark,
+  IconCopy,
+  IconDotsVertical,
+  IconInfoSquareRounded,
+  IconLink,
+  IconQuote,
+  IconShare3,
+} from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
 import { useSetAtom } from 'jotai'
 import { memo, useCallback } from 'react'
@@ -24,6 +35,7 @@ type PropsOptions = {
   onCopyIdClick: (e: StrictClickEvent) => void
   onCopyAuthorIdClick: (e: StrictClickEvent) => void
   onCopyLinkClick: (e: StrictClickEvent) => void
+  onBookmarkClick: (e: StrictClickEvent) => void
   onDetailsClick: (e: StrictClickEvent) => void
 }
 
@@ -39,6 +51,13 @@ const Options = memo(function Options(props: PropsOptions) {
       <Link to='/feed' search={{ kind: 6, e: event.id, pubkey: event.pubkey, permission: READ, type: 'reposts' }}>
         <MenuItem size='sm' leadingIcon={<IconShare3 {...iconProps} />} label='See reposts' onClick={() => {}} />
       </Link>
+      <Divider />
+      <MenuItem
+        size='sm'
+        leadingIcon={<IconBookmark {...iconProps} />}
+        label='Bookmark'
+        onClick={props.onBookmarkClick}
+      />
       <Divider />
       <MenuItem
         size='sm'
@@ -64,8 +83,16 @@ const Options = memo(function Options(props: PropsOptions) {
 export const PostOptions = memo(function PostOptions() {
   const { dense } = useContentContext()
   const { event } = useNoteContext()
+  const pubkey = useCurrentPubkey()
   const enqueueToast = useSetAtom(enqueueToastAtom)
   const setStatsDialog = useSetAtom(statsDialogAtom)
+
+  const { mutate: mutateBookMark } = usePublishEventMutation<[id: string, pubkey: string]>({
+    mutationFn:
+      ({ signer }) =>
+      ([id, pubkey]) =>
+        publishBookmark(pubkey, id, { signer }),
+  })
 
   const handleCopy = useCallback((value: string | undefined) => {
     return (e: StrictClickEvent) => {
@@ -96,6 +123,12 @@ export const PostOptions = memo(function PostOptions() {
             onCopyIdClick={handleCopy(nevent)}
             onCopyAuthorIdClick={handleCopy(user?.nprofile)}
             onCopyLinkClick={handleCopy(link)}
+            onBookmarkClick={() => {
+              if (pubkey) {
+                mutateBookMark([event.id, pubkey])
+                props.close()
+              }
+            }}
             onDetailsClick={(e) => {
               e.stopPropagation()
               e.preventDefault()
