@@ -1,9 +1,14 @@
 import { listTypeViewAtom } from '@/atoms/listMenu.atoms'
+import { LinkBase } from '@/components/elements/Links/LinkBase'
+import { SidebarContext } from '@/components/elements/Sidebar/SidebarContext'
 import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { Stack } from '@/components/ui/Stack/Stack'
+import { Kind } from '@/constants/kinds'
+import { useCurrentPubkey } from '@/hooks/useAuth'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconBookmark, IconServerBolt, IconSparkles, IconUserHeart } from '@tabler/icons-react'
 import { useAtom } from 'jotai'
+import { useContext } from 'react'
 import { css } from 'react-strict-dom'
 import { FollowSetList } from './FollowSets/FollowSetList'
 import { RelaySetList } from './RelaySets/RelaySetList'
@@ -18,6 +23,8 @@ type Props = {
 
 export const ListTypeMenu = (props: Props) => {
   const [view, setView] = useAtom(listTypeViewAtom)
+  const pubkey = useCurrentPubkey()
+  const sidebarContext = useContext(SidebarContext)
 
   if (view !== 'menu') {
     return (
@@ -31,17 +38,23 @@ export const ListTypeMenu = (props: Props) => {
 
   return (
     <Stack horizontal={false} sx={styles.root}>
-      <MenuItem
-        label='Bookmarks'
-        leadingIcon={<IconBookmark />}
-        onClick={() => {
-          if (props.onBookmarksClick) {
-            props.onBookmarksClick()
-            return
-          }
-          setView('bookmarks')
-        }}
-      />
+      <LinkBase
+        to='/feed'
+        search={{
+          kind: [Kind.BookmarkList],
+          author: [pubkey!],
+          type: 'lists',
+          live: false,
+          scope: 'sets_e',
+          limit: 50,
+        }}>
+        <MenuItem
+          interactive
+          label='Bookmarks'
+          leadingIcon={<IconBookmark />}
+          onClick={() => sidebarContext.setPane(false)}
+        />
+      </LinkBase>
       <MenuItem
         label='Follow Sets'
         leadingIcon={<IconUserHeart />}
