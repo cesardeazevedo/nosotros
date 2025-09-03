@@ -132,6 +132,7 @@ export const feedRoute = createRoute({
     d: zStringArray,
 
     // feed filters
+    live: z.boolean().optional(),
     scope: z
       .union([
         z.literal('self'),
@@ -143,9 +144,6 @@ export const feedRoute = createRoute({
       ])
       .optional(),
     blured: z.boolean().optional(),
-
-    includeRoot: z.boolean().optional(),
-    includeParents: z.boolean().optional(),
     includeReplies: z.boolean().optional(),
 
     type: z
@@ -157,6 +155,7 @@ export const feedRoute = createRoute({
         'reposts',
         'search',
         'tags',
+        'lists',
         'articles',
         'relaysets',
         'relayfeed',
@@ -193,6 +192,7 @@ export const feedRoute = createRoute({
     d: search.d,
 
     // feed filters
+    live: search.live,
     scope: search.scope,
     blured: search.blured,
     includeReplies: search.includeReplies,
@@ -207,6 +207,7 @@ export const feedRoute = createRoute({
       search,
       until,
       since,
+      live = true,
       scope = 'self',
       type = 'feed',
       blured,
@@ -298,6 +299,7 @@ export const feedRoute = createRoute({
     return {
       id,
       type,
+      live,
       includeReplies,
       filter,
       blured,
