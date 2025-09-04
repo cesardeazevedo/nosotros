@@ -10,17 +10,19 @@ import { Feed } from '../../Feed/Feed'
 import { StarterPackCard } from './StarterPackCard'
 
 type Props = {
+  column?: boolean
   dense?: boolean
 }
 
 export const StarterPackList = memo(function StarterPackList(props: Props) {
-  const { dense } = props
+  const { column = false, dense } = props
   const isLG = useLG()
   const isMobile = useMobile()
   const pubkey = useCurrentPubkey()
   const feed = useFeedState(createListModule(Kind.StarterPack, pubkey))
   return (
     <Feed
+      column={column}
       wrapper={(children) => (
         <html.div style={[styles.root, isLG && styles.root$lg, (dense || isMobile) && styles.root$dense]}>
           {children}

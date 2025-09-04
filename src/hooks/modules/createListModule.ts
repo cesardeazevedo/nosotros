@@ -16,6 +16,7 @@ export function createListModule(kind: Kind, pubkey: string | undefined): ListFe
     id,
     queryKey: queryKeys.feed(id, filter),
     filter,
+    pageSize: 30,
     ctx: {
       outbox: true,
       negentropy: false,

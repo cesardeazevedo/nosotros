@@ -8,18 +8,20 @@ import { Feed } from '../../Feed/Feed'
 import { RelaySetItem } from './RelaySetItem'
 
 type Props = {
+  column?: boolean
   dense?: boolean
 }
 
 export const RelaySetList = memo(function RelaySetList(props: Props) {
-  const { dense } = props
+  const { column, dense } = props
   const pubkey = useCurrentPubkey()
   const feed = useFeedState(createListModule(Kind.RelaySets, pubkey))
   return (
     <Feed
+      column={column}
       wrapper={(children) => <html.div style={[styles.root, dense && styles.root$dense]}>{children}</html.div>}
       feed={feed}
-      render={(event) => <RelaySetItem event={event} />}
+      render={(event) => <RelaySetItem event={event} sx={dense && styles.item$dense} />}
     />
   )
 })
@@ -31,5 +33,8 @@ const styles = css.create({
   },
   root$dense: {
     gridTemplateColumns: 'repeat(1, minmax(0, 3fr))',
+  },
+  item$dense: {
+    borderLeft: 0,
   },
 })

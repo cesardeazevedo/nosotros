@@ -2,6 +2,7 @@ import { PostHeaderDate } from '@/components/elements/Posts/PostHeaderDate'
 import { UserHeader } from '@/components/elements/User/UserHeader'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
+import type { SxProps } from '@/components/ui/types'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { useEventTag, useEventTags } from '@/hooks/useEventUtils'
 import { useSM } from '@/hooks/useMobile'
@@ -14,17 +15,18 @@ import { RelaySetLink } from './RelaySetLink'
 
 type Props = {
   event: NostrEventDB
+  sx?: SxProps
 }
 
 export const RelaySetItem = memo(function RelaySetItem(props: Props) {
-  const { event } = props
+  const { event, sx } = props
   const isMobile = useSM()
   const title = useEventTag(event, 'title')
   const description = useEventTag(event, 'description')
   const d = useEventTag(event, 'd')
   const relays = useEventTags(event, 'relay') || []
   return (
-    <Stack key={event.id} sx={[styles.root, isMobile && styles.root$mobile]}>
+    <Stack key={event.id} sx={[styles.root, isMobile && styles.root$mobile, sx]}>
       <RelaySetLink event={event} sx={styles.link}>
         <Stack horizontal={false}>
           <Stack gap={1}>
