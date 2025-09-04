@@ -1,4 +1,11 @@
-import { filesAtom, resetFileUploadAtom, selectFilesForUploadAtom, uploadFilesAtom } from '@/atoms/upload.atoms'
+import { enqueueToastAtom } from '@/atoms/toaster.atoms'
+import {
+  filesAtom,
+  resetFileUploadAtom,
+  resetIsUploadingAtom,
+  selectFilesForUploadAtom,
+  uploadFilesAtom,
+} from '@/atoms/upload.atoms'
 import { useContentContext } from '@/components/providers/ContentProvider'
 import { ButtonBase } from '@/components/ui/ButtonBase/ButtonBase'
 import { Stack } from '@/components/ui/Stack/Stack'
@@ -6,6 +13,8 @@ import type { SxProps } from '@/components/ui/types'
 import { usePublishEventMutation } from '@/hooks/mutations/usePublishEventMutation'
 import { useCurrentPubkey } from '@/hooks/useAuth'
 import { publish } from '@/nostr/publish/publish'
+import { duration } from '@/themes/duration.stylex'
+import { easing } from '@/themes/easing.stylex'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
@@ -16,7 +25,20 @@ import type { EventTemplate, NostrEvent } from 'nostr-tools'
 import { useObservableState } from 'observable-hooks'
 import { memo, useEffect } from 'react'
 import { css } from 'react-strict-dom'
-import { concat, concatMap, defer, endWith, from, map, mergeMap, startWith, takeUntil, tap } from 'rxjs'
+import {
+  catchError,
+  concat,
+  concatMap,
+  defer,
+  EMPTY,
+  endWith,
+  from,
+  map,
+  mergeMap,
+  startWith,
+  takeUntil,
+  tap,
+} from 'rxjs'
 import { MediaListEditor } from '../Media/MediaListEditor'
 import { EditorContainer } from './EditorContainer'
 import { EditorExpandables } from './EditorExpandables'
@@ -44,6 +66,8 @@ export const EditorMedia = memo(function EditorMedia(props: Props) {
   const selectFiles = useSetAtom(selectFilesForUploadAtom)
   const uploadFiles = useSetAtom(uploadFilesAtom)
   const resetFiles = useSetAtom(resetFileUploadAtom)
+  const resetUploadingFiles = useSetAtom(resetIsUploadingAtom)
+  const enqueueToast = useSetAtom(enqueueToastAtom)
 
   const state = useEditorSelector((editor) => editor)
   const pubkey = useCurrentPubkey()
@@ -77,6 +101,11 @@ export const EditorMedia = memo(function EditorMedia(props: Props) {
             tap(() => resetFiles()),
             map(() => false),
             startWith(0),
+            catchError((error) => {
+              resetUploadingFiles()
+              enqueueToast({ component: error.toString(), duration: 4000 })
+              return EMPTY
+            }),
           ),
         )
         return concat(countDown$, upload$).pipe(takeUntil(cancel$), endWith(false))
@@ -152,5 +181,12 @@ const styles = css.create({
     borderStyle: 'dashed',
     borderRadius: shape.xl,
     borderColor: palette.outline,
+    transform: 'scale(1)',
+    transitionProperty: 'transform',
+    transitionDuration: duration.short3,
+    transitionTimingFunction: easing.emphasized,
+    ':active': {
+      transform: 'scale(0.9)',
+    },
   },
 })
