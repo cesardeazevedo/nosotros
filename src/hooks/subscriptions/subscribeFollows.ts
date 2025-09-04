@@ -22,20 +22,23 @@ export function subscribeFeedFollowing(ctx: NostrContext, filter: NostrFilter) {
       const authors = [event.pubkey, ...event.tags.filter(isAuthorTag).map((x) => x[1])]
       const topics = event.tags.filter(isTopicTag).map((x) => x[1])
       const notes$ = subscribeStrategy(ctx, { ...rest, authors }).pipe(share())
-      const topics$ = subscribeStrategy(
-        { ...ctx, relays: TOPIC_RELAYS, subId: 'topics_' + ctx.subId },
-        { ...rest, '#t': topics },
-      ).pipe(share())
-      return combineLatest([notes$.pipe(take(1)), topics$.pipe(take(1))]).pipe(
-        mergeWith(notes$.pipe(skip(1))),
-        mergeWith(topics$.pipe(skip(1))),
-        map((data) => {
-          return dedupeById(data.flat())
-            .flat()
-            .sort((a, b) => b.created_at - a.created_at)
-            .slice(0, filter.limit)
-        }),
-      )
+      if (topics.length > 0) {
+        const topics$ = subscribeStrategy(
+          { ...ctx, relays: TOPIC_RELAYS, subId: 'topics_' + ctx.subId },
+          { ...rest, '#t': topics },
+        ).pipe(share())
+        return combineLatest([notes$.pipe(take(1)), topics$.pipe(take(1))]).pipe(
+          mergeWith(notes$.pipe(skip(1))),
+          mergeWith(topics$.pipe(skip(1))),
+          map((data) => {
+            return dedupeById(data.flat())
+              .flat()
+              .sort((a, b) => b.created_at - a.created_at)
+              .slice(0, filter.limit)
+          }),
+        )
+      }
+      return notes$
     }),
   )
 }
