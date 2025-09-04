@@ -1,6 +1,8 @@
 import { Kind } from '@/constants/kinds'
 import type { NostrFilter } from '@/core/types'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import type { NostrContext } from '@/nostr/context'
+import { isParameterizedReplaceableKind, isReplaceableKind } from 'nostr-tools/kinds'
 import type { DecodeResult } from 'nostr-tools/nip19'
 
 export const queryKeys = {
@@ -42,4 +44,17 @@ export function pointerToQueryKey(decoded: DecodeResult | undefined) {
     }
   }
   return ['noop']
+}
+
+export function eventToQueryKey(event: NostrEventDB) {
+  if (isReplaceableKind(event.kind)) {
+    return queryKeys.replaceable(event.kind, event.pubkey)
+  } else if (isParameterizedReplaceableKind(event.kind)) {
+    const dTag = event.tags.find((tag) => tag[0] === 'd')?.[1]
+    if (dTag) {
+      return queryKeys.addressable(event.kind, event.pubkey, dTag)
+    }
+  } else {
+    return queryKeys.event(event.id)
+  }
 }

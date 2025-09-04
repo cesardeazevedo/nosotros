@@ -58,7 +58,7 @@ export const FeedList = memo(function FeedList(props: Props) {
 
   const content = useMemo(() => {
     return list.map((item) => <React.Fragment key={item.id}>{render(item)}</React.Fragment>)
-  }, [list])
+  }, [list, render])
 
   if (column) {
     return (

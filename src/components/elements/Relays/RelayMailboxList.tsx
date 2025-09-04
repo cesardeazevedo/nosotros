@@ -12,19 +12,17 @@ import { typeScale } from '@/themes/typeScale.stylex'
 import { memo, useCallback, useState } from 'react'
 import { css, html } from 'react-strict-dom'
 import type { StrictReactDOMInputProps } from 'react-strict-dom/dist/types/StrictReactDOMInputProps'
-import { PaperContainer } from '../Layouts/PaperContainer'
 import { RelayMailboxListLoading } from './RelayMailboxListLoading'
 import { RelayUserList } from './RelayUserList'
 import { usePublishRelayList } from './relay.hooks'
 
 type Props = {
-  isEditing?: boolean
   pubkey: string
   permission: typeof READ | typeof WRITE
 }
 
 export const RelayMailboxList = memo(function RelayMailboxList(props: Props) {
-  const { pubkey, permission, isEditing } = props
+  const { pubkey, permission } = props
   const label = permission === WRITE ? 'Outbox' : 'Inbox'
   const description =
     permission === WRITE
@@ -60,7 +58,7 @@ export const RelayMailboxList = memo(function RelayMailboxList(props: Props) {
   const total = relays?.length
 
   return (
-    <PaperContainer>
+    <Stack grow horizontal={false}>
       <Stack horizontal={false}>
         <Stack horizontal={false} gap={0.5} sx={styles.header} justify='space-between'>
           <Text variant='title' size='md'>
@@ -72,34 +70,27 @@ export const RelayMailboxList = memo(function RelayMailboxList(props: Props) {
         </Stack>
         <Divider />
         <Stack gap={2}>
-          {relays.length ? (
-            <RelayUserList isEditing={isEditing} userRelays={relays} permission={permission} />
-          ) : (
-            <RelayMailboxListLoading />
-          )}
+          {relays.length ? <RelayUserList userRelays={relays} permission={permission} /> : <RelayMailboxListLoading />}
         </Stack>
-        {isEditing && (
-          <>
-            <Divider />
-            <Stack sx={styles.footer} justify='space-between' gap={1}>
-              <Stack sx={[styles.inputContainer, !!error && styles.inputError]} gap={1}>
-                <html.input
-                  style={styles.input}
-                  type='text'
-                  placeholder='wss://'
-                  value={input}
-                  aria-errormessage={error ? error : null}
-                  onChange={(e: StrictReactDOMInputProps['onChange']) => setInput(e.target.value)}
-                />
-              </Stack>
-              <Button disabled={isPending} onClick={handleSubmit} variant='filled' sx={styles.button}>
-                Add
-              </Button>
+        <>
+          <Stack sx={styles.footer} justify='space-between' gap={1}>
+            <Stack sx={[styles.inputContainer, !!error && styles.inputError]} gap={1}>
+              <html.input
+                style={styles.input}
+                type='text'
+                placeholder='wss://'
+                value={input}
+                aria-errormessage={error ? error : null}
+                onChange={(e: StrictReactDOMInputProps['onChange']) => setInput(e.target.value)}
+              />
             </Stack>
-          </>
-        )}
+            <Button disabled={isPending} onClick={handleSubmit} variant='filled' sx={styles.button}>
+              Add
+            </Button>
+          </Stack>
+        </>
       </Stack>
-    </PaperContainer>
+    </Stack>
   )
 })
 

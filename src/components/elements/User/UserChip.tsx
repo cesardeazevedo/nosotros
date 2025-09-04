@@ -5,17 +5,21 @@ import { UserAvatar } from './UserAvatar'
 
 type Props = {
   pubkey: string
+  selected?: boolean
+  onClick?: () => void
   onDelete?: () => void
 }
 
 export const UserChip = memo((props: Props) => {
-  const { pubkey, onDelete } = props
+  const { pubkey, selected, onClick, onDelete } = props
   const user = useUserState(pubkey)
   return (
     <Chip
       variant='input'
+      selected={selected}
       icon={<UserAvatar size='xs' pubkey={pubkey} />}
       label={user?.displayName}
+      onClick={onClick}
       onDelete={onDelete}
     />
   )

@@ -9,7 +9,6 @@ import { RepliesTree } from './RepliesTree'
 
 type Props = {
   note: NoteState
-  onLoadMoreClick?: () => void
 }
 
 function getPubkey(decoded: DecodeResult | undefined) {
@@ -27,7 +26,7 @@ function getPubkey(decoded: DecodeResult | undefined) {
 }
 
 export const RepliesPreview = function RepliesPreview(props: Props) {
-  const { note, onLoadMoreClick } = props
+  const { note } = props
   const context = useRouteContext({ strict: false })
 
   const replies = note.getRepliesPreviewUser(getPubkey(context.decoded))
@@ -40,7 +39,7 @@ export const RepliesPreview = function RepliesPreview(props: Props) {
     <Stack horizontal={false} sx={styles.root} justify='flex-start'>
       <html.div style={styles.repliesWrapper}>
         {replies && <RepliesTree nested={false} replies={replies} repliesOpen={note.state.repliesOpen} level={1} />}
-        <RepliesLoadMore note={note} onClick={onLoadMoreClick} disabled={false} />
+        <RepliesLoadMore note={note} disabled={false} />
       </html.div>
     </Stack>
   )

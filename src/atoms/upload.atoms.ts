@@ -37,14 +37,24 @@ async function hash(file: File) {
 
 export const filesAtom = atom<UploadFile[]>([])
 
-export const resetFileUploadAtom = atom(null, (_get, set) => {
+export const resetFileUploadAtom = atom(null, (_, set) => {
   set(filesAtom, [])
+})
+
+export const resetIsUploadingAtom = atom(null, (get, set) => {
+  const files = get(filesAtom)
+  set(
+    filesAtom,
+    files.map((f) => ({ ...f, uploading: false })),
+  )
 })
 
 export const deleteFileAtIndexAtom = atom(null, (get, set, index: number) => {
   const files = get(filesAtom)
-  const next = files.filter((_, i) => i !== index)
-  set(filesAtom, next)
+  set(
+    filesAtom,
+    files.filter((_, i) => i !== index),
+  )
 })
 
 export const setFileDataAtom = atom(null, (get, set, args: { src: string; attrs: Partial<UploadFile> }) => {

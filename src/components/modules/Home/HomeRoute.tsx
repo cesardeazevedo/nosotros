@@ -2,11 +2,12 @@ import { RouteContainer } from '@/components/elements/Layouts/RouteContainer'
 import { createHomeFeedModule } from '@/hooks/modules/createHomeFeedModule'
 import { useFeedState } from '@/hooks/state/useFeed'
 import { useCurrentPubkey } from '@/hooks/useAuth'
+import { useResetScroll } from '@/hooks/useResetScroll'
 import { useNavigate } from '@tanstack/react-router'
 import { memo, useMemo } from 'react'
 import { Feed } from '../Feed/Feed'
+import { FeedHeadline } from '../Feed/FeedHeadline'
 import { HomeHeader } from './HomeHeader'
-import { useResetScroll } from '@/hooks/useResetScroll'
 
 type Props = {
   replies?: boolean
@@ -30,7 +31,9 @@ export const HomeRoute = memo(function HomeRoute(props: Props) {
   }
 
   return (
-    <RouteContainer header={<HomeHeader feed={feed} onChangeTabs={handleChangeTabs} />}>
+    <RouteContainer
+      headline={<FeedHeadline feed={feed} />}
+      header={<HomeHeader feed={feed} onChangeTabs={handleChangeTabs} />}>
       <Feed feed={feed} />
     </RouteContainer>
   )

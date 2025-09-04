@@ -2,9 +2,7 @@ import { HeaderBase } from '@/components/elements/Layouts/HeaderBase'
 import { RouteContainer } from '@/components/elements/Layouts/RouteContainer'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Tab } from '@/components/ui/Tab/Tab'
-import { Text } from '@/components/ui/Text/Text'
 import { useCurrentPubkey } from '@/hooks/useAuth'
-import { useLG } from '@/hooks/useMobile'
 import { useResetScroll } from '@/hooks/useResetScroll'
 import { spacing } from '@/themes/spacing.stylex'
 import { Link, Outlet } from '@tanstack/react-router'
@@ -13,18 +11,10 @@ import { css } from 'react-strict-dom'
 
 export const ListsRoute = memo(function ListsRoute() {
   useResetScroll()
-  const isLG = useLG()
   const pubkey = useCurrentPubkey()
   return (
     <RouteContainer
       maxWidth='lg'
-      headline={
-        !isLG && (
-          <Text variant='headline' size='md' sx={styles.headline}>
-            Lists
-          </Text>
-        )
-      }
       header={
         <HeaderBase
           leading={

@@ -74,8 +74,6 @@ export const FollowEventRoot = (props: Props) => {
   const limitedTags = useMemo(() => filteredTags.slice(0, limit), [limit, filteredTags])
   const values = useMemo(() => tags.map(([, pubkey]) => pubkey), [tags])
 
-  console.log(tags.filter((x) => x[0] !== 'p'))
-
   return (
     <NoteProvider value={{ event }}>
       <PostHeader event={event} />

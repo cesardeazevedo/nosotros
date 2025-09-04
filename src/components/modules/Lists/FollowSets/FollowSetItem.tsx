@@ -2,6 +2,7 @@ import { PostHeaderDate } from '@/components/elements/Posts/PostHeaderDate'
 import { UserHeader } from '@/components/elements/User/UserHeader'
 import { UsersAvatars } from '@/components/elements/User/UsersAvatars'
 import { Stack } from '@/components/ui/Stack/Stack'
+import type { SxProps } from '@/components/ui/types'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { useEventTag, useEventTags } from '@/hooks/useEventUtils'
 import { useSM } from '@/hooks/useMobile'
@@ -13,17 +14,18 @@ import { FollowSetLink } from './FollowSetLink'
 
 type Props = {
   event: NostrEventDB
+  sx?: SxProps
 }
 
 export const FollowSetItem = memo(function FollowSetItem(props: Props) {
-  const { event } = props
+  const { event, sx } = props
   const isMobile = useSM()
   const title = useEventTag(event, 'title')
   const description = useEventTag(event, 'description')
   const d = useEventTag(event, 'd')
   const pubkeys = useEventTags(event, 'p') || []
   return (
-    <Stack sx={[styles.root, isMobile && styles.root$mobile]}>
+    <Stack sx={[styles.root, isMobile && styles.root$mobile, sx]}>
       <FollowSetLink event={event} sx={styles.link}>
         <Stack horizontal={false} grow>
           <Stack gap={1}>

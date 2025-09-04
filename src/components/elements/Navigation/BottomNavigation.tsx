@@ -78,7 +78,7 @@ export const BottomNavigation = memo(function BottomNavigation() {
             {({ isActive }) => <Tab active={isActive} sx={styles.tab} icon={<IconNews />} />}
           </Link>
           {!pubkey && (
-            <Link to='/explore/relays'>
+            <Link to='/relays'>
               {({ isActive }) => <Tab active={isActive} sx={styles.tab} icon={<IconServerBolt />} />}
             </Link>
           )}

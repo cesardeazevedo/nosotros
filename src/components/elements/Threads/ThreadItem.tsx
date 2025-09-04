@@ -83,18 +83,7 @@ export const ThreadItem = memo(function ThreadItem(props: Props) {
           </html.div>
         )}
       </ContentProvider>
-      {renderReplies && isCurrentNote && (
-        <Replies
-          note={note}
-          onLoadMoreClick={() => {
-            if (note.state.repliesOpen) {
-              note.paginate()
-            } else {
-              note.actions.toggleReplies()
-            }
-          }}
-        />
-      )}
+      {renderReplies && isCurrentNote && <Replies note={note} />}
     </>
   )
 })

@@ -1,12 +1,12 @@
 import { Kind } from '@/constants/kinds'
 import type { NostrFilter } from '@/core/types'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
-import type { NostrContext } from '@/nostr/context'
+import { dedupeById } from '@/utils/utils'
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import { strictDeepEqual } from 'fast-equals'
 import { useObservable, useObservableCallback, useSubscription } from 'observable-hooks'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { EMPTY, finalize, ignoreElements, switchMap, tap, throttleTime, filter as rxFilter } from 'rxjs'
+import { EMPTY, finalize, ignoreElements, filter as rxFilter, switchMap, tap, throttleTime } from 'rxjs'
 import { queryKeys } from '../query/queryKeys'
 import { setEventData } from '../query/queryUtils'
 import type { FeedScope } from '../query/useQueryFeeds'
@@ -20,6 +20,7 @@ export function useFeedState(options: FeedModule & { select?: (data: InfiniteEve
   const [prevFilter, setPrevFilter] = useState(options.filter)
   const [replies, setReplies] = useState<boolean | undefined>(options.includeReplies)
   const [prevReplies, setPrevReplies] = useState<boolean | undefined>(options.includeReplies)
+  const [autoUpdate, setAutoUpdate] = useState(options.autoUpdate ?? false)
 
   const [blured, setBlured] = useState(options.blured ?? false)
   const [buffer, setBuffer] = useState<NostrEventDB[]>([])
@@ -34,13 +35,26 @@ export function useFeedState(options: FeedModule & { select?: (data: InfiniteEve
     setPrevReplies(replies)
     setReplies(options.includeReplies)
   }
+  const onStream = useCallback(
+    (event: NostrEventDB) => {
+      if (autoUpdate) {
+        return addNewEvents([event])
+      }
+      if (event.metadata?.isRoot || event.kind !== Kind.Text) {
+        setBuffer((events) => [...events, event])
+      } else {
+        setBufferReplies((events) => [...events, event])
+      }
+    },
+    [autoUpdate],
+  )
 
-  const sub = useObservable<void, [NostrContext, FeedScope, NostrFilter]>(
+  const sub = useObservable<void, [FeedModule, NostrFilter, (event: NostrEventDB) => void]>(
     (input$) =>
       input$.pipe(
-        switchMap(([ctx, scope, filter]) => {
+        switchMap(([options, filter, onStream]) => {
           if (options.live !== false) {
-            return subscribeLive(ctx, scope, filter).pipe(
+            return subscribeLive(options.ctx, options.scope, filter).pipe(
               tap((event) => {
                 setEventData(event)
                 onStream(event)
@@ -52,17 +66,9 @@ export function useFeedState(options: FeedModule & { select?: (data: InfiniteEve
           return EMPTY
         }),
       ),
-    [options.ctx, options.scope, filter],
+    [options, filter, onStream],
   )
   useSubscription(sub)
-
-  const onStream = useCallback((event: NostrEventDB) => {
-    if (event.metadata?.isRoot || event.kind !== Kind.Text) {
-      setBuffer((events) => [...events, event])
-    } else {
-      setBufferReplies((events) => [...events, event])
-    }
-  }, [])
 
   const queryClient = useQueryClient()
   const queryKey = queryKeys.feed(options.id, filter, options.ctx)
@@ -84,7 +90,7 @@ export function useFeedState(options: FeedModule & { select?: (data: InfiniteEve
                     return !replies
                   }
                   default: {
-                    return true
+                    return !replies
                   }
                 }
               }),
@@ -101,26 +107,32 @@ export function useFeedState(options: FeedModule & { select?: (data: InfiniteEve
     }),
   )
 
-  const flush = () => {
-    queryClient.setQueryData(queryKey, (older: InfiniteEvents | undefined) => {
-      const ids = new Set(older?.pages.flat().map((x) => x.id))
-      const bufferData = replies ? bufferReplies : buffer
-      const sorted = bufferData.filter((x) => !ids.has(x.id)).sort((a, b) => b.created_at - a.created_at)
-      return {
-        pageParams: older?.pageParams || { limit: filter.limit },
-        pages: [[...sorted, ...(older?.pages?.[0] || [])], ...(older?.pages?.slice(1) || [])],
-      } as InfiniteEvents
-    })
+  const addNewEvents = useCallback(
+    (events: NostrEventDB[]) => {
+      queryClient.setQueryData(queryKey, (older: InfiniteEvents | undefined) => {
+        const sorted = events.sort((a, b) => b.created_at - a.created_at)
+        return {
+          pageParams: older?.pageParams || { limit: filter.limit },
+          pages: [dedupeById([...sorted, ...(older?.pages?.[0] || [])]), ...(older?.pages?.slice(1) || [])],
+        } as InfiniteEvents
+      })
+    },
+    [queryClient],
+  )
+
+  const flush = useCallback(() => {
     if (replies) {
+      addNewEvents(bufferReplies)
       setBufferReplies([])
     } else {
+      addNewEvents(buffer)
       setBuffer([])
     }
-  }
+  }, [replies, buffer, bufferReplies, setBuffer, setBufferReplies, addNewEvents])
 
   useEffect(() => {
     flush()
-  }, [replies])
+  }, [replies, autoUpdate])
 
   const bufferTotal = useMemo(() => buffer.length, [buffer])
   const bufferTotalReplies = useMemo(() => bufferReplies.length, [bufferReplies])
@@ -152,15 +164,15 @@ export function useFeedState(options: FeedModule & { select?: (data: InfiniteEve
 
   const resetFilter = useCallback(() => setFilter(options.filter), [options.filter])
 
-  const [paginate, paginate$] = useObservableCallback<[number, InfiniteEvents | undefined]>((input$) => {
+  const [paginate, paginate$] = useObservableCallback<[number, InfiniteEvents | undefined, FeedScope]>((input$) => {
     return input$.pipe(
       throttleTime(1200, undefined, { leading: true, trailing: true }),
       rxFilter(([, data]) => data?.pages.flat().length !== 0),
-      tap(([pageSize, data]) => {
+      tap(([pageSize, data, scope]) => {
         const total = data?.pages.flat().length || 0
         if (pageSize < total) {
-          setPageSize(pageSize + 10)
-        } else {
+          setPageSize(pageSize + (options.pageSize || 10))
+        } else if (scope !== 'sets_e') {
           query.fetchNextPage()
         }
       }),
@@ -181,6 +193,8 @@ export function useFeedState(options: FeedModule & { select?: (data: InfiniteEve
     bufferPubkeysReplies,
     bufferTotal,
     bufferTotalReplies,
+    autoUpdate,
+    setAutoUpdate,
     flush,
     hasKind,
     toggleKind,
@@ -190,7 +204,7 @@ export function useFeedState(options: FeedModule & { select?: (data: InfiniteEve
     setBlured,
     pageSize,
     setPageSize,
-    paginate: () => paginate([pageSize, query.data]),
+    paginate: () => paginate([pageSize, query.data, options.scope]),
     addRelay: () => {},
     removeRelay: () => {},
   }

@@ -24,6 +24,7 @@ export enum Kind {
   Highlight = 9802,
   RelayList = 10002,
   RelayFavorites = 10012,
+  VoiceMessage = 1222,
   ClientAuth = 22242,
   // replaceable
   BookmarkList = 10003,
@@ -36,6 +37,6 @@ export enum Kind {
   Article = 30023,
   StarterPack = 39089,
   MediaStarterPack = 39092,
-  RelayDiscovery = 30166,
+  RelayMonitor = 30166,
   NostrConnect = 24133,
 }

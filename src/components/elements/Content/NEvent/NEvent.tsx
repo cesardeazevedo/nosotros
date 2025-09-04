@@ -17,18 +17,18 @@ type Props = {
 }
 
 export const NEvent = memo(function NEvent(props: Props) {
-  const { pointer } = props
+  const { pointer, event } = props
   const { dense, disableLink } = useContentContext()
-  const event = useEventFromNIP19(pointer.bech32)
+  const { data } = useEventFromNIP19(pointer.bech32, event?.metadata?.relayHints)
   return (
     <html.div style={[styles.root, dense && styles.root$dense]}>
-      {!event.data && (
+      {!data && (
         <Skeleton variant='rectangular' animation='wave' sx={[styles.skeleton, dense && styles.skeleton$dense]} />
       )}
-      {event.data && (
+      {data && (
         <ContentProvider value={{ dense: true, disableLink }}>
           <Paper outlined sx={styles.content}>
-            <NostrEventQuote event={event.data} />
+            <NostrEventQuote event={data} />
           </Paper>
         </ContentProvider>
       )}

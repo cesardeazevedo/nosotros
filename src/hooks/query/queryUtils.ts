@@ -3,9 +3,8 @@ import { store } from '@/atoms/store'
 import { Kind } from '@/constants/kinds'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { dbSqlite } from '@/nostr/db'
-import { isParameterizedReplaceableKind, isReplaceableKind } from 'nostr-tools/kinds'
 import { queryClient } from './queryClient'
-import { queryKeys } from './queryKeys'
+import { eventToQueryKey, queryKeys } from './queryKeys'
 
 async function populateRelayInfo() {
   const res = await dbSqlite.queryRelayInfo([])
@@ -22,22 +21,16 @@ export async function prepopulate() {
   return Promise.all([populateRelayInfo(), populateRelayStats()])
 }
 
-export function setEventData(event: NostrEventDB) {
-  if (event.kind === Kind.RelayDiscovery) {
+export async function setEventData(event: NostrEventDB) {
+  // We don't need to keep track of these events individually
+  if ([Kind.RelayMonitor, Kind.Reaction].includes(event.kind)) {
     return
   }
-  if (isReplaceableKind(event.kind)) {
-    queryClient.setQueryData(queryKeys.replaceable(event.kind, event.pubkey), [event])
-  } else if (isParameterizedReplaceableKind(event.kind)) {
-    const dTag = event.tags.find((tag) => tag[0] === 'd')?.[1]
-    if (dTag) {
-      queryClient.setQueryData(queryKeys.addressable(event.kind, event.pubkey, dTag), [event])
-    }
-  } else {
-    queryClient.setQueryData(queryKeys.event(event.id), [event])
-  }
-
   if (event.kind === Kind.Text || event.kind === Kind.Comment) {
     store.set(addReplyAtom, event)
+  }
+  const queryKey = eventToQueryKey(event)
+  if (queryKey) {
+    queryClient.setQueryData(queryKey, [event])
   }
 }

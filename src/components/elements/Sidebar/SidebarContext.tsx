@@ -1,6 +1,6 @@
 import { createContext } from 'react'
 
-export type Panes = '/notifications' | '/lists' | '/explore/relays' | false
+export type Panes = '/notifications' | '/lists' | false
 
 export const SidebarContext = createContext({
   pane: false as Panes,

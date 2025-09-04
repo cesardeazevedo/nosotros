@@ -23,7 +23,7 @@ type Props = {
   border?: boolean
 }
 
-export const ArticleRoot = memo(function ArticleRoot(props: Props) {
+export const ArticleFeedItem = memo(function ArticleFeedItem(props: Props) {
   const note = useNoteState(props.event)
   const { dense } = useContentContext()
   const { event } = note

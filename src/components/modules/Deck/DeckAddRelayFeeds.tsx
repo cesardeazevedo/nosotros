@@ -10,24 +10,17 @@ import { useActionState } from 'react'
 import { css, html } from 'react-strict-dom'
 import { RelayFavoritesList } from '../RelayFavorites/RelayFavoritesList'
 import { DeckScroll } from './DeckScroll'
+import { normalizeRelayUrl } from '@/core/helpers/formatRelayUrl'
 
 type Props = {
   onSelect: (tag: string) => void
-}
-
-const normalizeWebSocketUrl = (value: string) => {
-  let v = value.trim()
-  if (!/^wss?:\/\//i.test(v)) {
-    v = 'wss://' + v
-  }
-  return v
 }
 
 export const DeckAddRelayFeeds = (props: Props) => {
   const [error, submit] = useActionState((_: string | null, formData: FormData) => {
     const value = formData.get('value')?.toString().trim() || ''
 
-    const normalized = normalizeWebSocketUrl(value)
+    const normalized = normalizeRelayUrl(value)
     try {
       const u = new URL(normalized)
       if (u.protocol === 'ws:' || u.protocol === 'wss:') {

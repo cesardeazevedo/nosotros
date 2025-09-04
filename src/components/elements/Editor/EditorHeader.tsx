@@ -20,7 +20,7 @@ export const EditorHeader = memo(function EditorHeader() {
           <motion.div
             key='username'
             initial={{ translateY: -6, opacity: 0 }}
-            animate={{ translateY: 2, opacity: 1 }}
+            animate={{ translateY: -1, opacity: 1 }}
             exit={{ translateY: -6, opacity: 0 }}>
             <UserName pubkey={pubkey} />
           </motion.div>

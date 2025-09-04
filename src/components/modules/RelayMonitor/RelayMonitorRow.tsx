@@ -10,7 +10,7 @@ type Props = {
   table?: boolean
 }
 
-export const RelayDiscoveryRow = memo(function RelayDiscoveryRow(props: Props) {
+export const RelayMonitorRow = memo(function RelayMonitorRow(props: Props) {
   const { event, table = true } = props
   const dTag = useEventTag(event, 'd')
   const relayPubkey = useEventTag(event, 'p')

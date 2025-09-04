@@ -31,11 +31,14 @@ export const FeedHeader = (props: Props) => {
     }
     case 'lists': {
       switch (feed.filter.kinds?.[0]) {
+        case Kind.BookmarkList: {
+          return <FeedHeaderBase label='Bookmarks' />
+        }
         case Kind.FollowSets: {
-          return <FeedHeaderBase label='Follow Sets' />
+          return <FeedHeaderBase label='Follow Sets' feed={feed} />
         }
         case Kind.RelaySets: {
-          return <FeedHeaderBase label='Relay Sets' />
+          return <FeedHeaderBase label='Relay Sets' feed={feed} />
         }
         default: {
           return <FeedHeaderBase label='Feed' feed={feed} />

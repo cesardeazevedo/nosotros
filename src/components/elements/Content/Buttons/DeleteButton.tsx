@@ -11,7 +11,7 @@ export const DeleteButton = (props: Props) => {
     <IconButton
       size='sm'
       sx={styles.root}
-      variant='outlined'
+      variant='standard'
       onClick={() => props.onClick()}
       icon={<IconX strokeWidth='2.5' size={16} />}
     />
@@ -24,5 +24,7 @@ const styles = css.create({
     right: 10,
     top: 14,
     zIndex: 1000,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    color: 'white',
   },
 })

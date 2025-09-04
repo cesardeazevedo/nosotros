@@ -8,7 +8,8 @@ import { typeFace } from '@/themes/typeFace.stylex'
 import React from 'react'
 import { css, html } from 'react-strict-dom'
 import { LinkRelayFeed } from '../../Links/LinkRelayFeed'
-import { RelayPopoverLink } from '../../Relays/RelayPopoverLink'
+import { RelayIcon } from '../../Relays/RelayIcon'
+import { RelayPopover } from '../../Relays/RelayPopover'
 
 type Props = {
   href: string
@@ -30,11 +31,14 @@ export const ContentLink = (props: Props) => {
   const isRelayLink = href?.startsWith('wss://')
   if (isRelayLink) {
     return (
-      <RelayPopoverLink url={href}>
-        <LinkRelayFeed url={formatRelayUrl(href)} sx={sx}>
-          {props.children}
-        </LinkRelayFeed>
-      </RelayPopoverLink>
+      <RelayPopover url={href}>
+        <html.span style={styles.link}>
+          <RelayIcon size='xxs' url={href} sx={styles.relay$avatar} />
+          <LinkRelayFeed url={formatRelayUrl(href)} sx={sx}>
+            {props.children}
+          </LinkRelayFeed>
+        </html.span>
+      </RelayPopover>
     )
   }
   if (isLongLink && href) {
@@ -49,6 +53,14 @@ const styles = css.create({
     fontWeight: typeFace.bold,
     display: 'inline-block',
     verticalAlign: 'top',
+  },
+  link: {
+    display: 'inline',
+    borderRadius: 6,
+    backgroundColor: palette.surfaceContainer,
+    paddingInline: 2,
+    paddingTop: 1,
+    paddingBottom: 1,
   },
   root$underline: {
     ':hover': {
@@ -66,5 +78,13 @@ const styles = css.create({
     paddingInline: spacing['padding1'],
     backgroundColor: palette.surfaceContainer,
     borderRadius: shape.lg,
+  },
+  relay$avatar: {
+    position: 'relative',
+    display: 'inline-block',
+    width: 16,
+    height: 16,
+    top: -2,
+    marginRight: 2,
   },
 })

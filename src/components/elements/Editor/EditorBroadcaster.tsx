@@ -44,14 +44,15 @@ export const EditorBroadcaster = memo(function EditorBroadcaster() {
         <Stack horizontal={false} sx={styles.panel} wrap={false} gap={1}>
           <Stack horizontal={false}>
             <Text variant='title' size='sm'>
-              My outbox relays
+              Relays
             </Text>
             <Text variant='body' size='md'>
-              Those are relays where you write your notes
+              Those are relays the note will be published to, this includes the inbox relays from people being mentioned
+              in the note
             </Text>
           </Stack>
           <Stack horizontal wrap gap={0.5}>
-            {state.myOutboxRelays.map((relay) => (
+            {state.allRelays.map((relay) => (
               <RelayInputChip key={relay} url={relay} onDelete={() => state.excludeRelay(relay)} />
             ))}
             <RelaySelectPopover label='Add relay' onSubmit={(relay) => state.includeRelay(relay)} />

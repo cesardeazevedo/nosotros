@@ -22,11 +22,11 @@ export function useUserState(pubkey?: string, options?: UserStateOptions) {
   const nprofile = useNprofile(pubkey)
   const follows = useUserFollows(pubkey, statsOptions)
 
-  const totalFollowing = useMemo(() => follows.data?.tags.filter((tag) => tag[0] === 'p').length || 0, [follows.data])
+  const totalFollowing = useMemo(() => follows.data?.tags.length || 0, [follows.data])
 
   const followsTag = useCallback(
-    (otherPubkey: string | undefined, tagName: string = 'p') => {
-      return follows.data?.tags.some((tag) => tagName === tag[0] && tag[1] === otherPubkey) || false
+    (value: string | undefined, tagName: string = 'p') => {
+      return follows.data?.tags.some((tag) => tagName === tag[0] && tag[1] === value) || false
     },
     [follows.data],
   )

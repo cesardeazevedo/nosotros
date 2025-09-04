@@ -1,9 +1,8 @@
 import { Button } from '@/components/ui/Button/Button'
 import { Stack } from '@/components/ui/Stack/Stack'
-import { useRepliesPubkeys } from '@/hooks/query/useReplies'
 import type { NoteState } from '@/hooks/state/useNote'
 import { spacing } from '@/themes/spacing.stylex'
-import { memo } from 'react'
+import { memo, useMemo } from 'react'
 import { css } from 'react-strict-dom'
 import { LinkNEvent } from '../Links/LinkNEvent'
 import { UsersAvatars } from '../User/UsersAvatars'
@@ -14,7 +13,7 @@ type Props = {
 
 export const ThreadRepliesSummary = memo(function ThreadRepliesSummary(props: Props) {
   const { note } = props
-  const pubkeys = useRepliesPubkeys(note)
+  const pubkeys = useMemo(() => note.replies.data?.map((x) => x.pubkey) || [], [note.replies.data])
   const total = note.repliesTotal || ''
 
   return (

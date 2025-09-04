@@ -1,19 +1,24 @@
 import type { NostrFilter, RelayHints } from '@/core/types'
 import type { NostrContext } from '@/nostr/context'
-import { from, identity, mergeMap } from 'rxjs'
+import { isParameterizedReplaceableKind } from 'nostr-tools/kinds'
+import { from, identity, map, mergeMap } from 'rxjs'
 import invariant from 'tiny-invariant'
 import { queryClient } from '../query/queryClient'
-import { addressableEventQueryOptions } from '../query/useQueryBase'
+import { addressableEventQueryOptions, replaceableEventQueryOptions } from '../query/useQueryBase'
 import { subscribeStrategy } from './subscribeStrategy'
 
 function fetchList(filter: NostrFilter) {
   const pubkey = filter.authors?.[0]
   const kind = filter.kinds?.[0]
-  const d = filter['#d']?.[0]
   invariant(kind, 'Missing d tag on subscribeFeedListP')
-  invariant(d, 'Missing d tag on subscribeFeedListP')
   invariant(pubkey, 'Missing author on subscribeFeedListP')
-  return queryClient.fetchQuery(addressableEventQueryOptions(kind, pubkey, d))
+  if (isParameterizedReplaceableKind(kind)) {
+    const d = filter['#d']?.[0]
+    invariant(d, 'Missing d tag on subscribeFeedListP')
+    return queryClient.fetchQuery(addressableEventQueryOptions(kind, pubkey, d))
+  }
+
+  return queryClient.fetchQuery(replaceableEventQueryOptions(kind, pubkey))
 }
 
 export function subscribeFeedListSetsP(ctx: NostrContext, filter: NostrFilter) {
@@ -38,7 +43,9 @@ export function subscribeFeedListSetsE(ctx: NostrContext, filter: NostrFilter) {
           ...ids.reduce((acc, id) => ({ ...acc, [id]: [event.pubkey] }), {}),
         },
       }
-      return subscribeStrategy({ ...ctx, relayHints }, { ids })
+      return subscribeStrategy({ ...ctx, relayHints }, { ids }).pipe(
+        map((events) => events.sort((a, b) => b.created_at - a.created_at)),
+      )
     }),
   )
 }

@@ -146,7 +146,7 @@ export const SidebarMenu = memo(function SidebarMenu() {
       <html.div style={styles.wrapper}>
         <SidebarMenuRecents />
       </html.div>
-      <html.div style={styles.wrapper}>
+      <Stack horizontal={false} gap={0.5} sx={styles.wrapper}>
         <SidebarMenuRelays />
         <Link to='/settings'>
           {({ isActive }) => (
@@ -160,7 +160,7 @@ export const SidebarMenu = memo(function SidebarMenu() {
         </Link>
         <br />
         {isMobile && <SidebarMenuLogout />}
-      </html.div>
+      </Stack>
     </Stack>
   )
 })

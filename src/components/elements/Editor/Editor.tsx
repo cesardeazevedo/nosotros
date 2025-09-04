@@ -7,6 +7,7 @@ import { usePublishEventMutation } from '@/hooks/mutations/usePublishEventMutati
 import { useCurrentPubkey } from '@/hooks/useAuth'
 import { publish } from '@/nostr/publish/publish'
 import { spacing } from '@/themes/spacing.stylex'
+import { IconChevronRight } from '@tabler/icons-react'
 import { UserAvatar } from 'components/elements/User/UserAvatar'
 import type { NostrEvent } from 'nostr-tools'
 import { useObservableState } from 'observable-hooks'
@@ -117,8 +118,15 @@ export const Editor = memo(function Editor(props: Props) {
           <Stack horizontal={false} grow>
             <Stack sx={[styles.content, dense && styles.content$dense]} gap={2} align='stretch'>
               <Stack horizontal={false} sx={styles.wrapper}>
-                <EditorHeader />
-                {headerComponent}
+                <Stack gap={1}>
+                  <EditorHeader />
+                  {state.open && headerComponent && (
+                    <Stack gap={1}>
+                      <IconChevronRight size={16} strokeWidth='3' />
+                      {headerComponent}
+                    </Stack>
+                  )}
+                </Stack>
                 {state.open ? <EditorTiptap key='editor' dense={dense} /> : <EditorPlaceholder />}
               </Stack>
             </Stack>

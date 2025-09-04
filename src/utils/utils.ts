@@ -45,3 +45,7 @@ export function compactObject<T>(input: T) {
   }
   return result as T
 }
+
+export function dedupeById<T extends { id: string }>(items: T[] | undefined = []) {
+  return [...new Map([...items].map((item) => [item.id, item])).values()]
+}

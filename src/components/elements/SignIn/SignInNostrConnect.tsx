@@ -15,7 +15,7 @@ import { spacing } from '@/themes/spacing.stylex'
 import { typeScale } from '@/themes/typeScale.stylex'
 import { IconCheck } from '@tabler/icons-react'
 import { useSetAtom } from 'jotai'
-import { pluckFirst, useObservable, useObservableEagerState } from 'observable-hooks'
+import { pluckFirst, useObservable, useObservableState } from 'observable-hooks'
 import { QRCodeCanvas } from 'qrcode.react'
 import { useState } from 'react'
 import { css, html } from 'react-strict-dom'
@@ -54,7 +54,7 @@ export const SignInNostrConnect = () => {
     },
     [relay],
   )
-  const url = useObservableEagerState(url$)
+  const url = useObservableState(url$)
 
   const { copy, copied } = useCopyClipboard(url)
 
@@ -75,7 +75,7 @@ export const SignInNostrConnect = () => {
           placement='bottom'
           opened={copied}>
           <html.div style={styles.qrcode}>
-            <QRCodeCanvas width={500} height={500} size={220} value={url} onClick={copy} />
+            {url && <QRCodeCanvas width={500} height={500} size={220} value={url} onClick={copy} />}
           </html.div>
         </Tooltip>
         <Text sx={styles.url} size='sm'>

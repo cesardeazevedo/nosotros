@@ -3,9 +3,10 @@ import { Stack } from '@/components/ui/Stack/Stack'
 import { useCurrentPubkey } from '@/hooks/useAuth'
 import { useSettings } from '@/hooks/useSettings'
 import { spacing } from '@/themes/spacing.stylex'
-import { Link, useMatchRoute } from '@tanstack/react-router'
+import { useMatchRoute } from '@tanstack/react-router'
 import React, { memo, useState } from 'react'
 import { css, html } from 'react-strict-dom'
+import { LinkBase } from '../Links/LinkBase'
 import { LinkSignIn } from '../Links/LinkSignIn'
 import { ProfilePopover } from '../Navigation/ProfilePopover'
 import { Sidebar } from './Sidebar'
@@ -15,7 +16,6 @@ import { SidebarContext } from './SidebarContext'
 import { SidebarTransition } from './SidebarTransition'
 import { SidebarPaneLists } from './panes/SidebarPaneLists'
 import { SidebarPaneNotifications } from './panes/SidebarPaneNotifications'
-import { SidebarPaneRelayDiscovery } from './panes/SidebarPaneRelayDiscovery'
 
 type Props = {
   children: React.ReactNode
@@ -49,22 +49,20 @@ export const SidebarLayout = memo(function SidebarLayout(props: Props) {
             {(sx, ref) => <SidebarPaneNotifications ref={ref} sx={sx} pubkey={pubkey} />}
           </SidebarTransition>
         )}
-        <SidebarTransition open={pane === '/explore/relays'}>
-          {(sx, ref) => <SidebarPaneRelayDiscovery ref={ref} sx={sx} />}
-        </SidebarTransition>
         <html.main
           style={[
             !isDeck && !settings.sidebarCollapsed && styles.main,
             isDeck && styles.main$deck,
             isDeck && !settings.sidebarCollapsed && styles.main$deck$expanded,
           ]}>
+          <html.div style={styles.leading} id='header_lead'></html.div>
           <html.div style={styles.trailing}>
             <Stack gap={1}>
               {pubkey ? (
                 <Stack gap={2}>
-                  <Link to='.' search={{ compose: true }}>
+                  <LinkBase to='.' search={(rest) => ({ ...rest, compose: true })}>
                     <Button variant='filled'>Create note</Button>
-                  </Link>
+                  </LinkBase>
                   <ProfilePopover />
                 </Stack>
               ) : (
@@ -82,6 +80,11 @@ export const SidebarLayout = memo(function SidebarLayout(props: Props) {
 })
 
 const styles = css.create({
+  leading: {
+    position: 'fixed',
+    // top: spacing.margin2,
+    marginLeft: spacing.margin1,
+  },
   trailing: {
     position: 'fixed',
     top: spacing.margin2,
@@ -89,9 +92,10 @@ const styles = css.create({
   },
   main: {
     overflowX: 'hidden',
-    paddingLeft: {
-      default: 0,
-      '@media (max-width: 1920px)': 315,
+    marginLeft: 315,
+    paddingRight: {
+      default: 315,
+      '@media (max-width: 1920px)': 0,
     },
   },
   main$deck: {

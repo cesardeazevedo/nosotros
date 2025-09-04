@@ -1,4 +1,5 @@
 import { enqueueToastAtom } from '@/atoms/toaster.atoms'
+import { useNostrContext } from '@/components/providers/NostrContextProvider'
 import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { MenuList } from '@/components/ui/MenuList/MenuList'
 import { Popover } from '@/components/ui/Popover/Popover'
@@ -29,6 +30,7 @@ type Props = {
 
 export const RepostPopover = memo(function RepostPopover(props: Props) {
   const { note, children } = props
+  const ctx = useNostrContext()
   const router = useRouter()
   const queryClient = useQueryClient()
   const enqueueToast = useSetAtom(enqueueToastAtom)
@@ -37,7 +39,7 @@ export const RepostPopover = memo(function RepostPopover(props: Props) {
     mutationFn:
       ({ signer }) =>
       (event) =>
-        publishRepost(event, { signer }),
+        publishRepost(event, { signer, includeRelays: ctx?.relays }),
     onSuccess: (event) => {
       queryClient.setQueryData(queryKeys.tag('e', [note.id], Kind.Repost), (old: NostrEventDB[] = []) => {
         return [...old, event]

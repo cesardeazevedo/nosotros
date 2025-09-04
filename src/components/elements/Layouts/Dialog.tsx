@@ -43,7 +43,7 @@ function MobileDialog(props: Props) {
 }
 
 export const DialogSheet = (props: Props) => {
-  const { children, surface = 'surfaceContainerLow' } = props
+  const { children, surface = 'surfaceContainerLowest' } = props
   const isMobile = useMobile()
   return (
     <>
@@ -51,7 +51,7 @@ export const DialogSheet = (props: Props) => {
       {!isMobile && (
         <Dialog {...props} trapFocus={false}>
           {surface ? (
-            <DialogContent shape='lg' surface={surface} maxWidth={props.maxWidth}>
+            <DialogContent outlined shape='lg' surface={surface} maxWidth={props.maxWidth}>
               {children}
             </DialogContent>
           ) : (

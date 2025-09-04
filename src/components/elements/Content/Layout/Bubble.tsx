@@ -1,4 +1,6 @@
 import type { SxProps } from '@/components/ui/types'
+import { duration } from '@/themes/duration.stylex'
+import { easing } from '@/themes/easing.stylex'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import React from 'react'
@@ -27,6 +29,13 @@ const styles = css.create({
     backgroundColor: palette.surfaceContainer,
   },
   highlight: {
+    transition: 'transform',
+    transitionDuration: duration.short3,
+    transitionTimingFunction: easing.emphasized,
+    transform: 'scale(1)',
+    ':active': {
+      transform: 'scale(0.96)',
+    },
     backgroundColor: {
       default: palette.surfaceContainer,
       ':hover': palette.surfaceContainerHigh,

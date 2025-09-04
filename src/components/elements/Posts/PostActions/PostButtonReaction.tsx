@@ -1,5 +1,6 @@
 import { enqueueToastAtom } from '@/atoms/toaster.atoms'
 import { useContentContext } from '@/components/providers/ContentProvider'
+import { useNostrContext } from '@/components/providers/NostrContextProvider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { usePublishEventMutation } from '@/hooks/mutations/usePublishEventMutation'
 import { useReactionByPubkey } from '@/hooks/query/useReactions'
@@ -41,6 +42,7 @@ export const ButtonReaction = memo(function ButtonReaction(props: Props) {
   const [mobileOpen, setMobileOpen] = useState(false)
   const { note } = props
   const { dense } = useContentContext()
+  const ctx = useNostrContext()
   const enqueueToast = useSetAtom(enqueueToastAtom)
   const pubkey = useCurrentPubkey()
   const total = note.reactions.data?.length || 0
@@ -52,7 +54,7 @@ export const ButtonReaction = memo(function ButtonReaction(props: Props) {
     mutationFn:
       ({ signer, pubkey }) =>
       ([reaction, event]) =>
-        publishReaction(pubkey, event, reaction, { signer }),
+        publishReaction(pubkey, event, reaction, { signer, includeRelays: ctx?.relays }),
     onError: (error) => {
       enqueueToast({ component: error.message })
     },

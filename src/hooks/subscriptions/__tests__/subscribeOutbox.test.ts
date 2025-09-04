@@ -32,14 +32,14 @@ describe('subscribeOutbox', () => {
     await relayOutbox.close()
     expect(spy.getValues()).toStrictEqual([
       [
-        'wss://relay1.com',
+        RELAY_1,
         {
           authors: ['p1'],
           kinds: [0],
         },
       ],
       [
-        'wss://relay2.com',
+        RELAY_2,
         {
           authors: ['p1'],
           kinds: [0],

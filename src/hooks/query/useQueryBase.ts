@@ -33,7 +33,7 @@ export function createEventQueryOptions<Selector = NostrEventDB[]>(options: UseQ
   return queryOptions<NostrEventDB[], Error, Selector>({
     queryFn: async () => {
       const { maxRelaysPerUser } = store.get(settingsAtom)
-      return await firstValueFrom(
+      const res = await firstValueFrom(
         subscribeStrategy({ ...ctx, maxRelaysPerUser }, filter).pipe(
           tap((res) => res.forEach(setEventData)),
           tap((res) => {
@@ -49,6 +49,10 @@ export function createEventQueryOptions<Selector = NostrEventDB[]>(options: UseQ
           defaultIfEmpty([]),
         ),
       )
+      if (!res.length) {
+        return queryClient.getQueryData<NostrEventDB[]>(opts.queryKey) || []
+      }
+      return res
     },
     ...opts,
   })

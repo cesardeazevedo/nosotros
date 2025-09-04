@@ -190,9 +190,13 @@ const styles = css.create({
       ':active': buttonTokens.containerElevation,
       ':disabled': elevation.shadows0,
     },
-    transitionProperty: 'background-color, box-shadow, color, outline-color, outline-offset, outline-width',
+    transitionProperty: 'transform, background-color, box-shadow, color, outline-color, outline-offset, outline-width',
     transitionDuration: duration.short3,
     transitionTimingFunction: easing.emphasized,
+    transform: 'scale(1)',
+    ':active': {
+      transform: 'scale(0.94)',
+    },
     cursor: {
       default: 'pointer',
       ':disabled': 'default',

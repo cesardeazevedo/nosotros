@@ -1,4 +1,5 @@
 import { ArticleHeadline } from '@/components/modules/Articles/ArticleHeadline'
+import { useNostrContext } from '@/components/providers/NostrContextProvider'
 import { NoteProvider } from '@/components/providers/NoteProvider'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
@@ -30,6 +31,7 @@ type Props = {
 
 export const PostRoot = memo(function PostRoot(props: Props) {
   const { event, header, open } = props
+  const isFeed = !!useNostrContext()
   const note = useNoteState(event, { repliesOpen: open, forceSync: open })
 
   const openReplies = useCallback(() => {
@@ -38,13 +40,13 @@ export const PostRoot = memo(function PostRoot(props: Props) {
 
   return (
     <NoteProvider value={{ event }}>
-      <html.article style={styles.root} ref={note.ref}>
+      <html.article style={[styles.root, isFeed && styles.root$divider]} ref={note.ref}>
         <PostLink note={note} onClick={openReplies}>
           {note.event.kind === Kind.Article && <ArticleHeadline />}
           {header || <PostHeader event={event} />}
           <PostContent note={note} />
           <PostActions note={note} onReplyClick={openReplies} />
-          {note.state.repliesOpen === null && <RepliesPreview note={note} onLoadMoreClick={openReplies} />}
+          {note.state.repliesOpen === null && <RepliesPreview note={note} />}
         </PostLink>
         <Expandable expanded={note.state.broadcastOpen}>
           <PostBroadcaster note={note} />
@@ -73,6 +75,8 @@ const styles = css.create({
     animation: fadeIn,
     animationTimingFunction: easing.emphasizedDecelerate,
     animationDuration: duration.long3,
+  },
+  root$divider: {
     borderBottom: '1px solid',
     borderBottomColor: palette.outlineVariant,
   },
