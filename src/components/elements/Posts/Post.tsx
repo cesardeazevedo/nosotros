@@ -46,7 +46,7 @@ export const PostRoot = memo(function PostRoot(props: Props) {
           {header || <PostHeader event={event} />}
           <PostContent note={note} />
           <PostActions note={note} onReplyClick={openReplies} />
-          {note.state.repliesOpen === null && <RepliesPreview note={note} onLoadMoreClick={openReplies} />}
+          {note.state.repliesOpen === null && <RepliesPreview note={note} />}
         </PostLink>
         <Expandable expanded={note.state.broadcastOpen}>
           <PostBroadcaster note={note} />

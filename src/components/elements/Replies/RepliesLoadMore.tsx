@@ -19,12 +19,19 @@ export const RepliesLoadMore = function RepliesLoadMore(props: Props) {
   const loading = note.replies.isLoading
   const repliesLeft = useAtomValue(repliesLeftAtomFamily({ id: note.event.id, limit: note.state.pageSize }))
   const noRepliesLeft = !loading && !!note.state.repliesOpen && repliesLeft === 0
+  const handleClick = () => {
+    if (note.state.repliesOpen) {
+      note.paginate()
+    } else {
+      note.actions.toggleReplies()
+    }
+  }
   return (
     <Stack sx={styles.root} gap={1}>
       <html.span style={styles.leading}>
         {loading ? <CircularProgress size='sm' /> : <IconDotsVertical {...css.props(styles.icon)} />}
       </html.span>
-      <Button variant='filledTonal' onClick={() => note.paginate()} disabled={loading || (disabled ?? noRepliesLeft)}>
+      <Button variant='filledTonal' onClick={handleClick} disabled={loading || (disabled ?? noRepliesLeft)}>
         {loading ? 'Loading replies' : noRepliesLeft ? 'No replies left' : `See More ${repliesLeft || ''} replies`}
       </Button>
     </Stack>

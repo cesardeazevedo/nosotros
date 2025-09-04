@@ -75,7 +75,7 @@ export const SignInNostrConnect = () => {
           placement='bottom'
           opened={copied}>
           <html.div style={styles.qrcode}>
-            <QRCodeCanvas width={500} height={500} size={220} value={url} onClick={copy} />
+            {url && <QRCodeCanvas width={500} height={500} size={220} value={url} onClick={copy} />}
           </html.div>
         </Tooltip>
         <Text sx={styles.url} size='sm'>

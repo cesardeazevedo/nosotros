@@ -158,7 +158,7 @@ export const SidebarCollapsed = memo(function SidebarCollapsed(props: Props) {
         {/* </Tooltip> */}
         <IconButton
           toggle
-          selected={context.pane === '/explore/relays' || !!match({ to: '/explore/relays' })}
+          selected={context.pane === '/explore/relays' || !!match({ to: '/relays' })}
           onClick={() => context.setPane('/explore/relays')}>
           <IconWorldBolt {...iconProps} />
         </IconButton>

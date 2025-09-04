@@ -65,7 +65,7 @@ const styles = css.create({
     cursor: 'pointer',
     backgroundColor: {
       default: 'transparent',
-      ':hover': 'rgba(125, 125, 125, 0.06)',
+      ':hover': 'rgba(125, 125, 125, 0.04)',
     },
   },
 })
