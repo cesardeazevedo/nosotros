@@ -29,6 +29,7 @@ export type FeedModule = Module & {
   blured?: boolean
   pageSize?: number
   includeReplies?: boolean
+  autoUpdate?: boolean
 }
 
 type PageParam = {

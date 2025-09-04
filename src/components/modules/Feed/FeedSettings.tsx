@@ -71,6 +71,17 @@ export const FeedSettings = memo(function FeedSettings(props: Props) {
         </Stack>
         <FeedSettingsSafety feed={feed} />
         {renderRelaySettings && <FeedSettingsRelays feed={feed} />}
+        <Text variant='label' size='lg' sx={styles.label}>
+          Other
+        </Text>
+        <Stack>
+          <Chip
+            variant='filter'
+            label='Auto Update'
+            selected={feed.autoUpdate}
+            onClick={() => feed.setAutoUpdate((prev) => !prev)}
+          />
+        </Stack>
       </Stack>
     </html.div>
   )
