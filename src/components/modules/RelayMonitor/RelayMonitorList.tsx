@@ -1,12 +1,12 @@
 import { RelayListRowLoading } from '@/components/elements/Relays/RelayListRowLoading'
 import { RelayLoadMore } from '@/components/elements/Relays/RelayLoadMore'
 import { Stack } from '@/components/ui/Stack/Stack'
-import type { RelayDiscoveryFeed } from '@/hooks/state/useRelayMonitorFeed'
+import type { RelayMonitorFeed } from '@/hooks/state/useRelayMonitorFeed'
 import { memo, useMemo } from 'react'
 import { RelayMonitorRow } from './RelayMonitorRow'
 
 type Props = {
-  feed: RelayDiscoveryFeed
+  feed: RelayMonitorFeed
 }
 
 export const RelayMonitorList = memo(function RelayMonitorList(props: Props) {

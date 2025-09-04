@@ -11,7 +11,7 @@ export const RelayActiveHeader = memo(function RelayActiveHeader() {
   return (
     <Stack gap={0.5} sx={styles.header} justify='space-between'>
       <Stack gap={1}>
-        <Text variant='title' size='md'>
+        <Text variant='title' size='sm'>
           Active Relays ({connected.length}/{relays.length})
         </Text>
       </Stack>

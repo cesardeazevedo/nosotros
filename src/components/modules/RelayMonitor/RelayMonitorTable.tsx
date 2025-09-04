@@ -2,12 +2,12 @@ import { RelayLoadMore } from '@/components/elements/Relays/RelayLoadMore'
 import { RelayTableHeader } from '@/components/elements/Relays/RelayTableHeader'
 import { RelayTableRowLoading } from '@/components/elements/Relays/RelayTableRowLoading'
 import { Stack } from '@/components/ui/Stack/Stack'
-import type { RelayDiscoveryFeed } from '@/hooks/state/useRelayMonitorFeed'
+import type { RelayMonitorFeed } from '@/hooks/state/useRelayMonitorFeed'
 import { memo, useMemo } from 'react'
 import { RelayMonitorRow } from './RelayMonitorRow'
 
 type Props = {
-  feed: RelayDiscoveryFeed
+  feed: RelayMonitorFeed
 }
 
 export const RelayMonitorTable = memo(function RelayMonitorTable(props: Props) {

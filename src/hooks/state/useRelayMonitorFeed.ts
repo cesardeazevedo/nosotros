@@ -1,4 +1,3 @@
-import { Kind } from '@/constants/kinds'
 import { DEFAULT_RELAY_MONITOR_PUBKEY } from '@/constants/relays'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import type { RelayInformation } from 'nostr-tools/nip11'
@@ -8,7 +7,7 @@ import { queryClient } from '../query/queryClient'
 import { queryKeys } from '../query/queryKeys'
 import { useFeedState } from './useFeed'
 
-export type RelayDiscoveryFeed = ReturnType<typeof useRelayMonitorFeed>
+export type RelayMonitorFeed = ReturnType<typeof useRelayMonitorFeed>
 
 export function useRelayMonitorFeed(options: RelayMonitorModule) {
   const feed = useFeedState(options)
@@ -32,8 +31,7 @@ export function useRelayMonitorFeed(options: RelayMonitorModule) {
 
   const all = useMemo(() => {
     const pages = feed.query.data?.pages || []
-    const flat = pages.flat().filter((e) => e.kind === Kind.RelayDiscovery)
-    return flat
+    return pages.flat()
   }, [feed.query.data])
 
   const groupByMonitor = useMemo(() => {
@@ -56,12 +54,6 @@ export function useRelayMonitorFeed(options: RelayMonitorModule) {
     return selected ? [...(groupByMonitor.get(selected) || [])] : []
   }, [selected, groupByMonitor])
 
-  // const left = useMemo(() => {
-  //   const total = list.length
-  //   const chunk = feed.options.filter.limit ?? 0
-  //   return Math.max(0, total - chunk)
-  // }, [list, feed.options.filter.limit])
-
   const listMonitors = seenMonitors
 
   const getByMonitor = useCallback(
@@ -77,13 +69,10 @@ export function useRelayMonitorFeed(options: RelayMonitorModule) {
 
   const select = useCallback((monitor: string) => setSelectedMonitor(monitor), [])
 
-  console.log('list', list)
-
   return {
     ...feed,
     selected,
     list,
-    // left,
     listMonitors,
     getByMonitor,
     getTotal,

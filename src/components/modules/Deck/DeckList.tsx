@@ -12,7 +12,7 @@ import { MediaColumn } from '../Media/MediaColumn'
 import { NostrEventColumn } from '../NostrEvent/NostrEventColumn'
 import { NotificationColumn } from '../Notifications/NotificationColumn'
 import { NProfileColumn } from '../NProfile/NProfileColumn'
-import { RelayDiscoveryColumn } from '../RelayDiscovery/RelayDiscoveryColumn'
+import { RelayMonitorColumn } from '../RelayMonitor/RelayMonitorColumn'
 import { RelayFeedColumn } from '../RelayFeed/RelayFeedColumn'
 import { SearchColumn } from '../Search/SearchColumn'
 import { TagColumn } from '../Tag/TagColumn'
@@ -52,7 +52,7 @@ const DeckModule = (props: Props) => {
       return <NostrEventColumn module={column as EventModule} />
     }
     case 'relaydiscovery': {
-      return <RelayDiscoveryColumn module={column} />
+      return <RelayMonitorColumn module={column} />
     }
     case 'relayfeed': {
       return <RelayFeedColumn module={column} />

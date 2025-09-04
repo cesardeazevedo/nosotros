@@ -23,7 +23,7 @@ export async function prepopulate() {
 
 export async function setEventData(event: NostrEventDB) {
   // We don't need to keep track of these events individually
-  if ([Kind.RelayDiscovery, Kind.Reaction].includes(event.kind)) {
+  if ([Kind.RelayMonitor, Kind.Reaction].includes(event.kind)) {
     return
   }
   if (event.kind === Kind.Text || event.kind === Kind.Comment) {

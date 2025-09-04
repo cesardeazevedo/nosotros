@@ -27,7 +27,7 @@ import { NotificationRoute } from './components/modules/Notifications/Notificati
 import { NProfileLoading } from './components/modules/NProfile/NProfileLoading'
 import { NProfileRoute } from './components/modules/NProfile/NProfileRoute'
 import { RelayActiveRoute } from './components/modules/RelayActive/RelayActiveRoute'
-import { RelayDiscoveryRoute } from './components/modules/RelayDiscovery/RelayDiscoveryRoute'
+import { RelayMonitorRoute } from './components/modules/RelayMonitor/RelayMonitorRoute'
 import { RelayRoute } from './components/modules/Relays/RelaysRoute'
 import { SearchRoute } from './components/modules/Search/SearchRoute'
 import { SettingsPreferencesRoute } from './components/modules/Settings/SettingsPreferenceRoute'
@@ -549,17 +549,17 @@ const relaysRoute = createRoute({
   path: '/relays',
   component: RelayRoute,
 })
-//
+
 const relayActiveRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/relays/active',
+  getParentRoute: () => relaysRoute,
+  path: '/',
   component: RelayActiveRoute,
 })
 
-const relayDiscoveryRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/explore/relays',
-  component: RelayDiscoveryRoute,
+const relayMonitorRoute = createRoute({
+  getParentRoute: () => relaysRoute,
+  path: '/monitor',
+  component: RelayMonitorRoute,
 })
 
 const settingsRoute = createRoute({
@@ -593,9 +593,7 @@ export const routeTree = rootRoute.addChildren([
   mediaRoute,
   articleRoute,
   composeRoute,
-  relaysRoute,
-  relayActiveRoute,
-  relayDiscoveryRoute,
+  relaysRoute.addChildren([relayActiveRoute, relayMonitorRoute]),
   settingsRoute.addChildren([settingsPreferenceRoute, settingsStorageRoute]),
 ])
 

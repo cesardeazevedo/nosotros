@@ -1,12 +1,12 @@
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
-import type { RelayDiscoveryFeed } from '@/hooks/state/useRelayMonitorFeed'
+import type { RelayMonitorFeed } from '@/hooks/state/useRelayMonitorFeed'
 import { palette } from '@/themes/palette.stylex'
 import { memo } from 'react'
 import { css } from 'react-strict-dom'
 
 type Props = {
-  feed: RelayDiscoveryFeed
+  feed: RelayMonitorFeed
 }
 
 export const RelayMonitorTitle = memo(function RelayMonitorTitle(props: Props) {

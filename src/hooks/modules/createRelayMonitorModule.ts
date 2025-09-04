@@ -7,7 +7,7 @@ export type RelayMonitorModule = FeedModule & {}
 export function createRelayMonitorModule(): RelayMonitorModule {
   const id = 'relaydiscovery'
   const filter = {
-    kinds: [Kind.RelayDiscovery],
+    kinds: [Kind.RelayMonitor],
     limit: 500,
   }
   return {

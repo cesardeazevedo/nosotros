@@ -36,6 +36,6 @@ export enum Kind {
   Article = 30023,
   StarterPack = 39089,
   MediaStarterPack = 39092,
-  RelayDiscovery = 30166,
+  RelayMonitor = 30166,
   NostrConnect = 24133,
 }

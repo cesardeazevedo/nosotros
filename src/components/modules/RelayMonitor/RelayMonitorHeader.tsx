@@ -3,7 +3,7 @@ import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import type { Props as StackProps } from '@/components/ui/Stack/Stack'
 import { Stack } from '@/components/ui/Stack/Stack'
-import type { RelayDiscoveryFeed } from '@/hooks/state/useRelayMonitorFeed'
+import type { RelayMonitorFeed } from '@/hooks/state/useRelayMonitorFeed'
 import { useMobile } from '@/hooks/useMobile'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
@@ -15,7 +15,7 @@ import { RelayMonitorSelect } from './RelayMonitorSelect'
 import { RelayMonitorTitle } from './RelayMonitorTitle'
 
 type Props = StackProps & {
-  feed: RelayDiscoveryFeed
+  feed: RelayMonitorFeed
   collapsed?: boolean
   renderTitle?: boolean
   children?: ReactNode
