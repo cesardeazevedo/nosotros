@@ -16,7 +16,6 @@ import { SidebarContext } from './SidebarContext'
 import { SidebarTransition } from './SidebarTransition'
 import { SidebarPaneLists } from './panes/SidebarPaneLists'
 import { SidebarPaneNotifications } from './panes/SidebarPaneNotifications'
-import { SidebarPaneRelayDiscovery } from './panes/SidebarPaneRelayDiscovery'
 
 type Props = {
   children: React.ReactNode
@@ -50,9 +49,6 @@ export const SidebarLayout = memo(function SidebarLayout(props: Props) {
             {(sx, ref) => <SidebarPaneNotifications ref={ref} sx={sx} pubkey={pubkey} />}
           </SidebarTransition>
         )}
-        <SidebarTransition open={pane === '/explore/relays'}>
-          {(sx, ref) => <SidebarPaneRelayDiscovery ref={ref} sx={sx} />}
-        </SidebarTransition>
         <html.main
           style={[
             !isDeck && !settings.sidebarCollapsed && styles.main,

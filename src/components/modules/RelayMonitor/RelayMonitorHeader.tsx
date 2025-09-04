@@ -3,7 +3,7 @@ import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import type { Props as StackProps } from '@/components/ui/Stack/Stack'
 import { Stack } from '@/components/ui/Stack/Stack'
-import type { RelayDiscoveryFeed } from '@/hooks/state/useRelayDiscoveryFeed'
+import type { RelayDiscoveryFeed } from '@/hooks/state/useRelayMonitorFeed'
 import { useMobile } from '@/hooks/useMobile'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
@@ -11,8 +11,8 @@ import { IconSettings, IconSettingsFilled } from '@tabler/icons-react'
 import type { ReactNode } from 'react'
 import { memo, useState } from 'react'
 import { css } from 'react-strict-dom'
-import { RelayDiscoveryMonitorSelect } from './RelayDiscoveryMonitorSelect'
-import { RelayDiscoveryTitle } from './RelayDiscoveryTitle'
+import { RelayMonitorSelect } from './RelayMonitorSelect'
+import { RelayMonitorTitle } from './RelayMonitorTitle'
 
 type Props = StackProps & {
   feed: RelayDiscoveryFeed
@@ -26,20 +26,20 @@ const iconProps = {
   strokeWidth: '1.5',
 }
 
-export const RelayDiscoveryHeader = memo(function RelayDiscoveryHeader(props: Props) {
+export const RelayMonitorHeader = memo(function RelayMonitorHeader(props: Props) {
   const { feed, renderTitle = true, collapsed = false, children, ...rest } = props
   const isMobile = useMobile()
   const isCollapsed = isMobile || collapsed
   const [expanded, setExpanded] = useState(false)
   const filters = (
     <Stack gap={0.5} {...rest}>
-      {feed.selected && <RelayDiscoveryMonitorSelect feed={feed} />}
+      {feed.selected && <RelayMonitorSelect feed={feed} />}
     </Stack>
   )
   return (
     <>
       <Stack gap={0.5} grow sx={styles.header} justify='space-between'>
-        {renderTitle && <RelayDiscoveryTitle feed={feed} />}
+        {renderTitle && <RelayMonitorTitle feed={feed} />}
         {!isCollapsed && filters}
         {isCollapsed && (
           <>

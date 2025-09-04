@@ -3,14 +3,14 @@ import { DEFAULT_RELAY_MONITOR_PUBKEY } from '@/constants/relays'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import type { RelayInformation } from 'nostr-tools/nip11'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import type { RelayDiscoveryModule } from '../modules/createRelayDiscoveryModule'
+import type { RelayMonitorModule } from '../modules/createRelayMonitorModule'
 import { queryClient } from '../query/queryClient'
 import { queryKeys } from '../query/queryKeys'
 import { useFeedState } from './useFeed'
 
-export type RelayDiscoveryFeed = ReturnType<typeof useRelayDiscoveryFeed>
+export type RelayDiscoveryFeed = ReturnType<typeof useRelayMonitorFeed>
 
-export function useRelayDiscoveryFeed(options: RelayDiscoveryModule) {
+export function useRelayMonitorFeed(options: RelayMonitorModule) {
   const feed = useFeedState(options)
 
   useEffect(() => {
@@ -56,11 +56,11 @@ export function useRelayDiscoveryFeed(options: RelayDiscoveryModule) {
     return selected ? [...(groupByMonitor.get(selected) || [])] : []
   }, [selected, groupByMonitor])
 
-  const left = useMemo(() => {
-    const total = list.length
-    const chunk = feed.options.filter.limit ?? 0
-    return Math.max(0, total - chunk)
-  }, [list, feed.options.filter.limit])
+  // const left = useMemo(() => {
+  //   const total = list.length
+  //   const chunk = feed.options.filter.limit ?? 0
+  //   return Math.max(0, total - chunk)
+  // }, [list, feed.options.filter.limit])
 
   const listMonitors = seenMonitors
 
@@ -77,11 +77,13 @@ export function useRelayDiscoveryFeed(options: RelayDiscoveryModule) {
 
   const select = useCallback((monitor: string) => setSelectedMonitor(monitor), [])
 
+  console.log('list', list)
+
   return {
     ...feed,
     selected,
     list,
-    left,
+    // left,
     listMonitors,
     getByMonitor,
     getTotal,

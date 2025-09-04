@@ -1,6 +1,6 @@
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
-import type { RelayDiscoveryFeed } from '@/hooks/state/useRelayDiscoveryFeed'
+import type { RelayDiscoveryFeed } from '@/hooks/state/useRelayMonitorFeed'
 import { palette } from '@/themes/palette.stylex'
 import { memo } from 'react'
 import { css } from 'react-strict-dom'
@@ -9,7 +9,7 @@ type Props = {
   feed: RelayDiscoveryFeed
 }
 
-export const RelayDiscoveryTitle = memo(function RelayDiscoveryTitle(props: Props) {
+export const RelayMonitorTitle = memo(function RelayMonitorTitle(props: Props) {
   const { feed } = props
   return (
     <Stack grow gap={0.5}>
