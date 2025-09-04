@@ -4,7 +4,7 @@ import { Text } from '@/components/ui/Text/Text'
 import { useNip05 } from '@/hooks/query/useNIP05'
 import { useUserState } from '@/hooks/state/useUser'
 import { palette } from '@/themes/palette.stylex'
-import { IconAt, IconExclamationCircle, IconExclamationCircleFilled } from '@tabler/icons-react'
+import { IconAt, IconExclamationCircle } from '@tabler/icons-react'
 import { memo } from 'react'
 import { css } from 'react-strict-dom'
 
