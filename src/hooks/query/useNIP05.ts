@@ -8,7 +8,7 @@ export type Nip05Response = {
   relays?: Record<string, string[]>
 }
 
-export function nip05QueryOptions(nip05: string = ''): UseQueryOptions<Nip05DB | undefined> {
+export function nip05QueryOptions(nip05: string = ''): UseQueryOptions<Nip05DB | null> {
   const [name, host] = nip05.split('@')
   return {
     queryKey: ['nip05', nip05] as const,
@@ -43,7 +43,7 @@ export function nip05QueryOptions(nip05: string = ''): UseQueryOptions<Nip05DB |
           timestamp: Date.now(),
         } as Nip05DB
       }
-      return undefined
+      return null
     },
   }
 }
