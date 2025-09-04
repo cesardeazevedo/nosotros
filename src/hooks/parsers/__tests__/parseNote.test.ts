@@ -145,6 +145,7 @@ describe('parseNote', () => {
     })
     const note = parse({
       id: '1',
+      pubkey: 'p1',
       content: `hello nostr:${encoded}`,
       tags: [
         ['e', '1', '', 'mention'],
@@ -152,7 +153,14 @@ describe('parseNote', () => {
       ],
     })
     expect(note.mentionedNotes).toStrictEqual(['1', '2', event.id])
-    expect(note.relayHints).toStrictEqual({ ids: { [event.id]: [RELAY_1] } })
+    expect(note.relayHints).toStrictEqual({
+      ids: { [event.id]: [RELAY_1] },
+      idHints: {
+        '1': ['p1'],
+        '2': ['p1'],
+        [event.id]: ['p1'],
+      },
+    })
     expect(note.rootId).toBe(undefined)
     expect(note.parentId).toBeUndefined()
   })
@@ -167,6 +175,7 @@ describe('parseNote', () => {
     })
     const note = parse({
       id: '1',
+      pubkey: 'p1',
       content: `nostr:${encoded}`,
       tags: [
         ['e', '1', '', 'mention'],
@@ -174,7 +183,13 @@ describe('parseNote', () => {
       ],
     })
     const id = `${event.kind}:${event.pubkey}:myarticle`
-    expect(note.relayHints).toStrictEqual({ ids: { [id]: [RELAY_1] } })
+    expect(note.relayHints).toStrictEqual({
+      ids: { [id]: [RELAY_1] },
+      idHints: {
+        [id]: ['p1'],
+        '1': ['p1'],
+      },
+    })
     expect(note.mentionedNotes).toStrictEqual(['1', id])
     expect(note.mentionedAuthors).toStrictEqual(['1', event.pubkey])
   })
@@ -239,11 +254,16 @@ describe('parseNote', () => {
       }),
     )
     expect(note.relayHints).toStrictEqual({
-      authors: { '1': [RELAY_2], [event1.pubkey]: [RELAY_2] },
+      authors: {
+        '1': [RELAY_2],
+        [event1.pubkey]: [RELAY_2],
+      },
       ids: { '1': [RELAY_2], [event1.id]: [RELAY_2, RELAY_3] },
       idHints: {
         '1': ['p1', 'p2'],
         '2': ['p3'],
+        [event1.id]: ['1'],
+        [event2.id]: ['1'],
       },
     } as RelayHints)
   })
@@ -260,7 +280,7 @@ describe('parseNote', () => {
     )
     expect(note.relayHints).toStrictEqual({
       idHints: {
-        [event1.id]: [event1.pubkey],
+        [event1.id]: [event1.pubkey, '1'],
       },
     })
   })
