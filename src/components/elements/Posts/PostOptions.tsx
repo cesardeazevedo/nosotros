@@ -27,7 +27,7 @@ import {
 import { Link } from '@tanstack/react-router'
 import { useSetAtom } from 'jotai'
 import { memo, useCallback } from 'react'
-import { css } from 'react-strict-dom'
+import { css, html } from 'react-strict-dom'
 import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDOMProps'
 
 type PropsOptions = {
@@ -43,39 +43,56 @@ const iconProps = { size: 20 }
 
 const Options = memo(function Options(props: PropsOptions) {
   const { event } = props
+  const itemProps = { interactive: true, size: 'sm' } as const
   return (
     <>
-      <Link to='/feed' search={{ kind: 1, q: event.id, pubkey: event.pubkey, permission: READ, type: 'quotes' }}>
-        <MenuItem size='sm' leadingIcon={<IconQuote {...iconProps} />} label='See quotes' onClick={() => {}} />
-      </Link>
-      <Link to='/feed' search={{ kind: 6, e: event.id, pubkey: event.pubkey, permission: READ, type: 'reposts' }}>
-        <MenuItem size='sm' leadingIcon={<IconShare3 {...iconProps} />} label='See reposts' onClick={() => {}} />
-      </Link>
+      <html.div style={styles.wrapper}>
+        <Link to='/feed' search={{ kind: 1, q: event.id, pubkey: event.pubkey, permission: READ, type: 'quotes' }}>
+          <MenuItem {...itemProps} leadingIcon={<IconQuote {...iconProps} />} label='See quotes' />
+        </Link>
+        <Link to='/feed' search={{ kind: 6, e: event.id, pubkey: event.pubkey, permission: READ, type: 'reposts' }}>
+          <MenuItem {...itemProps} leadingIcon={<IconShare3 {...iconProps} />} label='See reposts' />
+        </Link>
+      </html.div>
       <Divider />
-      <MenuItem
-        size='sm'
-        leadingIcon={<IconBookmark {...iconProps} />}
-        label='Bookmark'
-        onClick={props.onBookmarkClick}
-      />
+      <html.div style={styles.wrapper}>
+        <MenuItem
+          {...itemProps}
+          leadingIcon={<IconBookmark {...iconProps} />}
+          label='Bookmark'
+          onClick={props.onBookmarkClick}
+        />
+      </html.div>
       <Divider />
-      <MenuItem
-        size='sm'
-        leadingIcon={<IconInfoSquareRounded {...iconProps} />}
-        label='Details'
-        onClick={props.onDetailsClick}
-      />
-      <MenuItem size='sm' leadingIcon={<IconCopy {...iconProps} />} label='Copy ID' onClick={props.onCopyIdClick} />
-      <MenuItem
-        size='sm'
-        leadingIcon={<IconCopy {...iconProps} />}
-        label='Copy Author ID'
-        onClick={props.onCopyAuthorIdClick}
-      />
-      <MenuItem size='sm' leadingIcon={<IconLink {...iconProps} />} label='Copy Link' onClick={props.onCopyLinkClick} />
-      {/* <MenuItem disabled leadingIcon={<IconBookmark />} label='Bookmark' /> */}
-      {/* <MenuItem disabled variant='danger' leadingIcon={<IconEyeOff />} label='Mute' /> */}
-      {/* <MenuItem disabled variant='danger' leadingIcon={<IconUserMinus />} label='Unfollow' /> */}
+      <html.div style={styles.wrapper}>
+        <MenuItem
+          {...itemProps}
+          leadingIcon={<IconInfoSquareRounded {...iconProps} />}
+          label='Details'
+          onClick={props.onDetailsClick}
+        />
+        <MenuItem
+          {...itemProps}
+          leadingIcon={<IconCopy {...iconProps} />}
+          label='Copy ID'
+          onClick={props.onCopyIdClick}
+        />
+        <MenuItem
+          {...itemProps}
+          leadingIcon={<IconCopy {...iconProps} />}
+          label='Copy Author ID'
+          onClick={props.onCopyAuthorIdClick}
+        />
+        <MenuItem
+          {...itemProps}
+          leadingIcon={<IconLink {...iconProps} />}
+          label='Copy Link'
+          onClick={props.onCopyLinkClick}
+        />
+        {/* <MenuItem disabled leadingIcon={<IconBookmark />} label='Bookmark' /> */}
+        {/* <MenuItem disabled variant='danger' leadingIcon={<IconEyeOff />} label='Mute' /> */}
+        {/* <MenuItem disabled variant='danger' leadingIcon={<IconUserMinus />} label='Unfollow' /> */}
+      </html.div>
     </>
   )
 })
@@ -117,7 +134,7 @@ export const PostOptions = memo(function PostOptions() {
       sx={styles.menu}
       placement='bottom-end'
       contentRenderer={(props) => (
-        <MenuList surface='surfaceContainerLow'>
+        <MenuList surface='surfaceContainerLow' sx={styles.menuList}>
           <Options
             event={event}
             onCopyIdClick={handleCopy(nevent)}
@@ -148,7 +165,7 @@ export const PostOptions = memo(function PostOptions() {
             open()
           }}
           size={dense ? 'sm' : 'md'}
-          icon={<IconDotsVertical stroke='currentColor' strokeWidth='2.0' size={dense ? 18 : 20} />}
+          icon={<IconDotsVertical stroke='currentColor' strokeWidth='2.0' size={dense ? 16 : 18} opacity={0.8} />}
         />
       )}
     </Popover>
@@ -163,11 +180,9 @@ const styles = css.create({
     marginLeft: spacing.margin2,
   },
   menuList: {
-    backgroundColor: 'transparent',
-    width: '100%',
+    paddingInline: 0,
   },
-  clientHeader: {
-    paddingBlock: spacing.padding1,
-    paddingInline: spacing.padding2,
+  wrapper: {
+    paddingInline: spacing.padding1,
   },
 })

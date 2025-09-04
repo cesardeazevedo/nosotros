@@ -19,7 +19,7 @@ type Props = {
   sx?: SxProps
   anchor?: string
   active?: boolean
-  label?: string
+  label?: React.ReactNode | string
   variant?: TabVariant
   icon?: React.ReactNode
   activeIcon?: React.ReactNode

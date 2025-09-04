@@ -19,7 +19,7 @@ export const FeedHeadline = (props: Props) => {
     case 'quotes': {
       return (
         <HeadlineBase>
-          <Text variant='headline' size='lg'>
+          <Text variant='title' size='lg'>
             Post Interactions
           </Text>
         </HeadlineBase>

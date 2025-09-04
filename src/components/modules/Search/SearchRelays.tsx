@@ -38,7 +38,6 @@ export const SearchRelays = memo(function SearchRelays(props: Props) {
       .map(([, data]) => data)
       .filter((x) => !!x)
   }, [])
-  console.log(relays)
 
   const filteredRelays = useMemo(
     () => relays.filter((relay) => relay.url.toLowerCase().indexOf(query.toLowerCase()) > -1),

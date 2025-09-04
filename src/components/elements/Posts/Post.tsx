@@ -6,6 +6,7 @@ import { Kind } from '@/constants/kinds'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { queryKeys } from '@/hooks/query/queryKeys'
 import { useNoteState } from '@/hooks/state/useNote'
+import { useCurrentRoute } from '@/hooks/useNavigations'
 import { duration } from '@/themes/duration.stylex'
 import { easing } from '@/themes/easing.stylex'
 import { palette } from '@/themes/palette.stylex'
@@ -30,6 +31,7 @@ type Props = {
 
 export const PostRoot = memo(function PostRoot(props: Props) {
   const { event, header, open } = props
+  const currentRoute = useCurrentRoute().routeId
   const note = useNoteState(event, { repliesOpen: open, forceSync: open })
 
   const openReplies = useCallback(() => {
@@ -38,7 +40,7 @@ export const PostRoot = memo(function PostRoot(props: Props) {
 
   return (
     <NoteProvider value={{ event }}>
-      <html.article style={styles.root} ref={note.ref}>
+      <html.article style={[styles.root, currentRoute !== '/$nostr/' && styles.root$divider]} ref={note.ref}>
         <PostLink note={note} onClick={openReplies}>
           {note.event.kind === Kind.Article && <ArticleHeadline />}
           {header || <PostHeader event={event} />}
@@ -73,6 +75,8 @@ const styles = css.create({
     animation: fadeIn,
     animationTimingFunction: easing.emphasizedDecelerate,
     animationDuration: duration.long3,
+  },
+  root$divider: {
     borderBottom: '1px solid',
     borderBottomColor: palette.outlineVariant,
   },

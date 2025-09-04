@@ -62,7 +62,7 @@ export const ZapReceiptProfile = memo(function ZapReceiptProfile(props: Props) {
 
 const styles = css.create({
   root: {
-    paddingBlock: spacing.padding2,
+    padding: spacing.padding2,
   },
   icon: {
     padding: spacing.padding1,

@@ -86,7 +86,7 @@ const styles = css.create({
     background: `linear-gradient(0deg, ${palette.inverseSurface}, transparent)`,
   },
   shadow$dark: {
-    width: 'calc(100%-2px)',
+    width: 'calc(100% - 2px)',
     opacity: 0.86,
     left: 1,
     right: 1,

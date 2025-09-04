@@ -24,6 +24,7 @@ export enum Kind {
   Highlight = 9802,
   RelayList = 10002,
   RelayFavorites = 10012,
+  VoiceMessage = 1222,
   ClientAuth = 22242,
   // replaceable
   BookmarkList = 10003,

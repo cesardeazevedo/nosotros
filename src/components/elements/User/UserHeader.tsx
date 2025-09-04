@@ -38,7 +38,7 @@ export const UserHeader = memo(function UserHeader(props: Props) {
         <UserName pubkey={pubkey} size={size}>
           {children}
         </UserName>
-        {renderNIP05 && <UserNIP05 pubkey={pubkey} />}
+        {renderNIP05 && <UserNIP05 pubkey={pubkey} sx={styles.nip05} />}
         {footer}
       </Stack>
     </Stack>
@@ -48,5 +48,8 @@ export const UserHeader = memo(function UserHeader(props: Props) {
 const styles = css.create({
   root: {
     height: 40,
+  },
+  nip05: {
+    opacity: 0.66,
   },
 })

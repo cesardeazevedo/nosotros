@@ -4,7 +4,7 @@ import { Text } from '@/components/ui/Text/Text'
 import { useNip05 } from '@/hooks/query/useNIP05'
 import { useUserState } from '@/hooks/state/useUser'
 import { palette } from '@/themes/palette.stylex'
-import { IconAt, IconExclamationCircleFilled } from '@tabler/icons-react'
+import { IconAt, IconExclamationCircle, IconExclamationCircleFilled } from '@tabler/icons-react'
 import { memo } from 'react'
 import { css } from 'react-strict-dom'
 
@@ -21,15 +21,15 @@ export const UserNIP05 = memo(function UserNIP05(props: Props) {
     return
   }
   return (
-    <Text variant='label' size='sm' {...rest} sx={[styles.root, validNIP05 === false && styles.root$invalid]}>
+    <Text variant='label' size='sm' {...rest} sx={[styles.root, validNIP05 === false && styles.root$invalid, rest.sx]}>
       {validNIP05 !== false ? (
         <Stack>
           {!nip05.includes('@') && <IconAt size={12} />}
           {nip05}
         </Stack>
       ) : (
-        <Stack gap={0.5}>
-          <IconExclamationCircleFilled size={14} strokeWidth={1.8} />
+        <Stack>
+          <IconExclamationCircle size={12} strokeWidth={2.2} />
           {nip05.replace(/^_@/, '')}
         </Stack>
       )}
@@ -39,7 +39,6 @@ export const UserNIP05 = memo(function UserNIP05(props: Props) {
 
 const styles = css.create({
   root: {
-    opacity: 0.5,
     whiteSpace: 'nowrap',
     maxWidth: 250,
     textOverflow: 'ellipsis',
