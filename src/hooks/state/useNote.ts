@@ -4,7 +4,7 @@ import { useMethods } from '@/hooks/useMethods'
 import type { NostrContext } from '@/nostr/context'
 import { useAtomValue } from 'jotai'
 import { isParameterizedReplaceableKind } from 'nostr-tools/kinds'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useInView } from 'react-intersection-observer'
 import { useEventMetadata } from '../query/useQueryUser'
 import { useReactions } from '../query/useReactions'
@@ -22,7 +22,7 @@ export type NoteStateToggles = {
   broadcastOpen: boolean
   contentOpen: boolean
   repliesOpen: boolean | null
-  limit: number
+  pageSize: number
 }
 
 const PAGINATION_SIZE = 10
@@ -44,9 +44,9 @@ const createMethods = (state: NoteStateToggles) => ({
     ...state,
     contentOpen: payload ?? !state.contentOpen,
   }),
-  paginateReplies: (payload?: number) => ({
+  paginateReplies: (pageSize: number) => ({
     ...state,
-    limit: state.limit + (payload ?? PAGINATION_SIZE),
+    pageSize,
   }),
 })
 
@@ -66,10 +66,9 @@ export function useNoteState(event: NostrEventDB, options?: NoteOptions) {
     broadcastOpen: false,
     contentOpen: options?.repliesOpen ?? false,
     repliesOpen: (options?.repliesOpen ?? null) as boolean | null,
-    limit: PAGINATION_SIZE,
+    pageSize: PAGINATION_SIZE,
   })
 
-  const [limit, setLimit] = useState(PAGINATION_SIZE)
   const currentLoggedPubkey = useCurrentPubkey()
 
   const ctx = {
@@ -126,7 +125,7 @@ export function useNoteState(event: NostrEventDB, options?: NoteOptions) {
     })
   }, [replies.data])
 
-  const repliesChunk = useMemo(() => repliesSorted.slice(0, limit), [repliesSorted, limit])
+  const repliesChunk = useMemo(() => repliesSorted.slice(0, state.pageSize), [repliesSorted, state.pageSize])
 
   const repliesPreview = useMemo(() => {
     return replies.data?.filter((event) => currentUser?.followsTag(event.pubkey)).slice(0, 2) || []
@@ -147,9 +146,9 @@ export function useNoteState(event: NostrEventDB, options?: NoteOptions) {
 
   const paginate = useCallback(
     (offset = PAGINATION_SIZE) => {
-      setLimit((prev) => Math.min(replies.data?.length || Infinity, prev + offset))
+      actions.paginateReplies(Math.min(replies.data?.length || Infinity, state.pageSize + offset))
     },
-    [replies.data],
+    [state, actions.paginateReplies, replies.data],
   )
 
   const zapAmount = useMemo(() => {

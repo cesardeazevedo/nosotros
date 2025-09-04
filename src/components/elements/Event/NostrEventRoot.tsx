@@ -22,7 +22,7 @@ export const NostrEventRoot = memo(function NostrEventRoot(props: Props) {
       return event.metadata?.isRoot ? (
         <PostRoot event={event} open={open} />
       ) : (
-        <Threads event={event} renderRepliesSummary />
+        <Threads event={event} renderRepliesSummary={false} />
       )
     }
     case Kind.Follows: {
