@@ -153,15 +153,13 @@ export const SidebarCollapsed = memo(function SidebarCollapsed(props: Props) {
         </Stack>
       </Stack>
       <Stack horizontal={false} gap={2} align='center'>
-        {/* <Tooltip cursor='arrow' enterDelay={0} text='Add column' placement='right'> */}
-        {/*   <IconButton icon={<IconSquareRoundedPlus size={28} strokeWidth='1.5' />} /> */}
-        {/* </Tooltip> */}
-        <IconButton
-          toggle
-          selected={context.pane === '/explore/relays' || !!match({ to: '/relays' })}
-          onClick={() => context.setPane('/explore/relays')}>
-          <IconWorldBolt {...iconProps} />
-        </IconButton>
+        <Link to='/relays'>
+          {({ isActive }) => (
+            <IconButton toggle selected={isActive}>
+              <IconWorldBolt {...iconProps} />
+            </IconButton>
+          )}
+        </Link>
         <Link to='/settings'>
           {({ isActive }) => (
             <IconButton toggle selected={isActive}>
