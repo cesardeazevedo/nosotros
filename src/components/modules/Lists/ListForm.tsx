@@ -1,3 +1,4 @@
+import { enqueueToastAtom } from '@/atoms/toaster.atoms'
 import { Button } from '@/components/ui/Button/Button'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { Stack } from '@/components/ui/Stack/Stack'
@@ -9,6 +10,7 @@ import { usePublishEventMutation } from '@/hooks/mutations/usePublishEventMutati
 import { useCurrentPubkey, useCurrentSigner } from '@/hooks/useAuth'
 import { publish } from '@/nostr/publish/publish'
 import { spacing } from '@/themes/spacing.stylex'
+import { useSetAtom } from 'jotai'
 import type { UnsignedEvent } from 'nostr-tools'
 import { useActionState, useRef } from 'react'
 import { css } from 'react-strict-dom'
@@ -39,6 +41,7 @@ export const ListForm = (props: Props) => {
   const ref = useRef<RefListKind>(null)
   const pubkey = useCurrentPubkey()
   const signer = useCurrentSigner()
+  const enqueueToast = useSetAtom(enqueueToastAtom)
 
   // That's bad, we need to split this component into 2 for create and update
   const title = 'event' in props ? props.event.tags.find((x) => x[0] === 'title')?.[1] : ''
@@ -54,20 +57,25 @@ export const ListForm = (props: Props) => {
   })
 
   const [error, submit] = useActionState(async (_: unknown, formData: FormData) => {
-    const title = formData.get('title')?.toString()
-    const tags = ref.current?.getTags() || []
-    if (!title) return 'title required' as string
-    if (!signer || !pubkey) return 'signin required' as string
+    try {
+      const title = formData.get('title')?.toString()
+      const tags = ref.current?.getTags() || []
+      if (!title) return 'title required' as string
+      if (!signer || !pubkey) return 'signin required' as string
 
-    const uuid = window.crypto.randomUUID().replace(/-/g, '').slice(0, 21)
-    const newEvent = {
-      kind,
-      content: isEditing ? props.event.content : '',
-      pubkey,
-      tags: [['title', title], ['d', dTag || uuid], ...tags],
-    } as UnsignedEvent
-    await mutateAsync(newEvent)
-    onClose?.()
+      const uuid = window.crypto.randomUUID().replace(/-/g, '').slice(0, 21)
+      const newEvent = {
+        kind,
+        content: isEditing ? props.event.content : '',
+        pubkey,
+        tags: [['title', title], ['d', dTag || uuid], ...tags],
+      } as UnsignedEvent
+      await mutateAsync(newEvent)
+      onClose?.()
+    } catch (error) {
+      const msg = error as Error
+      enqueueToast({ component: msg.toString(), duration: 4000 })
+    }
   }, null)
 
   return (
