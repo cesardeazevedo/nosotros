@@ -8,6 +8,7 @@ import { useMemo } from 'react'
 import { WRITE } from './parsers/parseRelayList'
 import { useUserRelays } from './query/useQueryUser'
 import { useSeen } from './query/useSeen'
+import { useCurrentUser } from './useAuth'
 
 export function useEventTag(event: NostrEventDB | undefined, tagName: string) {
   return useMemo(() => {
@@ -37,6 +38,13 @@ export function useEventAltTag(event: NostrEventDB) {
 
 export function useEventPowTag(event: NostrEventDB) {
   return useEventTag(event, 'pow')
+}
+
+export function useEventFirstTopicCurrentUserFollows(event: NostrEventDB) {
+  const user = useCurrentUser()
+  return useMemo(() => {
+    return event.tags.filter(([tag]) => tag === 't').find(([tag, value]) => user.followsTag(value, tag))?.[1]
+  }, [event, user])
 }
 
 export function useEventKey(event: NostrEventDB) {

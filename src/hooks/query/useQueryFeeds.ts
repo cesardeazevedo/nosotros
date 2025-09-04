@@ -3,6 +3,7 @@ import { store } from '@/atoms/store'
 import type { NostrFilter } from '@/core/types'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import type { NostrContext } from '@/nostr/context'
+import { dedupeById } from '@/utils/utils'
 import type { InfiniteData, UseInfiniteQueryOptions } from '@tanstack/react-query'
 import { infiniteQueryOptions } from '@tanstack/react-query'
 import { concatMap, EMPTY, firstValueFrom, map, mergeMap, of, shareReplay, tap, timer } from 'rxjs'
@@ -83,10 +84,9 @@ export function createFeedQueryOptions(
             return timer(1500).pipe(
               mergeMap(() => {
                 const data = queryClient.getQueryData(options.queryKey) as InfiniteEvents | undefined
-                const ids = new Set(data?.pages.flat().map((x) => x.id))
                 const top = data?.pages[0][0].created_at || 0
-                res
-                  .filter((x) => !ids.has(x.id) && x.created_at > top && x.created_at < (Date.now() + 1000) / 1000)
+                dedupeById([...(data?.pages.flat() || []), ...res])
+                  .filter((x) => x.created_at > top && x.created_at < (Date.now() + 1000) / 1000)
                   .forEach((x) => {
                     options.onStream?.(x)
                   })
