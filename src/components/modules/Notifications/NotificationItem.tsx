@@ -36,6 +36,8 @@ import { NotificationMedia } from './NotificationMedia'
 
 type Props = {
   event: NostrEventDB
+  selected?: boolean
+  onClick?: () => void
   owner?: string
 }
 
@@ -65,7 +67,7 @@ function getNotificationType(event: NostrEventDB) {
 }
 
 export const NotificationItem = memo(function NotificationItem(props: Props) {
-  const { event, owner } = props
+  const { event, owner, selected = false, onClick } = props
 
   const acc = useCurrentAccount()
   const note = useNoteState(event)
@@ -106,7 +108,12 @@ export const NotificationItem = memo(function NotificationItem(props: Props) {
     <>
       <Stack
         gap={1}
-        sx={[styles.root, editorOpen && styles.root$expanded, unseen && styles.root$unseen]}
+        sx={[
+          styles.root,
+          editorOpen && styles.root$expanded,
+          unseen && styles.root$unseen,
+          selected && styles.root$selected,
+        ]}
         align='flex-start'
         onClick={handleClick}>
         {unseen && <html.div style={styles.unseen} />}
@@ -149,7 +156,7 @@ export const NotificationItem = memo(function NotificationItem(props: Props) {
           <UserAvatar pubkey={event.pubkey} />
           <NotificationLink type={type} note={note} related={relatedEvent.data}>
             <ContentProvider value={{ disableLink: true }}>
-              <Stack sx={styles.content} wrap grow>
+              <Stack sx={styles.content} wrap grow onClick={onClick}>
                 {author && <UserName pubkey={author} sx={styles.username} />}{' '}
                 {type === 'zap' && (
                   <>
@@ -234,6 +241,9 @@ const styles = css.create({
     },
   },
   root$unseen: {
+    backgroundColor: palette.surfaceContainerLow,
+  },
+  root$selected: {
     backgroundColor: palette.surfaceContainerLow,
   },
   root$expanded: {
