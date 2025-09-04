@@ -50,7 +50,11 @@ function userRelaysQueryOptions(pubkey: string | undefined, permission: number) 
     select: (events) => {
       return (
         events.flatMap((event) => {
-          return selectRelays(event.metadata?.relayList || [], { permission, maxRelaysPerUser: 20 })
+          return (
+            event.metadata?.relayList?.filter((data) => {
+              return permission !== undefined ? !!(data.permission & permission) || !data.permission : true
+            }) || []
+          )
         }) || []
       )
     },
