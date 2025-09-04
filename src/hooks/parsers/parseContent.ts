@@ -1,4 +1,5 @@
-import type { NostrEvent } from '@/core/types'
+import { mergeRelayHints } from '@/core/mergers/mergeRelayHints'
+import type { NostrEvent, RelayHints } from '@/core/types'
 import { welshmanToProseMirror } from '@/utils/welshmanToProsemirror'
 import { parse } from '@welshman/content'
 import type { Metadata } from '../../nostr/types'
@@ -21,6 +22,17 @@ export function parseContent(event: NostrEvent): Metadata {
     contentSchema,
     mentionedNotes,
     mentionedAuthors,
-    relayHints,
+    relayHints: mergeRelayHints([
+      relayHints,
+      mentionedNotes.reduce(
+        (acc, prev) => ({
+          idHints: {
+            ...acc.idHints,
+            [prev]: [event.pubkey],
+          },
+        }),
+        { idHints: {} } as RelayHints,
+      ),
+    ]),
   }
 }
