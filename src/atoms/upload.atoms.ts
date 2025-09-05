@@ -67,43 +67,57 @@ export const setFileDataAtom = atom(null, (get, set, args: { src: string; attrs:
   )
 })
 
-export const selectFilesForUploadAtom = atom(null, (get, set) => {
-  const settings = get(settingsAtom)
-  const input = document.createElement('input')
-  input.type = 'file'
-  input.multiple = true
-  input.accept = allowedMimeTypes.join(',')
-  input.onchange = (event) => {
-    const files = (event.target as HTMLInputElement).files
-    if (files) {
-      const newFiles = Array.from(files)
-        .filter((file) => {
-          if (!allowedMimeTypes.includes(file.type as (typeof allowedMimeTypes)[number])) {
-            return false
-          }
-          return true
-        })
-        .map((file) => {
-          return {
-            file,
-            src: URL.createObjectURL(file),
-            alt: '',
-            tags: [],
-            sha256: '',
-            uploading: false,
-            uploadError: '',
-            uploadType: settings.defaultUploadType,
-            uploadUrl: settings.defaultUploadUrl,
-          } as UploadFile
-        })
-      const current = get(filesAtom)
-      if (files.length > 0) {
-        set(filesAtom, [...current, ...newFiles])
+export const selectFilesForUploadAtom = atom(
+  null,
+  (
+    get,
+    set,
+    args: {
+      multiple?: boolean
+      defaultUploadType?: 'nip96' | 'blossom'
+      defaultUploadUrl?: string
+      onSelect?: (files: UploadFile[]) => void
+    } = {},
+  ) => {
+    const settings = get(settingsAtom)
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.multiple = args.multiple ?? true
+    input.accept = allowedMimeTypes.join(',')
+    input.onchange = (event) => {
+      const files = (event.target as HTMLInputElement).files
+      if (files) {
+        const newFiles = Array.from(files)
+          .filter((file) => {
+            if (!allowedMimeTypes.includes(file.type as (typeof allowedMimeTypes)[number])) {
+              return false
+            }
+            return true
+          })
+          .map((file) => {
+            return {
+              file,
+              src: URL.createObjectURL(file),
+              alt: '',
+              tags: [],
+              sha256: '',
+              uploading: false,
+              uploadError: '',
+              uploadType: args.defaultUploadType || settings.defaultUploadType,
+              uploadUrl: args.defaultUploadUrl || settings.defaultUploadUrl,
+            } as UploadFile
+          })
+        const current = get(filesAtom)
+        if (files.length > 0) {
+          const data = [...current, ...newFiles]
+          set(filesAtom, data)
+          args.onSelect?.(data)
+        }
       }
     }
-  }
-  input.click()
-})
+    input.click()
+  },
+)
 
 export const uploadFilesAtom = atom(null, async (get, set) => {
   const files = get(filesAtom)

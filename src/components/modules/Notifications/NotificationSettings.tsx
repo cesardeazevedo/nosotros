@@ -1,3 +1,4 @@
+import { toggleSettingAtom } from '@/atoms/settings.atoms'
 import { Chip } from '@/components/ui/Chip/Chip'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { Stack } from '@/components/ui/Stack/Stack'
@@ -6,7 +7,16 @@ import { Kind } from '@/constants/kinds'
 import type { NotificationFeedState } from '@/hooks/state/useNotificationFeed'
 import { spacing } from '@/themes/spacing.stylex'
 import type { IconProps } from '@tabler/icons-react'
-import { IconAt, IconBolt, IconHeart, IconMessage, IconShare3 } from '@tabler/icons-react'
+import {
+  IconAt,
+  IconBaselineDensityLarge,
+  IconBaselineDensitySmall,
+  IconBolt,
+  IconHeart,
+  IconMessage,
+  IconShare3,
+} from '@tabler/icons-react'
+import { useSetAtom } from 'jotai'
 import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 
@@ -21,6 +31,7 @@ const iconProps: IconProps = {
 
 export const NotificationSettings = memo(function NotificationSettings(props: Props) {
   const { feed } = props
+  const toggleSettings = useSetAtom(toggleSettingAtom)
   return (
     <html.div style={styles.root}>
       <Divider />
@@ -72,10 +83,36 @@ export const NotificationSettings = memo(function NotificationSettings(props: Pr
           {/*   onClick={() => feed.setIncludeMuted((prev) => !prev)} */}
           {/* /> */}
         </Stack>
+        <Text variant='label' size='lg' sx={styles.label}>
+          Layout
+        </Text>
+        <Stack gap={1}>
+          <Chip
+            selected={feed.layout === 'normal'}
+            label='Normal'
+            variant='filter'
+            icon={<IconBaselineDensityLarge {...iconProps} />}
+            onClick={() => {
+              feed.setLayout('normal')
+              toggleSettings('notificationsCompact', false)
+            }}
+          />
+          <Chip
+            selected={feed.layout === 'compact'}
+            label='Compact'
+            variant='filter'
+            icon={<IconBaselineDensitySmall {...iconProps} />}
+            onClick={() => {
+              feed.setLayout('compact')
+              toggleSettings('notificationsCompact', true)
+            }}
+          />
+        </Stack>
         <Stack>
           <Chip label='Reset' variant='assist' onClick={() => feed.resetFilter()} />
         </Stack>
       </Stack>
+      <Divider />
     </html.div>
   )
 })

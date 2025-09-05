@@ -1,5 +1,7 @@
 import { Button } from '@/components/ui/Button/Button'
 import { Chip } from '@/components/ui/Chip/Chip'
+import { Divider } from '@/components/ui/Divider/Divider'
+import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
@@ -70,47 +72,60 @@ export const SettingsStorageRoute = () => {
   }
 
   return (
-    <Stack sx={styles.root} horizontal={false}>
-      <Stack gap={1}>
-        <Text size='md' variant='headline'>
-          Browser Relay
+    <Stack grow horizontal={false}>
+      <Stack sx={styles.header} gap={1}>
+        <Text variant='title' size='lg'>
+          Cache Relay
         </Text>
         <Chip icon={<IconDatabase size={18} strokeWidth='1.5' />} label='SQLite (WASM)' />
       </Stack>
-
-      <Stack horizontal={false} align='stretch' gap={4}>
-        <Stack horizontal={false} sx={styles.middle} align='flex-start' gap={1}>
-          <Text sx={styles.number} variant='title' size='lg'>
-            {totalEvents !== null ? (
-              formatter.format(totalEvents) + ' events'
-            ) : (
-              <Skeleton variant='rectangular' sx={styles.skeleton} />
-            )}
-          </Text>
-          <Text sx={styles.number} variant='title' size='lg'>
-            {totalTags !== null ? (
-              formatter.format(totalTags) + ' tags'
-            ) : (
-              <Skeleton variant='rectangular' sx={styles.skeleton} />
-            )}
-          </Text>
-          <Text sx={styles.number} variant='title' size='lg'>
-            {dbSizeBytes !== null ? (
-              formatter.format(dbSizeBytes) + ' bytes'
-            ) : (
-              <Skeleton variant='rectangular' sx={styles.skeleton} />
-            )}
-          </Text>
-        </Stack>
-
-        <Stack gap={1}>
-          <Button variant='filled' disabled={exporting} onClick={handleExport}>
-            {exporting ? 'Exporting…' : 'Export database'}
-          </Button>
-
-          <Button variant='danger' disabled={deleting} onClick={handleDelete}>
-            {confirmDelete ? 'Confirm delete database?' : deleting ? 'Deleting…' : 'Delete database'}
-          </Button>
+      <Divider />
+      <Stack grow sx={styles.root} horizontal={false}>
+        <Stack horizontal={false} align='stretch'>
+          <MenuItem
+            label='Events'
+            trailing={
+              <Text sx={styles.number} variant='title' size='md'>
+                {totalEvents !== null ? (
+                  formatter.format(totalEvents)
+                ) : (
+                  <Skeleton variant='rectangular' sx={styles.skeleton} />
+                )}
+              </Text>
+            }
+          />
+          <Divider />
+          <MenuItem
+            label='Tags'
+            trailing={
+              <Text sx={styles.number} variant='title' size='md'>
+                {totalTags !== null ? (
+                  formatter.format(totalTags)
+                ) : (
+                  <Skeleton variant='rectangular' sx={styles.skeleton} />
+                )}
+              </Text>
+            }
+          />
+          <Divider />
+          <MenuItem
+            label='Export data'
+            trailing={
+              <Button variant='filled' disabled={exporting} onClick={handleExport}>
+                {exporting ? 'Exporting…' : 'Export database'}
+              </Button>
+            }
+          />
+          <Divider />
+          <MenuItem
+            label='Delete data'
+            trailing={
+              <Button variant='danger' disabled={deleting} onClick={handleDelete}>
+                {confirmDelete ? 'Confirm delete database?' : deleting ? 'Deleting…' : 'Delete database'}
+              </Button>
+            }
+          />
+          <Divider />
         </Stack>
       </Stack>
     </Stack>
@@ -120,7 +135,11 @@ export const SettingsStorageRoute = () => {
 const styles = css.create({
   root: {
     width: '100%',
-    padding: spacing.padding3,
+    // padding: spacing.padding3,
+  },
+  header: {
+    padding: spacing.padding2,
+    height: 60,
   },
   middle: {
     paddingBlock: spacing.padding2,

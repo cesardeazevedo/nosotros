@@ -68,7 +68,7 @@ const Img = (props: { src: string; blurhash?: string; dim?: { width: number; hei
   )
 }
 
-const ImageNavigation = (props: { src: string; id: string }) => {
+const ImageNavigation = (props: { src: string; id: string | undefined }) => {
   const { id } = props
   const event = useEvent(id)
   const isMobile = useMobile()
@@ -114,7 +114,7 @@ const ImageNavigation = (props: { src: string; id: string }) => {
   return (
     <>
       <IconButton
-        variant='filledTonal'
+        variant='filled'
         sx={styles.close}
         onClick={closeImage}
         icon={<IconX strokeWidth='1.2' size={24} />}

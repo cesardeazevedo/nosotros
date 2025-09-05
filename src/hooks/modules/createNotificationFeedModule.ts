@@ -21,6 +21,8 @@ export function createNotificationFeedModule(pubkey: string): NotificationFeedMo
     filter,
     ctx: {},
     scope: 'self',
+    pageSize: 30,
+    staleTime: 600000,
     includeReplies: true,
     includeMuted: true,
     includeMentions: true,

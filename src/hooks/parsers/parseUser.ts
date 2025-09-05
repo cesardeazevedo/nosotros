@@ -12,6 +12,7 @@ export type UserSchema = Partial<{
   lud16: string
   nip05: string
   nip05valid: boolean
+  pronouns: string
   picture: string
   banner: string
   website: string

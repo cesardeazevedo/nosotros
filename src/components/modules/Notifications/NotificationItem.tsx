@@ -37,6 +37,7 @@ import { NotificationMedia } from './NotificationMedia'
 type Props = {
   event: NostrEventDB
   selected?: boolean
+  dense?: boolean
   onClick?: () => void
   owner?: string
 }
@@ -67,7 +68,7 @@ function getNotificationType(event: NostrEventDB) {
 }
 
 export const NotificationItem = memo(function NotificationItem(props: Props) {
-  const { event, owner, selected = false, onClick } = props
+  const { event, owner, selected = false, onClick, dense = false } = props
 
   const acc = useCurrentAccount()
   const note = useNoteState(event)
@@ -105,19 +106,19 @@ export const NotificationItem = memo(function NotificationItem(props: Props) {
   }, [owner, event])
 
   return (
-    <>
+    <NotificationLink type={type} note={note} related={relatedEvent.data}>
       <Stack
-        gap={1}
+        gap={2}
         sx={[
           styles.root,
           editorOpen && styles.root$expanded,
           unseen && styles.root$unseen,
           selected && styles.root$selected,
         ]}
-        align='flex-start'
+        align={dense ? 'center' : 'flex-start'}
         onClick={handleClick}>
         {unseen && <html.div style={styles.unseen} />}
-        <Stack sx={styles.type} justify='flex-start' align='flex-start'>
+        <Stack sx={styles.type} justify='center' align='flex-start'>
           {type === 'zap' && (
             <>
               <Stack horizontal={false} align='center' sx={styles.zapIcon}>
@@ -152,60 +153,76 @@ export const NotificationItem = memo(function NotificationItem(props: Props) {
           {type === 'mention' && <IconAt size={28} strokeWidth='1.5' />}
           {type === 'repost' && <IconShare3 fill='currentColor' size={28} strokeWidth='1.5' />}
         </Stack>
-        <Stack gap={2} justify='flex-start' align='flex-start' grow>
-          <UserAvatar pubkey={event.pubkey} />
-          <NotificationLink type={type} note={note} related={relatedEvent.data}>
-            <ContentProvider value={{ disableLink: true }}>
-              <Stack sx={styles.content} wrap grow onClick={onClick}>
-                {author && <UserName pubkey={author} sx={styles.username} />}{' '}
+        <Stack gap={2} justify='flex-start' align={dense ? 'center' : 'flex-start'} grow sx={styles.wrapper}>
+          <UserAvatar pubkey={event.pubkey} size={dense ? 'sm' : 'md'} />
+          <ContentProvider value={{ disableLink: true }}>
+            <Stack sx={styles.content} wrap grow onClick={onClick} align='center' justify='center'>
+              {author && !dense && (
+                <Stack gap={0.5}>
+                  <UserName pubkey={author} sx={styles.username} />
+                  <PostHeaderDate dateStyle='long' date={event.created_at} />
+                </Stack>
+              )}
+              <>
                 {type === 'zap' && (
                   <>
-                    <Text size='md'>zapped to your note:</Text>
-                    {relatedEvent.data && <NotificationContent event={relatedEvent.data} />}
+                    {!dense && <Text size='md'>zapped to your note:</Text>}
+                    {relatedEvent.data && <NotificationContent dense={dense} event={relatedEvent.data} />}
                   </>
                 )}
                 {type === 'public_message' && (
                   <>
                     <Stack horizontal={false}>
-                      <Text size='md'>sent you a public message:</Text> <NotificationContent event={event} />
+                      {!dense && <Text size='md'>sent you a public message:</Text>}{' '}
+                      <NotificationContent dense={dense} event={event} />
                     </Stack>
                   </>
                 )}
                 {type === 'reaction' && (
                   <>
-                    <Text size='md'>reacted to your note:</Text>{' '}
-                    {relatedEvent.data && <NotificationContent event={relatedEvent.data} />}
+                    {!dense && <Text size='md'>reacted to your note:</Text>}{' '}
+                    {relatedEvent.data && <NotificationContent dense={dense} event={relatedEvent.data} />}
                   </>
                 )}
                 {type === 'reply' && (
                   <>
-                    <Text size='md'>
-                      replied to {event.pubkey === acc?.pubkey ? 'your note' : 'a note you were mentioned'}
-                      {': '}
-                    </Text>{' '}
-                    <NotificationContent event={event} />
+                    {!dense && (
+                      <Text size='md'>
+                        replied to {event.pubkey === acc?.pubkey ? 'your note' : 'a note you were mentioned'}
+                        {': '}
+                      </Text>
+                    )}{' '}
+                    <NotificationContent dense={dense} event={event} />
                   </>
                 )}
                 {type === 'mention' && (
                   <>
-                    <Text size='md'>mentioned you in a note:</Text> <NotificationContent event={event} />
+                    {!dense && <Text size='md'>mentioned you in a note:</Text>}{' '}
+                    <NotificationContent dense={dense} event={event} />
                   </>
                 )}
                 {type === 'repost' && (
                   <>
-                    <Text size='md'>
-                      reposted {event.pubkey === acc?.pubkey ? 'your note' : 'a note you were mentioned'}
-                    </Text>{' '}
-                    {relatedEvent.data && <NotificationContent event={relatedEvent.data} />}
+                    {!dense && (
+                      <Text size='md'>
+                        reposted {event.pubkey === acc?.pubkey ? 'your note' : 'a note you were mentioned'}
+                      </Text>
+                    )}{' '}
+                    {relatedEvent.data && <NotificationContent dense={dense} event={relatedEvent.data} />}
                   </>
                 )}
-                <PostHeaderDate dateStyle='long' date={event.created_at} />
-              </Stack>
-            </ContentProvider>
-          </NotificationLink>
+              </>
+            </Stack>
+          </ContentProvider>
         </Stack>
-        {!mobile && headImage && (
-          <html.div style={styles.trailing}>{note && <NotificationMedia event={event} />}</html.div>
+        {!mobile && (headImage || dense) && (
+          <html.div style={[styles.trailing, dense && styles.trailing$dense]}>
+            {dense ? (
+              <PostHeaderDate dateStyle='narrow' date={event.created_at} />
+            ) : (
+              <NotificationMedia event={event} />
+            )}
+          </html.div>
         )}
       </Stack>
       {type === 'public_message' && (
@@ -222,7 +239,7 @@ export const NotificationItem = memo(function NotificationItem(props: Props) {
           </ContentProvider>
         </Expandable>
       )}
-    </>
+    </NotificationLink>
   )
 })
 
@@ -239,6 +256,11 @@ const styles = css.create({
       default: 'transparent',
       ':hover': 'rgba(125, 125, 125, 0.08)',
     },
+  },
+  wrapper: {
+    // paddingBlock: spacing.padding1,
+    // paddingInline: spacing.padding2,
+    // lineHeight: 0,
   },
   root$unseen: {
     backgroundColor: palette.surfaceContainerLow,
@@ -281,15 +303,19 @@ const styles = css.create({
   },
   content: {
     display: 'inline-block',
-    flex: 1,
-    flexGrow: 1,
   },
   username: {
     display: 'inline-flex',
     fontWeight: 600,
   },
   trailing: {
+    textAlign: 'right',
     minWidth: 60,
+    maxWidth: 60,
+  },
+  trailing$dense: {
+    minWidth: 38,
+    maxWidth: 38,
   },
   zapAmount: {
     fontFamily: 'monospace',

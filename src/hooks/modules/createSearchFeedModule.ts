@@ -8,7 +8,7 @@ export function createSearchFeedModule(search: string): FeedModule {
   const filter = {
     kinds: [Kind.Text],
     search,
-    limit: 50,
+    limit: 500,
   }
   return {
     id,

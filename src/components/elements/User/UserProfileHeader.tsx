@@ -1,8 +1,9 @@
-import { toggleQRCodeDialogAtom } from '@/atoms/dialog.atoms'
+import { openImageDialogAtom, toggleQRCodeDialogAtom } from '@/atoms/dialog.atoms'
 import { addMediaErrorAtom, mediaErrorsAtom } from '@/atoms/media.atoms'
 import { enqueueToastAtom } from '@/atoms/toaster.atoms'
 import { FollowButton } from '@/components/modules/Follows/FollowButton'
 import { ContentProvider } from '@/components/providers/ContentProvider'
+import { Button } from '@/components/ui/Button/Button'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
@@ -19,14 +20,16 @@ import { spacing } from '@/themes/spacing.stylex'
 import { getImgProxyUrl } from '@/utils/imgproxy'
 import { IconBoltFilled, IconCopy, IconDotsVertical, IconQrcode, IconSend } from '@tabler/icons-react'
 import { useAtomValue, useSetAtom } from 'jotai'
-import { memo, useCallback } from 'react'
+import { memo, useCallback, useState } from 'react'
 import { css, html } from 'react-strict-dom'
 import { ContentLink } from '../Content/Link/Link'
+import { DialogSheet } from '../Layouts/Dialog'
 import { LinkBase } from '../Links/LinkBase'
 import { UserAvatar } from './UserAvatar'
 import { UserContentAbout } from './UserContentAbout'
 import { UserFollowings } from './UserFollowings'
 import { UserNIP05 } from './UserNIP05'
+import { UserProfileForm } from './UserProfileForm'
 import { UserRelays } from './UserRelays'
 
 type Props = {
@@ -35,11 +38,13 @@ type Props = {
 
 export const UserProfileBanner = function UserProfileBanner(props: { src: string }) {
   const { src } = props
+  const pushImage = useSetAtom(openImageDialogAtom)
   const addError = useSetAtom(addMediaErrorAtom)
   return (
-    <img
-      src={getImgProxyUrl('feed_img', src)}
-      style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+    <html.img
+      src={getImgProxyUrl('high_res', src)}
+      style={styles.banner}
+      onClick={() => pushImage({ src })}
       onError={() => addError(src)}
     />
   )
@@ -47,10 +52,12 @@ export const UserProfileBanner = function UserProfileBanner(props: { src: string
 
 export const UserProfileHeader = memo(function UserProfileHeader(props: Props) {
   const { pubkey } = props
+  const [editProfile, setEditProfile] = useState(false)
   const user = useUserState(pubkey, { syncFollows: true })
   const currentPubkey = useCurrentPubkey()
   const doesFollowCurrentUser = user.followsTag(currentPubkey)
   const { banner, nip05, lud16 } = user?.metadata || {}
+  const pushImage = useSetAtom(openImageDialogAtom)
   const hasError = useAtomValue(mediaErrorsAtom).has(banner || '')
   const toggleQRCodeDialog = useSetAtom(toggleQRCodeDialogAtom)
   const enqueueToast = useSetAtom(enqueueToastAtom)
@@ -64,6 +71,8 @@ export const UserProfileHeader = memo(function UserProfileHeader(props: Props) {
     }
   }, [])
 
+  const openImageDialog = (src: string) => pushImage({ src })
+
   return (
     <>
       <html.div style={styles.header}>
@@ -76,13 +85,18 @@ export const UserProfileHeader = memo(function UserProfileHeader(props: Props) {
       <Divider />
       <Stack horizontal={false} gap={1} sx={styles.content}>
         <ContentProvider value={{ disableLink: true, disablePopover: true }}>
-          <UserAvatar sx={styles.avatar} pubkey={pubkey} size='xl' />
+          <UserAvatar sx={styles.avatar} pubkey={pubkey} size='xl' onClick={openImageDialog} />
         </ContentProvider>
         <Stack sx={styles.center}>
           <Stack grow horizontal={false}>
             <Stack align='center'>
               <Text variant='headline' size='sm'>
                 {user?.displayName}
+                {user.metadata?.pronouns ? (
+                  <html.span style={styles.pronouns}>({user.metadata.pronouns})</html.span>
+                ) : (
+                  ''
+                )}
               </Text>
               {doesFollowCurrentUser && (
                 <Text sx={styles.followsYou} variant='label' size='md'>
@@ -144,7 +158,18 @@ export const UserProfileHeader = memo(function UserProfileHeader(props: Props) {
               />
             )}
           </Popover>
-          <FollowButton value={pubkey} />
+          {pubkey !== currentPubkey ? (
+            <FollowButton value={pubkey} />
+          ) : (
+            <>
+              <DialogSheet maxWidth='sm' open={editProfile} onClose={() => setEditProfile(false)}>
+                <UserProfileForm onClose={() => setEditProfile(false)} />
+              </DialogSheet>
+              <Button variant='filled' onClick={() => setEditProfile(true)}>
+                Edit profile
+              </Button>
+            </>
+          )}
         </Stack>
       </Stack>
     </>
@@ -160,7 +185,7 @@ const styles = css.create({
   header: {
     overflow: 'hidden',
     width: '100%',
-    height: 220,
+    height: 240,
     margin: '0 auto',
     padding: 0,
   },
@@ -182,7 +207,13 @@ const styles = css.create({
     position: 'absolute',
     left: 24,
     top: -50,
-    border: '4px solid white',
+    border: '4px solid',
+    borderColor: palette.surfaceContainerLowest,
+    transition: 'all 0.1s ease',
+    transform: 'scale(1)',
+    ':active': {
+      transform: 'scale(0.94)',
+    },
   },
   bannerFallback: {
     backgroundColor: palette.surfaceContainerLow,
@@ -212,5 +243,16 @@ const styles = css.create({
     paddingBlock: 2,
     paddingInline: 6,
     backgroundColor: palette.surfaceContainerHigh,
+  },
+  banner: {
+    cursor: 'pointer',
+    objectFit: 'cover',
+    width: '100%',
+    height: '100%',
+  },
+  pronouns: {
+    marginLeft: spacing['margin0.5'],
+    opacity: 0.8,
+    fontSize: '90%',
   },
 })

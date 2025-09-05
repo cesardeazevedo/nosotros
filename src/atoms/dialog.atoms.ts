@@ -3,7 +3,7 @@ import { atom } from 'jotai'
 import { atomWithReset } from 'jotai/utils'
 
 export type DialogListForm = NostrEventDB | number | false
-export type DialogImage = { eventId: string; src: string } | false
+export type DialogImage = { eventId?: string; src: string } | false
 export type DialogStats = string | false
 
 export const cameraDialogAtom = atomWithReset(false)
@@ -38,7 +38,7 @@ export const setListFormDialogAtom = atom(null, (_get, set, value: DialogListFor
   set(listFormDialogAtom, value)
 })
 
-export const openImageDialogAtom = atom(null, (_get, set, payload: { eventId: string; src: string }) => {
+export const openImageDialogAtom = atom(null, (_get, set, payload: { eventId?: string; src: string }) => {
   set(imageDialogAtom, { eventId: payload.eventId, src: payload.src })
 })
 

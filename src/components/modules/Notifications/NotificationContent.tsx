@@ -7,13 +7,14 @@ import { TextContent } from '../../elements/Content/Text'
 
 type Props = {
   event: NostrEventDB
+  dense?: boolean
 }
 
 export const NotificationContent = memo(function NotificationContent(props: Props) {
-  const { event } = props
+  const { event, dense } = props
   return (
     <NoteProvider value={{ event }}>
-      <html.div style={styles.root}>
+      <html.div style={[styles.root, dense && styles.root$dense]}>
         {event.metadata?.contentSchema?.content.map((node, index) => (
           <React.Fragment key={node.type + index}>
             {node.type === 'heading' && <TextContent hardBreak={false} node={node} />}
@@ -40,5 +41,8 @@ const styles = css.create({
     boxOrient: 'vertical',
     WebkitBoxOrient: 'vertical',
     display: '-webkit-box',
+  },
+  root$dense: {
+    WebkitLineClamp: 1,
   },
 })

@@ -14,6 +14,7 @@ export const settingsSchema = z
     defaultUploadUrl: z.string().url(),
     sidebarCollapsed: z.boolean(),
     sidebarRelaysCollapsed: z.boolean(),
+    notificationsCompact: z.boolean(),
     recentsCollapsed: z.boolean(),
     maxRelaysPerUser: z.number().int().nonnegative(),
     clientTag: z.boolean(),
@@ -32,6 +33,7 @@ export const DEFAULT_SETTINGS: Settings = {
   defaultUploadUrl: 'https://nostr.build',
   sidebarCollapsed: false,
   sidebarRelaysCollapsed: false,
+  notificationsCompact: false,
   recentsCollapsed: false,
   maxRelaysPerUser: 3,
   clientTag: true,
@@ -51,9 +53,9 @@ export const setSettingsAtom = atom(null, (get, set, patch: Partial<Settings>) =
   set(settingsAtom, { ...curr, ...patch })
 })
 
-export const toggleSettingAtom = atom(null, (get, set, key: keyof Settings) => {
+export const toggleSettingAtom = atom(null, (get, set, key: keyof Settings, value?: boolean) => {
   const curr = get(settingsAtom)
   if (typeof curr[key] === 'boolean') {
-    set(settingsAtom, { ...curr, [key]: !curr[key] })
+    set(settingsAtom, { ...curr, [key]: value ?? !curr[key] })
   }
 })

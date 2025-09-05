@@ -7,7 +7,7 @@ import { setEventData } from '@/hooks/query/queryUtils'
 import { setSeenData } from '@/hooks/query/useSeen'
 import { subscribeEventRelays } from '@/hooks/subscriptions/subscribeOutbox'
 import type { UnsignedEvent } from 'nostr-tools'
-import { connect, ignoreElements, map, merge, mergeMap, of, shareReplay, tap, throwError } from 'rxjs'
+import { connect, ignoreElements, map, merge, mergeMap, of, shareReplay, take, tap, throwError } from 'rxjs'
 import { parseEventMetadata } from '../../hooks/parsers/parseEventMetadata'
 import { dbSqlite } from '../db'
 import { pool } from '../pool'
@@ -48,6 +48,8 @@ export function publish(unsignedEvent: Omit<UnsignedEvent, 'created_at'>, option
               setSeenData(event.id, relay)
             }
           }),
+          take(1),
+          tap(([, , , , event]) => dbSqlite.insertEvent(event)),
           // We don't want the actual response from the relays in the main stream
           ignoreElements(),
         ),

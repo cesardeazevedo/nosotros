@@ -1,7 +1,7 @@
 {
   "name": "nosotros",
   "private": true,
-  "version": "1.2.1",
+  "version": "1.3.0",
   "type": "module",
   "author": "César Dias <cesardeazevedo@outlook.com>",
   "repository": "https://github.com/cesardeazevedo/nosotros",
@@ -52,6 +52,7 @@
     "idb": "^8.0.0",
     "jotai": "^2.13.1",
     "jotai-effect": "^2.0.5",
+    "jotai-scope": "^0.9.3",
     "light-bolt11-decoder": "^3.1.1",
     "linkifyjs": "^4.1.3",
     "luxon": "^3.5.0",

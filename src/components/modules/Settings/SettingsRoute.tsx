@@ -3,8 +3,6 @@ import { PaperContainer } from '@/components/elements/Layouts/PaperContainer'
 import { SettingsTabs } from '@/components/modules/Settings/SettingsTabs'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { Stack } from '@/components/ui/Stack/Stack'
-import { Text } from '@/components/ui/Text/Text'
-import { useMobile } from '@/hooks/useMobile'
 import { useResetScroll } from '@/hooks/useResetScroll'
 import { spacing } from '@/themes/spacing.stylex'
 import { Outlet } from '@tanstack/react-router'
@@ -13,21 +11,15 @@ import { css } from 'react-strict-dom'
 
 export const SettingsRoute = memo(() => {
   useResetScroll()
-  const isMobile = useMobile()
   return (
-    <CenteredContainer margin maxWidth='md' sx={styles.root}>
-      {!isMobile && (
-        <Stack sx={styles.header}>
-          <Text variant='headline' size='md'>
-            Settings
-          </Text>
-        </Stack>
-      )}
-      <PaperContainer>
-        <SettingsTabs />
-        <Divider />
-        <Stack>
-          <Outlet />
+    <CenteredContainer margin maxWidth='lg'>
+      <PaperContainer sx={styles.root}>
+        <Stack sx={styles.root} align='flex-start'>
+          <SettingsTabs />
+          <Divider orientation='vertical' />
+          <Stack grow sx={styles.main}>
+            <Outlet />
+          </Stack>
         </Stack>
       </PaperContainer>
     </CenteredContainer>
@@ -35,8 +27,14 @@ export const SettingsRoute = memo(() => {
 })
 
 const styles = css.create({
-  root: {},
+  root: {
+    height: 'calc(100vh - 180px)',
+  },
   header: {
     padding: spacing.padding2,
+  },
+  main: {
+    width: '100%',
+    // padding: spacing.padding2,
   },
 })
