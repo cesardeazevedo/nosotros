@@ -48,6 +48,7 @@ export const SettingsMediaStorage = memo(function SettingsMediaStorage() {
           onDelete={submit(Kind.BlossomServerList)}
           onSubmit={submit(Kind.BlossomServerList)}
         />
+        <br />
         <UploadServersTable
           kind={Kind.NIP96ServerList}
           servers={nip96ServerList.data}
