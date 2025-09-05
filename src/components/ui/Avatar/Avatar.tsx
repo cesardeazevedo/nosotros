@@ -5,6 +5,7 @@ import { typeScale } from '@/themes/typeScale.stylex'
 import type { UserAuthoredStyles } from '@stylexjs/stylex/lib/StyleXTypes'
 import React, { useEffect, useState } from 'react'
 import { css, html } from 'react-strict-dom'
+import type { StrictReactDOMImageProps } from 'react-strict-dom/dist/types/StrictReactDOMImageProps'
 import type { SxProps } from '../types'
 import { avatarTokens } from './Avatar.stylex'
 
@@ -17,6 +18,8 @@ export type Props = {
   srcSet?: string
   size?: 'xxs' | 'xs' | 'sm' | 'md' | 'lg' | 'xl'
   referrerPolicy?: HTMLImageElement['referrerPolicy']
+  onClick?: StrictReactDOMImageProps['onClick']
+  onError?: StrictReactDOMImageProps['onError']
   children?: React.ReactNode
 }
 
@@ -60,7 +63,7 @@ const useLoaded = (p: Pick<Props, 'src' | 'srcSet' | 'referrerPolicy'>) => {
 }
 
 export const Avatar = (props: Props) => {
-  const { variant = 'rounded', size = 'md', src, srcSet, referrerPolicy, children, sx } = props
+  const { variant = 'rounded', size = 'md', src, srcSet, referrerPolicy, children, sx, onClick, onError } = props
   const loaded = useLoaded({ src, srcSet, referrerPolicy })
   const hasImage = !!src || !!srcSet
   const okImage = hasImage && loaded !== 'error'
@@ -74,6 +77,8 @@ export const Avatar = (props: Props) => {
         style={[...style, styles.img, sx]}
         src={src}
         srcSet={srcSet}
+        onClick={onClick}
+        onError={onError}
       />
     )
   }

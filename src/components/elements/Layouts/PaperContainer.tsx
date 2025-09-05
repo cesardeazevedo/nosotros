@@ -1,4 +1,5 @@
 import { Paper } from '@/components/ui/Paper/Paper'
+import type { SxProps } from '@/components/ui/types'
 import { useMobile } from '@/hooks/useMobile'
 import { useIsDarkTheme } from '@/hooks/useTheme'
 import { palette } from '@/themes/palette.stylex'
@@ -10,6 +11,7 @@ type Props = {
   topRadius?: boolean
   maxWidth?: 'md' | 'lg'
   children?: React.ReactNode
+  sx?: SxProps
 }
 
 export const PaperContainer = memo(function PaperContainer(props: Props) {
@@ -22,7 +24,7 @@ export const PaperContainer = memo(function PaperContainer(props: Props) {
       outlined={isDark && !isMobile}
       elevation={isDark ? 0 : 1}
       surface='surfaceContainerLowest'
-      sx={[styles.root, styles[maxWidth], !topRadius && styles.resetTopRadius]}>
+      sx={[styles.root, styles[maxWidth], !topRadius && styles.resetTopRadius, rest.sx]}>
       {children}
     </Paper>
   )

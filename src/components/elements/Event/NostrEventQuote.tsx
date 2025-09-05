@@ -4,6 +4,7 @@ import { Kind } from '@/constants/kinds'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { memo } from 'react'
 import { PostQuote } from '../Posts/PostQuote'
+import { UserRoot } from '../User/UserRoot'
 import { ZapReceiptRoot } from '../Zaps/ZapReceipt'
 import { NostrEventUnsupported } from './NostrEventUnsupported'
 
@@ -14,6 +15,9 @@ type Props = {
 export const NostrEventQuote = memo(function NostrEventQuote(props: Props) {
   const { event } = props
   switch (event.kind) {
+    case Kind.Metadata: {
+      return <UserRoot pubkey={event.pubkey} />
+    }
     case Kind.Article: {
       return <ArticleFeedItem event={event} />
     }

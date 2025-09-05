@@ -63,13 +63,13 @@ const variants = css.create({
   },
   elevated: {
     [buttonTokens.labelTextColor]: palette.onSurface,
-    [buttonTokens.labelTextColor$hover]: 'red',
+    [buttonTokens.labelTextColor$hover]: palette.onSurface,
     [buttonTokens.labelTextColor$pressed]: palette.onSurface,
     [buttonTokens.labelTextColor$focus]: palette.onSurface,
     [buttonTokens.labelTextColor$disabled]: palette.onSurface,
     [buttonTokens.labelTextOpacity$disabled]: 0.38,
     [buttonTokens.containerColor]: palette.surfaceContainerLow,
-    [buttonTokens.containerColor$hover]: 'blue',
+    [buttonTokens.containerColor$hover]: palette.surfaceContainer,
     [buttonTokens.containerColor$pressed]: palette.surfaceContainerHigh,
     [buttonTokens.containerColor$disabled]: palette.surfaceContainerHigh,
     [buttonTokens.containerElevation]: {

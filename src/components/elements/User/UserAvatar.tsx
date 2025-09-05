@@ -12,18 +12,23 @@ export type Props = {
   pubkey: string
   sx?: SxProps
   size?: AvatarProps['size']
+  onClick?: (src: string) => void
   fallback?: boolean
 }
 
 export const UserAvatar = memo(function UserAvatar(props: Props) {
-  const { sx, pubkey, size = 'md', fallback = true } = props
+  const { sx, pubkey, size = 'md', fallback = true, onClick } = props
   const user = useUserMetadata(pubkey)
   const avatarProps = user?.metadata?.picture
     ? { src: getImgProxyUrl('user_avatar', user.metadata.picture) }
     : { src: '/user.jpg' }
   const avatar = (
     <LinkProfile pubkey={pubkey}>
-      <Avatar {...avatarProps} size={size} sx={[styles.avatar, sx]}>
+      <Avatar
+        {...avatarProps}
+        size={size}
+        sx={[styles.avatar, sx]}
+        onClick={() => onClick?.(user.metadata?.picture || '')}>
         {fallback ? <Avatar src='/user.jpg' size={size} /> : pubkey?.[0]}
       </Avatar>
     </LinkProfile>

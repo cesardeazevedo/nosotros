@@ -11,6 +11,7 @@ import { queryClient } from './queryClient'
 import { queryKeys } from './queryKeys'
 import type { CustomQueryOptions } from './useQueryBase'
 import { replaceableEventQueryOptions, useReplaceableEvent } from './useQueryBase'
+import { DEFAULT_NIP96_SERVERS } from '@/constants/relays'
 
 export function useEventMetadata(pubkey: string | undefined, options?: CustomQueryOptions<NostrEventDB>) {
   return useReplaceableEvent(Kind.Metadata, pubkey || '', {
@@ -28,6 +29,19 @@ export function useUserBlossomServers<Selector = NostrEventDB>(
   options?: CustomQueryOptions<Selector>,
 ) {
   return useReplaceableEvent(Kind.BlossomServerList, pubkey || '', {
+    ...options,
+    enabled: !!pubkey,
+    select: (events) => {
+      return events.flatMap((event) => event.tags.filter((x) => x[0] === 'server').flatMap((tag) => tag[1]))
+    },
+  })
+}
+
+export function useUserNIP96Servers<Selector = NostrEventDB>(
+  pubkey: string | undefined,
+  options?: CustomQueryOptions<Selector>,
+) {
+  return useReplaceableEvent(Kind.NIP96ServerList, pubkey || '', {
     ...options,
     enabled: !!pubkey,
     select: (events) => {
