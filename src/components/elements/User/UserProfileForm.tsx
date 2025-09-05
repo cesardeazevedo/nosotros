@@ -73,6 +73,9 @@ const UserProfileBanner = (props: { defaultValue?: string; onUploading?: (upload
               Set Banner URL
             </Button>
             <TooltipRich
+              cursor='dot'
+              sx={styles.tooltip}
+              floatingStrategy='absolute'
               openEvents={{ click: true, hover: false }}
               content={({ close }) => (
                 <UploadServersMenuList
@@ -159,6 +162,7 @@ const UserProfileAvatar = (props: { defaultValue?: string; onUploading?: (upload
       <TooltipRich
         cursor='dot'
         placement='bottom-start'
+        sx={styles.tooltip}
         openEvents={{ click: true, hover: false }}
         onClose={() => setView(view === 'selectUploadServer' ? 'idle' : view)}
         content={({ close }) => (
@@ -508,5 +512,9 @@ const styles = css.create({
   },
   hidden: {
     display: 'none',
+  },
+  tooltip: {
+    position: 'absolute',
+    zIndex: 10000,
   },
 })
