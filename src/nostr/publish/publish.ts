@@ -48,8 +48,6 @@ export function publish(unsignedEvent: Omit<UnsignedEvent, 'created_at'>, option
               setSeenData(event.id, relay)
             }
           }),
-          take(1),
-          tap(([, , , , event]) => dbSqlite.insertEvent(event)),
           // We don't want the actual response from the relays in the main stream
           ignoreElements(),
         ),
@@ -57,6 +55,7 @@ export function publish(unsignedEvent: Omit<UnsignedEvent, 'created_at'>, option
           mergeMap((x) => x.signedEvent),
           map(parseEventMetadata),
           tap(setEventData),
+          tap(dbSqlite.insertEvent),
         ),
       )
     }),
