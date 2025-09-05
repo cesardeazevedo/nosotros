@@ -98,7 +98,7 @@ export const ListItem = (props: Props) => {
         onClick={onClick}
         onMouseDown={onMouseDown}
         onMouseOver={onMouseOver}
-        sx={itemStyles}
+        sx={[...itemStyles, styles.interactive]}
         {...rest}>
         {content}
       </Button>
@@ -148,9 +148,11 @@ const styles = css.create({
     height: 'unset',
     width: '100%',
     textAlign: 'left',
+  },
+  interactive: {
     transform: {
       default: 'scale(1)',
-      ':active': 'scale(0.98)',
+      ':active': 'scale(0.97)',
     },
   },
   nonInteractive: {
