@@ -1,23 +1,12 @@
 import { Chip } from '@/components/ui/Chip/Chip'
-import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
-import { MenuList } from '@/components/ui/MenuList/MenuList'
 import { Popover } from '@/components/ui/Popover/Popover'
-import { Stack } from '@/components/ui/Stack/Stack'
-import { Text } from '@/components/ui/Text/Text'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
-import { useUserBlossomServers } from '@/hooks/query/useQueryUser'
-import { useCurrentPubkey } from '@/hooks/useAuth'
 import { useSetSettings, useSettings } from '@/hooks/useSettings'
-import { spacing } from '@/themes/spacing.stylex'
 import { IconBug, IconChevronDown } from '@tabler/icons-react'
 import { memo, useMemo } from 'react'
-import { css } from 'react-strict-dom'
-
-const nip96urls = ['nostr.build', 'nostrcheck.me', 'nostrage.com']
+import { UploadServersMenuList } from '../Upload/UploadServersMenuList'
 
 export const EditorSettingsUpload = memo(function EditorSettingsUpload() {
-  const pubkey = useCurrentPubkey()
-  const blossomServerList = useUserBlossomServers(pubkey)
   const settings = useSettings()
   const setSettings = useSetSettings()
   const selectedUrl = settings.defaultUploadUrl
@@ -40,49 +29,7 @@ export const EditorSettingsUpload = memo(function EditorSettingsUpload() {
   return (
     <Popover
       placement='bottom-end'
-      contentRenderer={({ close }) => (
-        <MenuList surface='surfaceContainerLowest'>
-          {blossomServerList.data && (
-            <>
-              <Stack sx={styles.subheader}>
-                <Text>Blossom Servers</Text>
-              </Stack>
-              {blossomServerList.data.map((url) => {
-                let formatted
-                try {
-                  formatted = new URL(url)
-                  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                } catch (error) {
-                  formatted = { host: url }
-                }
-                return (
-                  <MenuItem
-                    key={url}
-                    label={formatted.host}
-                    onClick={() => {
-                      onUpdate('blossom', url)
-                      close()
-                    }}
-                  />
-                )
-              })}
-            </>
-          )}
-          <Stack sx={styles.subheader}>
-            <Text>NIP-96</Text>
-          </Stack>
-          {nip96urls.map((url) => (
-            <MenuItem
-              key={url}
-              label={url}
-              onClick={() => {
-                onUpdate('nip96', 'https://' + url)
-                close()
-              }}
-            />
-          ))}
-        </MenuList>
-      )}>
+      contentRenderer={({ close }) => <UploadServersMenuList onSelect={onUpdate} onClose={close} />}>
       {({ getProps, setRef, open }) => (
         <Chip
           elevated
@@ -103,10 +50,4 @@ export const EditorSettingsUpload = memo(function EditorSettingsUpload() {
       )}
     </Popover>
   )
-})
-
-const styles = css.create({
-  subheader: {
-    paddingLeft: spacing.padding2,
-  },
 })

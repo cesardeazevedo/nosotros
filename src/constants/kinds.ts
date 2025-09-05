@@ -29,6 +29,7 @@ export enum Kind {
   // replaceable
   BookmarkList = 10003,
   BlossomServerList = 10063,
+  NIP96ServerList = 10096,
   MonitorDiscovery = 10166,
   FollowSets = 30000,
   RelaySets = 30002,
