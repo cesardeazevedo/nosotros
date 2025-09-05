@@ -45,6 +45,7 @@ export const UserContentAbout = memo(function UserContentAbout(props: Props) {
         <Text
           variant='label'
           size='lg'
+          role='button'
           onClick={(e) => {
             e.preventDefault()
             e.stopPropagation()
