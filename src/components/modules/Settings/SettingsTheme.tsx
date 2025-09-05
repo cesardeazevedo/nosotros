@@ -53,6 +53,7 @@ export const SettingsTheme = memo(function SettingsTheme() {
 const styles = css.create({
   root: {
     overflow: 'hidden',
+    marginLeft: spacing.margin2,
   },
   wrapper: {
     overflow: 'hidden',

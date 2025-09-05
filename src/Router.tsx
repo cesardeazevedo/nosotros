@@ -30,7 +30,9 @@ import { RelayActiveRoute } from './components/modules/RelayActive/RelayActiveRo
 import { RelayMonitorRoute } from './components/modules/RelayMonitor/RelayMonitorRoute'
 import { RelayRoute } from './components/modules/Relays/RelaysRoute'
 import { SearchRoute } from './components/modules/Search/SearchRoute'
+import { SettingsMediaStorage } from './components/modules/Settings/SettingsMediaStorage'
 import { SettingsPreferencesRoute } from './components/modules/Settings/SettingsPreferenceRoute'
+import { SettingsRelayAuth } from './components/modules/Settings/SettingsRelaysAuth'
 import { SettingsRoute } from './components/modules/Settings/SettingsRoute'
 import { SettingsStorageRoute } from './components/modules/Settings/SettingsStorage'
 import { TagHeader } from './components/modules/Tag/TagHeader'
@@ -574,6 +576,18 @@ const settingsPreferenceRoute = createRoute({
   component: SettingsPreferencesRoute,
 })
 
+const settingsRelaysAuthRoute = createRoute({
+  getParentRoute: () => settingsRoute,
+  path: '/relay_auth',
+  component: SettingsRelayAuth,
+})
+
+const settingsMediaStorage = createRoute({
+  getParentRoute: () => settingsRoute,
+  path: '/media',
+  component: SettingsMediaStorage,
+})
+
 const settingsStorageRoute = createRoute({
   getParentRoute: () => settingsRoute,
   path: '/storage',
@@ -594,7 +608,12 @@ export const routeTree = rootRoute.addChildren([
   articleRoute,
   composeRoute,
   relaysRoute.addChildren([relayActiveRoute, relayMonitorRoute]),
-  settingsRoute.addChildren([settingsPreferenceRoute, settingsStorageRoute]),
+  settingsRoute.addChildren([
+    settingsPreferenceRoute,
+    settingsRelaysAuthRoute,
+    settingsMediaStorage,
+    settingsStorageRoute,
+  ]),
 ])
 
 export const router = createRouter({
