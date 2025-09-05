@@ -104,6 +104,9 @@ importers:
       jotai-effect:
         specifier: ^2.0.5
         version: 2.0.5(jotai@2.13.1(@babel/core@7.26.7)(@babel/template@7.25.9)(@types/react@19.0.8)(react@19.0.0))
+      jotai-scope:
+        specifier: ^0.9.3
+        version: 0.9.3(jotai@2.13.1(@babel/core@7.26.7)(@babel/template@7.25.9)(@types/react@19.0.8)(react@19.0.0))(react@19.0.0)
       light-bolt11-decoder:
         specifier: ^3.1.1
         version: 3.2.0
@@ -4313,6 +4316,13 @@ packages:
     engines: {node: '>=12.20.0'}
     peerDependencies:
       jotai: '>=2.12.1'
+
+  jotai-scope@0.9.3:
+    resolution: {integrity: sha512-uwigjUy8HA3Ly/QLZkzMdsvVVbH/9yqs0dSfJxg0kAoSA/k6b6paMkC59M7GMhVOl2RenoGl4irDO7YP3MS03A==}
+    engines: {node: '>=14.0.0'}
+    peerDependencies:
+      jotai: '>=2.12.0'
+      react: '>=16.0.0'
 
   jotai@2.13.1:
     resolution: {integrity: sha512-cRsw6kFeGC9Z/D3egVKrTXRweycZ4z/k7i2MrfCzPYsL9SIWcPXTyqv258/+Ay8VUEcihNiE/coBLE6Kic6b8A==}
@@ -11245,6 +11255,11 @@ snapshots:
   jotai-effect@2.0.5(jotai@2.13.1(@babel/core@7.26.7)(@babel/template@7.25.9)(@types/react@19.0.8)(react@19.0.0)):
     dependencies:
       jotai: 2.13.1(@babel/core@7.26.7)(@babel/template@7.25.9)(@types/react@19.0.8)(react@19.0.0)
+
+  jotai-scope@0.9.3(jotai@2.13.1(@babel/core@7.26.7)(@babel/template@7.25.9)(@types/react@19.0.8)(react@19.0.0))(react@19.0.0):
+    dependencies:
+      jotai: 2.13.1(@babel/core@7.26.7)(@babel/template@7.25.9)(@types/react@19.0.8)(react@19.0.0)
+      react: 19.0.0
 
   jotai@2.13.1(@babel/core@7.26.7)(@babel/template@7.25.9)(@types/react@19.0.8)(react@19.0.0):
     optionalDependencies:

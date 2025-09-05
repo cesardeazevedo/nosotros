@@ -32,7 +32,7 @@ export function compactObject<T>(input: T) {
   const result: Record<string, unknown> = {}
 
   for (const [key, value] of Object.entries(input as Record<string, unknown>)) {
-    if (value === undefined) {
+    if (value === undefined || value === '') {
       continue
     }
     if (Array.isArray(value) && value.length === 0) {

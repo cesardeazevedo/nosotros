@@ -6,6 +6,7 @@ import { PopoverBase } from '../Popover/PopoverBase'
 import type {
   IPopoverBaseContentRendererProps,
   IPopoverBaseProps,
+  IPopoverBaseTriggerRendererProps,
   IRendererPropsWithForwardedProps,
 } from '../Popover/PopoverBase.types'
 import { tooltipTokens } from '../Tooltip/Tooltip.stylex'
@@ -16,7 +17,7 @@ type Props = Omit<IPopoverBaseProps, 'children' | 'contentRenderer'> & {
   persistent?: boolean
   keepMounted?: boolean
   elevation?: ElevationLevel
-  children: React.ReactNode
+  children: React.ReactNode | ((props: IPopoverBaseTriggerRendererProps) => React.ReactNode)
 }
 
 export const TooltipRich = memo(function TooltipRich(props: Props) {
@@ -59,7 +60,7 @@ export const TooltipRich = memo(function TooltipRich(props: Props) {
         }}>
         {(renderProps) => (
           <html.span {...renderProps.getProps()} ref={renderProps.setRef}>
-            {children}
+            {typeof children === 'function' ? children(renderProps) : children}
           </html.span>
         )}
       </PopoverBase>

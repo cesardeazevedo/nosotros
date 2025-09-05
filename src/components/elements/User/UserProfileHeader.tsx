@@ -1,4 +1,4 @@
-import { toggleQRCodeDialogAtom } from '@/atoms/dialog.atoms'
+import { openImageDialogAtom, toggleQRCodeDialogAtom } from '@/atoms/dialog.atoms'
 import { addMediaErrorAtom, mediaErrorsAtom } from '@/atoms/media.atoms'
 import { enqueueToastAtom } from '@/atoms/toaster.atoms'
 import { FollowButton } from '@/components/modules/Follows/FollowButton'
@@ -52,6 +52,7 @@ export const UserProfileBanner = function UserProfileBanner(props: { src: string
 
 export const UserProfileHeader = memo(function UserProfileHeader(props: Props) {
   const { pubkey } = props
+  const [editProfile, setEditProfile] = useState(false)
   const user = useUserState(pubkey, { syncFollows: true })
   const currentPubkey = useCurrentPubkey()
   const doesFollowCurrentUser = user.followsTag(currentPubkey)
@@ -157,7 +158,18 @@ export const UserProfileHeader = memo(function UserProfileHeader(props: Props) {
               />
             )}
           </Popover>
-          <FollowButton value={pubkey} />
+          {pubkey !== currentPubkey ? (
+            <FollowButton value={pubkey} />
+          ) : (
+            <>
+              <DialogSheet maxWidth='sm' open={editProfile} onClose={() => setEditProfile(false)}>
+                <UserProfileForm onClose={() => setEditProfile(false)} />
+              </DialogSheet>
+              <Button variant='filled' onClick={() => setEditProfile(true)}>
+                Edit profile
+              </Button>
+            </>
+          )}
         </Stack>
       </Stack>
     </>
