@@ -3,11 +3,14 @@ import { useAtomValue } from 'jotai'
 import { useMemo, useState } from 'react'
 import { createNotificationFeedModule, type NotificationFeedModule } from '../modules/createNotificationFeedModule'
 import type { InfiniteEvents } from '../query/useQueryFeeds'
+import { useSettings } from '../useSettings'
 import { useFeedState } from './useFeed'
 
 export type NotificationFeedState = ReturnType<typeof useNotificationFeedState>
 
 export function useNotificationFeedState(options: NotificationFeedModule) {
+  const { notificationsCompact } = useSettings()
+  const [layout, setLayout] = useState<'compact' | 'normal'>(notificationsCompact ? 'compact' : 'normal')
   const [includeMuted, setIncludeMuted] = useState(options.includeMuted)
   const [includeMentions, setIncludeMentions] = useState(options.includeMentions)
   const [includeReplies, setIncludeReplies] = useState(options.includeReplies ?? false)
@@ -40,6 +43,8 @@ export function useNotificationFeedState(options: NotificationFeedModule) {
 
   return {
     ...feed,
+    layout,
+    setLayout,
     includeReplies,
     includeMuted,
     includeMentions,
