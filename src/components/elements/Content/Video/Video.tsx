@@ -1,4 +1,4 @@
-import { currentVideoAtom, removeCurrentVideoAtom, setCurrentVideoAtom } from '@/atoms/media.atoms'
+import { addMediaDimAtom, currentVideoAtom, removeCurrentVideoAtom, setCurrentVideoAtom } from '@/atoms/media.atoms'
 import { useNoteContext } from '@/components/providers/NoteProvider'
 import type { SxProps } from '@/components/ui/types'
 import { useMediaStore } from '@/hooks/useMediaStore'
@@ -25,6 +25,7 @@ export const Video = memo(function Video(props: Props) {
   const ref = useRef<HTMLVideoElement>(null)
   const extension = useMemo(() => new URL(src).pathname.split('.').pop(), [src])
 
+  const addMediaDim = useSetAtom(addMediaDimAtom)
   const setVideo = useSetAtom(setCurrentVideoAtom)
   const removeVideo = useSetAtom(removeCurrentVideoAtom)
   const currentVideo = useAtomValue(currentVideoAtom)
@@ -74,6 +75,12 @@ export const Video = memo(function Video(props: Props) {
             const video = ref.current
             if (video) {
               setVideo({ video, play: video.paused })
+            }
+          }}
+          onLoadedMetadata={(e) => {
+            const element = e.target as HTMLVideoElement
+            if (!event.metadata?.imeta?.[src].dim) {
+              addMediaDim({ src, dim: [element.videoWidth, element.videoHeight] })
             }
           }}
           src={src}
