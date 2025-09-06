@@ -165,7 +165,7 @@ export const UserProfileHeader = memo(function UserProfileHeader(props: Props) {
               <DialogSheet maxWidth='sm' open={editProfile} onClose={() => setEditProfile(false)}>
                 <UserProfileForm onClose={() => setEditProfile(false)} />
               </DialogSheet>
-              <Button variant='filled' onClick={() => setEditProfile(true)}>
+              <Button disabled={!user.event} variant='filled' onClick={() => setEditProfile(true)}>
                 Edit profile
               </Button>
             </>
