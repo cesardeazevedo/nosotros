@@ -115,14 +115,14 @@ const ImageNavigation = (props: { src: string; id: string | undefined }) => {
     <>
       <IconButton
         variant='filled'
-        sx={styles.close}
+        sx={[styles.button, styles.close]}
         onClick={closeImage}
         icon={<IconX strokeWidth='1.2' size={24} />}
       />
       {isMultiple && !isMobile && (
         <IconButton
           variant='filledTonal'
-          sx={[styles.button$left, disabledLeft && styles.button$disable]}
+          sx={[styles.button, styles.button$left, disabledLeft && styles.button$disable]}
           disabled={disabledLeft}
           onClick={onLeft}>
           <IconChevronLeft />
@@ -134,7 +134,7 @@ const ImageNavigation = (props: { src: string; id: string | undefined }) => {
       {isMultiple && !isMobile && (
         <IconButton
           variant='filledTonal'
-          sx={[styles.button$right, disabledRight && styles.button$disable]}
+          sx={[styles.button, styles.button$right, disabledRight && styles.button$disable]}
           onClick={onRight}
           disabled={disabledRight}>
           <IconChevronRight />
@@ -189,6 +189,13 @@ const styles = css.create({
     transitionProperty: 'opacity',
     transitionDuration: duration.short2,
   },
+  button: {
+    backgroundColor: 'black',
+    color: 'white',
+    ':disabled': {
+      opacity: 0.1,
+    },
+  },
   button$left: {
     position: 'absolute',
     left: 24,
@@ -212,7 +219,6 @@ const styles = css.create({
     left: 18,
     top: 18,
     zIndex: 10,
-    color: 'white',
     bgcolor: 'rgba(0, 0, 0, 0.8)',
   },
   bounds: (width: number, height: number) => ({ width, height }),
