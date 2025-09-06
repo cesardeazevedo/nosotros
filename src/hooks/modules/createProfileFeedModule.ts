@@ -27,6 +27,7 @@ export function createProfileModule(
     filter,
     includeReplies: options.includeReplies,
     ctx: {},
+    autoUpdate: true,
     scope: 'self',
   }
 }
