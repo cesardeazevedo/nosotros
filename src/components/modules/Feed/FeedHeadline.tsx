@@ -1,7 +1,9 @@
 import { RelayChip } from '@/components/elements/Relays/RelayChip'
+import { Divider } from '@/components/ui/Divider/Divider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import type { FeedState } from '@/hooks/state/useFeed'
+import { useMobile } from '@/hooks/useMobile'
 import { spacing } from '@/themes/spacing.stylex'
 import React from 'react'
 import { css } from 'react-strict-dom'
@@ -10,7 +12,15 @@ type Props = {
   feed: FeedState
 }
 
-const HeadlineBase = (props: { children: React.ReactNode }) => <Stack sx={styles.root}>{props.children}</Stack>
+const HeadlineBase = (props: { children: React.ReactNode }) => {
+  const isMobile = useMobile()
+  return (
+    <>
+      <Stack sx={styles.root}>{props.children}</Stack>
+      {isMobile && <Divider />}
+    </>
+  )
+}
 
 export const FeedHeadline = (props: Props) => {
   const { feed } = props

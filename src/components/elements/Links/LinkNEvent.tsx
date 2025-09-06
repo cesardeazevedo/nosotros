@@ -58,6 +58,10 @@ export const LinkNEvent = memo(function LinkNEvent(props: Props) {
       state={{ from: router.latestLocation.pathname } as never}
       {...rest}
       {...css.props([underline && styles.underline])}
+      onDragStart={(e) => {
+        e.stopPropagation()
+        e.preventDefault()
+      }}
       params={{ nostr: nevent }}>
       {props.children}
     </Link>

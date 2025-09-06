@@ -25,12 +25,7 @@ export const RouteContainer = memo(function RouteContainer(props: Props) {
     <CenteredContainer margin {...rest}>
       {portal && !isMobile && createPortal(headline, portal)}
       <PaperContainer maxWidth={rest.maxWidth}>
-        {isMobile && (
-          <>
-            {headline}
-            <Divider />
-          </>
-        )}
+        {isMobile && <>{headline}</>}
         {header}
         {renderDivider && <Divider />}
         {children}

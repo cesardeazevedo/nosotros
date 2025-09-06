@@ -1,5 +1,5 @@
 import { openImageDialogAtom } from '@/atoms/dialog.atoms'
-import { addMediaErrorAtom, mediaErrorsAtom } from '@/atoms/media.atoms'
+import { addMediaDimAtom, addMediaErrorAtom, mediaErrorsAtom } from '@/atoms/media.atoms'
 import { useContentContext } from '@/components/providers/ContentProvider'
 import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
@@ -29,6 +29,7 @@ export const Image = memo(function Image(props: Props) {
   const { disableLink } = useContentContext()
   const { event } = useNoteContext()
   const pushImage = useSetAtom(openImageDialogAtom)
+  const addMediaDim = useSetAtom(addMediaDimAtom)
   const hasError = useAtomValue(mediaErrorsAtom).has(src)
   const addError = useSetAtom(addMediaErrorAtom)
 
@@ -62,6 +63,11 @@ export const Image = memo(function Image(props: Props) {
               src={proxy ? getImgProxyUrl('feed_img', src) : src}
               onClick={handleClick}
               onError={() => addError(src)}
+              onLoad={(e: { target: HTMLImageElement }) => {
+                if (!event.metadata?.imeta?.[src].dim) {
+                  addMediaDim({ src, dim: [e.target.naturalWidth, e.target.naturalHeight] })
+                }
+              }}
               {...rest}
             />
           )}

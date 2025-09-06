@@ -82,7 +82,7 @@ export const NotificationItem = memo(function NotificationItem(props: Props) {
   const zapper = useEventTag(event, 'P')
   const zapAmount = event.metadata?.bolt11?.amount?.value || '0'
 
-  const author = type === 'zap' ? zapper : event.pubkey
+  const author = type === 'zap' ? zapper || event.pubkey : event.pubkey
 
   const lastSeen = useAtomValue(selectedLastSeenAtom)?.notifications || 0
   const lastSeenRef = useRef<number>(lastSeen)
@@ -154,7 +154,7 @@ export const NotificationItem = memo(function NotificationItem(props: Props) {
           {type === 'repost' && <IconShare3 fill='currentColor' size={28} strokeWidth='1.5' />}
         </Stack>
         <Stack gap={2} justify='flex-start' align={dense ? 'center' : 'flex-start'} grow sx={styles.wrapper}>
-          <UserAvatar pubkey={event.pubkey} size={dense ? 'sm' : 'md'} />
+          <UserAvatar pubkey={author} size={dense ? 'sm' : 'md'} />
           <ContentProvider value={{ disableLink: true }}>
             <Stack sx={styles.content} wrap grow onClick={onClick} align='center' justify='center'>
               {author && !dense && (
