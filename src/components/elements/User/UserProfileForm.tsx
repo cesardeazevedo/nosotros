@@ -15,6 +15,7 @@ import { TooltipRich } from '@/components/ui/TooltipRich/TooltipRich'
 import { usePublishEventMutation } from '@/hooks/mutations/usePublishEventMutation'
 import type { UserSchema } from '@/hooks/parsers/parseUser'
 import { useCurrentUser } from '@/hooks/useAuth'
+import { useMobile } from '@/hooks/useMobile'
 import { publishMetadata } from '@/nostr/publish/publishMetadata'
 import { elevation } from '@/themes/elevation.stylex'
 import { palette } from '@/themes/palette.stylex'
@@ -37,6 +38,7 @@ const UserProfileBanner = (props: { defaultValue?: string; onUploading?: (upload
   const selectFiles = useSetAtom(selectFilesForUploadAtom)
   const uploadFiles = useSetAtom(uploadFilesAtom)
   const files = useAtomValue(filesAtom)
+  const isMobile = useMobile()
   const file = files.length > 0 ? files[0] : undefined
   const isUploading = file?.uploading || false
   return (
@@ -48,7 +50,7 @@ const UserProfileBanner = (props: { defaultValue?: string; onUploading?: (upload
         gap={1}
         align='center'
         justify='center'
-        sx={[styles.banner$backdrop, (showInput || isUploading) && styles.banner$editing]}>
+        sx={[styles.banner$backdrop, (showInput || isUploading || isMobile) && styles.banner$editing]}>
         {isUploading && <CircularProgress />}
         {!showInput && !isUploading && (
           <>
@@ -74,8 +76,6 @@ const UserProfileBanner = (props: { defaultValue?: string; onUploading?: (upload
             </Button>
             <TooltipRich
               cursor='dot'
-              sx={styles.tooltip}
-              floatingStrategy='absolute'
               openEvents={{ click: true, hover: false }}
               content={({ close }) => (
                 <UploadServersMenuList
@@ -155,6 +155,7 @@ const UserProfileAvatar = (props: { defaultValue?: string; onUploading?: (upload
   const resetFiles = useSetAtom(resetFileUploadAtom)
   const selectFiles = useSetAtom(selectFilesForUploadAtom)
   const uploadFiles = useSetAtom(uploadFilesAtom)
+  const isMobile = useMobile()
   const file = files.length > 0 ? files[0] : undefined
   const isUploading = file?.uploading || false
   return (
@@ -162,7 +163,6 @@ const UserProfileAvatar = (props: { defaultValue?: string; onUploading?: (upload
       <TooltipRich
         cursor='dot'
         placement='bottom-start'
-        sx={styles.tooltip}
         openEvents={{ click: true, hover: false }}
         onClose={() => setView(view === 'selectUploadServer' ? 'idle' : view)}
         content={({ close }) => (
@@ -220,7 +220,7 @@ const UserProfileAvatar = (props: { defaultValue?: string; onUploading?: (upload
           <Stack
             align='center'
             justify='center'
-            sx={[styles.banner$backdrop, styles.avatar$backdrop, isUploading && styles.avatar$uploading]}>
+            sx={[styles.banner$backdrop, styles.avatar$backdrop, (isUploading || isMobile) && styles.avatar$uploading]}>
             {isUploading ? <CircularProgress size='sm' /> : <IconUpload stroke='white' size={28} strokeWidth='1.2' />}
           </Stack>
           {src && !error ? (
@@ -512,9 +512,5 @@ const styles = css.create({
   },
   hidden: {
     display: 'none',
-  },
-  tooltip: {
-    position: 'absolute',
-    zIndex: 10000,
   },
 })
