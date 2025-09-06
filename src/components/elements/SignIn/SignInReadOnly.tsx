@@ -1,3 +1,11 @@
+import { toggleCameraDialogAtom } from '@/atoms/dialog.atoms'
+import {
+  inputPubkeyAtom,
+  setReadonlyInputAtom,
+  signinErrorAtom,
+  submitNostrAddressAtom,
+  submitReadOnlyAtom,
+} from '@/atoms/signin.atoms'
 import { ContentProvider } from '@/components/providers/ContentProvider'
 import { Button } from '@/components/ui/Button/Button'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
@@ -5,54 +13,52 @@ import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { TextField } from '@/components/ui/TextField/TextField'
+import { useEventFromNIP19 } from '@/hooks/query/useQueryBase'
 import { useGoBack } from '@/hooks/useNavigations'
-import { useRootContext } from '@/hooks/useRootStore'
-import { subscribeUser } from '@/nostr/subscriptions/subscribeUser'
-import { signinStore } from '@/stores/signin/signin.store'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconClipboardCopy, IconScan } from '@tabler/icons-react'
 import { useMobile } from 'hooks/useMobile'
-import { observer } from 'mobx-react-lite'
-import { pluckFirst, useObservable, useObservableState } from 'observable-hooks'
-import { useActionState, useCallback, useRef } from 'react'
+import { useAtomValue, useSetAtom } from 'jotai'
+import { memo, useActionState, useCallback, useRef } from 'react'
 import { css } from 'react-strict-dom'
-import { debounceTime, filter, switchMap } from 'rxjs'
-import { dialogStore } from 'stores/ui/dialogs.store'
+import invariant from 'tiny-invariant'
 import { decodeNIP19 } from 'utils/nip19'
 import { UserAvatar } from '../User/UserAvatar'
 import { UserName } from '../User/UserName'
 import { SignInHeader } from './SignInHeader'
 
-const SignInPreview = observer(function UserPreview() {
-  const input = signinStore.inputPubkey
-  const context = useRootContext()
-
-  const input$ = useObservable(pluckFirst, [input])
-  const sub = useObservable(() => {
-    return input$.pipe(
-      filter((x) => !!x),
-      debounceTime(250),
-      switchMap((value) => subscribeUser(value, context)),
-    )
-  })
-  const user = useObservableState(sub)
+const SignInPreview = memo(function SignInUserPreview() {
+  const input = useAtomValue(inputPubkeyAtom)
+  const { data: event } = useEventFromNIP19(input)
 
   return (
-    user && (
+    event && (
       <ContentProvider value={{ disableLink: true, disablePopover: true }}>
         <Stack horizontal={false} gap={2} justify='flex-end' align='center'>
-          {!user ? <Skeleton variant='circular' sx={styles.loading} /> : <UserAvatar pubkey={user.pubkey} size='lg' />}
-          {user && <UserName variant='title' size='lg' pubkey={user.pubkey} />}
+          {!event ? (
+            <Skeleton variant='circular' sx={styles.loading} />
+          ) : (
+            <UserAvatar pubkey={event.pubkey} size='lg' />
+          )}
+          {event && <UserName variant='title' size='lg' pubkey={event.pubkey} />}
         </Stack>
       </ContentProvider>
     )
   )
 })
 
-export const SignInReadOnly = observer(function SignInForm() {
+export const SignInReadOnly = memo(function SignInForm() {
   const isMobile = useMobile()
   const goBack = useGoBack()
   const ref = useRef<HTMLInputElement>(null)
+
+  const errorMsg = useAtomValue(signinErrorAtom)
+  const toggleCamera = useSetAtom(toggleCameraDialogAtom)
+
+  const setInput = useSetAtom(setReadonlyInputAtom)
+  const setSigninError = useSetAtom(signinErrorAtom)
+  const submitNostrAddress = useSetAtom(submitNostrAddressAtom)
+  const submitReadOnly = useSetAtom(submitReadOnlyAtom)
 
   const [error, submitAction] = useActionState(async (_: string | null, formData: FormData) => {
     try {
@@ -60,19 +66,19 @@ export const SignInReadOnly = observer(function SignInForm() {
       const decoded = decodeNIP19(input)
       switch (decoded?.type) {
         case 'npub': {
-          signinStore.submitReadonly(decoded.data)
+          submitReadOnly(decoded.data)
           break
         }
         case 'nprofile': {
-          signinStore.submitReadonly(decoded.data.pubkey)
+          submitReadOnly(decoded.data.pubkey)
           break
         }
         default: {
           if (input.includes('@')) {
-            await signinStore.submitNostrAddress(input)
+            await submitNostrAddress(input)
             break
           } else if (input.length === 64) {
-            signinStore.submitReadonly(input)
+            submitReadOnly(input)
             break
           }
           throw new Error('Invalid Input')
@@ -86,16 +92,22 @@ export const SignInReadOnly = observer(function SignInForm() {
     }
   }, null)
 
+  const pasteClipboard = async () => {
+    const permissionStatus = await navigator.permissions.query({ name: 'clipboard-read' as PermissionName })
+    invariant(permissionStatus.state === 'granted', 'Clipboard permission rejected')
+    return await window.navigator.clipboard.readText()
+  }
+
   const handleClipboard = useCallback(async () => {
     try {
-      const res = await signinStore.pasteClipboard()
+      const res = await pasteClipboard()
       if (ref.current) {
         ref.current.value = res
       }
-      signinStore.setReadonlyInput(res)
+      setInput(res)
     } catch (err) {
       const error = err as Error
-      signinStore.setError(error.message)
+      setSigninError(error.message)
     }
   }, [])
 
@@ -112,18 +124,15 @@ export const SignInReadOnly = observer(function SignInForm() {
               shrink
               name='input'
               ref={ref}
-              onChange={(e) => signinStore.setReadonlyInput(e.target.value)}
-              error={!!error || !!signinStore.error}
+              onChange={(e) => setInput(e.target.value)}
+              error={!!error || !!errorMsg}
               placeholder='npub, nprofile, nostr address (nip-05)'
-              trailing={isMobile && <IconButton onClick={() => dialogStore.toggleCamera()} icon={<IconScan />} />}
+              trailing={isMobile && <IconButton onClick={() => toggleCamera()} icon={<IconScan />} />}
             />
             {error && <Text>{error}</Text>}
-            {signinStore.error && <Text>{signinStore.error}</Text>}
-            <Button
-              variant='outlined'
-              sx={styles.button}
-              onClick={handleClipboard}
-              icon={<IconClipboardCopy size={18} strokeWidth='1.2' style={{ marginLeft: -20 }} />}>
+            {errorMsg && <Text>{errorMsg}</Text>}
+            <Button variant='outlined' sx={styles.button} onClick={handleClipboard}>
+              <IconClipboardCopy size={18} strokeWidth='1.2' style={{ marginLeft: -20 }} />
               Paste
             </Button>
           </Stack>

@@ -1,32 +1,33 @@
 import { ContentProvider, useContentContext } from '@/components/providers/ContentProvider'
 import { Paper } from '@/components/ui/Paper/Paper'
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
-import { eventStore } from '@/stores/events/event.store'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import { useEventFromNIP19 } from '@/hooks/query/useQueryBase'
 import { duration } from '@/themes/duration.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import { observer } from 'mobx-react-lite'
 import type { NAddrAttributes } from 'nostr-editor'
+import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 import { NostrEventQuote } from '../../Event/NostrEventQuote'
 
 type Props = {
   pointer: NAddrAttributes
+  event?: NostrEventDB
 }
 
-export const NAddr = observer(function NAddr(props: Props) {
-  const { pointer } = props
+export const NAddr = memo(function NAddr(props: Props) {
   const { dense } = useContentContext()
-  const event = eventStore.get([pointer.kind, pointer.pubkey, pointer.identifier].join(':'))
+  const event = useEventFromNIP19(props.pointer.bech32, props.event?.metadata?.relayHints)
   return (
     <html.div style={[styles.root, dense && styles.root$dense]}>
-      {!event && (
+      {!event.data && (
         <Skeleton variant='rectangular' animation='wave' sx={[styles.skeleton, dense && styles.skeleton$dense]} />
       )}
-      {event && (
+      {event.data && (
         <ContentProvider value={{ dense: true }}>
           <Paper outlined sx={styles.content}>
-            <NostrEventQuote event={event.event} />
+            <NostrEventQuote event={event.data} />
           </Paper>
         </ContentProvider>
       )}

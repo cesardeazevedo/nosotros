@@ -1,29 +1,32 @@
-import type { FeedModule } from '@/stores/modules/feed.module'
-import { DeckScroll } from '../Deck/DeckScroll'
-import { Feed } from '../Feed/Feed'
-import { SearchHeader } from './SearchHeader'
-import { SearchSettings } from './SearchSettings'
-import { FeedHeaderBase } from '../Feed/headers/FeedHeaderBase'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { Stack } from '@/components/ui/Stack/Stack'
+import type { FeedModule } from '@/hooks/query/useQueryFeeds'
+import { useFeedState } from '@/hooks/state/useFeed'
+import { memo } from 'react'
+import { DeckScroll } from '../Deck/DeckScroll'
+import { Feed } from '../Feed/Feed'
+import { FeedHeaderBase } from '../Feed/headers/FeedHeaderBase'
+import { SearchHeader } from './SearchHeader'
+import { SearchSettings } from './SearchSettings'
 
 type Props = {
   module: FeedModule
 }
 
-export const SearchColumn = (props: Props) => {
+export const SearchColumn = memo(function SearchColumn(props: Props) {
   const { module } = props
+  const feed = useFeedState(module)
   return (
     <Stack horizontal={false}>
       <FeedHeaderBase
-        feed={module.feed}
-        leading={<SearchHeader module={module} updateSearchParams={false} />}
-        customSettings={<SearchSettings renderSearchField={false} module={module} />}
+        feed={feed}
+        leading={<SearchHeader feed={feed} />}
+        customSettings={<SearchSettings feed={feed} />}
       />
       <Divider />
       <DeckScroll>
-        <Feed column feed={module.feed} />
+        <Feed column feed={feed} />
       </DeckScroll>
     </Stack>
   )
-}
+})

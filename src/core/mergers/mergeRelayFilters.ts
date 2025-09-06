@@ -8,13 +8,11 @@ export function mergeRelayFilters(relayFilters: RelayFilters[]) {
 
   for (const relayFilter of relayFilters) {
     const relay = relayFilter[0]
-    const filters = relayFilter[1]
+    const filter = relayFilter[1]
     grouped[relay] ??= []
-    filters.forEach((filter) => {
-      if (isFilterValid(filter)) {
-        grouped[relay].push(filter)
-      }
-    })
+    if (isFilterValid(filter)) {
+      grouped[relay].push(filter)
+    }
   }
 
   const result: [string, NostrFilter[]][] = []

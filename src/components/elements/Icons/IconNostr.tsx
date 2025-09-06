@@ -6,8 +6,8 @@ export const IconNostr = () => (
     x='0px'
     y='0px'
     viewBox='0 0 24 24'
-    width='30'
-    height='30'>
+    width='28'
+    height='28'>
     <g>
       <path
         fill='none'

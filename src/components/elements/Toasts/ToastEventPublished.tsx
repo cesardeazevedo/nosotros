@@ -1,17 +1,18 @@
+import { eventNip19Atom, publishesByIdAtom, publishFailuresAtom, publishSuccessesAtom } from '@/atoms/publish.atoms'
+import { dequeueToastAtom } from '@/atoms/toaster.atoms'
 import { Button } from '@/components/ui/Button/Button'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
-import { publishStore } from '@/stores/publish/publish.store'
-import { toastStore } from '@/stores/ui/toast.store'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconChevronDown, IconChevronRight, IconX } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
-import { observer } from 'mobx-react-lite'
+import { useAtomValue, useSetAtom } from 'jotai'
 import type { NostrEvent } from 'nostr-tools'
+import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 import { RelayChip } from '../Relays/RelayChip'
 import { RelayPublishIcon } from '../Relays/RelayPublishIcon'
@@ -24,7 +25,7 @@ type Props = {
   initiallyExpanded?: boolean
 }
 
-export const ToastEventPublished = observer(function ToastEventPublished(props: Props) {
+export const ToastEventPublished = memo(function ToastEventPublished(props: Props) {
   const {
     event,
     eventLabel = 'Event',
@@ -32,10 +33,11 @@ export const ToastEventPublished = observer(function ToastEventPublished(props: 
     initiallyExpanded = false,
     renderEventLink = true,
   } = props
-  const publishes = publishStore.get(event.id)
-  const successes = publishStore.successes(event.id)
-  const failures = publishStore.failures(event.id)
-  const link = publishStore.nip19(event)
+  const dequeueToast = useSetAtom(dequeueToastAtom)
+  const publishes = useAtomValue(publishesByIdAtom(event.id))
+  const successes = useAtomValue(publishSuccessesAtom(event.id))
+  const failures = useAtomValue(publishFailuresAtom(event.id))
+  const link = useAtomValue(eventNip19Atom(event))
   return (
     <Stack horizontal={false} align='stretch' sx={styles.root}>
       <Stack gap={0.5} sx={styles.header} justify='space-between'>
@@ -44,7 +46,7 @@ export const ToastEventPublished = observer(function ToastEventPublished(props: 
             {eventLabel} {actionLabel}
           </Text>
         </html.div>
-        <IconButton onClick={() => toastStore.dequeue()}>
+        <IconButton onClick={() => dequeueToast()}>
           <IconX size={20} />
         </IconButton>
       </Stack>

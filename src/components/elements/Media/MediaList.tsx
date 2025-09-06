@@ -1,25 +1,27 @@
 import { ContentProvider } from '@/components/providers/ContentProvider'
 import { useNoteContext } from '@/components/providers/NoteProvider'
+import { useImetaList } from '@/hooks/useEventUtils'
 import { spacing } from '@/themes/spacing.stylex'
 import { type MutableRefObject, useRef } from 'react'
 import { css, html } from 'react-strict-dom'
 import { useDraggable } from 'react-use-draggable-scroll'
 import { Image } from '../Content/Image/Image'
-import { Video } from '../Content/Video/Video'
 import { MediaWrapper } from '../Content/Layout/MediaWrapper'
+import { Video } from '../Content/Video/Video'
 
 export const MediaList = () => {
-  const { note } = useNoteContext()
+  const { event } = useNoteContext()
   const ref = useRef<HTMLDivElement>(null)
   // @ts-ignore
   const { events } = useDraggable(ref as MutableRefObject<HTMLElement>, {
     applyRubberBandEffect: true,
   })
-  const isMultiple = note.imetaList.length > 1
+  const imetaList = useImetaList(event)
+  const isMultiple = imetaList.length > 1
   return (
     <ContentProvider value={{ dense: true }}>
       <div {...css.props(styles.root)} {...events} ref={ref}>
-        {note.imetaList.map(([type, src]) => (
+        {imetaList.map(([type, src]) => (
           <html.div key={src} style={styles.item}>
             <MediaWrapper
               disablePadding

@@ -6,5 +6,11 @@ export const LinkBase = function LinkBase(props: LinkProps & { children: ReactNo
   const { children, ...rest } = props
   const { disableLink } = useContentContext()
   // We don't wanna render a <a> if the link is disabled
-  return props.disabled || disableLink ? <>{children}</> : <Link {...rest}>{children}</Link>
+  return props.disabled || disableLink ? (
+    <>{children}</>
+  ) : (
+    <Link {...rest} onClick={(e) => e.stopPropagation()}>
+      {children}
+    </Link>
+  )
 }

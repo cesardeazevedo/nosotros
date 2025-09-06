@@ -1,20 +1,21 @@
+import { dequeueToastAtom, peekToastAtom } from '@/atoms/toaster.atoms'
 import { Paper } from '@/components/ui/Paper/Paper'
 import { PopoverBase } from '@/components/ui/Popover/PopoverBase'
 import { useMobile } from '@/hooks/useMobile'
-import { toastStore } from '@/stores/ui/toast.store'
 import { spacing } from '@/themes/spacing.stylex'
-import { observer } from 'mobx-react-lite'
-import { useEffect } from 'react'
+import { useAtomValue, useSetAtom } from 'jotai'
+import { memo, useEffect } from 'react'
 import { css, html } from 'react-strict-dom'
 
-export const Toaster = observer(function Toaster() {
-  const toast = toastStore.peek
+export const Toaster = memo(function Toaster() {
+  const toast = useAtomValue(peekToastAtom)
+  const dequeue = useSetAtom(dequeueToastAtom)
   const isMobile = useMobile()
 
   useEffect(() => {
     if (toast && toast.duration) {
       setTimeout(() => {
-        toastStore.dequeue()
+        dequeue()
       }, toast.duration)
     }
   }, [toast])

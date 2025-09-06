@@ -7,35 +7,34 @@ import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { visibleOnHoverStyle } from '@/components/ui/helpers/visibleOnHover.stylex'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Stack } from '@/components/ui/Stack/Stack'
-import { useRootStore } from '@/hooks/useRootStore'
-import type { FeedStore } from '@/stores/feeds/feed.store'
+import type { FeedState } from '@/hooks/state/useFeed'
 import { spacing } from '@/themes/spacing.stylex'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconTrash } from '@tabler/icons-react'
-import type { ReactNode } from '@tanstack/react-router'
-import { useContext, useState } from 'react'
+import type { ReactNode } from 'react'
+import { memo, useState } from 'react'
 import { css } from 'react-strict-dom'
-import { DeckContext } from '../../Deck/DeckContext'
+import { useDeckColumn, useRemoveDeckColumn } from '../../Deck/hooks/useDeck'
 import type { Props as FeedSettingsProps } from '../FeedSettings'
 import { FeedSettings } from '../FeedSettings'
 
 type Props = HeaderBaseProps &
   Partial<FeedSettingsProps> & {
-    feed?: FeedStore
+    feed?: FeedState
     customSettings?: ReactNode
     onDelete?: () => void
+    renderSetting?: boolean
   }
 
-export const FeedHeaderBase = (props: Props) => {
+export const FeedHeaderBase = memo(function FeedHeaderBase(props: Props) {
   const [expanded, setExpanded] = useState(false)
-  const { feed, customSettings, renderRelaySettings, onDelete, ...rest } = props
-  const root = useRootStore()
-  const deckModule = useContext(DeckContext).module
-  const isDeck = !!deckModule
+  const { feed, customSettings, renderRelaySettings, onDelete, renderSetting = true, ...rest } = props
+  const column = useDeckColumn()
+  const isDeck = !!column
+  const removeDeckColumn = useRemoveDeckColumn(column?.id)
+
   const handleDelete = () => {
-    if (deckModule) {
-      root.decks.selected.delete(deckModule.id)
-    }
+    removeDeckColumn()
   }
   return (
     <>
@@ -57,7 +56,9 @@ export const FeedHeaderBase = (props: Props) => {
         </Stack>
       </HeaderBase>
       <Expandable expanded={expanded}>
-        {feed && (customSettings || <FeedSettings feed={feed} renderRelaySettings={renderRelaySettings} />)}
+        {feed &&
+          renderSetting &&
+          (customSettings || <FeedSettings feed={feed} renderRelaySettings={renderRelaySettings} />)}
         {isDeck && (
           <>
             <Divider />
@@ -71,7 +72,7 @@ export const FeedHeaderBase = (props: Props) => {
       </Expandable>
     </>
   )
-}
+})
 
 const styles = css.create({
   footer: {

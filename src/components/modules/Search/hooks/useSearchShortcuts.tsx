@@ -1,7 +1,9 @@
-import { dialogStore } from '@/stores/ui/dialogs.store'
+import { toggleSearchDialogAtom } from '@/atoms/dialog.atoms'
+import { useSetAtom } from 'jotai'
 import { useEffect } from 'react'
 
 export function useSearchShortcuts() {
+  const toggleSearch = useSetAtom(toggleSearchDialogAtom)
   useEffect(() => {
     const abortController = new AbortController()
     const { signal } = abortController
@@ -9,7 +11,7 @@ export function useSearchShortcuts() {
     const handleKeyDown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
         event.preventDefault()
-        dialogStore.toggleSearch(true)
+        toggleSearch(true)
       }
     }
     window.addEventListener('keydown', handleKeyDown, { signal })

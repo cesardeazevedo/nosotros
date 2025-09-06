@@ -1,5 +1,5 @@
+import type { PublishedEvent } from '@/atoms/publish.atoms'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
-import type { PublishedEvent } from '@/stores/publish/publish.store'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconBug, IconCheck } from '@tabler/icons-react'
 import { css, html } from 'react-strict-dom'

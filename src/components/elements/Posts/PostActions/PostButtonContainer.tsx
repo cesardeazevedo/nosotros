@@ -16,12 +16,15 @@ type Props = {
 
 export const ButtonContainer = (props: Props & ContainerProps) => {
   const { value, children, sx } = props
-  return (
-    <Stack sx={[styles.root, !value && styles.empty, sx]} gap={0.5}>
-      {children}
-      {value || ''}
-    </Stack>
-  )
+  if (value) {
+    return (
+      <Stack sx={[styles.root, !value && styles.empty, sx]} gap={0.5}>
+        {children}
+        {value || ''}
+      </Stack>
+    )
+  }
+  return children
 }
 
 const styles = css.create({

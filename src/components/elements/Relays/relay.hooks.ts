@@ -1,21 +1,15 @@
-import { useCurrentSigner } from '@/hooks/useRootStore'
+import { usePublishEventMutation } from '@/hooks/mutations/usePublishEventMutation'
 import { publishRelayList } from '@/nostr/publish/publishRelayList'
 import type { UserRelay } from '@/nostr/types'
-import { useObservableState } from 'observable-hooks'
-import { catchError, last, map, mergeMap, of, startWith } from 'rxjs'
+
+type Input = [UserRelay, boolean]
 
 export function usePublishRelayList() {
-  const signer = useCurrentSigner()
-  return useObservableState<boolean, [UserRelay, revoke: boolean]>((input$) => {
-    return input$.pipe(
-      mergeMap(([userRelay, revoke]) => {
-        return publishRelayList(userRelay, revoke, { signer }).pipe(
-          last(),
-          map(() => false),
-          catchError(() => of(false)),
-          startWith(true),
-        )
-      }),
-    )
-  }, false)
+  return usePublishEventMutation<Input>({
+    mutationFn:
+      ({ signer }) =>
+      ([userRelay, revoke]) => {
+        return publishRelayList(userRelay, revoke, { signer })
+      },
+  })
 }

@@ -1,10 +1,14 @@
 import { Kind } from '@/constants/kinds'
-import type { PublisherOptions } from '@/core/NostrPublish'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import { queryClient } from '@/hooks/query/queryClient'
+import { queryKeys } from '@/hooks/query/queryKeys'
 import type { NostrEvent } from 'nostr-tools'
 import { isParameterizedReplaceableKind } from 'nostr-tools/kinds'
+import { tap } from 'rxjs'
+import type { LocalPublisherOptions } from './publish'
 import { publish } from './publish'
 
-export function publishReaction(pubkey: string, event: NostrEvent, reaction: string, options: PublisherOptions) {
+export function publishReaction(pubkey: string, event: NostrEvent, reaction: string, options: LocalPublisherOptions) {
   return publish(
     {
       kind: Kind.Reaction,
@@ -23,5 +27,12 @@ export function publishReaction(pubkey: string, event: NostrEvent, reaction: str
       ...options,
       include: [event],
     },
+  ).pipe(
+    tap((reaction) => {
+      queryClient.setQueryData(queryKeys.tag('e', [event.id], reaction.kind), (old: NostrEventDB[] = []) => [
+        ...old,
+        reaction,
+      ])
+    }),
   )
 }

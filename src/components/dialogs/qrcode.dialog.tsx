@@ -1,12 +1,13 @@
 import { DialogSheet } from 'components/elements/Layouts/Dialog'
 import { QRCode } from 'components/elements/QRCode/QRCode'
-import { observer } from 'mobx-react-lite'
-import { dialogStore } from 'stores/ui/dialogs.store'
+import { memo } from 'react'
+import { useDialogControl } from '../../hooks/useDialogs'
 
-export const QRCodeDialog = observer(function QRCodeDialog() {
+export const QRCodeDialog = memo(function QRCodeDialog() {
+  const [pubkey, onClose] = useDialogControl('qrcode')
   return (
-    <DialogSheet open={dialogStore.qrcode} onClose={() => dialogStore.toggleQRCode(false)} maxWidth='xs'>
-      <QRCode />
+    <DialogSheet open={!!pubkey} onClose={onClose} maxWidth='xs'>
+      {pubkey && <QRCode pubkey={pubkey} />}
     </DialogSheet>
   )
 })

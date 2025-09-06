@@ -1,10 +1,10 @@
-import { useContentContext } from '@/components/providers/ContentProvider'
+import { ContentProvider, useContentContext } from '@/components/providers/ContentProvider'
 import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Kind } from '@/constants/kinds'
-import { getMimeFromExtension } from '@/nostr/helpers/parseImeta'
-import { observer } from 'mobx-react-lite'
+import { getMimeFromExtension } from '@/hooks/parsers/parseImeta'
+import { useEventTag } from '@/hooks/useEventUtils'
 import type { ImageNode, Node, VideoNode } from 'nostr-editor'
-import React from 'react'
+import React, { memo } from 'react'
 import { Image } from './Image/Image'
 import { MediaWrapper } from './Layout/MediaWrapper'
 import { Paragraph } from './Layout/Paragraph'
@@ -35,13 +35,14 @@ const isImageNode = (kind: Kind, node: Node): node is ImageNode => {
   return type === 'image'
 }
 
-export const Content = observer(function Content(props: Props) {
+export const Content = memo(function Content(props: Props) {
   const { wrapper, children, renderMedia = true } = props
-  const { note } = useNoteContext()
-  const { dense } = useContentContext()
+  const { event } = useNoteContext()
+  const { dense, blured } = useContentContext()
+  const nsfw = useEventTag(event, 'content-warning')
   return (
-    <>
-      {note.metadata.contentSchema?.content.map((node, index) => {
+    <ContentProvider value={{ blured: !!nsfw || blured }}>
+      {event.metadata?.contentSchema?.content.map((node, index) => {
         const Wrapper = wrapper?.(node) || React.Fragment
         const size = dense ? 'md' : 'lg'
         return (
@@ -50,18 +51,18 @@ export const Content = observer(function Content(props: Props) {
               {children?.(index)}
               {node.type === 'heading' && <Heading node={node} />}
               {node.type === 'paragraph' && <Paragraph node={node} />}
-              {renderMedia && isImageNode(note.event.kind, node) && (
+              {renderMedia && isImageNode(event.kind, node) && (
                 <MediaWrapper size={size} src={node.attrs.src}>
                   <Image src={node.attrs!.src} />
                 </MediaWrapper>
               )}
-              {renderMedia && isVideoNode(note.event.kind, node) && (
+              {renderMedia && isVideoNode(event.kind, node) && (
                 <MediaWrapper size={size} src={node.attrs.src}>
                   <Video src={node.attrs.src} />
                 </MediaWrapper>
               )}
-              {node.type === 'nevent' && <NEvent pointer={node.attrs} />}
-              {node.type === 'naddr' && <NAddr pointer={node.attrs} />}
+              {node.type === 'nevent' && <NEvent pointer={node.attrs} event={event} />}
+              {node.type === 'naddr' && <NAddr pointer={node.attrs} event={event} />}
               {node.type === 'orderedList' && <List type='ol' node={node} />}
               {node.type === 'bulletList' && <List type='ul' node={node} />}
               {node.type === 'codeBlock' && <CodeBlock node={node} />}
@@ -72,13 +73,11 @@ export const Content = observer(function Content(props: Props) {
                   <YoutubeEmbed src={node.attrs.src} />
                 </MediaWrapper>
               )}
-              {node.type === 'bolt11' && (
-                <LNInvoice nevent={note.event.nevent} bolt11={node.attrs.bolt11} lnbc={node.attrs.lnbc} />
-              )}
+              {node.type === 'bolt11' && <LNInvoice event={event} bolt11={node.attrs.bolt11} lnbc={node.attrs.lnbc} />}
             </>
           </Wrapper>
         )
       })}
-    </>
+    </ContentProvider>
   )
 })

@@ -29,7 +29,6 @@ export const UploadButton = (props: Props) => {
           <MenuList>
             {nip96urls.map((url) => (
               <MenuItem
-                interactive
                 key={url}
                 label={url}
                 onClick={() => {

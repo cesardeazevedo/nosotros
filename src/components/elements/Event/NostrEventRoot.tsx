@@ -1,29 +1,35 @@
+import { FollowEventRoot } from '@/components/modules/Follows/FollowEventRoot'
 import { Kind } from '@/constants/kinds'
-import type { NostrEventMetadata } from '@/nostr/types'
-import { metadataSymbol } from '@/nostr/types'
-import { observer } from 'mobx-react-lite'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import { memo } from 'react'
 import { PostRoot } from '../Posts/Post'
-import { RepliesThread } from '../Replies/RepliesThread'
+import { PublicMessageRoot } from '../PublicMessage/PublicMessageRoot'
 import { RepostRoot } from '../Repost/Repost'
+import { Threads } from '../Threads/Threads'
 import { ZapReceiptRoot } from '../Zaps/ZapReceipt'
 import { NostrEventUnsupported } from './NostrEventUnsupported'
 
 type Props = {
-  event: NostrEventMetadata
+  event: NostrEventDB
   open?: boolean
 }
 
-export const NostrEventRoot = observer(function NostrEventRoot(props: Props) {
+export const NostrEventRoot = memo(function NostrEventRoot(props: Props) {
   const { event, open } = props
   switch (event.kind) {
     case Kind.Comment:
     case Kind.Text: {
-      return event[metadataSymbol].isRoot ? (
+      return event.metadata?.isRoot ? (
         <PostRoot event={event} open={open} />
       ) : (
-        <RepliesThread event={event} open={open} />
+        <Threads event={event} renderRepliesSummary={false} />
       )
     }
+    case Kind.Follows: {
+      return <FollowEventRoot event={event} />
+    }
+    case Kind.PublicMessage:
+      return <PublicMessageRoot event={event} />
     case Kind.Article: {
       return <PostRoot event={event} open={open} />
     }
