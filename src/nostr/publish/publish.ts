@@ -55,7 +55,7 @@ export function publish(unsignedEvent: Omit<UnsignedEvent, 'created_at'>, option
           mergeMap((x) => x.signedEvent),
           map(parseEventMetadata),
           tap(setEventData),
-          tap(dbSqlite.insertEvent),
+          tap((event) => dbSqlite.insertEvent(event)),
         ),
       )
     }),
