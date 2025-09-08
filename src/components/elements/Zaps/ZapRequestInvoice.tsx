@@ -20,7 +20,7 @@ import { useObservableState } from 'observable-hooks'
 import { QRCodeCanvas } from 'qrcode.react'
 import { useMemo, useRef } from 'react'
 import { css, html } from 'react-strict-dom'
-import { filter, identity, map, mergeMap, take } from 'rxjs'
+import { filter, identity, map, mergeMap, take, tap } from 'rxjs'
 import { CopyButton } from '../Buttons/CopyButton'
 import type { CopyButtonRef } from '../Buttons/CopyIconButton'
 
@@ -61,7 +61,18 @@ export const ZapRequestInvoice = (props: Props) => {
   // }, [])
 
   const [paid] = useObservableState<boolean>(() => {
-    return subscribeRemote({ relays: event.relays }, { kinds: [Kind.ZapReceipt] }).pipe(
+    return subscribeRemote(
+      {
+        network: 'REMOTE_ONLY',
+        outbox: false,
+        relays: event.relays,
+        negentropy: false,
+        closeOnEose: false,
+        subId: 'zap_receipt',
+      },
+      { kinds: [Kind.ZapReceipt], since: parseInt((Date.now() / 1000).toString()) },
+    ).pipe(
+      tap((x) => console.log('>', x)),
       mergeMap(identity),
       filter((event) => {
         // Make sure the zap receipt is the one we are looking for
