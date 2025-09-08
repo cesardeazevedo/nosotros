@@ -35,7 +35,6 @@ export function useUserState(pubkey?: string, options?: UserStateOptions) {
     ...metadata,
     follows,
     nprofile,
-    relays: [],
     mutedNotes: new Set(),
     mutedAuthors: new Set(),
     followsTag,

@@ -1,12 +1,12 @@
 import { Kind } from '@/constants/kinds'
 import { compactArray } from '@/utils/utils'
 import type { NostrEvent } from 'nostr-tools'
-import { isParameterizedReplaceableKind } from 'nostr-tools/kinds'
+import { isAddressableKind } from 'nostr-tools/kinds'
 import type { LocalPublisherOptions } from './publish'
 import { publish } from './publish'
 
 export function publishRepost(event: NostrEvent, options: LocalPublisherOptions) {
-  const isAddressable = isParameterizedReplaceableKind(event.kind)
+  const isAddressable = isAddressableKind(event.kind)
   return publish(
     {
       ...event,

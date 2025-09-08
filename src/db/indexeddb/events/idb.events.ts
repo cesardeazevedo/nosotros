@@ -1,7 +1,7 @@
 import type { Kind } from 'constants/kinds'
 import type { NostrEvent, NostrFilter } from 'core/types'
 import type * as idb from 'idb'
-import { isParameterizedReplaceableKind, isReplaceableKind } from 'nostr-tools/kinds'
+import { isAddressableKind, isReplaceableKind } from 'nostr-tools/kinds'
 import type { IndexedDBSchema } from '../idb.schemas'
 import { IDBEventQuery } from './idb.events.query'
 
@@ -87,7 +87,7 @@ export class IDBEventStore {
       }
     }
 
-    const isAddressable = isParameterizedReplaceableKind(data.kind)
+    const isAddressable = isAddressableKind(data.kind)
     if (isAddressable) {
       const index = tags.index('kind_tag_value_created_at')
       const dTag = data.tags.find((x) => x[0] === 'd')

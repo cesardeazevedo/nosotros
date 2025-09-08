@@ -3,7 +3,7 @@ import type { NostrFilter } from '@/core/types'
 import { getDTag } from '@/utils/nip19'
 import type { BindableValue, Database } from '@sqlite.org/sqlite-wasm'
 import type { NostrEvent } from 'nostr-tools'
-import { isParameterizedReplaceableKind, isReplaceableKind } from 'nostr-tools/kinds'
+import { isAddressableKind, isReplaceableKind } from 'nostr-tools/kinds'
 import { InsertBatcher } from '../batcher'
 import type { NostrEventDB, NostrEventExists, NostrEventStored } from '../sqlite.types'
 
@@ -27,7 +27,7 @@ export class SqliteEventStore {
   exists(db: Database, event: NostrEvent) {
     if (isReplaceableKind(event.kind)) {
       return this.getReplaceable(db, event.kind, event.pubkey)
-    } else if (isParameterizedReplaceableKind(event.kind)) {
+    } else if (isAddressableKind(event.kind)) {
       const dTag = event.tags.find((tag) => tag[1] === 'd')?.[1]
       if (dTag) {
         return this.getAddressable(db, event.kind, event.pubkey, dTag)
@@ -182,7 +182,7 @@ export class SqliteEventStore {
       }
     }
 
-    if (isParameterizedReplaceableKind(event.kind)) {
+    if (isAddressableKind(event.kind)) {
       const dTag = getDTag(event)
       if (!dTag) {
         return false

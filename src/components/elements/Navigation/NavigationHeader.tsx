@@ -4,13 +4,13 @@ import { Text } from '@/components/ui/Text/Text'
 import { useGoBack, useNostrRoute } from '@/hooks/useNavigations'
 import { IconChevronLeft } from '@tabler/icons-react'
 import { useMatch } from '@tanstack/react-router'
-import type { DecodeResult } from 'nostr-tools/nip19'
+import type { DecodedResult } from 'nostr-tools/nip19'
 import { memo } from 'react'
 import { css } from 'react-strict-dom'
 import { UserAvatar } from '../User/UserAvatar'
 import { UserName } from '../User/UserName'
 
-const getPubkey = (decoded?: DecodeResult) => {
+const getPubkey = (decoded?: DecodedResult) => {
   switch (decoded?.type) {
     case 'nprofile': {
       return decoded.data.pubkey

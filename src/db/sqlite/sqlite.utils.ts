@@ -1,4 +1,4 @@
-import { isParameterizedReplaceableKind, isReplaceableKind } from 'nostr-tools/kinds'
+import { isAddressableKind, isReplaceableKind } from 'nostr-tools/kinds'
 import type { NostrEventDB } from './sqlite.types'
 
 export function filterOlderReplaceableEvents(events: NostrEventDB[]) {
@@ -14,7 +14,7 @@ export function filterOlderReplaceableEvents(events: NostrEventDB[]) {
       if (!existing || existing.created_at < event.created_at) {
         replaceableMap.set(key, event)
       }
-    } else if (isParameterizedReplaceableKind(event.kind)) {
+    } else if (isAddressableKind(event.kind)) {
       const dTag = event.tags.find((tag) => tag[0] === 'd')?.[1]
       if (!dTag) {
         continue
