@@ -7,11 +7,14 @@ import { CircularProgress } from '@/components/ui/Progress/CircularProgress'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { TextField } from '@/components/ui/TextField/TextField'
+import { dedupe } from '@/core/helpers/dedupe'
+import type { Signer } from '@/core/signers/signer'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import { useUserRelays } from '@/hooks/query/useQueryUser'
 import { useNoteState } from '@/hooks/state/useNote'
-import type { UserState } from '@/hooks/state/useUser'
 import { useUserState } from '@/hooks/state/useUser'
-import { useCurrentAccount, useCurrentSigner, useCurrentUser } from '@/hooks/useAuth'
+import { useCurrentPubkey, useCurrentSigner } from '@/hooks/useAuth'
+import { READ, WRITE } from '@/nostr/types'
 import { spacing } from '@/themes/spacing.stylex'
 import { bech32, utf8 } from '@scure/base'
 import { IconAlertCircleFilled, IconBolt } from '@tabler/icons-react'
@@ -24,7 +27,7 @@ import { getZapEndpoint, makeZapRequest } from 'nostr-tools/nip57'
 import { useObservableState } from 'observable-hooks'
 import { memo } from 'react'
 import { css } from 'react-strict-dom'
-import { catchError, filter, first, from, map, mergeMap, of, startWith, tap, throwError } from 'rxjs'
+import { catchError, filter, first, from, map, merge, mergeMap, of, startWith, tap, throwError } from 'rxjs'
 import { fromFetch } from 'rxjs/fetch'
 import { UserAvatar } from '../User/UserAvatar'
 import { UserName } from '../User/UserName'
@@ -38,35 +41,38 @@ const formatter = new Intl.NumberFormat()
 
 export const ZapRequest = memo(function ZapRequest(props: Props) {
   const { event } = props
-  const acc = useCurrentAccount()
   const signer = useCurrentSigner()
   const store = useAtomValue(zapRequestAtom)
   const updateStore = useSetAtom(updateZapRequestAtom)
   const enqueueToast = useSetAtom(enqueueToastAtom)
 
-  const currentUser = useCurrentUser()
+  const pubkey = useCurrentPubkey()
   const navigate = useNavigate()
   const router = useRouter()
   const note = useNoteState(event)
   const user = useUserState(event.pubkey)
+  const userRelays = useUserRelays(user.pubkey, READ).data?.map((x) => x.relay) || []
+  const currentUserRelays = useUserRelays(pubkey, WRITE).data?.map((x) => x.relay) || []
+  const relays = dedupe(userRelays, currentUserRelays)
   const zapEnabled = note?.user ? user.canReceiveZap : true
 
-  const [pending, onSubmit] = useObservableState<boolean, [UserState, ZapRequestStore] | undefined>((input$) => {
+  const [pending, onSubmit] = useObservableState<
+    boolean,
+    [signer: Signer, userEvent: NostrEvent, ZapRequestStore, string[]] | undefined
+  >((input$) => {
     return input$.pipe(
       filter((x) => !!x),
-      mergeMap(([user, store]) => {
-        return from(getZapEndpoint(user.event as unknown as NostrEvent)).pipe(
+      mergeMap(([signer, userEvent, store, relays]) => {
+        return from(getZapEndpoint(userEvent)).pipe(
           mergeMap((callback) => {
             if (!callback) return throwError(() => new Error('Error when getting zap endpoint'))
-            if (!acc?.pubkey || !signer) return throwError(() => new Error('Not authenticated'))
 
             const comment = store.comment
             const amount = store.amount * 1000
-            const relays = [...(currentUser?.relays || []), ...user.relays]
 
             const zapEvent = makeZapRequest({
-              profile: user.pubkey!, // TODO: get this type right
-              event: event.id,
+              pubkey: event.pubkey,
+              event: event,
               amount,
               comment,
               relays,
@@ -75,7 +81,6 @@ export const ZapRequest = memo(function ZapRequest(props: Props) {
             const lnurl = bech32.encode('lnurl', bech32.toWords(utf8.decode(callback)), Bech32MaxSize)
             const signed = signer.sign({
               ...zapEvent,
-              pubkey: acc.pubkey,
               tags: [...zapEvent.tags, ['lnurl', lnurl]],
             })
 
@@ -84,40 +89,46 @@ export const ZapRequest = memo(function ZapRequest(props: Props) {
                 if (!event) {
                   return throwError(() => 'Signed rejected')
                 }
-                return fromFetch<{ pr: string }>(
-                  `${callback}?amount=${amount}&nostr=${encodeURI(JSON.stringify(event))}&lnurl=${lnurl}`,
-                  {
-                    selector: (res) => res.json(),
-                    mode: 'cors',
-                    credentials: 'omit',
-                  },
+                return merge(
+                  fromFetch<{ pr: string } | { message: string; error: true }>(
+                    `${callback}?amount=${amount}&nostr=${encodeURI(JSON.stringify(event))}&lnurl=${lnurl}`,
+                    {
+                      selector: (res) => res.json(),
+                      mode: 'cors',
+                      credentials: 'omit',
+                    },
+                  ),
                 )
               }),
               tap((response) => {
-                navigate({
-                  search: {
-                    invoice: response.pr,
-                    nevent: nip19.neventEncode({
-                      id: event.id,
-                      author: user.pubkey,
-                      relays,
-                    }),
-                  },
-                  to: '.',
-                  state: { from: router.latestLocation.pathname } as never,
-                })
+                if ('error' in response && response.error) {
+                  enqueueToast({ component: response.message, duration: 5000 })
+                } else if ('pr' in response) {
+                  navigate({
+                    search: {
+                      invoice: response.pr,
+                      nevent: nip19.neventEncode({
+                        id: event.id,
+                        author: event.pubkey,
+                        relays,
+                      }),
+                    },
+                    to: '.',
+                    state: { from: router.latestLocation.pathname } as never,
+                  })
+                }
               }),
             )
           }),
           first(),
           map(() => false),
           startWith(true),
-          catchError((res) => {
-            const error = res as Error
-            enqueueToast({ component: error.message, duration: 5000 })
-            return of(false)
-          }),
         )
+      }),
+      catchError((res) => {
+        const error = res as Error
+        enqueueToast({ component: error.message, duration: 5000 })
+        return of(false)
       }),
     )
   })
@@ -135,11 +146,6 @@ export const ZapRequest = memo(function ZapRequest(props: Props) {
             {user.pubkey && <UserName size='lg' variant='title' pubkey={user.pubkey} />}
           </Stack>
         </ContentProvider>
-        {/* {note && ( */}
-        {/*   <html.div style={styles.note}> */}
-        {/*     <PostReplyContent note={note} size='xs' /> */}
-        {/*   </html.div> */}
-        {/* )} */}
       </Stack>
       {!zapEnabled && (
         <Stack gap={1} horizontal={false} align='center' sx={styles.content}>
@@ -195,7 +201,12 @@ export const ZapRequest = memo(function ZapRequest(props: Props) {
         />
       </Stack>
       <br />
-      <Button disabled={pending} fullWidth variant='filled' sx={styles.button} onClick={() => onSubmit([user, store])}>
+      <Button
+        disabled={pending}
+        fullWidth
+        variant='filled'
+        sx={styles.button}
+        onClick={() => signer && user.event && onSubmit([signer, user.event, store, relays])}>
         <Stack gap={1} justify='center'>
           {pending && <CircularProgress size='xs' />}
           {pending ? 'Generating Invoice...' : `Zap ${formatter.format(store.amount)} sats`}
