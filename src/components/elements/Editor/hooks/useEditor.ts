@@ -6,7 +6,7 @@ import { useSeen } from '@/hooks/query/useSeen'
 import { WRITE } from '@/nostr/types'
 import { compactArray } from '@/utils/utils'
 import type { NostrEvent } from 'nostr-tools'
-import { isParameterizedReplaceableKind } from 'nostr-tools/kinds'
+import { isAddressableKind } from 'nostr-tools/kinds'
 import { useContextSelector } from 'use-context-selector'
 import type { EditorContextType } from '../EditorProvider'
 import { EditorContext } from '../EditorProvider'
@@ -81,7 +81,7 @@ export function useReplyTags(event: NostrEventDB | undefined) {
               ['P', rootEvent.pubkey, rootUserHeadRelay || ''],
             ],
           )
-          if (isParameterizedReplaceableKind(rootEvent.kind)) {
+          if (isAddressableKind(rootEvent.kind)) {
             const dTag = rootEvent.tags.find((tag) => tag[0] === 'd')?.[1]
             const address = [rootEvent.id, rootEvent.pubkey, dTag].join(':')
             tags.unshift(['A', address, rootEventHeadRelay || '', rootEvent?.pubkey])
@@ -94,7 +94,7 @@ export function useReplyTags(event: NostrEventDB | undefined) {
               ['P', event.pubkey, userHeadRelay || ''],
             ],
           )
-          if (isParameterizedReplaceableKind(event.kind)) {
+          if (isAddressableKind(event.kind)) {
             const dTag = event.tags.find((tag) => tag[0] === 'd')?.[1]
             const address = [event.id, event.pubkey, dTag].join(':')
             tags.unshift(['A', address, eventHeadRelay || '', event.pubkey])

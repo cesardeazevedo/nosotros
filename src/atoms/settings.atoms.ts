@@ -10,7 +10,7 @@ export const settingsSchema = z
     nip05: z.boolean(),
     autoPlay: z.boolean(),
     defaultEmoji: z.string(),
-    defaultUploadType: z.string(),
+    defaultUploadType: z.enum(['blossom', 'nip96']),
     defaultUploadUrl: z.string().url(),
     sidebarCollapsed: z.boolean(),
     sidebarRelaysCollapsed: z.boolean(),

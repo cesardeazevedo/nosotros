@@ -198,13 +198,12 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
       : createEditor({
           sign,
           placeholder: () => placeholderRef.current,
-          defaultUploadUrl: settings.defaultUploadUrl,
-          defaultUploadType: settings.defaultUploadType,
           onUploadStart: () => methods.toggle('isUploading', true),
           onUploadDrop: () => focus(),
           onUploadComplete: () => methods.toggle('isUploading', false),
+          onUploadError: () => methods.toggle('isUploading', false),
         })
-  }, [kind, settings.defaultUploadUrl, settings.defaultUploadType])
+  }, [kind])
 
   const editor = useEditor(editorProps, [editorProps])
 

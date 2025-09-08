@@ -49,3 +49,18 @@ export function compactObject<T>(input: T) {
 export function dedupeById<T extends { id: string }>(items: T[] | undefined = []) {
   return [...new Map([...items].map((item) => [item.id, item])).values()]
 }
+
+export function bufferToHex(buffer: ArrayBuffer) {
+  const view = new Uint8Array(buffer)
+  const out: string[] = []
+  for (let i = 0; i < view.length; i++) {
+    out.push(view[i].toString(16).padStart(2, '0'))
+  }
+  return out.join('')
+}
+
+export async function hashFile(file: File) {
+  const buffer = await file.arrayBuffer()
+  const digest = await crypto.subtle.digest('SHA-256', buffer)
+  return bufferToHex(digest)
+}

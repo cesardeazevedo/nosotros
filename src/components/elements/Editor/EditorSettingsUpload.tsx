@@ -11,11 +11,6 @@ export const EditorSettingsUpload = memo(function EditorSettingsUpload() {
   const setSettings = useSetSettings()
   const selectedUrl = settings.defaultUploadUrl
 
-  const onUpdate = (uploadType: string, uploadUrl: string) => {
-    setSettings({ defaultUploadType: uploadType })
-    setSettings({ defaultUploadUrl: uploadUrl })
-  }
-
   const [url, error] = useMemo(() => {
     try {
       const url = new URL(selectedUrl)
@@ -29,7 +24,16 @@ export const EditorSettingsUpload = memo(function EditorSettingsUpload() {
   return (
     <Popover
       placement='bottom-end'
-      contentRenderer={({ close }) => <UploadServersMenuList onSelect={onUpdate} onClose={close} />}>
+      contentRenderer={({ close }) => (
+        <UploadServersMenuList
+          onSelect={(uploadType, uploadUrl) => {
+            close()
+            setSettings({ defaultUploadType: uploadType })
+            setSettings({ defaultUploadUrl: uploadUrl })
+          }}
+          onClose={close}
+        />
+      )}>
       {({ getProps, setRef, open }) => (
         <Chip
           elevated

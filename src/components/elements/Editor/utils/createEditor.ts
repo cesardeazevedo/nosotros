@@ -1,7 +1,14 @@
+import { settingsAtom } from '@/atoms/settings.atoms'
+import { store } from '@/atoms/store'
 import { NEventEditor } from '@/components/elements/Content/NEvent/NEventEditor'
 import { NProfileEditor } from '@/components/elements/Content/NProfile/NProfileEditor'
 import { TweetEditor } from '@/components/elements/Content/Tweet/TweetEditor'
 import { YoutubeEditor } from '@/components/elements/Content/Youtube/YoutubeEditor'
+import type { BlossomOptions } from '@/utils/uploadBlossom'
+import { uploadBlossom } from '@/utils/uploadBlossom'
+import type { NIP96Options } from '@/utils/uploadNIP96'
+import { uploadNIP96 } from '@/utils/uploadNIP96'
+import { hashFile } from '@/utils/utils'
 import type { NodeViewProps } from '@tiptap/core'
 import DocumentExtension from '@tiptap/extension-document'
 import DropCursorExtension from '@tiptap/extension-dropcursor'
@@ -27,11 +34,10 @@ const addNodeView = (Component: React.ComponentType<NodeViewProps>) => ({
 type Options = {
   sign: (unsigned: EventTemplate) => Promise<NostrEvent>
   placeholder: () => string
-  defaultUploadUrl: string
-  defaultUploadType: string
   onUploadStart: () => void
   onUploadDrop: () => void
   onUploadComplete: () => void
+  onUploadError: () => void
 }
 
 export function createEditor(options: Options): UseEditorOptions {
@@ -50,17 +56,31 @@ export function createEditor(options: Options): UseEditorOptions {
         link: {
           openOnClick: false,
         },
-        image: {
-          defaultUploadUrl: options.defaultUploadUrl || 'https://nostr.build',
-          defaultUploadType: (options.defaultUploadType || 'nip96') as 'nip96' | 'blossom',
-        },
-        video: {
-          defaultUploadUrl: 'https://nostr.build',
-          defaultUploadType: 'nip96',
-        },
+        image: {},
+        video: {},
         fileUpload: {
           immediateUpload: false,
-          sign: (event) => options.sign(event),
+          upload: async (attrs) => {
+            const { defaultUploadType, defaultUploadUrl } = store.get(settingsAtom)
+            const data: BlossomOptions | NIP96Options = {
+              ...attrs,
+              hash: hashFile,
+              sign: (event) => options.sign(event),
+              serverUrl: defaultUploadUrl,
+            }
+            try {
+              if (defaultUploadType === 'nip96') {
+                return await uploadNIP96(data)
+              } else {
+                return await uploadBlossom(data)
+              }
+            } catch (error) {
+              options.onUploadError()
+              return {
+                error: String(error),
+              }
+            }
+          },
           onStart() {
             options.onUploadStart()
           },
@@ -69,6 +89,9 @@ export function createEditor(options: Options): UseEditorOptions {
           },
           onComplete() {
             options.onUploadComplete()
+          },
+          onUploadError() {
+            options.onUploadError()
           },
         },
         extend: {
