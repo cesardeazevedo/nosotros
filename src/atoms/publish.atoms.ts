@@ -2,7 +2,7 @@ import type { BroadcastResponse } from '@/core/operators/broadcast'
 import { encodeSafe } from '@/utils/nip19'
 import { atom } from 'jotai'
 import { nip19, type NostrEvent } from 'nostr-tools'
-import { isParameterizedReplaceableKind } from 'nostr-tools/kinds'
+import { isAddressableKind } from 'nostr-tools/kinds'
 
 export type PublishedEvent = {
   relay: string
@@ -27,7 +27,7 @@ export const eventNip19Atom = (event: NostrEvent) =>
     const relays = (get(publishesAtom)[event.id] ?? []).map((x) => x.relay)
     return encodeSafe(() => {
       const identifier = event.tags.find((t) => t[0] === 'd')?.[1]
-      if (isParameterizedReplaceableKind(event.kind) && identifier) {
+      if (isAddressableKind(event.kind) && identifier) {
         return nip19.naddrEncode({
           kind: event.kind,
           pubkey: event.pubkey,
@@ -52,5 +52,14 @@ export const addPublishAtom = atom(null, (get, set, payload: BroadcastResponse) 
     [eventId]: current[eventId]
       ? [...current[eventId], { relay, eventId, status, msg, event }]
       : [{ relay, eventId, status, msg, event }],
+  })
+})
+
+// useful when rebroadcast after auth or some error
+export const resetPublishEventRelayAtom = atom(null, (get, set, [eventId, relay]: [string, string]) => {
+  const publishes = get(publishesAtom)
+  set(publishesAtom, {
+    ...publishes,
+    [eventId]: publishes[eventId].filter((x) => x.relay !== relay),
   })
 })

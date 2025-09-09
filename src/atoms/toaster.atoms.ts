@@ -26,8 +26,5 @@ export const dequeueToastAtom = atom(null, (get, set) => {
   const [first, ...rest] = list
   const firstClosed: ToastItem = { ...first, open: false }
   set(toastsAtom, [firstClosed, ...rest])
-
-  setTimeout(() => {
-    set(toastsAtom, (prev) => prev.slice(1))
-  }, 250)
+  set(toastsAtom, (prev) => prev.slice(1))
 })

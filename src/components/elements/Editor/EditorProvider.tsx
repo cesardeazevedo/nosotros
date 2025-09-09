@@ -60,6 +60,7 @@ export type EditorContextType = EditorMethods & {
   sign: (event: EventTemplate) => Promise<NostrEvent>
   upload: () => Promise<Array<ImageAttributes | VideoAttributes>>
   event: EventTemplate | null
+  protectedEvent: boolean
   mentions: string[]
   mentionsInboxRelays: string[]
   myOutboxRelays: string[]
@@ -126,6 +127,7 @@ export type EditorRef = {
 
 type Props = EditorProps & {
   kind?: Kind
+  protectedEvent?: boolean
   relays?: string[]
   parent?: NostrEventDB
   queryKey?: QueryKey
@@ -148,7 +150,7 @@ function getPostKindName(kind: Kind | undefined) {
 }
 
 export const EditorProvider = memo(function EditorProvider(props: Props) {
-  const { parent, ref, queryKey, pubkey: publicMessagePubkey, relays, ...rest } = props
+  const { parent, ref, queryKey, protectedEvent = false, pubkey: publicMessagePubkey, relays, ...rest } = props
 
   const settings = useSettings()
   const pubkey = useCurrentPubkey()
@@ -245,13 +247,15 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
   const getTags = useCallback(() => {
     const clientTag = settings.clientTag ? [CLIENT_TAG] : []
     const nsfwTag = state.nsfwEnabled ? [['content-warning', '']] : []
+    const protectedTag = relays ? [['-']] : []
     const editorTags = (editor?.storage?.nostr.getEditorTags?.() || []) as NostrEvent['tags']
     return compactArray([
+      ...protectedTag,
       ...editorTags.filter((tag) => (isAuthorTag(tag) ? !state.excludedMentions.has(tag[1]) : true)),
       ...clientTag,
       ...nsfwTag,
     ])
-  }, [editor])
+  }, [editor, relays])
 
   const replyTags = useReplyTags(parent)
   const publicMessageTags = usePublicMessageTags(publicMessagePubkey, parent)
@@ -290,10 +294,13 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
       .filter((relay) => !state.excludedRelays.has(relay)) || []
 
   const allRelays = useMemo(() => {
-    return Array.from(new Set([...mentionsInboxRelays, ...state.includedRelays, ...(relays || myOutboxRelays)])).filter(
+    if (relays) {
+      return relays
+    }
+    return Array.from(new Set([...mentionsInboxRelays, ...state.includedRelays, ...myOutboxRelays])).filter(
       (relay) => !state.excludedRelays.has(relay),
     )
-  }, [relays, mentionsInboxRelays, myOutboxRelays, state.includedRelays, state.excludedRelays])
+  }, [relays, protectedEvent, mentionsInboxRelays, myOutboxRelays, state.includedRelays, state.excludedRelays])
 
   const setEventCache = useCallback(
     (event: NostrEvent) => {
@@ -341,6 +348,7 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
         mentions,
         mentionsInboxRelays,
         myOutboxRelays,
+        protectedEvent: protectedEvent,
         allRelays,
         ...state,
         ...methods,

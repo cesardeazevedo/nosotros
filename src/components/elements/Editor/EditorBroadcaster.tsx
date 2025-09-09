@@ -1,9 +1,13 @@
 import { Button } from '@/components/ui/Button/Button'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
+import { palette } from '@/themes/palette.stylex'
+import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
+import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { memo } from 'react'
-import { css } from 'react-strict-dom'
+import { css, html } from 'react-strict-dom'
+import { Link } from '../Links/Link'
 import { RelayInputChip } from '../Relays/RelayInputChip'
 import { RelaySelectPopover } from '../Relays/RelaySelectPopover'
 import { UserChip } from '../User/UserChip'
@@ -23,23 +27,38 @@ export const EditorBroadcaster = memo(function EditorBroadcaster() {
       </Stack>
       <Stack horizontal={false}>
         <Stack horizontal={false} sx={styles.panel} wrap={false} gap={1}>
-          <Stack horizontal={false}>
-            <Text variant='title' size='md'>
-              Mentions
-            </Text>
-            <Text variant='body' size='md' sx={styles.description}>
-              You can remove some authors from being notified when mentioning them.
-            </Text>
-          </Stack>
-          <Stack horizontal wrap gap={0.5}>
-            <Stack align='flex-start' wrap={false} gap={1} horizontal={false}>
-              <Stack wrap gap={0.5}>
-                {state.mentions.map((pubkey) => (
-                  <UserChip key={pubkey} pubkey={pubkey} onDelete={() => state.excludeMention(pubkey)} />
-                ))}
-              </Stack>
+          {state.protectedEvent ? (
+            <Stack horizontal={false} sx={styles.protectedEvent}>
+              <Text variant='title' size='md'>
+                Protected Note{' '}
+                <Link href='https://github.com/nostr-protocol/nips/blob/master/70.md'>
+                  <html.span style={styles.link}>NIP-70</html.span>
+                </Link>
+              </Text>
+              You are writing a protected note specific to {state.allRelays.join(',')}, other relays might still accept
+              your note if they haven't implemented NIP-70, people being mentioned won't not be notified.
             </Stack>
-          </Stack>
+          ) : (
+            <>
+              <Stack horizontal={false}>
+                <Text variant='title' size='md'>
+                  Mentions
+                </Text>
+                <Text variant='body' size='md' sx={styles.description}>
+                  You can remove some authors from being notified when mentioning them.
+                </Text>
+              </Stack>
+              <Stack horizontal wrap gap={0.5}>
+                <Stack align='flex-start' wrap={false} gap={1} horizontal={false}>
+                  <Stack wrap gap={0.5}>
+                    {state.mentions.map((pubkey) => (
+                      <UserChip key={pubkey} pubkey={pubkey} onDelete={() => state.excludeMention(pubkey)} />
+                    ))}
+                  </Stack>
+                </Stack>
+              </Stack>
+            </>
+          )}
         </Stack>
         <Stack horizontal={false} sx={styles.panel} wrap={false} gap={1}>
           <Stack horizontal={false}>
@@ -53,9 +72,15 @@ export const EditorBroadcaster = memo(function EditorBroadcaster() {
           </Stack>
           <Stack horizontal wrap gap={0.5}>
             {state.allRelays.map((relay) => (
-              <RelayInputChip key={relay} url={relay} onDelete={() => state.excludeRelay(relay)} />
+              <RelayInputChip
+                key={relay}
+                url={relay}
+                {...(state.protectedEvent ? {} : { onDelete: () => state.excludeRelay(relay) })}
+              />
             ))}
-            <RelaySelectPopover label='Add relay' onSubmit={(relay) => state.includeRelay(relay)} />
+            {!state.protectedEvent && (
+              <RelaySelectPopover label='Add relay' onSubmit={(relay) => state.includeRelay(relay)} />
+            )}
           </Stack>
         </Stack>
       </Stack>
@@ -77,5 +102,19 @@ const styles = css.create({
   },
   description: {
     maxWidth: '70%',
+  },
+  protectedEvent: {
+    border: '1px solid',
+    borderColor: colors.orange6,
+    borderRadius: shape.lg,
+    padding: spacing.padding2,
+  },
+  link: {
+    borderRadius: shape.sm,
+    paddingInline: spacing.padding1,
+    backgroundColor: palette.surfaceContainer,
+    ':hover': {
+      backgroundColor: palette.surfaceContainerHighest,
+    },
   },
 })

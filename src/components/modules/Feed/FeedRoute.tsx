@@ -26,6 +26,7 @@ export const FeedRoute = memo(function FeedRoute(props: Props) {
       {renderEditor && (
         <>
           <EditorProvider
+            protectedEvent
             relays={feed.options.ctx.relays}
             headerComponent={
               feed.options.ctx.relays && (

@@ -1,14 +1,22 @@
+import { addPublishAtom, resetPublishEventRelayAtom } from '@/atoms/publish.atoms'
+import { dequeueToastAtom } from '@/atoms/toaster.atoms'
 import { EditorTiptap } from '@/components/elements/Editor/EditorTiptap'
 import { useContentContext } from '@/components/providers/ContentProvider'
 import type { Props as StackProps } from '@/components/ui/Stack/Stack'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { SxProps } from '@/components/ui/types'
+import { NostrPublisher } from '@/core/NostrPublish'
+import { createAuthenticator } from '@/core/observable/createAuthenticator'
+import { broadcast } from '@/core/operators/broadcast'
+import { RelayToClient } from '@/core/types'
 import { usePublishEventMutation } from '@/hooks/mutations/usePublishEventMutation'
 import { useCurrentPubkey } from '@/hooks/useAuth'
+import { pool } from '@/nostr/pool'
 import { publish } from '@/nostr/publish/publish'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconChevronRight } from '@tabler/icons-react'
 import { UserAvatar } from 'components/elements/User/UserAvatar'
+import { useSetAtom } from 'jotai'
 import type { NostrEvent } from 'nostr-tools'
 import { useObservableState } from 'observable-hooks'
 import type { ReactNode } from 'react'
@@ -23,11 +31,15 @@ import {
   endWith,
   filter,
   from,
+  ignoreElements,
   map,
+  merge,
   mergeMap,
   of,
+  shareReplay,
   startWith,
   takeUntil,
+  tap,
 } from 'rxjs'
 import { BubbleContainer } from '../Content/Layout/Bubble'
 import { EditorContainer } from './EditorContainer'
@@ -66,13 +78,51 @@ export const Editor = memo(function Editor(props: Props) {
   const { dense } = useContentContext()
   const pubkey = useCurrentPubkey()
 
+  const dequeueToast = useSetAtom(dequeueToastAtom)
+  const addPublish = useSetAtom(addPublishAtom)
+  const resetPublishAtom = useSetAtom(resetPublishEventRelayAtom)
   const state = useEditorSelector((editor) => editor)
 
   const { mutateAsync } = usePublishEventMutation({
     mutationFn:
       ({ signer, pubkey }) =>
-      () =>
-        state.event ? publish({ ...state.event, pubkey }, { relays: state.allRelays, signer }) : EMPTY,
+      () => {
+        if (state.event) {
+          return merge(
+            publish({ ...state.event, pubkey }, { relays: state.allRelays, signer }).pipe(
+              mergeMap((signed) => {
+                const { metadata, ...event } = signed
+                return merge(
+                  of(signed),
+                  createAuthenticator({
+                    pool,
+                    auto: true,
+                    whitelist: of(state.allRelays),
+                    signer,
+                  }).pipe(
+                    mergeMap(([relay, res]) => {
+                      if (res.toUpperCase() === RelayToClient.OK) {
+                        return of(new NostrPublisher(undefined, { include: [event], relays: of([relay]) })).pipe(
+                          broadcast(pool),
+                          tap((res) => {
+                            resetPublishAtom([event.id, relay])
+                            addPublish(res)
+                            dequeueToast()
+                            onSuccess?.(event)
+                          }),
+                        )
+                      }
+                      return EMPTY
+                    }),
+                    ignoreElements(),
+                  ),
+                ).pipe(shareReplay())
+              }),
+            ),
+          )
+        }
+        return EMPTY
+      },
     onSuccess,
   })
 
