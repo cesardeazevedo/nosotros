@@ -15,6 +15,7 @@ import { pool } from '../pool'
 export type LocalPublisherOptions = Omit<PublisherOptions, 'relays'> & {
   relays?: string[]
   includeRelays?: string[]
+  saveEvent?: boolean
 }
 
 export function publish(unsignedEvent: Omit<UnsignedEvent, 'created_at'>, options: LocalPublisherOptions = {}) {
@@ -23,6 +24,7 @@ export function publish(unsignedEvent: Omit<UnsignedEvent, 'created_at'>, option
     return throwError(() => new Error(error))
   }
 
+  const { saveEvent = true } = options
   const event = {
     ...unsignedEvent,
     created_at: parseInt((Date.now() / 1000).toString()),
@@ -55,7 +57,11 @@ export function publish(unsignedEvent: Omit<UnsignedEvent, 'created_at'>, option
           mergeMap((x) => x.signedEvent),
           map(parseEventMetadata),
           tap(setEventData),
-          tap((event) => dbSqlite.insertEvent(event)),
+          tap((event) => {
+            if (saveEvent) {
+              dbSqlite.insertEvent(event)
+            }
+          }),
         ),
       )
     }),

@@ -89,7 +89,10 @@ export const Editor = memo(function Editor(props: Props) {
       () => {
         if (state.event) {
           return merge(
-            publish({ ...state.event, pubkey }, { relays: state.allRelays, signer }).pipe(
+            publish(
+              { ...state.event, pubkey },
+              { relays: state.allRelays, signer, saveEvent: !state.protectedEvent },
+            ).pipe(
               mergeMap((signed) => {
                 const { metadata, ...event } = signed
                 return merge(

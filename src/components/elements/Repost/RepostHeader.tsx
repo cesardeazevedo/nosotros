@@ -1,3 +1,4 @@
+import { ContentProvider } from '@/components/providers/ContentProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
@@ -21,7 +22,7 @@ export const RepostHeader = memo(function RepostHeader(props: Props) {
   const { data } = useRepostedEvent(event)
   return (
     <Stack horizontal justify='space-between' sx={styles.root}>
-      <Stack horizontal={false} sx={styles.content}>
+      <Stack horizontal={false} justify='flex-start' sx={styles.content}>
         <UserHeader
           dense
           renderNIP05={false}
@@ -30,7 +31,10 @@ export const RepostHeader = memo(function RepostHeader(props: Props) {
           sx={styles.top}
           align='flex-start'
           size='sm'>
-          <PostHeaderDate date={event.created_at} />
+          <ContentProvider value={{ dense: true }}>
+            <PostHeaderDate date={event.created_at} />
+            <PostOptions event={event} />
+          </ContentProvider>
         </UserHeader>
         {data && (
           <PostUserHeader
@@ -47,7 +51,7 @@ export const RepostHeader = memo(function RepostHeader(props: Props) {
           </html.span>
         </Tooltip>
       </Stack>
-      {data && <PostOptions />}
+      {data && <PostOptions event={data} />}
     </Stack>
   )
 })
@@ -67,7 +71,7 @@ const styles = css.create({
   top: {
     position: 'absolute',
     color: palette.onSurfaceVariant,
-    top: 0,
+    top: -4,
     left: 0,
   },
   bottom: {

@@ -39,7 +39,7 @@ export const PostActions = memo(function PostActions(props: Props) {
       )}
       <ButtonZap note={note} />
       {renderRelays && <ButtonRelays note={note} />}
-      {renderOptions && <PostOptions />}
+      {renderOptions && <PostOptions event={note.event} />}
     </Stack>
   )
 })

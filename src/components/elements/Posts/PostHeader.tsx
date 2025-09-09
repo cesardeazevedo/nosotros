@@ -15,7 +15,7 @@ export const PostHeader = function PostHeader(props: Props) {
   return (
     <Stack horizontal justify='space-between' sx={styles.root}>
       <PostUserHeader event={event} />
-      {renderOptions && <PostOptions />}
+      {renderOptions && <PostOptions event={event} />}
     </Stack>
   )
 }
