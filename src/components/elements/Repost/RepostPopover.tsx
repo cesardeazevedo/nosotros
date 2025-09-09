@@ -62,7 +62,8 @@ export const RepostPopover = memo(function RepostPopover(props: Props) {
               onClick={(e) => {
                 e.preventDefault()
                 e.stopPropagation()
-                mutate(note.event)
+                const { metadata, ...event } = note.event
+                mutate(event)
               }}
             />
           )}
