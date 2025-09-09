@@ -34,8 +34,13 @@ export function useZaps(event: NostrEventDB, options?: CustomQueryOptions) {
 }
 
 export function useZapsByPubkey(pubkey: string | undefined, event: NostrEventDB) {
-  const reactions = useZaps(event)
+  const zaps = useZaps(event)
   return useMemo(() => {
-    return pubkey ? reactions.data?.find((event) => event.pubkey === pubkey) : undefined
-  }, [pubkey, reactions.data])
+    return pubkey
+      ? zaps.data?.find((event) => {
+          const zapper = event.tags.find((tag) => tag[0] === 'P')?.[1] || event.pubkey
+          return zapper === pubkey
+        })
+      : undefined
+  }, [pubkey, zaps.data])
 }
