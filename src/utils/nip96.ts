@@ -256,7 +256,7 @@ export async function readServerConfig(serverUrl: string): Promise<ServerConfigu
     }
 
     return data
-  } catch (_) {
+  } catch {
     throw new Error(`Error fetching.`)
   }
 }
