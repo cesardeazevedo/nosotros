@@ -107,6 +107,9 @@ importers:
       jotai-scope:
         specifier: ^0.9.3
         version: 0.9.3(jotai@2.13.1(@babel/core@7.26.7)(@babel/template@7.25.9)(@types/react@19.0.8)(react@19.0.0))(react@19.0.0)
+      js-base64:
+        specifier: ^3.7.8
+        version: 3.7.8
       light-bolt11-decoder:
         specifier: ^3.1.1
         version: 3.2.0
@@ -4342,8 +4345,8 @@ packages:
       react:
         optional: true
 
-  js-base64@3.7.7:
-    resolution: {integrity: sha512-7rCnleh0z2CkXhH67J8K1Ytz0b2Y+yxTPL+/KOJoa20hfnVQ/3/T6W/KflYI4bRHRagNeXeU2bkNGI3v1oS/lw==}
+  js-base64@3.7.8:
+    resolution: {integrity: sha512-hNngCeKxIUQiEUN3GPJOkz4wF/YvdUdbNL9hsBcMQTkKzboD7T/q3OYOuuPZLUE6dBxSGpwhk5mwuDud7JVAow==}
 
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
@@ -11268,7 +11271,7 @@ snapshots:
       '@types/react': 19.0.8
       react: 19.0.0
 
-  js-base64@3.7.7: {}
+  js-base64@3.7.8: {}
 
   js-tokens@4.0.0: {}
 
@@ -11800,7 +11803,7 @@ snapshots:
       '@tiptap/extension-image': 2.11.5(@tiptap/core@2.11.5(@tiptap/pm@2.11.5))
       '@tiptap/extension-link': 2.11.5(@tiptap/core@2.11.5(@tiptap/pm@2.11.5))(@tiptap/pm@2.11.5)
       '@tiptap/pm': 2.11.5
-      js-base64: 3.7.7
+      js-base64: 3.7.8
       light-bolt11-decoder: 3.2.0
       linkifyjs: 4.2.0
       nostr-tools: 2.16.2(typescript@5.7.3)
