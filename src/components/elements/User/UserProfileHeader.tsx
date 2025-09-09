@@ -106,9 +106,9 @@ export const UserProfileHeader = memo(function UserProfileHeader(props: Props) {
             </Stack>
             {nip05 && <UserNIP05 variant='label' size='lg' pubkey={pubkey} />}
             {lud16 && (
-              <Stack>
-                <IconBoltFilled size={12} strokeWidth='1.8' />
-                {lud16}
+              <Stack align='flex-start'>
+                <IconBoltFilled size={14} strokeWidth='1.8' />
+                <html.span style={styles.lud16}>{lud16}</html.span>
               </Stack>
             )}
           </Stack>
@@ -254,5 +254,9 @@ const styles = css.create({
     marginLeft: spacing['margin0.5'],
     opacity: 0.8,
     fontSize: '90%',
+  },
+  lud16: {
+    wordBreak: 'break-word',
+    maxWidth: '80%',
   },
 })

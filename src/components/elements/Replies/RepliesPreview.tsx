@@ -2,7 +2,7 @@ import { Stack } from '@/components/ui/Stack/Stack'
 import type { NoteState } from '@/hooks/state/useNote'
 import { spacing } from '@/themes/spacing.stylex'
 import { useRouteContext } from '@tanstack/react-router'
-import type { DecodeResult } from 'nostr-tools/nip19'
+import type { DecodedResult } from 'nostr-tools/nip19'
 import { css, html } from 'react-strict-dom'
 import { RepliesLoadMore } from './RepliesLoadMore'
 import { RepliesTree } from './RepliesTree'
@@ -11,7 +11,7 @@ type Props = {
   note: NoteState
 }
 
-function getPubkey(decoded: DecodeResult | undefined) {
+function getPubkey(decoded: DecodedResult | undefined) {
   switch (decoded?.type) {
     case 'npub': {
       return decoded.data

@@ -4,6 +4,7 @@ import { Text } from '@/components/ui/Text/Text'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { useEventTag } from '@/hooks/useEventUtils'
+import { useMobile } from '@/hooks/useMobile'
 import { useRelativeDate } from '@/hooks/useRelativeDate'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
@@ -21,13 +22,14 @@ const formatter = new Intl.NumberFormat()
 
 export const ZapReceiptProfile = memo(function ZapReceiptProfile(props: Props) {
   const { event } = props
+  const isMobile = useMobile()
   const [shortDate, fullDate] = useRelativeDate(event.created_at, 'long')
   const zapper = useEventTag(event, 'P')
   const receiver = useEventTag(event, 'p')
   const amount = event.metadata?.bolt11?.amount?.value || 0
   return (
     <html.div style={styles.root}>
-      <Stack justify='space-between' align='center' gap={1}>
+      <Stack horizontal={!isMobile} justify='space-between' align='center' gap={isMobile ? 4 : 1}>
         {zapper && (
           <UserHeader
             pubkey={zapper}
@@ -66,6 +68,7 @@ const styles = css.create({
   },
   icon: {
     padding: spacing.padding1,
+    paddingInline: spacing.padding2,
     border: '1px solid',
     borderColor: palette.outlineVariant,
     borderRadius: shape.full,

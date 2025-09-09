@@ -3,7 +3,7 @@ import { FALLBACK_RELAYS } from '@/constants/relays'
 import type { NostrFilter, RelayHints } from '@/core/types'
 import type { NostrEvent } from 'nostr-tools'
 import { nip19 } from 'nostr-tools'
-import { isParameterizedReplaceableKind } from 'nostr-tools/kinds'
+import { isAddressableKind } from 'nostr-tools/kinds'
 
 export function decodeNIP19(data?: string) {
   if (data) {
@@ -23,7 +23,7 @@ export function encodeSafe<T>(callback: () => T) {
   }
 }
 
-export function decodeToFilter(decoded?: nip19.DecodeResult): NostrFilter | undefined {
+export function decodeToFilter(decoded?: nip19.DecodedResult): NostrFilter | undefined {
   switch (decoded?.type) {
     case 'nprofile': {
       return { kinds: [Kind.Metadata], authors: [decoded.data.pubkey] }
@@ -46,7 +46,7 @@ export function decodeToFilter(decoded?: nip19.DecodeResult): NostrFilter | unde
   }
 }
 
-export function decodeRelays(decoded?: nip19.DecodeResult): string[] {
+export function decodeRelays(decoded?: nip19.DecodedResult): string[] {
   switch (decoded?.type) {
     case 'nprofile':
     case 'naddr':
@@ -59,7 +59,7 @@ export function decodeRelays(decoded?: nip19.DecodeResult): string[] {
   }
 }
 
-export function nip19ToRelayHints(decoded?: nip19.DecodeResult): RelayHints {
+export function nip19ToRelayHints(decoded?: nip19.DecodedResult): RelayHints {
   switch (decoded?.type) {
     case 'npub': {
       return {
@@ -111,7 +111,7 @@ export function nip19ToRelayHints(decoded?: nip19.DecodeResult): RelayHints {
 }
 
 export function eventAddress(event: NostrEvent) {
-  if (isParameterizedReplaceableKind(event.kind)) {
+  if (isAddressableKind(event.kind)) {
     const dTag = getDTag(event)
     if (dTag) {
       return [event.kind, event.pubkey, dTag].join(':')

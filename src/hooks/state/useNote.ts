@@ -3,7 +3,7 @@ import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { useMethods } from '@/hooks/useMethods'
 import type { NostrContext } from '@/nostr/context'
 import { useAtomValue } from 'jotai'
-import { isParameterizedReplaceableKind } from 'nostr-tools/kinds'
+import { isAddressableKind } from 'nostr-tools/kinds'
 import { useCallback, useMemo } from 'react'
 import { useInView } from 'react-intersection-observer'
 import { useEventMetadata } from '../query/useQueryUser'
@@ -93,7 +93,7 @@ export function useNoteState(event: NostrEventDB, options?: NoteOptions) {
 
   const { id, metadata } = event
   const dTag = useEventDTag(event)
-  const address = isParameterizedReplaceableKind(event.kind) ? [event.kind, event.pubkey, dTag].join(':') : undefined
+  const address = isAddressableKind(event.kind) ? [event.kind, event.pubkey, dTag].join(':') : undefined
 
   const replies = useEventReplies(event, {
     enabled: queryOptions.enabled,
@@ -176,7 +176,7 @@ export function useNoteState(event: NostrEventDB, options?: NoteOptions) {
     inView,
     user,
 
-    nip19: isParameterizedReplaceableKind(event.kind) ? naddress : nevent,
+    nip19: isAddressableKind(event.kind) ? naddress : nevent,
 
     reposts,
     reactions,

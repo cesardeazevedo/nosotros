@@ -1,7 +1,7 @@
 import { parseEventMetadata } from '@/hooks/parsers/parseEventMetadata'
 import { getDTag } from '@/utils/nip19'
 import type { Filter, NostrEvent } from 'nostr-tools'
-import { isParameterizedReplaceableKind, isReplaceableKind } from 'nostr-tools/kinds'
+import { isAddressableKind, isReplaceableKind } from 'nostr-tools/kinds'
 import type { Nip05DB, RelayInfoDB, RelayStatsDB, SeenDB } from '../types'
 import type { NostrEventDB, NostrEventExists } from './sqlite.types'
 import { type SqliteMessageResponse, type SqliteMessages } from './sqlite.types'
@@ -50,7 +50,7 @@ export class SqliteStorage {
   async exists(event: NostrEvent) {
     if (isReplaceableKind(event.kind)) {
       return await this.send<NostrEventExists>({ method: 'existsReplaceable', params: [event.kind, event.pubkey] })
-    } else if (isParameterizedReplaceableKind(event.kind)) {
+    } else if (isAddressableKind(event.kind)) {
       const dTag = getDTag(event)
       if (dTag) {
         return await this.send<NostrEventExists>({

@@ -7,6 +7,7 @@ import { fakeEvent, fakeEventMeta } from '@/utils/faker'
 import { test } from '@/utils/fixtures'
 import { subscribeSpyTo } from '@hirez_io/observer-spy'
 import { subscribeRemote, subscribeStrategy } from '../subscribeStrategy'
+import { take } from 'rxjs'
 
 describe('subscribeStrategy', () => {
   test('assert CACHE_ONLY', async ({ insertEvent }) => {
@@ -100,7 +101,8 @@ describe('subscribeStrategy', () => {
     const event1Meta = fakeEventMeta(event1)
     const relay = createMockRelay(RELAY_1, [event1])
 
-    const spy = subscribeSpyTo(subscribeStrategy(ctx, filter))
+    // we are taking a single value as the subscribeAfterAuth won't let the stream to complete
+    const spy = subscribeSpyTo(subscribeStrategy(ctx, filter).pipe(take(1)))
     await spy.onComplete()
     await relay.close()
 

@@ -46,13 +46,10 @@ export function createEventQueryOptions<Selector = NostrEventDB[]>(options: UseQ
           }),
           takeUntil(timer(6500)),
           shareReplay(),
-          defaultIfEmpty([]),
+          defaultIfEmpty([] as NostrEventDB[]),
         ),
       )
-      if (!res.length) {
-        return queryClient.getQueryData<NostrEventDB[]>(opts.queryKey) || []
-      }
-      return res
+      return queryClient.getQueryData<NostrEventDB[]>(opts.queryKey) || res
     },
     ...opts,
   })

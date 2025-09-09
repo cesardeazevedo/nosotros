@@ -1,6 +1,6 @@
 import type { NostrFilter, RelayHints } from '@/core/types'
 import type { NostrContext } from '@/nostr/context'
-import { isParameterizedReplaceableKind } from 'nostr-tools/kinds'
+import { isAddressableKind } from 'nostr-tools/kinds'
 import { from, identity, map, mergeMap } from 'rxjs'
 import invariant from 'tiny-invariant'
 import { queryClient } from '../query/queryClient'
@@ -12,7 +12,7 @@ function fetchList(filter: NostrFilter) {
   const kind = filter.kinds?.[0]
   invariant(kind, 'Missing d tag on subscribeFeedListP')
   invariant(pubkey, 'Missing author on subscribeFeedListP')
-  if (isParameterizedReplaceableKind(kind)) {
+  if (isAddressableKind(kind)) {
     const d = filter['#d']?.[0]
     invariant(d, 'Missing d tag on subscribeFeedListP')
     return queryClient.fetchQuery(addressableEventQueryOptions(kind, pubkey, d))

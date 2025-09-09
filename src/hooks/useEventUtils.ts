@@ -3,7 +3,7 @@ import type { IMetaFields } from '@/hooks/parsers/parseImeta'
 import { getMimeType } from '@/hooks/parsers/parseImeta'
 import { encodeSafe } from '@/utils/nip19'
 import { nip19 } from 'nostr-tools'
-import { isParameterizedReplaceableKind, isReplaceableKind } from 'nostr-tools/kinds'
+import { isAddressableKind, isReplaceableKind } from 'nostr-tools/kinds'
 import { useMemo } from 'react'
 import { WRITE } from './parsers/parseRelayList'
 import { useUserRelays } from './query/useQueryUser'
@@ -53,7 +53,7 @@ export function useEventKey(event: NostrEventDB) {
   return useMemo(() => {
     const { id, kind, pubkey } = event
     const isReplaceable = isReplaceableKind(kind)
-    const isAddressable = isParameterizedReplaceableKind(kind)
+    const isAddressable = isAddressableKind(kind)
 
     return isReplaceable ? [kind, pubkey].join(':') : isAddressable ? [kind, pubkey, d].join(':') : id
   }, [d])

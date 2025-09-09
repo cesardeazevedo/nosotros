@@ -63,7 +63,7 @@ export const UploadServersMenuList = (props: Props) => {
             label={url.replace('https://', '')}
             size='sm'
             onClick={() => {
-              onSelect('nip96', 'https://' + url)
+              onSelect('nip96', url)
               onClose()
             }}
           />

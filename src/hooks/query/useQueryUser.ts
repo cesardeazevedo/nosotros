@@ -11,7 +11,6 @@ import { queryClient } from './queryClient'
 import { queryKeys } from './queryKeys'
 import type { CustomQueryOptions } from './useQueryBase'
 import { replaceableEventQueryOptions, useReplaceableEvent } from './useQueryBase'
-import { DEFAULT_NIP96_SERVERS } from '@/constants/relays'
 
 export function useEventMetadata(pubkey: string | undefined, options?: CustomQueryOptions<NostrEventDB>) {
   return useReplaceableEvent(Kind.Metadata, pubkey || '', {

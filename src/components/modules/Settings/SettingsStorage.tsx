@@ -83,6 +83,19 @@ export const SettingsStorageRoute = () => {
       <Stack grow sx={styles.root} horizontal={false}>
         <Stack horizontal={false} align='stretch'>
           <MenuItem
+            label='Size'
+            trailing={
+              <Text sx={styles.number} variant='title' size='md'>
+                {dbSizeBytes !== null ? (
+                  formatter.format(dbSizeBytes / (1024 * 1024)) + ' MB'
+                ) : (
+                  <Skeleton variant='rectangular' sx={styles.skeleton} />
+                )}
+              </Text>
+            }
+          />
+          <Divider />
+          <MenuItem
             label='Events'
             trailing={
               <Text sx={styles.number} variant='title' size='md'>
