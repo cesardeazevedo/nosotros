@@ -1,12 +1,12 @@
 import { statsDialogAtom } from '@/atoms/dialog.atoms'
 import { enqueueToastAtom } from '@/atoms/toaster.atoms'
 import { useContentContext } from '@/components/providers/ContentProvider'
-import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { MenuList } from '@/components/ui/MenuList/MenuList'
 import { Popover } from '@/components/ui/Popover/Popover'
+import type { SxProps } from '@/components/ui/types'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { usePublishEventMutation } from '@/hooks/mutations/usePublishEventMutation'
 import { useUserState } from '@/hooks/state/useUser'
@@ -97,9 +97,13 @@ const Options = memo(function Options(props: PropsOptions) {
   )
 })
 
-export const PostOptions = memo(function PostOptions() {
+type Props = {
+  event: NostrEventDB
+}
+
+export const PostOptions = memo(function PostOptions(props: Props) {
+  const { event } = props
   const { dense } = useContentContext()
-  const { event } = useNoteContext()
   const pubkey = useCurrentPubkey()
   const enqueueToast = useSetAtom(enqueueToastAtom)
   const setStatsDialog = useSetAtom(statsDialogAtom)
