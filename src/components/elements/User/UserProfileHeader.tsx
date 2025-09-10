@@ -18,9 +18,10 @@ import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { getImgProxyUrl } from '@/utils/imgproxy'
+import { sanitizeUrl } from '@braintree/sanitize-url'
 import { IconBoltFilled, IconCopy, IconDotsVertical, IconQrcode, IconSend } from '@tabler/icons-react'
 import { useAtomValue, useSetAtom } from 'jotai'
-import { memo, useCallback, useState } from 'react'
+import { memo, useCallback, useMemo, useState } from 'react'
 import { css, html } from 'react-strict-dom'
 import { ContentLink } from '../Content/Link/Link'
 import { DialogSheet } from '../Layouts/Dialog'
@@ -73,6 +74,20 @@ export const UserProfileHeader = memo(function UserProfileHeader(props: Props) {
 
   const openImageDialog = (src: string) => pushImage({ src })
 
+  const website = useMemo(() => {
+    if (user.metadata?.website) {
+      try {
+        const url = sanitizeUrl(user.metadata.website)
+        if (url === 'about:blank') {
+          return false
+        }
+        return url
+      } catch {
+        return false
+      }
+    }
+  }, [user.metadata?.website])
+
   return (
     <>
       <html.div style={styles.header}>
@@ -108,7 +123,7 @@ export const UserProfileHeader = memo(function UserProfileHeader(props: Props) {
             {lud16 && (
               <Stack align='flex-start'>
                 <IconBoltFilled size={14} strokeWidth='1.8' />
-                <html.span style={styles.lud16}>{lud16}</html.span>
+                <html.span style={styles.breakWord}>{lud16}</html.span>
               </Stack>
             )}
           </Stack>
@@ -118,7 +133,11 @@ export const UserProfileHeader = memo(function UserProfileHeader(props: Props) {
           </Stack>
         </Stack>
         <UserContentAbout pubkey={pubkey} />
-        {user.metadata?.website && <ContentLink href={user.metadata.website}>{user.metadata.website}</ContentLink>}
+        {website && (
+          <ContentLink href={website}>
+            <html.span style={styles.breakWord}>{website}</html.span>
+          </ContentLink>
+        )}
         <Stack sx={styles.follow} gap={0.5}>
           <Popover
             placement='bottom-end'
@@ -255,7 +274,7 @@ const styles = css.create({
     opacity: 0.8,
     fontSize: '90%',
   },
-  lud16: {
+  breakWord: {
     wordBreak: 'break-word',
     maxWidth: '80%',
   },
