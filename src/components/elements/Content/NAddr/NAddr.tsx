@@ -26,9 +26,7 @@ export const NAddr = memo(function NAddr(props: Props) {
       )}
       {event.data && (
         <ContentProvider value={{ dense: true }}>
-          <Paper outlined sx={styles.content}>
-            <NostrEventQuote event={event.data} />
-          </Paper>
+          <NostrEventQuote event={event.data} />
         </ContentProvider>
       )}
     </html.div>

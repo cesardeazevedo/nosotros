@@ -27,9 +27,7 @@ export const NEvent = memo(function NEvent(props: Props) {
       )}
       {data && (
         <ContentProvider value={{ dense: true, disableLink }}>
-          <Paper outlined sx={styles.content}>
-            <NostrEventQuote event={data} />
-          </Paper>
+          <NostrEventQuote event={data} />
         </ContentProvider>
       )}
     </html.div>
@@ -47,16 +45,6 @@ const styles = css.create({
     paddingTop: spacing.padding1,
     paddingBottom: 0,
     maxWidth: 'calc(100vw - 90px)',
-  },
-  content: {
-    position: 'relative',
-    transition: 'background',
-    transitionTimingFunction: 'ease',
-    transitionDuration: duration.short1,
-    backgroundColor: {
-      default: 'transparent',
-      ':hover': 'rgba(125, 125, 125, 0.04)',
-    },
   },
   skeleton: {
     paddingInline: spacing.padding2,
