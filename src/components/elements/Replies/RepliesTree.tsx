@@ -1,10 +1,10 @@
-import type { Event } from '@/stores/events/event'
-import { observer } from 'mobx-react-lite'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import { memo } from 'react'
 import { Reply } from './Reply'
 
-export const RepliesTree = observer(function RepliesTree(props: {
+export const RepliesTree = memo(function RepliesTree(props: {
   repliesOpen: boolean | null
-  replies: Event[]
+  replies: NostrEventDB[]
   level: number
   nested?: boolean
 }) {

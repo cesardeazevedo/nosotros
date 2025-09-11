@@ -1,37 +1,26 @@
-import { Editor } from '@/components/elements/Editor/Editor'
-import { EditorContainer } from '@/components/elements/Editor/EditorContainer'
-import { EditorPlaceholder } from '@/components/elements/Editor/EditorPlaceholder'
-import { UserAvatar } from '@/components/elements/User/UserAvatar'
-import { HomeFeedTabs } from '@/components/modules/Home/HomeFeedTabs'
+import { EditorProvider } from '@/components/elements/Editor/EditorProvider'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { Stack } from '@/components/ui/Stack/Stack'
-import { useCurrentPubkey } from '@/hooks/useRootStore'
-import type { HomeModule } from '@/stores/modules/home.module'
+import type { FeedState } from '@/hooks/state/useFeed'
+import { memo } from 'react'
+import { FeedReplyTabs } from '../Feed/FeedReplyTabs'
 import { FeedHeaderBase } from '../Feed/headers/FeedHeaderBase'
 
 type Props = {
-  module?: HomeModule
+  feed: FeedState
   renderEditor?: boolean
+  onChangeTabs?: (tab: string | undefined) => void
 }
 
-export const HomeHeader = (props: Props) => {
-  const { module, renderEditor = true } = props
-  const pubkey = useCurrentPubkey()
+export const HomeHeader = memo(function HomeHeader(props: Props) {
+  const { feed, renderEditor = true, onChangeTabs } = props
   return (
     <>
-      <FeedHeaderBase feed={module?.feed} leading={<HomeFeedTabs module={module} />} />
+      <FeedHeaderBase feed={feed} leading={<FeedReplyTabs feed={feed} onChange={onChangeTabs} />} />
       <Divider />
       <Stack horizontal={false} align='stretch' justify='space-between'>
-        {module && renderEditor && <Editor initialOpen={false} store={module.feed.editor} />}
-        {!module && (
-          <EditorContainer open={false}>
-            <UserAvatar size='md' pubkey={pubkey} />
-            <Stack grow>
-              <EditorPlaceholder placeholder="What's in your mind?" />
-            </Stack>
-          </EditorContainer>
-        )}
+        {renderEditor && <EditorProvider queryKey={feed.options.queryKey} initialOpen={false} />}
       </Stack>
     </>
   )
-}
+})

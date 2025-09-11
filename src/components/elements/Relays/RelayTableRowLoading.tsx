@@ -1,7 +1,7 @@
 import { RelayFriendsListLoading } from '@/components/elements/Relays/RelayFriendsListLoading'
 import { RelayTableHeader } from '@/components/elements/Relays/RelayTableHeader'
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
-import { useCurrentPubkey } from '@/hooks/useRootStore'
+import { useCurrentPubkey } from '@/hooks/useAuth'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'

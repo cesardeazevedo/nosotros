@@ -1,30 +1,25 @@
 import { Divider } from '@/components/ui/Divider/Divider'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
-import type { EditorStore } from '@/stores/editor/editor.store'
-import { observer } from 'mobx-react-lite'
+import { memo } from 'react'
 import { EditorBroadcaster } from './EditorBroadcaster'
 import { EditorSettings } from './EditorSettings'
-import { EditorZapSplits } from './EditorZapSplit'
+import { useEditorSelector } from './hooks/useEditor'
 
-type Props = {
-  store: EditorStore
-}
-
-export const EditorExpandables = observer(function EditorExpandables(props: Props) {
-  const { store } = props
+export const EditorExpandables = memo(function EditorExpandables() {
+  const section = useEditorSelector((editor) => editor.section)
   return (
     <>
-      <Expandable expanded={store.section === 'broadcast'}>
+      <Expandable expanded={section === 'broadcast'}>
         <Divider />
-        <EditorBroadcaster store={store} />
+        <EditorBroadcaster />
       </Expandable>
-      <Expandable expanded={store.section === 'settings'}>
+      <Expandable expanded={section === 'settings'}>
         <Divider />
-        <EditorSettings key='json' store={store} />
+        <EditorSettings key='json' />
       </Expandable>
-      <Expandable expanded={store.section === 'zaps'}>
+      <Expandable expanded={section === 'zaps'}>
         <Divider />
-        <EditorZapSplits key='json' store={store} />
+        {/* <EditorZapSplits key='json' /> */}
       </Expandable>
       {/* <Expandable expanded={store.section === 'pow'}> */}
       {/* <Divider /> */}

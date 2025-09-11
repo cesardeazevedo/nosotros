@@ -12,3 +12,55 @@ export function fallbackEmoji(reaction: string) {
       return reaction
   }
 }
+
+// removes undefined and empty strings from last items in tags
+export const compactArray = (x: Array<Array<string | undefined>>): string[][] => {
+  return x
+    .filter((x) => x.length > 1 || x[0] === '-')
+    .map((y) => {
+      const filtered = y.filter((z): z is string => z !== undefined)
+      const lastNonEmptyIndex = filtered.findLastIndex((z) => z !== '')
+      return filtered.slice(0, lastNonEmptyIndex + 1)
+    })
+}
+
+export function compactObject<T>(input: T) {
+  if (input === null || typeof input !== 'object' || Array.isArray(input)) {
+    return input
+  }
+
+  const result: Record<string, unknown> = {}
+
+  for (const [key, value] of Object.entries(input as Record<string, unknown>)) {
+    if (value === undefined || value === '') {
+      continue
+    }
+    if (Array.isArray(value) && value.length === 0) {
+      continue
+    }
+    if (typeof value === 'object' && value !== null && !Array.isArray(value) && Object.keys(value).length === 0) {
+      continue
+    }
+    result[key] = value
+  }
+  return result as T
+}
+
+export function dedupeById<T extends { id: string }>(items: T[] | undefined = []) {
+  return [...new Map([...items].map((item) => [item.id, item])).values()]
+}
+
+export function bufferToHex(buffer: ArrayBuffer) {
+  const view = new Uint8Array(buffer)
+  const out: string[] = []
+  for (let i = 0; i < view.length; i++) {
+    out.push(view[i].toString(16).padStart(2, '0'))
+  }
+  return out.join('')
+}
+
+export async function hashFile(file: File) {
+  const buffer = await file.arrayBuffer()
+  const digest = await crypto.subtle.digest('SHA-256', buffer)
+  return bufferToHex(digest)
+}

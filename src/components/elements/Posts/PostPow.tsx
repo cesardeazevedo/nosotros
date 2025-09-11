@@ -1,16 +1,22 @@
-import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Chip } from '@/components/ui/Chip/Chip'
 import { chipTokens } from '@/components/ui/Chip/Chip.stylex'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import { useEventTag } from '@/hooks/useEventUtils'
 import { typeScale } from '@/themes/typeScale.stylex'
 import { css } from 'react-strict-dom'
 
-export const PostPow = () => {
-  const { note } = useNoteContext()
+type Props = {
+  event: NostrEventDB
+}
+
+export const PostPow = (props: Props) => {
+  const { event } = props
+  const pow = useEventTag(event, 'pow')
   return (
-    note.event.pow && (
+    pow && (
       <Tooltip cursor='arrow' text={'This note was created with proof of work'}>
-        <Chip sx={styles.chip} variant='assist' label={`PoW-${note.event.pow[2]}`} />
+        <Chip sx={styles.chip} variant='assist' label={`PoW-${pow[2]}`} />
       </Tooltip>
     )
   )

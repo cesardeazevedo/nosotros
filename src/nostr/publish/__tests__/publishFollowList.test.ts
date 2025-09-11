@@ -31,27 +31,26 @@ describe('publishFollowList', () => {
     await relay1.close()
     await relayOutbox.close()
     await relayFallback.close()
+    const event = {
+      kind: 3,
+      content: '',
+      pubkey,
+      tags: [
+        ['p', 'p2'],
+        ['p', 'p3'],
+        ['p', 'p4'],
+        ['p', 'p5'],
+      ],
+      id: expect.any(String),
+      sig: expect.any(String),
+      created_at: expect.any(Number),
+    }
     expect(relay1.received).toStrictEqual([
       ['REQ', '1', { kinds: [Kind.Follows], authors: [pubkey] }],
       ['CLOSE', '1'],
-      [
-        'EVENT',
-        {
-          kind: 3,
-          content: '',
-          pubkey,
-          tags: [
-            ['p', 'p2'],
-            ['p', 'p3'],
-            ['p', 'p4'],
-            ['p', 'p5'],
-          ],
-          created_at: expect.any(Number),
-          id: expect.any(String),
-          sig: expect.any(String),
-        },
-      ],
+      ['EVENT', event],
     ])
+    expect(relayFallback.received).toStrictEqual([['EVENT', event]])
   })
 
   test('assert unfollow', async ({ createMockRelay, signer }) => {

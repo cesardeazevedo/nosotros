@@ -5,15 +5,12 @@ import { Link } from '@tanstack/react-router'
 import { useMobile } from 'hooks/useMobile'
 import React from 'react'
 import { css } from 'react-strict-dom'
-import { IconPencil } from '../Icons/IconPencil'
 
 export const PostFabButton = React.memo(function PostFabButton() {
   const isMobile = useMobile()
   return (
     <Link to='.' search={{ compose: true }}>
-      <Fab variant='primary' label='Create note' sx={[styles.root, isMobile && styles.root$mobile]}>
-        <IconPencil />
-      </Fab>
+      <Fab variant='primary' label='Create note' sx={[styles.root, isMobile && styles.root$mobile]} />
     </Link>
   )
 })

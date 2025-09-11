@@ -1,22 +1,25 @@
 import { Paper } from '@/components/ui/Paper/Paper'
 import { Stack } from '@/components/ui/Stack/Stack'
-import type { Event } from '@/stores/events/event'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import { useEventTags } from '@/hooks/useEventUtils'
 import { spacing } from '@/themes/spacing.stylex'
 import type { Ref } from 'react'
 import { useImperativeHandle, useState } from 'react'
 import { css } from 'react-strict-dom'
-import { Search } from '../../Search/Search'
 import { UserChip } from '../../../elements/User/UserChip'
+import { Search } from '../../Search/Search'
 import type { RefListKind } from '../ListForm'
 
 export type Props = {
-  event?: Event
+  event?: NostrEventDB
   ref: Ref<RefListKind>
 }
 
 export const FollowSetForm = (props: Props) => {
   const [, setQuery] = useState('')
-  const [selected, setSelected] = useState<string[]>(props.event?.getTags('p') || [])
+
+  const profiles = useEventTags(props.event, 'p')
+  const [selected, setSelected] = useState<string[]>(profiles)
 
   const add = (pubkey: string) => {
     if (selected.indexOf(pubkey) === -1) {

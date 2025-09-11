@@ -1,31 +1,40 @@
+import { goToAtom, signinErrorAtom, signinResponseAtom, submitBunkerAtom } from '@/atoms/signin.atoms'
 import { Button } from '@/components/ui/Button/Button'
 import { Paper } from '@/components/ui/Paper/Paper'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { TextField } from '@/components/ui/TextField/TextField'
 import { useGoBack } from '@/hooks/useNavigations'
-import { signinStore } from '@/stores/signin/signin.store'
 import { spacing } from '@/themes/spacing.stylex'
 import { typeScale } from '@/themes/typeScale.stylex'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconCircleCheck } from '@tabler/icons-react'
-import { observer } from 'mobx-react-lite'
-import { useActionState } from 'react'
+import { useAtomValue, useSetAtom } from 'jotai'
+import { memo, useActionState } from 'react'
 import { css } from 'react-strict-dom'
 import { Link } from '../Links/Link'
 import { SignInHeader } from './SignInHeader'
 
-export const SignInRemoteSigner = observer(function SignInRemoteSigner() {
+export const SignInRemoteSigner = memo(function SignInRemoteSigner() {
   const goBack = useGoBack()
+  const setPage = useSetAtom(goToAtom)
+  const submitBunker = useSetAtom(submitBunkerAtom)
+  const error = useAtomValue(signinErrorAtom)
+  const response = useAtomValue(signinResponseAtom)
 
   const [, submit, isPending] = useActionState(async (_: unknown, formData: FormData) => {
-    const bunkerUrl = formData.get('bunkerUrl')
-    if (bunkerUrl) {
-      await signinStore.submitBunker(bunkerUrl.toString())
+    const bunkerUrl = formData.get('bunkerUrl')?.toString().trim()
+    if (!bunkerUrl) {
+      return null
+    }
+    try {
+      await submitBunker(bunkerUrl)
       goBack()
+    } catch (error) {
+      return error
     }
     return null
-  }, [])
+  }, null)
 
   return (
     <form action={submit}>
@@ -51,19 +60,19 @@ export const SignInRemoteSigner = observer(function SignInRemoteSigner() {
                 placeholder='bunker://'
                 sx={styles.textarea}
               />
-              {signinStore.error && (
+              {error && (
                 <Paper surface='errorContainer' sx={styles.response}>
                   <Text variant='body' size='lg'>
-                    {signinStore.error}
+                    {error}
                   </Text>
                 </Paper>
               )}
-              {signinStore.response && (
+              {response && (
                 <Paper surface='surfaceContainer' sx={styles.response}>
                   <Stack align='center' justify='center' gap={1}>
                     <IconCircleCheck size={18} {...css.props(styles.iconSuccess)} />
                     <Text variant='body' size='lg'>
-                      {signinStore.response}
+                      {response}
                     </Text>
                   </Stack>
                 </Paper>
@@ -71,7 +80,7 @@ export const SignInRemoteSigner = observer(function SignInRemoteSigner() {
             </Stack>
           </Stack>
           <Stack horizontal={false} gap={1}>
-            <Button variant='outlined' sx={styles.button} onClick={() => signinStore.goTo('REMOTE_SIGN_NOSTR_CONNECT')}>
+            <Button variant='outlined' sx={styles.button} onClick={() => setPage('REMOTE_SIGN_NOSTR_CONNECT')}>
               Get NostrConnect URL
             </Button>
             <Button type='submit' variant='filled' sx={styles.button} disabled={isPending}>

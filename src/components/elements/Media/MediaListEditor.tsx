@@ -1,21 +1,19 @@
+import { deleteFileAtIndexAtom, filesAtom, setFileDataAtom } from '@/atoms/upload.atoms'
 import { ContentProvider } from '@/components/providers/ContentProvider'
-import type { UploadStore } from '@/stores/editor/upload.store'
 import { spacing } from '@/themes/spacing.stylex'
-import { observer } from 'mobx-react-lite'
+import { useAtomValue, useSetAtom } from 'jotai'
 import type { ImageAttributes, VideoAttributes } from 'nostr-editor'
-import { type MutableRefObject, useRef } from 'react'
+import { memo, type MutableRefObject, useRef } from 'react'
 import { css, html } from 'react-strict-dom'
 import { useDraggable } from 'react-use-draggable-scroll'
 import { ImageEditor } from '../Content/Image/ImageEditor'
 import { VideoEditor } from '../Content/Video/VideoEditor'
 
-type Props = {
-  uploadStore: UploadStore
-}
-
-export const MediaListEditor = observer(function MediaListEditor(props: Props) {
-  const { uploadStore } = props
+export const MediaListEditor = memo(function MediaListEditor() {
   const ref = useRef<HTMLDivElement>(null)
+  const files = useAtomValue(filesAtom)
+  const deleteFile = useSetAtom(deleteFileAtIndexAtom)
+  const setFileData = useSetAtom(setFileDataAtom)
   // @ts-ignore
   const { events } = useDraggable(ref as MutableRefObject<HTMLElement>, {
     applyRubberBandEffect: true,
@@ -24,22 +22,22 @@ export const MediaListEditor = observer(function MediaListEditor(props: Props) {
     <ContentProvider value={{ dense: true }}>
       <html.div style={styles.root1}>
         <div {...css.props(styles.root)} {...events} ref={ref}>
-          {uploadStore.files.map((file, index) => (
+          {files.map((file, index) => (
             <html.div key={file.src} style={styles.itemWrap}>
               {file.file.type.startsWith('image') && (
                 <ImageEditor
                   {...(file as ImageAttributes)}
                   sx={styles.item}
-                  onDelete={() => uploadStore.delete(index)}
-                  onUpdate={(attrs) => uploadStore.setFileData(file.src, attrs)}
+                  onDelete={() => deleteFile(index)}
+                  onUpdate={(attrs) => setFileData({ src: file.src, attrs })}
                 />
               )}
               {file.file.type.startsWith('video') && (
                 <VideoEditor
                   {...(file as VideoAttributes)}
                   sx={styles.item}
-                  onDelete={() => uploadStore.delete(index)}
-                  onUpdate={(attrs) => uploadStore.setFileData(file.src, attrs)}
+                  onDelete={() => deleteFile(index)}
+                  onUpdate={(attrs) => setFileData({ src: file.src, attrs })}
                 />
               )}
             </html.div>

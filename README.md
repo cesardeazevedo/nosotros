@@ -20,7 +20,6 @@ A nostr web client with great user experience on mobile and on desktop.
 ### Running test
 
 `pnpm run test`
-`pnpm run test:e2e`
 
 # License
 

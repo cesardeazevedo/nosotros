@@ -1,18 +1,18 @@
+import { useDeckColumn } from '@/components/modules/Deck/hooks/useDeck'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { spacing } from '@/themes/spacing.stylex'
-import React, { memo, useContext } from 'react'
+import React, { memo } from 'react'
 import { css, html } from 'react-strict-dom'
-import { DeckContext } from '../../modules/Deck/DeckContext'
 
 type Props = {
   rows?: number
 }
 
-export const PostLoading = memo(({ rows = 2 }: Props) => {
+export const PostLoading = memo(function PostLoading({ rows = 2 }: Props) {
   const list = [...Array(rows).keys()]
-  const renderDivider = useContext(DeckContext).index !== undefined
+  const renderDivider = useDeckColumn()?.index !== undefined
 
   return list.map((key, index) => (
     <React.Fragment key={key}>

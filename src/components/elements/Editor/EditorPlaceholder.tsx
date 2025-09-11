@@ -2,15 +2,12 @@ import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { typeFace } from '@/themes/typeFace.stylex'
 import { css } from 'react-strict-dom'
-
-type Props = {
-  placeholder: string
-}
+import { useEditorSelector } from './hooks/useEditor'
 
 // Since redering tiptap is a bit expensive,
 // this component acts more as a fake editor.
-export const EditorPlaceholder = (props: Props) => {
-  const { placeholder } = props
+export const EditorPlaceholder = () => {
+  const placeholder = useEditorSelector((editor) => editor.placeholder)
   return (
     <Stack sx={styles.root}>
       <Text size='lg' variant='body' sx={styles.label}>

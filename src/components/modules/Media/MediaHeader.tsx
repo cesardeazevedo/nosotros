@@ -1,32 +1,33 @@
 import { Divider } from '@/components/ui/Divider/Divider'
 import { Stack } from '@/components/ui/Stack/Stack'
-import type { MediaModule } from '@/stores/modules/media.module'
+import type { MediaFeedState } from '@/hooks/state/useMediaFeed'
 import { spacing } from '@/themes/spacing.stylex'
+import { memo } from 'react'
 import { css } from 'react-strict-dom'
 import { FeedHeaderBase } from '../Feed/headers/FeedHeaderBase'
 import { MediaFeedLayoutButtons } from './MediaFeedLayoutToggles'
 
 type Props = {
-  module?: MediaModule
+  feed: MediaFeedState
 }
 
-export const MediaHeader = (props: Props) => {
-  const { module } = props
+export const MediaHeader = memo(function MediaHeader(props: Props) {
+  const { feed } = props
   return (
     <FeedHeaderBase
       label='Media'
-      feed={module?.feed}
+      feed={feed}
       customSettings={
         <>
           <Divider />
           <Stack sx={styles.settings}>
-            <MediaFeedLayoutButtons module={module} />
+            <MediaFeedLayoutButtons feed={feed} />
           </Stack>
         </>
       }
     />
   )
-}
+})
 
 const styles = css.create({
   settings: {

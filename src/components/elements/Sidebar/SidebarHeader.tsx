@@ -1,14 +1,13 @@
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Stack } from '@/components/ui/Stack/Stack'
-import { useGlobalSettings } from '@/hooks/useRootStore'
+import { useToggleSettings } from '@/hooks/useSettings'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconLayoutSidebarLeftCollapse } from '@tabler/icons-react'
-import { Observer } from 'mobx-react-lite'
+import { useContext } from 'react'
 import { css } from 'react-strict-dom'
 import { IconButtonSearch } from '../Buttons/IconButtonSearch'
 import { HeaderLogo } from '../Header/HeaderLogo'
-import { useContext } from 'react'
 import { SidebarContext } from './SidebarContext'
 
 const iconProps = {
@@ -17,7 +16,7 @@ const iconProps = {
 }
 
 export const SidebarHeader = () => {
-  const globalSettings = useGlobalSettings()
+  const toggle = useToggleSettings()
   const context = useContext(SidebarContext)
   return (
     <Stack justify='space-between' sx={styles.root}>
@@ -25,13 +24,9 @@ export const SidebarHeader = () => {
       <Stack gap={0.5}>
         <IconButtonSearch />
         {context.renderCollapsedButton && (
-          <Observer>
-            {() => (
-              <IconButton onClick={() => globalSettings.toggle('sidebarCollapsed')}>
-                <IconLayoutSidebarLeftCollapse {...iconProps} />
-              </IconButton>
-            )}
-          </Observer>
+          <IconButton onClick={() => toggle('sidebarCollapsed')}>
+            <IconLayoutSidebarLeftCollapse {...iconProps} />
+          </IconButton>
         )}
       </Stack>
     </Stack>

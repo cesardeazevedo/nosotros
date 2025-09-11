@@ -19,6 +19,6 @@ export const SettingsSubHeader = function (props: Props) {
 const styles = css.create({
   root: {
     color: palette.onSurfaceVariant,
-    marginLeft: spacing.margin2,
+    marginLeft: spacing.margin3,
   },
 })

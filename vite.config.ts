@@ -20,6 +20,9 @@ export default defineConfig(({ mode }) => {
       port: 8000,
       hmr: false,
     },
+    optimizeDeps: {
+      exclude: ['@sqlite.org/sqlite-wasm'],
+    },
     build: {
       sourcemap: true,
     },
@@ -121,8 +124,12 @@ export default defineConfig(({ mode }) => {
         workbox: {
           sourcemap: true,
           maximumFileSizeToCacheInBytes: 2800000,
-          globPatterns: ['**/*.{js,css,svg,html,ico}'],
-          globIgnores: ['assets/clarity-*.js'], // this file from shiki is crashing for some reason
+          globPatterns: ['**/*.{js,css,svg,ico}'],
+          globIgnores: [
+            'assets/clarity-*.js', // this file from shiki is crashing for some reason
+            'assets/*worker*.js',
+            'assets/sqlite3-opfs*.js',
+          ],
           cleanupOutdatedCaches: true,
           clientsClaim: true,
           skipWaiting: true,
