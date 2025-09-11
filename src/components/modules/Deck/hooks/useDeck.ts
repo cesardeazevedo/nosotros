@@ -5,7 +5,6 @@ import { useAtomValue, useSetAtom } from 'jotai'
 import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDOMProps'
 import { useContext } from 'use-context-selector'
 import { DeckColumnContext } from '../DeckContext'
-import { MouseEventHandler } from 'react'
 
 export function useDecks() {
   const decks = useAtomValue(decksAtom)
