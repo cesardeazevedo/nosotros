@@ -15,11 +15,12 @@ import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { getImgProxyUrl } from '@/utils/imgproxy'
 import type { NAddr } from 'nostr-tools/nip19'
-import { memo } from 'react'
+import React, { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 
 type Props = {
   event: NostrEventDB
+  header?: React.ReactNode
   border?: boolean
 }
 
@@ -40,9 +41,11 @@ export const ArticleFeedItem = memo(function ArticleFeedItem(props: Props) {
             <Stack sx={styles.wrapper} align='center' gap={2}>
               <Stack grow gap={1} horizontal={false} sx={styles.content} align='flex-start'>
                 <Stack horizontal={false} gap={2}>
-                  <UserHeader pubkey={note.event.pubkey}>
-                    <PostHeaderDate dateStyle='long' nevent={note.nip19} date={publishedAt} />
-                  </UserHeader>
+                  {props.header || (
+                    <UserHeader pubkey={note.event.pubkey}>
+                      <PostHeaderDate dateStyle='long' nevent={note.nip19} date={publishedAt} />
+                    </UserHeader>
+                  )}
                   <Text variant='headline' size='sm'>
                     {title}
                   </Text>

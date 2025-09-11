@@ -1,3 +1,5 @@
+import { ArticleFeedItem } from '@/components/modules/Articles/ArticleFeedItem'
+import { Kind } from '@/constants/kinds'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { useRepostedEvent } from '@/hooks/query/useQueryBase'
 import { memo } from 'react'
@@ -10,6 +12,17 @@ type Props = {
 
 export const RepostRoot = memo(function RepostRoot(props: Props) {
   const { event } = props
-  const { data } = useRepostedEvent(event)
-  return data && <PostRoot event={data} header={<RepostHeader event={event} />} />
+  const { data: innerEvent } = useRepostedEvent(event)
+  if (innerEvent) {
+    switch (innerEvent.kind) {
+      // people weren't supposed to be sharing articles with kind 6 events, but we lost the battle
+      case Kind.Article: {
+        return <ArticleFeedItem event={innerEvent} header={<RepostHeader event={event} />} />
+      }
+      default: {
+        return <PostRoot event={innerEvent} header={<RepostHeader event={event} />} />
+      }
+    }
+  }
+  return null
 })

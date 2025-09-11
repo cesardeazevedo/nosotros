@@ -8,33 +8,35 @@ import { spacing } from '@/themes/spacing.stylex'
 import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 import { EditorProvider } from '../Editor/EditorProvider'
-import { NostrEventUnsupported } from '../Event/NostrEventUnsupported'
+import { NostrEventUnsupportedContent } from '../Event/NostrEventUnsupportedContent'
+import { LinkNEvent } from '../Links/LinkNEvent'
 import { PostActions } from '../Posts/PostActions/PostActions'
 import { PostContent } from '../Posts/PostContent'
 import { PostHeader } from '../Posts/PostHeader'
-import { ReplyLink } from '../Replies/ReplyLink'
+import { Replies } from '../Replies/Replies'
 
 type Props = {
   note: NoteState
   renderEditor?: boolean
+  renderReplies?: boolean
 }
 
 export const ThreadRoot = memo(function ThreadRoot(props: Props) {
-  const { note, renderEditor } = props
+  const { note, renderEditor, renderReplies = false } = props
   return (
     <ContentProvider value={{ dense: true }}>
       <Stack gap={2} align='flex-start' sx={styles.root}>
         <html.div style={styles.thread} />
-        <Stack horizontal={false} grow>
+        <Stack horizontal={false} sx={styles.content}>
           <PostHeader event={note.event} renderOptions={false} />
-          {![Kind.Text, Kind.Comment, Kind.Article].includes(note.event.kind) ? (
-            <NostrEventUnsupported sx={styles.unsupported} event={note.event} />
+          {![Kind.Text, Kind.Comment, Kind.Article, Kind.Media].includes(note.event.kind) ? (
+            <NostrEventUnsupportedContent sx={styles.unsupported} event={note.event} />
           ) : (
             <>
               <Stack horizontal={false} sx={styles.rootWrapper}>
-                <ReplyLink nevent={note.nip19}>
+                <LinkNEvent nevent={note.nip19}>
                   <PostContent note={note} />
-                </ReplyLink>
+                </LinkNEvent>
                 <PostActions
                   note={note}
                   renderOptions
@@ -53,6 +55,7 @@ export const ThreadRoot = memo(function ThreadRoot(props: Props) {
           )}
         </Stack>
       </Stack>
+      {renderReplies && <Replies note={note} />}
     </ContentProvider>
   )
 })
@@ -61,6 +64,9 @@ const styles = css.create({
   root: {
     position: 'relative',
   },
+  content: {
+    width: '100%',
+  },
   actions: {
     paddingTop: spacing.padding1,
   },
@@ -68,7 +74,7 @@ const styles = css.create({
     position: 'relative',
     paddingTop: 0,
     paddingLeft: spacing.padding8,
-    paddingRight: spacing.padding4,
+    paddingRight: spacing.padding2,
     paddingBottom: spacing.padding2,
   },
   thread: {

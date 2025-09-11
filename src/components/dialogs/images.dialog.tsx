@@ -1,225 +1,204 @@
-import { closeImageDialogAtom } from '@/atoms/dialog.atoms'
-import { useEvent } from '@/hooks/query/useQueryBase'
-import { useBlurhash } from '@/hooks/useBlurhash'
+import { useEventFromNIP19 } from '@/hooks/query/useQueryBase'
+import { useDialogControl } from '@/hooks/useDialogs'
 import { useImetaList } from '@/hooks/useEventUtils'
-import { useMobile } from '@/hooks/useMobile'
-import { duration } from '@/themes/duration.stylex'
+import { useLG } from '@/hooks/useMobile'
 import { palette } from '@/themes/palette.stylex'
+import { spacing } from '@/themes/spacing.stylex'
 import { getImgProxyUrl } from '@/utils/imgproxy'
-import { IconChevronLeft, IconChevronRight, IconX } from '@tabler/icons-react'
-import { useSetAtom } from 'jotai'
-import { memo, useEffect, useMemo, useState } from 'react'
-import { css } from 'react-strict-dom'
-import { useDialogControl } from '../../hooks/useDialogs'
-import { buttonTokens } from '../ui/Button/Button.stylex'
-import { Dialog } from '../ui/Dialog/Dialog'
-import { IconButton } from '../ui/IconButton/IconButton'
-import { scrimTokens } from '../ui/Scrim/Scrim.stylex'
-import { Stack } from '../ui/Stack/Stack'
+import { colors } from '@stylexjs/open-props/lib/colors.stylex'
+import { IconArrowLeft, IconArrowRight, IconX } from '@tabler/icons-react'
+import { useMatch, useNavigate } from '@tanstack/react-router'
+import type { ReactNode } from 'react'
+import { memo, useLayoutEffect, useMemo, useState } from 'react'
+import { css, html } from 'react-strict-dom'
+import type { SlideImage, SlideVideo } from 'yet-another-react-lightbox'
+import Lightbox from 'yet-another-react-lightbox'
+import VideoPlugin from 'yet-another-react-lightbox/plugins/video'
+import 'yet-another-react-lightbox/styles.css'
+import { Threads } from '../elements/Threads/Threads'
+import { ContentProvider } from '../providers/ContentProvider'
+import { CircularProgress } from '../ui/Progress/CircularProgress'
+import { circularProgressTokens } from '../ui/Progress/CircularProgress.stylex'
 
-function adjustDimensions(width: number, height: number): { width: number; height: number } {
-  const widthScale = window.innerWidth / width
-  const heightScale = window.innerHeight / height
-
-  const scaleFactor = Math.min(widthScale, heightScale)
-
-  return {
-    width: Math.floor(width * scaleFactor),
-    height: Math.floor(height * scaleFactor),
-  }
-}
-
-const Img = (props: { src: string; blurhash?: string; dim?: { width: number; height: number } }) => {
-  const { src, dim } = props
-  const isMobile = useMobile()
-  const [loaded, setLoaded] = useState(false)
-
-  // Checks if media was already loaded by the browser to skip the blurhash entirely
-  const completed = useMemo(() => {
-    const img = new Image()
-    img.src = src
-    return img.complete
-  }, [src])
-
-  const blurhash = useBlurhash(!completed ? props.blurhash : '')
-  const adjustedDims = dim ? adjustDimensions(dim?.width, dim?.height) : undefined
+const LightboxPortal = function LightboxPortal(props: { open?: boolean; children: ReactNode }) {
+  const isLG = useLG()
   return (
-    <>
-      {blurhash && adjustedDims && !completed && (
-        <img
-          src={blurhash}
-          {...css.props([
-            styles.img,
-            styles.img$blur,
-            isMobile && styles.img$mobile,
-            adjustedDims && styles.bounds(adjustedDims.width, adjustedDims.height),
-            loaded && styles.blur$off,
-          ])}
-          {...adjustedDims}
-        />
-      )}
-      <img
-        {...adjustedDims}
-        src={getImgProxyUrl('high_res', src)}
-        {...css.props([styles.img, isMobile && styles.img$mobile])}
-        onLoad={() => setLoaded(true)}
-      />
-    </>
-  )
-}
-
-const ImageNavigation = (props: { src: string; id: string | undefined }) => {
-  const { id } = props
-  const event = useEvent(id)
-  const isMobile = useMobile()
-  const list = useImetaList(event.data)
-  const closeImage = useSetAtom(closeImageDialogAtom)
-  const isMultiple = list.length > 1
-  const [index, setSelectedItem] = useState(list.findIndex(([, src]) => src === props.src || 0))
-  const src = list[index]?.[1] || props.src
-  const { blurhash, dim } = list[index]?.[2] || {}
-  const disabledLeft = index === 0
-  const disabledRight = index === list.length - 1
-
-  const onLeft = () => setSelectedItem((prev) => Math.max(0, prev - 1))
-  const onRight = () => setSelectedItem((prev) => Math.min(list.length - 1, prev + 1))
-
-  // prefetch all images for the caroussel
-  useEffect(() => {
-    list
-      .filter(([type]) => type === 'image')
-      .forEach(([, src]) => {
-        const img = new Image()
-        img.src = src
-      })
-  }, [list])
-
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      switch (e.key) {
-        case 'ArrowLeft': {
-          onLeft()
-          break
-        }
-        case 'ArrowRight': {
-          onRight()
-          break
-        }
-      }
-    }
-    window.addEventListener('keydown', handleKey)
-    return () => window.removeEventListener('keydown', handleKey)
-  }, [])
-
-  return (
-    <>
-      <IconButton
-        variant='filled'
-        sx={[styles.button, styles.close]}
-        onClick={closeImage}
-        icon={<IconX strokeWidth='1.2' size={24} />}
-      />
-      {isMultiple && !isMobile && (
-        <IconButton
-          variant='filledTonal'
-          sx={[styles.button, styles.button$left, disabledLeft && styles.button$disable]}
-          disabled={disabledLeft}
-          onClick={onLeft}>
-          <IconChevronLeft />
-        </IconButton>
-      )}
-      <Stack sx={styles.img$container}>
-        <Img key={src} src={src} blurhash={blurhash} dim={dim} />
-      </Stack>
-      {isMultiple && !isMobile && (
-        <IconButton
-          variant='filledTonal'
-          sx={[styles.button, styles.button$right, disabledRight && styles.button$disable]}
-          onClick={onRight}
-          disabled={disabledRight}>
-          <IconChevronRight />
-        </IconButton>
-      )}
-    </>
+    <html.div style={props.open && portalStyles.wrapper}>
+      <html.div id='lightbox' style={portalStyles.lightboxContainer} />
+      {props.open && !isLG && <html.div style={portalStyles.repliesPane}>{props.children}</html.div>}
+    </html.div>
   )
 }
 
 export const ImagesDialog = memo(function ImagesDialog() {
-  const [dialog, onClose] = useDialogControl('image')
+  const isLG = useLG()
+  const navigate = useNavigate()
+  const [dialog, closeDialog] = useDialogControl('image')
+  const [portal, setPortal] = useState(() => document.querySelector('#lightbox'))
+  const mediaIndex = useMatch({
+    from: '__root__',
+    select: (x) => x.search?.media,
+  })
+  const nevent = useMatch({
+    from: '__root__',
+    select: (x) => x.search?.n,
+  })
+  const event = useEventFromNIP19(nevent || '', undefined, false)
+  const list = useImetaList(event.data)
+
+  const open = !!dialog || (!!nevent && mediaIndex !== undefined)
+  const src = dialog ? dialog.src : list[mediaIndex || 0]?.[1]
+
+  useLayoutEffect(() => {
+    if (!portal) {
+      setPortal(document.querySelector('#lightbox'))
+    }
+  }, [open, portal])
+
+  const handleClose = () => {
+    closeDialog()
+    navigate({ to: '.', search: ({ media, n, ...rest } = {}) => rest, replace: true })
+  }
+
+  const slides = useMemo(() => {
+    if (!open) return []
+    if (list.length > 0) {
+      return list.map(([type, src, metadata]) => {
+        if (type === 'image') {
+          return {
+            type: 'image',
+            src,
+            width: metadata?.dim?.width,
+            height: metadata?.dim?.height,
+          } as SlideImage
+        }
+        return {
+          type: 'video',
+          sources: [
+            {
+              src,
+              type: metadata?.m || 'video/mp4',
+            },
+          ],
+          loop: true,
+          muted: true,
+          autoPlay: true,
+          width: metadata?.dim?.width,
+          height: metadata?.dim?.height,
+        } as SlideVideo
+      })
+    }
+    return [
+      {
+        src: getImgProxyUrl('high_res', src),
+      },
+    ]
+  }, [open, list])
+
+  const currentIndex = mediaIndex
+
   return (
-    <Dialog
-      sx={styles.root}
-      open={!!dialog}
-      onClose={onClose}
-      slotProps={{ floatingTransition: { sx: styles.floating } }}>
-      {dialog && <ImageNavigation src={dialog.src} id={dialog.eventId} />}
-    </Dialog>
+    <html.div
+      {...css.props(styles.container)}
+      onClick={(e) => {
+        const target = ('target' in e ? e.target : null) as HTMLElement | null
+        if (target?.classList?.contains('yarl__slide_current')) {
+          handleClose()
+        }
+      }}>
+      <LightboxPortal open={open}>
+        <ContentProvider value={{ autoPlay: false }}>
+          {event.data && !!nevent && (
+            <Threads event={event.data} maxLevel={Infinity} renderEditor renderReplies renderRepliesSummary={false} />
+          )}
+        </ContentProvider>
+      </LightboxPortal>
+      <style>
+        {`
+        .yarl__button:hover {
+          transform: scale(1.1) !important;
+        }
+        .yarl__button:active {
+          transform: scale(1.0) !important;
+        }
+        .yarl__button:disabled {
+          display: none;
+        }
+       `}
+      </style>
+      <Lightbox
+        open={open}
+        close={handleClose}
+        slides={slides}
+        index={currentIndex}
+        portal={{
+          root: event.data && !!nevent ? portal : undefined,
+        }}
+        plugins={[VideoPlugin]}
+        carousel={{ preload: 10, finite: true }}
+        controller={{
+          touchAction: 'none',
+          closeOnPullUp: true,
+          closeOnBackdropClick: true,
+          closeOnPullDown: true,
+        }}
+        styles={{
+          container: {
+            width: '100%',
+          },
+          root: {
+            width: !isLG && nevent ? 'calc(100% - 600px)' : '100%',
+          },
+          button: {
+            margin: 12,
+            position: 'absolute',
+            transition: 'transform 0.2s ease',
+            transform: 'scale(1)',
+            backgroundColor: colors.gray9,
+            borderRadius: '100%',
+            padding: 10,
+          },
+        }}
+        render={{
+          iconLoading: () => <CircularProgress size='md' />,
+          iconPrev: () => <IconArrowLeft strokeWidth='1.5' />,
+          iconNext: () => <IconArrowRight strokeWidth='1.5' />,
+          iconClose: () => <IconX strokeWidth='1.5' />,
+        }}
+      />
+    </html.div>
   )
 })
 
-const styles = css.create({
-  root: {
-    [scrimTokens.containerColor$darken]: `color-mix(in srgb, #000 92%, transparent)`,
+const portalStyles = css.create({
+  wrapper: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    display: 'flex',
+    zIndex: 1000,
+    [circularProgressTokens.color]: 'white',
   },
-  floating: {
-    transform: 'none',
-  },
-  blur$off: {
-    opacity: 0,
-  },
-  img$container: {
+  lightboxContainer: {
+    flex: 1,
     position: 'relative',
-    overflow: 'hidden',
   },
-  img: {
-    maxWidth: 'calc(100vw - 240px)',
-    maxHeight: '100vh',
-    height: 'auto',
-    pointerEvents: 'none',
-    userSelect: 'none',
-    backgroundColor: palette.surfaceContainerLow,
+  repliesPane: {
+    width: 600,
+    backgroundColor: palette.surfaceContainerLowest,
+    padding: spacing.padding1,
+    borderLeft: '1px solid',
+    borderLeftColor: palette.outline,
+    overflowY: 'auto',
+    overflowX: 'hidden',
+    zIndex: 10000,
   },
-  img$mobile: {
-    maxWidth: '100%',
-    maxHeight: 'calc(100vh - 120px)',
+})
+
+const styles = css.create({
+  container: {
+    position: 'relative',
   },
-  img$blur: {
-    position: 'absolute',
-    height: 'auto',
-    transitionProperty: 'opacity',
-    transitionDuration: duration.short2,
-  },
-  button: {
-    backgroundColor: 'black',
-    color: 'white',
-    ':disabled': {
-      opacity: 0.1,
-    },
-  },
-  button$left: {
-    position: 'absolute',
-    left: 24,
-    margin: 'auto',
-    top: 0,
-    bottom: 0,
-  },
-  button$right: {
-    position: 'absolute',
-    margin: 'auto',
-    right: 24,
-    top: 0,
-    bottom: 0,
-  },
-  button$disable: {
-    [buttonTokens.containerColor$disabled]: 'black',
-    [buttonTokens.labelTextColor$disabled]: 'white',
-  },
-  close: {
-    position: 'absolute',
-    left: 18,
-    top: 18,
-    zIndex: 10,
-    bgcolor: 'rgba(0, 0, 0, 0.8)',
-  },
-  bounds: (width: number, height: number) => ({ width, height }),
 })

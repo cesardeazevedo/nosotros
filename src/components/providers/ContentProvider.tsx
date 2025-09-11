@@ -4,6 +4,7 @@ export type ContentContextValues = {
   dense: boolean
   disableLink: boolean
   disablePopover: boolean
+  autoPlay: boolean | undefined
   blured: boolean
 }
 
@@ -11,6 +12,7 @@ const defaults = {
   dense: false,
   disableLink: false,
   disablePopover: false,
+  autoPlay: undefined,
   blured: false,
 }
 

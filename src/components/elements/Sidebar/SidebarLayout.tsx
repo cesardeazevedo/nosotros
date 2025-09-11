@@ -89,6 +89,7 @@ const styles = css.create({
     position: 'fixed',
     top: spacing.margin2,
     right: spacing.margin2,
+    zIndex: 1,
   },
   main: {
     overflowX: 'hidden',

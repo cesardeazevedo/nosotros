@@ -1,9 +1,7 @@
 import { ContentProvider, useContentContext } from '@/components/providers/ContentProvider'
-import { Paper } from '@/components/ui/Paper/Paper'
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { useEventFromNIP19 } from '@/hooks/query/useQueryBase'
-import { duration } from '@/themes/duration.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import type { NEventAttributes } from 'nostr-editor'
@@ -27,9 +25,7 @@ export const NEvent = memo(function NEvent(props: Props) {
       )}
       {data && (
         <ContentProvider value={{ dense: true, disableLink }}>
-          <Paper outlined sx={styles.content}>
-            <NostrEventQuote event={data} />
-          </Paper>
+          <NostrEventQuote event={data} />
         </ContentProvider>
       )}
     </html.div>
@@ -47,16 +43,6 @@ const styles = css.create({
     paddingTop: spacing.padding1,
     paddingBottom: 0,
     maxWidth: 'calc(100vw - 90px)',
-  },
-  content: {
-    position: 'relative',
-    transition: 'background',
-    transitionTimingFunction: 'ease',
-    transitionDuration: duration.short1,
-    backgroundColor: {
-      default: 'transparent',
-      ':hover': 'rgba(125, 125, 125, 0.04)',
-    },
   },
   skeleton: {
     paddingInline: spacing.padding2,

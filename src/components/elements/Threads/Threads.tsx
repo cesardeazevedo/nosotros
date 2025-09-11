@@ -29,7 +29,7 @@ export const Threads = memo(function RepliesThread(props: Props) {
     event,
     renderEditor = true,
     renderParents = true,
-    renderReplies = true,
+    renderReplies = false,
     renderRepliesSummary = true,
     level = 0,
     maxLevel = Infinity,
@@ -47,10 +47,11 @@ export const Threads = memo(function RepliesThread(props: Props) {
               {renderParents && (
                 <ThreadParents event={event} level={level + 1} maxLevel={maxLevel} renderEditor={renderEditor} />
               )}
-              <ThreadItem note={note} renderEditor={renderEditor} renderReplies={renderReplies} />
+              <ThreadItem note={note} renderEditor={renderEditor} renderReplies={level === 0} />
             </>
           ) : (
-            <ThreadRoot note={note} renderEditor={renderEditor} />
+            // {/* disable the thead line here if renderReplies is true */}
+            <ThreadRoot note={note} renderEditor={renderEditor} renderReplies={level === 0} />
           )}
           {renderRepliesSummary && note.repliesTotal > 0 && level === 0 && (
             <html.div style={styles.footer}>
@@ -60,7 +61,9 @@ export const Threads = memo(function RepliesThread(props: Props) {
         </>
       ) : (
         <>
-          {event.metadata?.isRoot === true && <ThreadRoot note={note} renderEditor={renderEditor} />}
+          {event.metadata?.isRoot === true && (
+            <ThreadRoot note={note} renderEditor={renderEditor} renderReplies={renderReplies} />
+          )}
           {event.metadata?.isRoot === false &&
             (root.data ? <ThreadRootLoader event={root.data} renderEditor={renderEditor} /> : <ThreadLoading />)}
         </>

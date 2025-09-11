@@ -1,8 +1,7 @@
 import { welshmanToProseMirror } from '@/utils/welshmanToProsemirror'
 import { parse } from '@welshman/content'
-import type { ContentSchema } from 'nostr-editor'
 import type { NostrEvent } from 'nostr-tools'
-import type { Metadata } from '../../nostr/types'
+import type { ContentCustomSchema, Metadata } from '../../nostr/types'
 
 export type UserSchema = Partial<{
   name: string
@@ -16,7 +15,7 @@ export type UserSchema = Partial<{
   picture: string
   banner: string
   website: string
-  aboutParsed: ContentSchema
+  aboutParsed: ContentCustomSchema
   // invalid fields
   displayName: string
   username: string

@@ -49,7 +49,7 @@ export function useDeckAddNextColumn(createModule: () => DeckColumn) {
 
   return {
     isDeck: true,
-    add: (e: StrictClickEvent) => {
+    add: (e: React.MouseEvent<HTMLElement> | StrictClickEvent) => {
       e.preventDefault()
       e.stopPropagation()
 

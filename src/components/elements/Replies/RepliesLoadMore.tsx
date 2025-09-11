@@ -8,6 +8,7 @@ import { spacing } from '@/themes/spacing.stylex'
 import { IconDotsVertical } from '@tabler/icons-react'
 import { useAtomValue } from 'jotai'
 import { css, html } from 'react-strict-dom'
+import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDOMProps'
 
 type Props = {
   note: NoteState
@@ -19,7 +20,8 @@ export const RepliesLoadMore = function RepliesLoadMore(props: Props) {
   const loading = note.replies.isLoading
   const repliesLeft = useAtomValue(repliesLeftAtomFamily({ id: note.event.id, limit: note.state.pageSize }))
   const noRepliesLeft = !loading && !!note.state.repliesOpen && repliesLeft === 0
-  const handleClick = () => {
+  const handleClick = (e: StrictClickEvent) => {
+    e.stopPropagation()
     if (note.state.repliesOpen) {
       note.paginate()
     } else {

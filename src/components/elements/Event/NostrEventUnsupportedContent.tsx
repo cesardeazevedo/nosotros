@@ -13,7 +13,7 @@ type Props = {
   sx?: SxProps
 }
 
-export const NostrEventUnsupported = (props: Props) => {
+export const NostrEventUnsupportedContent = (props: Props) => {
   const { event, sx } = props
   const alt = event?.tags.filter((x) => x[0] === 'alt')?.[1] || ''
   return (
@@ -36,9 +36,7 @@ export const NostrEventUnsupported = (props: Props) => {
 }
 
 const styles = css.create({
-  root: {
-    padding: spacing.padding2,
-  },
+  root: {},
   paper: {
     textAlign: 'center',
     paddingBlock: spacing.padding2,

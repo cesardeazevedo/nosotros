@@ -3,7 +3,7 @@ import { createEventModule } from '@/hooks/modules/createEventModule'
 import type { NoteState } from '@/hooks/state/useNote'
 import { useMobile } from '@/hooks/useMobile'
 import { useMatch, useNavigate, useRouter } from '@tanstack/react-router'
-import { memo, useCallback, type ReactNode } from 'react'
+import React, { memo, useCallback, type ReactNode } from 'react'
 import { css, html } from 'react-strict-dom'
 import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDOMProps'
 
@@ -13,7 +13,7 @@ type Props = {
   onClick?: () => void
 }
 
-export const PostLink = memo(function postList(props: Props) {
+export const PostLink = memo(function PostLink(props: Props) {
   const { note, children, onClick } = props
   const context = useMatch({ from: '/$nostr', shouldThrow: false })?.context
   const mobile = useMobile()
@@ -26,16 +26,9 @@ export const PostLink = memo(function postList(props: Props) {
   const handleClick = useCallback(
     (e: StrictClickEvent) => {
       if (deck.isDeck) {
-        return deck.add(e)
+        return deck.add(e as React.MouseEvent<HTMLElement>)
       }
-      const element = 'target' in e ? (e.target as HTMLElement) : null
-      const isLink = !!element?.closest('a')
-      const isButton = !!element?.closest('button')
-      if (isButton || isLink) {
-        e.preventDefault()
-        e.stopPropagation()
-        return
-      }
+
       if (!mobile) {
         note.actions.toggleContent(true)
         onClick?.()
@@ -65,7 +58,7 @@ const styles = css.create({
     cursor: 'pointer',
     backgroundColor: {
       default: 'transparent',
-      ':hover': 'rgba(125, 125, 125, 0.04)',
+      ':hover:not(:has(button:hover, img:hover))': 'rgba(125, 125, 125, 0.04)',
     },
   },
 })

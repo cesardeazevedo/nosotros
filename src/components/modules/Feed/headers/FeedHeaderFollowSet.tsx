@@ -16,9 +16,11 @@ type Props = {
 
 export const FeedHeaderFollowSet = function FeedHeaderFollowSet(props: Props) {
   const { feed } = props
+  // this component also supports starter pack
+  const kind = feed.filter.kinds?.[0] || Kind.FollowSets
   const author = feed.filter.authors?.[0] || ''
   const d = feed.filter['#d']?.[0] || ''
-  const event = useEventAddress(Kind.FollowSets, author, d)
+  const event = useEventAddress(kind, author, d)
 
   return (
     <FeedHeaderBase

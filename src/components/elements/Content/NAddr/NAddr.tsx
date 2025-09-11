@@ -1,5 +1,4 @@
 import { ContentProvider, useContentContext } from '@/components/providers/ContentProvider'
-import { Paper } from '@/components/ui/Paper/Paper'
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { useEventFromNIP19 } from '@/hooks/query/useQueryBase'
@@ -26,9 +25,7 @@ export const NAddr = memo(function NAddr(props: Props) {
       )}
       {event.data && (
         <ContentProvider value={{ dense: true }}>
-          <Paper outlined sx={styles.content}>
-            <NostrEventQuote event={event.data} />
-          </Paper>
+          <NostrEventQuote event={event.data} />
         </ContentProvider>
       )}
     </html.div>

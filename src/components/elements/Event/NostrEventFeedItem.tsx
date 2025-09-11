@@ -10,7 +10,7 @@ import { RepostRoot } from '../Repost/Repost'
 import { Threads } from '../Threads/Threads'
 import { UserRoot } from '../User/UserRoot'
 import { ZapReceiptRoot } from '../Zaps/ZapReceipt'
-import { NostrEventUnsupported } from './NostrEventUnsupported'
+import { NostrEventUnsupportedContent } from './NostrEventUnsupportedContent'
 
 type Props = {
   event: NostrEventDB
@@ -53,7 +53,7 @@ export const NostrEventFeedItem = memo(function NostrEventFeedItem(props: Props)
     }
     default: {
       console.log('Unhandled item to render', event)
-      return <NostrEventUnsupported event={event} />
+      return <NostrEventUnsupportedContent event={event} />
     }
   }
 })

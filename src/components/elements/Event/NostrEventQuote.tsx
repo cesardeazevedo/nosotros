@@ -6,7 +6,9 @@ import { memo } from 'react'
 import { PostQuote } from '../Posts/PostQuote'
 import { UserRoot } from '../User/UserRoot'
 import { ZapReceiptRoot } from '../Zaps/ZapReceipt'
-import { NostrEventUnsupported } from './NostrEventUnsupported'
+import { NostrEventUnsupportedContent } from './NostrEventUnsupportedContent'
+import { StarterPackCard } from '@/components/modules/Lists/StarterPacks/StarterPackCard'
+import { Paper } from '@/components/ui/Paper/Paper'
 
 type Props = {
   event: NostrEventDB
@@ -16,10 +18,18 @@ export const NostrEventQuote = memo(function NostrEventQuote(props: Props) {
   const { event } = props
   switch (event.kind) {
     case Kind.Metadata: {
-      return <UserRoot pubkey={event.pubkey} />
+      return (
+        <Paper outlined>
+          <UserRoot pubkey={event.pubkey} />
+        </Paper>
+      )
     }
     case Kind.Article: {
-      return <ArticleFeedItem event={event} />
+      return (
+        <Paper outlined>
+          <ArticleFeedItem event={event} />
+        </Paper>
+      )
     }
     case Kind.Text:
     case Kind.Media:
@@ -27,15 +37,25 @@ export const NostrEventQuote = memo(function NostrEventQuote(props: Props) {
       return <PostQuote event={event} />
     }
     case Kind.Follows: {
-      return <FollowEventRoot event={event} />
+      return (
+        <Paper outlined>
+          <FollowEventRoot event={event} />
+        </Paper>
+      )
     }
     case Kind.ZapReceipt: {
-      // Ideally we would render a specific component for quotes, but zap root is fine here
-      return <ZapReceiptRoot event={event} />
+      return (
+        <Paper outlined>
+          <ZapReceiptRoot event={event} />
+        </Paper>
+      )
+    }
+    case Kind.StarterPack: {
+      return <StarterPackCard event={event} />
     }
     default: {
       console.log('Unhandled item to render', event)
-      return <NostrEventUnsupported event={event} />
+      return <NostrEventUnsupportedContent event={event} />
     }
   }
 })

@@ -1,7 +1,7 @@
 {
   "name": "nosotros",
   "private": true,
-  "version": "1.3.4",
+  "version": "1.4.0",
   "type": "module",
   "author": "César Dias <cesardeazevedo@outlook.com>",
   "repository": "https://github.com/cesardeazevedo/nosotros",
@@ -12,7 +12,6 @@
     "test": "vitest --mode test",
     "test:watch": "vitest --watch --mode test",
     "test:coverage": "vitest run --coverage --mode test",
-    "test:e2e": "playwright test ./src/e2e",
     "format": "prettier --write .",
     "type-check": "tsc --noEmit",
     "type-check:watch": "npm run type-check -- --watch",
@@ -20,6 +19,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@braintree/sanitize-url": "^7.1.1",
     "@floating-ui/react": "^0.27.7",
     "@mui/utils": "^6.0.1",
     "@noble/hashes": "^1.5.0",
@@ -79,6 +79,7 @@
     "tiny-invariant": "^1.3.3",
     "tiptap-markdown": "^0.8.10",
     "use-context-selector": "^2.0.0",
+    "yet-another-react-lightbox": "^3.25.0",
     "zod": "^3.24.1"
   },
   "devDependencies": {
@@ -87,7 +88,6 @@
     "@babel/preset-typescript": "^7.22.15",
     "@eslint/js": "^9.9.1",
     "@hirez_io/observer-spy": "^2.2.0",
-    "@playwright/test": "^1.40.0",
     "@stylexjs/open-props": "^0.7.5",
     "@stylexjs/stylex": "^0.7.5",
     "@tanstack/react-router-devtools": "^1.114.29",

@@ -20,6 +20,9 @@ export const FollowButton = memo(function FollowButton(props: Props) {
   const { isPending, mutate } = useFollowSubmit(tag, [value])
 
   const isFollowing = currentUser?.followsTag(value, tag)
+  if (tag === 'p' && value === currentUser.pubkey) {
+    return
+  }
 
   return (
     <>
