@@ -1,7 +1,7 @@
 import { mediaDimsAtom } from '@/atoms/media.atoms'
 import { useContentContext } from '@/components/providers/ContentProvider'
 import { useNoteContext } from '@/components/providers/NoteProvider'
-import { Kind } from '@/constants/kinds'
+import { adjustDimensions, MAX_BOUNDS } from '@/hooks/useMediaStore'
 import { spacing } from '@/themes/spacing.stylex'
 import { useAtomValue } from 'jotai'
 import React, { memo } from 'react'
@@ -11,54 +11,23 @@ type Props = {
   children: React.ReactNode
   src: string
   size?: keyof typeof MAX_BOUNDS
-  fixedHeight?: number
-  disablePadding?: boolean
-}
-
-const MAX_BOUNDS = {
-  sm: {
-    maxWidth: 390,
-    maxHeight: 410,
-  },
-  md: {
-    maxWidth: 460,
-    maxHeight: 480,
-  },
-  lg: {
-    maxWidth: 540,
-    maxHeight: 560,
-  },
-} as const
-
-function adjustDimensions(
-  width: number,
-  height: number,
-  maxWidth: number,
-  maxHeight: number,
-): { width: number; height: number } {
-  const widthScale = maxWidth / width
-  const heightScale = maxHeight / height
-
-  const scaleFactor = Math.min(widthScale, heightScale)
-
-  return {
-    width: Math.floor(width * scaleFactor),
-    height: Math.floor(height * scaleFactor),
-  }
+  fixedHeight?: number | null
 }
 
 export const MediaWrapper = memo(function MediaWrapper(props: Props) {
-  const { src, size = 'md', children } = props
+  const { src, size = 'md', children, fixedHeight } = props
   const { event } = useNoteContext()
   const { dense } = useContentContext()
   const dim = event.metadata?.imeta?.[src]?.dim
   const dims = useAtomValue(mediaDimsAtom)
+
   const width = dims.get(src)?.[0] || dim?.width
   const height = dims.get(src)?.[1] || dim?.height
-  const adjusted =
-    width && height && event.kind === Kind.Media
-      ? adjustDimensions(width, height, MAX_BOUNDS[size].maxWidth, MAX_BOUNDS[size].maxWidth)
-      : null
+
+  let adjusted = null
+  if (width && height) {
+    adjusted = adjustDimensions(width, height, MAX_BOUNDS[size].maxWidth, fixedHeight || MAX_BOUNDS[size].maxHeight)
+  }
 
   return (
     <html.div
@@ -87,7 +56,6 @@ const styles = css.create({
   padding: {
     marginBlock: spacing.margin2,
     paddingLeft: spacing.padding2,
-    paddingRight: spacing.padding2,
   },
   bounds: (width: number, height: number) => ({ width, height }),
 })

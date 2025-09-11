@@ -157,14 +157,14 @@ export function useEventAddress(kind: Kind, pubkey: string, identifier: string, 
   )
 }
 
-export function useEventFromNIP19(nip19: string, relayHints?: RelayHints) {
+export function useEventFromNIP19(nip19: string, relayHints?: RelayHints, keepPrevious?: boolean) {
   const decoded = decodeNIP19(nip19.replace('nostr:', ''))
   const filter = decoded ? decodeToFilter(decoded) : undefined
 
   return useQuery({
     ...eventFromNIP19QueryOptions(nip19, relayHints),
     enabled: !!nip19 && !!filter,
-    placeholderData: keepPreviousData,
+    placeholderData: keepPrevious !== false ? keepPreviousData : undefined,
   })
 }
 

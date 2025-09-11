@@ -2,7 +2,7 @@ import { useDeckColumn } from '@/components/modules/Deck/hooks/useDeck'
 import { ContentProvider } from '@/components/providers/ContentProvider'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { Stack } from '@/components/ui/Stack/Stack'
-import type { NoteState } from '@/hooks/state/useNote'
+import { type NoteState } from '@/hooks/state/useNote'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconDotsVertical } from '@tabler/icons-react'
@@ -11,10 +11,10 @@ import { memo, useEffect, useRef } from 'react'
 import { css, html } from 'react-strict-dom'
 import { EditorProvider } from '../Editor/EditorProvider'
 import { WaveDivider } from '../Layouts/WaveDivider'
+import { LinkNEvent } from '../Links/LinkNEvent'
 import { PostActions } from '../Posts/PostActions/PostActions'
 import { Replies } from '../Replies/Replies'
 import { ReplyContent } from '../Replies/ReplyContent'
-import { ReplyLink } from '../Replies/ReplyLink'
 import { UserAvatar } from '../User/UserAvatar'
 
 type Props = {
@@ -51,19 +51,17 @@ export const ThreadItem = memo(function ThreadItem(props: Props) {
           <Stack align='flex-start' gap={1} sx={styles.content}>
             {hasReplies && <html.div style={styles.thread} />}
             <UserAvatar pubkey={event.pubkey} />
-            <Stack gap={1}>
-              <Stack horizontal={false}>
-                {isCurrentNote ? (
-                  <ReplyContent note={note} highlight={false} />
-                ) : (
-                  <ReplyLink nevent={note.nip19}>
-                    <ReplyContent note={note} />
-                  </ReplyLink>
-                )}
-                <html.div style={styles.root$actions}>
-                  <PostActions renderOptions note={note} onReplyClick={() => note.actions.toggleReplying()} />
-                </html.div>
-              </Stack>
+            <Stack horizontal={false} sx={styles.wrapper}>
+              {isCurrentNote ? (
+                <ReplyContent note={note} highlight={false} />
+              ) : (
+                <LinkNEvent block nevent={note.nip19}>
+                  <ReplyContent note={note} />
+                </LinkNEvent>
+              )}
+              <html.div style={styles.root$actions}>
+                <PostActions renderOptions note={note} onReplyClick={() => note.actions.toggleReplying()} />
+              </html.div>
             </Stack>
           </Stack>
         </html.div>
@@ -94,6 +92,9 @@ const styles = css.create({
   },
   content: {
     paddingBlock: spacing.padding1,
+  },
+  wrapper: {
+    width: '100%',
   },
   current: {
     position: 'absolute',

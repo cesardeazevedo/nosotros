@@ -2,7 +2,7 @@ import { Fab } from '@/components/ui/Fab/Fab'
 import type { NoteState } from '@/hooks/state/useNote'
 import { useIsDarkTheme } from '@/hooks/useTheme'
 import { palette } from '@/themes/palette.stylex'
-import React, { memo } from 'react'
+import React, { memo, useEffect, useRef } from 'react'
 import { css, html } from 'react-strict-dom'
 import useMeasure from 'react-use-measure'
 
@@ -27,8 +27,24 @@ export const PostContentWrapper = memo(function PostContentWrapper(props: Props)
   const canExpand = bounds.height >= maxHeight && !expanded
   const isDarkTheme = useIsDarkTheme()
 
+  const root = useRef<HTMLDivElement | null>(null)
+
+  // Some very weird issue with this after introducing YARL component,
+  // after closing the YARL dialog, the root div is being suddenly upwards
+  // clipping the content, this needs further investigation
+  useEffect(() => {
+    const element = root.current
+    if (element) {
+      const onScroll = () => {
+        element.scrollTop = 0
+      }
+      element.addEventListener('scroll', onScroll)
+      return () => element.removeEventListener('scroll', onScroll)
+    }
+  }, [])
+
   return (
-    <html.div style={[styles.root, styles[size], expanded && styles.root$expanded]}>
+    <html.div style={[styles.root, styles[size], expanded && styles.root$expanded]} ref={root}>
       <html.div ref={ref}>{props.children}</html.div>
       {canExpand && (
         <html.div style={styles.container}>
@@ -52,6 +68,7 @@ const styles = css.create({
   root: {
     position: 'relative',
     overflow: 'hidden',
+    width: '100%',
   },
   xs: {
     maxHeight: sizes.xs,

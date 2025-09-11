@@ -9,6 +9,7 @@ import { WRITE } from './parsers/parseRelayList'
 import { useUserRelays } from './query/useQueryUser'
 import { useSeen } from './query/useSeen'
 import { useCurrentUser } from './useAuth'
+import { Kind } from '@/constants/kinds'
 
 export function useEventTag(event: NostrEventDB | undefined, tagName: string) {
   return useMemo(() => {
@@ -108,10 +109,17 @@ export function useNaddress(event: NostrEventDB) {
 
 export function useImetaList(event: NostrEventDB | undefined) {
   return useMemo(() => {
-    return Object.entries(event?.metadata?.imeta || {}).map(([src, data]) => {
-      const mime = getMimeType(src, data as IMetaFields)
-      return [mime, src, data] as const
-    })
+    if (event?.metadata?.imeta && event.kind === Kind.Media) {
+      return Object.entries(event?.metadata?.imeta).map(([src, data]) => {
+        const mime = getMimeType(src, data as IMetaFields)
+        return [mime, src, data] as const
+      })
+    }
+    return (
+      event?.metadata?.contentSchema?.content
+        .filter((x) => x.type === 'image' || x.type === 'video')
+        .map((x) => [x.type, x.attrs.src as string, event.metadata?.imeta?.[x.attrs.src]] as const) || ([] as const)
+    )
   }, [event])
 }
 

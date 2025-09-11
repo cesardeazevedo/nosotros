@@ -18,7 +18,6 @@ import { EditorProvider } from '../Editor/EditorProvider'
 import { PostActions } from '../Posts/PostActions/PostActions'
 import { RepliesTree } from './RepliesTree'
 import { ReplyContent } from './ReplyContent'
-import { ReplyLink } from './ReplyLink'
 
 type Props = {
   event: NostrEventDB
@@ -147,9 +146,7 @@ export const Reply = memo(function Reply(props: Props) {
                   {hasReplies && <html.span aria-hidden style={styles.connectorDown} onClick={handleOpen} />}
                   <UserAvatar pubkey={event.pubkey} />
                 </html.div>
-                <ReplyLink nevent={nevent}>
-                  <ReplyContent note={note} />
-                </ReplyLink>
+                <ReplyContent note={note} />
               </Stack>
               <html.div style={styles.actions}>
                 <Stack>

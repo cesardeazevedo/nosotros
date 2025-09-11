@@ -2,20 +2,25 @@ import { useDeckAddNextColumn } from '@/components/modules/Deck/hooks/useDeck'
 import { useContentContext } from '@/components/providers/ContentProvider'
 import { createEventModule } from '@/hooks/modules/createEventModule'
 import { decodeNIP19 } from '@/utils/nip19'
+import type { LinkProps } from '@tanstack/react-router'
 import { Link, useRouter } from '@tanstack/react-router'
 import { nip19 } from 'nostr-tools'
 import type { NEvent, Note } from 'nostr-tools/nip19'
+import type { DragEventHandler } from 'react'
 import React, { memo, useMemo } from 'react'
-import { css, html } from 'react-strict-dom'
+import { css } from 'react-strict-dom'
 
 export type Props = {
   nevent?: NEvent | Note | string | undefined
-  children: React.ReactNode
+  search?: LinkProps['search']
+  media?: boolean
+  block?: boolean
   underline?: boolean
+  children: React.ReactNode
 }
 
 export const LinkNEvent = memo(function LinkNEvent(props: Props) {
-  const { underline, nevent: neventProp, ...rest } = props
+  const { underline, nevent: neventProp, search, block = false, media = false, ...rest } = props
   const { disableLink } = useContentContext()
 
   const router = useRouter()
@@ -40,15 +45,42 @@ export const LinkNEvent = memo(function LinkNEvent(props: Props) {
 
   const deck = useDeckAddNextColumn(() => createEventModule(nevent))
 
+  const handleDragStart: DragEventHandler<HTMLAnchorElement> = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+  }
+
   if (disableLink || !nevent) {
     return props.children
   }
 
+  if (media) {
+    return (
+      <Link
+        to={'.'}
+        search={(s) => ({
+          media: s.media,
+          ...(typeof search === 'function' ? search(s) : typeof search === 'object' ? search : {}),
+          n: nevent,
+        })}
+        {...rest}
+        {...css.props([block && styles.block, underline && styles.underline])}
+        onClick={(e) => e.stopPropagation()}
+        onDragStart={handleDragStart}>
+        {props.children}
+      </Link>
+    )
+  }
+
   if (deck.isDeck) {
     return (
-      <html.a onClick={deck.add} {...rest} style={[styles.cursor, underline && styles.underline]}>
+      <a
+        onClick={deck.add}
+        {...rest}
+        {...css.props([styles.cursor, block && styles.block, underline && styles.underline])}
+        onDragStart={handleDragStart}>
         {props.children}
-      </html.a>
+      </a>
     )
   }
 
@@ -57,11 +89,8 @@ export const LinkNEvent = memo(function LinkNEvent(props: Props) {
       to={`/$nostr`}
       state={{ from: router.latestLocation.pathname } as never}
       {...rest}
-      {...css.props([underline && styles.underline])}
-      onDragStart={(e) => {
-        e.stopPropagation()
-        e.preventDefault()
-      }}
+      {...css.props([block && styles.block && styles.block, underline && styles.underline])}
+      onDragStart={handleDragStart}
       params={{ nostr: nevent }}>
       {props.children}
     </Link>
@@ -77,5 +106,10 @@ const styles = css.create({
       default: 'inherit',
       ':hover': 'underline',
     },
+  },
+  block: {
+    display: 'block',
+    width: '100%',
+    height: '100%',
   },
 })

@@ -1,13 +1,7 @@
+import type { ContentCustomSchema, CustomNode, ImageCustomNode, VideoCustomNode } from '@/nostr/types'
 import { ParsedType, type Parsed } from '@welshman/content'
 import { decode } from 'light-bolt11-decoder'
-import type {
-  ContentSchema,
-  NAddrAttributes,
-  NEventAttributes,
-  Node,
-  NProfileAttributes,
-  ParagraphNode,
-} from 'nostr-editor'
+import type { NAddrAttributes, NEventAttributes, Node, NProfileAttributes, ParagraphNode } from 'nostr-editor'
 import { TLDs } from './tlds'
 
 const IMAGE_EXTENSIONS = /\.(jpg|jpeg|gif|png|bmp|svg|webp)$/
@@ -50,25 +44,13 @@ function getLinkKind(url: string): LinkKinds {
   }
 }
 
-function trimEdges(content: Node[]): Node[] {
-  let start = 0
-  let end = content.length - 1
-  while (start <= end && content[start]?.type === 'hardBreak') {
-    start++
-  }
-  while (end >= start && content[end]?.type === 'hardBreak') {
-    end--
-  }
-  return content.slice(start, end + 1)
-}
-
 export function welshmanToProseMirror(welshmanSchema: Parsed[], blockNodesOptions?: ParsedType[]) {
   const blockNodes = new Set(blockNodesOptions || [ParsedType.Event, ParsedType.Address, ParsedType.Invoice])
 
   const result = {
     type: 'doc',
     content: [],
-  } as ContentSchema
+  } as ContentCustomSchema
 
   const nprofiles = [] as NProfileAttributes[]
   const nevents = [] as NEventAttributes[]
@@ -80,9 +62,9 @@ export function welshmanToProseMirror(welshmanSchema: Parsed[], blockNodesOption
   } as ParagraphNode & { content: Node[] }
 
   const pushParagraph = () => {
-    const trimmed = trimEdges(currentParagraph.content)
-    if (trimmed.length > 0) {
-      result.content.push({ type: 'paragraph', content: trimmed } as ParagraphNode)
+    const trimmed = cleanParagraph(currentParagraph)
+    if (trimmed && trimmed.type === 'paragraph' && trimmed.content?.length !== 0) {
+      result.content.push(trimmed)
     }
     currentParagraph = { type: 'paragraph', content: [] }
   }
@@ -210,5 +192,72 @@ export function welshmanToProseMirror(welshmanSchema: Parsed[], blockNodesOption
     nevents,
     nprofiles,
     naddresses,
+  }
+}
+
+export function cleanParagraph(paragraph: ParagraphNode): ParagraphNode | null {
+  if (!paragraph.content) {
+    return null
+  }
+  const filteredContent = paragraph.content.filter((node) => {
+    if (node.type === 'text') {
+      return node.text !== ' ' && node.text !== ''
+    }
+    return true
+  })
+  const firstValidIndex = filteredContent.findIndex((node) => node.type !== 'hardBreak')
+  if (firstValidIndex === -1) {
+    return null
+  }
+  const lastValidIndex = filteredContent.findLastIndex((node) => node.type !== 'hardBreak')
+
+  const trimmedContent = filteredContent.slice(firstValidIndex, lastValidIndex + 1)
+
+  if (trimmedContent.length === 0) {
+    return null
+  }
+
+  return {
+    type: 'paragraph',
+    content: trimmedContent,
+  }
+}
+
+export function groupProsemirrorMedia(contentSchema: ContentCustomSchema) {
+  const groupedContent: CustomNode[] = []
+  let currentMediaGroup: Array<ImageCustomNode | VideoCustomNode> = []
+  let mediaIndex = 0
+
+  const pushMediaGroup = () => {
+    if (currentMediaGroup.length === 1) {
+      groupedContent.push(currentMediaGroup[0])
+    } else if (currentMediaGroup.length > 1) {
+      groupedContent.push({
+        type: 'mediaGroup',
+        content: currentMediaGroup,
+      })
+    }
+    currentMediaGroup = []
+  }
+
+  contentSchema.content.forEach((node) => {
+    if (node.type === 'image' || node.type === 'video') {
+      const nodeWithIndex: ImageCustomNode | VideoCustomNode = {
+        ...node,
+        index: mediaIndex,
+      }
+      currentMediaGroup.push(nodeWithIndex)
+      mediaIndex++
+    } else {
+      pushMediaGroup()
+      groupedContent.push(node)
+    }
+  })
+
+  pushMediaGroup()
+
+  return {
+    ...contentSchema,
+    content: groupedContent,
   }
 }

@@ -1,48 +1,35 @@
-import { openImageDialogAtom } from '@/atoms/dialog.atoms'
 import { addMediaDimAtom, addMediaErrorAtom, mediaErrorsAtom } from '@/atoms/media.atoms'
-import { useContentContext } from '@/components/providers/ContentProvider'
 import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { SxProps } from '@/components/ui/types'
+import { useNevent } from '@/hooks/useEventUtils'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { getImgProxyUrl } from '@/utils/imgproxy'
 import { IconPhotoOff } from '@tabler/icons-react'
 import { useAtomValue, useSetAtom } from 'jotai'
-import { memo, useCallback } from 'react'
+import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
-import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDOMProps'
 import { BlurContainer } from '../../Layouts/BlurContainer'
+import { LinkNEvent } from '../../Links/LinkNEvent'
 import { ContentLink } from '../Link/Link'
 
 type Props = {
   src: string
   proxy?: boolean
+  index?: number
   draggable?: boolean
-  onClick?: (event?: StrictClickEvent) => void
   sx?: SxProps
 }
 
 export const Image = memo(function Image(props: Props) {
-  const { src, proxy = true, sx, onClick, ...rest } = props
-  const { disableLink } = useContentContext()
+  const { src, proxy = true, index = 0, sx, ...rest } = props
   const { event } = useNoteContext()
-  const pushImage = useSetAtom(openImageDialogAtom)
   const addMediaDim = useSetAtom(addMediaDimAtom)
   const hasError = useAtomValue(mediaErrorsAtom).has(src)
   const addError = useSetAtom(addMediaErrorAtom)
-
-  const handleClick = useCallback(
-    (e: StrictClickEvent) => {
-      e.preventDefault()
-      e.stopPropagation()
-      if (!hasError && event) {
-        return onClick ? onClick() : pushImage({ eventId: event.id, src })
-      }
-    },
-    [src, event, disableLink, hasError, pushImage],
-  )
+  const nevent = useNevent(event)
 
   return (
     <BlurContainer>
@@ -57,19 +44,20 @@ export const Image = memo(function Image(props: Props) {
             </ContentLink>
           )}
           {!hasError && (
-            <html.img
-              role='button'
-              style={[styles.img, blurStyles, sx]}
-              src={proxy ? getImgProxyUrl('feed_img', src) : src}
-              onClick={handleClick}
-              onError={() => addError(src)}
-              onLoad={(e: { target: HTMLImageElement }) => {
-                if (!event.metadata?.imeta?.[src].dim) {
-                  addMediaDim({ src, dim: [e.target.naturalWidth, e.target.naturalHeight] })
-                }
-              }}
-              {...rest}
-            />
+            <LinkNEvent media block nevent={nevent} search={{ media: index }}>
+              <html.img
+                role='button'
+                style={[styles.img, blurStyles, sx]}
+                src={proxy ? getImgProxyUrl('feed_img', src) : src}
+                onError={() => addError(src)}
+                onLoad={(e: { target: HTMLImageElement }) => {
+                  if (!event.metadata?.imeta?.[src].dim) {
+                    addMediaDim({ src, dim: [e.target.naturalWidth, e.target.naturalHeight] })
+                  }
+                }}
+                {...rest}
+              />
+            </LinkNEvent>
           )}
         </>
       )}
@@ -81,10 +69,10 @@ const styles = css.create({
   img: {
     display: 'block',
     blockSize: 'auto',
-    marginBlock: spacing.margin1,
-    maxHeight: 500,
+    maxHeight: 560,
     cursor: 'pointer',
-    backgroundColor: palette.surfaceContainerLow,
+    border: '1px solid',
+    borderColor: palette.outlineVariant,
     borderRadius: shape.xl,
     transition: 'transform 150ms ease',
     ':active': { transform: 'scale(0.985)' },

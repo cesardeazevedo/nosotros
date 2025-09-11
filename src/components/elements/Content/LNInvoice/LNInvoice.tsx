@@ -48,7 +48,7 @@ export const LNInvoice = function LNInvoice(props: Props) {
               {amount} sats
             </Text>
           </Stack>
-          <Link to='.' search={{ invoice: lnbc, nevent }}>
+          <Link to='.' search={{ invoice: lnbc, n: nevent }}>
             <Button variant='filled'>Pay</Button>
           </Link>
         </Stack>
@@ -65,8 +65,8 @@ const styles = css.create({
     padding: spacing.padding4,
   },
   root$dense: {
-    my: 1,
-    mx: 0,
+    marginTop: spacing.margin1,
+    marginInline: 0,
     padding: spacing.padding2,
   },
   copy: {

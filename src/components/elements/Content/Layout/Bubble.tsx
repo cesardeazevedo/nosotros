@@ -21,7 +21,7 @@ const styles = css.create({
     paddingInline: '12px',
     paddingTop: '4px',
     paddingBottom: '6px',
-    width: '100%',
+    width: 'fit-content',
     wordBreak: 'break-word',
     borderRadius: shape.xl,
     display: 'inline-block',

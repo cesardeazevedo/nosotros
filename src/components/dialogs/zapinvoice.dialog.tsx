@@ -11,13 +11,13 @@ export const ZapRequestInvoiceDialog = () => {
   })
   const nevent = useMatch({
     from: '__root__',
-    select: (x) => x.search?.nevent,
+    select: (x) => x.search?.n,
   })
 
   const navigate = useNavigate()
 
   const handleClose = useCallback(() => {
-    navigate({ to: '.', search: ({ invoice, nevent, ...rest } = {}) => rest })
+    navigate({ to: '.', search: ({ invoice, n, ...rest } = {}) => rest })
   }, [])
 
   const decoded = decodeNIP19(nevent || '')
