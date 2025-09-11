@@ -215,7 +215,7 @@ export class SqliteEventStore {
       },
     )
     for (const tag of event.tags) {
-      if (tag.length >= 2) {
+      if (tag.length >= 2 && tag[0].length === 1) {
         db.exec(
           `INSERT OR IGNORE INTO tags (eventId, tag, value, kind, pubkey, created_at)
           VALUES (?, ?, ?, ?, ?, ?)`,
