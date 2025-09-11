@@ -14,6 +14,7 @@ import { Text } from '@/components/ui/Text/Text'
 import { Kind } from '@/constants/kinds'
 import { useUserState } from '@/hooks/state/useUser'
 import { useCurrentPubkey } from '@/hooks/useAuth'
+import { useMobile } from '@/hooks/useMobile'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
@@ -54,6 +55,7 @@ export const UserProfileBanner = function UserProfileBanner(props: { src: string
 export const UserProfileHeader = memo(function UserProfileHeader(props: Props) {
   const { pubkey } = props
   const [editProfile, setEditProfile] = useState(false)
+  const isMobile = useMobile()
   const user = useUserState(pubkey, { syncFollows: true })
   const currentPubkey = useCurrentPubkey()
   const doesFollowCurrentUser = user.followsTag(currentPubkey)
@@ -102,32 +104,32 @@ export const UserProfileHeader = memo(function UserProfileHeader(props: Props) {
         <ContentProvider value={{ disableLink: true, disablePopover: true }}>
           <UserAvatar sx={styles.avatar} pubkey={pubkey} size='xl' onClick={openImageDialog} />
         </ContentProvider>
-        <Stack sx={styles.center}>
+        <Stack sx={styles.center} horizontal={!isMobile} gap={isMobile ? 1 : 0}>
           <Stack grow horizontal={false}>
-            <Stack align='center'>
-              <Text variant='headline' size='sm'>
+            <Text variant='headline' size='sm'>
+              <Stack align='center'>
                 {user?.displayName}
                 {user.metadata?.pronouns ? (
                   <html.span style={styles.pronouns}>({user.metadata.pronouns})</html.span>
                 ) : (
                   ''
                 )}
-              </Text>
-              {doesFollowCurrentUser && (
-                <Text sx={styles.followsYou} variant='label' size='md'>
-                  Follows You
-                </Text>
-              )}
-            </Stack>
+                {doesFollowCurrentUser && (
+                  <Text sx={styles.followsYou} variant='label' size='md'>
+                    Follows You
+                  </Text>
+                )}
+              </Stack>
+            </Text>
             {nip05 && <UserNIP05 variant='label' size='lg' pubkey={pubkey} />}
             {lud16 && (
               <Stack align='flex-start'>
-                <IconBoltFilled size={14} strokeWidth='1.8' />
+                <IconBoltFilled size={14} strokeWidth='1.8' style={{ position: 'relative', top: 4 }} />
                 <html.span style={styles.breakWord}>{lud16}</html.span>
               </Stack>
             )}
           </Stack>
-          <Stack gap={1} horizontal={false} align='flex-end'>
+          <Stack gap={0} horizontal={false} align={isMobile ? 'flex-start' : 'flex-end'}>
             <UserFollowings pubkey={pubkey} />
             <UserRelays pubkey={pubkey} />
           </Stack>
@@ -163,7 +165,13 @@ export const UserProfileHeader = memo(function UserProfileHeader(props: Props) {
                 />
                 <Divider />
                 <LinkBase search={{ compose_kind: Kind.PublicMessage, compose: true, pubkey }}>
-                  <MenuItem size='sm' interactive leadingIcon={<IconSend size={18} />} label='Send Public Message' />
+                  <MenuItem
+                    size='sm'
+                    interactive
+                    onClick={() => close()}
+                    leadingIcon={<IconSend size={18} />}
+                    label='Send Public Message'
+                  />
                 </LinkBase>
               </MenuList>
             )}>
@@ -257,6 +265,9 @@ const styles = css.create({
     marginTop: 4,
     display: 'flex',
     verticalAlign: 'middle',
+    // alignItems: 'flex-start',
+    width: 'fit-content',
+    whiteSpace: 'nowrap',
     color: palette.onSurfaceVariant,
     borderRadius: shape.lg,
     paddingBlock: 2,

@@ -107,7 +107,7 @@ export const ZapRequest = memo(function ZapRequest(props: Props) {
                   navigate({
                     search: {
                       invoice: response.pr,
-                      nevent: nip19.neventEncode({
+                      n: nip19.neventEncode({
                         id: event.id,
                         author: event.pubkey,
                         relays,

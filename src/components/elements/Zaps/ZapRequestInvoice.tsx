@@ -116,7 +116,7 @@ export const ZapRequestInvoice = (props: Props) => {
                   <Button
                     fullWidth
                     variant='filledTonal'
-                    onClick={() => navigate({ to: '.', search: ({ nevent, invoice, ...rest }) => rest })}>
+                    onClick={() => navigate({ to: '.', search: ({ n, invoice, ...rest }) => rest })}>
                     Close
                   </Button>
                 </Stack>
