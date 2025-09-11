@@ -24,7 +24,14 @@ export const ContentLink = (props: Props) => {
   const isLongLink = (href?.length || 0) > 36
   const sx = [styles.root, underline && styles.root$underline, shrink && styles.shrink, props.sx] as SxProps
   const content = (
-    <html.a href={href} target='_blank' rel='noopener noreferrer' style={sx}>
+    <html.a
+      href={href}
+      target='_blank'
+      rel='noopener noreferrer'
+      style={sx}
+      onClick={(e) => {
+        e.stopPropagation()
+      }}>
       {props.children}
     </html.a>
   )
