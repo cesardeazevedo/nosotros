@@ -6,8 +6,8 @@ import { useMemo } from 'react'
 
 export const MAX_BOUNDS = {
   sm: {
-    maxWidth: 390,
-    maxHeight: 410,
+    maxWidth: 360,
+    maxHeight: 380,
   },
   md: {
     maxWidth: 460,
