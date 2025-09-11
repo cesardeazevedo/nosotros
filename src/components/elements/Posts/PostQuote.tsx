@@ -27,8 +27,8 @@ export const PostQuote = memo(function PostQuote(props: Props) {
     <LinkNEvent block nevent={nevent}>
       <NoteProvider value={{ event }}>
         <ContentProvider value={{ blured, dense: true, disableLink: true }}>
-          <Paper outlined sx={styles.content}>
-            <html.div style={styles.root}>
+          <Paper outlined sx={styles.root}>
+            <html.div style={styles.wrapper}>
               {header || <PostUserHeader dense sx={styles.header} event={event} />}
               <PostContent initialExpanded note={note} />
               <PostActions note={note} sx={styles.actions} />
@@ -42,6 +42,17 @@ export const PostQuote = memo(function PostQuote(props: Props) {
 
 const styles = css.create({
   root: {
+    position: 'relative',
+    transition: 'background',
+    transitionTimingFunction: 'ease',
+    transitionDuration: duration.short1,
+    marginBottom: spacing.padding1,
+    backgroundColor: {
+      default: 'transparent',
+      ':hover': 'rgba(125, 125, 125, 0.04)',
+    },
+  },
+  wrapper: {
     paddingInline: spacing.padding2,
   },
   header: {
@@ -50,15 +61,5 @@ const styles = css.create({
   actions: {
     marginTop: spacing.margin1,
     paddingBottom: spacing.padding1,
-  },
-  content: {
-    position: 'relative',
-    transition: 'background',
-    transitionTimingFunction: 'ease',
-    transitionDuration: duration.short1,
-    backgroundColor: {
-      default: 'transparent',
-      ':hover': 'rgba(125, 125, 125, 0.04)',
-    },
   },
 })
