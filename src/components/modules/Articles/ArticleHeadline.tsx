@@ -1,3 +1,4 @@
+import { openImageDialogAtom } from '@/atoms/dialog.atoms'
 import { addMediaErrorAtom, mediaErrorsAtom } from '@/atoms/media.atoms'
 import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
@@ -18,6 +19,7 @@ export const ArticleHeadline = memo(function ArticleHeadline() {
   const match = useMatchRoute()
   const isDeck = match({ to: '/deck/$id' })
   const isMobile = useMobile()
+  const pushImage = useSetAtom(openImageDialogAtom)
   const title = useEventTag(event, 'title')
   const image = useEventTag(event, 'image')
   const summary = useEventTag(event, 'summary')
@@ -29,6 +31,7 @@ export const ArticleHeadline = memo(function ArticleHeadline() {
         <html.img
           src={getImgProxyUrl('feed_img', image)}
           style={[styles.banner, !isDeck && styles.banner$round, isMobile && styles.banner$mobile]}
+          onClick={() => pushImage({ src: image })}
           onError={() => addError(image)}
         />
       )}
@@ -54,6 +57,7 @@ const styles = css.create({
     paddingInline: spacing.padding2,
   },
   banner: {
+    cursor: 'pointer',
     objectFit: 'cover',
     maxHeight: 350,
     width: '100%',
