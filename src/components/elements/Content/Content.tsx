@@ -47,7 +47,7 @@ export const Content = memo(function Content(props: Props) {
     <ContentProvider value={{ blured: !!nsfw || blured }}>
       {schema.content.map((node, index) => {
         const Wrapper = wrapper?.(node) || React.Fragment
-        const size = dense ? 'md' : 'lg'
+        const size = dense ? 'sm' : 'lg'
         return (
           <Wrapper key={node.type + index}>
             <>
