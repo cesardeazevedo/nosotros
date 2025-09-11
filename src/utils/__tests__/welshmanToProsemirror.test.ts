@@ -92,15 +92,18 @@ describe('welshmanToProseMirror', () => {
           content: [
             {
               type: 'image',
-              attrs: { src: 'https://host.com/image.jpg', index: 0 },
+              attrs: { src: 'https://host.com/image.jpg' },
+              index: 0,
             },
             {
               type: 'video',
-              attrs: { src: 'https://host.com/video.mp4', index: 1 },
+              attrs: { src: 'https://host.com/video.mp4' },
+              index: 1,
             },
             {
               type: 'image',
-              attrs: { src: 'https://host.com/image2.png', index: 2 },
+              attrs: { src: 'https://host.com/image2.png' },
+              index: 2,
             },
           ],
         },
@@ -115,10 +118,10 @@ describe('welshmanToProseMirror', () => {
         },
         {
           attrs: {
-            index: 3,
             src: 'https://host.com/image3.jpg',
           },
           type: 'image',
+          index: 3,
         },
       ],
     })
