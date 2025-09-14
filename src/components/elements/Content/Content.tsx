@@ -42,7 +42,10 @@ export const Content = memo(function Content(props: Props) {
   const { event } = useNoteContext()
   const { dense, blured } = useContentContext()
   const nsfw = useEventTag(event, 'content-warning')
-  const schema = useMemo(() => groupProsemirrorMedia(event.metadata?.contentSchema || ({} as ContentCustomSchema)), [])
+  const schema = useMemo(
+    () => groupProsemirrorMedia(event.metadata?.contentSchema || ({} as ContentCustomSchema)),
+    [event],
+  )
   return (
     <ContentProvider value={{ blured: !!nsfw || blured }}>
       {schema.content.map((node, index) => {
