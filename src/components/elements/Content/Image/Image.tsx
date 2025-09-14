@@ -3,6 +3,7 @@ import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { SxProps } from '@/components/ui/types'
 import { useNevent } from '@/hooks/useEventUtils'
+import { useMobile } from '@/hooks/useMobile'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
@@ -30,6 +31,7 @@ export const Image = memo(function Image(props: Props) {
   const hasError = useAtomValue(mediaErrorsAtom).has(src)
   const addError = useSetAtom(addMediaErrorAtom)
   const nevent = useNevent(event)
+  const isMobile = useMobile()
 
   return (
     <BlurContainer>
@@ -47,7 +49,7 @@ export const Image = memo(function Image(props: Props) {
             <LinkNEvent media block nevent={nevent} search={{ media: index }}>
               <html.img
                 role='button'
-                style={[styles.img, blurStyles, sx]}
+                style={[styles.img, isMobile && styles.img$mobile, blurStyles, sx]}
                 src={proxy ? getImgProxyUrl('feed_img', src) : src}
                 onError={() => addError(src)}
                 onLoad={(e: { target: HTMLImageElement }) => {
@@ -74,6 +76,9 @@ const styles = css.create({
     borderRadius: shape.xl,
     transition: 'transform 150ms ease',
     ':active': { transform: 'scale(0.985)' },
+  },
+  img$mobile: {
+    maxHeight: 380,
   },
   fallback: {
     width: '100%',
