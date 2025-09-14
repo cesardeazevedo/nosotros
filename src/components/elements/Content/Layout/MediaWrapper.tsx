@@ -45,12 +45,6 @@ export const MediaWrapper = memo(function MediaWrapper(props: Props) {
 })
 
 const styles = css.create({
-  root: {
-    marginBlock: spacing.margin2,
-    maxInlineSize: '100%',
-    maxBlockSize: 'fit-content',
-    overflow: 'hidden',
-  },
   root$dense: {
     // this is likely rendered on replies
     maxWidth: 'calc(100vw - 90px)',

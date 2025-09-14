@@ -108,7 +108,7 @@ export const ImagesDialog = memo(function ImagesDialog() {
       }}>
       <LightboxPortal open={open}>
         <ContentProvider value={{ autoPlay: false }}>
-          {event.data && !!nevent && (
+          {open && event.data && !!nevent && (
             <Threads event={event.data} maxLevel={Infinity} renderEditor renderReplies renderRepliesSummary={false} />
           )}
         </ContentProvider>
@@ -128,7 +128,7 @@ export const ImagesDialog = memo(function ImagesDialog() {
       </style>
       <Lightbox
         open={open}
-        close={handleClose}
+        on={{ exiting: handleClose }}
         slides={slides}
         index={currentIndex}
         portal={{
@@ -149,14 +149,24 @@ export const ImagesDialog = memo(function ImagesDialog() {
           root: {
             width: !isLG && nevent ? 'calc(100% - 600px)' : '100%',
           },
+          slide: {
+            padding: 0,
+          },
           button: {
             margin: 12,
             position: 'absolute',
             transition: 'transform 0.2s ease',
             transform: 'scale(1)',
             backgroundColor: colors.gray9,
+            boxShadow: 'none',
             borderRadius: '100%',
             padding: 10,
+          },
+          navigationPrev: {
+            display: isLG ? 'none' : 'inline-block',
+          },
+          navigationNext: {
+            display: isLG ? 'none' : 'inline-block',
           },
         }}
         render={{

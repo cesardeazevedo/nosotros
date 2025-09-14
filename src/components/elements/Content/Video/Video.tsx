@@ -78,9 +78,7 @@ export const Video = memo(function Video(props: Props) {
             controls={controls}
             onLoadedMetadata={(e) => {
               const element = e.target as HTMLVideoElement
-              if (!event.metadata?.imeta?.[src].dim) {
-                addMediaDim({ src, dim: [element.videoWidth, element.videoHeight] })
-              }
+              addMediaDim({ src, dim: [element.videoWidth, element.videoHeight] })
             }}
             src={src}
             {...media}>

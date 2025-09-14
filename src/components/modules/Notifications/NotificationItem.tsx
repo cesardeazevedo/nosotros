@@ -123,7 +123,7 @@ export const NotificationItem = memo(function NotificationItem(props: Props) {
             <>
               <Stack horizontal={false} align='center' sx={styles.zapIcon}>
                 <IconBolt fill='currentColor' size={28} strokeWidth='1.5' />
-                <Text size='lg' sx={styles.zapAmount}>
+                <Text size='sm' sx={styles.zapAmount}>
                   {formatter.format(parseInt(zapAmount) / 1000)}
                 </Text>
               </Stack>
