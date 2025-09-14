@@ -51,9 +51,7 @@ export const Image = memo(function Image(props: Props) {
                 src={proxy ? getImgProxyUrl('feed_img', src) : src}
                 onError={() => addError(src)}
                 onLoad={(e: { target: HTMLImageElement }) => {
-                  if (!event.metadata?.imeta?.[src].dim) {
-                    addMediaDim({ src, dim: [e.target.naturalWidth, e.target.naturalHeight] })
-                  }
+                  addMediaDim({ src, dim: [e.target.naturalWidth, e.target.naturalHeight] })
                 }}
                 {...rest}
               />
