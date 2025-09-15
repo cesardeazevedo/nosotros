@@ -2,6 +2,7 @@ import { Kind } from '@/constants/kinds'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { queryClient } from '@/hooks/query/queryClient'
 import { queryKeys } from '@/hooks/query/queryKeys'
+import { eventAddress } from '@/utils/nip19'
 import type { NostrEvent } from 'nostr-tools'
 import { isAddressableKind } from 'nostr-tools/kinds'
 import { tap } from 'rxjs'
@@ -29,10 +30,11 @@ export function publishReaction(pubkey: string, event: NostrEvent, reaction: str
     },
   ).pipe(
     tap((reaction) => {
-      queryClient.setQueryData(queryKeys.tag('e', [event.id], reaction.kind), (old: NostrEventDB[] = []) => [
-        ...old,
-        reaction,
-      ])
+      const address = eventAddress(event)
+      queryClient.setQueryData(
+        queryKeys.tag(address ? 'a' : 'e', [address || event.id], reaction.kind),
+        (old: NostrEventDB[] = []) => [...old, reaction],
+      )
     }),
   )
 }
