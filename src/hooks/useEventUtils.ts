@@ -1,3 +1,4 @@
+import { Kind } from '@/constants/kinds'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import type { IMetaFields } from '@/hooks/parsers/parseImeta'
 import { getMimeType } from '@/hooks/parsers/parseImeta'
@@ -9,24 +10,23 @@ import { WRITE } from './parsers/parseRelayList'
 import { useUserRelays } from './query/useQueryUser'
 import { useSeen } from './query/useSeen'
 import { useCurrentUser } from './useAuth'
-import { Kind } from '@/constants/kinds'
 
 export function useEventTag(event: NostrEventDB | undefined, tagName: string) {
   return useMemo(() => {
     return event?.tags.find((tag) => tag[0] === tagName)?.[1]
-  }, [tagName])
+  }, [event, tagName])
 }
 
 export function useEventLastTag(event: NostrEventDB | undefined, tagName: string) {
   return useMemo(() => {
     return event?.tags.findLast((tag) => tag[0] === tagName)?.[1]
-  }, [tagName])
+  }, [event, tagName])
 }
 
 export function useEventTags(event: NostrEventDB | undefined, tagName: string) {
   return useMemo(() => {
     return event?.tags.filter((tag) => tag[0] === tagName).map((tag) => tag[1]) || []
-  }, [tagName])
+  }, [event, tagName])
 }
 
 export function useEventDTag(event: NostrEventDB) {
@@ -57,7 +57,7 @@ export function useEventKey(event: NostrEventDB) {
     const isAddressable = isAddressableKind(kind)
 
     return isReplaceable ? [kind, pubkey].join(':') : isAddressable ? [kind, pubkey, d].join(':') : id
-  }, [d])
+  }, [event, d])
 }
 
 export function useNevent(event: NostrEventDB | undefined) {
