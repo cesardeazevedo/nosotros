@@ -1,6 +1,7 @@
 import { addMediaDimAtom, currentVideoAtom, removeCurrentVideoAtom, setCurrentVideoAtom } from '@/atoms/media.atoms'
 import { useContentContext } from '@/components/providers/ContentProvider'
 import { useNoteContext } from '@/components/providers/NoteProvider'
+import { visibleOnHoverStyle } from '@/components/ui/helpers/visibleOnHover.stylex'
 import type { SxProps } from '@/components/ui/types'
 import { useNevent } from '@/hooks/useEventUtils'
 import { useMediaStore } from '@/hooks/useMediaStore'
@@ -12,20 +13,20 @@ import { memo, useEffect, useMemo, useRef } from 'react'
 import { css } from 'react-strict-dom'
 import { BlurContainer } from '../../Layouts/BlurContainer'
 import { LinkNEvent } from '../../Links/LinkNEvent'
+import { VideoControls } from './VideoControls'
 
 type Props = {
   src: string
   loop?: boolean
   muted?: boolean
   autoPlay?: boolean
-  controls?: boolean
   index?: number
   preload?: HTMLVideoElement['preload']
   sx?: SxProps
 }
 
 export const Video = memo(function Video(props: Props) {
-  const { src, controls = true, muted = false, loop = false, preload = 'metadata', index, sx } = props
+  const { src, muted = false, loop = false, preload = 'metadata', index, sx } = props
   const { event } = useNoteContext()
   const { autoPlay: contextAutoPlay } = useContentContext()
   const nevent = useNevent(event)
@@ -65,7 +66,7 @@ export const Video = memo(function Video(props: Props) {
   return (
     <BlurContainer>
       {({ blurStyles }) => (
-        <LinkNEvent media block nevent={nevent} search={{ media: index }}>
+        <LinkNEvent media block nevent={nevent} search={{ media: index }} sx={visibleOnHoverStyle.root}>
           <video
             {...css.props([styles.video, blurStyles, sx])}
             playsInline
@@ -76,7 +77,7 @@ export const Video = memo(function Video(props: Props) {
             muted={autoPlay ? true : muted}
             autoPlay={false}
             preload={preload}
-            controls={controls}
+            controls={false}
             onLoadedMetadata={(e) => {
               const element = e.target as HTMLVideoElement
               addMediaDim({ src, dim: [element.videoWidth, element.videoHeight] })
@@ -85,6 +86,7 @@ export const Video = memo(function Video(props: Props) {
             {...media}>
             <source src={src} type={`video/${extension === 'mov' ? 'mp4' : extension}`} />
           </video>
+          <VideoControls ref={ref} />
         </LinkNEvent>
       )}
     </BlurContainer>
