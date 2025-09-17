@@ -24,7 +24,7 @@ type Props = {
 export const ThreadRoot = memo(function ThreadRoot(props: Props) {
   const { note, renderEditor, renderReplies = false } = props
   return (
-    <ContentProvider value={{ dense: true }}>
+    <ContentProvider value={{ dense: false }}>
       <Stack gap={2} align='flex-start' sx={styles.root}>
         <html.div style={styles.thread} />
         <Stack horizontal={false} sx={styles.content}>
@@ -37,12 +37,14 @@ export const ThreadRoot = memo(function ThreadRoot(props: Props) {
                 <LinkNEvent nevent={note.nip19}>
                   <PostContent note={note} />
                 </LinkNEvent>
-                <PostActions
-                  note={note}
-                  renderOptions
-                  onReplyClick={() => note.actions.toggleReplying()}
-                  sx={styles.actions}
-                />
+                <ContentProvider value={{ dense: true }}>
+                  <PostActions
+                    note={note}
+                    renderOptions
+                    onReplyClick={() => note.actions.toggleReplying()}
+                    sx={styles.actions}
+                  />
+                </ContentProvider>
               </Stack>
               {renderEditor && (
                 <html.div style={styles.editor}>
@@ -69,11 +71,12 @@ const styles = css.create({
   },
   actions: {
     paddingTop: spacing.padding1,
+    marginLeft: spacing.margin1,
   },
   rootWrapper: {
     position: 'relative',
     paddingTop: 0,
-    paddingLeft: spacing.padding8,
+    paddingLeft: spacing.padding7,
     paddingRight: spacing.padding2,
     paddingBottom: spacing.padding2,
   },
@@ -97,7 +100,8 @@ const styles = css.create({
     },
   },
   unsupported: {
-    marginLeft: spacing.margin6,
+    marginLeft: spacing.margin8,
+    marginRight: spacing.margin2,
   },
   editor: {
     position: 'relative',
