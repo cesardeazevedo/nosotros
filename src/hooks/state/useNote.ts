@@ -51,6 +51,7 @@ const createMethods = (state: NoteStateToggles) => ({
 })
 
 type NoteOptions = {
+  contentOpen?: boolean
   repliesOpen?: boolean
   forceSync?: boolean
 }
@@ -64,7 +65,7 @@ export function useNoteState(event: NostrEventDB, options?: NoteOptions) {
   const [state, actions] = useMethods(createMethods, {
     isReplying: false,
     broadcastOpen: false,
-    contentOpen: options?.repliesOpen ?? false,
+    contentOpen: options?.contentOpen ?? false,
     repliesOpen: (options?.repliesOpen ?? null) as boolean | null,
     pageSize: PAGINATION_SIZE,
   })
