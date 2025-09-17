@@ -5,6 +5,7 @@ import type { SxProps } from '@/components/ui/types'
 import { useNevent } from '@/hooks/useEventUtils'
 import { useMediaStore } from '@/hooks/useMediaStore'
 import { useSettings } from '@/hooks/useSettings'
+import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { memo, useEffect, useMemo, useRef } from 'react'
@@ -94,13 +95,13 @@ const styles = css.create({
   video: {
     display: 'block',
     blockSize: 'auto',
-    inlineSize: '100%',
-    maxInlineSize: '100%',
-    minWidth: 140,
-    width: 'fit-content',
-    // height: '100%',
-    maxHeight: 560,
+    minWidth: 300,
+    width: 'inherit',
+    maxWidth: 'inherit',
+    maxHeight: 'inherit',
     backgroundColor: '#000',
+    border: '1px solid',
+    borderColor: palette.outlineVariant,
     borderRadius: shape.lg,
     transition: 'transform 150ms ease',
     ':active': {

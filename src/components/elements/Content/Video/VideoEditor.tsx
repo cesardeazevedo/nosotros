@@ -1,5 +1,6 @@
 import { ContentProvider } from '@/components/providers/ContentProvider'
 import type { SxProps } from '@/components/ui/types'
+import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import type { VideoAttributes } from 'nostr-editor'
 import { useMemo } from 'react'
@@ -33,12 +34,14 @@ export const VideoEditor = (props: Props) => {
 
 const styles = css.create({
   root: {
-    objectFit: 'contain',
-    width: 'auto',
-    height: 'auto',
-    userSelect: 'none',
+    height: '100%',
+    width: 'fit-content',
+    maxHeight: 'inherit',
     cursor: 'pointer',
-    maxHeight: 350,
-    borderRadius: shape.lg,
+    border: '1px solid',
+    borderColor: palette.outlineVariant,
+    borderRadius: shape.xl,
+    transition: 'transform 150ms ease',
+    ':active': { transform: 'scale(0.985)' },
   },
 })

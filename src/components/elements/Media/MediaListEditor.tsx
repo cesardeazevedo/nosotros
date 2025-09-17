@@ -1,33 +1,36 @@
 import { deleteFileAtIndexAtom, filesAtom, setFileDataAtom } from '@/atoms/upload.atoms'
 import { ContentProvider } from '@/components/providers/ContentProvider'
-import { spacing } from '@/themes/spacing.stylex'
 import { useAtomValue, useSetAtom } from 'jotai'
 import type { ImageAttributes, VideoAttributes } from 'nostr-editor'
-import { memo, type MutableRefObject, useRef } from 'react'
-import { css, html } from 'react-strict-dom'
-import { useDraggable } from 'react-use-draggable-scroll'
+import { memo } from 'react'
+import { css } from 'react-strict-dom'
 import { ImageEditor } from '../Content/Image/ImageEditor'
+import { MediaGroup } from '../Content/Layout/MediaGroup'
+import { MediaWrapper } from '../Content/Layout/MediaWrapper'
 import { VideoEditor } from '../Content/Video/VideoEditor'
 
 export const MediaListEditor = memo(function MediaListEditor() {
-  const ref = useRef<HTMLDivElement>(null)
   const files = useAtomValue(filesAtom)
   const deleteFile = useSetAtom(deleteFileAtIndexAtom)
   const setFileData = useSetAtom(setFileDataAtom)
-  // @ts-ignore
-  const { events } = useDraggable(ref as MutableRefObject<HTMLElement>, {
-    applyRubberBandEffect: true,
-  })
+  const isMultiple = files.length > 1
+  const isCarousell = files.length > 2
   return (
     <ContentProvider value={{ dense: true }}>
-      <html.div style={styles.root1}>
-        <div {...css.props(styles.root)} {...events} ref={ref}>
-          {files.map((file, index) => (
-            <html.div key={file.src} style={styles.itemWrap}>
+      <MediaGroup caroussel={files.length > 2}>
+        {files.map((file, index) => (
+          <MediaWrapper
+            key={file.src}
+            size={isCarousell ? 'sm' : 'md'}
+            src={file.src}
+            fixed={isCarousell}
+            fixedHeight={isCarousell ? 200 : undefined}
+            sx={styles.wrapper}>
+            <>
               {file.file.type.startsWith('image') && (
                 <ImageEditor
                   {...(file as ImageAttributes)}
-                  sx={styles.item}
+                  cover={isMultiple}
                   onDelete={() => deleteFile(index)}
                   onUpdate={(attrs) => setFileData({ src: file.src, attrs })}
                 />
@@ -35,46 +38,23 @@ export const MediaListEditor = memo(function MediaListEditor() {
               {file.file.type.startsWith('video') && (
                 <VideoEditor
                   {...(file as VideoAttributes)}
-                  sx={styles.item}
                   onDelete={() => deleteFile(index)}
                   onUpdate={(attrs) => setFileData({ src: file.src, attrs })}
                 />
               )}
-            </html.div>
-          ))}
-        </div>
-      </html.div>
+            </>
+          </MediaWrapper>
+        ))}
+      </MediaGroup>
     </ContentProvider>
   )
 })
 
 const styles = css.create({
-  root1: {
-    overflowX: 'scroll',
-    overflowY: 'hidden',
-  },
-  root: {
-    display: 'flex',
-    flexDirection: 'row',
-    gap: spacing.margin1,
-    width: 'max-content',
-    overflowY: 'hidden',
-    marginBottom: spacing.margin1,
-    paddingBottom: 4,
-  },
-  mediaMultiple: {
-    maxHeight: 310,
-  },
-  itemWrap: {
-    width: 'fit-content',
-    height: 'fit-content',
-    //maxHeight: 300,
+  wrapper: {
     position: 'relative',
-    userSelect: 'none',
-    userDrag: 'none',
-  },
-  item: {
-    height: 290,
-    objectFit: 'cover',
+    height: '100%',
+    margin: 0,
+    width: 'fit-content',
   },
 })
