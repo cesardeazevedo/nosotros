@@ -5,6 +5,7 @@ import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { useNoteState } from '@/hooks/state/useNote'
+import { useIsCurrentRouteEventID } from '@/hooks/useNavigations'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { useNavigate, useRouter } from '@tanstack/react-router'
@@ -40,6 +41,7 @@ export const Reply = memo(function Reply(props: Props) {
   const rootRef = useRef<HTMLDivElement | null>(null)
   const avatarCellRef = useRef<HTMLDivElement | null>(null)
   const childrenRef = useRef<HTMLDivElement | null>(null)
+  const isCurrentEvent = useIsCurrentRouteEventID(event.id)
 
   const handleOpen = useCallback(() => setOpen((v) => !v), [])
 
@@ -146,7 +148,9 @@ export const Reply = memo(function Reply(props: Props) {
                   {hasReplies && <html.span aria-hidden style={styles.connectorDown} onClick={handleOpen} />}
                   <UserAvatar pubkey={event.pubkey} />
                 </html.div>
-                <ReplyContent note={note} />
+                <ContentProvider value={{ disableLink: isCurrentEvent }}>
+                  <ReplyContent note={note} />
+                </ContentProvider>
               </Stack>
               <html.div style={styles.actions}>
                 <Stack>

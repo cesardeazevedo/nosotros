@@ -26,14 +26,8 @@ const getPubkey = (decoded?: DecodedResult) => {
 
 export const NavigationHeader = memo(function NavigationHeader() {
   useMatch({ from: '__root__' })
-  const nostrRoute = useNostrRoute()
+  const context = useNostrRoute()
   const goBack = useGoBack()
-
-  // TODO: This needs better inference
-  let context = null
-  if (nostrRoute?.context && 'decoded' in nostrRoute.context) {
-    context = nostrRoute.context
-  }
   const pubkey = getPubkey(context?.decoded)
   return (
     <Stack justify='flex-start' gap={1} sx={styles.root}>

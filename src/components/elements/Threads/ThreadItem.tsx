@@ -3,15 +3,14 @@ import { ContentProvider } from '@/components/providers/ContentProvider'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { type NoteState } from '@/hooks/state/useNote'
+import { useIsCurrentRouteEventID } from '@/hooks/useNavigations'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconDotsVertical } from '@tabler/icons-react'
-import { useMatch } from '@tanstack/react-router'
 import { memo, useEffect, useRef } from 'react'
 import { css, html } from 'react-strict-dom'
 import { EditorProvider } from '../Editor/EditorProvider'
 import { WaveDivider } from '../Layouts/WaveDivider'
-import { LinkNEvent } from '../Links/LinkNEvent'
 import { PostActions } from '../Posts/PostActions/PostActions'
 import { Replies } from '../Replies/Replies'
 import { ReplyContent } from '../Replies/ReplyContent'
@@ -27,45 +26,38 @@ export const ThreadItem = memo(function ThreadItem(props: Props) {
   const { note, renderEditor = true, renderReplies = true } = props
   const { event } = note
   const ref = useRef<HTMLDivElement>(null)
-  const context = useMatch({ from: '/$nostr', shouldThrow: false })?.context
   const deck = useDeckColumn()
-  const isCurrentNote =
-    (deck?.type === 'event' && deck.filter.ids?.[0] === event.id) ||
-    (context?.decoded?.type === 'nevent' ? context?.decoded.data.id === note.id : false)
+  const isCurrentRoute = useIsCurrentRouteEventID(event.id)
+  const isDeck = deck?.type === 'event' && deck.filter?.ids?.[0] === event.id
+  const isCurrentEvent = isDeck || isCurrentRoute
 
   useEffect(() => {
-    if (isCurrentNote && ref.current) {
+    if (isCurrentEvent && ref.current) {
       setTimeout(() => {
         ref.current?.scrollIntoView({ behavior: 'instant', block: 'start' })
       }, 100)
     }
-  }, [isCurrentNote, note.id])
+  }, [isCurrentEvent, note.id])
 
   const hasReplies = (note.replies.data?.length || 0) > 0
 
   return (
     <>
-      <ContentProvider value={{ dense: true }}>
+      <ContentProvider value={{ dense: true, disableLink: isCurrentEvent }}>
         <html.div style={styles.reply} ref={ref}>
-          {isCurrentNote && <html.div style={styles.current}></html.div>}
+          {isCurrentEvent && <html.div style={styles.current}></html.div>}
           <Stack align='flex-start' gap={1} sx={styles.content}>
             {hasReplies && <html.div style={styles.thread} />}
             <UserAvatar pubkey={event.pubkey} />
             <Stack horizontal={false} sx={styles.wrapper}>
-              {isCurrentNote ? (
-                <ReplyContent note={note} highlight={false} />
-              ) : (
-                <LinkNEvent block nevent={note.nip19}>
-                  <ReplyContent note={note} />
-                </LinkNEvent>
-              )}
+              {isCurrentEvent ? <ReplyContent note={note} highlight={false} /> : <ReplyContent note={note} />}
               <html.div style={styles.root$actions}>
                 <PostActions renderOptions note={note} onReplyClick={() => note.actions.toggleReplying()} />
               </html.div>
             </Stack>
           </Stack>
         </html.div>
-        {renderEditor && isCurrentNote && note.state.repliesOpen && (
+        {renderEditor && isCurrentEvent && note.state.repliesOpen && (
           <Stack sx={styles.divider} gap={2}>
             <html.div>
               <IconDotsVertical strokeWidth='1.8' size={24} />
@@ -81,7 +73,7 @@ export const ThreadItem = memo(function ThreadItem(props: Props) {
           </html.div>
         )}
       </ContentProvider>
-      {renderReplies && isCurrentNote && <Replies note={note} />}
+      {renderReplies && isCurrentEvent && <Replies note={note} />}
     </>
   )
 })
