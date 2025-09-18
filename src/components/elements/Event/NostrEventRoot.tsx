@@ -18,6 +18,7 @@ export const NostrEventRoot = memo(function NostrEventRoot(props: Props) {
   const { event, open } = props
   switch (event.kind) {
     case Kind.Comment:
+    case Kind.Highlight:
     case Kind.Text: {
       return event.metadata?.isRoot ? (
         <PostRoot event={event} open={open} />
