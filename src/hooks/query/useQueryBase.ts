@@ -17,6 +17,7 @@ import { subscribeStrategy } from '../subscriptions/subscribeStrategy'
 import { queryClient } from './queryClient'
 import { pointerToQueryKey, queryKeys } from './queryKeys'
 import { setEventData } from './queryUtils'
+import { UserMentionEntity } from 'react-tweet/api'
 
 export type UseQueryOptionsWithFilter<Selector = NostrEventDB[]> = UseQueryOptions<NostrEventDB[], Error, Selector> & {
   filter: Filter
@@ -170,6 +171,13 @@ export function useEventFromNIP19(nip19: string, relayHints?: RelayHints, keepPr
 
 export function useRepostedEvent(event: NostrEventDB) {
   const id = event.metadata?.mentionedNotes?.[0] || ''
+  let initialData: [NostrEventDB] | undefined
+  try {
+    initialData =
+      event.content && event.content !== '{}' ? [parseEventMetadata(JSON.parse(event.content || '{}'))] : undefined
+  } catch {
+    // invalid content json
+  }
   return useQuery(
     eventQueryOptions({
       queryKey: queryKeys.event(id),
@@ -184,8 +192,7 @@ export function useRepostedEvent(event: NostrEventDB) {
         },
       },
       enabled: !!id,
-      initialData:
-        event.content && event.content !== '{}' ? [parseEventMetadata(JSON.parse(event.content || '{}'))] : undefined,
+      initialData,
       select: (events) => events[0],
     }),
   )
