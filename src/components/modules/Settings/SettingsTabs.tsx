@@ -3,7 +3,7 @@ import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { spacing } from '@/themes/spacing.stylex'
-import { IconDatabase, IconLock, IconPhoto, IconSettings } from '@tabler/icons-react'
+import { IconDatabase, IconInfoCircle, IconLock, IconPhoto, IconSettings } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
 import { css } from 'react-strict-dom'
 
@@ -50,6 +50,11 @@ export const SettingsTabs = () => {
         <Link to='/settings/storage'>
           {({ isActive }) => (
             <MenuItem interactive selected={isActive} leadingIcon={<IconDatabase {...iconProps} />} label='Cache' />
+          )}
+        </Link>
+        <Link to='/settings/about'>
+          {({ isActive }) => (
+            <MenuItem interactive selected={isActive} leadingIcon={<IconInfoCircle {...iconProps} />} label='About' />
           )}
         </Link>
       </Stack>

@@ -30,6 +30,7 @@ import { RelayActiveRoute } from './components/modules/RelayActive/RelayActiveRo
 import { RelayMonitorRoute } from './components/modules/RelayMonitor/RelayMonitorRoute'
 import { RelayRoute } from './components/modules/Relays/RelaysRoute'
 import { SearchRoute } from './components/modules/Search/SearchRoute'
+import { SettingsAboutRoute } from './components/modules/Settings/SettingsAbout'
 import { SettingsMediaStorage } from './components/modules/Settings/SettingsMediaStorage'
 import { SettingsPreferencesRoute } from './components/modules/Settings/SettingsPreferenceRoute'
 import { SettingsRelayAuth } from './components/modules/Settings/SettingsRelaysAuth'
@@ -595,6 +596,12 @@ const settingsStorageRoute = createRoute({
   component: SettingsStorageRoute,
 })
 
+const settingsAboutRoute = createRoute({
+  getParentRoute: () => settingsRoute,
+  path: '/about',
+  component: SettingsAboutRoute,
+})
+
 export const routeTree = rootRoute.addChildren([
   homeRoute,
   homeRepliesRoute,
@@ -614,6 +621,7 @@ export const routeTree = rootRoute.addChildren([
     settingsRelaysAuthRoute,
     settingsMediaStorage,
     settingsStorageRoute,
+    settingsAboutRoute,
   ]),
 ])
 
