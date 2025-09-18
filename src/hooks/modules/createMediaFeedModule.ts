@@ -4,7 +4,6 @@ import { queryKeys } from '../query/queryKeys'
 import type { FeedModule } from '../query/useQueryFeeds'
 
 export type MediaFeedModule = FeedModule & {
-  type: 'media'
   layout: 'row' | 'grid'
 }
 
@@ -14,7 +13,7 @@ export function createMediaFeedModule(pubkey?: string): MediaFeedModule {
     const filter: NostrFilter = {
       kinds: [Kind.Media],
       authors: [pubkey],
-      limit: 50,
+      limit: 51,
     }
     return {
       id: name,
@@ -22,6 +21,7 @@ export function createMediaFeedModule(pubkey?: string): MediaFeedModule {
       queryKey: queryKeys.feed(name, filter),
       filter,
       ctx: {},
+      pageSize: 21,
       layout: 'row',
       scope: pubkey ? 'following' : 'self',
     }
@@ -29,13 +29,14 @@ export function createMediaFeedModule(pubkey?: string): MediaFeedModule {
   const name = 'guest_media'
   const filter: NostrFilter = {
     kinds: [Kind.Media],
-    limit: 50,
+    limit: 51,
   }
   return {
     id: name,
     type: 'media',
     queryKey: queryKeys.feed(name, filter),
     filter,
+    pageSize: 21,
     ctx: {
       outbox: false,
       negentropy: false,
