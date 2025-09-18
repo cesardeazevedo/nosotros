@@ -247,7 +247,7 @@ export const DeckMenu = memo(function DeckMenu(props: Props) {
             }
             onClick={() => add(createRelayMonitorModule())}
             supportingText={<span>Discovery relays found by relay monitors (NIP-66)</span>}>
-            <Text size='lg'>Relay Discovery</Text>
+            <Text size='lg'>Relay Monitors</Text>
           </ListItem>
         </List>
       )}

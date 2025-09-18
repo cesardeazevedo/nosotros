@@ -19,7 +19,9 @@ export function createNotificationFeedModule(pubkey: string): NotificationFeedMo
     type: 'inbox',
     queryKey: queryKeys.feed(id, filter),
     filter,
-    ctx: {},
+    ctx: {
+      subId: 'notification',
+    },
     scope: 'self',
     pageSize: 30,
     staleTime: 600000,

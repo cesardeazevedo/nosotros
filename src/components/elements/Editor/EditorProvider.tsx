@@ -226,7 +226,7 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
 
   const focus = () => {
     setTimeout(() => {
-      editor?.commands.focus()
+      editor?.commands.focus('start')
     })
   }
 

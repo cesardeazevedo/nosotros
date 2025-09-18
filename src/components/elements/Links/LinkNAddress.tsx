@@ -3,6 +3,7 @@ import { useContentContext } from '@/components/providers/ContentProvider'
 import { createEventModule } from '@/hooks/modules/createEventModule'
 import { Link, useRouter } from '@tanstack/react-router'
 import type { NAddr } from 'nostr-tools/nip19'
+import type { DragEventHandler } from 'react'
 import React, { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 
@@ -18,6 +19,11 @@ export const LinkNAddress = memo(function LinkNAddress(props: Props) {
 
   const router = useRouter()
   const deck = useDeckAddNextColumn(() => createEventModule(naddress))
+
+  const handleDragStart: DragEventHandler<HTMLAnchorElement> = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+  }
 
   if (disableLink || !naddress) {
     return props.children
@@ -37,7 +43,8 @@ export const LinkNAddress = memo(function LinkNAddress(props: Props) {
       state={{ from: router.latestLocation.pathname } as never}
       {...rest}
       {...css.props([underline && styles.underline])}
-      params={{ nostr: naddress }}>
+      params={{ nostr: naddress }}
+      onDragStart={handleDragStart}>
       {props.children}
     </Link>
   )

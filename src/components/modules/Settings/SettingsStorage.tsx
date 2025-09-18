@@ -42,7 +42,7 @@ export const SettingsStorageRoute = () => {
     try {
       setExporting(true)
       const bytes = await dbSqlite.exportDB()
-      const blob = new Blob([bytes], { type: 'application/octet-stream' })
+      const blob = new Blob([bytes as BlobPart], { type: 'application/octet-stream' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url

@@ -55,6 +55,7 @@ const styles = css.create({
     },
   },
   resetTopRadius: {
-    borderRadius: 0,
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
   },
 })

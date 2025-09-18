@@ -18,7 +18,7 @@ export const MAX_BOUNDS = {
     maxHeight: 480,
   },
   lg: {
-    maxWidth: 570,
+    maxWidth: 560,
     maxHeight: 590,
   },
 } as const

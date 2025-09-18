@@ -1,4 +1,4 @@
-import { addMediaDimAtom, addMediaErrorAtom, mediaErrorsAtom } from '@/atoms/media.atoms'
+import { addMediaDimAtom, mediaErrorsAtom } from '@/atoms/media.atoms'
 import { useContentContext } from '@/components/providers/ContentProvider'
 import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'

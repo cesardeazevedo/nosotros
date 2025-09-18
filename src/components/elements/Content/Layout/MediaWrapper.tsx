@@ -57,6 +57,7 @@ export const MediaWrapper = memo(function MediaWrapper(props: Props) {
 
 const styles = css.create({
   root: {
+    position: 'relative',
     width: 'fit-content',
   },
   root$dense: {

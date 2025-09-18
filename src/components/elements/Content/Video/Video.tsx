@@ -97,7 +97,7 @@ const styles = css.create({
   video: {
     display: 'block',
     blockSize: 'auto',
-    minWidth: 300,
+    minWidth: 150,
     width: 'inherit',
     maxWidth: 'inherit',
     maxHeight: 'inherit',
