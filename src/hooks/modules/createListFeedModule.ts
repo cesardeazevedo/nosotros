@@ -32,3 +32,25 @@ export function createListFeedModule(event: NostrEventDB, scope?: FeedScope): Fe
     scope: scope || 'sets_p',
   }
 }
+
+export function createBookmarkFeedModule(pubkey: string): FeedModule {
+  const id = `bookmarks_${pubkey}_feed`
+  const filter: NostrFilter = {
+    kinds: [Kind.BookmarkList],
+    authors: [pubkey],
+    limit: 100,
+  }
+  return {
+    id,
+    queryKey: queryKeys.feed(id, filter),
+    filter,
+    ctx: {
+      outbox: true,
+      negentropy: false,
+    },
+    live: false,
+    autoUpdate: true,
+    type: 'lists',
+    scope: 'sets_e',
+  }
+}
