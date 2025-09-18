@@ -15,7 +15,6 @@ import { IconChevronLeft, IconCircleCheck, IconWallet } from '@tabler/icons-reac
 import { useNavigate } from '@tanstack/react-router'
 import { AnimatePresence, motion, MotionConfig } from 'framer-motion'
 import { DateTime } from 'luxon'
-import type { EventPointer } from 'nostr-tools/nip19'
 import { useObservableState } from 'observable-hooks'
 import { QRCodeCanvas } from 'qrcode.react'
 import { useMemo, useRef } from 'react'
@@ -25,7 +24,7 @@ import { CopyButton } from '../Buttons/CopyButton'
 import type { CopyButtonRef } from '../Buttons/CopyIconButton'
 
 type Props = {
-  event: EventPointer
+  relays: string[]
   invoice: string
 }
 
@@ -37,7 +36,7 @@ const variants = {
 }
 
 export const ZapRequestInvoice = (props: Props) => {
-  const { event, invoice } = props
+  const { relays, invoice } = props
 
   const copyButtonRef = useRef<CopyButtonRef | null>(null)
   const goBack = useGoBack()
@@ -63,9 +62,9 @@ export const ZapRequestInvoice = (props: Props) => {
   const [paid] = useObservableState<boolean>(() => {
     return subscribeRemote(
       {
+        relays,
         network: 'REMOTE_ONLY',
         outbox: false,
-        relays: event.relays,
         negentropy: false,
         closeOnEose: false,
         subId: 'zap_receipt',

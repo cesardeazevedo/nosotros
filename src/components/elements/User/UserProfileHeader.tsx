@@ -11,6 +11,7 @@ import { MenuList } from '@/components/ui/MenuList/MenuList'
 import { Popover } from '@/components/ui/Popover/Popover'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
+import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 import { Kind } from '@/constants/kinds'
 import { useUserState } from '@/hooks/state/useUser'
 import { useCurrentPubkey } from '@/hooks/useAuth'
@@ -20,7 +21,17 @@ import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { getImgProxyUrl } from '@/utils/imgproxy'
 import { sanitizeUrl } from '@braintree/sanitize-url'
-import { IconBoltFilled, IconCopy, IconDotsVertical, IconQrcode, IconSend } from '@tabler/icons-react'
+import { colors } from '@stylexjs/open-props/lib/colors.stylex'
+import {
+  IconBolt,
+  IconBoltFilled,
+  IconBrandZapier,
+  IconCopy,
+  IconDotsVertical,
+  IconQrcode,
+  IconSend,
+} from '@tabler/icons-react'
+import { useRouter } from '@tanstack/react-router'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { memo, useCallback, useMemo, useState } from 'react'
 import { css, html } from 'react-strict-dom'
@@ -55,6 +66,7 @@ export const UserProfileBanner = function UserProfileBanner(props: { src: string
 export const UserProfileHeader = memo(function UserProfileHeader(props: Props) {
   const { pubkey } = props
   const [editProfile, setEditProfile] = useState(false)
+  const router = useRouter()
   const isMobile = useMobile()
   const user = useUserState(pubkey, { syncFollows: true })
   const currentPubkey = useCurrentPubkey()
@@ -140,7 +152,15 @@ export const UserProfileHeader = memo(function UserProfileHeader(props: Props) {
             <html.span style={styles.breakWord}>{website}</html.span>
           </ContentLink>
         )}
-        <Stack sx={styles.follow} gap={0.5}>
+        <Stack sx={styles.actions} gap={0.5}>
+          <Tooltip enterDelay={0} text={`Zap ${user.displayName}`}>
+            <LinkBase search={{ zap: user.nprofile }} state={{ from: router.latestLocation.pathname } as never}>
+              <IconButton
+                variant='outlined'
+                icon={<IconBoltFilled color={colors.violet5} stroke='currentColor' strokeWidth='2.0' size={20} />}
+              />
+            </LinkBase>
+          </Tooltip>
           <Popover
             placement='bottom-end'
             contentRenderer={({ close }) => (
@@ -225,7 +245,7 @@ const styles = css.create({
   center: {
     paddingBlock: spacing.padding1,
   },
-  follow: {
+  actions: {
     position: 'absolute',
     right: 22,
     top: 20,

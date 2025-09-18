@@ -11,7 +11,6 @@ import { dedupe } from '@/core/helpers/dedupe'
 import type { Signer } from '@/core/signers/signer'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { useUserRelays } from '@/hooks/query/useQueryUser'
-import { useNoteState } from '@/hooks/state/useNote'
 import { useUserState } from '@/hooks/state/useUser'
 import { useCurrentPubkey, useCurrentSigner } from '@/hooks/useAuth'
 import { READ, WRITE } from '@/nostr/types'
@@ -20,7 +19,7 @@ import { bech32, utf8 } from '@scure/base'
 import { IconAlertCircleFilled, IconBolt } from '@tabler/icons-react'
 import { useNavigate, useRouter } from '@tanstack/react-router'
 import { useAtomValue, useSetAtom } from 'jotai'
-import type { NostrEvent } from 'nostr-tools'
+import type { EventTemplate, NostrEvent } from 'nostr-tools'
 import { nip19 } from 'nostr-tools'
 import { Bech32MaxSize } from 'nostr-tools/nip19'
 import { getZapEndpoint, makeZapRequest } from 'nostr-tools/nip57'
@@ -33,14 +32,16 @@ import { UserAvatar } from '../User/UserAvatar'
 import { UserName } from '../User/UserName'
 import { ZapChipAmount } from './ZapChipAmount'
 
-type Props = {
-  event: NostrEventDB
-}
+type ZapEvent = { toEvent: NostrEventDB }
+type ZapProfile = { toPubkey: string }
+
+type Props = ZapEvent | ZapProfile
 
 const formatter = new Intl.NumberFormat()
 
 export const ZapRequest = memo(function ZapRequest(props: Props) {
-  const { event } = props
+  const toEvent = 'toEvent' in props ? props.toEvent : undefined
+  const toPubkey = 'toEvent' in props ? props.toEvent.pubkey : props.toPubkey
   const signer = useCurrentSigner()
   const store = useAtomValue(zapRequestAtom)
   const updateStore = useSetAtom(updateZapRequestAtom)
@@ -49,12 +50,11 @@ export const ZapRequest = memo(function ZapRequest(props: Props) {
   const pubkey = useCurrentPubkey()
   const navigate = useNavigate()
   const router = useRouter()
-  const note = useNoteState(event)
-  const user = useUserState(event.pubkey)
+  const user = useUserState(toPubkey)
   const userRelays = useUserRelays(user.pubkey, READ).data?.map((x) => x.relay) || []
   const currentUserRelays = useUserRelays(pubkey, WRITE).data?.map((x) => x.relay) || []
   const relays = dedupe(userRelays, currentUserRelays)
-  const zapEnabled = note?.user ? user.canReceiveZap : true
+  const zapEnabled = user.canReceiveZap
 
   const [pending, onSubmit] = useObservableState<
     boolean,
@@ -70,13 +70,23 @@ export const ZapRequest = memo(function ZapRequest(props: Props) {
             const comment = store.comment
             const amount = store.amount * 1000
 
-            const zapEvent = makeZapRequest({
-              pubkey: event.pubkey,
-              event: event,
-              amount,
-              comment,
-              relays,
-            })
+            let zapEvent: EventTemplate
+            if (toEvent) {
+              const { metadata, ...rest } = toEvent
+              zapEvent = makeZapRequest({
+                event: rest,
+                amount,
+                comment,
+                relays,
+              })
+            } else {
+              zapEvent = makeZapRequest({
+                pubkey: toPubkey,
+                amount,
+                comment,
+                relays,
+              })
+            }
 
             const lnurl = bech32.encode('lnurl', bech32.toWords(utf8.decode(callback)), Bech32MaxSize)
             const signed = signer.sign({
@@ -104,14 +114,20 @@ export const ZapRequest = memo(function ZapRequest(props: Props) {
                 if ('error' in response && response.error) {
                   enqueueToast({ component: response.message, duration: 5000 })
                 } else if ('pr' in response) {
+                  const n = toEvent
+                    ? nip19.neventEncode({
+                        id: toEvent.id,
+                        author: toPubkey,
+                        relays,
+                      })
+                    : nip19.nprofileEncode({
+                        pubkey: toPubkey,
+                        relays,
+                      })
                   navigate({
                     search: {
+                      n,
                       invoice: response.pr,
-                      n: nip19.neventEncode({
-                        id: event.id,
-                        author: event.pubkey,
-                        relays,
-                      }),
                     },
                     to: '.',
                     state: { from: router.latestLocation.pathname } as never,

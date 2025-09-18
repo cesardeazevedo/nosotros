@@ -1,4 +1,4 @@
-import { decodeNIP19 } from '@/utils/nip19'
+import { decodeNIP19, decodeRelays } from '@/utils/nip19'
 import { useMatch, useNavigate } from '@tanstack/react-router'
 import { useCallback } from 'react'
 import { DialogSheet } from '../elements/Layouts/Dialog'
@@ -21,11 +21,11 @@ export const ZapRequestInvoiceDialog = () => {
   }, [])
 
   const decoded = decodeNIP19(nevent || '')
-  const data = decoded?.type === 'nevent' ? decoded?.data : undefined
+  const relays = decodeRelays(decoded)
 
   return (
     <DialogSheet maxWidth='xs' open={!!invoice && !!nevent} onClose={handleClose}>
-      {invoice && data && <ZapRequestInvoice event={data} invoice={invoice} />}
+      {invoice && <ZapRequestInvoice relays={relays} invoice={invoice} />}
     </DialogSheet>
   )
 }
