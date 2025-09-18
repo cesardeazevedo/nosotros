@@ -53,7 +53,7 @@ export const LinkNEvent = memo(function LinkNEvent(props: Props) {
     e.stopPropagation()
   }
 
-  if (disableLink || !nevent) {
+  if ((disableLink && !media) || !nevent) {
     return props.children
   }
 
