@@ -1,3 +1,4 @@
+import { APP_DESCRIPTION, APP_NAME, APP_URL, APP_IMAGE } from '@/constants/app'
 import { Kind } from '@/constants/kinds'
 import { kinds, type NostrEvent, type UnsignedEvent } from 'nostr-tools'
 import type { Observable } from 'rxjs'
@@ -48,9 +49,6 @@ export type NIP46RemoteSignerOptions = {
   secret?: string
   clientSecret?: string
   remotePubkey?: string
-  url?: string
-  name?: string
-  description?: string
   method: BunkerMethods
 }
 
@@ -71,7 +69,13 @@ type BunkerPubkey = [BunkerPointer, string]
 
 function buildNostrConnectUrl(relay: string, pubkey: string, options: Omit<NIP46RemoteSignerOptions, 'method'>) {
   const { clientSecret, ...rest } = options
-  const params = new URLSearchParams({ ...rest })
+  const params = new URLSearchParams({
+    ...rest,
+    name: APP_NAME,
+    description: APP_DESCRIPTION,
+    url: APP_URL,
+    image: APP_IMAGE,
+  })
   params.append('relay', relay)
   return `nostrconnect://${pubkey}?${params.toString()}`
 }
