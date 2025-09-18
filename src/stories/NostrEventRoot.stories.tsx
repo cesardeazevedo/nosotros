@@ -102,20 +102,6 @@ export const Kind3FollowList: Story = {
   },
 }
 
-export const Kind6Repost: Story = {
-  args: {
-    event: fakeEventMeta({
-      kind: 6,
-      pubkey: 'p1',
-      content: JSON.stringify(fakeEventMeta({ id: 'e1', kind: 1, content: 'Hello Nostr', pubkey: 'p2' })),
-      tags: [
-        ['p', 'p2'],
-        ['e', 'e1'],
-      ],
-    }),
-  },
-}
-
 export const Kind24PublicMessage: Story = {
   args: {
     event: fakeEventMeta({
@@ -236,5 +222,130 @@ Suspendisse sollicitudin velit sed leo. Ut pharetra augue nec augue. Nam elit ma
       ],
     }),
     open: true,
+  },
+}
+
+export const Kind6RepostTextNote: Story = {
+  args: {
+    event: fakeEventMeta({
+      kind: 6,
+      pubkey: 'p1',
+      content: JSON.stringify(
+        fakeEventMeta({
+          id: 'e1',
+          kind: 1,
+          content: 'This is the original text note being reposted',
+          pubkey: 'p2',
+        }),
+      ),
+      tags: [
+        ['p', 'p2'],
+        ['e', 'e1'],
+      ],
+    }),
+  },
+}
+
+export const Kind6RepostArticle: Story = {
+  args: {
+    event: fakeEventMeta({
+      kind: 6,
+      pubkey: 'p1',
+      content: JSON.stringify(
+        fakeEventMeta({
+          id: 'e2',
+          kind: 30023,
+          content: `# How to Build a Decentralized Future
+
+The future of the internet is decentralized. In this article, we explore the fundamentals of building truly distributed systems.
+
+![Future](https://placehold.co/800x400)
+
+## Key Principles
+
+1. **User ownership** - Users control their data
+2. **Censorship resistance** - No single point of failure
+3. **Interoperability** - Systems work together
+
+The path forward requires both technical innovation and social coordination.`,
+          pubkey: 'p2',
+          tags: [
+            ['title', 'How to Build a Decentralized Future'],
+            ['image', 'https://placehold.co/800x400'],
+          ],
+        }),
+      ),
+      tags: [
+        ['p', 'p2'],
+        ['e', 'e2'],
+      ],
+    }),
+  },
+}
+
+export const Kind6RepostUnsupportedKind: Story = {
+  args: {
+    event: fakeEventMeta({
+      kind: 6,
+      pubkey: 'p1',
+      content: JSON.stringify(
+        fakeEventMeta({
+          id: 'e3',
+          kind: 1337,
+          content: 'This is an unsupported kind that should show fallback UI',
+          pubkey: 'p2',
+        }),
+      ),
+      tags: [
+        ['p', 'p2'],
+        ['e', 'e3'],
+      ],
+    }),
+  },
+}
+
+export const Kind6RepostWithMedia: Story = {
+  args: {
+    event: fakeEventMeta({
+      kind: 6,
+      pubkey: 'p1',
+      content: JSON.stringify(
+        fakeEventMeta({
+          id: 'e4',
+          kind: 1,
+          content:
+            'Check out this amazing video! https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+          pubkey: 'p2',
+          tags: [
+            [
+              'imeta',
+              'url https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+              'm video/mp4',
+              'alt Big Buck Bunny sample video',
+              'size 5510872',
+              'dim 1280x720',
+            ],
+          ],
+        }),
+      ),
+      tags: [
+        ['p', 'p2'],
+        ['e', 'e4'],
+      ],
+    }),
+  },
+}
+
+export const Kind6RepostInvalidContent: Story = {
+  args: {
+    event: fakeEventMeta({
+      kind: 6,
+      pubkey: 'p1',
+      content: 'invalid json content that should show error handling',
+      tags: [
+        ['p', 'p2'],
+        ['e', 'e5'],
+      ],
+    }),
   },
 }
