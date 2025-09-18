@@ -8,6 +8,7 @@ import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import type { FeedState } from '@/hooks/state/useFeed'
 import React, { memo } from 'react'
 import { FeedAuthNotice } from './FeedAuthNotice'
+import { FeedEmpty } from './FeedEmpty'
 
 export type Props = {
   feed: FeedState
@@ -28,7 +29,7 @@ export const Feed = memo(function Feed(props: Props) {
           feed={feed}
           onScrollEnd={feed.paginate}
           render={(event) => (render ? render(event) : <NostrEventFeedItem event={event} />)}
-          footer={loading || <PostLoading rows={4} />}
+          footer={<>{!feed.isEmpty ? <PostLoading rows={4} /> : <FeedEmpty feed={feed} />}</>}
           {...rest}
         />
       </ContentProvider>

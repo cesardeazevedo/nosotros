@@ -107,6 +107,17 @@ export function useFeedState(options: FeedModule & { select?: (data: InfiniteEve
     }),
   )
 
+  const [isEmpty, setIsEmpty] = useState(false)
+
+  useEffect(() => {
+    setIsEmpty(false)
+    const timer = setTimeout(() => {
+      const count = query.data?.pages?.[0]?.length ?? 0
+      setIsEmpty(count === 0)
+    }, 6000)
+    return () => clearTimeout(timer)
+  }, [query.data?.pages?.[0]])
+
   const addNewEvents = useCallback(
     (events: NostrEventDB[]) => {
       queryClient.setQueryData(queryKey, (older: InfiniteEvents | undefined) => {
@@ -207,6 +218,8 @@ export function useFeedState(options: FeedModule & { select?: (data: InfiniteEve
     setBlured,
     pageSize,
     setPageSize,
+    isEmpty,
+    setIsEmpty,
     paginate: () => paginate([pageSize, query.data, options.scope]),
     addRelay: () => {},
     removeRelay: () => {},
