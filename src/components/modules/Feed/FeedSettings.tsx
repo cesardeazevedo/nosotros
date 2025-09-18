@@ -10,6 +10,7 @@ import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 import { FeedSettingsRelays } from './settings/FeedSettingsRelays'
 import { FeedSettingsSafety } from './settings/FeedSettingsSafety'
+import { FeedSettingsSubmit } from './settings/FeedSettingsSubmit'
 
 const iconProps = {
   size: 18,
@@ -18,11 +19,12 @@ const iconProps = {
 
 export type Props = {
   feed: FeedState
+  onClose?: () => void
   renderRelaySettings?: boolean
 }
 
 export const FeedSettings = memo(function FeedSettings(props: Props) {
-  const { feed, renderRelaySettings = false } = props
+  const { feed, renderRelaySettings = false, onClose } = props
   return (
     <html.div style={styles.root}>
       <Divider />
@@ -67,7 +69,6 @@ export const FeedSettings = memo(function FeedSettings(props: Props) {
           {/*   onClick={() => feed.toggleKind(Kind.Highlight)} */}
           {/* /> */}
           {/* <Chip variant='filter' icon={<IconBroadcast {...iconProps} />} label='Live Events' /> */}
-          <Chip label='Reset' variant='assist' onClick={() => feed.resetFilter()} />
         </Stack>
         <FeedSettingsSafety feed={feed} />
         {renderRelaySettings && <FeedSettingsRelays feed={feed} />}
@@ -82,6 +83,7 @@ export const FeedSettings = memo(function FeedSettings(props: Props) {
             onClick={() => feed.setAutoUpdate((prev) => !prev)}
           />
         </Stack>
+        <FeedSettingsSubmit feed={feed} onClose={onClose} />
       </Stack>
     </html.div>
   )

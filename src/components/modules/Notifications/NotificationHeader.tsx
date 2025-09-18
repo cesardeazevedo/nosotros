@@ -48,7 +48,7 @@ export const NotificationHeader = memo(function NotificationHeader(props: Props)
         </HeaderBase>
       </NotificationHeaderLink>
       <Expandable expanded={expanded}>
-        <NotificationSettings feed={feed} />
+        <NotificationSettings feed={feed} onClose={() => setExpanded(false)} />
       </Expandable>
     </>
   )

@@ -19,9 +19,11 @@ import {
 import { useSetAtom } from 'jotai'
 import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
+import { FeedSettingsSubmit } from '../Feed/settings/FeedSettingsSubmit'
 
 type Props = {
   feed: NotificationFeedState
+  onClose?: () => void
 }
 
 const iconProps: IconProps = {
@@ -30,7 +32,7 @@ const iconProps: IconProps = {
 }
 
 export const NotificationSettings = memo(function NotificationSettings(props: Props) {
-  const { feed } = props
+  const { feed, onClose } = props
   const toggleSettings = useSetAtom(toggleSettingAtom)
   return (
     <html.div style={styles.root}>
@@ -109,10 +111,10 @@ export const NotificationSettings = memo(function NotificationSettings(props: Pr
           />
         </Stack>
         <Stack>
-          <Chip label='Reset' variant='assist' onClick={() => feed.resetFilter()} />
+          <Chip label='Reset' variant='assist' onClick={() => feed.resetFeed()} />
         </Stack>
+        <FeedSettingsSubmit feed={feed} onClose={onClose} />
       </Stack>
-      <Divider />
     </html.div>
   )
 })
