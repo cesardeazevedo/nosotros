@@ -6,11 +6,15 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
 
-export default [
-  {
-    languageOptions: {
-      globals: globals.browser,
-    },
+export default [{
+  languageOptions: {
+    globals: globals.browser,
+  },
+}, pluginJs.configs.recommended, ...tseslint.configs.recommended, eslintPluginPrettierRecommended, {
+  plugins: {
+    react,
+    'jsx-a11y': jsxA11y,
+    'react-refresh': reactRefresh,
   },
   pluginJs.configs.recommended,
   ...tseslint.configs.recommended,

@@ -1,5 +1,6 @@
 import type { DeckColumn } from '@/atoms/deck.atoms'
 import { addDeckColumnAtom, deckNewPane, decksAtom, DEFAULT_DECK, removeDeckColumnAtom } from '@/atoms/deck.atoms'
+import { persistentFeedStatesAtom } from '@/atoms/modules.atoms'
 import { useParams } from '@tanstack/react-router'
 import { useAtomValue, useSetAtom } from 'jotai'
 import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDOMProps'
@@ -27,11 +28,11 @@ const isReplaceableType = (type?: string) => {
   return !!type && REPLACEABLE_COLUMNS.includes(type as (typeof REPLACEABLE_COLUMNS)[number])
 }
 
-const shouldReplaceCurrent = (currentType: string, incomingType: string) => {
-  if (currentType === 'relayfeed' && incomingType === 'event') {
+const shouldReplaceCurrent = (currentType: string | undefined, nextType: string | undefined) => {
+  if (currentType === 'relayfeed' && nextType === 'event') {
     return false
   }
-  return isReplaceableType(currentType) && isReplaceableType(incomingType)
+  return isReplaceableType(currentType) && isReplaceableType(nextType)
 }
 
 export function useDeckAddNextColumn(createModule: () => DeckColumn) {
@@ -41,7 +42,8 @@ export function useDeckAddNextColumn(createModule: () => DeckColumn) {
   const deck = useDeck()
   const addDeckColumn = useSetAtom(addDeckColumnAtom)
   const setDeckNewPane = useSetAtom(deckNewPane)
-  const column = useDeckColumn()
+  const columnModules = useAtomValue(persistentFeedStatesAtom)
+  const columnContext = useDeckColumn()
 
   if (!inDeckRoute) {
     return { isDeck: false } as const
@@ -57,15 +59,16 @@ export function useDeckAddNextColumn(createModule: () => DeckColumn) {
 
       if (e.metaKey) {
         addDeckColumn({ deckId: deck.id, module })
-      } else if (column && shouldReplaceCurrent(column.type, module.type)) {
-        addDeckColumn({ deckId: deck.id, module, index: column.index, replace: true })
-      } else if (column) {
-        const nextIndex = column.index + 1
-        const next = deck.columns[nextIndex]
+      } else if (columnContext && shouldReplaceCurrent(columnContext.type, module.type)) {
+        addDeckColumn({ deckId: deck.id, module, index: columnContext.index, replace: true })
+      } else if (columnContext) {
+        const nextIndex = columnContext.index + 1
+        const id = deck.columnIds?.[nextIndex] || ''
+        const next = columnModules[id]
         const replaceNext = isReplaceableType(next?.type)
         addDeckColumn({ deckId: deck.id, module, index: nextIndex, replace: replaceNext })
       } else {
-        addDeckColumn({ deckId: deck.id, module, index: deck.columns.length })
+        addDeckColumn({ deckId: deck.id, module, index: deck.columnIds?.length })
       }
 
       setDeckNewPane(false)

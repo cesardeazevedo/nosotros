@@ -1,17 +1,26 @@
 import { EditorProvider } from '@/components/elements/Editor/EditorProvider'
 import { Divider } from '@/components/ui/Divider/Divider'
+import { createHomeFeedModule } from '@/hooks/modules/createHomeFeedModule'
 import type { FeedModule } from '@/hooks/query/useQueryFeeds'
 import { useFeedState } from '@/hooks/state/useFeed'
-import { memo } from 'react'
+import { memo, useMemo } from 'react'
 import { DeckColumnFeed } from '../Deck/DeckColumnFeed'
 import { HomeHeader } from './HomeHeader'
 
 type Props = {
-  feedModule: FeedModule
+  module: FeedModule
 }
 
 export const HomeColumn = memo(function HomeColumn(props: Props) {
-  const feed = useFeedState(props.feedModule)
+  const { module } = props
+  const data = useMemo(() => {
+    return {
+      ...createHomeFeedModule(module.filter.authors?.[0]),
+      ...module,
+    }
+  }, [module])
+
+  const feed = useFeedState(data)
 
   return (
     <DeckColumnFeed
@@ -24,7 +33,14 @@ export const HomeColumn = memo(function HomeColumn(props: Props) {
         </>
       )}
       header={
-        <HomeHeader renderEditor={false} feed={feed} onChangeTabs={(tab) => feed.setReplies(tab === 'replies')} />
+        <HomeHeader
+          renderEditor={false}
+          feed={feed}
+          onChangeTabs={(tab) => {
+            feed.setReplies(tab === 'replies')
+            feed.saveFeed()
+          }}
+        />
       }
       feed={feed}
     />

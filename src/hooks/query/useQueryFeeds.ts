@@ -29,8 +29,11 @@ export type FeedModule = Module & {
   blured?: boolean
   pageSize?: number
   includeReplies?: boolean
+  includeMuted?: boolean
   staleTime?: number
   autoUpdate?: boolean
+  buffer?: NostrEventDB[]
+  bufferReplies?: NostrEventDB[]
 }
 
 type PageParam = {

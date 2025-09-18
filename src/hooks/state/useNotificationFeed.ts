@@ -1,54 +1,44 @@
 import { selectedLastSeenAtom } from '@/atoms/lastSeen.atoms'
-import { useAtomValue } from 'jotai'
+import { createNotificationFeedAtoms } from '@/atoms/modules.atoms'
+import { useAtom, useAtomValue } from 'jotai'
 import { useMemo, useState } from 'react'
 import { createNotificationFeedModule, type NotificationFeedModule } from '../modules/createNotificationFeedModule'
 import type { InfiniteEvents } from '../query/useQueryFeeds'
 import { useSettings } from '../useSettings'
-import { useFeedState } from './useFeed'
+import { useFeedStateAtom } from './useFeed'
 
 export type NotificationFeedState = ReturnType<typeof useNotificationFeedState>
 
-export function useNotificationFeedState(options: NotificationFeedModule) {
+export function useNotificationFeedState(module: NotificationFeedModule) {
   const { notificationsCompact } = useSettings()
   const [layout, setLayout] = useState<'compact' | 'normal'>(notificationsCompact ? 'compact' : 'normal')
-  const [includeMuted, setIncludeMuted] = useState(options.includeMuted)
-  const [includeMentions, setIncludeMentions] = useState(options.includeMentions)
-  const [includeReplies, setIncludeReplies] = useState(options.includeReplies ?? false)
+  const feedAtoms = useMemo(() => createNotificationFeedAtoms(module), [module.id])
+  const [includeReplies, setIncludeReplies] = useAtom(feedAtoms.includeReplies)
+  const [includeMentions, setIncludeMentions] = useAtom(feedAtoms.includeMentions)
 
-  const module = useMemo(() => {
-    return {
-      ...options,
-      includeReplies,
-      ctx: {
-        subId: 'notification',
-      },
-      select: (data: InfiniteEvents) => {
-        return {
-          pages: data.pages.map((page) =>
-            page.filter((event) => {
-              if (includeMentions === false && event.metadata?.isRoot) return false
-              // TODO
-              // if (includeMuted === false && !!user?.isEventMuted(event.id)) return false
-              if (includeReplies === false && event.kind === 1 && !event.metadata?.isRoot) return false
-              return true
-            }),
-          ),
-          pageParams: data.pageParams,
-        }
-      },
-    }
-  }, [options, includeReplies, includeMentions, includeMuted])
-
-  const feed = useFeedState(module)
+  const feed = useFeedStateAtom(feedAtoms, {
+    select: (data: InfiniteEvents) => {
+      return {
+        pages: data.pages.map((page) =>
+          page.filter((event) => {
+            if (includeMentions === false && event.metadata?.isRoot) return false
+            // TODO
+            // if (includeMuted === false && !!user?.isEventMuted(event.id)) return false
+            if (includeReplies === false && event.kind === 1 && !event.metadata?.isRoot) return false
+            return true
+          }),
+        ),
+        pageParams: data.pageParams,
+      }
+    },
+  })
 
   return {
     ...feed,
     layout,
     setLayout,
     includeReplies,
-    includeMuted,
     includeMentions,
-    setIncludeMuted,
     setIncludeMentions,
     setIncludeReplies,
   }

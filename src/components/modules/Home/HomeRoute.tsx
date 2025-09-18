@@ -27,6 +27,7 @@ export const HomeRoute = memo(function HomeRoute(props: Props) {
   const feed = useFeedState(module)
 
   const handleChangeTabs = (anchor: string | undefined) => {
+    feed.setPageSize(module.pageSize)
     navigate({ to: anchor === 'replies' ? '/threads' : '/' })
   }
 
