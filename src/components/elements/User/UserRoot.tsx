@@ -8,17 +8,21 @@ import { css } from 'react-strict-dom'
 import { LinkProfile } from '../Links/LinkProfile'
 import { UserContentAbout } from './UserContentAbout'
 import { UserHeader } from './UserHeader'
+import { UserProfileBanner } from './UserProfileBanner'
 
 type Props = {
   pubkey: string
+  border?: boolean
+  renderBanner?: boolean
 }
 
 export const UserRoot = memo(function UserRoot(props: Props) {
-  const { pubkey } = props
+  const { pubkey, border = false, renderBanner = false } = props
   return (
     <LinkProfile pubkey={pubkey}>
       <ContentProvider value={{ disableLink: true }}>
-        <Stack sx={[styles.root, styles.action]} align='flex-start' gap={2}>
+        {renderBanner && <UserProfileBanner dense pubkey={pubkey} />}
+        <Stack sx={[styles.root, styles.action, border && styles.border]} align='flex-start' gap={2}>
           <Stack grow horizontal={false} gap={4}>
             <UserHeader pubkey={pubkey} />
             <UserContentAbout pubkey={pubkey} />
@@ -33,8 +37,6 @@ export const UserRoot = memo(function UserRoot(props: Props) {
 const styles = css.create({
   root: {
     padding: spacing.padding2,
-    borderBottomWidth: 1,
-    borderBottomColor: palette.outlineVariant,
   },
   action: {
     cursor: 'pointer',
@@ -45,5 +47,9 @@ const styles = css.create({
   },
   about: {
     marginLeft: spacing.margin7,
+  },
+  border: {
+    borderBottomWidth: 1,
+    borderBottomColor: palette.outlineVariant,
   },
 })
