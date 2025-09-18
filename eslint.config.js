@@ -1,3 +1,6 @@
+// For more info, see https://github.com/storybookjs/eslint-plugin-storybook#configuration-flat-config-format
+import storybook from 'eslint-plugin-storybook'
+
 import pluginJs from '@eslint/js'
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
 import jsxA11y from 'eslint-plugin-jsx-a11y'
@@ -6,15 +9,11 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
 
-export default [{
-  languageOptions: {
-    globals: globals.browser,
-  },
-}, pluginJs.configs.recommended, ...tseslint.configs.recommended, eslintPluginPrettierRecommended, {
-  plugins: {
-    react,
-    'jsx-a11y': jsxA11y,
-    'react-refresh': reactRefresh,
+export default [
+  {
+    languageOptions: {
+      globals: globals.browser,
+    },
   },
   pluginJs.configs.recommended,
   ...tseslint.configs.recommended,
@@ -37,4 +36,5 @@ export default [{
       '@typescript-eslint/no-empty-object-type': ['error', { allowInterfaces: 'with-single-extends' }],
     },
   },
+  ...storybook.configs['flat/recommended'],
 ]
