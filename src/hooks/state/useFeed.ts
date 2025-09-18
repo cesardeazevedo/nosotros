@@ -166,16 +166,19 @@ export function useFeedState(options: FeedModule & { select?: (data: InfiniteEve
 
   const [paginate, paginate$] = useObservableCallback<[number, InfiniteEvents | undefined, FeedScope]>((input$) => {
     return input$.pipe(
-      throttleTime(1200, undefined, { leading: true, trailing: true }),
       rxFilter(([, data]) => data?.pages.flat().length !== 0),
-      tap(([pageSize, data, scope]) => {
+      tap(([pageSize, data]) => {
         const total = data?.pages.flat().length || 0
         if (pageSize < total) {
           setPageSize(pageSize + (options.pageSize || 10))
-        } else if (scope !== 'sets_e') {
-          query.fetchNextPage()
         }
       }),
+      rxFilter(([pageSize, data, scope]) => {
+        const total = data?.pages.flat().length || 0
+        return pageSize >= total && scope !== 'sets_e'
+      }),
+      throttleTime(1000, undefined, { leading: true, trailing: true }),
+      tap(() => query.fetchNextPage()),
     )
   })
   useSubscription(paginate$)
