@@ -50,9 +50,7 @@ export const MediaFeed = memo(function MediaFeed(props: Props) {
 
 const styles = css.create({
   grid: {
-    '::after': {
-      content: '""',
-      flex: '0 0 calc(100% / 3)',
-    },
+    display: 'grid',
+    gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
   },
 })
