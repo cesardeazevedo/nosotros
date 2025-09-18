@@ -14,10 +14,12 @@ export const MediaColumn = memo(function MediaColumn(props: Props) {
   const { module } = props
   const feed = useMediaFeedState(module)
   return (
-    <Stack horizontal={false}>
-      <MediaHeader feed={feed} />
-      <Divider />
-      <MediaFeed column feed={feed} />
-    </Stack>
+    <div>
+      <Stack horizontal={false}>
+        <MediaHeader feed={feed} />
+        <Divider />
+        <MediaFeed column feed={feed} />
+      </Stack>
+    </div>
   )
 })

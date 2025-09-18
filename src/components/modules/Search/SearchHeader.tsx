@@ -25,6 +25,7 @@ export const SearchHeader = memo(function SearchHeader(props: Props) {
     <Stack sx={styles.root} justify='space-between'>
       <form action={submit} {...css.props(styles.form)}>
         <SearchField
+          key={feed.filter.search}
           name='searchInput'
           placeholder='Search on nostr'
           autoFocus={false}

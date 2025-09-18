@@ -22,7 +22,7 @@ export const UploadServersMenuList = (props: Props) => {
   const nip96ServerList = useUserNIP96Servers(pubkey)
   const blossomServerList = useUserBlossomServers(pubkey)
   return (
-    <MenuList surface={surface} sx={styles.root}>
+    <MenuList outlined surface={surface} sx={styles.root}>
       {blossomServerList.data && (
         <>
           <html.span style={styles.wrapper}>

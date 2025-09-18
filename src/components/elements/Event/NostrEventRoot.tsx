@@ -6,6 +6,7 @@ import { PostRoot } from '../Posts/Post'
 import { PublicMessageRoot } from '../PublicMessage/PublicMessageRoot'
 import { RepostRoot } from '../Repost/Repost'
 import { Threads } from '../Threads/Threads'
+import { UserRoot } from '../User/UserRoot'
 import { ZapReceiptRoot } from '../Zaps/ZapReceipt'
 import { NostrEventUnsupportedContent } from './NostrEventUnsupportedContent'
 
@@ -17,6 +18,9 @@ type Props = {
 export const NostrEventRoot = memo(function NostrEventRoot(props: Props) {
   const { event, open } = props
   switch (event.kind) {
+    case Kind.Metadata: {
+      return <UserRoot pubkey={event.pubkey} />
+    }
     case Kind.Comment:
     case Kind.Highlight:
     case Kind.Text: {

@@ -1,5 +1,6 @@
 import { recentsAtom, removeRecentAtom } from '@/atoms/recent.atoms'
 import { ContentProvider } from '@/components/providers/ContentProvider'
+import { Divider } from '@/components/ui/Divider/Divider'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
@@ -14,7 +15,7 @@ import { Link } from '@tanstack/react-router'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { nip19 } from 'nostr-tools'
 import { memo } from 'react'
-import { css } from 'react-strict-dom'
+import { css, html } from 'react-strict-dom'
 import { UserAvatar } from '../User/UserAvatar'
 import { UserName } from '../User/UserName'
 import { SidebarSubheader } from './SidebarSubheader'
@@ -62,21 +63,24 @@ export const SidebarMenuRecents = memo(function SidebarMenuRecents() {
   const recents = useAtomValue(recentsAtom)
   return (
     recents.length > 0 && (
-      <div>
-        <Expandable
-          initiallyExpanded={settings.recentsCollapsed}
-          onChange={() => toggle('recentsCollapsed')}
-          trigger={(triggerProps) => <SidebarSubheader {...triggerProps} label='Recent' />}>
-          <Stack horizontal={false} sx={styles.content}>
-            {recents.map((recent) => {
-              if (recent.type === 'profile') {
-                return <RecentProfileRow key={recent.id + recent.type} recent={recent} />
-              }
-              return null
-            })}
-          </Stack>
-        </Expandable>
-      </div>
+      <>
+        <html.div style={styles.wrapper}>
+          <Expandable
+            initiallyExpanded={settings.recentsCollapsed}
+            onChange={() => toggle('recentsCollapsed')}
+            trigger={(triggerProps) => <SidebarSubheader {...triggerProps} label='Recent' />}>
+            <Stack horizontal={false} sx={styles.content}>
+              {recents.map((recent) => {
+                if (recent.type === 'profile') {
+                  return <RecentProfileRow key={recent.id + recent.type} recent={recent} />
+                }
+                return null
+              })}
+            </Stack>
+          </Expandable>
+        </html.div>
+        <Divider />
+      </>
     )
   )
 })
@@ -84,6 +88,10 @@ export const SidebarMenuRecents = memo(function SidebarMenuRecents() {
 const styles = css.create({
   content: {
     marginTop: spacing['padding0.5'],
+  },
+  wrapper: {
+    width: '100%',
+    paddingInline: 12,
   },
   name: {
     maxWidth: 190,

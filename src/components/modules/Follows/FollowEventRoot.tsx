@@ -110,7 +110,7 @@ export const FollowEventRoot = (props: Props) => {
         {limitedTags.map(([tag, value]) => {
           const key = tag + value
           if (tag === 'p') {
-            return <UserRoot key={key} pubkey={value} />
+            return <UserRoot border key={key} pubkey={value} />
           }
           return (
             <Stack key={key} sx={styles.tag} justify='space-between'>

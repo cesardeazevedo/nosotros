@@ -86,7 +86,7 @@ export const Video = memo(function Video(props: Props) {
             {...media}>
             <source src={src} type={`video/${extension === 'mov' ? 'mp4' : extension}`} />
           </video>
-          <VideoControls ref={ref} />
+          <VideoControls sx={styles.controls} ref={ref} />
         </LinkNEvent>
       )}
     </BlurContainer>
@@ -98,7 +98,6 @@ const styles = css.create({
     display: 'block',
     blockSize: 'auto',
     minWidth: 150,
-    width: 'inherit',
     maxWidth: 'inherit',
     maxHeight: 'inherit',
     backgroundColor: '#000',
@@ -109,5 +108,9 @@ const styles = css.create({
     ':active': {
       transform: 'scale(0.985)',
     },
+  },
+  controls: {
+    borderBottomRightRadius: shape.lg,
+    borderBottomLeftRadius: shape.lg,
   },
 })

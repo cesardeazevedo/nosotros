@@ -21,7 +21,7 @@ export const NostrEventFeedItem = memo(function NostrEventFeedItem(props: Props)
 
   switch (event.kind) {
     case Kind.Metadata: {
-      return <UserRoot pubkey={event.pubkey} />
+      return <UserRoot border pubkey={event.pubkey} />
     }
     case Kind.Text: {
       return event.metadata?.isRoot ? (

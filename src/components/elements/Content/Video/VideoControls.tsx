@@ -3,6 +3,7 @@ import { visibleOnHoverStyle } from '@/components/ui/helpers/visibleOnHover.styl
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { TooltipRich } from '@/components/ui/TooltipRich/TooltipRich'
+import type { SxProps } from '@/components/ui/types'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconMaximize, IconPictureInPicture } from '@tabler/icons-react'
@@ -17,6 +18,7 @@ import { IconVolumeOff } from '../../Icons/IconVolumeOff'
 
 type Props = {
   ref: React.RefObject<HTMLVideoElement | null>
+  sx?: SxProps
 }
 
 const iconProps = {
@@ -26,7 +28,7 @@ const iconProps = {
 }
 
 export const VideoControls = function VideoControls(props: Props) {
-  const { ref } = props
+  const { ref, sx } = props
   const video = ref.current
   const [duration, setDuration] = useState(0)
   const [volume, setVolume] = useState(1)
@@ -225,7 +227,7 @@ export const VideoControls = function VideoControls(props: Props) {
   return (
     <html.div
       ref={containerRef}
-      style={[styles.container, (isPlaying || (video?.currentTime || 0) === 0) && visibleOnHoverStyle.item]}
+      style={[styles.container, (isPlaying || (video?.currentTime || 0) === 0) && visibleOnHoverStyle.item, sx]}
       onClick={(event) => {
         event.preventDefault()
         event.stopPropagation()
