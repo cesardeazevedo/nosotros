@@ -99,7 +99,7 @@ const sizes = css.create({
     [avatarTokens.labelTextSize]: typeScale.bodySize$sm,
   },
   xs: {
-    [avatarTokens.containerSize]: '24px',
+    [avatarTokens.containerSize]: '26px',
     [avatarTokens.labelTextSize]: typeScale.bodySize$sm,
   },
   sm: {

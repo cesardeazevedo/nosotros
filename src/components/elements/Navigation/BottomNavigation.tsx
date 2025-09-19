@@ -100,7 +100,7 @@ export const BottomNavigation = memo(function BottomNavigation() {
                 <Tab
                   active={isActive}
                   sx={[styles.tab, styles.tabProfile]}
-                  icon={<UserAvatar size='sm' pubkey={pubkey} />}
+                  icon={<UserAvatar size='xs' pubkey={pubkey} />}
                 />
               )}
             </Link>
