@@ -64,5 +64,7 @@ const styles = css.create({
   },
   cover: {
     objectFit: 'cover',
+    height: '100%',
+    width: '100%',
   },
 })

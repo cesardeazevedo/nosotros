@@ -46,10 +46,14 @@ export const ImageEditor = (props: Props) => {
 }
 
 const styles = css.create({
+  wrapper: {
+    position: 'relative',
+    margin: 0,
+    padding: 0,
+  },
   img: {
     maxWidth: '100%',
     maxHeight: 'inherit',
-    height: '100%',
     cursor: 'pointer',
     border: '1px solid',
     borderColor: palette.outlineVariant,
@@ -59,10 +63,6 @@ const styles = css.create({
   },
   cover: {
     objectFit: 'cover',
-  },
-  wrapper: {
-    position: 'relative',
-    margin: 0,
-    padding: 0,
+    height: '100%',
   },
 })

@@ -18,7 +18,7 @@ export const MediaListEditor = memo(function MediaListEditor() {
     size: (isCarousel ? 'sm' : 'md') as 'sm' | 'md',
     fixed: isCarousel,
     fixedHeight: isCarousel ? 200 : undefined,
-    sx: styles.wrapper,
+    sx: [styles.wrapper, isMultiple && styles.multiple],
   }
   return (
     <ContentProvider value={{ dense: true }}>
@@ -42,7 +42,6 @@ export const MediaListEditor = memo(function MediaListEditor() {
                   onDelete={() => deleteFile(index)}
                   onUpdate={(attrs) => setFileData({ src: file.src, attrs })}
                   wrapperProps={wrapperProps}
-                  sx={styles.wrapper}
                 />
               )}
             </>
@@ -57,7 +56,10 @@ const styles = css.create({
   wrapper: {
     position: 'relative',
     margin: 0,
-    height: 'inherit',
-    width: 'inherit',
+    width: 'auto',
+  },
+  multiple: {
+    width: '100%',
+    height: '100%',
   },
 })

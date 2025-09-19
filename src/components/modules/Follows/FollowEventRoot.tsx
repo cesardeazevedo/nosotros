@@ -152,5 +152,7 @@ const styles = css.create({
   },
   tag: {
     padding: spacing.padding2,
+    borderBottom: '1px solid',
+    borderColor: palette.outlineVariant,
   },
 })

@@ -197,7 +197,17 @@ export const VideoControls = function VideoControls(props: Props) {
   const handleFullscreen = useCallback(() => {
     const video = ref.current
     if (video) {
-      video.requestFullscreen()
+      if ('requestFullscreen' in video) {
+        video.requestFullscreen()
+      } else if ('webkitRequestFullscreen' in video) {
+        ;(video as HTMLVideoElement & { webkitRequestFullscreen: () => void }).webkitRequestFullscreen()
+      } else if ('mozRequestFullScreen' in video) {
+        ;(video as HTMLVideoElement & { mozRequestFullScreen: () => void }).mozRequestFullScreen()
+      } else if ('msRequestFullscreen' in video) {
+        ;(video as HTMLVideoElement & { msRequestFullscreen: () => void }).msRequestFullscreen()
+      } else if ('webkitEnterFullscreen' in video) {
+        ;(video as HTMLVideoElement & { webkitEnterFullscreen: () => void }).webkitEnterFullscreen()
+      }
     }
   }, [ref.current])
 

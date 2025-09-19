@@ -73,7 +73,8 @@ const styles = css.create({
   img: {
     display: 'block',
     blockSize: 'auto',
-    width: 'fit-content',
+    width: 'auto',
+    height: 'auto',
     maxHeight: 'inherit',
     cursor: 'pointer',
     border: '1px solid',
