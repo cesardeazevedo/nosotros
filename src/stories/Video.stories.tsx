@@ -76,6 +76,25 @@ export const VideoMP4: Story = {
   },
 }
 
+export const VideoPortrait: Story = {
+  args: {
+    event: fakeEventMeta({
+      kind: 1,
+      pubkey: 'p1',
+      content:
+        'Check out this video! https://blossom.nosotros.app/eaf519203c5bb57aa0b063970838925a80422716d40d95114020b740bb88bbe4.mp4',
+      tags: [
+        [
+          'imeta',
+          'url https://blossom.nosotros.app/eaf519203c5bb57aa0b063970838925a80422716d40d95114020b740bb88bbe4.mp4',
+          'm video/mp4',
+          'dim 720x1280',
+        ],
+      ],
+    }),
+  },
+}
+
 export const VideoMP4NoIMETA: Story = {
   args: {
     event: fakeEventMeta({

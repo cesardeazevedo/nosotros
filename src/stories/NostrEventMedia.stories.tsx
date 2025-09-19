@@ -307,7 +307,7 @@ export const Kind1ImetaPortrait: Story = {
     event: fakeEventMeta({
       kind: 1,
       pubkey: 'p1',
-      content: ['Mixed 4 images', 'https://placehold.co/2280x2922.jpg'].join(' '),
+      content: 'https://placehold.co/2280x2922.jpg',
       tags: [['imeta', 'url https://placehold.co/2280x2922.jpg', 'x 123', 'm image/jpeg', 'dim 2280x2922']],
     }),
   },
