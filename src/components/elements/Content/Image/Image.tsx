@@ -1,48 +1,41 @@
+import { addMediaDimAtom, mediaErrorsAtom } from '@/atoms/media.atoms'
 import { useContentContext } from '@/components/providers/ContentProvider'
 import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { SxProps } from '@/components/ui/types'
+import { useNevent } from '@/hooks/useEventUtils'
 import { useMediaStore } from '@/hooks/useMediaStore'
-import { useGlobalSettings } from '@/hooks/useRootStore'
-import { mediaStore } from '@/stores/media/media.store'
+import { useMobile } from '@/hooks/useMobile'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
+import { getImgProxyUrl } from '@/utils/imgproxy'
 import { IconPhotoOff } from '@tabler/icons-react'
-import { observer } from 'mobx-react-lite'
-import { useCallback } from 'react'
+import { useAtomValue, useSetAtom } from 'jotai'
+import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
-import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDOMProps'
-import { dialogStore } from 'stores/ui/dialogs.store'
 import { BlurContainer } from '../../Layouts/BlurContainer'
+import { LinkNEvent } from '../../Links/LinkNEvent'
 import { ContentLink } from '../Link/Link'
 
 type Props = {
   src: string
   proxy?: boolean
+  index?: number
   draggable?: boolean
-  onClick?: (event?: StrictClickEvent) => void
+  cover?: boolean
   sx?: SxProps
 }
 
-export const Image = observer(function Image(props: Props) {
-  const { src, proxy = true, sx, onClick, ...rest } = props
-  const { disableLink } = useContentContext()
-  const { note } = useNoteContext()
-  const globalSettings = useGlobalSettings()
-  const hasError = mediaStore.hasError(src)
-  const media = useMediaStore(src, note.metadata.imeta)
-
-  const handleClick = useCallback(
-    (e: StrictClickEvent) => {
-      e.preventDefault()
-      e.stopPropagation()
-      if (!hasError && note) {
-        return onClick ? onClick() : dialogStore.pushImage(note, src)
-      }
-    },
-    [src, note, disableLink, hasError],
-  )
+export const Image = memo(function Image(props: Props) {
+  const { src, proxy = true, index = 0, cover = false, sx, ...rest } = props
+  const { event } = useNoteContext()
+  const { dense } = useContentContext()
+  const media = useMediaStore(src, event.metadata?.imeta)
+  const addMediaDim = useSetAtom(addMediaDimAtom)
+  const hasError = useAtomValue(mediaErrorsAtom).has(src)
+  const nevent = useNevent(event)
+  const isMobile = useMobile()
 
   return (
     <BlurContainer>
@@ -57,14 +50,18 @@ export const Image = observer(function Image(props: Props) {
             </ContentLink>
           )}
           {!hasError && (
-            <html.img
-              style={[styles.img, blurStyles, sx]}
-              src={proxy ? globalSettings.getImgProxyUrl('feed_img', src) : src}
-              onClick={handleClick}
-              onError={() => mediaStore.addError(src)}
-              {...rest}
-              {...media}
-            />
+            <LinkNEvent media block nevent={nevent} search={{ media: index }}>
+              <html.img
+                role='button'
+                style={[styles.img, cover && styles.cover, (dense || isMobile) && styles.img$dense, blurStyles, sx]}
+                src={proxy ? getImgProxyUrl('feed_img', src) : src}
+                onLoad={(e: { target: HTMLImageElement }) => {
+                  addMediaDim({ src, dim: [e.target.naturalWidth, e.target.naturalHeight] })
+                }}
+                {...media}
+                {...rest}
+              />
+            </LinkNEvent>
           )}
         </>
       )}
@@ -74,19 +71,23 @@ export const Image = observer(function Image(props: Props) {
 
 const styles = css.create({
   img: {
-    objectFit: 'cover',
-    width: '100%',
-    height: '100%',
-    maxWidth: '100%',
-    maxHeight: '100%',
-    userSelect: 'none',
+    display: 'block',
+    blockSize: 'auto',
+    width: 'auto',
+    height: 'auto',
+    maxHeight: 'inherit',
     cursor: 'pointer',
-    backgroundColor: palette.surfaceContainerLow,
+    border: '1px solid',
+    borderColor: palette.outlineVariant,
     borderRadius: shape.xl,
     transition: 'transform 150ms ease',
-    ':active': {
-      transform: 'scale(0.985)',
-    },
+    ':active': { transform: 'scale(0.985)' },
+  },
+  img$dense: {
+    maxHeight: 340,
+  },
+  cover: {
+    objectFit: 'cover',
   },
   fallback: {
     width: '100%',
@@ -94,8 +95,9 @@ const styles = css.create({
     textAlign: 'center',
     wordBreak: 'break-all',
     userSelect: 'all',
-    paddingInline: spacing.padding1,
-    backgroundColor: palette.surfaceContainer,
+    paddingInline: spacing.padding8,
+    paddingBlock: spacing.padding4,
+    backgroundColor: palette.surfaceContainerLow,
     color: palette.onSurfaceVariant,
     borderRadius: shape.lg,
   },

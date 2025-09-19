@@ -1,26 +1,27 @@
 import { Paper } from '@/components/ui/Paper/Paper'
 import { SearchField } from '@/components/ui/Search/Search'
 import { Stack } from '@/components/ui/Stack/Stack'
-import type { Event } from '@/stores/events/event'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import { useEventTags } from '@/hooks/useEventUtils'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import { observer } from 'mobx-react-lite'
 import type { Ref } from 'react'
-import { useImperativeHandle, useRef, useState } from 'react'
+import { memo, useImperativeHandle, useRef, useState } from 'react'
 import { css, html } from 'react-strict-dom'
+import { RelayChip } from '../../../elements/Relays/RelayChip'
 import type { OnKeyDownRef } from '../../Search/SearchContent'
 import { SearchRelays } from '../../Search/SearchRelays'
-import { RelayChip } from '../../../elements/Relays/RelayChip'
 import type { RefListKind } from '../ListForm'
 
 type Props = {
   ref: Ref<RefListKind>
-  event?: Event
+  event?: NostrEventDB
 }
 
-export const RelaySetForm = observer(function RelaySetForm(props: Props) {
+export const RelaySetForm = memo(function RelaySetForm(props: Props) {
   const [query, setQuery] = useState('')
-  const [selected, setSelected] = useState<string[]>(props.event?.getTags('relay') || [])
+  const relays = useEventTags(props.event, 'relays') || []
+  const [selected, setSelected] = useState<string[]>(relays)
 
   const searchRef = useRef<OnKeyDownRef>(null)
 

@@ -5,8 +5,8 @@ import { Paper } from '@/components/ui/Paper/Paper'
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { useMobile } from '@/hooks/useMobile'
-import type { Note } from '@/stores/notes/note'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconChevronDown, IconChevronRight } from '@tabler/icons-react'
 import { githubDarkTheme } from '@uiw/react-json-view/githubDark'
@@ -15,7 +15,7 @@ import { RemoveScroll } from 'react-remove-scroll'
 import { css, html } from 'react-strict-dom'
 
 type Props = {
-  note: Note
+  event: NostrEventDB
   onClose?: () => void
 }
 
@@ -51,7 +51,13 @@ const JsonContent = function PostUserJson(props: { value?: object }) {
           <JsonView
             value={value}
             collapsed={false}
-            style={{ overflow: 'auto', padding: 12, maxHeight: isMobile ? '100%' : 300, ...githubDarkTheme }}
+            style={{
+              backgroundColor: 'black',
+              overflow: 'auto',
+              padding: 12,
+              maxHeight: isMobile ? '100%' : 300,
+              ...githubDarkTheme,
+            }}
             displayDataTypes={false}
             enableClipboard={true}
           />
@@ -62,9 +68,9 @@ const JsonContent = function PostUserJson(props: { value?: object }) {
 }
 
 export const PostStats = (props: Props) => {
-  const { note, onClose } = props
+  const { event, onClose } = props
+  const { metadata, ...data } = event
   const isMobile = useMobile()
-  const { event } = note.event
   return (
     <RemoveScroll>
       <html.div style={styles.root}>
@@ -79,7 +85,7 @@ export const PostStats = (props: Props) => {
             {/*   ))} */}
             {/* </Panel> */}
             <Panel defaultExpanded label='Raw Event'>
-              <JsonContent value={event} />
+              <JsonContent value={data} />
             </Panel>
             {/* <Panel label='User Raw Event'> */}
             {/*   <JsonContent value={note.user?.meta} /> */}

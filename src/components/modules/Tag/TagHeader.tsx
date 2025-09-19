@@ -1,17 +1,17 @@
 import { Chip } from '@/components/ui/Chip/Chip'
 import { Stack } from '@/components/ui/Stack/Stack'
-import type { FeedModule } from '@/stores/modules/feed.module'
-import { observer } from 'mobx-react-lite'
+import type { FeedState } from '@/hooks/state/useFeed'
+import { memo } from 'react'
 import { css } from 'react-strict-dom'
 
 type Props = {
-  module?: FeedModule
+  feed: FeedState
   tags?: string[]
 }
 
-export const TagHeader = observer(function TagHeader(props: Props) {
-  const { module } = props
-  const tags = module?.feed.filter['#t'] || props.tags
+export const TagHeader = memo(function TagHeader(props: Props) {
+  const { feed } = props
+  const tags = feed.filter['#t'] || props.tags
   return (
     <Stack gap={0.5} sx={styles.root} justify='flex-start'>
       {tags?.slice(0, 4).map((tag) => <Chip key={tag} label={`#${tag}`} />)}

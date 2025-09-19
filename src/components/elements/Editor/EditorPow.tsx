@@ -1,17 +1,10 @@
-import { Slider } from '@/components/ui/Slider/Slider'
 import { Text } from '@/components/ui/Text/Text'
-import type { EditorStore } from '@/stores/editor/editor.store'
 import { spacing } from '@/themes/spacing.stylex'
-import { observer } from 'mobx-react-lite'
+import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 import { ContentLink } from '../Content/Link/Link'
 
-type Props = {
-  editor: EditorStore
-}
-
-export const EditorPow = observer(function EditorPow(props: Props) {
-  const { editor } = props
+export const EditorPow = memo(function EditorPow() {
   return (
     <>
       <html.div style={styles.root}>
@@ -24,8 +17,8 @@ export const EditorPow = observer(function EditorPow(props: Props) {
         </Text>
         <ContentLink href='https://github.com/nostr-protocol/nips/blob/master/13.md'>Read More</ContentLink>
         <html.div style={styles.content}>
-          <Text variant='title'>Difficulty ({editor.powDifficulty})</Text>
-          <Slider min={0} max={40} value={editor.powDifficulty} onChange={(value) => editor.setPowDifficulty(value)} />
+          {/* <Text variant='title'>Difficulty ({editor.powDifficulty})</Text> */}
+          {/* <Slider min={0} max={40} value={editor.powDifficulty} onChange={(value) => editor.setPowDifficulty(value)} /> */}
         </html.div>
       </html.div>
     </>

@@ -1,10 +1,15 @@
+import { settingsAtom } from '@/atoms/settings.atoms'
+import { store } from '@/atoms/store'
 import { NEventEditor } from '@/components/elements/Content/NEvent/NEventEditor'
 import { NProfileEditor } from '@/components/elements/Content/NProfile/NProfileEditor'
 import { TweetEditor } from '@/components/elements/Content/Tweet/TweetEditor'
 import { YoutubeEditor } from '@/components/elements/Content/Youtube/YoutubeEditor'
-import type { EditorStore } from '@/stores/editor/editor.store'
+import type { BlossomOptions } from '@/utils/uploadBlossom'
+import { uploadBlossom } from '@/utils/uploadBlossom'
+import type { NIP96Options } from '@/utils/uploadNIP96'
+import { uploadNIP96 } from '@/utils/uploadNIP96'
+import { hashFile } from '@/utils/utils'
 import type { NodeViewProps } from '@tiptap/core'
-import { Editor } from '@tiptap/core'
 import DocumentExtension from '@tiptap/extension-document'
 import DropCursorExtension from '@tiptap/extension-dropcursor'
 import GapcursorExtension from '@tiptap/extension-gapcursor'
@@ -13,8 +18,10 @@ import HistoryExtension from '@tiptap/extension-history'
 import ParagraphExtension from '@tiptap/extension-paragraph'
 import Placeholder from '@tiptap/extension-placeholder'
 import TextExtension from '@tiptap/extension-text'
+import type { UseEditorOptions } from '@tiptap/react'
 import { ReactNodeViewRenderer } from '@tiptap/react'
 import { NostrExtension, editorProps } from 'nostr-editor'
+import type { EventTemplate, NostrEvent } from 'nostr-tools'
 import { ImageNodeViewWrapper } from '../../Content/Image/ImageNodeViewWrapper'
 import { NAddrEditor } from '../../Content/NAddr/NAddrEditor'
 import { VideoNodeViewWrapper } from '../../Content/Video/VideoNodeViewWrapper'
@@ -24,13 +31,17 @@ const addNodeView = (Component: React.ComponentType<NodeViewProps>) => ({
   addNodeView: () => ReactNodeViewRenderer(Component),
 })
 
-type Settings = {
-  defaultUploadUrl: string
-  defaultUploadType: string
+type Options = {
+  sign: (unsigned: EventTemplate) => Promise<NostrEvent>
+  placeholder: () => string
+  onUploadStart: () => void
+  onUploadDrop: () => void
+  onUploadComplete: () => void
+  onUploadError: () => void
 }
 
-export function createEditor(store: EditorStore, settings: Settings) {
-  return new Editor({
+export function createEditor(options: Options): UseEditorOptions {
+  return {
     editorProps,
     extensions: [
       TextExtension,
@@ -40,30 +51,47 @@ export function createEditor(store: EditorStore, settings: Settings) {
       HistoryExtension,
       DropCursorExtension,
       GapcursorExtension,
-      Placeholder.configure({ placeholder: store.placeholder }),
+      Placeholder.configure({ placeholder: options.placeholder }),
       NostrExtension.configure({
         link: {
           openOnClick: false,
         },
-        image: {
-          defaultUploadUrl: settings.defaultUploadUrl || 'https://nostr.build',
-          defaultUploadType: (settings.defaultUploadType || 'nip96') as 'nip96' | 'blossom',
-        },
-        video: {
-          defaultUploadUrl: 'https://nostr.build',
-          defaultUploadType: 'nip96',
-        },
+        image: {},
+        video: {},
         fileUpload: {
           immediateUpload: false,
-          sign: (event) => store.sign(event),
+          upload: async (attrs) => {
+            const { defaultUploadType, defaultUploadUrl } = store.get(settingsAtom)
+            const data: BlossomOptions | NIP96Options = {
+              ...attrs,
+              hash: hashFile,
+              sign: (event) => options.sign(event),
+              serverUrl: defaultUploadUrl,
+            }
+            try {
+              if (defaultUploadType === 'nip96') {
+                return await uploadNIP96(data)
+              } else {
+                return await uploadBlossom(data)
+              }
+            } catch (error) {
+              options.onUploadError()
+              return {
+                error: String(error),
+              }
+            }
+          },
           onStart() {
-            store.isUploading.toggle(true)
+            options.onUploadStart()
           },
           onDrop() {
-            store.editor?.commands.focus()
+            options.onUploadDrop()
           },
           onComplete() {
-            store.isUploading.toggle(false)
+            options.onUploadComplete()
+          },
+          onUploadError() {
+            options.onUploadError()
           },
         },
         extend: {
@@ -82,8 +110,5 @@ export function createEditor(store: EditorStore, settings: Settings) {
         },
       }),
     ],
-    onUpdate({ editor }) {
-      store.onUpdate(editor)
-    },
-  })
+  }
 }

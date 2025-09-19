@@ -1,12 +1,12 @@
+import { toggleSearchDialogAtom } from '@/atoms/dialog.atoms'
 import { NotificationBadge } from '@/components/modules/Notifications/NotificationBadge'
 import { focusRingTokens } from '@/components/ui/FocusRing/FocusRing.stylex'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Tab } from '@/components/ui/Tab/Tab'
 import { tabTokens } from '@/components/ui/Tab/Tab.stylex'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
+import { useCurrentPubkey, useCurrentUser } from '@/hooks/useAuth'
 import { useMobile } from '@/hooks/useMobile'
-import { useCurrentPubkey, useCurrentUser } from '@/hooks/useRootStore'
-import { dialogStore } from '@/stores/ui/dialogs.store'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
@@ -21,18 +21,21 @@ import {
   IconUser,
 } from '@tabler/icons-react'
 import { Link, useRouter } from '@tanstack/react-router'
-import { observer } from 'mobx-react-lite'
+import { useSetAtom } from 'jotai'
 import { nip19 } from 'nostr-tools'
+import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 import { IconHome } from '../Icons/IconHome'
 import { IconHomeFilled } from '../Icons/IconHomeFilled'
 import { LinkSignIn } from '../Links/LinkSignIn'
+import { UserAvatar } from '../User/UserAvatar'
 
-export const BottomNavigation = observer(function BottomNavigation() {
-  const user = useCurrentUser()
+export const BottomNavigation = memo(function BottomNavigation() {
   const pubkey = useCurrentPubkey()
+  const user = useCurrentUser()
   const mobile = useMobile()
   const router = useRouter()
+  const toggleSearch = useSetAtom(toggleSearchDialogAtom)
 
   if (!mobile) {
     return <></>
@@ -65,7 +68,7 @@ export const BottomNavigation = observer(function BottomNavigation() {
             </Link>
           </Tooltip>
           <div>
-            <Tab sx={styles.tab} icon={<IconSearch />} onClick={() => dialogStore.toggleSearch()} />
+            <Tab sx={styles.tab} icon={<IconSearch />} onClick={() => toggleSearch()} />
           </div>
           <Link to='/media' onClick={handleResetScroll('/media')}>
             {({ isActive }) => (
@@ -76,7 +79,7 @@ export const BottomNavigation = observer(function BottomNavigation() {
             {({ isActive }) => <Tab active={isActive} sx={styles.tab} icon={<IconNews />} />}
           </Link>
           {!pubkey && (
-            <Link to='/explore/relays'>
+            <Link to='/relays'>
               {({ isActive }) => <Tab active={isActive} sx={styles.tab} icon={<IconServerBolt />} />}
             </Link>
           )}
@@ -94,7 +97,11 @@ export const BottomNavigation = observer(function BottomNavigation() {
           {pubkey && nprofile && (
             <Link to='/$nostr' params={{ nostr: nprofile }} onClick={handleResetScroll('/' + nprofile)}>
               {({ isActive }) => (
-                <Tab active={isActive} sx={styles.tab} icon={<IconUser />} activeIcon={<IconUser />} />
+                <Tab
+                  active={isActive}
+                  sx={[styles.tab, styles.tabProfile]}
+                  icon={<UserAvatar size='xs' pubkey={pubkey} />}
+                />
               )}
             </Link>
           )}
@@ -133,5 +140,8 @@ const styles = css.create({
     borderRadius: shape.full,
     [tabTokens.containerShape]: shape.full,
     [focusRingTokens.color]: palette.secondaryContainer,
+  },
+  tabProfile: {
+    backgroundColor: 'transparent',
   },
 })

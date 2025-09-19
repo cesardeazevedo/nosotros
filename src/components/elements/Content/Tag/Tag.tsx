@@ -21,10 +21,8 @@ export const Tag = (props: Props) => {
     )
   }
   return (
-    <Link to='/tag/$tag' params={{ tag: tag.replace('#', '') }}>
-      <Text sx={styles.root} size='lg'>
-        {children}
-      </Text>
+    <Link to='/tag/$tag' params={{ tag: tag.replace('#', '') }} {...css.props(styles.root)}>
+      {children}
     </Link>
   )
 }

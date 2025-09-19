@@ -34,7 +34,6 @@ export const SidebarSubheader = (props: Props) => {
       selected={selected}
       sx={[styles.root, visibleOnHoverStyle.root, sx]}
       onClick={isExpandable ? () => expand?.(!expanded) : undefined}
-      interactive={!!isExpandable}
       label={
         <Text size='md' sx={styles.label}>
           {label}
@@ -45,6 +44,7 @@ export const SidebarSubheader = (props: Props) => {
         onCreateClick && (
           <IconButton
             size='sm'
+            as='div'
             sx={visibleOnHoverStyle.item}
             onClick={(e) => {
               e.preventDefault()
@@ -62,7 +62,7 @@ export const SidebarSubheader = (props: Props) => {
 const styles = css.create({
   root: {
     gap: spacing.padding1,
-    paddingLeft: spacing.padding2,
+    paddingLeft: spacing.padding3,
     paddingRight: spacing.padding2,
   },
   label: {

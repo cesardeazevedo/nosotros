@@ -1,31 +1,38 @@
+import { openImageDialogAtom } from '@/atoms/dialog.atoms'
+import { addMediaErrorAtom, mediaErrorsAtom } from '@/atoms/media.atoms'
 import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
+import { useEventTag } from '@/hooks/useEventUtils'
 import { useMobile } from '@/hooks/useMobile'
-import { useGlobalSettings } from '@/hooks/useRootStore'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
+import { getImgProxyUrl } from '@/utils/imgproxy'
 import { useMatchRoute } from '@tanstack/react-router'
-import { observer } from 'mobx-react-lite'
+import { useAtomValue, useSetAtom } from 'jotai'
+import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 
-export const ArticleHeadline = observer(function ArticleHeadline() {
-  const { note } = useNoteContext()
-  const globalSettings = useGlobalSettings()
+export const ArticleHeadline = memo(function ArticleHeadline() {
+  const { event } = useNoteContext()
   const match = useMatchRoute()
   const isDeck = match({ to: '/deck/$id' })
   const isMobile = useMobile()
-  const { event } = note
-  const title = event.getTag('title')
-  const image = event.getTag('image')
-  const summary = event.getTag('summary')
+  const pushImage = useSetAtom(openImageDialogAtom)
+  const title = useEventTag(event, 'title')
+  const image = useEventTag(event, 'image')
+  const summary = useEventTag(event, 'summary')
+  const addError = useSetAtom(addMediaErrorAtom)
+  const hasError = useAtomValue(mediaErrorsAtom).has(image || '')
   return (
     <Stack horizontal={false} sx={styles.root} gap={1}>
-      {image && (
+      {image && !hasError && (
         <html.img
-          src={globalSettings.getImgProxyUrl('feed_img', image)}
+          src={getImgProxyUrl('feed_img', image)}
           style={[styles.banner, !isDeck && styles.banner$round, isMobile && styles.banner$mobile]}
+          onClick={() => pushImage({ src: image })}
+          onError={() => addError(image)}
         />
       )}
       <Stack horizontal={false} gap={1} sx={styles.content}>
@@ -50,6 +57,7 @@ const styles = css.create({
     paddingInline: spacing.padding2,
   },
   banner: {
+    cursor: 'pointer',
     objectFit: 'cover',
     maxHeight: 350,
     width: '100%',

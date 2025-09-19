@@ -6,6 +6,36 @@ import { subscribeSpyTo } from '@hirez_io/observer-spy'
 import { publishFollowList } from '../publishFollowList'
 
 describe('publishFollowList', () => {
+  test('assert new follow list', async ({ createMockRelay, signer }) => {
+    const pubkey = 'p1'
+    const relay1 = createMockRelay(RELAY_1, [])
+    const relayOutbox = createMockRelay(RELAY_OUTBOX_1, [
+      fakeEvent({ kind: Kind.RelayList, pubkey, tags: [['r', RELAY_1, 'write']] }),
+    ])
+    const relayFallback = createMockRelay(RELAY_FALLBACK_1, [])
+    const $ = publishFollowList(pubkey, 'p', ['p2'], { signer })
+    const spy = subscribeSpyTo($)
+    await spy.onComplete()
+    await relay1.close()
+    await relayOutbox.close()
+    await relayFallback.close()
+    const event = {
+      kind: 3,
+      content: '',
+      pubkey,
+      tags: [['p', 'p2']],
+      id: expect.any(String),
+      sig: expect.any(String),
+      created_at: expect.any(Number),
+    }
+    expect(relayFallback.received).toStrictEqual([['EVENT', event]])
+    expect(relay1.received).toStrictEqual([
+      ['REQ', '1', { kinds: [Kind.Follows], authors: [pubkey] }],
+      ['CLOSE', '1'],
+      ['EVENT', event],
+    ])
+  })
+
   test('assert follow', async ({ createMockRelay, signer }) => {
     const pubkey = 'p1'
     const relay1 = createMockRelay(RELAY_1, [
@@ -31,27 +61,26 @@ describe('publishFollowList', () => {
     await relay1.close()
     await relayOutbox.close()
     await relayFallback.close()
+    const event = {
+      kind: 3,
+      content: '',
+      pubkey,
+      tags: [
+        ['p', 'p2'],
+        ['p', 'p3'],
+        ['p', 'p4'],
+        ['p', 'p5'],
+      ],
+      id: expect.any(String),
+      sig: expect.any(String),
+      created_at: expect.any(Number),
+    }
     expect(relay1.received).toStrictEqual([
       ['REQ', '1', { kinds: [Kind.Follows], authors: [pubkey] }],
       ['CLOSE', '1'],
-      [
-        'EVENT',
-        {
-          kind: 3,
-          content: '',
-          pubkey,
-          tags: [
-            ['p', 'p2'],
-            ['p', 'p3'],
-            ['p', 'p4'],
-            ['p', 'p5'],
-          ],
-          created_at: expect.any(Number),
-          id: expect.any(String),
-          sig: expect.any(String),
-        },
-      ],
+      ['EVENT', event],
     ])
+    expect(relayFallback.received).toStrictEqual([['EVENT', event]])
   })
 
   test('assert unfollow', async ({ createMockRelay, signer }) => {

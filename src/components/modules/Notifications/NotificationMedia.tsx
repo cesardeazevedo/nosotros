@@ -1,24 +1,28 @@
-import type { Note } from '@/stores/notes/note'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import { useEventHeadImage, useNevent } from '@/hooks/useEventUtils'
 import { shape } from '@/themes/shape.stylex'
-import { observer } from 'mobx-react-lite'
+import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 import { LinkNEvent } from '../../elements/Links/LinkNEvent'
 
 type Props = {
-  note: Note
+  event: NostrEventDB
 }
 
-export const NotificationMedia = observer(function NotificationMedia(props: Props) {
-  const { note } = props
+export const NotificationMedia = memo(function NotificationMedia(props: Props) {
+  const { event } = props
 
-  if (!note || !note.headImage) {
+  const nevent = useNevent(event)
+  const headImage = useEventHeadImage(event)
+
+  if (!headImage) {
     return
   }
 
   return (
-    <LinkNEvent nevent={note.event.nevent}>
+    <LinkNEvent nevent={nevent}>
       <html.div style={styles.root}>
-        <html.img style={styles.img} src={note.headImage} />
+        <html.img style={styles.img} src={headImage} />
       </html.div>
     </LinkNEvent>
   )

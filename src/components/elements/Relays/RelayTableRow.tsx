@@ -4,14 +4,13 @@ import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
+import { useRelayInfo } from '@/hooks/query/useRelayInfo'
+import { useCurrentPubkey } from '@/hooks/useAuth'
 import { useMobile, useSM } from '@/hooks/useMobile'
-import { useCurrentPubkey } from '@/hooks/useRootStore'
-import { relaysStore } from '@/stores/relays/relays.store'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconChevronDown, IconChevronRight, IconCoinBitcoin, IconLock } from '@tabler/icons-react'
-import { observer } from 'mobx-react-lite'
-import { useState } from 'react'
+import { memo, useState } from 'react'
 import { css } from 'react-strict-dom'
 import { LinkRelayFeed } from '../Links/LinkRelayFeed'
 import { RelayChip } from '../Relays/RelayChip'
@@ -25,17 +24,15 @@ export type Props = {
   relay: string
   relayPubkey?: string
   rtt?: number | string
-  authRequired?: boolean
-  paymentRequired?: boolean
 }
 
-export const RelayTableRow = observer(function RelayTableRow(props: Props) {
-  const { relay, rtt, authRequired = false, paymentRequired = false } = props
+export const RelayTableRow = memo(function RelayTableRow(props: Props) {
+  const { relay, rtt } = props
   const pubkey = useCurrentPubkey()
   const [open, setOpen] = useState(false)
   const root = css.props(styles.root)
   const td = css.props(styles.cell)
-  const info = relaysStore.getInfo(relay)
+  const { data: info } = useRelayInfo(relay)
   const isMD = useMobile()
   const isSM = useSM()
   return (
@@ -69,12 +66,12 @@ export const RelayTableRow = observer(function RelayTableRow(props: Props) {
               renderDisconnectedIcon={false}
               onClick={() => setOpen((prev) => !prev)}
             />
-            {authRequired && (
+            {info?.limitation?.auth_required && (
               <Tooltip text='Authentication Required' enterDelay={0}>
                 <Chip icon={<IconLock size={18} strokeWidth='1.5' />} label='' />
               </Tooltip>
             )}
-            {paymentRequired && (
+            {info?.limitation?.payment_required && (
               <Tooltip text='Payment Required' enterDelay={0}>
                 <Chip icon={<IconCoinBitcoin size={18} strokeWidth='1.5' />} label='' />
               </Tooltip>
@@ -83,7 +80,7 @@ export const RelayTableRow = observer(function RelayTableRow(props: Props) {
         </td>
         {pubkey && !isMD && (
           <td {...td} align='right'>
-            <RelayFriendsList relay={relay} />
+            <RelayFriendsList url={relay} />
           </td>
         )}
         {rtt && !isSM && (

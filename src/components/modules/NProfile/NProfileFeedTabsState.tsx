@@ -5,14 +5,16 @@ import { styles } from './NProfileFeedTabs'
 
 type Props = {
   active: string
-  onChange: (anchor: string) => void
+  onChange: (anchor: NProfileTabs) => void
 }
+
+export type NProfileTabs = 'notes' | 'replies' | 'media' | 'articles'
 
 export const NProfileFeedTabsState = (props: Props) => {
   const { active } = props
   return (
     <Stack justify='space-evenly' sx={styles.root}>
-      <Tabs anchor={active} onChange={(anchor) => anchor && props.onChange(anchor)}>
+      <Tabs anchor={active} onChange={(anchor) => anchor && props.onChange(anchor as NProfileTabs)}>
         <Tab sx={styles.tab} anchor='notes' label='Notes' />
         <Tab sx={styles.tab} anchor='replies' label='Replies' />
         <Tab sx={styles.tab} anchor='media' label='Media' />

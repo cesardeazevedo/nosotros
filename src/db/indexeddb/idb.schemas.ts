@@ -1,6 +1,6 @@
 import type { NostrEvent } from '@/core/types'
 import type { Kind } from 'constants/kinds'
-import type { MetadataDB, Nip05DB, RelayInfoDB, RelayStatsDB, SeenDB, TagDB } from 'db/types'
+import type { Nip05DB, RelayInfoDB, RelayStatsDB, SeenDB, TagDB } from 'db/types'
 import type { DBSchema } from 'idb'
 
 export interface IndexedDBSchema extends DBSchema {
@@ -20,7 +20,7 @@ export interface IndexedDBSchema extends DBSchema {
   }
   metadata: {
     key: string
-    value: MetadataDB
+    value: unknown
   }
   seen: {
     key: [eventId: string, relay: string]

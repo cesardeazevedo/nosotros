@@ -1,20 +1,33 @@
-import { Kind } from '@/constants/kinds'
-import type { Event } from '@/stores/events/event'
-import type { FeedModuleSnapshotIn } from '@/stores/modules/feed.module'
-import type { LinkProps } from '@tanstack/react-router'
+import type { SxProps } from '@/components/ui/types'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import { createListFeedModule } from '@/hooks/modules/createListFeedModule'
+import { useEventTag } from '@/hooks/useEventUtils'
 import { Link } from '@tanstack/react-router'
-import { observer } from 'mobx-react-lite'
+import type { ReactNode } from 'react'
+import { memo, useMemo } from 'react'
+import { css, html } from 'react-strict-dom'
+import { useDeckAddNextColumn } from '../../Deck/hooks/useDeck'
 
-type Props = LinkProps & {
-  event: Event
-  onClick?: (snapshot: FeedModuleSnapshotIn) => void
+type Props = {
+  event: NostrEventDB
+  onClick?: () => void
+  sx?: SxProps
+  children: ReactNode
 }
 
-export const FollowSetLink = observer(function FollowSetLink(props: Props) {
-  const { event, children, onClick, ...rest } = props
-  const kinds = [Kind.FollowSets, Kind.Text, Kind.Repost]
-  const pubkey = event.pubkey
-  const d = event.getTag('d') || ''
+export const FollowSetLink = memo(function FollowSetLink(props: Props) {
+  const { event, children, onClick, sx, ...rest } = props
+  const d = useEventTag(event, 'd') || ''
+  const module = useMemo(() => createListFeedModule(event), [event])
+  const deck = useDeckAddNextColumn(() => module)
+
+  if (deck.isDeck) {
+    return (
+      <html.a href='' onClick={deck.add} style={sx}>
+        {children}
+      </html.a>
+    )
+  }
 
   return (
     <Link
@@ -22,27 +35,13 @@ export const FollowSetLink = observer(function FollowSetLink(props: Props) {
       search={{
         scope: 'sets_p',
         author: event.pubkey,
-        d: event.getTag('d'),
+        d,
         type: 'followset',
-        kind: kinds,
-        limit: 20,
+        kind: module.filter.kinds,
+        limit: module.filter.limit,
       }}
       disabled={!!onClick}
-      onClick={() =>
-        onClick?.({
-          type: 'followset',
-          feed: {
-            filter: {
-              kinds,
-              authors: [pubkey],
-              '#d': [d],
-              limit: 20,
-            },
-            scope: 'sets_p',
-            context: {},
-          },
-        })
-      }
+      {...css.props(sx)}
       {...rest}>
       {children}
     </Link>

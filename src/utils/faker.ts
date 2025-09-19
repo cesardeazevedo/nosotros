@@ -1,5 +1,5 @@
-import type { Metadata, NostrEventMetadata } from '@/nostr/types'
-import { metadataSymbol } from '@/nostr/types'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import { parseEventMetadata } from '@/hooks/parsers/parseEventMetadata'
 import { Kind } from 'constants/kinds'
 import type { NostrEvent } from 'nostr-tools'
 import { finalizeEvent, generateSecretKey } from 'nostr-tools'
@@ -17,15 +17,9 @@ export function fakeEvent(data?: Partial<NostrEvent>): NostrEvent {
   }
 }
 
-export function fakeEventMeta(
-  data: Partial<NostrEvent>,
-  metadata: (event: NostrEvent) => Metadata = () => ({}),
-): NostrEventMetadata {
+export function fakeEventMeta(data: Partial<NostrEvent>): NostrEventDB {
   const event = fakeEvent(data)
-  return {
-    ...event,
-    [metadataSymbol]: metadata(event),
-  }
+  return parseEventMetadata(event)
 }
 
 export function fakeSignature(wrappedEvent: NostrEvent) {

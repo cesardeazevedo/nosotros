@@ -4,29 +4,28 @@ import { Divider } from '@/components/ui/Divider/Divider'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { Fab } from '@/components/ui/Fab/Fab'
 import { Stack } from '@/components/ui/Stack/Stack'
+import type { FeedState } from '@/hooks/state/useFeed'
 import { useMobile } from '@/hooks/useMobile'
-import type { FeedStore } from '@/stores/feeds/feed.store'
+import { useSettings } from '@/hooks/useSettings'
 import { duration } from '@/themes/duration.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconArrowUp } from '@tabler/icons-react'
-import { observer } from 'mobx-react-lite'
 import { useObservableRef, useObservableState } from 'observable-hooks'
-import { useContext, type RefObject } from 'react'
+import { memo, type RefObject } from 'react'
 import { css, html } from 'react-strict-dom'
 import { delay, fromEvent, map, mergeMap, of, startWith, switchMap } from 'rxjs'
-import { DeckContext } from '../Deck/DeckContext'
+import { useDeckColumn } from '../Deck/hooks/useDeck'
 
 type Props = {
-  feed: FeedStore
-
+  feed: FeedState
   ref?: RefObject<HTMLElement | null>
 }
 
-export const FeedNewPosts = observer(function FeedNewPosts(props: Props) {
+export const FeedNewPosts = memo(function FeedNewPosts(props: Props) {
   const { feed } = props
   const isMobile = useMobile()
-  const isDeck = useContext(DeckContext).index !== undefined
+  const isDeck = useDeckColumn()?.index !== undefined
   const [, ref$] = useObservableRef(props.ref)
   const [fabVisible] = useObservableState(() => {
     return ref$.pipe(
@@ -39,7 +38,7 @@ export const FeedNewPosts = observer(function FeedNewPosts(props: Props) {
       }),
       map((position) => position > 250),
       switchMap((isVisible) => {
-        return of(isVisible).pipe(delay(isVisible ? 7000 : 0))
+        return of(isVisible).pipe(delay(isVisible ? 5000 : 0))
       }),
       startWith(false),
     )
@@ -47,42 +46,47 @@ export const FeedNewPosts = observer(function FeedNewPosts(props: Props) {
 
   const handleFlush = () => {
     const element = props.ref?.current || window
-    element.scrollTo({ top: 0, behavior: 'smooth' })
+    element.scrollTo({ top: 0, behavior: 'instant' })
     feed.flush()
   }
+
+  const bufferTotal = feed.replies ? feed.bufferTotalReplies : feed.bufferTotal
+  const bufferPubkeys = feed.replies ? feed.bufferPubkeysReplies : feed.bufferPubkeys
+  const sidebarCollapsed = useSettings().sidebarCollapsed
+
   return (
     <>
-      <Expandable expanded={feed.buffer.size > 0}>
+      <Expandable expanded={bufferTotal > 0}>
         <>
           <Stack justify='center' sx={styles.root}>
             <Button variant='filledTonal' onClick={handleFlush} sx={styles.button}>
               <Stack gap={2}>
-                {feed.buffer.size.toString()} new notes
-                <UsersAvatars
-                  max={3}
-                  borderColor='surfaceContainer'
-                  renderTooltip={false}
-                  pubkeys={feed.bufferPubkeys}
-                />
+                {bufferTotal} new notes
+                <UsersAvatars borderColor='surfaceContainer' renderTooltip={false} pubkeys={bufferPubkeys} />
               </Stack>
             </Button>
           </Stack>
           <Divider />
         </>
       </Expandable>
-      <html.div style={isDeck ? styles.floating$deck : styles.floating}>
+      <html.div
+        key={sidebarCollapsed.toString()}
+        style={[
+          isDeck ? styles.floating$deck : styles.floating,
+          !sidebarCollapsed && !isMobile && styles.floating$sidebar,
+        ]}>
         <Fab
           size='sm'
           variant='primary'
-          sx={[styles.fab, fabVisible && feed.buffer.size > 0 && styles.fab$visible, isMobile && styles.fab$mobile]}
+          sx={[styles.fab, fabVisible && bufferTotal > 0 && styles.fab$visible, isMobile && styles.fab$mobile]}
           onClick={handleFlush}
           label={
             <Stack gap={2}>
               <Stack gap={1}>
                 <IconArrowUp size={20} />
-                {feed.buffer.size || ''} new notes
+                {bufferTotal} new notes
               </Stack>
-              <UsersAvatars max={3} borderColor='primary' renderTooltip={false} pubkeys={feed.bufferPubkeys} />
+              <UsersAvatars borderColor='primary' renderTooltip={false} pubkeys={bufferPubkeys} />
             </Stack>
           }
         />
@@ -106,12 +110,20 @@ const styles = css.create({
     alignSelf: 'center',
     zIndex: 100,
     height: 0,
+    right: 0,
+    left: 0,
+  },
+  floating$sidebar: {
+    left: {
+      default: 0,
+      '@media (max-width: 1920px)': 315,
+    },
   },
   floating$deck: {
     position: 'sticky',
     margin: 'auto',
     textAlign: 'center',
-    top: 32,
+    top: 84,
     left: 0,
     right: 0,
     height: 0,
@@ -132,8 +144,13 @@ const styles = css.create({
     zIndex: 90,
     opacity: 0,
     pointerEvents: 'none',
+    transform: 'scale(1)',
+    transformOrigin: 'bottom',
     transitionDuration: duration.short3,
     transitionProperty: 'transform, opacity',
+    // opacity: 1,
+    // pointerEvents: 'auto',
+    // transform: 'translateY(8px)',
   },
   fab$mobile: {
     top: 60,

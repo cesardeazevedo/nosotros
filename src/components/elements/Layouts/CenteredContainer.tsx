@@ -34,7 +34,7 @@ const styles = css.create({
   },
   md: {
     maxWidth: {
-      default: 600,
+      default: 640,
       [md]: '100%',
     },
   },

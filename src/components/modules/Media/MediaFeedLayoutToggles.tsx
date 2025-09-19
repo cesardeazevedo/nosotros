@@ -1,27 +1,27 @@
 import { Chip } from '@/components/ui/Chip/Chip'
 import { Stack } from '@/components/ui/Stack/Stack'
-import type { MediaModule } from '@/stores/modules/media.module'
+import type { MediaFeedState } from '@/hooks/state/useMediaFeed'
 import { IconLayoutGrid, IconLayoutRows } from '@tabler/icons-react'
-import { observer } from 'mobx-react-lite'
+import { memo } from 'react'
 
 type Props = {
-  module?: MediaModule
+  feed: MediaFeedState
 }
 
-export const MediaFeedLayoutButtons = observer(function MediaFeedLayoutButtons(props: Props) {
-  const { module } = props
+export const MediaFeedLayoutButtons = memo(function MediaFeedLayoutButtons(props: Props) {
+  const { feed } = props
   return (
     <Stack align='flex-end' gap={0.5}>
       <Chip
-        selected={module?.layout === 'row'}
-        onClick={() => module?.setLayout('row')}
+        selected={feed.layout === 'row'}
+        onClick={() => feed.setLayout('row')}
         icon={<IconLayoutRows size={18} strokeWidth='1.5' />}
         label='Row'
       />
       <Chip
         icon={<IconLayoutGrid size={18} strokeWidth='1.5' />}
-        selected={module?.layout === 'grid'}
-        onClick={() => module?.setLayout('grid')}
+        selected={feed.layout === 'grid'}
+        onClick={() => feed.setLayout('grid')}
         label='Grid'
       />
     </Stack>

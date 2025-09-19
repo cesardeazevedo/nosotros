@@ -2,17 +2,15 @@ import { elevation } from '@/themes/elevation.stylex'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import { state } from '@/themes/state.stylex'
 import { typeScale } from '@/themes/typeScale.stylex'
-import React, { forwardRef } from 'react'
+import React from 'react'
 import { css } from 'react-strict-dom'
 import type { Props as ButtonProps } from '../Button/Button'
 import { Button } from '../Button/Button'
 import { buttonTokens } from '../Button/Button.stylex'
-import { rippleTokens } from '../Ripple/Ripple.stylex'
 import { Text } from '../Text/Text'
 
-type Variants = 'surface' | 'primary' | 'secondary' | 'tertiary' | 'branded'
+type Variants = 'primary' | 'secondary' | 'tertiary'
 
 type Props = Omit<ButtonProps, 'variant' | 'trailingIcon'> & {
   size?: 'sm' | 'md' | 'lg'
@@ -21,24 +19,22 @@ type Props = Omit<ButtonProps, 'variant' | 'trailingIcon'> & {
   flat?: boolean
 }
 
-export const Fab = forwardRef<HTMLButtonElement, Props>((props, ref) => {
-  const { variant = 'branded', children, label, icon, size = 'md', flat, fullWidth, ...rest } = props
+export const Fab = (props: Props) => {
+  const { variant = 'primary', children, label, size = 'md', flat, fullWidth, sx, ...rest } = props
   const extended = !!label
   return (
     <Button
-      variant={'elevated'}
-      icon={icon || children}
-      {...rest}
+      variant='elevated'
       sx={[
         styles.root,
-        flat && styles.flat,
-        extended ? sizes.md : sizes[size],
-        extended && styles.root$extended,
+        extended ? sizes.extended : sizes[size],
         variants[variant],
+        flat && styles.flat,
         fullWidth && styles.fullWidth,
-        rest.sx,
+        sx,
       ]}
-      ref={ref}>
+      {...rest}>
+      {children}
       {label && (
         <Text variant='label' size='lg' sx={styles.label}>
           {label}
@@ -46,55 +42,69 @@ export const Fab = forwardRef<HTMLButtonElement, Props>((props, ref) => {
       )}
     </Button>
   )
-})
+}
 
 const variants = css.create({
-  surface: {
-    [buttonTokens.containerColor]: palette.surfaceContainerHigh,
-    [buttonTokens.labelTextColor]: palette.primary,
-    [rippleTokens.color$hover]: palette.primary,
-  },
   primary: {
     [buttonTokens.containerColor]: palette.primaryContainer,
+    [buttonTokens.containerColor$hover]: palette.primaryFixedDim,
+    [buttonTokens.containerColor$pressed]: palette.primaryContainer,
+    [buttonTokens.containerColor$disabled]: palette.surfaceContainerHigh,
+
     [buttonTokens.labelTextColor]: palette.onPrimaryContainer,
-    [rippleTokens.color$hover]: palette.onPrimaryContainer,
-    [rippleTokens.opacity$hover]: state.opacity$hover,
+    [buttonTokens.labelTextColor$hover]: palette.onPrimaryContainer,
+    [buttonTokens.labelTextColor$pressed]: palette.onPrimaryContainer,
+    [buttonTokens.labelTextColor$focus]: palette.onPrimaryContainer,
+    [buttonTokens.labelTextColor$disabled]: palette.onSurface,
   },
   secondary: {
     [buttonTokens.containerColor]: palette.secondaryContainer,
+    [buttonTokens.containerColor$hover]: palette.secondaryContainer,
+    [buttonTokens.containerColor$pressed]: palette.secondaryContainer,
+    [buttonTokens.containerColor$disabled]: palette.surfaceContainerHigh,
+
     [buttonTokens.labelTextColor]: palette.onSecondaryContainer,
-    [rippleTokens.color$hover]: palette.onSecondaryContainer,
-    [rippleTokens.opacity$hover]: state.opacity$hover,
+    [buttonTokens.labelTextColor$hover]: palette.onSecondaryContainer,
+    [buttonTokens.labelTextColor$pressed]: palette.onSecondaryContainer,
+    [buttonTokens.labelTextColor$focus]: palette.onSecondaryContainer,
+    [buttonTokens.labelTextColor$disabled]: palette.onSurface,
   },
   tertiary: {
     [buttonTokens.containerColor]: palette.tertiaryContainer,
+    [buttonTokens.containerColor$hover]: palette.tertiaryContainer,
+    [buttonTokens.containerColor$pressed]: palette.tertiaryContainer,
+    [buttonTokens.containerColor$disabled]: palette.surfaceContainerHigh,
+
     [buttonTokens.labelTextColor]: palette.onTertiaryContainer,
-    [rippleTokens.color$hover]: palette.onTertiaryContainer,
-    [rippleTokens.opacity$hover]: state.opacity$hover,
-  },
-  branded: {
-    [buttonTokens.containerColor]: palette.surfaceContainerHigh,
-    [buttonTokens.labelTextColor]: palette.primary,
-    [rippleTokens.color$hover]: palette.primary,
-    [rippleTokens.opacity$hover]: state.opacity$hover,
+    [buttonTokens.labelTextColor$hover]: palette.onTertiaryContainer,
+    [buttonTokens.labelTextColor$pressed]: palette.onTertiaryContainer,
+    [buttonTokens.labelTextColor$focus]: palette.onTertiaryContainer,
+    [buttonTokens.labelTextColor$disabled]: palette.onSurface,
   },
 })
 
 const sizes = css.create({
   sm: {
-    width: 40,
-    height: 40,
+    [buttonTokens.containerHeight]: 40,
+    [buttonTokens.containerMinWidth]: 40,
     [buttonTokens.containerShape]: shape.lg,
   },
   md: {
-    width: 56,
-    height: 56,
+    [buttonTokens.containerHeight]: 56,
+    [buttonTokens.containerMinWidth]: 56,
     [buttonTokens.containerShape]: shape.lg,
   },
   lg: {
-    width: 96,
-    height: 96,
+    [buttonTokens.containerHeight]: 96,
+    [buttonTokens.containerMinWidth]: 96,
     [buttonTokens.containerShape]: shape.lg,
+  },
+  extended: {
+    [buttonTokens.containerHeight]: 56,
+    [buttonTokens.containerMinWidth]: 80,
+    [buttonTokens.containerShape]: shape.lg,
+    paddingLeft: spacing.padding2,
+    paddingRight: spacing.padding2,
   },
 })
 
@@ -102,15 +112,13 @@ const styles = css.create({
   root: {
     [buttonTokens.leadingSpace]: 0,
     [buttonTokens.trailingSpace]: 0,
-    [buttonTokens.containerMinWidth]: '40px',
-    [buttonTokens.containerElevation]: elevation.shadows3,
     [buttonTokens.labelTextWeight]: typeScale.labelWeight$md,
-    [rippleTokens.opacity$hover]: state.opacity$hover,
-  },
-  root$extended: {
-    width: 'auto',
-    paddingLeft: spacing.padding2,
-    paddingRight: spacing.padding2,
+    [buttonTokens.containerElevation]: {
+      default: elevation.shadows3,
+      ':hover': elevation.shadows4, // visual feedback via elevation bump
+      ':active': elevation.shadows2,
+      ':disabled': elevation.shadows0,
+    },
   },
   flat: {
     [buttonTokens.containerElevation]: elevation.shadows0,
@@ -119,6 +127,7 @@ const styles = css.create({
     width: '100%',
   },
   label: {
+    marginInlineStart: spacing.padding1,
     whiteSpace: 'nowrap',
   },
 })

@@ -1,5 +1,5 @@
 import type { Observable } from 'rxjs'
-import { combineLatestWith, distinct, EMPTY, filter, map, mergeMap, scan } from 'rxjs'
+import { catchError, combineLatestWith, distinct, EMPTY, filter, map, mergeMap, scan } from 'rxjs'
 import type { Pool } from '../pool'
 import type { Signer } from '../signers/signer'
 import { authenticate } from './authenticate'
@@ -23,7 +23,10 @@ export function createAuthenticator(options: RelayAuthenticatorOptions) {
       const relay = pool.get(url)
       const challenge = relays.get(url)
       if (relay && challenge) {
-        return authenticate({ relay, challenge, signer }).pipe(map((msg) => [url, msg[0]] as const))
+        return authenticate({ relay, challenge, signer }).pipe(
+          map((msg) => [url, msg[0]] as const),
+          catchError(() => EMPTY),
+        )
       }
       return EMPTY
     }),

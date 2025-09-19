@@ -1,4 +1,4 @@
-import { useRouter, useRouterState } from '@tanstack/react-router'
+import { useMatch, useRouter, useRouterState } from '@tanstack/react-router'
 import { useCallback } from 'react'
 
 export function useGoBack() {
@@ -16,9 +16,25 @@ export function useCurrentRoute() {
 }
 
 export function useNostrRoute() {
-  const current = useCurrentRoute()
-  if ('decoded' in (current.context || {})) {
-    return current
+  return useMatch({ from: '/$nostr', shouldThrow: false })?.context
+}
+
+export function useIsCurrentRouteEventID(id: string) {
+  const context = useNostrRoute()
+  if (context?.decoded) {
+    switch (context.decoded.type) {
+      case 'note': {
+        return context.decoded.data === id
+      }
+      case 'nevent': {
+        return context.decoded.data.id === id
+      }
+      case 'npub': {
+        return context.decoded.data === id
+      }
+      case 'nprofile': {
+        return context.decoded.data.pubkey === id
+      }
+    }
   }
-  return null
 }

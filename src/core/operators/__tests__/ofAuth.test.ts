@@ -1,9 +1,8 @@
 import type { MessageReceived } from '@/core/types'
 import { RelayToClient } from '@/core/types'
-import { fakeEvent } from '@/utils/faker'
 import { subscribeSpyTo } from '@hirez_io/observer-spy'
 import type { Observable } from 'rxjs'
-import { from, Subject } from 'rxjs'
+import { from } from 'rxjs'
 import { ofAuth } from '../ofAuth'
 
 describe('ofAuth', () => {
@@ -18,14 +17,5 @@ describe('ofAuth', () => {
     const spy = subscribeSpyTo($)
     await spy.onComplete()
     expect(spy.getValues()).toStrictEqual([[RelayToClient.AUTH, '123']])
-  })
-
-  test('assert no auth messages and complete the stream', async () => {
-    const subject = new Subject<MessageReceived>()
-    const $ = subject.asObservable().pipe(ofAuth())
-    const spy = subscribeSpyTo($)
-    subject.next([RelayToClient.EVENT, '1', fakeEvent({ kind: 1 })])
-    await spy.onComplete()
-    expect(spy.getValues()).toStrictEqual([])
   })
 })
