@@ -113,6 +113,7 @@ const styles = css.create({
       display: 'none',
     },
     '-ms-overflow-style': 'none',
+    scrollbarWidth: 'none',
   },
   pair: {
     gridTemplateColumns: '1fr 1fr',
