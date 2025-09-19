@@ -20,13 +20,14 @@ type Props = {
   loop?: boolean
   muted?: boolean
   autoPlay?: boolean
+  cover?: boolean
   index?: number
   preload?: HTMLVideoElement['preload']
   sx?: SxProps
 }
 
 export const Video = memo(function Video(props: Props) {
-  const { src, muted = false, loop = false, preload = 'metadata', index, sx } = props
+  const { src, muted = false, loop = false, preload = 'metadata', index, cover, sx } = props
   const { event } = useNoteContext()
   const { autoPlay: contextAutoPlay } = useContentContext()
   const nevent = useNevent(event)
@@ -68,7 +69,7 @@ export const Video = memo(function Video(props: Props) {
       {({ blurStyles }) => (
         <LinkNEvent media block nevent={nevent} search={{ media: index }} sx={visibleOnHoverStyle.root}>
           <video
-            {...css.props([styles.video, blurStyles, sx])}
+            {...css.props([styles.video, cover && styles.cover, blurStyles, sx])}
             playsInline
             role='button'
             webkit-playsinline='true'
@@ -108,6 +109,9 @@ const styles = css.create({
     ':active': {
       transform: 'scale(0.985)',
     },
+  },
+  cover: {
+    objectFit: 'cover',
   },
   controls: {
     borderBottomRightRadius: shape.lg,

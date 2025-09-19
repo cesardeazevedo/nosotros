@@ -60,7 +60,7 @@ export function useMediaStore(src: string, imeta: IMetaTags | undefined): MediaP
   const dim = imeta?.[src]?.dim
   const width = dims.get(src)?.[0] || dim?.width
   const height = dims.get(src)?.[1] || dim?.height
-  const bounds = width !== 0 && height !== 0 ? { width, height } : {}
+  const bounds = width && height ? adjustDimensions(width, height, MAX_BOUNDS.lg) : {}
   return {
     ...bounds,
     onError: () => addError(src),

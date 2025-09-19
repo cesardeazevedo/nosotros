@@ -19,7 +19,7 @@ type Props =
   | {
       // needed when rendering for different formats like files
       children: ReactNode
-      caroussel: boolean
+      length: number
     }
 
 const MediaDraggable = (props: { children: ReactNode }) => {
@@ -43,18 +43,18 @@ const MediaList = (props: MediaProps) => {
     event,
   )
   const isMultiple = media.length > 1
-  const isCarousell = media.length > 2
+  const isCarousel = media.length > 2
   return (
     <>
       {media.map(({ type, src, index }) => {
         return (
           <MediaWrapper
             key={src}
-            fixed={isCarousell}
+            fixed={isCarousel}
             event={event}
             size='sm'
             src={src}
-            fixedHeight={isCarousell ? minHeight : undefined}
+            fixedHeight={isCarousel ? minHeight : undefined}
             sx={styles.wrapper}>
             {type === 'image' && (
               <Image
@@ -65,7 +65,9 @@ const MediaList = (props: MediaProps) => {
                 index={index}
               />
             )}
-            {type === 'video' && <Video preload='auto' src={src} sx={[isMultiple && styles.multiple]} index={index} />}
+            {type === 'video' && (
+              <Video preload='auto' src={src} cover={isMultiple} sx={[isMultiple && styles.multiple]} index={index} />
+            )}
           </MediaWrapper>
         )
       })}
@@ -76,12 +78,14 @@ const MediaList = (props: MediaProps) => {
 export const MediaGroup = (props: Props) => {
   const { dense } = useContentContext()
 
-  const caroussel = 'children' in props ? props.caroussel : props.media.length > 2
+  const length = 'children' in props ? props.length : props.media.length
+  const isCarousel = length > 2
+  const isPair = length == 2
 
-  if (!caroussel) {
+  if (!isCarousel) {
     return (
       <ContentProvider value={{ dense: true }}>
-        <html.div style={[styles.root, styles.pair, dense && styles.root$dense]}>
+        <html.div style={[styles.root, isPair && styles.pair, dense && styles.root$dense]}>
           {'children' in props ? props.children : <MediaList {...props} />}
         </html.div>
       </ContentProvider>
@@ -97,6 +101,7 @@ const styles = css.create({
     gridAutoFlow: 'column',
     placeItems: 'center',
     gridAutoColumns: 'max-content',
+    position: 'relative',
     gap: 6,
     width: '100%',
     height: '100%',

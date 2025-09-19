@@ -9,7 +9,7 @@ import { useAtomValue } from 'jotai'
 import React, { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 
-type Props = {
+export type Props = {
   children: React.ReactNode
   src: string
   size?: keyof typeof MAX_BOUNDS

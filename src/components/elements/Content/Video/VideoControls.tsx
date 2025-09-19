@@ -29,7 +29,6 @@ const iconProps = {
 
 export const VideoControls = function VideoControls(props: Props) {
   const { ref, sx } = props
-  const video = ref.current
   const [duration, setDuration] = useState(0)
   const [volume, setVolume] = useState(1)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -47,6 +46,7 @@ export const VideoControls = function VideoControls(props: Props) {
   const setVideo = useSetAtom(setCurrentVideoAtom)
 
   useEffect(() => {
+    const video = ref.current
     if (!video) return
 
     setDuration(video.duration || 0)
@@ -99,7 +99,7 @@ export const VideoControls = function VideoControls(props: Props) {
       video.removeEventListener('pause', updatePlaying)
       video.removeEventListener('volumechange', updateMuted)
     }
-  }, [video, duration])
+  }, [ref.current, duration])
 
   useEffect(() => {
     if (!containerRef.current || !timeDisplayRef.current) return
@@ -120,6 +120,7 @@ export const VideoControls = function VideoControls(props: Props) {
 
   const handleProgressClick = useCallback(
     (event: Readonly<{ pageX: number; preventDefault: () => void; stopPropagation: () => void }>) => {
+      const video = ref.current
       if (!progressRef.current || !duration || !video) return
 
       event.preventDefault()
@@ -130,7 +131,7 @@ export const VideoControls = function VideoControls(props: Props) {
       const time = percent * duration
       video.currentTime = time
     },
-    [video, duration],
+    [ref.current, duration],
   )
 
   const handleMouseDown = useCallback(
@@ -145,6 +146,7 @@ export const VideoControls = function VideoControls(props: Props) {
 
   const handleMouseMove = useCallback(
     (event: MouseEvent) => {
+      const video = ref.current
       if (!isDragging || !progressRef.current || !duration || !video) return
 
       const rect = progressRef.current.getBoundingClientRect()
@@ -152,7 +154,7 @@ export const VideoControls = function VideoControls(props: Props) {
       const time = percent * duration
       video.currentTime = time
     },
-    [isDragging, video, duration],
+    [isDragging, ref.current, duration],
   )
 
   const handleMouseUp = useCallback(() => {
@@ -161,15 +163,17 @@ export const VideoControls = function VideoControls(props: Props) {
 
   const handleVolumeChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
+      const video = ref.current
       if (video) {
         video.muted = false
         video.volume = parseFloat(e.target.value)
       }
     },
-    [video],
+    [ref.current],
   )
 
   const handleTogglePlay = useCallback(() => {
+    const video = ref.current
     if (video) {
       if (video.paused) {
         video.play()
@@ -178,28 +182,31 @@ export const VideoControls = function VideoControls(props: Props) {
       }
       setVideo({ video, play: !video.paused })
     }
-  }, [video])
+  }, [ref.current])
 
   const handleToggleMute = useCallback(() => {
+    const video = ref.current
     if (video) {
       video.muted = !video.muted
       if (video.volume === 0 && !video.muted) {
         video.volume = 1
       }
     }
-  }, [video])
+  }, [ref.current])
 
   const handleFullscreen = useCallback(() => {
+    const video = ref.current
     if (video) {
       video.requestFullscreen()
     }
-  }, [video])
+  }, [ref.current])
 
   const handlePictureInPicture = useCallback(() => {
+    const video = ref.current
     if (video) {
       video.requestPictureInPicture()
     }
-  }, [video])
+  }, [ref.current])
 
   useEffect(() => {
     if (isDragging) {
@@ -227,7 +234,7 @@ export const VideoControls = function VideoControls(props: Props) {
   return (
     <html.div
       ref={containerRef}
-      style={[styles.container, (isPlaying || (video?.currentTime || 0) === 0) && visibleOnHoverStyle.item, sx]}
+      style={[styles.container, (isPlaying || (ref.current?.currentTime || 0) === 0) && visibleOnHoverStyle.item, sx]}
       onClick={(event) => {
         event.preventDefault()
         event.stopPropagation()

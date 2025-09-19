@@ -6,36 +6,54 @@ import type { VideoAttributes } from 'nostr-editor'
 import { useMemo } from 'react'
 import { css } from 'react-strict-dom'
 import { DeleteButton } from '../Buttons/DeleteButton'
+import { MediaError } from '../Layout/MediaError'
 import { MediaUploading } from '../Layout/MediaUploading'
+import { MediaWrapper, type Props as MediaWrapperProps } from '../Layout/MediaWrapper'
 
 type Props = VideoAttributes & {
   onUpdate: (attrs: Partial<VideoAttributes>) => void
   onDelete: () => void
   sx?: SxProps
+  cover?: boolean
   uploading?: boolean
+  wrapperProps?: Omit<MediaWrapperProps, 'children' | 'src'>
 }
 
 export const VideoEditor = (props: Props) => {
-  const { src, sx, uploading } = props
+  const { src, sx, uploading, error, wrapperProps, cover } = props
   const extension = useMemo(() => new URL(src).pathname.split('.').pop(), [src])
   return (
     <>
-      <DeleteButton onClick={() => props.onDelete()} />
       <ContentProvider value={{ dense: true }}>
-        <MediaUploading uploading={uploading}>
-          <video {...css.props([styles.root, sx])} loop muted autoPlay preload='autor' controls={false} src={src}>
-            <source src={src} type={`video/${extension === 'mov' ? 'mp4' : extension}`} />
-          </video>
-        </MediaUploading>
+        <MediaWrapper size='md' src={src} sx={styles.wrapper} {...wrapperProps}>
+          <DeleteButton onClick={() => props.onDelete()} />
+          <MediaUploading uploading={uploading}>
+            <video
+              {...css.props([styles.root, cover && styles.cover, sx])}
+              loop
+              muted
+              autoPlay
+              preload='autor'
+              controls={false}
+              src={src}>
+              <source src={src} type={`video/${extension === 'mov' ? 'mp4' : extension}`} />
+            </video>
+            <MediaError error={error} />
+          </MediaUploading>
+        </MediaWrapper>
       </ContentProvider>
     </>
   )
 }
 
 const styles = css.create({
+  wrapper: {
+    position: 'relative',
+    margin: 0,
+    padding: 0,
+  },
   root: {
-    height: '100%',
-    width: 'fit-content',
+    maxWidth: '100%',
     maxHeight: 'inherit',
     cursor: 'pointer',
     border: '1px solid',
@@ -43,5 +61,8 @@ const styles = css.create({
     borderRadius: shape.xl,
     transition: 'transform 150ms ease',
     ':active': { transform: 'scale(0.985)' },
+  },
+  cover: {
+    objectFit: 'cover',
   },
 })
