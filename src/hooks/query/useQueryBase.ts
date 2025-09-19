@@ -17,7 +17,6 @@ import { subscribeStrategy } from '../subscriptions/subscribeStrategy'
 import { queryClient } from './queryClient'
 import { pointerToQueryKey, queryKeys } from './queryKeys'
 import { setEventData } from './queryUtils'
-import { UserMentionEntity } from 'react-tweet/api'
 
 export type UseQueryOptionsWithFilter<Selector = NostrEventDB[]> = UseQueryOptions<NostrEventDB[], Error, Selector> & {
   filter: Filter
