@@ -4,7 +4,6 @@ import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { TextField } from '@/components/ui/TextField/TextField'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
-import { APP_NAME } from '@/constants/app'
 import { DEFAULT_NOSTR_CONNECT_RELAY } from '@/constants/relays'
 import { NIP46RemoteSigner } from '@/core/signers/nip46.signer'
 import { useCopyClipboard } from '@/hooks/useCopyClipboard'
@@ -36,7 +35,6 @@ export const SignInNostrConnect = () => {
         map((relay) => {
           return new NIP46RemoteSigner(pool, {
             method: { method: 'nostrconnect', relay },
-            name: APP_NAME,
           })
         }),
         switchMap((signer) => {
@@ -64,7 +62,6 @@ export const SignInNostrConnect = () => {
         <Text variant='headline'>Sign In with NostrConnect</Text>
       </SignInHeader>
       <Stack grow horizontal={false} align='center' sx={styles.content} gap={2}>
-        <CircularProgress size='md' />
         <Tooltip
           text={
             <Stack gap={0.5}>
@@ -75,13 +72,16 @@ export const SignInNostrConnect = () => {
           placement='bottom'
           opened={copied}>
           <html.div style={styles.qrcode}>
-            {url && <QRCodeCanvas width={500} height={500} size={220} value={url} onClick={copy} />}
+            {url && <QRCodeCanvas width={500} height={500} size={200} value={url} onClick={copy} />}
           </html.div>
         </Tooltip>
         <Text sx={styles.url} size='sm'>
           {url}
         </Text>
-        <RelayChip url={relay} />
+        <Stack gap={2}>
+          <CircularProgress size='sm' />
+          <RelayChip url={relay} />
+        </Stack>
         <TextField fullWidth shrink value={relay} onChange={(e) => setRelay(e.target.value)} label='Connection Relay' />
       </Stack>
     </Stack>
@@ -93,7 +93,7 @@ const styles = css.create({
     height: '100%',
   },
   url: {
-    width: 320,
+    maxWidth: 340,
     fontFamily: 'monospace',
     [typeScale.bodyLineHeight$lg]: '22px',
     [typeScale.bodyLetterSpacing$lg]: '0px',

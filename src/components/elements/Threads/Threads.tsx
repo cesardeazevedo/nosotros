@@ -35,7 +35,7 @@ export const Threads = memo(function RepliesThread(props: Props) {
     maxLevel = Infinity,
   } = props
 
-  const note = useNoteState(event, { repliesOpen: true, forceSync: true })
+  const note = useNoteState(event, { repliesOpen: true, forceSync: true, contentOpen: false })
   const root = useRootEvent(event)
 
   return (

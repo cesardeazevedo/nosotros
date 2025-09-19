@@ -1,5 +1,4 @@
 import { openImageDialogAtom, toggleQRCodeDialogAtom } from '@/atoms/dialog.atoms'
-import { addMediaErrorAtom, mediaErrorsAtom } from '@/atoms/media.atoms'
 import { enqueueToastAtom } from '@/atoms/toaster.atoms'
 import { FollowButton } from '@/components/modules/Follows/FollowButton'
 import { ContentProvider } from '@/components/providers/ContentProvider'
@@ -11,6 +10,7 @@ import { MenuList } from '@/components/ui/MenuList/MenuList'
 import { Popover } from '@/components/ui/Popover/Popover'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
+import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 import { Kind } from '@/constants/kinds'
 import { useUserState } from '@/hooks/state/useUser'
 import { useCurrentPubkey } from '@/hooks/useAuth'
@@ -18,10 +18,11 @@ import { useMobile } from '@/hooks/useMobile'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import { getImgProxyUrl } from '@/utils/imgproxy'
 import { sanitizeUrl } from '@braintree/sanitize-url'
+import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconBoltFilled, IconCopy, IconDotsVertical, IconQrcode, IconSend } from '@tabler/icons-react'
-import { useAtomValue, useSetAtom } from 'jotai'
+import { useRouter } from '@tanstack/react-router'
+import { useSetAtom } from 'jotai'
 import { memo, useCallback, useMemo, useState } from 'react'
 import { css, html } from 'react-strict-dom'
 import { ContentLink } from '../Content/Link/Link'
@@ -31,6 +32,7 @@ import { UserAvatar } from './UserAvatar'
 import { UserContentAbout } from './UserContentAbout'
 import { UserFollowings } from './UserFollowings'
 import { UserNIP05 } from './UserNIP05'
+import { UserProfileBanner } from './UserProfileBanner'
 import { UserProfileForm } from './UserProfileForm'
 import { UserRelays } from './UserRelays'
 
@@ -38,30 +40,16 @@ type Props = {
   pubkey: string
 }
 
-export const UserProfileBanner = function UserProfileBanner(props: { src: string }) {
-  const { src } = props
-  const pushImage = useSetAtom(openImageDialogAtom)
-  const addError = useSetAtom(addMediaErrorAtom)
-  return (
-    <html.img
-      src={getImgProxyUrl('high_res', src)}
-      style={styles.banner}
-      onClick={() => pushImage({ src })}
-      onError={() => addError(src)}
-    />
-  )
-}
-
 export const UserProfileHeader = memo(function UserProfileHeader(props: Props) {
   const { pubkey } = props
   const [editProfile, setEditProfile] = useState(false)
+  const router = useRouter()
   const isMobile = useMobile()
   const user = useUserState(pubkey, { syncFollows: true })
   const currentPubkey = useCurrentPubkey()
   const doesFollowCurrentUser = user.followsTag(currentPubkey)
-  const { banner, nip05, lud16 } = user?.metadata || {}
+  const { nip05, lud16 } = user?.metadata || {}
   const pushImage = useSetAtom(openImageDialogAtom)
-  const hasError = useAtomValue(mediaErrorsAtom).has(banner || '')
   const toggleQRCodeDialog = useSetAtom(toggleQRCodeDialogAtom)
   const enqueueToast = useSetAtom(enqueueToastAtom)
   const handleCopy = useCallback((value: string | undefined) => {
@@ -92,13 +80,7 @@ export const UserProfileHeader = memo(function UserProfileHeader(props: Props) {
 
   return (
     <>
-      <html.div style={styles.header}>
-        {banner && banner.startsWith('http') && !hasError ? (
-          <UserProfileBanner src={banner} />
-        ) : (
-          <html.div style={styles.bannerFallback} />
-        )}
-      </html.div>
+      <UserProfileBanner pubkey={pubkey} />
       <Divider />
       <Stack horizontal={false} gap={1} sx={styles.content}>
         <ContentProvider value={{ disableLink: true, disablePopover: true }}>
@@ -140,7 +122,15 @@ export const UserProfileHeader = memo(function UserProfileHeader(props: Props) {
             <html.span style={styles.breakWord}>{website}</html.span>
           </ContentLink>
         )}
-        <Stack sx={styles.follow} gap={0.5}>
+        <Stack sx={styles.actions} gap={0.5}>
+          <Tooltip enterDelay={0} text={`Zap ${user.displayName}`}>
+            <LinkBase search={{ zap: user.nprofile }} state={{ from: router.latestLocation.pathname } as never}>
+              <IconButton
+                variant='outlined'
+                icon={<IconBoltFilled color={colors.violet5} stroke='currentColor' strokeWidth='2.0' size={20} />}
+              />
+            </LinkBase>
+          </Tooltip>
           <Popover
             placement='bottom-end'
             contentRenderer={({ close }) => (
@@ -209,13 +199,6 @@ const styles = css.create({
     padding: 0,
   },
   paper: {},
-  header: {
-    overflow: 'hidden',
-    width: '100%',
-    height: 240,
-    margin: '0 auto',
-    padding: 0,
-  },
   content: {
     position: 'relative',
     paddingInline: spacing.padding3,
@@ -225,7 +208,7 @@ const styles = css.create({
   center: {
     paddingBlock: spacing.padding1,
   },
-  follow: {
+  actions: {
     position: 'absolute',
     right: 22,
     top: 20,
@@ -241,10 +224,6 @@ const styles = css.create({
     ':active': {
       transform: 'scale(0.94)',
     },
-  },
-  bannerFallback: {
-    backgroundColor: palette.surfaceContainerLow,
-    height: '100%',
   },
   secondary: {
     color: palette.onSurfaceVariant,
@@ -273,12 +252,6 @@ const styles = css.create({
     paddingBlock: 2,
     paddingInline: 6,
     backgroundColor: palette.surfaceContainerHigh,
-  },
-  banner: {
-    cursor: 'pointer',
-    objectFit: 'cover',
-    width: '100%',
-    height: '100%',
   },
   pronouns: {
     marginLeft: spacing['margin0.5'],

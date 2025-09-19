@@ -1,6 +1,8 @@
 import { IconExpandable } from '@/components/elements/Icons/IconExpandable'
 import type { Props as HeaderBaseProps } from '@/components/elements/Layouts/HeaderBase'
 import { HeaderBase } from '@/components/elements/Layouts/HeaderBase'
+import { Anchored } from '@/components/ui/Anchored/Anchored'
+import { Badge } from '@/components/ui/Badge/Badge'
 import { Button } from '@/components/ui/Button/Button'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
@@ -21,7 +23,7 @@ import { FeedSettings } from '../FeedSettings'
 type Props = HeaderBaseProps &
   Partial<FeedSettingsProps> & {
     feed?: FeedState
-    customSettings?: ReactNode
+    customSettings?: ReactNode | (({ close }: { close: () => void }) => ReactNode)
     onDelete?: () => void
     renderSetting?: boolean
   }
@@ -47,10 +49,12 @@ export const FeedHeaderBase = memo(function FeedHeaderBase(props: Props) {
           )}
           {feed && (
             <Button variant='filledTonal' onClick={() => setExpanded((prev) => !prev)}>
-              <Stack gap={0.5}>
-                <IconExpandable upwards strokeWidth='2.5' expanded={expanded} />
-                Feed Settings
-              </Stack>
+              <Anchored content={feed.isDirty && <Badge dot />}>
+                <Stack gap={0.5}>
+                  <IconExpandable upwards strokeWidth='2.5' expanded={expanded} />
+                  Feed Settings
+                </Stack>
+              </Anchored>
             </Button>
           )}
         </Stack>
@@ -58,7 +62,11 @@ export const FeedHeaderBase = memo(function FeedHeaderBase(props: Props) {
       <Expandable expanded={expanded}>
         {feed &&
           renderSetting &&
-          (customSettings || <FeedSettings feed={feed} renderRelaySettings={renderRelaySettings} />)}
+          ((typeof customSettings === 'function'
+            ? customSettings({ close: () => setExpanded(false) })
+            : customSettings) || (
+            <FeedSettings feed={feed} renderRelaySettings={renderRelaySettings} onClose={() => setExpanded(false)} />
+          ))}
         {isDeck && (
           <>
             <Divider />

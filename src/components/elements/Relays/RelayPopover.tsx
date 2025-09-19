@@ -16,7 +16,7 @@ const PopoverContent = memo(function PopoverContent(props: { url: string }) {
   const { url } = props
 
   return (
-    <Paper elevation={2} surface='surfaceContainerLow' sx={styles.root}>
+    <Paper outlined surface='surfaceContainerLowest' sx={styles.root}>
       <RelayHeader url={url} />
     </Paper>
   )
@@ -42,6 +42,7 @@ export const RelayPopover = memo(function RelayPopoverLink(props: Props) {
 const styles = css.create({
   root: {
     minWidth: 340,
+    maxWidth: 440,
     maxHeight: 400,
   },
 })

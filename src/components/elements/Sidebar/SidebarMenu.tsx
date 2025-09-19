@@ -143,10 +143,7 @@ export const SidebarMenu = memo(function SidebarMenu() {
         </>
       )}
       <Divider />
-      <html.div style={styles.wrapper}>
-        <SidebarMenuRecents />
-      </html.div>
-      <Divider />
+      <SidebarMenuRecents />
       <Stack horizontal={false} gap={0.5} sx={styles.wrapper}>
         <SidebarMenuRelays />
         <Link to='/settings'>

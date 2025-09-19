@@ -32,7 +32,7 @@ type Props = {
 export const PostRoot = memo(function PostRoot(props: Props) {
   const { event, header, open } = props
   const isFeed = !!useNostrContext()
-  const note = useNoteState(event, { repliesOpen: open, forceSync: open })
+  const note = useNoteState(event, { repliesOpen: open, forceSync: open, contentOpen: open })
 
   const openReplies = useCallback(() => {
     note.actions.toggleReplies()

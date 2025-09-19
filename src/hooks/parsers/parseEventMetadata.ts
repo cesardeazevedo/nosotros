@@ -16,6 +16,7 @@ export function parseMetadata(event: NostrEvent): Metadata | null {
     case Kind.Metadata:
       return parseUser(event)
     case Kind.Text:
+    case Kind.Highlight:
     case Kind.PublicMessage:
       return parseNote(event)
     case Kind.Comment:

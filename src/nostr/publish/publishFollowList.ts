@@ -1,6 +1,6 @@
 import { Kind } from '@/constants/kinds'
 import { subscribeLastEvent } from '@/hooks/subscriptions/subscribeLast'
-import { EMPTY, mergeMap } from 'rxjs'
+import { mergeMap } from 'rxjs'
 import type { LocalPublisherOptions } from './publish'
 import { publish } from './publish'
 
@@ -10,7 +10,17 @@ export function publishFollowList(pubkey: string, tag: string, newValues: string
   const filter = { kinds, authors: [pubkey] }
   return subscribeLastEvent({ network: 'REMOTE_ONLY' }, filter).pipe(
     mergeMap((event) => {
-      if (!event) return EMPTY // Couldn't find last follows list of the user
+      if (!event) {
+        return publish(
+          {
+            kind: Kind.Follows,
+            content: '',
+            pubkey,
+            tags: newValues.map((v) => [tag, v]),
+          },
+          options,
+        )
+      }
 
       const values = new Set(event.tags.filter(([t]) => t === tag).map((x) => x[1]))
       const tags = (

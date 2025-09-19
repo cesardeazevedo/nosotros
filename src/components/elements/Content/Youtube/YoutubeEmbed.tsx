@@ -1,3 +1,4 @@
+import { addMediaDimAtom, mediaDimsAtom } from '@/atoms/media.atoms'
 import { Button } from '@/components/ui/Button/Button'
 import { Text } from '@/components/ui/Text/Text'
 import { palette } from '@/themes/palette.stylex'
@@ -5,6 +6,7 @@ import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { getImgProxyUrl } from '@/utils/imgproxy'
 import { IconPlayerPlayFilled } from '@tabler/icons-react'
+import { useAtomValue, useSetAtom } from 'jotai'
 import { useMemo, useState } from 'react'
 import { css, html } from 'react-strict-dom'
 import { ContentLink } from '../Link/Link'
@@ -19,19 +21,37 @@ export const YoutubeEmbed = (props: Props) => {
   const { src } = props
   const [open, setOpen] = useState(false)
 
+  const addMediaDim = useSetAtom(addMediaDimAtom)
   const embedId = useMemo(() => src.match(REGEX_VIDEO_ID)?.[1].replace('/', ''), [src])
 
   const iframeSrc = `https://youtube.com/embed/${embedId}?autoplay=1&state=1`
   const posterUrl = `https://i.ytimg.com/vi/${embedId}/hqdefault.jpg`
+
+  const [width, height] = useAtomValue(mediaDimsAtom).get(src) || []
 
   return (
     <>
       {embedId ? (
         <html.div style={styles.content}>
           {!open && (
-            <html.img style={[styles.img]} src={getImgProxyUrl('feed_img', posterUrl)} onClick={() => setOpen(true)} />
+            <html.img
+              style={[styles.img]}
+              src={getImgProxyUrl('feed_img', posterUrl)}
+              onClick={() => setOpen(true)}
+              onLoad={(e: { target: HTMLImageElement }) => {
+                addMediaDim({ src, dim: [e.target.naturalWidth, e.target.naturalHeight] })
+              }}
+            />
           )}
-          {open && <iframe {...css.props(styles.iframe)} src={iframeSrc} width={400} height={280} />}
+          {open && (
+            <iframe
+              {...css.props(styles.iframe)}
+              src={iframeSrc}
+              style={{ minHeight: height, minWidth: width }}
+              width={width}
+              height={height}
+            />
+          )}
           {!open && (
             <Button sx={styles.button} onClick={() => setOpen(true)}>
               <IconPlayerPlayFilled fill='white' />
@@ -70,9 +90,12 @@ const styles = css.create({
     position: 'relative',
     borderRadius: 1,
     overflow: 'hidden',
-    width: 'fit-content',
+    width: '100%',
+    height: '100%',
   },
   iframe: {
+    width: '100%',
+    height: '100%',
     border: 'none',
     marginTop: spacing.margin2,
     borderRadius: shape.lg,

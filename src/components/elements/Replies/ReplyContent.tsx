@@ -1,3 +1,4 @@
+import { ContentProvider } from '@/components/providers/ContentProvider'
 import type { NoteState } from '@/hooks/state/useNote'
 import type { CustomNode } from '@/nostr/types'
 import { Content } from 'components/elements/Content/Content'
@@ -39,7 +40,9 @@ export const ReplyContent = memo(function ReplyContent(props: Props) {
             ? React.Fragment
             : (props: { children: ReactNode }) => (
                 <LinkNEvent block nevent={note.nip19}>
-                  <BubbleContainer highlight={highlight}>{props.children}</BubbleContainer>
+                  <ContentProvider value={{ disableLink: false }}>
+                    <BubbleContainer highlight={highlight}>{props.children}</BubbleContainer>
+                  </ContentProvider>
                 </LinkNEvent>
               )
         }

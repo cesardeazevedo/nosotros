@@ -19,7 +19,7 @@ export const ReplyHeader = memo(function ReplyHeader() {
   const parentUser = useUserMetadata(parent.data?.pubkey)
   const nevent = useNevent(parent.data)
   return (
-    <Stack sx={[styles.root, dense && styles.root$dense]} gap={1}>
+    <Stack sx={[styles.root, dense && styles.root$dense]} gap={2}>
       <IconDotsVertical size={20} {...css.props(styles.icon)} />
       <LinkNEvent nevent={nevent}>
         <Button variant='filledTonal' sx={styles.button}>
@@ -32,6 +32,7 @@ export const ReplyHeader = memo(function ReplyHeader() {
 
 const styles = css.create({
   root: {
+    marginLeft: spacing.margin1,
     paddingInline: spacing.padding2,
     paddingBottom: spacing.padding1,
   },

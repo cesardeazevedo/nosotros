@@ -17,12 +17,12 @@ export const DeckColumnContainer = (props: Props) => {
 
 const sizes = css.create({
   sm: {
-    minWidth: 390,
-    maxWidth: 390,
+    minWidth: 400,
+    maxWidth: 400,
   },
   md: {
-    minWidth: 600,
-    maxWidth: 600,
+    minWidth: 650,
+    maxWidth: 650,
   },
   lg: {
     minWidth: 700,

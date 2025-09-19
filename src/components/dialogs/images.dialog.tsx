@@ -11,10 +11,11 @@ import { useMatch, useNavigate } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 import { memo, useLayoutEffect, useMemo, useState } from 'react'
 import { css, html } from 'react-strict-dom'
-import type { SlideImage, SlideVideo } from 'yet-another-react-lightbox'
+import type { SlideImage } from 'yet-another-react-lightbox'
 import Lightbox from 'yet-another-react-lightbox'
-import VideoPlugin from 'yet-another-react-lightbox/plugins/video'
 import 'yet-another-react-lightbox/styles.css'
+import type { VideoSlide } from '../elements/Content/Video/VideoLightbox'
+import { VideoPlugin } from '../elements/Content/Video/VideoLightbox'
 import { Threads } from '../elements/Threads/Threads'
 import { ContentProvider } from '../providers/ContentProvider'
 import { CircularProgress } from '../ui/Progress/CircularProgress'
@@ -83,9 +84,10 @@ export const ImagesDialog = memo(function ImagesDialog() {
           loop: true,
           muted: true,
           autoPlay: true,
+          controls: false,
           width: metadata?.dim?.width,
           height: metadata?.dim?.height,
-        } as SlideVideo
+        } as VideoSlide
       })
     }
     return [
@@ -96,6 +98,7 @@ export const ImagesDialog = memo(function ImagesDialog() {
   }, [open, list])
 
   const currentIndex = mediaIndex
+  const isMultiple = slides.length > 1
 
   return (
     <html.div
@@ -124,11 +127,15 @@ export const ImagesDialog = memo(function ImagesDialog() {
         .yarl__button:disabled {
           display: none;
         }
+        .yarl__video_container {
+          position: relative;
+        }
        `}
       </style>
       <Lightbox
         open={open}
         on={{ exiting: handleClose }}
+        // @ts-ignore
         slides={slides}
         index={currentIndex}
         portal={{
@@ -150,7 +157,9 @@ export const ImagesDialog = memo(function ImagesDialog() {
             width: !isLG && nevent ? 'calc(100% - 600px)' : '100%',
           },
           slide: {
-            padding: 0,
+            position: 'relative',
+            paddingBlock: 0,
+            paddingInline: isLG ? 0 : 72,
           },
           button: {
             margin: 12,
@@ -159,14 +168,15 @@ export const ImagesDialog = memo(function ImagesDialog() {
             transform: 'scale(1)',
             backgroundColor: colors.gray9,
             boxShadow: 'none',
+            filter: 'none',
             borderRadius: '100%',
             padding: 10,
           },
           navigationPrev: {
-            display: isLG ? 'none' : 'inline-block',
+            display: isLG || !isMultiple ? 'none' : 'inline-block',
           },
           navigationNext: {
-            display: isLG ? 'none' : 'inline-block',
+            display: isLG || !isMultiple ? 'none' : 'inline-block',
           },
         }}
         render={{
@@ -188,7 +198,7 @@ const portalStyles = css.create({
     right: 0,
     bottom: 0,
     display: 'flex',
-    zIndex: 1000,
+    zIndex: 300,
     [circularProgressTokens.color]: 'white',
   },
   lightboxContainer: {

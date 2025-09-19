@@ -63,7 +63,7 @@ const styles = css.create({
   root: {
     display: '-webkit-box',
     '-webkit-box-orient': 'vertical',
-    '-webkit-line-clamp': '4',
+    '-webkit-line-clamp': '5',
     textOverflow: 'ellipsis',
     overflow: 'hidden',
   },

@@ -34,7 +34,7 @@ const styles = css.create({
     transitionTimingFunction: easing.emphasized,
     transform: 'scale(1)',
     ':active': {
-      transform: 'scale(0.96)',
+      transform: 'scale(0.985)',
     },
     backgroundColor: {
       default: palette.surfaceContainer,

@@ -28,6 +28,7 @@ import { css, html } from 'react-strict-dom'
 import { IconHome } from '../Icons/IconHome'
 import { IconHomeFilled } from '../Icons/IconHomeFilled'
 import { LinkSignIn } from '../Links/LinkSignIn'
+import { UserAvatar } from '../User/UserAvatar'
 
 export const BottomNavigation = memo(function BottomNavigation() {
   const pubkey = useCurrentPubkey()
@@ -96,7 +97,11 @@ export const BottomNavigation = memo(function BottomNavigation() {
           {pubkey && nprofile && (
             <Link to='/$nostr' params={{ nostr: nprofile }} onClick={handleResetScroll('/' + nprofile)}>
               {({ isActive }) => (
-                <Tab active={isActive} sx={styles.tab} icon={<IconUser />} activeIcon={<IconUser />} />
+                <Tab
+                  active={isActive}
+                  sx={[styles.tab, styles.tabProfile]}
+                  icon={<UserAvatar size='sm' pubkey={pubkey} />}
+                />
               )}
             </Link>
           )}
@@ -135,5 +140,8 @@ const styles = css.create({
     borderRadius: shape.full,
     [tabTokens.containerShape]: shape.full,
     [focusRingTokens.color]: palette.secondaryContainer,
+  },
+  tabProfile: {
+    backgroundColor: 'transparent',
   },
 })

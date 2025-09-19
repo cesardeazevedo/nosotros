@@ -19,6 +19,7 @@ const styles = css.create({
     padding: '.1em .3em .1em',
     marginInline: 2,
     borderRadius: 6,
+    whiteSpace: 'nowrap',
     backgroundColor: palette.surfaceContainerHigh,
   },
   darker: {

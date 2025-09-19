@@ -46,7 +46,7 @@ export const FeedNewPosts = memo(function FeedNewPosts(props: Props) {
 
   const handleFlush = () => {
     const element = props.ref?.current || window
-    element.scrollTo({ top: 0, behavior: 'smooth' })
+    element.scrollTo({ top: 0, behavior: 'instant' })
     feed.flush()
   }
 
@@ -144,8 +144,13 @@ const styles = css.create({
     zIndex: 90,
     opacity: 0,
     pointerEvents: 'none',
+    transform: 'scale(1)',
+    transformOrigin: 'bottom',
     transitionDuration: duration.short3,
     transitionProperty: 'transform, opacity',
+    // opacity: 1,
+    // pointerEvents: 'auto',
+    // transform: 'translateY(8px)',
   },
   fab$mobile: {
     top: 60,

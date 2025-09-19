@@ -3,7 +3,7 @@ import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Kind } from '@/constants/kinds'
 import { getMimeFromExtension } from '@/hooks/parsers/parseImeta'
 import { useEventTag } from '@/hooks/useEventUtils'
-import type { ContentCustomSchema, CustomNode, ImageCustomNode, VideoCustomNode } from '@/nostr/types'
+import type { CustomNode, ImageCustomNode, VideoCustomNode } from '@/nostr/types'
 import { groupProsemirrorMedia } from '@/utils/welshmanToProsemirror'
 import React, { memo, useMemo } from 'react'
 import { Image } from './Image/Image'
@@ -42,10 +42,12 @@ export const Content = memo(function Content(props: Props) {
   const { event } = useNoteContext()
   const { dense, blured } = useContentContext()
   const nsfw = useEventTag(event, 'content-warning')
-  const schema = useMemo(
-    () => groupProsemirrorMedia(event.metadata?.contentSchema || ({} as ContentCustomSchema)),
-    [event],
-  )
+  const schema = useMemo(() => {
+    if (event.metadata?.contentSchema) {
+      return groupProsemirrorMedia(event.metadata?.contentSchema)
+    }
+    return { content: [] }
+  }, [event])
   return (
     <ContentProvider value={{ blured: !!nsfw || blured }}>
       {schema.content.map((node, index) => {

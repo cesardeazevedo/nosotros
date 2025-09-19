@@ -1,6 +1,6 @@
 import { listFormDialogAtom } from '@/atoms/dialog.atoms'
 import { listTypeViewAtom } from '@/atoms/listMenu.atoms'
-import { LinkBase } from '@/components/elements/Links/LinkBase'
+import { BookmarksLink } from '@/components/elements/Links/LinkBookmark'
 import { SidebarContext } from '@/components/elements/Sidebar/SidebarContext'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
@@ -41,23 +41,14 @@ export const ListTypeMenu = (props: Props) => {
 
   return (
     <Stack horizontal={false} sx={styles.root}>
-      <LinkBase
-        to='/feed'
-        search={{
-          kind: [Kind.BookmarkList],
-          author: [pubkey!],
-          type: 'lists',
-          live: false,
-          scope: 'sets_e',
-          limit: 50,
-        }}>
+      <BookmarksLink pubkey={pubkey}>
         <MenuItem
           interactive
           label='Bookmarks'
           leadingIcon={<IconBookmark />}
           onClick={() => sidebarContext.setPane(false)}
         />
-      </LinkBase>
+      </BookmarksLink>
       <MenuItem
         label='Follow Sets'
         leadingIcon={<IconUsersGroup />}

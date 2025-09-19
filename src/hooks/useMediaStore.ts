@@ -4,28 +4,35 @@ import type { IMetaTags } from '@/hooks/parsers/parseImeta'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { useMemo } from 'react'
 
+export type MediaSize = keyof typeof MAX_BOUNDS
+
+export const MIN_HEIGHT = 180
+
 export const MAX_BOUNDS = {
   sm: {
-    maxWidth: 360,
-    maxHeight: 380,
+    maxWidth: 320,
+    maxHeight: 340,
   },
   md: {
     maxWidth: 460,
     maxHeight: 480,
   },
   lg: {
-    maxWidth: 540,
-    maxHeight: 560,
+    maxWidth: 560,
+    maxHeight: 590,
   },
 } as const
 
 export function adjustDimensions(
   width: number,
   height: number,
-  maxWidth: number,
-  maxHeight: number,
+  bounds: {
+    maxWidth: number
+    maxHeight: number
+  },
 ): { width: number; height: number } {
   const aspectRatio = width / height
+  const { maxWidth, maxHeight } = bounds || MAX_BOUNDS.lg
 
   let newWidth = maxWidth
   let newHeight = maxWidth / aspectRatio
@@ -53,7 +60,7 @@ export function useMediaStore(src: string, imeta: IMetaTags | undefined): MediaP
   const dim = imeta?.[src]?.dim
   const width = dims.get(src)?.[0] || dim?.width
   const height = dims.get(src)?.[1] || dim?.height
-  const bounds = width !== 0 && height !== 0 ? { width, height } : {}
+  const bounds = width && height ? adjustDimensions(width, height, MAX_BOUNDS.lg) : {}
   return {
     ...bounds,
     onError: () => addError(src),
@@ -68,13 +75,11 @@ export function useMinHeightFromSources(sources: string[], event: NostrEventDB) 
       .map((src) => {
         const dim = event.metadata?.imeta?.[src]?.dim
         const width = dims.get(src)?.[0] || dim?.width
-        const height = dims.get(src)?.[1] || dim?.height
-        return width && height
-          ? adjustDimensions(width, height, MAX_BOUNDS.sm.maxWidth, MAX_BOUNDS.sm.maxHeight).height
-          : height
+        const height = dims.get(src)?.[1] || dim?.height || 0
+        return width && height ? adjustDimensions(width, height, MAX_BOUNDS.sm).height : height
       })
       .filter((x): x is number => !!x)
     const minHeight = Math.min(...heights)
-    return Math.max(230, minHeight)
+    return Math.max(MIN_HEIGHT, minHeight)
   }, [dims, sources, event])
 }

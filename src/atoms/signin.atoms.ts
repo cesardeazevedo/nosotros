@@ -1,15 +1,14 @@
-import { APP_DESCRIPTION, APP_NAME } from '@/constants/app'
 import { FALLBACK_RELAYS } from '@/constants/relays'
 import type { NIP46RemoteSignerOptions } from '@/core/signers/nip46.signer'
 import { NIP46RemoteSigner } from '@/core/signers/nip46.signer'
 import { queryClient } from '@/hooks/query/queryClient'
 import { nip05QueryOptions } from '@/hooks/query/useNIP05'
+import { pool } from '@/nostr/pool'
 import { decodeNIP19 } from '@/utils/nip19'
 import { bytesToHex } from '@noble/hashes/utils'
 import { atom } from 'jotai'
 import { nip19, type NostrEvent, type UnsignedEvent } from 'nostr-tools'
 import { loginAtom } from './auth.atoms'
-import { pool } from '@/nostr/pool'
 
 export const PAGES = {
   SELECT: 0,
@@ -142,8 +141,6 @@ export const submitBunkerAtom = atom(null, async (_, set, bunkerUrl: string) => 
 
   try {
     const params: Omit<NIP46RemoteSignerOptions, 'auth'> = {
-      name: APP_NAME,
-      description: APP_DESCRIPTION,
       method: {
         method: 'bunkerurl',
         bunkerUrl,
@@ -198,9 +195,7 @@ export const submitNostrConnectAtom = atom(
         signer: {
           name: 'nip46',
           params: {
-            name: APP_NAME,
             remotePubkey: pubkey,
-            description: APP_DESCRIPTION,
             method: { method: 'nostrconnect', relay: payload.relay },
             secret: payload.signer.secret,
             clientSecret: bytesToHex(payload.signer.clientSigner.secret),

@@ -261,7 +261,7 @@ export const UserProfileForm = (props: Props) => {
   const enqueueToast = useSetAtom(enqueueToastAtom)
   const meta = user.metadata
   const initialValues: UserSchema = {
-    display_name: meta?.display_name,
+    name: meta?.name || meta?.display_name,
     about: meta?.about,
     banner: meta?.banner,
     picture: meta?.picture || '',
@@ -284,7 +284,7 @@ export const UserProfileForm = (props: Props) => {
 
   const submitAction = async (_: unknown, formData: FormData) => {
     const values: UserSchema = {
-      display_name: formData.get('display_name')?.toString() || '',
+      name: formData.get('name')?.toString() || '',
       about: formData.get('about')?.toString(),
       banner: formData.get('banner')?.toString(),
       picture: formData.get('picture')?.toString(),
@@ -333,14 +333,7 @@ export const UserProfileForm = (props: Props) => {
             <UserProfileAvatar defaultValue={initialValues.picture} onUploading={setAvatarUploading} />
           </ScopeProvider>
           <Stack gap={1}>
-            <TextField
-              name='display_name'
-              fullWidth
-              shrink
-              label='Name'
-              placeholder='Name'
-              defaultValue={initialValues.display_name}
-            />
+            <TextField name='name' fullWidth shrink label='Name' placeholder='Name' defaultValue={initialValues.name} />
             <TextField
               name='pronouns'
               shrink

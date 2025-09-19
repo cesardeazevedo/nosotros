@@ -1,5 +1,6 @@
 import { useDeckAddNextColumn } from '@/components/modules/Deck/hooks/useDeck'
 import { useContentContext } from '@/components/providers/ContentProvider'
+import type { SxProps } from '@/components/ui/types'
 import { createEventModule } from '@/hooks/modules/createEventModule'
 import { decodeNIP19 } from '@/utils/nip19'
 import type { LinkProps } from '@tanstack/react-router'
@@ -17,13 +18,15 @@ export type Props = {
   block?: boolean
   underline?: boolean
   children: React.ReactNode
+  sx?: SxProps
 }
 
 export const LinkNEvent = memo(function LinkNEvent(props: Props) {
-  const { underline, nevent: neventProp, search, block = false, media = false, ...rest } = props
+  const { underline, nevent: neventProp, search, block = false, media = false, sx, ...rest } = props
   const { disableLink } = useContentContext()
 
   const router = useRouter()
+  const style = [styles.cursor, block && styles.block, underline && styles.underline, sx]
 
   // Swap note1 to nevent as note1 was deprecated
   const nevent = useMemo(() => {
@@ -50,7 +53,7 @@ export const LinkNEvent = memo(function LinkNEvent(props: Props) {
     e.stopPropagation()
   }
 
-  if (disableLink || !nevent) {
+  if ((disableLink && !media) || !nevent) {
     return props.children
   }
 
@@ -64,7 +67,7 @@ export const LinkNEvent = memo(function LinkNEvent(props: Props) {
           n: nevent,
         })}
         {...rest}
-        {...css.props([block && styles.block, underline && styles.underline])}
+        {...css.props(style)}
         onClick={(e) => e.stopPropagation()}
         onDragStart={handleDragStart}>
         {props.children}
@@ -77,7 +80,7 @@ export const LinkNEvent = memo(function LinkNEvent(props: Props) {
       <a
         onClick={deck.add}
         {...rest}
-        {...css.props([styles.cursor, block && styles.block, underline && styles.underline])}
+        {...css.props([style, underline && styles.underline])}
         onDragStart={handleDragStart}>
         {props.children}
       </a>
@@ -89,7 +92,7 @@ export const LinkNEvent = memo(function LinkNEvent(props: Props) {
       to={`/$nostr`}
       state={{ from: router.latestLocation.pathname } as never}
       {...rest}
-      {...css.props([block && styles.block && styles.block, underline && styles.underline])}
+      {...css.props(style)}
       onDragStart={handleDragStart}
       params={{ nostr: nevent }}>
       {props.children}
@@ -108,8 +111,11 @@ const styles = css.create({
     },
   },
   block: {
+    position: 'relative',
     display: 'block',
-    width: '100%',
-    height: '100%',
+    width: 'auto', // needed because of firefox
+    height: 'inherit',
+    maxHeight: 'inherit',
+    maxWidth: 'inherit',
   },
 })

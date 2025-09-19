@@ -1,8 +1,10 @@
-import { addMediaDimAtom, addMediaErrorAtom, mediaErrorsAtom } from '@/atoms/media.atoms'
+import { addMediaDimAtom, mediaErrorsAtom } from '@/atoms/media.atoms'
+import { useContentContext } from '@/components/providers/ContentProvider'
 import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { SxProps } from '@/components/ui/types'
 import { useNevent } from '@/hooks/useEventUtils'
+import { useMediaStore } from '@/hooks/useMediaStore'
 import { useMobile } from '@/hooks/useMobile'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
@@ -21,15 +23,17 @@ type Props = {
   proxy?: boolean
   index?: number
   draggable?: boolean
+  cover?: boolean
   sx?: SxProps
 }
 
 export const Image = memo(function Image(props: Props) {
-  const { src, proxy = true, index = 0, sx, ...rest } = props
+  const { src, proxy = true, index = 0, cover = false, sx, ...rest } = props
   const { event } = useNoteContext()
+  const { dense } = useContentContext()
+  const media = useMediaStore(src, event.metadata?.imeta)
   const addMediaDim = useSetAtom(addMediaDimAtom)
   const hasError = useAtomValue(mediaErrorsAtom).has(src)
-  const addError = useSetAtom(addMediaErrorAtom)
   const nevent = useNevent(event)
   const isMobile = useMobile()
 
@@ -49,12 +53,12 @@ export const Image = memo(function Image(props: Props) {
             <LinkNEvent media block nevent={nevent} search={{ media: index }}>
               <html.img
                 role='button'
-                style={[styles.img, isMobile && styles.img$mobile, blurStyles, sx]}
+                style={[styles.img, cover && styles.cover, (dense || isMobile) && styles.img$dense, blurStyles, sx]}
                 src={proxy ? getImgProxyUrl('feed_img', src) : src}
-                onError={() => addError(src)}
                 onLoad={(e: { target: HTMLImageElement }) => {
                   addMediaDim({ src, dim: [e.target.naturalWidth, e.target.naturalHeight] })
                 }}
+                {...media}
                 {...rest}
               />
             </LinkNEvent>
@@ -69,7 +73,8 @@ const styles = css.create({
   img: {
     display: 'block',
     blockSize: 'auto',
-    maxHeight: 560,
+    width: 'fit-content',
+    maxHeight: 'inherit',
     cursor: 'pointer',
     border: '1px solid',
     borderColor: palette.outlineVariant,
@@ -77,8 +82,11 @@ const styles = css.create({
     transition: 'transform 150ms ease',
     ':active': { transform: 'scale(0.985)' },
   },
-  img$mobile: {
-    maxHeight: 380,
+  img$dense: {
+    maxHeight: 340,
+  },
+  cover: {
+    objectFit: 'cover',
   },
   fallback: {
     width: '100%',

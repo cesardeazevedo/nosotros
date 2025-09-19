@@ -27,8 +27,7 @@ function parseUserMetadata(event: NostrEvent) {
   const { displayName, username, ...rest } = parsed
   return {
     ...rest,
-    name: parsed.name || username,
-    display_name: parsed.display_name || displayName,
+    name: parsed.name || parsed.display_name || displayName,
     aboutParsed,
   }
 }

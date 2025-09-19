@@ -166,48 +166,47 @@ export const NotificationItem = memo(function NotificationItem(props: Props) {
               <>
                 {type === 'zap' && (
                   <>
-                    {!dense && <Text size='md'>zapped to your note:</Text>}
+                    {<Text size='md'>zapped to your note:</Text>}
                     {relatedEvent.data && <NotificationContent dense={dense} event={relatedEvent.data} />}
                   </>
                 )}
                 {type === 'public_message' && (
                   <>
                     <Stack horizontal={false}>
-                      {!dense && <Text size='md'>sent you a public message:</Text>}{' '}
+                      <Text size='md'>sent you a public message:</Text>{' '}
                       <NotificationContent dense={dense} event={event} />
                     </Stack>
                   </>
                 )}
                 {type === 'reaction' && (
                   <>
-                    {!dense && <Text size='md'>reacted to your note:</Text>}{' '}
+                    {<Text size='md'>reacted to your note:</Text>}{' '}
                     {relatedEvent.data && <NotificationContent dense={dense} event={relatedEvent.data} />}
                   </>
                 )}
                 {type === 'reply' && (
                   <>
-                    {!dense && (
+                    {
                       <Text size='md'>
                         replied to {event.pubkey === acc?.pubkey ? 'your note' : 'a note you were mentioned'}
                         {': '}
                       </Text>
-                    )}{' '}
+                    }{' '}
                     <NotificationContent dense={dense} event={event} />
                   </>
                 )}
                 {type === 'mention' && (
                   <>
-                    {!dense && <Text size='md'>mentioned you in a note:</Text>}{' '}
-                    <NotificationContent dense={dense} event={event} />
+                    <Text size='md'>mentioned you in a note:</Text> <NotificationContent dense={dense} event={event} />
                   </>
                 )}
                 {type === 'repost' && (
                   <>
-                    {!dense && (
+                    {
                       <Text size='md'>
                         reposted {event.pubkey === acc?.pubkey ? 'your note' : 'a note you were mentioned'}
                       </Text>
-                    )}{' '}
+                    }{' '}
                     {relatedEvent.data && <NotificationContent dense={dense} event={relatedEvent.data} />}
                   </>
                 )}

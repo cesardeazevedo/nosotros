@@ -9,10 +9,10 @@ import React from 'react'
 import { css, html } from 'react-strict-dom'
 import { UserAvatar } from './UserAvatar'
 import { UserContentAbout } from './UserContentAbout'
+import { UserFollowings } from './UserFollowings'
 import { UserName } from './UserName'
 import { UserNIP05 } from './UserNIP05'
 import { UserRelays } from './UserRelays'
-import { UserFollowings } from './UserFollowings'
 
 type Props = {
   pubkey: string
@@ -36,7 +36,7 @@ export const UserPopover = function UserPopover(props: Props) {
       cursor='dot'
       content={() => (
         <ContentProvider value={{ disablePopover: true }}>
-          <Paper elevation={4} shape='lg' surface='surfaceContainerLow' sx={styles.root}>
+          <Paper outlined shape='lg' surface='surfaceContainerLowest' sx={styles.root}>
             <Stack justify='space-between' sx={styles.header}>
               <UserAvatar size='lg' pubkey={pubkey} />
               <Stack gap={0.5}>
