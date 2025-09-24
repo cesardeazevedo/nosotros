@@ -20,7 +20,7 @@ import {
   IconServerBolt,
   IconUser,
 } from '@tabler/icons-react'
-import { Link, useRouter } from '@tanstack/react-router'
+import { Link, useMatch, useRouter } from '@tanstack/react-router'
 import { useSetAtom } from 'jotai'
 import { nip19 } from 'nostr-tools'
 import { memo } from 'react'
@@ -35,6 +35,9 @@ export const BottomNavigation = memo(function BottomNavigation() {
   const user = useCurrentUser()
   const mobile = useMobile()
   const router = useRouter()
+  const isIndexRoute = !!useMatch({ from: '/', shouldThrow: false })
+  const isThreadsRoute = !!useMatch({ from: '/threads', shouldThrow: false })
+  const isHome = isIndexRoute || isThreadsRoute
   const toggleSearch = useSetAtom(toggleSearchDialogAtom)
 
   if (!mobile) {
@@ -62,9 +65,7 @@ export const BottomNavigation = memo(function BottomNavigation() {
         <Stack grow justify='space-around'>
           <Tooltip text='Home' enterDelay={0}>
             <Link to='/' onClick={handleResetScroll('/')}>
-              {({ isActive }) => (
-                <Tab active={isActive} sx={styles.tab} icon={<IconHome />} activeIcon={<IconHomeFilled />} />
-              )}
+              <Tab active={isHome} sx={styles.tab} icon={<IconHome />} activeIcon={<IconHomeFilled />} />
             </Link>
           </Tooltip>
           <div>
