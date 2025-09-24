@@ -25,7 +25,7 @@ function useSearchOnRelays(options: SearchOptions) {
       queryKey: ['search', options.query],
       filter: {
         kinds: [Kind.Metadata],
-        search: options.query,
+        search: options.query.toLowerCase(),
         limit: 15,
       },
       enabled: !!options.query,
@@ -51,7 +51,7 @@ function useSearchFollowingUsers(options: SearchOptions) {
         data: results
           .filter((x) => !!x)
           .map((result) => result.data)
-          .filter((user) => user?.content.toLowerCase().indexOf(query) !== -1)
+          .filter((user) => user?.content.toLowerCase().indexOf(query.toLowerCase()) !== -1)
           .slice(0, limit),
       }
     },
