@@ -119,7 +119,7 @@ export const VideoControls = function VideoControls(props: Props) {
   }, [])
 
   const handleProgressClick = useCallback(
-    (event: Readonly<{ pageX: number; preventDefault: () => void; stopPropagation: () => void }>) => {
+    (event: Readonly<{ pageX: number; preventDefault: () => void; stopPropagation: () => void }> | TouchEvent) => {
       const video = ref.current
       if (!progressRef.current || !duration || !video) return
 
@@ -127,7 +127,8 @@ export const VideoControls = function VideoControls(props: Props) {
       event.stopPropagation()
 
       const rect = progressRef.current.getBoundingClientRect()
-      const percent = (event.pageX - rect.left) / rect.width
+      const clientX = 'touches' in event ? event.touches[0].clientX : event.pageX
+      const percent = (clientX - rect.left) / rect.width
       const time = percent * duration
       video.currentTime = time
     },
@@ -135,7 +136,7 @@ export const VideoControls = function VideoControls(props: Props) {
   )
 
   const handleMouseDown = useCallback(
-    (event: Readonly<{ pageX: number; preventDefault: () => void; stopPropagation: () => void }>) => {
+    (event: Readonly<{ pageX: number; preventDefault: () => void; stopPropagation: () => void }> | TouchEvent) => {
       event.preventDefault()
       event.stopPropagation()
       setIsDragging(true)
@@ -145,12 +146,13 @@ export const VideoControls = function VideoControls(props: Props) {
   )
 
   const handleMouseMove = useCallback(
-    (event: MouseEvent) => {
+    (event: MouseEvent | TouchEvent) => {
       const video = ref.current
       if (!isDragging || !progressRef.current || !duration || !video) return
 
       const rect = progressRef.current.getBoundingClientRect()
-      const percent = Math.max(0, Math.min(1, (event.pageX - rect.left) / rect.width))
+      const clientX = 'touches' in event ? event.touches[0].clientX : event.clientX
+      const percent = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width))
       const time = percent * duration
       video.currentTime = time
     },
@@ -222,9 +224,13 @@ export const VideoControls = function VideoControls(props: Props) {
     if (isDragging) {
       document.addEventListener('mousemove', handleMouseMove)
       document.addEventListener('mouseup', handleMouseUp)
+      document.addEventListener('touchmove', handleMouseMove)
+      document.addEventListener('touchend', handleMouseUp)
       return () => {
         document.removeEventListener('mousemove', handleMouseMove)
         document.removeEventListener('mouseup', handleMouseUp)
+        document.removeEventListener('touchmove', handleMouseMove)
+        document.removeEventListener('touchend', handleMouseUp)
       }
     }
   }, [isDragging, handleMouseMove, handleMouseUp])
@@ -253,14 +259,18 @@ export const VideoControls = function VideoControls(props: Props) {
         ref={progressRef}
         style={styles.progressContainer}
         onClick={handleProgressClick}
+        onTouchStart={handleMouseDown}
         onPointerMove={cancelEvent}
         onMouseDown={handleMouseDown}
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}>
         <html.div style={[styles.progressTrack, isHovering && styles.progressTrackHover]}>
           <html.div ref={progressFillRef} style={styles.progressFill} />
-          <html.div ref={progressThumbOuterRef} style={styles.progressThumbOuter} />
-          <html.div ref={progressThumbRef} style={[styles.progressThumb, isHovering && styles.progressThumbVisible]} />
+          {(isHovering || isDragging) && <html.div ref={progressThumbOuterRef} style={styles.progressThumbOuter} />}
+          <html.div
+            ref={progressThumbRef}
+            style={[styles.progressThumb, (isHovering || isDragging) && styles.progressThumbVisible]}
+          />
         </html.div>
       </html.div>
       <Stack gap={1} justify='space-between'>
