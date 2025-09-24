@@ -505,6 +505,7 @@ const tagsRoute = createRoute({
     return (
       <FeedRoute
         feed={feed}
+        renderEditor={false}
         header={<FeedHeaderBase feed={feed} renderRelaySettings leading={<TagHeader feed={feed} />} />}
       />
     )
