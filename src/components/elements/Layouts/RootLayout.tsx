@@ -1,7 +1,6 @@
 import { useMobile } from '@/hooks/useMobile'
 import { useRelayAuthenticator } from '@/hooks/useRelayAuthenticator'
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
-import { Outlet, useRouteContext } from '@tanstack/react-router'
+import { Outlet } from '@tanstack/react-router'
 import { Dialogs } from 'components/modules/DialogsModule'
 import { memo } from 'react'
 import { Header } from '../Header/Header'
@@ -11,7 +10,6 @@ import { Toaster } from './Toaster'
 
 export const RootLayout = memo(function RootLayout() {
   const isMobile = useMobile()
-  const context = useRouteContext({ from: '__root__' })
   useRelayAuthenticator()
 
   return (
@@ -29,12 +27,6 @@ export const RootLayout = memo(function RootLayout() {
       )}
       <BottomNavigation />
       <Toaster />
-      {import.meta.env.DEV && (
-        <div style={{ fontSize: '125%' }}>
-          <ReactQueryDevtools client={context.queryClient} />
-        </div>
-      )}
-      {/* <TanStackRouterDevtools router={router} /> */}
     </>
   )
 })

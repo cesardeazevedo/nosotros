@@ -1,3 +1,4 @@
+import { RouterProvider } from '@tanstack/react-router'
 import { Provider } from 'jotai'
 import ReactDOM from 'react-dom/client'
 import { registerSW } from 'virtual:pwa-register'
@@ -6,9 +7,8 @@ import { ContentProvider } from './components/providers/ContentProvider'
 import { QueryProvider } from './components/providers/QueryProvider'
 import { StylexProvider } from './components/providers/StylexProvider'
 import { queryClient } from './hooks/query/queryClient'
-import './styles/stylex.css'
-import { RouterProvider } from '@tanstack/react-router'
 import { router } from './Router'
+import './styles/stylex.css'
 
 registerSW({ immediate: true })
 
