@@ -2,10 +2,10 @@ import { Kind } from '@/constants/kinds'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { eventAddress } from '@/utils/nip19'
 import { useQuery } from '@tanstack/react-query'
+import { useMemo } from 'react'
 import { queryKeys } from './queryKeys'
 import type { CustomQueryOptions } from './useQueryBase'
 import { eventQueryOptions } from './useQueryBase'
-import { useMemo } from 'react'
 
 export function eventRepostsQueryOptions(event: NostrEventDB, options?: CustomQueryOptions) {
   const address = eventAddress(event)

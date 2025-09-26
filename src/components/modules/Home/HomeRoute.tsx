@@ -3,7 +3,7 @@ import { createHomeFeedModule } from '@/hooks/modules/createHomeFeedModule'
 import { useFeedState } from '@/hooks/state/useFeed'
 import { useCurrentPubkey } from '@/hooks/useAuth'
 import { useResetScroll } from '@/hooks/useResetScroll'
-import { useNavigate } from '@tanstack/react-router'
+import { useMatch, useNavigate } from '@tanstack/react-router'
 import { memo, useMemo } from 'react'
 import { Feed } from '../Feed/Feed'
 import { FeedHeadline } from '../Feed/FeedHeadline'
@@ -18,6 +18,7 @@ export const HomeRoute = memo(function HomeRoute(props: Props) {
   const { replies = false } = props
   const navigate = useNavigate()
   const pubkey = useCurrentPubkey()
+  const isThreadsRoute = !!useMatch({ from: '/threads', shouldThrow: false })
   const module = useMemo(() => {
     return {
       ...createHomeFeedModule(pubkey),
@@ -29,6 +30,9 @@ export const HomeRoute = memo(function HomeRoute(props: Props) {
   const handleChangeTabs = (anchor: string | undefined) => {
     feed.setPageSize(module.pageSize)
     navigate({ to: anchor === 'replies' ? '/threads' : '/' })
+    if ((anchor === 'replies' && isThreadsRoute) || (anchor !== 'replies' && !isThreadsRoute)) {
+      feed.onRefresh()
+    }
   }
 
   return (

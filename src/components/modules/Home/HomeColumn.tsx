@@ -37,8 +37,13 @@ export const HomeColumn = memo(function HomeColumn(props: Props) {
           renderEditor={false}
           feed={feed}
           onChangeTabs={(tab) => {
-            feed.setReplies(tab === 'replies')
-            feed.saveFeed()
+            const isReplies = tab === 'replies'
+            if (isReplies !== feed.replies) {
+              feed.setReplies(isReplies)
+              feed.saveFeed()
+            } else {
+              feed.onRefresh()
+            }
           }}
         />
       }
