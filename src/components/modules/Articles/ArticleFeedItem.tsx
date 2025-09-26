@@ -32,7 +32,6 @@ export const ArticleFeedItem = memo(function ArticleFeedItem(props: Props) {
   const title = useEventTag(event, 'title')
   const image = useEventTag(event, 'image')
   const summary = useEventTag(event, 'summary')
-  const publishedAt = parseInt(useEventTag(event, 'published_at') || event.created_at.toString())
   return (
     <Stack horizontal={false} sx={[styles.root, props.border && styles.root$border]} ref={note.ref}>
       <NoteProvider value={{ event }}>
@@ -43,7 +42,7 @@ export const ArticleFeedItem = memo(function ArticleFeedItem(props: Props) {
                 <Stack horizontal={false} gap={2}>
                   {props.header || (
                     <UserHeader pubkey={note.event.pubkey}>
-                      <PostHeaderDate dateStyle='long' nevent={note.nip19} date={publishedAt} />
+                      <PostHeaderDate dateStyle='long' nevent={note.nip19} date={event.created_at} />
                     </UserHeader>
                   )}
                   <Text variant='headline' size='sm'>
