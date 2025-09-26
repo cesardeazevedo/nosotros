@@ -16,7 +16,7 @@ const user1 = fakeEventMeta({
 })
 
 const meta = {
-  title: 'Components/NostrEventMediaWrapper',
+  title: 'Components/NostrEventMedia',
   component: NostrEventRoot,
   parameters: {
     layout: 'centered',

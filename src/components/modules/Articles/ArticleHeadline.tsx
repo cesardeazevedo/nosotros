@@ -1,10 +1,12 @@
 import { openImageDialogAtom } from '@/atoms/dialog.atoms'
 import { addMediaErrorAtom, mediaErrorsAtom } from '@/atoms/media.atoms'
+import { PostHeaderDate } from '@/components/elements/Posts/PostHeaderDate'
 import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { useEventTag } from '@/hooks/useEventUtils'
 import { useMobile } from '@/hooks/useMobile'
+import { publish } from '@/nostr/publish/publish'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
@@ -25,6 +27,7 @@ export const ArticleHeadline = memo(function ArticleHeadline() {
   const summary = useEventTag(event, 'summary')
   const addError = useSetAtom(addMediaErrorAtom)
   const hasError = useAtomValue(mediaErrorsAtom).has(image || '')
+  const publishedAt = parseInt(useEventTag(event, 'published_at') || event.created_at.toString())
   return (
     <Stack horizontal={false} sx={styles.root} gap={1}>
       {image && !hasError && (
@@ -43,6 +46,14 @@ export const ArticleHeadline = memo(function ArticleHeadline() {
           <Text variant='title' size='lg' sx={styles.summary}>
             {summary}
           </Text>
+        )}
+        {publishedAt !== event.created_at && (
+          <Stack gap={0.5}>
+            <Text variant='body' size='sm'>
+              Published
+            </Text>
+            <PostHeaderDate dateStyle='long' date={publishedAt} />
+          </Stack>
         )}
       </Stack>
     </Stack>

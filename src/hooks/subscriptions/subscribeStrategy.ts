@@ -79,6 +79,7 @@ export function subscribeStrategy(ctx: NostrContext, filter: NostrFilter, dbFilt
         }),
       )
     }
+    case 'LIVE':
     case 'REMOTE_ONLY': {
       return subscribeRemote(ctx, filter)
     }

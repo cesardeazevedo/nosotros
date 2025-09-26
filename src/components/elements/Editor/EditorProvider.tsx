@@ -171,7 +171,7 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
       ? parent.metadata?.isRoot
         ? `${replyName} on ${parent.pubkey === pubkey ? 'your' : parentName} ${itemName}`
         : `${replyName} on ${parentName} ${itemName}`
-      : "What's in your mind?"
+      : "What's on your mind?"
   }, [kind, parent, parentUser.event])
 
   const placeholderRef = useRef(placeholder)

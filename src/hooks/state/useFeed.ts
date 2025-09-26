@@ -8,12 +8,14 @@ import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { useObservable, useObservableCallback, useSubscription } from 'observable-hooks'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { EMPTY, finalize, ignoreElements, filter as rxFilter, switchMap, tap, throttleTime } from 'rxjs'
+import { EMPTY, finalize, ignoreElements, filter as rxFilter, Subject, switchMap, tap, throttleTime } from 'rxjs'
 import { queryKeys } from '../query/queryKeys'
 import { setEventData } from '../query/queryUtils'
 import type { FeedScope } from '../query/useQueryFeeds'
 import { createFeedQueryOptions, type FeedModule, type InfiniteEvents } from '../query/useQueryFeeds'
 import { subscribeLive } from '../subscriptions/subscribeLive'
+
+export const feedRefresh$ = new Subject<string>()
 
 export type FeedState = ReturnType<typeof useFeedState>
 
@@ -183,6 +185,13 @@ export function useFeedStateAtom(feedAtoms: FeedAtoms, extras?: Extras) {
     [],
   )
 
+  const onRefresh = () => {
+    queryClient.resetQueries({ queryKey })
+    queryClient.invalidateQueries({ queryKey })
+    setIsEmpty(false)
+    resetBuffers()
+  }
+
   const [paginate, paginate$] = useObservableCallback<[number, InfiniteEvents | undefined, FeedScope]>((input$) => {
     return input$.pipe(
       rxFilter(([, data]) => data?.pages.flat().length !== 0),
@@ -201,6 +210,14 @@ export function useFeedStateAtom(feedAtoms: FeedAtoms, extras?: Extras) {
     )
   })
   useSubscription(paginate$)
+
+  const refresh$ = useObservable(() =>
+    feedRefresh$.pipe(
+      rxFilter((x) => options.id.startsWith(x)),
+      tap(() => onRefresh()),
+    ),
+  )
+  useSubscription(refresh$)
 
   return {
     atoms: feedAtoms,
@@ -225,6 +242,7 @@ export function useFeedStateAtom(feedAtoms: FeedAtoms, extras?: Extras) {
     toggleKind,
     resetFeed,
     resetBuffers,
+    onRefresh,
     blured,
     setBlured,
     pageSize,

@@ -22,8 +22,7 @@ export const FeedList = memo(function FeedList(props: Props) {
   const { feed, render, onScrollEnd, column, renderNewPostsIndicator = true } = props
   const ref = useRef<HTMLDivElement>(null)
   const pullRefreshProps = {
-    queryKey: feed.queryKey,
-    onRefresh: feed.resetBuffers,
+    onRefresh: feed.onRefresh,
   }
 
   const list = useMemo(
