@@ -1,10 +1,10 @@
+import { settingsAtom } from '@/atoms/settings.atoms'
+import { store } from '@/atoms/store'
 import type { NostrFilter } from '@/core/types'
 import type { NostrContext } from '@/nostr/context'
 import { delay, identity, mergeMap, filter as rxFilter } from 'rxjs'
 import type { FeedScope } from '../query/useQueryFeeds'
 import { subscribeFeed } from './subscribeFeed'
-import { store } from '@/atoms/store'
-import { settingsAtom } from '@/atoms/settings.atoms'
 
 export function subscribeLive(ctx: NostrContext, scope: FeedScope, filter: NostrFilter) {
   const now = Date.now() / 10000
@@ -14,7 +14,8 @@ export function subscribeLive(ctx: NostrContext, scope: FeedScope, filter: Nostr
       closeOnEose: false,
       negentropy: false,
       subId: 'live',
-      network: 'REMOTE_ONLY',
+      // REMOTE_ONLY doesn't get inserted in the database
+      network: ctx.network === 'REMOTE_ONLY' ? 'REMOTE_ONLY' : 'LIVE',
       maxRelaysPerUser: store.get(settingsAtom).maxRelaysPerUser,
     },
     scope,

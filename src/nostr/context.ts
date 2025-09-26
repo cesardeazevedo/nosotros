@@ -25,6 +25,7 @@ export type NostrContext = {
     | 'CACHE_FIRST_BATCH'
     | 'CACHE_ONLY'
     | 'REMOTE_ONLY'
+    | 'LIVE'
   batcher?: SubscriptionBatcher<NostrEventDB>
   ignoreRelays?: string[]
   maxRelaysPerUser?: number
