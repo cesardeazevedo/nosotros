@@ -25,7 +25,9 @@ export class SqliteSharedService {
   private static CHANNEL_NAME = 'SQLITE_CHANNEL'
   private static SERVICE_NAME = 'SQLITE_SERVICE'
 
-  private sharedWorker = new SharedWorker(new URL('./sqlite.shared.worker.ts', import.meta.url), { type: 'module' })
+  private sharedWorker = window.SharedWorker
+    ? new SharedWorker(new URL('./sqlite.shared.worker.ts', import.meta.url), { type: 'module' })
+    : null
   private clientId = this.getClientId()
   private providerPort = this.providerChange()
   private clientChannel = new BroadcastChannel(SqliteSharedService.CHANNEL_NAME)
@@ -103,7 +105,9 @@ export class SqliteSharedService {
           service.postMessage(data.clientId)
         })
 
-        this.sharedWorker.port.postMessage(data, [requestedPort])
+        if (this.sharedWorker) {
+          this.sharedWorker.port.postMessage(data, [requestedPort])
+        }
       },
       { signal: this.onDeactivate.signal },
     )
@@ -145,8 +149,10 @@ export class SqliteSharedService {
       navigator.locks.request(clientId!, () => new Promise(() => resolve()))
     })
 
-    this.sharedWorker.port.start()
-    this.sharedWorker.port.postMessage({ type: 'register', clientId })
+    if (this.sharedWorker) {
+      this.sharedWorker.port.start()
+      this.sharedWorker.port.postMessage({ type: 'register', clientId })
+    }
 
     return clientId
   }
@@ -168,15 +174,21 @@ export class SqliteSharedService {
         }
         // the port arrives on the shared worker message
         const port = (e.ports && e.ports[0]) || null
-        this.sharedWorker.port.removeEventListener('message', onMessage as EventListener)
+        if (this.sharedWorker) {
+          this.sharedWorker.port.removeEventListener('message', onMessage as EventListener)
+        }
         resolve(port)
       }
-      this.sharedWorker.port.addEventListener('message', onMessage as EventListener)
+      if (this.sharedWorker) {
+        this.sharedWorker.port.addEventListener('message', onMessage as EventListener)
+      }
 
       setTimeout(() => {
-        this.sharedWorker.port.removeEventListener('message', onMessage as EventListener)
+        if (this.sharedWorker) {
+          this.sharedWorker.port.removeEventListener('message', onMessage as EventListener)
+        }
         resolve(null)
-      }, 2000)
+      }, 1500)
     })
     if (res) {
       res.onmessage = (e: MessageEvent) => {
