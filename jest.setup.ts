@@ -20,6 +20,25 @@ class ESBuildAndJSDOMCompatibleTextEncoder extends TextEncoder {
 }
 global.TextEncoder = ESBuildAndJSDOMCompatibleTextEncoder
 
+Object.defineProperty(global.navigator, 'locks', {
+  writable: true,
+  value: {
+    request: vi.fn((name, optionsOrCallback, callback) => {
+      const actualCallback = typeof optionsOrCallback === 'function' ? optionsOrCallback : callback
+      return Promise.resolve(actualCallback({}))
+    }),
+    query: vi.fn().mockResolvedValue({ held: [] }),
+  },
+})
+
+// @ts-ignore
+global.BroadcastChannel = vi.fn(() => ({
+  postMessage: vi.fn(),
+  addEventListener: vi.fn(),
+  removeEventListener: vi.fn(),
+  close: vi.fn(),
+}))
+
 vi.mock('nostr-tools', async () => {
   const originalModule = await vi.importActual<Record<string, unknown>>('nostr-tools')
   return {
