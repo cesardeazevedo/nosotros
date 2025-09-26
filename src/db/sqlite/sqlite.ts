@@ -3,44 +3,15 @@ import { getDTag } from '@/utils/nip19'
 import type { Filter, NostrEvent } from 'nostr-tools'
 import { isAddressableKind, isReplaceableKind } from 'nostr-tools/kinds'
 import type { Nip05DB, RelayInfoDB, RelayStatsDB, SeenDB } from '../types'
+import { SqliteSharedService } from './sqlite.shared'
 import type { NostrEventDB, NostrEventExists } from './sqlite.types'
-import { type SqliteMessageResponse, type SqliteMessages } from './sqlite.types'
-
-type Resolvers = {
-  resolve: CallableFunction
-  reject: CallableFunction
-}
+import { type SqliteMessages } from './sqlite.types'
 
 export class SqliteStorage {
-  worker: Worker
-  requests = new Map<string, Resolvers>()
-
-  constructor() {
-    this.requests = new Map()
-    this.worker = new Worker(new URL('./sqlite.worker.ts', import.meta.url), { type: 'module' })
-    this.worker.onmessage = (e) => {
-      const raw = e.data
-      const res = (typeof raw === 'string' ? JSON.parse(raw) : raw) as SqliteMessageResponse<unknown> & { id: string }
-      const resolvers = this.requests.get(res.id)
-      if (!resolvers) {
-        return
-      }
-      this.requests.delete(res.id)
-      if ('error' in res) {
-        resolvers.reject(res.error)
-      } else {
-        resolvers.resolve(res.result)
-      }
-    }
-  }
+  private service = new SqliteSharedService()
 
   private async send<T = void>(msg: SqliteMessages) {
-    return new Promise<T>((resolve, reject) => {
-      const id = Math.random().toString().slice(2)
-      this.requests.set(id, { resolve, reject })
-      const data = JSON.stringify({ ...msg, id, sent: Date.now() })
-      this.worker.postMessage(data)
-    })
+    return this.service.send<T>(msg)
   }
 
   async queryEvents(filter: Filter) {
