@@ -18,6 +18,7 @@ import {
   IconBookmark,
   IconCopy,
   IconDotsVertical,
+  IconExternalLink,
   IconInfoSquareRounded,
   IconLink,
   IconQuote,
@@ -28,9 +29,11 @@ import { useSetAtom } from 'jotai'
 import { memo, useCallback } from 'react'
 import { css, html } from 'react-strict-dom'
 import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDOMProps'
+import { ContentLink } from '../Content/Link/Link'
 
 type PropsOptions = {
   event: NostrEventDB
+  nevent: string | undefined
   onCopyIdClick: (e: StrictClickEvent) => void
   onCopyAuthorIdClick: (e: StrictClickEvent) => void
   onCopyLinkClick: (e: StrictClickEvent) => void
@@ -41,7 +44,7 @@ type PropsOptions = {
 const iconProps = { size: 20 }
 
 const Options = memo(function Options(props: PropsOptions) {
-  const { event } = props
+  const { event, nevent } = props
   const itemProps = { interactive: true, size: 'sm' } as const
   return (
     <>
@@ -88,6 +91,9 @@ const Options = memo(function Options(props: PropsOptions) {
           label='Copy Link'
           onClick={props.onCopyLinkClick}
         />
+        <ContentLink tooltip={false} underline={false} href={`https://njump.me/${nevent}`} sx={styles.link}>
+          <MenuItem {...itemProps} leadingIcon={<IconExternalLink {...iconProps} />} label='Njump.me' />
+        </ContentLink>
         {/* <MenuItem disabled leadingIcon={<IconBookmark />} label='Bookmark' /> */}
         {/* <MenuItem disabled variant='danger' leadingIcon={<IconEyeOff />} label='Mute' /> */}
         {/* <MenuItem disabled variant='danger' leadingIcon={<IconUserMinus />} label='Unfollow' /> */}
@@ -140,6 +146,7 @@ export const PostOptions = memo(function PostOptions(props: Props) {
         <MenuList surface='surfaceContainerLow' sx={styles.menuList}>
           <Options
             event={event}
+            nevent={nevent}
             onCopyIdClick={handleCopy(nevent)}
             onCopyAuthorIdClick={handleCopy(user?.nprofile)}
             onCopyLinkClick={handleCopy(link)}
@@ -187,5 +194,8 @@ const styles = css.create({
   },
   wrapper: {
     paddingInline: spacing.padding1,
+  },
+  link: {
+    width: '100%',
   },
 })

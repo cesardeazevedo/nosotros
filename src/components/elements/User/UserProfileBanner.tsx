@@ -47,6 +47,6 @@ const styles = css.create({
   },
   fallback: {
     backgroundColor: palette.surfaceContainerLow,
-    height: '100%',
+    height: 240,
   },
 })

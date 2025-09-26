@@ -18,6 +18,7 @@ export const SearchRoute = memo(function SearchRoute() {
   return (
     <FeedRoute
       feed={feed}
+      renderEditor={false}
       header={
         <>
           <Stack sx={styles.header} horizontal={false} justify='stretch'>

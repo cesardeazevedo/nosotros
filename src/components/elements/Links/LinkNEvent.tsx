@@ -62,6 +62,7 @@ export const LinkNEvent = memo(function LinkNEvent(props: Props) {
       <Link
         to={'.'}
         search={(s) => ({
+          ...s,
           media: s.media,
           ...(typeof search === 'function' ? search(s) : typeof search === 'object' ? search : {}),
           n: nevent,

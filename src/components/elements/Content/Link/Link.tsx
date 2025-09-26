@@ -13,6 +13,7 @@ import { RelayPopover } from '../../Relays/RelayPopover'
 
 type Props = {
   href: string
+  tooltip?: boolean
   underline?: boolean
   shrink?: boolean
   children?: React.ReactNode | string
@@ -20,7 +21,7 @@ type Props = {
 }
 
 export const ContentLink = (props: Props) => {
-  const { href, underline = true, shrink = true } = props
+  const { href, underline = true, shrink = true, tooltip } = props
   const isLongLink = (href?.length || 0) > 36
   const sx = [styles.root, underline && styles.root$underline, shrink && styles.shrink, props.sx] as SxProps
   const content = (
@@ -48,7 +49,7 @@ export const ContentLink = (props: Props) => {
       </RelayPopover>
     )
   }
-  if (isLongLink && href) {
+  if (isLongLink && href && tooltip !== false) {
     return <Tooltip text={href}>{content}</Tooltip>
   }
   return <>{content}</>
