@@ -1,14 +1,15 @@
+import { createDeckAtom } from '@/atoms/deck.atoms'
 import { Button } from '@/components/ui/Button/Button'
 import { ButtonBase } from '@/components/ui/ButtonBase/ButtonBase'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { TextField } from '@/components/ui/TextField/TextField'
 import { TooltipRich } from '@/components/ui/TooltipRich/TooltipRich'
-import { useRootStore } from '@/hooks/useRootStore'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import EmojiPicker, { EmojiStyle, Theme as EmojiTheme } from 'emoji-picker-react'
+import { useSetAtom } from 'jotai'
 import { useActionState, useState } from 'react'
 import { css } from 'react-strict-dom'
 
@@ -17,12 +18,12 @@ type Props = {
 }
 
 export const DeckForm = (props: Props) => {
-  const root = useRootStore()
+  const createDeck = useSetAtom(createDeckAtom)
   const [icon, setIcon] = useState('🤙')
   const [, submit] = useActionState((_: unknown, formData: FormData) => {
     const name = formData.get('name')?.toString()
     if (name) {
-      root.decks.add({ name, icon })
+      createDeck({ name, icon })
       props.onCancel?.()
     }
     return null

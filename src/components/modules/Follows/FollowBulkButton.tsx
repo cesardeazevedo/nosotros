@@ -1,21 +1,21 @@
 import { Button } from '@/components/ui/Button/Button'
-import { useCurrentAccount, useCurrentUser } from '@/hooks/useRootStore'
-import { observer } from 'mobx-react-lite'
+import { useCurrentUser } from '@/hooks/useAuth'
+import { memo } from 'react'
 import { useFollowSubmit } from './hooks/useFollowSubmit'
 
 type Props = {
-  pubkeys: string[]
+  tag?: string
+  values: string[]
 }
 
-export const FollowBulkButton = observer(function FollowBulkButton(props: Props) {
-  const { pubkeys } = props
-  const acc = useCurrentAccount()
+export const FollowBulkButton = memo(function FollowBulkButton(props: Props) {
+  const { tag = 'p', values } = props
   const user = useCurrentUser()
-  const [pending, onSubmit] = useFollowSubmit(pubkeys)
-  const isFollowingAll = pubkeys.every((x) => user?.followsPubkey(x) || x === user?.pubkey)
+  const { isPending, mutate } = useFollowSubmit(tag, values)
+  const isFollowingAll = values.every((x) => user?.followsTag(x) || x === user?.pubkey)
   return (
-    <Button disabled={isFollowingAll || pending || !acc} variant='filled' onClick={() => acc && onSubmit(acc)}>
-      Follow All ({pubkeys.length})
+    <Button disabled={isFollowingAll || isPending} variant='filled' onClick={() => mutate()}>
+      Follow All ({values.length})
     </Button>
   )
 })

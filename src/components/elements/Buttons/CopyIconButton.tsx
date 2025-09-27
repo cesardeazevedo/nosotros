@@ -2,11 +2,12 @@ import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 import type { SxProps } from '@/components/ui/types'
+import { useCopyClipboard } from '@/hooks/useCopyClipboard'
 import { spacing } from '@/themes/spacing.stylex'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconCheck, IconCopy } from '@tabler/icons-react'
 import { AnimatePresence, motion, MotionConfig } from 'framer-motion'
-import { forwardRef, useCallback, useImperativeHandle, useState } from 'react'
+import { forwardRef, useImperativeHandle } from 'react'
 import { css, html } from 'react-strict-dom'
 
 type Props = {
@@ -26,22 +27,9 @@ const variants = {
 
 export const CopyIconButton = forwardRef<CopyButtonRef, Props>((props, ref) => {
   const { text, title = 'Copy text' } = props
-  const [copied, setCopied] = useState(false)
+  const { copy, copied } = useCopyClipboard(text)
 
-  const handleCopy = useCallback(() => {
-    if (text) {
-      navigator.clipboard.writeText(text).then(() => {
-        setCopied(true)
-        setTimeout(() => {
-          setCopied(false)
-        }, 2000)
-      })
-    }
-  }, [text])
-
-  useImperativeHandle(ref, () => ({
-    copy: handleCopy,
-  }))
+  useImperativeHandle(ref, () => ({ copy }))
 
   return (
     <html.div style={props.sx}>
@@ -61,7 +49,7 @@ export const CopyIconButton = forwardRef<CopyButtonRef, Props>((props, ref) => {
         <IconButton
           size='sm'
           sx={styles.button}
-          onClick={handleCopy}
+          onClick={copy}
           icon={
             <MotionConfig transition={{ duration: 0.2 }}>
               <AnimatePresence initial={false} mode='wait'>

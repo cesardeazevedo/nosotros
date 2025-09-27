@@ -1,16 +1,21 @@
-import type { Props as ButtonProps } from '@/components/ui/Button/Button'
 import { Button } from '@/components/ui/Button/Button'
 import { Stack } from '@/components/ui/Stack/Stack'
+import type { SxProps } from '@/components/ui/types'
+import { useCopyClipboard } from '@/hooks/useCopyClipboard'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconCheck, IconCopy } from '@tabler/icons-react'
 import { AnimatePresence, motion, MotionConfig } from 'framer-motion'
-import { forwardRef, useCallback, useImperativeHandle, useState } from 'react'
+import type { Ref } from 'react'
+import { useImperativeHandle } from 'react'
 import { css, html } from 'react-strict-dom'
 
 type Props = {
+  fullWidth?: boolean
+  sx?: SxProps
   title?: string
+  ref?: Ref<CopyButtonRef | undefined>
   text: string | undefined
-} & Partial<ButtonProps>
+}
 
 type CopyButtonRef = {
   copy: () => void
@@ -21,28 +26,15 @@ const variants = {
   hidden: { opacity: 0, scale: 0.8 },
 }
 
-export const CopyButton = forwardRef<CopyButtonRef, Props>((props, ref) => {
-  const { text, title = 'Copy text', ...rest } = props
-  const [copied, setCopied] = useState(false)
+export const CopyButton = (props: Props) => {
+  const { ref, text, title = 'Copy text', ...rest } = props
+  const { copy, copied } = useCopyClipboard(text)
 
-  const handleCopy = useCallback(() => {
-    if (text) {
-      navigator.clipboard.writeText(text).then(() => {
-        setCopied(true)
-        setTimeout(() => {
-          setCopied(false)
-        }, 2000)
-      })
-    }
-  }, [text])
-
-  useImperativeHandle(ref, () => ({
-    copy: handleCopy,
-  }))
+  useImperativeHandle(ref, () => ({ copy }))
 
   return (
     <html.div style={props.sx}>
-      <Button variant='filledTonal' sx={styles.button} onClick={handleCopy} {...rest}>
+      <Button variant='filledTonal' sx={styles.button} onClick={copy} {...rest}>
         <MotionConfig transition={{ duration: 0.08 }}>
           <AnimatePresence initial={false} mode='wait'>
             {copied ? (
@@ -65,7 +57,7 @@ export const CopyButton = forwardRef<CopyButtonRef, Props>((props, ref) => {
       </Button>
     </html.div>
   )
-})
+}
 
 const styles = css.create({
   copied: {

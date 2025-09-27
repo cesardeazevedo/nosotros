@@ -1,11 +1,13 @@
+import { toggleCreateDeckDialogAtom } from '@/atoms/dialog.atoms'
+import { useDecks } from '@/components/modules/Deck/hooks/useDeck'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { Stack } from '@/components/ui/Stack/Stack'
-import { useRootStore } from '@/hooks/useRootStore'
-import { dialogStore } from '@/stores/ui/dialogs.store'
+import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { Link, useMatchRoute } from '@tanstack/react-router'
-import { observer } from 'mobx-react-lite'
+import { useSetAtom } from 'jotai'
+import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 import { SidebarSubheader } from './SidebarSubheader'
 
@@ -13,18 +15,18 @@ type Props = {
   expanded?: boolean
 }
 
-export const SidebarMenuDecks = observer(function SidebarMenuDecks(props: Props) {
-  const rootStore = useRootStore()
+export const SidebarMenuDecks = memo(function SidebarMenuDecks(props: Props) {
   const match = useMatchRoute()
-  const { decks } = rootStore
+  const decks = useDecks()
+  const toggleDeckDialog = useSetAtom(toggleCreateDeckDialogAtom)
   return (
     <Expandable
       initiallyExpanded={props.expanded ?? !!match({ to: '/deck/$id' })}
       trigger={(triggerProps) => (
-        <SidebarSubheader {...triggerProps} label={'Decks'} onCreateClick={() => dialogStore.toggleDeck(true)} />
+        <SidebarSubheader {...triggerProps} label={'Decks'} onCreateClick={() => toggleDeckDialog()} />
       )}>
       <Stack horizontal={false} sx={styles.content} gap={0.5}>
-        {decks.list.map((deck) => (
+        {decks?.map((deck) => (
           <Link key={deck.id} to='/deck/$id' params={{ id: deck.id }}>
             {({ isActive }) => (
               <MenuItem
@@ -53,7 +55,7 @@ const styles = css.create({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'white',
+    backgroundColor: palette.surfaceContainer,
     borderRadius: 50,
     fontSize: 18,
     width: 28,

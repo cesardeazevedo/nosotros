@@ -1,17 +1,29 @@
+import { toggleSettingAtom } from '@/atoms/settings.atoms'
 import { Chip } from '@/components/ui/Chip/Chip'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { Kind } from '@/constants/kinds'
-import type { FeedModule } from '@/stores/modules/feed.module'
+import type { NotificationFeedState } from '@/hooks/state/useNotificationFeed'
 import { spacing } from '@/themes/spacing.stylex'
 import type { IconProps } from '@tabler/icons-react'
-import { IconAt, IconBolt, IconHeart, IconMessage, IconShare3, IconVolumeOff } from '@tabler/icons-react'
-import { observer } from 'mobx-react-lite'
+import {
+  IconAt,
+  IconBaselineDensityLarge,
+  IconBaselineDensitySmall,
+  IconBolt,
+  IconHeart,
+  IconMessage,
+  IconShare3,
+} from '@tabler/icons-react'
+import { useSetAtom } from 'jotai'
+import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
+import { FeedSettingsSubmit } from '../Feed/settings/FeedSettingsSubmit'
 
 type Props = {
-  module: FeedModule
+  feed: NotificationFeedState
+  onClose?: () => void
 }
 
 const iconProps: IconProps = {
@@ -19,9 +31,9 @@ const iconProps: IconProps = {
   strokeWidth: '1.5',
 }
 
-export const NotificationSettings = observer(function NotificationSettings(props: Props) {
-  const { module } = props
-  const { feed } = module
+export const NotificationSettings = memo(function NotificationSettings(props: Props) {
+  const { feed, onClose } = props
+  const toggleSettings = useSetAtom(toggleSettingAtom)
   return (
     <html.div style={styles.root}>
       <Divider />
@@ -47,16 +59,16 @@ export const NotificationSettings = observer(function NotificationSettings(props
           <Chip
             label='Replies'
             variant='filter'
-            selected={feed.options.includeReplies}
+            selected={feed.includeReplies}
             icon={<IconMessage {...iconProps} />}
-            onClick={() => feed.options.toggle('includeReplies')}
+            onClick={() => feed.setIncludeReplies((prev) => !prev)}
           />
           <Chip
-            selected={feed.options.includeMentions}
+            selected={feed.includeMentions}
             label='Mentions'
             variant='filter'
             icon={<IconAt {...iconProps} />}
-            onClick={() => feed.options.toggle('includeMentions')}
+            onClick={() => feed.setIncludeMentions((prev) => !prev)}
           />
           <Chip
             selected={feed.hasKind(Kind.ZapReceipt)}
@@ -65,17 +77,43 @@ export const NotificationSettings = observer(function NotificationSettings(props
             icon={<IconBolt {...iconProps} />}
             onClick={() => feed.toggleKind(Kind.ZapReceipt)}
           />
+          {/* <Chip */}
+          {/*   selected={feed.includeMuted} */}
+          {/*   label='Muted' */}
+          {/*   variant='filter' */}
+          {/*   icon={<IconVolumeOff {...iconProps} />} */}
+          {/*   onClick={() => feed.setIncludeMuted((prev) => !prev)} */}
+          {/* /> */}
+        </Stack>
+        <Text variant='label' size='lg' sx={styles.label}>
+          Layout
+        </Text>
+        <Stack gap={1}>
           <Chip
-            selected={feed.options.includeMuted}
-            label='Muted'
+            selected={feed.layout === 'normal'}
+            label='Normal'
             variant='filter'
-            icon={<IconVolumeOff {...iconProps} />}
-            onClick={() => feed.options.toggle('includeMuted')}
+            icon={<IconBaselineDensityLarge {...iconProps} />}
+            onClick={() => {
+              feed.setLayout('normal')
+              toggleSettings('notificationsCompact', false)
+            }}
+          />
+          <Chip
+            selected={feed.layout === 'compact'}
+            label='Compact'
+            variant='filter'
+            icon={<IconBaselineDensitySmall {...iconProps} />}
+            onClick={() => {
+              feed.setLayout('compact')
+              toggleSettings('notificationsCompact', true)
+            }}
           />
         </Stack>
         <Stack>
-          <Chip label='Reset' variant='assist' onClick={() => feed.resetFilter()} />
+          <Chip label='Reset' variant='assist' onClick={() => feed.resetFeed()} />
         </Stack>
+        <FeedSettingsSubmit feed={feed} onClose={onClose} />
       </Stack>
     </html.div>
   )

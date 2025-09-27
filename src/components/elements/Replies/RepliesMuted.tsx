@@ -1,28 +1,23 @@
-import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Button } from '@/components/ui/Button/Button'
 import { Stack } from '@/components/ui/Stack/Stack'
-import { useCurrentUser } from '@/hooks/useRootStore'
+import type { NoteState } from '@/hooks/state/useNote'
 import { spacing } from '@/themes/spacing.stylex'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconVolumeOff } from '@tabler/icons-react'
-import { observer } from 'mobx-react-lite'
 import { useState } from 'react'
 import { css } from 'react-strict-dom'
-import { RepliesTree } from './RepliesTree'
 
 type Props = {
-  level: number
+  note: NoteState
 }
 
-export const RepliesMuted = observer(function RepliesMuted(props: Props) {
-  const { level } = props
-  const { note } = useNoteContext()
-  const user = useCurrentUser()
+export const RepliesMuted = function RepliesMuted(props: Props) {
+  const { note } = props
   const [openMuted, setOpenMuted] = useState(false)
-  const replies = note.repliesMuted(user)
+  const replies = note.repliesMuted
   return (
     <>
-      {replies.length > 0 && !openMuted && (
+      {replies?.length !== 0 && !openMuted && (
         <Button sx={styles.expandButtonMuted} variant='filledTonal' onClick={() => setOpenMuted(true)}>
           <Stack gap={1}>
             <IconVolumeOff color={colors.red5} size={16} strokeWidth='1.5' />
@@ -30,17 +25,17 @@ export const RepliesMuted = observer(function RepliesMuted(props: Props) {
           </Stack>
         </Button>
       )}
-      {openMuted && (
-        <RepliesTree
-          replies={replies}
-          repliesOpen //={repliesOpen}
-          level={level + 1}
-          nested={false}
-        />
-      )}
+      {/* {openMuted && ( */}
+      {/*   <RepliesTree */}
+      {/*     replies={replies} */}
+      {/*     repliesOpen //={repliesOpen} */}
+      {/*     level={level + 1} */}
+      {/*     nested={false} */}
+      {/*   /> */}
+      {/* )} */}
     </>
   )
-})
+}
 
 const styles = css.create({
   expandButtonMuted: {

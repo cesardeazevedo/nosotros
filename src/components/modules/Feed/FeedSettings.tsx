@@ -3,13 +3,14 @@ import { Divider } from '@/components/ui/Divider/Divider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { Kind } from '@/constants/kinds'
-import type { FeedStore } from '@/stores/feeds/feed.store'
+import type { FeedState } from '@/hooks/state/useFeed'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconArticle, IconMessage2, IconPhoto, IconShare3 } from '@tabler/icons-react'
-import { observer } from 'mobx-react-lite'
+import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 import { FeedSettingsRelays } from './settings/FeedSettingsRelays'
 import { FeedSettingsSafety } from './settings/FeedSettingsSafety'
+import { FeedSettingsSubmit } from './settings/FeedSettingsSubmit'
 
 const iconProps = {
   size: 18,
@@ -17,12 +18,13 @@ const iconProps = {
 }
 
 export type Props = {
-  feed: FeedStore
+  feed: FeedState
+  onClose?: () => void
   renderRelaySettings?: boolean
 }
 
-export const FeedSettings = observer(function FeedSettings(props: Props) {
-  const { feed, renderRelaySettings = false } = props
+export const FeedSettings = memo(function FeedSettings(props: Props) {
+  const { feed, renderRelaySettings = false, onClose } = props
   return (
     <html.div style={styles.root}>
       <Divider />
@@ -67,10 +69,21 @@ export const FeedSettings = observer(function FeedSettings(props: Props) {
           {/*   onClick={() => feed.toggleKind(Kind.Highlight)} */}
           {/* /> */}
           {/* <Chip variant='filter' icon={<IconBroadcast {...iconProps} />} label='Live Events' /> */}
-          <Chip label='Reset' variant='assist' onClick={() => feed.resetFilter()} />
         </Stack>
         <FeedSettingsSafety feed={feed} />
         {renderRelaySettings && <FeedSettingsRelays feed={feed} />}
+        <Text variant='label' size='lg' sx={styles.label}>
+          Other
+        </Text>
+        <Stack>
+          <Chip
+            variant='filter'
+            label='Auto Update'
+            selected={feed.autoUpdate}
+            onClick={() => feed.setAutoUpdate((prev) => !prev)}
+          />
+        </Stack>
+        <FeedSettingsSubmit feed={feed} onClose={onClose} />
       </Stack>
     </html.div>
   )

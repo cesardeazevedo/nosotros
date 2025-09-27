@@ -8,7 +8,7 @@ export const DeckScroll = (props: Props) => <html.div style={styles.root}>{props
 
 const styles = css.create({
   root: {
-    overflowX: 'auto',
+    overflowX: 'hidden',
     overflowY: 'auto',
   },
 })

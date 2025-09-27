@@ -1,36 +1,35 @@
 import { elevation } from '@/themes/elevation.stylex'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
-import { state } from '@/themes/state.stylex'
 import type { UserAuthoredStyles } from '@stylexjs/stylex/lib/StyleXTypes'
-import React, { forwardRef } from 'react'
+import React from 'react'
 import { css } from 'react-strict-dom'
 import type { Props as ButtonProps } from '../Button/Button'
 import { Button } from '../Button/Button'
 import { buttonTokens } from '../Button/Button.stylex'
-import { rippleTokens } from '../Ripple/Ripple.stylex'
 import type { SxProps } from '../types'
 import { iconButtonTokens } from './IconButton.stylex'
 
-type IconButtonVariants = 'standard' | 'filled' | 'filledTonal' | 'outlined'
-
+type IconButtonVariant = 'standard' | 'filled' | 'filledTonal' | 'outlined'
 type IconButtonSize = 'sm' | 'md'
 
 export interface Props extends Omit<ButtonProps, 'variant'> {
   sx?: SxProps
-  variant?: IconButtonVariants
+  icon?: React.ReactNode
+  variant?: IconButtonVariant
   toggle?: boolean
   selected?: boolean
   size?: IconButtonSize
   selectedIcon?: React.ReactNode
   'aria-label'?: React.AriaAttributes['aria-label']
   'aria-label-selected'?: React.AriaAttributes['aria-label']
+  ref?: React.Ref<HTMLButtonElement & HTMLDivElement>
 }
 
-export const IconButton = forwardRef<HTMLButtonElement, Props>((props, ref) => {
+export const IconButton = (props: Props) => {
   const {
     sx,
-    icon,
+    icon = props.children,
     size = 'md',
     variant = 'standard',
     selectedIcon,
@@ -38,12 +37,13 @@ export const IconButton = forwardRef<HTMLButtonElement, Props>((props, ref) => {
     toggle,
     'aria-label': ariaLabel,
     'aria-label-selected': ariaLabelSelected,
+    ref,
     ...rest
   } = props
 
   return (
     <Button
-      icon={selected ? selectedIcon || icon : icon}
+      ref={ref}
       aria-label={toggle && selected ? (ariaLabelSelected ?? ariaLabel) : ariaLabel}
       sx={[
         styles.root,
@@ -52,59 +52,64 @@ export const IconButton = forwardRef<HTMLButtonElement, Props>((props, ref) => {
         toggle ? (selected ? styles.selected : styles.toggle) : null,
         sx,
       ]}
-      variant={variant === 'standard' ? undefined : variant}
-      ref={ref}
-      {...rest}
-    />
+      variant={variant === 'standard' ? undefined : (variant as ButtonProps['variant'])}
+      {...rest}>
+      {selected ? (selectedIcon ?? icon) : icon}
+    </Button>
   )
-})
+}
 
 const variants = css.create({
   standard: {
     [buttonTokens.labelTextColor]: palette.onSurfaceVariant,
-    [iconButtonTokens.toggleIconColorSelected]: palette.primary,
-    [iconButtonTokens.toggleContainerColorSelected]: palette.surfaceContainerHigh,
   },
   filled: {
     [buttonTokens.containerColor]: palette.primary,
+    [buttonTokens.containerColor$hover]: palette.primary,
+    [buttonTokens.containerColor$pressed]: palette.primary,
     [buttonTokens.containerColor$disabled]: palette.onSurface,
-    [buttonTokens.containerOpacity$disabled]: state.containerOpacity$disabled,
-    [iconButtonTokens.toggleContainerColor]: palette.surfaceContainerHighest,
-    [iconButtonTokens.toggleContainerColorSelected]: palette.primary,
-    [iconButtonTokens.toggleIconColor]: palette.primary,
-    [iconButtonTokens.toggleIconColorSelected]: palette.onPrimary,
-    [rippleTokens.color$hover]: palette.onPrimary,
+    [buttonTokens.labelTextColor]: palette.onPrimary,
+    [buttonTokens.labelTextColor$hover]: palette.onPrimary,
+    [buttonTokens.labelTextColor$pressed]: palette.onPrimary,
+    [buttonTokens.labelTextColor$focus]: palette.onPrimary,
+    [buttonTokens.containerElevation]: {
+      default: elevation.shadows0,
+      ':hover': elevation.shadows1,
+      ':active': elevation.shadows0,
+    },
   },
   filledTonal: {
-    [buttonTokens.containerColor]: palette.secondaryContainer,
+    [buttonTokens.labelTextColor]: palette.onSecondaryContainer,
+    [buttonTokens.containerColor]: palette.surfaceContainer,
+    [buttonTokens.containerColor$hover]: palette.surfaceContainer,
+    [buttonTokens.containerColor$pressed]: palette.surfaceContainer,
     [buttonTokens.containerColor$disabled]: palette.onSurface,
-    [buttonTokens.containerOpacity$disabled]: state.containerOpacity$disabled,
-    [iconButtonTokens.toggleContainerColor]: palette.surfaceContainerHighest,
-    [iconButtonTokens.toggleContainerColorSelected]: palette.secondaryContainer,
+    [buttonTokens.containerElevation]: elevation.shadows0,
   },
   outlined: {
-    [iconButtonTokens.toggleContainerColorSelected]: palette.inverseSurface,
-    [iconButtonTokens.toggleIconColor]: palette.onSurfaceVariant,
-    [iconButtonTokens.toggleIconColorSelected]: palette.inverseOnSurface,
+    [buttonTokens.labelTextColor]: palette.onSurfaceVariant,
+    [buttonTokens.containerColor]: 'transparent',
+    [buttonTokens.containerColor$hover]: palette.surfaceContainerHigh,
+    [buttonTokens.containerColor$pressed]: palette.surfaceContainerHighest,
+    [buttonTokens.containerElevation]: elevation.shadows0,
+    [buttonTokens.outlineColor]: palette.outline,
   },
-} as Record<IconButtonVariants, UserAuthoredStyles>)
+} as Record<IconButtonVariant, UserAuthoredStyles>)
 
 const sizes = css.create({
   sm: {
-    width: 28,
-    height: 28,
+    [buttonTokens.containerHeight]: '28px',
+    [buttonTokens.containerMinWidth]: '28px',
   },
   md: {
-    width: 36,
-    height: 36,
+    [buttonTokens.containerHeight]: '36px',
+    [buttonTokens.containerMinWidth]: '36px',
   },
 })
 
 const styles = css.create({
   root: {
     flexShrink: 0,
-    [buttonTokens.containerHeight]: 28,
-    [buttonTokens.containerMinWidth]: 28,
     [buttonTokens.leadingSpace]: '0px',
     [buttonTokens.trailingSpace]: '0px',
     [buttonTokens.containerElevation]: elevation.shadows0,
@@ -113,7 +118,6 @@ const styles = css.create({
   toggle: {
     [buttonTokens.containerColor]: iconButtonTokens.toggleContainerColor,
     [buttonTokens.labelTextColor]: iconButtonTokens.toggleIconColor,
-    [rippleTokens.color$hover]: palette.primary,
   },
   selected: {
     [buttonTokens.containerColor]: iconButtonTokens.toggleContainerColorSelected,

@@ -1,14 +1,17 @@
 import type { RelayInformation } from 'nostr-tools/nip11'
-import { fromFetch } from 'rxjs/fetch'
 
-export function fetchRelayInfo(url: string) {
-  return fromFetch<RelayInformation>('https://' + url.replace('wss://', ''), {
-    selector: (res) => res.json(),
-    method: 'GET',
-    credentials: 'omit',
-    priority: 'low',
-    headers: {
-      Accept: 'application/nostr+json',
-    },
-  })
+export async function fetchRelayInfo(url: string) {
+  try {
+    const res = await fetch('https://' + url.replace('wss://', ''), {
+      method: 'GET',
+      credentials: 'omit',
+      priority: 'low',
+      headers: {
+        Accept: 'application/nostr+json',
+      },
+    })
+    return (await res.json()) as RelayInformation
+  } catch {
+    return undefined
+  }
 }

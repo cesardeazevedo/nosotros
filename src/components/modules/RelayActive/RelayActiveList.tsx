@@ -1,30 +1,23 @@
 import { RelayListRow } from '@/components/elements/Relays/RelayListRow'
 import { RelayListRowLoading } from '@/components/elements/Relays/RelayListRowLoading'
+import { RelayLoadMore } from '@/components/elements/Relays/RelayLoadMore'
 import { Stack } from '@/components/ui/Stack/Stack'
-import { relaysStore } from '@/stores/relays/relays.store'
-import { observer } from 'mobx-react-lite'
+import { useActiveRelays } from '@/hooks/useRelays'
+import { memo, useState } from 'react'
 
-export const RelayActiveList = observer(function RelayActiveList() {
+export const RelayActiveList = memo(function RelayActiveList() {
+  const [pageSize, setPageSize] = useState(30)
+  const relays = useActiveRelays()
   return (
-    <Stack horizontal={false}>
-      {relaysStore.connected.length === 0 ? (
-        <RelayListRowLoading />
-      ) : (
-        <>
-          {relaysStore.connected.map((relay) => {
-            const info = relaysStore.getInfo(relay.url)
-            return (
-              <RelayListRow
-                key={relay.url}
-                relay={relay.url}
-                relayPubkey={info?.pubkey}
-                authRequired={!!info?.limitation?.auth_required}
-                paymentRequired={!!info?.limitation?.payment_required}
-              />
-            )
-          })}
-        </>
-      )}
-    </Stack>
+    <>
+      <Stack horizontal={false}>
+        {relays.length === 0 ? (
+          <RelayListRowLoading />
+        ) : (
+          relays.slice(0, pageSize).map((relay) => <RelayListRow key={relay.url} url={relay.url} />)
+        )}
+      </Stack>
+      <RelayLoadMore total={relays.length} pageSize={pageSize} onClick={() => setPageSize((prev) => prev + 30)} />
+    </>
   )
 })

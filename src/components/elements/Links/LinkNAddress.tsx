@@ -1,13 +1,11 @@
+import { useDeckAddNextColumn } from '@/components/modules/Deck/hooks/useDeck'
 import { useContentContext } from '@/components/providers/ContentProvider'
-import { useRootStore } from '@/hooks/useRootStore'
-import { createNAddressModule } from '@/stores/modules/module.helpers'
-import { decodeNIP19 } from '@/utils/nip19'
+import { createEventModule } from '@/hooks/modules/createEventModule'
 import { Link, useRouter } from '@tanstack/react-router'
-import { observer } from 'mobx-react-lite'
 import type { NAddr } from 'nostr-tools/nip19'
-import React, { useCallback, useContext } from 'react'
-import { css } from 'react-strict-dom'
-import { DeckContext } from '../../modules/Deck/DeckContext'
+import type { DragEventHandler } from 'react'
+import React, { memo } from 'react'
+import { css, html } from 'react-strict-dom'
 
 export type Props = {
   naddress: NAddr | undefined
@@ -15,31 +13,27 @@ export type Props = {
   underline?: boolean
 }
 
-export const LinkNAddress = observer(function LinkNAddress(props: Props) {
+export const LinkNAddress = memo(function LinkNAddress(props: Props) {
   const { naddress, underline, ...rest } = props
-  const router = useRouter()
-  const root = useRootStore()
-  const { index } = useContext(DeckContext)
   const { disableLink } = useContentContext()
 
-  const handleClickDeck = useCallback(() => {
-    if (naddress) {
-      const decoded = decodeNIP19(naddress)
-      if (decoded?.type === 'naddr') {
-        root.decks.selected.add(createNAddressModule(decoded.data), (index || 0) + 1)
-      }
-    }
-  }, [naddress, index])
+  const router = useRouter()
+  const deck = useDeckAddNextColumn(() => createEventModule(naddress))
+
+  const handleDragStart: DragEventHandler<HTMLAnchorElement> = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+  }
 
   if (disableLink || !naddress) {
     return props.children
   }
 
-  if (index !== undefined) {
+  if (deck.isDeck) {
     return (
-      <a onClick={handleClickDeck} {...rest} {...css.props([styles.cursor, underline && styles.underline])}>
+      <html.a onClick={deck.add} {...rest} {...css.props([styles.cursor, underline && styles.underline])}>
         {props.children}
-      </a>
+      </html.a>
     )
   }
 
@@ -49,7 +43,8 @@ export const LinkNAddress = observer(function LinkNAddress(props: Props) {
       state={{ from: router.latestLocation.pathname } as never}
       {...rest}
       {...css.props([underline && styles.underline])}
-      params={{ nostr: naddress }}>
+      params={{ nostr: naddress }}
+      onDragStart={handleDragStart}>
       {props.children}
     </Link>
   )

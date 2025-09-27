@@ -1,23 +1,19 @@
 import type { Props as IconButtonProps } from '@/components/ui/IconButton/IconButton'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
-import { useGlobalSettings } from '@/hooks/useRootStore'
+import { useSetSettings, useSettings } from '@/hooks/useSettings'
 import { IconMoon, IconSun } from '@tabler/icons-react'
-import { observer } from 'mobx-react-lite'
-import { useCallback } from 'react'
+import { memo } from 'react'
 
-export const ThemeButton = observer(function ThemeButton(props: IconButtonProps) {
-  const globalSettings = useGlobalSettings()
-  const mode = globalSettings.theme
-
-  const handleClick = useCallback(() => {
-    globalSettings.set('theme', globalSettings.theme === 'dark' ? 'light' : 'dark')
-  }, [])
+export const ThemeButton = memo(function ThemeButton(props: IconButtonProps) {
+  const settings = useSettings()
+  const set = useSetSettings()
+  const mode = settings.theme
 
   return (
     <Tooltip cursor='arrow' text='Toggle dark / light theme' enterDelay={0}>
       <IconButton
-        onClick={handleClick}
+        onClick={() => set({ theme: settings.theme === 'dark' ? 'light' : 'dark' })}
         {...props}
         sx={props.sx}
         icon={

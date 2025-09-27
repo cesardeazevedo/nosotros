@@ -18,6 +18,11 @@
   height: 100%;
 }
 
+pre.shiki {
+  word-break: break-word;
+  white-space: break-spaces;
+}
+
 .ProseMirror {
   height: 100%;
 }

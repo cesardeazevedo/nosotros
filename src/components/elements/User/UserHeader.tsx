@@ -1,8 +1,7 @@
 import type { Props as StackProps } from '@/components/ui/Stack/Stack'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { Props as TextProps } from '@/components/ui/Text/Text'
-import { observer } from 'mobx-react-lite'
-import React from 'react'
+import React, { memo } from 'react'
 import { css } from 'react-strict-dom'
 import type { Props as UserAvatarProps } from './UserAvatar'
 import { UserAvatar } from './UserAvatar'
@@ -20,7 +19,7 @@ export type Props = StackProps & {
   renderNIP05?: boolean
 }
 
-export const UserHeader = observer(function UserHeader(props: Props) {
+export const UserHeader = memo(function UserHeader(props: Props) {
   const {
     renderAvatar = true,
     pubkey,
@@ -39,7 +38,7 @@ export const UserHeader = observer(function UserHeader(props: Props) {
         <UserName pubkey={pubkey} size={size}>
           {children}
         </UserName>
-        {renderNIP05 && <UserNIP05 pubkey={pubkey} />}
+        {renderNIP05 && <UserNIP05 pubkey={pubkey} sx={styles.nip05} />}
         {footer}
       </Stack>
     </Stack>
@@ -49,5 +48,8 @@ export const UserHeader = observer(function UserHeader(props: Props) {
 const styles = css.create({
   root: {
     height: 40,
+  },
+  nip05: {
+    opacity: 0.66,
   },
 })

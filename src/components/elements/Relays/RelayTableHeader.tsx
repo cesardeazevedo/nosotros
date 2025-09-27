@@ -1,21 +1,17 @@
-import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Stack } from '@/components/ui/Stack/Stack'
+import { useCurrentPubkey } from '@/hooks/useAuth'
 import { useMobile, useSM } from '@/hooks/useMobile'
-import { useCurrentPubkey } from '@/hooks/useRootStore'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { css } from 'react-strict-dom'
-import { IconExpandable } from '../Icons/IconExpandable'
 
 type Props = {
-  usersSorted?: boolean
-  onUsersColumnClick?: () => void
   renderLatencyColumn?: boolean
   renderPeopleColumn?: boolean
 }
 
 export const RelayTableHeader = (props: Props) => {
-  const { usersSorted = false, onUsersColumnClick, renderLatencyColumn = true, renderPeopleColumn = true } = props
+  const { renderLatencyColumn = true, renderPeopleColumn = true } = props
   const pubkey = useCurrentPubkey()
   const root = css.props(styles.root)
   const td = css.props(styles.cell)
@@ -29,15 +25,8 @@ export const RelayTableHeader = (props: Props) => {
         </th>
         <th {...td} align='left'></th>
         {!isMobile && pubkey && renderPeopleColumn && (
-          <th {...td} align='left' onClick={onUsersColumnClick}>
-            <Stack gap={0.5}>
-              People
-              {onUsersColumnClick && (
-                <IconButton size='sm' sx={styles.iconButton}>
-                  <IconExpandable upwards expanded={usersSorted} size={14} strokeWidth='3' />
-                </IconButton>
-              )}
-            </Stack>
+          <th {...td} align='left'>
+            <Stack gap={0.5}>People</Stack>
           </th>
         )}
         {renderLatencyColumn && !isSM && (

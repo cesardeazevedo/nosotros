@@ -1,22 +1,35 @@
+import type { SubscriptionBatcher } from '@/core/SubscriptionBatcher'
 import type { RelayHints } from '@/core/types'
-import type { batchers } from './batcher'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import type { QueryKey } from '@tanstack/react-query'
+
+export enum NetworkStrategy {
+  CACHE_FIRST,
+  CACHE_ONLY,
+  REMOTE_ONLY,
+}
 
 export type NostrContext = {
+  subId?: string
   relays?: string[]
   relaySets?: string[]
-  relaysLocal?: string[]
   relayHints?: RelayHints
   pubkey?: string
   permission?: number
-  batcher?: keyof typeof batchers | false
-  nip05?: boolean
-  authAuto?: boolean
-  authWhitelist?: string[]
+  queryKey?: QueryKey
+  closeOnEose?: boolean
+  ignoreAuth?: boolean
+  network?:
+    | 'STALE_WHILE_REVALIDATE'
+    | 'STALE_WHILE_REVALIDATE_BATCH'
+    | 'CACHE_FIRST'
+    | 'CACHE_FIRST_BATCH'
+    | 'CACHE_ONLY'
+    | 'REMOTE_ONLY'
+    | 'LIVE'
+  batcher?: SubscriptionBatcher<NostrEventDB>
   ignoreRelays?: string[]
   maxRelaysPerUser?: number
-  queryDB?: boolean
-  insertDB?: boolean
-  insertStore?: boolean
   outbox?: boolean
-  prune?: boolean
+  negentropy?: boolean
 }

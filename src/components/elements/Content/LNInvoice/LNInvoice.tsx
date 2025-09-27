@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/Button/Button'
 import { Paper } from '@/components/ui/Paper/Paper'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import { useNevent } from '@/hooks/useEventUtils'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconBolt } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
@@ -14,13 +16,14 @@ import { css } from 'react-strict-dom'
 type Props = {
   bolt11?: ReturnType<typeof decode>
   lnbc: string
-  nevent?: string | undefined
+  event: NostrEventDB
 }
 
 export const LNInvoice = function LNInvoice(props: Props) {
-  const { lnbc, nevent } = props
+  const { event, lnbc } = props
   const { dense } = useContentContext()
   const bolt11 = props.bolt11 || decode(lnbc)
+  const nevent = useNevent(event)
 
   const amount = useMemo(() => {
     return parseInt(bolt11.sections.find((x: { name: string }) => x.name === 'amount')?.value || '0') / 1000
@@ -45,7 +48,7 @@ export const LNInvoice = function LNInvoice(props: Props) {
               {amount} sats
             </Text>
           </Stack>
-          <Link to='.' search={{ invoice: lnbc, nevent }}>
+          <Link to='.' search={{ invoice: lnbc, n: nevent }}>
             <Button variant='filled'>Pay</Button>
           </Link>
         </Stack>
@@ -62,8 +65,8 @@ const styles = css.create({
     padding: spacing.padding4,
   },
   root$dense: {
-    my: 1,
-    mx: 0,
+    marginTop: spacing.margin1,
+    marginInline: 0,
     padding: spacing.padding2,
   },
   copy: {

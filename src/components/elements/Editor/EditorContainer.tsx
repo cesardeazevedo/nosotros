@@ -2,8 +2,7 @@ import { ContentProvider, useContentContext } from '@/components/providers/Conte
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { SxProps } from '@/components/ui/types'
 import { spacing } from '@/themes/spacing.stylex'
-import { observer } from 'mobx-react-lite'
-import React from 'react'
+import React, { memo } from 'react'
 import { css } from 'react-strict-dom'
 
 type Props = {
@@ -14,7 +13,7 @@ type Props = {
   children: React.ReactNode
 }
 
-export const EditorContainer = observer(function EditorContainer(props: Props) {
+export const EditorContainer = memo(function EditorContainer(props: Props) {
   const { renderBubble, open, onClick, sx, children } = props
   const { dense } = useContentContext()
   return (
@@ -24,6 +23,7 @@ export const EditorContainer = observer(function EditorContainer(props: Props) {
       justify='space-between'
       gap={renderBubble ? 1 : 2}
       onClick={() => onClick?.()}
+      role='button'
       sx={[styles.root, open && styles.root$open, sx]}>
       <ContentProvider value={{ dense, disableLink: true, disablePopover: true }}>{children}</ContentProvider>
     </Stack>

@@ -1,5 +1,3 @@
-import { IDBStorage } from 'db/indexeddb/idb'
+import { SqliteStorage } from '@/db/sqlite/sqlite'
 
-const DB_NAME = import.meta.env.VITE_DB_NAME
-
-export const db = new IDBStorage(DB_NAME)
+export const dbSqlite = new SqliteStorage()

@@ -1,25 +1,28 @@
 import { useContentContext } from '@/components/providers/ContentProvider'
-import { useNoteContext } from '@/components/providers/NoteProvider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
+import type { NoteState } from '@/hooks/state/useNote'
 import { IconServerBolt } from '@tabler/icons-react'
 import { useMobile } from 'hooks/useMobile'
-import { observer } from 'mobx-react-lite'
-import { useCallback } from 'react'
+import { memo, useCallback } from 'react'
 import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDOMProps'
 import { ButtonContainer } from './PostButtonContainer'
 import { iconProps } from './utils'
 
-export const ButtonRelays = observer(function ButtonRelays() {
+type Props = {
+  note: NoteState
+}
+
+export const ButtonRelays = memo(function ButtonRelays(props: Props) {
+  const { note } = props
   const { dense } = useContentContext()
-  const { note } = useNoteContext()
   const isMobile = useMobile()
 
   const handleClick = useCallback(
     (e: StrictClickEvent) => {
       e.preventDefault()
       e.stopPropagation()
-      note.toggleBroadcast()
+      note.actions.toggleBroadcast()
     },
     [isMobile],
   )
@@ -30,11 +33,14 @@ export const ButtonRelays = observer(function ButtonRelays() {
       key={isMobile.toString()}
       enterDelay={0}
       text={
-        <div>Seen on {note.event.seenOn?.map((relay) => <div key={relay}>{relay.replace('wss://', '')}</div>)}</div>
+        <div style={{ whiteSpace: 'pre-wrap' }}>
+          Seen on{'\n'}
+          {note.seenOn?.map((relay) => relay.replace('wss://', '')).join('\n')}
+        </div>
       }>
-      <ButtonContainer value={note.event.seenOn?.length || 0} aria-label='Seen on relays'>
+      <ButtonContainer value={note.seenOn?.length || 0} aria-label='Seen on relays'>
         <IconButton
-          toggle={note.broadcastOpen}
+          toggle={note.state.broadcastOpen}
           size={dense ? 'sm' : 'md'}
           onClick={handleClick}
           icon={

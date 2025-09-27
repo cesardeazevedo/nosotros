@@ -1,30 +1,34 @@
-import { Divider } from '@/components/ui/Divider/Divider'
-import type { NostrEventMetadata } from '@/nostr/types'
-import type { FeedStore } from '@/stores/feeds/feed.store'
-import { observer } from 'mobx-react-lite'
+import { PullToRefresh } from '@/components/elements/PullToRefresh/PullToRefresh'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import type { FeedState } from '@/hooks/state/useFeed'
+import { spacing } from '@/themes/spacing.stylex'
 import type { BaseSyntheticEvent } from 'react'
-import React, { useCallback, useLayoutEffect, useMemo, useRef } from 'react'
+import React, { memo, useCallback, useLayoutEffect, useMemo, useRef } from 'react'
 import { css, html } from 'react-strict-dom'
 import { FeedNewPosts } from './FeedNewPosts'
 
-const always = () => true
-
 export type Props = {
-  feed: FeedStore
+  feed: FeedState
   column?: boolean
-  divider?: boolean
   renderNewPostsIndicator?: boolean
   onScrollEnd?: () => void
-  filter?: (item: NostrEventMetadata) => boolean
-  render: (item: NostrEventMetadata) => React.ReactNode
+  render: (item: NostrEventDB) => React.ReactNode
   wrapper?: (children: React.ReactNode) => React.ReactNode
   header?: React.ReactNode
   footer?: React.ReactNode
 }
 
-export const FeedList = observer(function FeedList(props: Props) {
-  const { feed, render, divider = true, onScrollEnd, filter = always, column, renderNewPostsIndicator = true } = props
+export const FeedList = memo(function FeedList(props: Props) {
+  const { feed, render, onScrollEnd, column, renderNewPostsIndicator = true } = props
   const ref = useRef<HTMLDivElement>(null)
+  const pullRefreshProps = {
+    onRefresh: feed.onRefresh,
+  }
+
+  const list = useMemo(
+    () => feed.query.data?.pages.flat().slice(0, feed.pageSize) || [],
+    [feed.query.data?.pages, feed.pageSize],
+  )
 
   useLayoutEffect(() => {
     if (!column) {
@@ -36,7 +40,7 @@ export const FeedList = observer(function FeedList(props: Props) {
 
   const handleWindowScroll = useCallback(() => {
     const offset = document.scrollingElement?.scrollTop || 0
-    if (offset >= (document.scrollingElement?.scrollHeight || Infinity) - 2000) {
+    if (offset >= (document.scrollingElement?.scrollHeight || Infinity) - 2100) {
       onScrollEnd?.()
     }
   }, [onScrollEnd])
@@ -52,45 +56,49 @@ export const FeedList = observer(function FeedList(props: Props) {
   )
 
   const content = useMemo(() => {
-    return feed.list.filter(filter).map((item) => (
-      <React.Fragment key={item.id}>
-        {render(item)}
-        {divider && <Divider />}
-      </React.Fragment>
-    ))
-  }, [feed.list, divider])
+    return list.map((item) => <React.Fragment key={item.id}>{render(item)}</React.Fragment>)
+  }, [list, render])
 
   if (column) {
     return (
-      <html.div style={styles.column} ref={ref} onScroll={handleScrollColumn}>
-        {props.header}
-        {!props.wrapper && renderNewPostsIndicator && <FeedNewPosts ref={ref} feed={feed} />}
-        {props.wrapper
-          ? props.wrapper(
-              <>
-                {renderNewPostsIndicator && <FeedNewPosts ref={ref} feed={feed} />}
-                {content}
-              </>,
-            )
-          : content}
-        {props.footer}
-      </html.div>
+      <PullToRefresh {...pullRefreshProps}>
+        <html.div style={styles.column} ref={ref} onScroll={handleScrollColumn}>
+          {props.header}
+          {!props.wrapper && renderNewPostsIndicator && <FeedNewPosts ref={ref} feed={feed} />}
+          {props.wrapper ? (
+            <>
+              {props.wrapper(
+                <>
+                  {renderNewPostsIndicator && <FeedNewPosts ref={ref} feed={feed} />}
+                  {content}
+                </>,
+              )}
+            </>
+          ) : (
+            content
+          )}
+          {props.footer}
+        </html.div>
+      </PullToRefresh>
     )
   }
   return (
-    <>
+    <PullToRefresh {...pullRefreshProps}>
       {props.header}
       <FeedNewPosts feed={feed} />
       {props.wrapper ? props.wrapper(<>{content}</>) : content}
       {props.footer}
-    </>
+    </PullToRefresh>
   )
 })
 
 const styles = css.create({
   column: {
     position: 'relative',
-    height: '95vh',
+    height: 'calc(100vh - 70px)',
     overflow: 'scroll',
+  },
+  refreshing: {
+    paddingBlock: spacing.padding2,
   },
 })

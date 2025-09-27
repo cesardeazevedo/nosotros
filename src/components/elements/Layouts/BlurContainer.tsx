@@ -35,6 +35,6 @@ const styles = css.create({
     pointerEvents: 'none',
   },
   blur: {
-    filter: 'blur(14px)',
+    filter: 'blur(40px)',
   },
 })

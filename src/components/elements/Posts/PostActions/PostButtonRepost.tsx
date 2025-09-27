@@ -1,28 +1,33 @@
 import { useContentContext } from '@/components/providers/ContentProvider'
-import { useNoteContext } from '@/components/providers/NoteProvider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
-import { useCurrentUser } from '@/hooks/useRootStore'
+import { useRepostsByPubkey } from '@/hooks/query/useReposts'
+import type { NoteState } from '@/hooks/state/useNote'
+import { useCurrentPubkey } from '@/hooks/useAuth'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconShare3 } from '@tabler/icons-react'
-import { observer } from 'mobx-react-lite'
+import { memo } from 'react'
 import { RepostPopover } from '../../Repost/RepostPopover'
 import { ButtonContainer } from './PostButtonContainer'
 import { iconProps } from './utils'
 
-export const ButtonRepost = observer(function ButtonRepost() {
+type Props = {
+  note: NoteState
+}
+
+export const ButtonRepost = memo(function ButtonRepost(props: Props) {
+  const { note } = props
   const { dense } = useContentContext()
-  const { note } = useNoteContext()
-  const user = useCurrentUser()
-  const reposted = !!user?.repostedByEventId(note.id)
+  const pubkey = useCurrentPubkey()
+  const reposted = useRepostsByPubkey(pubkey, note.event)
 
   return (
-    <ButtonContainer value={note.reposts.length}>
+    <ButtonContainer value={note.reposts.data?.length}>
       <RepostPopover note={note}>
         {({ getProps, setRef, open }) => (
           <IconButton
             {...getProps()}
             ref={setRef}
-            toggle={reposted}
+            toggle={!!reposted}
             size={dense ? 'sm' : 'md'}
             onClick={(e) => {
               open()

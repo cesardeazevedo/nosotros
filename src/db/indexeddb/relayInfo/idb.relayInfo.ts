@@ -8,9 +8,7 @@ export class IDBRelayInfo {
 
   async query(url: string) {
     const db = await this.db
-    const res = await db.get('relayInfo', formatRelayUrl(url))
-    // console.log('querying info', formatRelayUrl(url), res)
-    return res
+    return await db.get('relayInfo', formatRelayUrl(url))
   }
 
   async queryAll() {

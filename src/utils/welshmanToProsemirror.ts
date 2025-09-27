@@ -1,13 +1,7 @@
+import type { ContentCustomSchema, CustomNode, ImageCustomNode, VideoCustomNode } from '@/nostr/types'
 import { ParsedType, type Parsed } from '@welshman/content'
 import { decode } from 'light-bolt11-decoder'
-import type {
-  ContentSchema,
-  NAddrAttributes,
-  NEventAttributes,
-  Node,
-  NProfileAttributes,
-  ParagraphNode,
-} from 'nostr-editor'
+import type { NAddrAttributes, NEventAttributes, Node, NProfileAttributes, ParagraphNode } from 'nostr-editor'
 import { TLDs } from './tlds'
 
 const IMAGE_EXTENSIONS = /\.(jpg|jpeg|gif|png|bmp|svg|webp)$/
@@ -21,23 +15,32 @@ type LinkKinds = 'text' | 'image' | 'video' | 'tweet' | 'youtube'
 function getLinkKind(url: string): LinkKinds {
   if (YOUTUBE_EMBED.test(url)) {
     return 'youtube'
-  } else if (TWITTER_EMBED.test(url)) {
+  }
+  if (TWITTER_EMBED.test(url)) {
     return 'tweet'
-  } else {
-    try {
-      const { pathname, origin } = new URL(url)
-      const [, tld] = origin.split('.')
-      return TLDs.has(tld)
-        ? 'text'
-        : IMAGE_EXTENSIONS.test(pathname)
-          ? 'image'
-          : VIDEO_EXTENSIONS.test(pathname)
-            ? 'video'
-            : 'text'
-    } catch (error) {
-      console.log('url parser error', error)
+  }
+
+  try {
+    const { pathname, hostname } = new URL(url)
+
+    if (IMAGE_EXTENSIONS.test(pathname)) {
+      return 'image'
+    }
+    if (VIDEO_EXTENSIONS.test(pathname)) {
+      return 'video'
+    }
+
+    const parts = hostname.split('.')
+    const tld = parts[parts.length - 1]
+
+    if (typeof TLDs !== 'undefined' && TLDs.has(tld)) {
       return 'text'
     }
+
+    return 'text'
+  } catch (error) {
+    console.log('url parser error', error)
+    return 'text'
   }
 }
 
@@ -47,7 +50,7 @@ export function welshmanToProseMirror(welshmanSchema: Parsed[], blockNodesOption
   const result = {
     type: 'doc',
     content: [],
-  } as ContentSchema
+  } as ContentCustomSchema
 
   const nprofiles = [] as NProfileAttributes[]
   const nevents = [] as NEventAttributes[]
@@ -59,10 +62,11 @@ export function welshmanToProseMirror(welshmanSchema: Parsed[], blockNodesOption
   } as ParagraphNode & { content: Node[] }
 
   const pushParagraph = () => {
-    if (currentParagraph.content.length > 0) {
-      result.content.push(currentParagraph)
-      currentParagraph = { type: 'paragraph', content: [] }
+    const trimmed = cleanParagraph(currentParagraph)
+    if (trimmed && trimmed.type === 'paragraph' && trimmed.content?.length !== 0) {
+      result.content.push(trimmed)
     }
+    currentParagraph = { type: 'paragraph', content: [] }
   }
 
   welshmanSchema.forEach((node) => {
@@ -71,19 +75,13 @@ export function welshmanToProseMirror(welshmanSchema: Parsed[], blockNodesOption
 
       switch (node.type) {
         case ParsedType.Event: {
-          const attrs = {
-            ...node.value,
-            bech32: node.raw,
-          } as NEventAttributes
+          const attrs = { ...node.value, bech32: node.raw } as NEventAttributes
           result.content.push({ type: 'nevent', attrs })
           nevents.push(attrs)
           break
         }
         case ParsedType.Address: {
-          const attrs = {
-            ...node.value,
-            bech32: node.raw,
-          } as NAddrAttributes
+          const attrs = { ...node.value, bech32: node.raw } as NAddrAttributes
           result.content.push({ type: 'naddr', attrs })
           naddresses.push(attrs)
           break
@@ -92,14 +90,10 @@ export function welshmanToProseMirror(welshmanSchema: Parsed[], blockNodesOption
           try {
             result.content.push({
               type: 'bolt11',
-              attrs: {
-                bolt11: decode(node.raw),
-                lnbc: node.raw,
-              },
+              attrs: { bolt11: decode(node.raw), lnbc: node.raw },
             })
           } catch (error) {
             console.error(error)
-            break
           }
           break
         }
@@ -111,7 +105,19 @@ export function welshmanToProseMirror(welshmanSchema: Parsed[], blockNodesOption
           break
         }
         case ParsedType.Code: {
-          currentParagraph.content.push({ type: 'text', text: node.value, marks: [{ type: 'code' }] })
+          const isBlock = node.raw.startsWith('```')
+          if (isBlock) {
+            pushParagraph()
+            result.content.push({
+              type: 'codeBlock',
+              attrs: {
+                language: '',
+              },
+              content: [{ type: 'text', text: node.value }],
+            })
+          } else {
+            currentParagraph.content.push({ type: 'text', text: node.value, marks: [{ type: 'code' }] })
+          }
           break
         }
         case ParsedType.Newline: {
@@ -124,19 +130,15 @@ export function welshmanToProseMirror(welshmanSchema: Parsed[], blockNodesOption
           break
         }
         case ParsedType.Profile: {
-          const attrs = {
-            ...node.value,
-            relays: node.value.relays || [],
-            bech32: node.raw,
-          } as NProfileAttributes
+          const attrs = { ...node.value, relays: node.value.relays || [], bech32: node.raw } as NProfileAttributes
           nprofiles.push(attrs)
           currentParagraph.content.push({ type: 'nprofile', attrs })
           break
         }
         case ParsedType.Link: {
           const url = node.value.url.toString()
-          const type = getLinkKind(url)
-          switch (type) {
+          const kind = getLinkKind(url)
+          switch (kind) {
             case 'text': {
               currentParagraph.content.push({
                 type: 'text',
@@ -147,62 +149,36 @@ export function welshmanToProseMirror(welshmanSchema: Parsed[], blockNodesOption
             }
             case 'image': {
               pushParagraph()
-              result.content.push({
-                type: 'image',
-                attrs: {
-                  src: url,
-                },
-              })
+              result.content.push({ type: 'image', attrs: { src: url } })
               break
             }
             case 'video': {
               pushParagraph()
-              result.content.push({
-                type: 'video',
-                // @ts-ignore
-                attrs: {
-                  src: url,
-                },
-              })
+              // @ts-ignore – custom node in your schema
+              result.content.push({ type: 'video', attrs: { src: url } })
               break
             }
             case 'tweet': {
               pushParagraph()
-              result.content.push({
-                type: 'tweet',
-                attrs: {
-                  src: url,
-                },
-              })
+              result.content.push({ type: 'tweet', attrs: { src: url } })
               break
             }
             case 'youtube': {
               pushParagraph()
-              result.content.push({
-                type: 'youtube',
-                attrs: {
-                  src: url,
-                },
-              })
+              result.content.push({ type: 'youtube', attrs: { src: url } })
               break
             }
           }
           break
         }
-        case ParsedType.Topic:
+        case ParsedType.Topic: {
           currentParagraph.content.push({
             type: 'text',
             text: node.raw,
-            marks: [
-              {
-                type: 'tag',
-                attrs: {
-                  tag: `#${node.value}`,
-                },
-              },
-            ],
+            marks: [{ type: 'tag', attrs: { tag: `#${node.value}` } }],
           })
           break
+        }
         default:
           break
       }
@@ -216,5 +192,72 @@ export function welshmanToProseMirror(welshmanSchema: Parsed[], blockNodesOption
     nevents,
     nprofiles,
     naddresses,
+  }
+}
+
+export function cleanParagraph(paragraph: ParagraphNode): ParagraphNode | null {
+  if (!paragraph.content) {
+    return null
+  }
+  const filteredContent = paragraph.content.filter((node) => {
+    if (node.type === 'text') {
+      return node.text !== ' ' && node.text !== ''
+    }
+    return true
+  })
+  const firstValidIndex = filteredContent.findIndex((node) => node.type !== 'hardBreak')
+  if (firstValidIndex === -1) {
+    return null
+  }
+  const lastValidIndex = filteredContent.findLastIndex((node) => node.type !== 'hardBreak')
+
+  const trimmedContent = filteredContent.slice(firstValidIndex, lastValidIndex + 1)
+
+  if (trimmedContent.length === 0) {
+    return null
+  }
+
+  return {
+    type: 'paragraph',
+    content: trimmedContent,
+  }
+}
+
+export function groupProsemirrorMedia(contentSchema: ContentCustomSchema) {
+  const groupedContent: CustomNode[] = []
+  let currentMediaGroup: Array<ImageCustomNode | VideoCustomNode> = []
+  let mediaIndex = 0
+
+  const pushMediaGroup = () => {
+    if (currentMediaGroup.length === 1) {
+      groupedContent.push(currentMediaGroup[0])
+    } else if (currentMediaGroup.length > 1) {
+      groupedContent.push({
+        type: 'mediaGroup',
+        content: currentMediaGroup,
+      })
+    }
+    currentMediaGroup = []
+  }
+
+  contentSchema.content.forEach((node) => {
+    if (node.type === 'image' || node.type === 'video') {
+      const nodeWithIndex: ImageCustomNode | VideoCustomNode = {
+        ...node,
+        index: mediaIndex,
+      }
+      currentMediaGroup.push(nodeWithIndex)
+      mediaIndex++
+    } else {
+      pushMediaGroup()
+      groupedContent.push(node)
+    }
+  })
+
+  pushMediaGroup()
+
+  return {
+    ...contentSchema,
+    content: groupedContent,
   }
 }

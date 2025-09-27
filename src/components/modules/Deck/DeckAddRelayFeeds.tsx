@@ -8,24 +8,35 @@ import { typeScale } from '@/themes/typeScale.stylex'
 import { IconServerBolt } from '@tabler/icons-react'
 import { useActionState } from 'react'
 import { css, html } from 'react-strict-dom'
+import { RelayFavoritesList } from '../RelayFavorites/RelayFavoritesList'
+import { DeckScroll } from './DeckScroll'
+import { normalizeRelayUrl } from '@/core/helpers/formatRelayUrl'
 
 type Props = {
   onSelect: (tag: string) => void
 }
 
 export const DeckAddRelayFeeds = (props: Props) => {
-  const [, submit] = useActionState((_: unknown, formData: FormData) => {
-    const tag = formData.get('value')?.toString()
-    if (tag) {
-      props.onSelect(tag)
+  const [error, submit] = useActionState((_: string | null, formData: FormData) => {
+    const value = formData.get('value')?.toString().trim() || ''
+
+    const normalized = normalizeRelayUrl(value)
+    try {
+      const u = new URL(normalized)
+      if (u.protocol === 'ws:' || u.protocol === 'wss:') {
+        props.onSelect(normalized)
+      }
+    } catch {
+      return 'Enter a valid ws:// or wss:// URL'
     }
+
     return null
-  }, [])
+  }, null)
 
   return (
     <>
       <form action={submit}>
-        <html.div style={styles.header}>
+        <Stack sx={styles.header}>
           <Stack grow gap={0.5}>
             <SearchField
               name='value'
@@ -36,8 +47,14 @@ export const DeckAddRelayFeeds = (props: Props) => {
               Add
             </Button>
           </Stack>
-        </html.div>
+        </Stack>
+        {error && <html.div style={styles.error}>{error}</html.div>}
       </form>
+      <DeckScroll>
+        <Stack horizontal={false} sx={styles.content}>
+          <RelayFavoritesList />
+        </Stack>
+      </DeckScroll>
     </>
   )
 }
@@ -58,7 +75,15 @@ const styles = css.create({
     width: '100%',
     height: '100%',
   },
+  content: {
+    padding: spacing.padding1,
+  },
   button: {
     height: 50,
+  },
+  error: {
+    color: palette.error,
+    fontSize: typeScale.bodySize$sm,
+    paddingInline: spacing['padding0.5'],
   },
 })

@@ -3,10 +3,10 @@ import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { CircularProgress } from '@/components/ui/Progress/CircularProgress'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
+import { Kind } from '@/constants/kinds'
+import { parseBolt11 } from '@/hooks/parsers/parseZap'
+import { subscribeRemote } from '@/hooks/subscriptions/subscribeStrategy'
 import { useGoBack } from '@/hooks/useNavigations'
-import { useRootContext } from '@/hooks/useRootStore'
-import { parseBolt11 } from '@/nostr/helpers/parseZap'
-import { waitForZapReceipt } from '@/nostr/subscriptions/waitForZapReceipt'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
@@ -15,17 +15,16 @@ import { IconChevronLeft, IconCircleCheck, IconWallet } from '@tabler/icons-reac
 import { useNavigate } from '@tanstack/react-router'
 import { AnimatePresence, motion, MotionConfig } from 'framer-motion'
 import { DateTime } from 'luxon'
-import type { EventPointer } from 'nostr-tools/nip19'
 import { useObservableState } from 'observable-hooks'
 import { QRCodeCanvas } from 'qrcode.react'
 import { useMemo, useRef } from 'react'
 import { css, html } from 'react-strict-dom'
-import { first, map } from 'rxjs'
+import { filter, identity, map, mergeMap, take, tap } from 'rxjs'
 import { CopyButton } from '../Buttons/CopyButton'
 import type { CopyButtonRef } from '../Buttons/CopyIconButton'
 
 type Props = {
-  event: EventPointer
+  relays: string[]
   invoice: string
 }
 
@@ -37,9 +36,8 @@ const variants = {
 }
 
 export const ZapRequestInvoice = (props: Props) => {
-  const { event, invoice } = props
+  const { relays, invoice } = props
 
-  const context = useRootContext()
   const copyButtonRef = useRef<CopyButtonRef | null>(null)
   const goBack = useGoBack()
   const navigate = useNavigate()
@@ -62,8 +60,24 @@ export const ZapRequestInvoice = (props: Props) => {
   // }, [])
 
   const [paid] = useObservableState<boolean>(() => {
-    return waitForZapReceipt(event.id, invoice, { ...context, relays: event.relays }).pipe(
-      first(),
+    return subscribeRemote(
+      {
+        relays,
+        network: 'REMOTE_ONLY',
+        outbox: false,
+        negentropy: false,
+        closeOnEose: false,
+        subId: 'zap_receipt',
+      },
+      { kinds: [Kind.ZapReceipt], since: parseInt((Date.now() / 1000).toString()) },
+    ).pipe(
+      tap((x) => console.log('>', x)),
+      mergeMap(identity),
+      filter((event) => {
+        // Make sure the zap receipt is the one we are looking for
+        return event.tags.find((tag) => tag[0] === 'bolt11')?.[1] === invoice
+      }),
+      take(1),
       map(() => true),
     )
   })
@@ -95,13 +109,13 @@ export const ZapRequestInvoice = (props: Props) => {
                   </Stack>
                   <Stack>
                     <Text variant='label' size='lg' sx={styles.amount}>
-                      Amount: {formatter.format(parseInt(amount) / 1000)} SATS
+                      Amount: {amount ? formatter.format(parseInt(amount) / 1000) : '-'} SATS
                     </Text>
                   </Stack>
                   <Button
                     fullWidth
                     variant='filledTonal'
-                    onClick={() => navigate({ to: '.', search: ({ nevent, invoice, ...rest }) => rest })}>
+                    onClick={() => navigate({ to: '.', search: ({ n, invoice, ...rest }) => rest })}>
                     Close
                   </Button>
                 </Stack>
@@ -143,7 +157,8 @@ export const ZapRequestInvoice = (props: Props) => {
                 <Stack horizontal={false} gap={1}>
                   <CopyButton fullWidth text={invoice} title='Copy Invoice' ref={copyButtonRef} />
                   <a href={`lightning:${invoice}`}>
-                    <Button fullWidth variant='filled' sx={styles.button} icon={<IconWallet strokeWidth='1.5' />}>
+                    <Button fullWidth variant='filled' sx={styles.button}>
+                      <IconWallet strokeWidth='1.5' />
                       Open Wallet
                     </Button>
                   </a>

@@ -1,24 +1,45 @@
+import { enqueueToastAtom } from '@/atoms/toaster.atoms'
+import {
+  filesAtom,
+  resetFileUploadAtom,
+  resetIsUploadingAtom,
+  selectFilesForUploadAtom,
+  uploadFilesAtom,
+} from '@/atoms/upload.atoms'
 import { useContentContext } from '@/components/providers/ContentProvider'
 import { ButtonBase } from '@/components/ui/ButtonBase/ButtonBase'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { SxProps } from '@/components/ui/types'
-import { Kind } from '@/constants/kinds'
-import { useCurrentPubkey, useGlobalSettings } from '@/hooks/useRootStore'
-import type { EditorStore } from '@/stores/editor/editor.store'
-import { UploadStore } from '@/stores/editor/upload.store'
-import { toastStore } from '@/stores/ui/toast.store'
+import { usePublishEventMutation } from '@/hooks/mutations/usePublishEventMutation'
+import { useCurrentPubkey } from '@/hooks/useAuth'
+import { publish } from '@/nostr/publish/publish'
+import { duration } from '@/themes/duration.stylex'
+import { easing } from '@/themes/easing.stylex'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconPhotoPlus } from '@tabler/icons-react'
 import { UserAvatar } from 'components/elements/User/UserAvatar'
-import { observer } from 'mobx-react-lite'
+import { useAtomValue, useSetAtom } from 'jotai'
+import type { EventTemplate, NostrEvent } from 'nostr-tools'
 import { useObservableState } from 'observable-hooks'
-import { useEffect, useMemo } from 'react'
+import { memo, useEffect } from 'react'
 import { css } from 'react-strict-dom'
-import { concat, concatMap, defer, endWith, from, map, mergeMap, startWith, takeUntil, tap } from 'rxjs'
+import {
+  catchError,
+  concat,
+  concatMap,
+  defer,
+  EMPTY,
+  endWith,
+  from,
+  map,
+  mergeMap,
+  startWith,
+  takeUntil,
+  tap,
+} from 'rxjs'
 import { MediaListEditor } from '../Media/MediaListEditor'
-import { ToastEventPublished } from '../Toasts/ToastEventPublished'
 import { EditorContainer } from './EditorContainer'
 import { EditorExpandables } from './EditorExpandables'
 import { EditorHeader } from './EditorHeader'
@@ -26,56 +47,65 @@ import { EditorPlaceholder } from './EditorPlaceholder'
 import { EditorSubmit } from './EditorSubmit'
 import { EditorTiptap } from './EditorTiptap'
 import { EditorToolbar } from './EditorToolbar'
+import { useEditorSelector } from './hooks/useEditor'
 import { cancel$, countDown$ } from './utils/countDown'
 
 type Props = {
-  store: EditorStore
   initialOpen?: boolean
   renderDiscard?: boolean
   sx?: SxProps
   onDiscard?: () => void
+  onSuccess?: (event: NostrEvent) => void
 }
 
 // For kind 20 notes
-export const EditorMedia = observer(function EditorMedia(props: Props) {
-  const { store, initialOpen, renderDiscard = true, onDiscard } = props
+export const EditorMedia = memo(function EditorMedia(props: Props) {
+  const { initialOpen, renderDiscard = true, onDiscard, onSuccess } = props
   const { dense } = useContentContext()
-  const globalSettings = useGlobalSettings()
+  const files = useAtomValue(filesAtom)
+  const selectFiles = useSetAtom(selectFilesForUploadAtom)
+  const uploadFiles = useSetAtom(uploadFilesAtom)
+  const resetFiles = useSetAtom(resetFileUploadAtom)
+  const resetUploadingFiles = useSetAtom(resetIsUploadingAtom)
+  const enqueueToast = useSetAtom(enqueueToastAtom)
 
+  const state = useEditorSelector((editor) => editor)
   const pubkey = useCurrentPubkey()
 
+  const { mutateAsync } = usePublishEventMutation<EventTemplate>({
+    mutationFn:
+      ({ signer, pubkey }) =>
+      (event) =>
+        publish({ ...event, pubkey }, { relays: state.allRelays, signer }),
+    onSuccess,
+  })
+
   useEffect(() => {
-    store.setKind(Kind.Media)
-    store.open.toggle(initialOpen)
-  }, [])
+    state.toggle('open', initialOpen)
+    if (initialOpen && !('ontouchstart' in window)) {
+      state.focus()
+    }
+  }, [initialOpen])
 
-  const uploadStore = useMemo(
-    () =>
-      new UploadStore({
-        sign: (event) => store.sign(event),
-        defaultUploadType: globalSettings.defaultUploadType as 'nip96' | 'blossom',
-        defaultUploadUrl: globalSettings.defaultUploadUrl,
-      }),
-    [],
-  )
-
-  const [submitState, submit] = useObservableState<string | number | boolean, [EditorStore, UploadStore]>((input$) => {
+  const [submitState, submit] = useObservableState<string | number | boolean, EventTemplate>((input$) => {
     return input$.pipe(
-      concatMap(([store, uploadStore]) => {
+      concatMap((event) => {
         const upload$ = defer(() =>
-          from(uploadStore.uploadFiles()).pipe(
+          from(uploadFiles()).pipe(
             mergeMap((imetas) => {
-              return store.submit({
-                ...store.rawEvent,
-                tags: [...imetas, ...store.rawEvent.tags],
+              return mutateAsync({
+                ...event,
+                tags: [...imetas, ...event.tags],
               })
             }),
-            tap((event) => {
-              toastStore.enqueue(<ToastEventPublished event={event} eventLabel={store.title} />, { duration: 10000 })
-            }),
-            tap(() => uploadStore.reset()),
+            tap(() => resetFiles()),
             map(() => false),
             startWith(0),
+            catchError((error) => {
+              resetUploadingFiles()
+              enqueueToast({ component: error.toString(), duration: 4000 })
+              return EMPTY
+            }),
           ),
         )
         return concat(countDown$, upload$).pipe(takeUntil(cancel$), endWith(false))
@@ -85,35 +115,34 @@ export const EditorMedia = observer(function EditorMedia(props: Props) {
 
   return (
     <>
-      <EditorContainer open={store.open.value} onClick={() => store.setOpen()}>
-        <UserAvatar size='md' pubkey={pubkey} />
+      <EditorContainer open={state.open} onClick={() => state.setOpen()}>
+        {pubkey && <UserAvatar pubkey={pubkey} />}
         <Stack horizontal={false} align='stretch' justify={'center'} grow sx={styles.content}>
           <Stack sx={[styles.content, dense && styles.content$dense]} gap={2} align='flex-start'>
             <Stack horizontal={false} sx={styles.wrapper}>
-              <EditorHeader store={store} />
-              {store.open.value ? (
+              <EditorHeader />
+              {state.open ? (
                 <>
-                  <EditorTiptap kind20 key='editor' dense={dense} store={store} placeholder={store.placeholder} />
-                  <MediaListEditor uploadStore={uploadStore} />
-                  <ButtonBase sx={styles.mediaBox} onClick={() => uploadStore.selectFiles()}>
+                  <EditorTiptap key='editor' dense={dense} />
+                  <MediaListEditor />
+                  <ButtonBase sx={styles.mediaBox} onClick={() => selectFiles()}>
                     <IconPhotoPlus size={28} strokeWidth={'1.8'} />
                   </ButtonBase>
                 </>
               ) : (
-                <EditorPlaceholder placeholder={store.placeholder} />
+                <EditorPlaceholder />
               )}
             </Stack>
           </Stack>
-          {store.open.value && (
-            <EditorToolbar renderAddMedia={false} store={store}>
+          {state.open && (
+            <EditorToolbar renderAddMedia={false}>
               <EditorSubmit
-                store={store}
                 state={submitState}
-                disabled={uploadStore.files.length === 0 || store.isUploading.value}
+                disabled={files.length === 0 || state.isUploading}
                 renderDiscard={renderDiscard}
-                onSubmit={() => submit([store, uploadStore])}
+                onSubmit={() => state.event && submit(state.event)}
                 onDiscard={() => {
-                  uploadStore.reset()
+                  resetFiles()
                   onDiscard?.()
                 }}
               />
@@ -121,7 +150,7 @@ export const EditorMedia = observer(function EditorMedia(props: Props) {
           )}
         </Stack>
       </EditorContainer>
-      <EditorExpandables store={store} />
+      <EditorExpandables />
     </>
   )
 })
@@ -152,5 +181,12 @@ const styles = css.create({
     borderStyle: 'dashed',
     borderRadius: shape.xl,
     borderColor: palette.outline,
+    transform: 'scale(1)',
+    transitionProperty: 'transform',
+    transitionDuration: duration.short3,
+    transitionTimingFunction: easing.emphasized,
+    ':active': {
+      transform: 'scale(0.9)',
+    },
   },
 })

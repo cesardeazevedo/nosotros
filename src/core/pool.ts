@@ -1,4 +1,3 @@
-import { LRUCache } from 'lru-cache'
 import { distinct, mergeAll, mergeMap, of, ReplaySubject } from 'rxjs'
 import { formatRelayUrl } from './helpers/formatRelayUrl'
 import { Relay } from './Relay'
@@ -6,15 +5,11 @@ import { Relay } from './Relay'
 type Options = {
   blacklist?: Array<{ pattern: RegExp }>
   open?: (url: string) => Relay
-  allowLocalConnection?: boolean
 }
 
 export class Pool {
   relays = new Map<string, Relay>()
-  blacklisted = new LRUCache({
-    ttl: 30000,
-    ttlAutopurge: true,
-  })
+  blacklisted = new Set<string>()
 
   private relaysSubject = new ReplaySubject<Relay>()
   relays$ = this.relaysSubject.asObservable()
@@ -42,7 +37,6 @@ export class Pool {
     relay.websocket$.subscribe({
       error: () => {
         this.delete(url)
-        this.blacklist(url)
       },
       complete: () => {
         this.delete(url)
@@ -68,14 +62,11 @@ export class Pool {
   }
 
   blacklist(url: string) {
-    this.blacklisted.set(url, true)
+    this.blacklisted.add(url)
   }
 
   get(url: string): Relay | undefined {
     url = formatRelayUrl(url)
-    if (!url.startsWith('wss://') && this.options?.allowLocalConnection !== true) {
-      return
-    }
     if (this.blacklisted.has(url)) {
       return
     }

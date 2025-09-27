@@ -3,23 +3,24 @@ import type { Props as IconButtonProps } from '@/components/ui/IconButton/IconBu
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { PopoverBase } from '@/components/ui/Popover/PopoverBase'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
-import type { EditorStore } from '@/stores/editor/editor.store'
 import { IconMoodSmile } from '@tabler/icons-react'
 import EmojiPicker, { EmojiStyle, Theme } from 'emoji-picker-react'
-import { observer } from 'mobx-react-lite'
+import { memo } from 'react'
+import { useEditorSection, useEditorSelector } from '../hooks/useEditor'
 
-type Props = IconButtonProps & {
-  store: EditorStore
-}
+type Props = IconButtonProps & {}
 
-export const EditorButtonReactions = observer(function EditorButtonReactions(props: Props) {
-  const { store, ...rest } = props
+export const EditorButtonReactions = memo(function EditorButtonReactions(props: Props) {
+  const { ...rest } = props
   const { dense } = useContentContext()
+  const { section, openSection } = useEditorSection()
+  const editor = useEditorSelector((editor) => editor.editor)
+
   return (
     <PopoverBase
       placement='bottom-start'
-      opened={store.section === 'reactions'}
-      onClose={() => store.openSection('reactions')}
+      opened={section === 'reactions'}
+      onClose={() => openSection('reactions')}
       contentRenderer={() => (
         <EmojiPicker
           open
@@ -27,7 +28,7 @@ export const EditorButtonReactions = observer(function EditorButtonReactions(pro
           emojiStyle={EmojiStyle.NATIVE}
           previewConfig={{ showPreview: false }}
           onEmojiClick={({ emoji }) => {
-            store.editor?.chain().insertContent(emoji).focus().run()
+            editor?.chain().insertContent(emoji).focus().run()
           }}
         />
       )}>
@@ -41,7 +42,7 @@ export const EditorButtonReactions = observer(function EditorButtonReactions(pro
             selected={opened}
             size={dense ? 'sm' : 'md'}
             icon={<IconMoodSmile size={dense ? 20 : 22} strokeWidth='1.6' />}
-            onClick={() => store.openSection('reactions')}
+            onClick={() => openSection('reactions')}
           />
         </Tooltip>
       )}

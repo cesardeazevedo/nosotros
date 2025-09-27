@@ -1,3 +1,4 @@
+import { setListFormDialogAtom } from '@/atoms/dialog.atoms'
 import { IconUsersGroupFilled } from '@/components/elements/Icons/IconUsersGroupFilled'
 import { UserHeader } from '@/components/elements/User/UserHeader'
 import { Button } from '@/components/ui/Button/Button'
@@ -6,40 +7,29 @@ import { Paper } from '@/components/ui/Paper/Paper'
 import { PopoverBase } from '@/components/ui/Popover/PopoverBase'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
-import { useCurrentPubkey } from '@/hooks/useRootStore'
-import { subscribeUsers } from '@/nostr/subscriptions/subscribeUser'
-import type { Event } from '@/stores/events/event'
-import { dialogStore } from '@/stores/ui/dialogs.store'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import { useCurrentPubkey } from '@/hooks/useAuth'
+import { useEventTag, useEventTags } from '@/hooks/useEventUtils'
 import { spacing } from '@/themes/spacing.stylex'
-import { observer } from 'mobx-react-lite'
-import { useObservable, useSubscription } from 'observable-hooks'
-import { useState } from 'react'
+import { useSetAtom } from 'jotai'
+import { memo, useState } from 'react'
 import { css } from 'react-strict-dom'
-import { filter, mergeMap } from 'rxjs'
 import { FollowBulkButton } from '../../Follows/FollowBulkButton'
 import { FollowButton } from '../../Follows/FollowButton'
 
 type Props = {
-  events: Event[]
+  event: NostrEventDB
 }
 
-export const FollowSetChip = observer(function FollowSetChip(props: Props) {
-  const { events } = props
+export const FollowSetChip = memo(function FollowSetChip(props: Props) {
+  const { event } = props
   const [open, setOpen] = useState(false)
+  const setListFormDialog = useSetAtom(setListFormDialogAtom)
   const pubkey = useCurrentPubkey()
-  const isMultipleList = events.length > 1
-  const pubkeys = events.flatMap((x) => x.getTags('p'))
-  const title = events?.[0]?.getTag('title') + ` (${pubkeys.length})`
-  const sub = useObservable(
-    (input$) => {
-      return input$.pipe(
-        filter(([, open]) => open),
-        mergeMap(([pubkeys]) => subscribeUsers(pubkeys, {})),
-      )
-    },
-    [pubkeys, open],
-  )
-  useSubscription(sub)
+  const pubkeys = useEventTags(event, 'p')
+  const dTag = useEventTag(event, 'd')
+  const titleTag = useEventTag(event, 'title')
+  const title = (titleTag || dTag) + ` (${pubkeys?.length || ''})`
 
   return (
     <PopoverBase
@@ -50,19 +40,19 @@ export const FollowSetChip = observer(function FollowSetChip(props: Props) {
       contentRenderer={() => (
         <Paper outlined surface='surfaceContainerLow' sx={styles.popover}>
           <Stack sx={styles.header} justify='space-between' gap={4}>
-            <Text size='lg'>{isMultipleList ? 'Follow Sets' : title}</Text>
+            <Text size='lg'>{title}</Text>
             <Stack gap={0.5}>
-              {!isMultipleList && pubkey === events[0].pubkey && (
+              {pubkey === event.pubkey && (
                 <Button
                   variant='outlined'
                   onClick={() => {
                     setOpen(false)
-                    dialogStore.setListForm(events[0])
+                    setListFormDialog(event)
                   }}>
                   Edit
                 </Button>
               )}
-              <FollowBulkButton pubkeys={pubkeys} />
+              <FollowBulkButton values={pubkeys} />
             </Stack>
           </Stack>
           <Stack horizontal={false} align='stretch' gap={0.5} sx={styles.maxHeight}>
@@ -71,7 +61,7 @@ export const FollowSetChip = observer(function FollowSetChip(props: Props) {
                 <Stack sx={styles.userHeader}>
                   <UserHeader grow key={pubkey} pubkey={pubkey} userAvatarProps={{ size: 'sm' }} />
                 </Stack>
-                <FollowButton pubkey={pubkey} sx={styles.followButton} />
+                <FollowButton value={pubkey} sx={styles.followButton} />
               </Stack>
             ))}
           </Stack>
@@ -81,7 +71,7 @@ export const FollowSetChip = observer(function FollowSetChip(props: Props) {
         <Chip
           {...getProps()}
           ref={setRef}
-          label={isMultipleList ? 'Follow Sets' : title}
+          label={title}
           icon={<IconUsersGroupFilled size={18} />}
           onClick={() => setOpen(true)}
         />

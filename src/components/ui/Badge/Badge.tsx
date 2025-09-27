@@ -8,7 +8,10 @@ import type { Props as PaperProps } from '../Paper/Paper'
 import { Paper } from '../Paper/Paper'
 import { Text } from '../Text/Text'
 
+type BadgeVariant = 'primary' | 'secondary'
+
 type Props = Omit<PaperProps, 'children'> & {
+  variant?: BadgeVariant
   value?: string | number
   maxValue?: number
   showZero?: boolean
@@ -16,7 +19,7 @@ type Props = Omit<PaperProps, 'children'> & {
 }
 
 export const Badge = (props: Props) => {
-  const { dot, value, maxValue = 99, showZero } = props
+  const { variant = 'primary', dot, value, maxValue = 99, showZero } = props
   const valueAsNumber = typeof value === 'number' ? Number(value) : undefined
   const invisible = (value === undefined && !dot) || (valueAsNumber !== undefined && valueAsNumber <= 0 && !showZero)
   const displayValue = useMemo(
@@ -31,7 +34,7 @@ export const Badge = (props: Props) => {
     [dot, value, maxValue, valueAsNumber],
   )
   return (
-    <Paper sx={[styles.root, invisible && styles.root$invisible, dot && styles.root$dot]}>
+    <Paper sx={[styles.root, invisible && styles.root$invisible, dot && styles.root$dot, styles[`root$${variant}`]]}>
       <Text sx={styles.label}>{displayValue}</Text>
     </Paper>
   )
@@ -49,12 +52,19 @@ const styles = css.create({
     boxSizing: 'border-box',
     minWidth: 16,
     height: 16,
-    backgroundColor: palette.error,
     padding: spacing.padding1,
     transitionProperty: 'transform',
     transitionDuration: duration.short3,
     transitionTimingFunction: easing.standard,
     whiteSpace: 'nowrap',
+  },
+  root$primary: {
+    backgroundColor: palette.error,
+    color: 'white',
+  },
+  root$secondary: {
+    backgroundColor: palette.surfaceContainerHighest,
+    color: palette.onSurface,
   },
   root$dot: {
     transform: `scale(0.5)`,
@@ -65,6 +75,5 @@ const styles = css.create({
   },
   label: {
     position: 'relative',
-    color: 'white',
   },
 })

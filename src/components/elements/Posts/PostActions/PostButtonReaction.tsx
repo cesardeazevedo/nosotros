@@ -1,16 +1,20 @@
+import { enqueueToastAtom } from '@/atoms/toaster.atoms'
 import { useContentContext } from '@/components/providers/ContentProvider'
-import { useNoteContext } from '@/components/providers/NoteProvider'
+import { useNostrContext } from '@/components/providers/NostrContextProvider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
+import { usePublishEventMutation } from '@/hooks/mutations/usePublishEventMutation'
+import { useReactionByPubkey } from '@/hooks/query/useReactions'
+import type { NoteState } from '@/hooks/state/useNote'
+import { useCurrentPubkey } from '@/hooks/useAuth'
 import { useMobile } from '@/hooks/useMobile'
-import { useCurrentPubkey, useCurrentSigner, useCurrentUser } from '@/hooks/useRootStore'
 import { publishReaction } from '@/nostr/publish/publishReaction'
-import { toastStore } from '@/stores/ui/toast.store'
 import { fallbackEmoji } from '@/utils/utils'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconHeart, IconHeartFilled } from '@tabler/icons-react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { observer } from 'mobx-react-lite'
-import { useCallback, useState } from 'react'
+import { useSetAtom } from 'jotai'
+import type { NostrEvent } from 'nostr-tools'
+import { memo, useState } from 'react'
 import { css, html } from 'react-strict-dom'
 import { ReactionPicker } from '../../Reactions/ReactionPicker'
 import { ReactionsTooltip } from '../../Reactions/ReactionsTooltip'
@@ -30,40 +34,47 @@ const emojiColors: Record<string, string> = {
   '😡': colors.orange7,
 }
 
-export const ButtonReaction = observer(function ButtonReaction() {
-  const { note } = useNoteContext()
-  const { dense } = useContentContext()
+type Props = {
+  note: NoteState
+}
+
+export const ButtonReaction = memo(function ButtonReaction(props: Props) {
   const [mobileOpen, setMobileOpen] = useState(false)
-  const user = useCurrentUser()
-  const total = note.reactions.length
-  const myReaction = user?.reactionByEventId?.(note.id)?.event.content
-  const color = myReaction ? emojiColors[fallbackEmoji(myReaction)] || colors.red7 : colors.red7
+  const { note } = props
+  const { dense } = useContentContext()
+  const ctx = useNostrContext()
+  const enqueueToast = useSetAtom(enqueueToastAtom)
   const pubkey = useCurrentPubkey()
-  const signer = useCurrentSigner()
+  const total = note.reactions.data?.length || 0
+  const myReaction = useReactionByPubkey(pubkey, note.event)?.content
+  const color = myReaction ? emojiColors[fallbackEmoji(myReaction)] || colors.red7 : colors.red7
   const mobile = useMobile()
 
-  const handleReact = useCallback(
-    (reaction: string) => {
-      if (pubkey) {
-        publishReaction(pubkey, note.event.event, reaction, { signer }).subscribe({
-          error: (error) => toastStore.enqueue(error.message),
-        })
-      }
+  const { mutate } = usePublishEventMutation<[string, NostrEvent]>({
+    mutationFn:
+      ({ signer, pubkey }) =>
+      ([reaction, event]) =>
+        publishReaction(pubkey, event, reaction, { signer, includeRelays: ctx?.relays }),
+    onError: (error) => {
+      enqueueToast({ component: error.message })
     },
-    [pubkey, note],
-  )
+  })
+
+  const handleReaction = (reaction: string) => {
+    mutate([reaction, note.event])
+  }
 
   return (
     <>
       <ButtonContainer
         value={
           !!total && (
-            <ReactionsTooltip noteId={note.id}>
+            <ReactionsTooltip>
               <span>{total || ''}</span>
             </ReactionsTooltip>
           )
         }>
-        <ReactionPicker mobileOpen={mobileOpen} onClick={handleReact} onClose={() => setMobileOpen(false)}>
+        <ReactionPicker mobileOpen={mobileOpen} onClick={handleReaction} onClose={() => setMobileOpen(false)}>
           <AnimatePresence initial={false}>
             <IconButton
               size={dense ? 'sm' : 'md'}
@@ -74,7 +85,7 @@ export const ButtonReaction = observer(function ButtonReaction() {
                 if (mobile && !mobileOpen) {
                   setMobileOpen(true)
                 } else {
-                  handleReact('❤️')
+                  handleReaction('❤️')
                   setMobileOpen(false)
                 }
               }}

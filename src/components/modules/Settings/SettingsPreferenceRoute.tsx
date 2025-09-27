@@ -1,59 +1,47 @@
 import { SettingsClientTag } from '@/components/modules/Settings/SettingsClientTag'
-import { SettingsScrollLoader } from '@/components/modules/Settings/SettingsScrollLoader'
 import { SettingsMaxRelaysOutbox } from '@/components/modules/Settings/SettingsMaxRelaysOutbox'
-import { SettingsMediaStorage } from '@/components/modules/Settings/SettingsMediaStorage'
 import { SettingsNIP05 } from '@/components/modules/Settings/SettingsNIP05'
 import { SettingsSubHeader } from '@/components/modules/Settings/SettingsSubHeader'
 import { SettingsTheme } from '@/components/modules/Settings/SettingsTheme'
 import { Stack } from '@/components/ui/Stack/Stack'
-import { spacing } from '@/themes/spacing.stylex'
-import { css } from 'react-strict-dom'
-import { SettingsRelayAuth } from './SettingsRelaysAuth'
 import { SettingsContent } from './SettingsContent'
+import { Text } from '@/components/ui/Text/Text'
+import { Divider } from '@/components/ui/Divider/Divider'
+import { css } from 'react-strict-dom'
+import { spacing } from '@/themes/spacing.stylex'
+import { SettingsLayout } from './SettingsLayout'
 
 export const SettingsPreferencesRoute = () => {
   return (
-    <Stack horizontal={false} gap={4} sx={styles.root} align='flex-start'>
-      <Stack horizontal={false} gap={1}>
+    <Stack grow horizontal={false}>
+      <Stack sx={styles.header}>
+        <Text variant='title' size='lg'>
+          General
+        </Text>
+      </Stack>
+      <Divider />
+      <Stack horizontal={false} gap={1} align='flex-start' sx={styles.content}>
         <SettingsSubHeader>Theme</SettingsSubHeader>
         <SettingsTheme />
       </Stack>
-      <Stack horizontal={false} gap={1} align='flex-start'>
-        <SettingsSubHeader>Network Settings</SettingsSubHeader>
+      <br />
+      <Stack horizontal={false} gap={2} align='flex-start'>
         <SettingsNIP05 />
-        <br />
         <SettingsMaxRelaysOutbox />
-        <br />
-        <SettingsRelayAuth />
-        <br />
-        <SettingsScrollLoader />
-      </Stack>
-      <Stack horizontal={false} gap={1}>
-        <SettingsSubHeader>Content Settings</SettingsSubHeader>
         <SettingsContent />
-      </Stack>
-      <Stack horizontal={false} gap={1}>
-        <SettingsSubHeader>Post Settings</SettingsSubHeader>
         <SettingsClientTag />
-      </Stack>
-      <Stack horizontal={false} gap={1} align='flex-start' justify='flex-start'>
-        <SettingsSubHeader>Upload Settings</SettingsSubHeader>
-        <SettingsMediaStorage />
+        <SettingsLayout />
       </Stack>
     </Stack>
   )
 }
 
 const styles = css.create({
-  root: {
-    padding: spacing.padding2,
-    width: '100%',
-  },
   header: {
-    paddingLeft: spacing.padding2,
+    paddingBlock: spacing.padding2,
+    paddingInline: spacing.padding4,
   },
-  menu: {
-    width: '100%',
-    // maxWidth: 500,
+  content: {
+    paddingTop: spacing.padding2,
   },
 })

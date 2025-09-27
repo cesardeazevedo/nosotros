@@ -1,64 +1,88 @@
+import { useDeckAddNextColumn } from '@/components/modules/Deck/hooks/useDeck'
 import { useContentContext } from '@/components/providers/ContentProvider'
-import { useRootStore } from '@/hooks/useRootStore'
-import { createNEventModule } from '@/stores/modules/module.helpers'
-import { seenStore } from '@/stores/seen/seen.store'
+import type { SxProps } from '@/components/ui/types'
+import { createEventModule } from '@/hooks/modules/createEventModule'
 import { decodeNIP19 } from '@/utils/nip19'
+import type { LinkProps } from '@tanstack/react-router'
 import { Link, useRouter } from '@tanstack/react-router'
-import { observer, useLocalObservable } from 'mobx-react-lite'
 import { nip19 } from 'nostr-tools'
 import type { NEvent, Note } from 'nostr-tools/nip19'
-import React, { useCallback, useContext } from 'react'
+import type { DragEventHandler } from 'react'
+import React, { memo, useMemo } from 'react'
 import { css } from 'react-strict-dom'
-import { DeckContext } from '../../modules/Deck/DeckContext'
 
 export type Props = {
-  nevent?: NEvent | Note
-  children: React.ReactNode
+  nevent?: NEvent | Note | string | undefined
+  search?: LinkProps['search']
+  media?: boolean
+  block?: boolean
   underline?: boolean
-  replaceOnDeck?: boolean
+  children: React.ReactNode
+  sx?: SxProps
 }
 
-export const LinkNEvent = observer(function LinkNEvent(props: Props) {
-  const { underline, replaceOnDeck = false, ...rest } = props
-  const router = useRouter()
-  const root = useRootStore()
-  const { index } = useContext(DeckContext)
+export const LinkNEvent = memo(function LinkNEvent(props: Props) {
+  const { underline, nevent: neventProp, search, block = false, media = false, sx, ...rest } = props
   const { disableLink } = useContentContext()
-  const isDeck = index !== undefined
 
-  // Some quotes might be note1
-  const nevent = useLocalObservable(() => ({
-    get value() {
-      const { nevent } = props
-      if (nevent && (nevent.startsWith('note1') || nevent.startsWith('nostr:note1'))) {
-        const decoded = decodeNIP19(nevent)
-        if (decoded?.type === 'note') {
-          return nip19.neventEncode({
+  const router = useRouter()
+  const style = [styles.cursor, block && styles.block, underline && styles.underline, sx]
+
+  // Swap note1 to nevent as note1 was deprecated
+  const nevent = useMemo(() => {
+    if (neventProp) {
+      const isNote1 = neventProp.startsWith('note1') || neventProp.startsWith('nostr:note1')
+      if (isNote1) {
+        const decoded = decodeNIP19(neventProp)
+        if (decoded && decoded.type === 'note') {
+          const encoded = nip19.neventEncode({
             id: decoded.data,
-            relays: seenStore.get(decoded.data),
+            relays: [],
           })
+          return encoded
         }
       }
-      return nevent
-    },
-  })).value
-
-  const handleClickDeck = useCallback(() => {
-    if (nevent) {
-      const decoded = decodeNIP19(nevent)
-      if (decoded?.type === 'nevent') {
-        root.decks.selected.add(createNEventModule(decoded.data), (index || 0) + (replaceOnDeck ? 0 : 1), replaceOnDeck)
-      }
+      return neventProp
     }
-  }, [nevent, index])
+  }, [neventProp])
 
-  if (disableLink || !nevent) {
+  const deck = useDeckAddNextColumn(() => createEventModule(nevent))
+
+  const handleDragStart: DragEventHandler<HTMLAnchorElement> = (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+  }
+
+  if ((disableLink && !media) || !nevent) {
     return props.children
   }
 
-  if (isDeck) {
+  if (media) {
     return (
-      <a onClick={handleClickDeck} {...rest} {...css.props([styles.cursor, underline && styles.underline])}>
+      <Link
+        to={'.'}
+        search={(s) => ({
+          ...s,
+          media: s.media,
+          ...(typeof search === 'function' ? search(s) : typeof search === 'object' ? search : {}),
+          n: nevent,
+        })}
+        {...rest}
+        {...css.props(style)}
+        onClick={(e) => e.stopPropagation()}
+        onDragStart={handleDragStart}>
+        {props.children}
+      </Link>
+    )
+  }
+
+  if (deck.isDeck) {
+    return (
+      <a
+        onClick={deck.add}
+        {...rest}
+        {...css.props([style, underline && styles.underline])}
+        onDragStart={handleDragStart}>
         {props.children}
       </a>
     )
@@ -69,7 +93,8 @@ export const LinkNEvent = observer(function LinkNEvent(props: Props) {
       to={`/$nostr`}
       state={{ from: router.latestLocation.pathname } as never}
       {...rest}
-      {...css.props([underline && styles.underline])}
+      {...css.props(style)}
+      onDragStart={handleDragStart}
       params={{ nostr: nevent }}>
       {props.children}
     </Link>
@@ -85,5 +110,13 @@ const styles = css.create({
       default: 'inherit',
       ':hover': 'underline',
     },
+  },
+  block: {
+    position: 'relative',
+    display: 'block',
+    width: 'auto', // needed because of firefox
+    height: 'inherit',
+    maxHeight: 'inherit',
+    maxWidth: 'inherit',
   },
 })

@@ -1,11 +1,13 @@
-import { Camera } from 'components/elements/Camera/Camera'
-import { DialogSheet } from 'components/elements/Layouts/Dialog'
-import { observer } from 'mobx-react-lite'
-import { dialogStore } from 'stores/ui/dialogs.store'
+import { Camera } from '@/components/elements/Camera/Camera'
+import { DialogSheet } from '@/components/elements/Layouts/Dialog'
+import { useDialogControl } from '@/hooks/useDialogs'
+import { memo } from 'react'
 
-export const CameraDialog = observer(function CameraDialog() {
+export const CameraDialog = memo(function CameraDialog() {
+  const [open, onClose] = useDialogControl('camera')
+
   return (
-    <DialogSheet maxWidth='xs' open={dialogStore.camera} onClose={() => dialogStore.toggleCamera(false)}>
+    <DialogSheet maxWidth='xs' open={open} onClose={onClose}>
       <Camera />
     </DialogSheet>
   )

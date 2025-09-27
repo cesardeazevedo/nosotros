@@ -1,10 +1,11 @@
+import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { typeFace } from '@/themes/typeFace.stylex'
 import { typeScale } from '@/themes/typeScale.stylex'
 import type { UserAuthoredStyles } from '@stylexjs/stylex/lib/StyleXTypes'
 import React, { useEffect, useState } from 'react'
 import { css, html } from 'react-strict-dom'
-import { Skeleton } from '../Skeleton/Skeleton'
+import type { StrictReactDOMImageProps } from 'react-strict-dom/dist/types/StrictReactDOMImageProps'
 import type { SxProps } from '../types'
 import { avatarTokens } from './Avatar.stylex'
 
@@ -15,50 +16,35 @@ export type Props = {
   variant?: AvatarVariant
   src?: string
   srcSet?: string
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
-  crossOrigin?: null | ('anonymous' | 'use-credentials')
-  referrerPolicy?:
-    | null
-    | (
-        | 'no-referrer'
-        | 'no-referrer-when-downgrade'
-        | 'origin'
-        | 'origin-when-cross-origin'
-        | 'same-origin'
-        | 'strict-origin'
-        | 'strict-origin-when-cross-origin'
-        | 'unsafe-url'
-      )
+  size?: 'xxs' | 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+  referrerPolicy?: HTMLImageElement['referrerPolicy']
+  onClick?: StrictReactDOMImageProps['onClick']
+  onError?: StrictReactDOMImageProps['onError']
   children?: React.ReactNode
-  fallbackRandomColor?: string
 }
 
-function useLoaded({ crossOrigin, referrerPolicy, src, srcSet }: Props) {
+const useLoaded = (p: Pick<Props, 'src' | 'srcSet' | 'referrerPolicy'>) => {
+  const { src, srcSet, referrerPolicy } = p
   const [loaded, setLoaded] = useState<false | 'loaded' | 'error'>(false)
 
   useEffect(() => {
     if (!src && !srcSet) {
       setLoaded(false)
-      return undefined
+      return
     }
-
     setLoaded(false)
-
     let active = true
     const image = new Image()
     image.onload = () => {
-      if (!active) {
-        return
+      if (active) {
+        setLoaded('loaded')
       }
-      setLoaded('loaded')
     }
     image.onerror = () => {
-      if (!active) {
-        return
+      if (active) {
+        setLoaded('error')
       }
-      setLoaded('error')
     }
-    image.crossOrigin = crossOrigin || null
     if (referrerPolicy) {
       image.referrerPolicy = referrerPolicy
     }
@@ -68,39 +54,38 @@ function useLoaded({ crossOrigin, referrerPolicy, src, srcSet }: Props) {
     if (srcSet) {
       image.srcset = srcSet
     }
-
     return () => {
       active = false
     }
-  }, [crossOrigin, referrerPolicy, src, srcSet])
+  }, [src, srcSet, referrerPolicy])
 
   return loaded
 }
 
 export const Avatar = (props: Props) => {
-  const { variant = 'rounded', size = 'md', src, srcSet, crossOrigin, referrerPolicy, children, sx } = props
-  const loaded = useLoaded({ src, srcSet, crossOrigin, referrerPolicy })
+  const { variant = 'rounded', size = 'md', src, srcSet, referrerPolicy, children, sx, onClick, onError } = props
+  const loaded = useLoaded({ src, srcSet, referrerPolicy })
   const hasImage = !!src || !!srcSet
-  const hasImageNotFailing = hasImage && loaded !== 'error'
-  return (
-    <html.div style={[sizes[size], styles.root, variants[variant], sx]}>
-      {!loaded && src ? (
-        <Skeleton variant='circular' animation='wave' sx={[sizes[size], styles.loading]} />
-      ) : hasImageNotFailing ? (
-        <html.img
-          loading='lazy'
-          fetchPriority='low'
-          style={styles.img}
-          src={src}
-          srcSet={srcSet}
-          crossOrigin={crossOrigin}
-          referrerPolicy={referrerPolicy}
-        />
-      ) : children ? (
-        <html.div style={styles.content}>{children}</html.div>
-      ) : null}
-    </html.div>
-  )
+  const okImage = hasImage && loaded !== 'error'
+  const style = [sizes[size], variants[variant], styles.square]
+  if (okImage) {
+    return (
+      <html.img
+        loading='lazy'
+        decoding='async'
+        fetchPriority='low'
+        style={[...style, styles.img, sx]}
+        src={src}
+        srcSet={srcSet}
+        onClick={onClick}
+        onError={onError}
+      />
+    )
+  }
+  if (children) {
+    return <html.div style={[...style, styles.fallback]}>{children}</html.div>
+  }
+  return <html.div style={[...style, styles.empty]} />
 }
 
 const variants = css.create({
@@ -109,8 +94,12 @@ const variants = css.create({
 } as Record<AvatarVariant, UserAuthoredStyles>)
 
 const sizes = css.create({
+  xxs: {
+    [avatarTokens.containerSize]: '16px',
+    [avatarTokens.labelTextSize]: typeScale.bodySize$sm,
+  },
   xs: {
-    [avatarTokens.containerSize]: '24px',
+    [avatarTokens.containerSize]: '26px',
     [avatarTokens.labelTextSize]: typeScale.bodySize$sm,
   },
   sm: {
@@ -132,43 +121,38 @@ const sizes = css.create({
 })
 
 const styles = css.create({
-  root: {
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: avatarTokens.containerSize,
-    height: avatarTokens.containerSize,
+  square: {
+    inlineSize: avatarTokens.containerSize,
+    blockSize: avatarTokens.containerSize,
+    minInlineSize: avatarTokens.containerSize,
+    minBlockSize: avatarTokens.containerSize,
+    maxInlineSize: avatarTokens.containerSize,
+    maxBlockSize: avatarTokens.containerSize,
     borderRadius: avatarTokens.containerShape,
     overflow: 'hidden',
     userSelect: 'none',
-    color: avatarTokens.labelTextColor,
-    textTransform: 'uppercase',
-    flexShrink: 0,
-    flexGrow: 0,
-  },
-  img: {
-    width: '100%',
-    height: '100%',
-    textAlign: 'center',
-    objectFit: 'cover',
-    color: 'transparent',
-    textIndent: 10000,
-  },
-  content: {
-    width: '100%',
-    height: '100%',
-    display: 'flex',
+    backgroundColor: palette.surfaceContainerLowest,
+    display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
+  },
+  img: {
+    blockSize: '100%',
+    inlineSize: '100%',
+    objectFit: 'cover',
+    objectPosition: 'center',
+    color: 'transparent',
+    textIndent: 10000,
+  },
+  fallback: {
     fontSize: avatarTokens.labelTextSize,
     fontWeight: typeFace.bold,
-    backgroundColor: 'white',
     color: 'black',
+    backgroundColor: 'white',
+    textTransform: 'uppercase',
   },
-  loading: {
-    width: avatarTokens.containerSize,
-    height: avatarTokens.containerSize,
+  empty: {
+    backgroundColor: palette.surfaceContainerLowest,
   },
 })

@@ -1,0 +1,6 @@
+export const isEventTag = (tag: string[]) => tag[0] === 'e' || tag[0] === 'E'
+export const isAddressTag = (tag: string[]) => tag[0] === 'a'
+export const isQuoteTag = (tag: string[]) => tag[0] === 'q'
+export const isAuthorTag = (tag: string[]) => tag[0] === 'p' || tag[0] === 'P'
+export const isMention = (tag: string[]) => tag[3] === 'mention'
+export const isTopicTag = (tag: string[]) => tag[0] === 't'

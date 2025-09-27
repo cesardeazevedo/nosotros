@@ -1,62 +1,77 @@
 import { CenteredContainer } from '@/components/elements/Layouts/CenteredContainer'
+import { HeaderBase } from '@/components/elements/Layouts/HeaderBase'
+import { PaperContainer } from '@/components/elements/Layouts/PaperContainer'
 import { RelayMailboxList } from '@/components/elements/Relays/RelayMailboxList'
-import { Button } from '@/components/ui/Button/Button'
+import { Divider } from '@/components/ui/Divider/Divider'
 import { Stack } from '@/components/ui/Stack/Stack'
-import { Text } from '@/components/ui/Text/Text'
-import { useFollowingUsers } from '@/hooks/useFollowingUsers'
+import { Tab } from '@/components/ui/Tab/Tab'
+import { Tabs } from '@/components/ui/Tabs/Tabs'
+import { useCurrentPubkey } from '@/hooks/useAuth'
 import { useMobile } from '@/hooks/useMobile'
-import { useResetScroll } from '@/hooks/useResetScroll'
-import { useCurrentPubkey, useCurrentUser } from '@/hooks/useRootStore'
+import { useCurrentRoute } from '@/hooks/useNavigations'
 import { READ, WRITE } from '@/nostr/types'
 import { spacing } from '@/themes/spacing.stylex'
-import { IconPencil } from '@tabler/icons-react'
-import { observer } from 'mobx-react-lite'
-import { useState } from 'react'
-import { css, html } from 'react-strict-dom'
+import { Link, Outlet } from '@tanstack/react-router'
+import { memo } from 'react'
+import { css } from 'react-strict-dom'
+import { RelayActiveHeader } from '../RelayActive/RelayActiveHeader'
 
-export const RelayRoute = observer(function RelayRoute() {
-  const [isEditing, setIsEditing] = useState(false)
-  const user = useCurrentUser()
+export const RelayRoute = memo(function RelayRoute() {
+  const isMobile = useMobile()
+  const current = useCurrentRoute()
   const pubkey = useCurrentPubkey()
-  const mobile = useMobile()
-  useResetScroll()
-  useFollowingUsers()
   return (
-    <CenteredContainer margin sx={styles.root}>
-      <Stack horizontal={false} gap={mobile ? 0 : 4}>
+    <>
+      <CenteredContainer margin maxWidth='lg'>
         {pubkey && (
-          <html.div>
-            <Stack justify='space-between' gap={4} sx={[styles.header, mobile && styles.header$mobile]}>
-              <Text variant='display' size='sm'>
-                Mailbox Relays
-              </Text>
-              <Button
-                onClick={() => setIsEditing((prev) => !prev)}
-                icon={!isEditing && <IconPencil size={18} />}
-                variant={isEditing ? 'danger' : 'filled'}>
-                {isEditing ? 'Cancel' : 'Edit'}
-              </Button>
-            </Stack>
-            <Stack horizontal gap={mobile ? 0 : 2} justify='space-between' align='flex-start' wrap>
-              <RelayMailboxList isEditing={isEditing} user={user!} permission={WRITE} />
-              <RelayMailboxList isEditing={isEditing} user={user!} permission={READ} />
-            </Stack>
-          </html.div>
+          <>
+            <PaperContainer maxWidth='lg'>
+              <HeaderBase label='Relay Settings' />
+              <Divider />
+              <Stack horizontal={false}>
+                <Stack horizontal justify='space-between' align='flex-start' wrap>
+                  <RelayMailboxList pubkey={pubkey} permission={WRITE} />
+                  <Divider orientation='vertical' />
+                  <RelayMailboxList pubkey={pubkey} permission={READ} />
+                </Stack>
+              </Stack>
+            </PaperContainer>
+            {!isMobile && <br />}
+          </>
         )}
-      </Stack>
-    </CenteredContainer>
+        <PaperContainer maxWidth='lg'>
+          <Stack>
+            <Stack sx={styles.tabs} align='center' justify='flex-start'>
+              <Tabs anchor={current.routeId || ''}>
+                <Link to='/relays'>
+                  <Tab anchor='/relays/' label={<RelayActiveHeader />} />
+                </Link>
+                <Link to='/relays/monitor'>
+                  <Tab anchor='/relays/monitor' label='Relay Monitor' />
+                </Link>
+              </Tabs>
+            </Stack>
+          </Stack>
+          <Divider />
+          <Outlet />
+        </PaperContainer>
+      </CenteredContainer>
+    </>
   )
 })
 
 const styles = css.create({
   root: {
-    maxWidth: 960,
+    // maxWidth: 960,
   },
   header: {
-    marginBottom: spacing.margin4,
+    // marginBottom: spacing.margin4,
   },
   header$mobile: {
     padding: spacing.padding2,
     paddingBottom: 0,
+  },
+  tabs: {
+    padding: 12,
   },
 })

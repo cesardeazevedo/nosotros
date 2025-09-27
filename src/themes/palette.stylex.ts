@@ -23,14 +23,14 @@ export const vars = {
   onErrorContainer: colors.red12,
 
   surface: colors.gray0,
-  onSurface: colors.stone11,
-  onSurfaceVariant: colors.stone8,
+  onSurface: colors.gray11,
+  onSurfaceVariant: colors.gray8,
 
   surfaceContainerLowest: '#fff',
-  surfaceContainerLow: colors.stone0,
-  surfaceContainer: colors.stone1,
-  surfaceContainerHigh: colors.stone2,
-  surfaceContainerHighest: colors.stone3,
+  surfaceContainerLow: colors.gray0,
+  surfaceContainer: colors.gray1,
+  surfaceContainerHigh: colors.gray2,
+  surfaceContainerHighest: colors.gray3,
 
   inverseSurface: colors.gray8,
   inverseOnSurface: colors.gray0,

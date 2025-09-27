@@ -32,10 +32,8 @@ describe('Pool', () => {
     relay1.error()
 
     expect(pool.relays.size).toBe(1)
-    expect(pool.blacklisted.has(RELAY_1)).toBe(true)
 
     relay2.error()
     expect(pool.relays.size).toBe(0)
-    expect(pool.blacklisted.has(RELAY_2)).toBe(true)
   })
 })

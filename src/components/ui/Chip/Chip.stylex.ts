@@ -48,5 +48,3 @@ const vars = {
 }
 
 export const chipTokens = css.defineVars(vars)
-
-export const chipTheme = css.createTheme(chipTokens, vars)

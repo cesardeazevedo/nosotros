@@ -56,7 +56,7 @@ export const Drawer = forwardRef<HTMLDivElement, Props>(function Drawer(props, r
 const styles = css.create({
   root: {
     position: 'fixed',
-    zIndex: 500,
+    zIndex: 300,
   },
   root$vertical: {
     top: 0,

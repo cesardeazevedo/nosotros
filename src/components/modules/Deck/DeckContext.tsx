@@ -1,13 +1,4 @@
-import type { ModulesInstances } from '@/stores/modules/module.store'
-import { createContext } from 'react'
+import type { Modules } from '@/hooks/modules/module'
+import { createContext } from 'use-context-selector'
 
-export const deckContextvalues = {}
-
-export const DeckContext = createContext({
-  ...deckContextvalues,
-  module: undefined,
-  index: undefined,
-} as {
-  module: ModulesInstances | undefined
-  index: number | undefined
-})
+export const DeckColumnContext = createContext<(Modules & { index: number }) | undefined>(undefined)

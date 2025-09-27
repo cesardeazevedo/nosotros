@@ -2,39 +2,29 @@ import { Kind } from '@/constants/kinds'
 import { OUTBOX_RELAYS } from '@/constants/relays'
 import { formatRelayUrl } from '@/core/helpers/formatRelayUrl'
 import type { PublisherOptions } from '@/core/NostrPublish'
-import { start } from '@/core/operators/start'
-import { EMPTY, last, map, mergeMap, of } from 'rxjs'
-import { cacheReplaceablePrune } from '../cache'
-import { parseEventMetadata } from '../operators/parseEventMetadata'
-import { pool } from '../pool'
-import { createSubscription } from '../subscriptions/createSubscription'
+import { subscribeLastEvent } from '@/hooks/subscriptions/subscribeLast'
+import { EMPTY, mergeMap } from 'rxjs'
+import type { NostrContext } from '../context'
 import type { UserRelay } from '../types'
-import { addPermission, metadataSymbol, parseRelayListToTags, revokePermission } from '../types'
+import { addPermission, parseRelayList, parseRelayListToTags, revokePermission } from '../types'
 import { publish } from './publish'
-
-const kinds = [Kind.RelayList]
 
 export function publishRelayList(userRelay: UserRelay, revoke: boolean, options: PublisherOptions) {
   const { pubkey } = userRelay
-  const filter = { kinds, authors: [pubkey] }
-  cacheReplaceablePrune.delete([Kind.RelayList, pubkey].join(':'))
-  const sub = createSubscription(filter, { relays: OUTBOX_RELAYS })
+  const ctx: NostrContext = { network: 'REMOTE_ONLY', outbox: true, relays: OUTBOX_RELAYS }
+  const filter = { kinds: [Kind.RelayList], authors: [pubkey] }
 
-  return of(sub).pipe(
-    start(pool),
-    map(([, event]) => event),
-    parseEventMetadata(),
-    last(undefined, null),
+  return subscribeLastEvent(ctx, filter).pipe(
     mergeMap((event) => {
       if (event) {
-        const relayList = event[metadataSymbol]?.relayList || []
+        const { relayList = [] } = parseRelayList(event)
         const data = { ...userRelay, relay: formatRelayUrl(userRelay.relay) }
         const tags = parseRelayListToTags(revoke ? revokePermission(relayList, data) : addPermission(relayList, data))
         return publish(
           { content: event.content, pubkey, kind: Kind.RelayList, tags },
           {
             ...options,
-            relays: of(OUTBOX_RELAYS),
+            relays: OUTBOX_RELAYS,
           },
         )
       }

@@ -1,6 +1,6 @@
-import { observer } from 'mobx-react-lite'
 import { FeedHeaderBase } from '../Feed/headers/FeedHeaderBase'
+import { memo } from 'react'
 
-export const ArticlesHeader = observer(function ArticlesHeader() {
+export const ArticlesHeader = memo(function ArticlesHeader() {
   return <FeedHeaderBase label='Articles' />
 })

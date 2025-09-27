@@ -27,9 +27,7 @@ export const Stats = memo(function Stats() {
       <Link href='https://github.com/cesardeazevedo/nosotros' target='_blank' rel='noopeneer'>
         <Stack align='flex-start'>
           <IconGithub />
-          <Text variant='label' size='md' sx={styles.text}>
-            GitHub
-          </Text>
+          GitHub
         </Stack>
       </Link>
     </Stack>

@@ -1,16 +1,33 @@
 import type { RelayHints } from '@/core/types'
-import type { ContentSchema, IMetaTags } from 'nostr-editor'
-import type { NostrEvent } from 'nostr-tools'
-import type { UserRelay } from './helpers/parseRelayList'
-import type { ParsedTags } from './helpers/parseTags'
-import type { UserSchema } from './helpers/parseUser'
-import type { Bolt11 } from './helpers/parseZap'
+import type { ContentSchema, ImageNode, IMetaTags, Node, VideoNode } from 'nostr-editor'
+import type { UserRelay } from '../hooks/parsers/parseRelayList'
+import type { UserSchema } from '../hooks/parsers/parseUser'
+import type { Bolt11 } from '../hooks/parsers/parseZap'
 
-export * from './helpers/parseRelayList'
+export * from '../hooks/parsers/parseRelayList'
 
 export const metadataSymbol = Symbol('metadata')
 
-export type MetadataSymbol<T> = { [metadataSymbol]: T }
+export type MetadataSymbol<T> = { metadata: T }
+
+export type ImageCustomNode = ImageNode & {
+  index: number
+}
+
+export type VideoCustomNode = VideoNode & {
+  index: number
+}
+
+export type CustomNode =
+  | Node
+  | {
+      type: 'mediaGroup'
+      content: Array<ImageCustomNode | VideoCustomNode>
+    }
+
+export type ContentCustomSchema = Omit<ContentSchema, 'content'> & {
+  content: Array<CustomNode>
+}
 
 export type Metadata = {
   imeta?: IMetaTags
@@ -18,13 +35,10 @@ export type Metadata = {
   rootId?: string
   parentId?: string
   userMetadata?: UserSchema
-  contentSchema?: ContentSchema
+  contentSchema?: ContentCustomSchema
   mentionedNotes?: string[]
   mentionedAuthors?: string[]
   bolt11?: Bolt11
   relayList?: UserRelay[]
   relayHints?: Partial<RelayHints>
-  tags?: ParsedTags
 }
-
-export type NostrEventMetadata = NostrEvent & MetadataSymbol<Metadata>
