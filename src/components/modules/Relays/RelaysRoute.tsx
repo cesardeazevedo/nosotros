@@ -7,6 +7,7 @@ import { Stack } from '@/components/ui/Stack/Stack'
 import { Tab } from '@/components/ui/Tab/Tab'
 import { Tabs } from '@/components/ui/Tabs/Tabs'
 import { useCurrentPubkey } from '@/hooks/useAuth'
+import { useMobile } from '@/hooks/useMobile'
 import { useCurrentRoute } from '@/hooks/useNavigations'
 import { READ, WRITE } from '@/nostr/types'
 import { spacing } from '@/themes/spacing.stylex'
@@ -16,6 +17,7 @@ import { css } from 'react-strict-dom'
 import { RelayActiveHeader } from '../RelayActive/RelayActiveHeader'
 
 export const RelayRoute = memo(function RelayRoute() {
+  const isMobile = useMobile()
   const current = useCurrentRoute()
   const pubkey = useCurrentPubkey()
   return (
@@ -34,7 +36,7 @@ export const RelayRoute = memo(function RelayRoute() {
                 </Stack>
               </Stack>
             </PaperContainer>
-            <br />
+            {!isMobile && <br />}
           </>
         )}
         <PaperContainer maxWidth='lg'>

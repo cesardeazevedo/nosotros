@@ -2,6 +2,8 @@ import { Divider } from '@/components/ui/Divider/Divider'
 import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
+import { useMobile } from '@/hooks/useMobile'
+import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconDatabase, IconInfoCircle, IconLock, IconPhoto, IconSettings } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
@@ -13,6 +15,7 @@ const iconProps = {
 }
 
 export const SettingsTabs = () => {
+  const isMobile = useMobile()
   return (
     <Stack horizontal={false}>
       <Stack sx={styles.header}>
@@ -21,7 +24,14 @@ export const SettingsTabs = () => {
         </Text>
       </Stack>
       <Divider />
-      <Stack grow horizontal={false} gap={0.5} align='stretch' justify='flex-start' sx={styles.root}>
+      <Stack
+        grow
+        wrap={isMobile}
+        horizontal={isMobile}
+        gap={0.5}
+        align={isMobile ? 'flex-start' : 'stretch'}
+        justify='flex-start'
+        sx={[styles.root, isMobile && styles.root$mobile]}>
         <Link to='/settings' activeOptions={{ exact: true }}>
           {({ isActive }) => (
             <MenuItem interactive selected={isActive} leadingIcon={<IconSettings {...iconProps} />} label='General' />
@@ -68,6 +78,12 @@ const styles = css.create({
     height: '100%',
     minWidth: 310,
     maxWidth: 310,
+  },
+  root$mobile: {
+    maxWidth: '100%',
+    borderBottom: '1px solid',
+    borderBottomColor: palette.outlineVariant,
+    backgroundColor: palette.surfaceContainerLow,
   },
   header: {
     paddingBlock: spacing.padding2,

@@ -54,7 +54,7 @@ export const SidebarMenu = memo(function SidebarMenu() {
         {!pubkey && (
           <>
             <JoinNostrButton />
-            <br />
+            {!isMobile && <br />}
           </>
         )}
         {pubkey && (
