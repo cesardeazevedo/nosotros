@@ -1,9 +1,9 @@
+import { useMobile } from '@/hooks/useMobile'
 import { spacing } from '@/themes/spacing.stylex'
 import { EditorContent as TiptapEditorContent } from '@tiptap/react'
 import { memo, useId } from 'react'
 import { css } from 'react-strict-dom'
 import { useEditorSelector } from './hooks/useEditor'
-import { useMobile } from '@/hooks/useMobile'
 
 type Props = {
   dense?: boolean
@@ -44,6 +44,7 @@ const styles = css.create({
     overflowY: 'auto',
   },
   root$mobile: {
+    fontWeight: 400,
     maxHeight: 'calc(100vh - 280px)',
   },
   root$disabled: {
