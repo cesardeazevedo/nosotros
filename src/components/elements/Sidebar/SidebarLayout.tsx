@@ -55,7 +55,9 @@ export const SidebarLayout = memo(function SidebarLayout(props: Props) {
             isDeck && styles.main$deck,
             isDeck && !settings.sidebarCollapsed && styles.main$deck$expanded,
           ]}>
-          <html.div style={styles.leading} id='header_lead'></html.div>
+          <html.div
+            style={[styles.leading, settings.sidebarCollapsed && styles.leading$collapsed]}
+            id='header_lead'></html.div>
           <html.div style={styles.trailing}>
             <Stack gap={1}>
               {pubkey ? (
@@ -82,8 +84,11 @@ export const SidebarLayout = memo(function SidebarLayout(props: Props) {
 const styles = css.create({
   leading: {
     position: 'fixed',
-    // top: spacing.margin2,
+    top: 0,
     marginLeft: spacing.margin1,
+  },
+  leading$collapsed: {
+    marginLeft: 90,
   },
   trailing: {
     position: 'fixed',
