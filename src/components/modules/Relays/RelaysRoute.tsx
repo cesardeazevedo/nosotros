@@ -7,6 +7,7 @@ import { Stack } from '@/components/ui/Stack/Stack'
 import { Tab } from '@/components/ui/Tab/Tab'
 import { Tabs } from '@/components/ui/Tabs/Tabs'
 import { useCurrentPubkey } from '@/hooks/useAuth'
+import { useMobile } from '@/hooks/useMobile'
 import { useCurrentRoute } from '@/hooks/useNavigations'
 import { READ, WRITE } from '@/nostr/types'
 import { spacing } from '@/themes/spacing.stylex'
@@ -16,25 +17,28 @@ import { css } from 'react-strict-dom'
 import { RelayActiveHeader } from '../RelayActive/RelayActiveHeader'
 
 export const RelayRoute = memo(function RelayRoute() {
+  const isMobile = useMobile()
   const current = useCurrentRoute()
   const pubkey = useCurrentPubkey()
   return (
     <>
       <CenteredContainer margin maxWidth='lg'>
-        <PaperContainer maxWidth='lg'>
-          <HeaderBase label='Relay Settings' />
-          <Divider />
-          <Stack horizontal={false}>
-            {pubkey && (
-              <Stack horizontal justify='space-between' align='flex-start' wrap>
-                <RelayMailboxList pubkey={pubkey} permission={WRITE} />
-                <Divider orientation='vertical' />
-                <RelayMailboxList pubkey={pubkey} permission={READ} />
+        {pubkey && (
+          <>
+            <PaperContainer maxWidth='lg'>
+              <HeaderBase label='Relay Settings' />
+              <Divider />
+              <Stack horizontal={false}>
+                <Stack horizontal justify='space-between' align='flex-start' wrap>
+                  <RelayMailboxList pubkey={pubkey} permission={WRITE} />
+                  <Divider orientation='vertical' />
+                  <RelayMailboxList pubkey={pubkey} permission={READ} />
+                </Stack>
               </Stack>
-            )}
-          </Stack>
-        </PaperContainer>
-        <br />
+            </PaperContainer>
+            {!isMobile && <br />}
+          </>
+        )}
         <PaperContainer maxWidth='lg'>
           <Stack>
             <Stack sx={styles.tabs} align='center' justify='flex-start'>

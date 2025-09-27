@@ -42,33 +42,42 @@ export class SqliteSharedService {
 
   private async init() {
     // Connect to the current provider and future providers.
-    this.clientChannel.addEventListener('message', ({ data }) => {
-      if (data?.type === 'provider' && data?.sharedService === this.serviceName) {
-        this.providerPort = this.providerChange()
-      }
-    })
-
-    // Check if we can become provider immediately
-    await navigator.locks.request(this.serviceName, { ifAvailable: true }, async (locked) => {
-      if (locked) {
-        return await this.initializeProvider()
-      } else {
-        this.workerService.resolve({ isProvider: false })
-      }
-    })
-
-    // Always wait for the lock (this will fire when provider dies)
-    navigator.locks
-      .request(this.serviceName, async () => {
-        // Reset the promise since we're now becoming provider
-        this.workerService = Promise.withResolvers<WorkerProvider>()
-        return await this.initializeProvider()
+    if (this.sharedWorker) {
+      this.clientChannel.addEventListener('message', ({ data }) => {
+        if (data?.type === 'provider' && data?.sharedService === this.serviceName) {
+          this.providerPort = this.providerChange()
+        }
       })
-      .catch(() => {})
+
+      // Check if we can become provider immediately
+      await navigator.locks.request(this.serviceName, { ifAvailable: true }, async (locked) => {
+        if (locked) {
+          return await this.initializeProvider()
+        } else {
+          this.workerService.resolve({ isProvider: false })
+        }
+      })
+
+      // Always wait for the lock (this will fire when provider dies)
+      navigator.locks
+        .request(this.serviceName, async () => {
+          // Reset the promise since we're now becoming provider
+          this.workerService = Promise.withResolvers<WorkerProvider>()
+          return await this.initializeProvider()
+        })
+        .catch(() => {})
+    } else {
+      // SharedWorker not supported (Chrome Android), initialize as a provider and terminate the worker
+      // if the user opens a new tab (steal)
+      const worker = this.initializeWorker()
+      this.workerService.resolve({ worker, isProvider: true })
+      await navigator.locks
+        .request(this.serviceName, { steal: true }, () => new Promise<void>(() => {}))
+        .catch(() => worker.terminate())
+    }
   }
 
-  private async initializeProvider() {
-    // provider tab
+  private initializeWorker() {
     const worker = new Worker(new URL('./sqlite.worker.ts', import.meta.url), { type: 'module' })
     worker.onmessage = (e) => {
       const raw = e.data
@@ -86,7 +95,12 @@ export class SqliteSharedService {
         resolvers.resolve(res.result)
       }
     }
+    return worker
+  }
 
+  private async initializeProvider() {
+    // provider tab
+    const worker = this.initializeWorker()
     this.workerService.resolve({ worker, isProvider: true })
 
     const service = this.createSharedServicePort()
