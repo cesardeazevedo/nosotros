@@ -21,20 +21,22 @@ export const RelayRoute = memo(function RelayRoute() {
   return (
     <>
       <CenteredContainer margin maxWidth='lg'>
-        <PaperContainer maxWidth='lg'>
-          <HeaderBase label='Relay Settings' />
-          <Divider />
-          <Stack horizontal={false}>
-            {pubkey && (
-              <Stack horizontal justify='space-between' align='flex-start' wrap>
-                <RelayMailboxList pubkey={pubkey} permission={WRITE} />
-                <Divider orientation='vertical' />
-                <RelayMailboxList pubkey={pubkey} permission={READ} />
+        {pubkey && (
+          <>
+            <PaperContainer maxWidth='lg'>
+              <HeaderBase label='Relay Settings' />
+              <Divider />
+              <Stack horizontal={false}>
+                <Stack horizontal justify='space-between' align='flex-start' wrap>
+                  <RelayMailboxList pubkey={pubkey} permission={WRITE} />
+                  <Divider orientation='vertical' />
+                  <RelayMailboxList pubkey={pubkey} permission={READ} />
+                </Stack>
               </Stack>
-            )}
-          </Stack>
-        </PaperContainer>
-        <br />
+            </PaperContainer>
+            <br />
+          </>
+        )}
         <PaperContainer maxWidth='lg'>
           <Stack>
             <Stack sx={styles.tabs} align='center' justify='flex-start'>
