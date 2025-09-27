@@ -1,19 +1,20 @@
 import { Paper } from '@/components/ui/Paper/Paper'
+import type { SxProps } from '@/components/ui/types'
 import { useMobile } from '@/hooks/useMobile'
 import { useIsDarkTheme } from '@/hooks/useTheme'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
-import { observer } from 'mobx-react-lite'
-import React from 'react'
+import React, { memo } from 'react'
 import { css } from 'react-strict-dom'
 
 type Props = {
   topRadius?: boolean
   maxWidth?: 'md' | 'lg'
   children?: React.ReactNode
+  sx?: SxProps
 }
 
-export const PaperContainer = observer(function PaperContainer(props: Props) {
+export const PaperContainer = memo(function PaperContainer(props: Props) {
   const { children, maxWidth = 'md', topRadius = true, ...rest } = props
   const isMobile = useMobile()
   const isDark = useIsDarkTheme()
@@ -23,7 +24,7 @@ export const PaperContainer = observer(function PaperContainer(props: Props) {
       outlined={isDark && !isMobile}
       elevation={isDark ? 0 : 1}
       surface='surfaceContainerLowest'
-      sx={[styles.root, styles[maxWidth], !topRadius && styles.resetTopRadius]}>
+      sx={[styles.root, styles[maxWidth], !topRadius && styles.resetTopRadius, rest.sx]}>
       {children}
     </Paper>
   )
@@ -54,6 +55,7 @@ const styles = css.create({
     },
   },
   resetTopRadius: {
-    borderRadius: 0,
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
   },
 })

@@ -2,19 +2,20 @@ import { UserAvatar } from '@/components/elements/User/UserAvatar'
 import { ContentProvider } from '@/components/providers/ContentProvider'
 import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { Text } from '@/components/ui/Text/Text'
-import type { Event } from '@/stores/events/event'
-import { observer } from 'mobx-react-lite'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import { useEventTag, useEventTags } from '@/hooks/useEventUtils'
+import { memo } from 'react'
 
 type Props = {
-  event: Event
+  event: NostrEventDB
   selected?: boolean
 }
 
-export const RelaySetMenuItem = observer(function RelaySetMenuItem(props: Props) {
+export const RelaySetMenuItem = memo(function RelaySetMenuItem(props: Props) {
   const { event, selected } = props
-  const title = event.getTag('title')
-  const description = event.getTag('description')
-  const relays = event.getTags('relay')
+  const title = useEventTag(event, 'title')
+  const description = useEventTag(event, 'description')
+  const relays = useEventTags(event, 'relay')
   return (
     <ContentProvider value={{ disablePopover: true, disableLink: true }}>
       <MenuItem

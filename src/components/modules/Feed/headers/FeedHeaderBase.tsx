@@ -1,41 +1,42 @@
 import { IconExpandable } from '@/components/elements/Icons/IconExpandable'
 import type { Props as HeaderBaseProps } from '@/components/elements/Layouts/HeaderBase'
 import { HeaderBase } from '@/components/elements/Layouts/HeaderBase'
+import { Anchored } from '@/components/ui/Anchored/Anchored'
+import { Badge } from '@/components/ui/Badge/Badge'
 import { Button } from '@/components/ui/Button/Button'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { visibleOnHoverStyle } from '@/components/ui/helpers/visibleOnHover.stylex'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Stack } from '@/components/ui/Stack/Stack'
-import { useRootStore } from '@/hooks/useRootStore'
-import type { FeedStore } from '@/stores/feeds/feed.store'
+import type { FeedState } from '@/hooks/state/useFeed'
 import { spacing } from '@/themes/spacing.stylex'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconTrash } from '@tabler/icons-react'
-import type { ReactNode } from '@tanstack/react-router'
-import { useContext, useState } from 'react'
+import type { ReactNode } from 'react'
+import { memo, useState } from 'react'
 import { css } from 'react-strict-dom'
-import { DeckContext } from '../../Deck/DeckContext'
+import { useDeckColumn, useRemoveDeckColumn } from '../../Deck/hooks/useDeck'
 import type { Props as FeedSettingsProps } from '../FeedSettings'
 import { FeedSettings } from '../FeedSettings'
 
 type Props = HeaderBaseProps &
   Partial<FeedSettingsProps> & {
-    feed?: FeedStore
-    customSettings?: ReactNode
+    feed?: FeedState
+    customSettings?: ReactNode | (({ close }: { close: () => void }) => ReactNode)
     onDelete?: () => void
+    renderSetting?: boolean
   }
 
-export const FeedHeaderBase = (props: Props) => {
+export const FeedHeaderBase = memo(function FeedHeaderBase(props: Props) {
   const [expanded, setExpanded] = useState(false)
-  const { feed, customSettings, renderRelaySettings, onDelete, ...rest } = props
-  const root = useRootStore()
-  const deckModule = useContext(DeckContext).module
-  const isDeck = !!deckModule
+  const { feed, customSettings, renderRelaySettings, onDelete, renderSetting = true, ...rest } = props
+  const column = useDeckColumn()
+  const isDeck = !!column
+  const removeDeckColumn = useRemoveDeckColumn(column?.id)
+
   const handleDelete = () => {
-    if (deckModule) {
-      root.decks.selected.delete(deckModule.id)
-    }
+    removeDeckColumn()
   }
   return (
     <>
@@ -48,16 +49,24 @@ export const FeedHeaderBase = (props: Props) => {
           )}
           {feed && (
             <Button variant='filledTonal' onClick={() => setExpanded((prev) => !prev)}>
-              <Stack gap={0.5}>
-                <IconExpandable upwards strokeWidth='2.5' expanded={expanded} />
-                Feed Settings
-              </Stack>
+              <Anchored content={feed.isDirty && <Badge dot />}>
+                <Stack gap={0.5}>
+                  <IconExpandable upwards strokeWidth='2.5' expanded={expanded} />
+                  Feed Settings
+                </Stack>
+              </Anchored>
             </Button>
           )}
         </Stack>
       </HeaderBase>
       <Expandable expanded={expanded}>
-        {feed && (customSettings || <FeedSettings feed={feed} renderRelaySettings={renderRelaySettings} />)}
+        {feed &&
+          renderSetting &&
+          ((typeof customSettings === 'function'
+            ? customSettings({ close: () => setExpanded(false) })
+            : customSettings) || (
+            <FeedSettings feed={feed} renderRelaySettings={renderRelaySettings} onClose={() => setExpanded(false)} />
+          ))}
         {isDeck && (
           <>
             <Divider />
@@ -71,7 +80,7 @@ export const FeedHeaderBase = (props: Props) => {
       </Expandable>
     </>
   )
-}
+})
 
 const styles = css.create({
   footer: {

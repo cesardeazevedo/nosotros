@@ -1,16 +1,18 @@
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
-import { relaysStore } from '@/stores/relays/relays.store'
+import { useActiveRelays, useConnectedRelays } from '@/hooks/useRelays'
 import { spacing } from '@/themes/spacing.stylex'
-import { observer } from 'mobx-react-lite'
+import { memo } from 'react'
 import { css } from 'react-strict-dom'
 
-export const RelayActiveHeader = observer(function RelayActiveHeader() {
+export const RelayActiveHeader = memo(function RelayActiveHeader() {
+  const relays = useActiveRelays()
+  const connected = useConnectedRelays()
   return (
     <Stack gap={0.5} sx={styles.header} justify='space-between'>
       <Stack gap={1}>
-        <Text variant='title' size='md'>
-          Active Relays ({relaysStore.connected.length}/{relaysStore.list.length})
+        <Text variant='title' size='sm'>
+          Active Relays ({connected.length}/{relays.length})
         </Text>
       </Stack>
     </Stack>

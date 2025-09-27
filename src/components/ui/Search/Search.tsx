@@ -20,14 +20,14 @@ type Props = {
 } & React.InputHTMLAttributes<HTMLInputElement>
 
 export const SearchField = (props: Props) => {
-  const { sx, leading, trailing, onCancel, ...rest } = props
+  const { sx, leading, trailing, onCancel, autoFocus = true, ...rest } = props
   const ref = useRef<HTMLInputElement>(null)
   const refs = mergeRefs([ref, props.ref])
   return (
     <>
       <Stack sx={[styles.root, sx]} gap={1}>
         {leading !== false ? leading || <IconSearch size={20} {...css.props(styles.icon)} /> : undefined}
-        <input {...css.props(styles.input)} {...rest} autoFocus type='text' ref={refs} />
+        <input {...css.props(styles.input)} {...rest} autoFocus={autoFocus} type='text' ref={refs} />
         {trailing || (
           <IconButton
             size='sm'

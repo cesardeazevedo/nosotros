@@ -7,8 +7,10 @@ import { css } from 'react-strict-dom'
 
 export const buttonTokens = css.defineVars({
   containerColor: 'unset',
+  containerColor$hover: 'unset',
+  containerColor$pressed: 'unset',
   containerColor$disabled: 'unset',
-  containerOpacity$disabled: 'unset',
+  containerOpacity$disabled: state.containerOpacity$disabled,
   containerElevation: 'unset',
   containerShape: shape.xl,
   containerHeight: '40px',
@@ -25,7 +27,7 @@ export const buttonTokens = css.defineVars({
   labelTextColor$disabled: palette.onSurface,
   labelTextOpacity$disabled: state.opacity$disabled,
 
-  // spacings
+  // spacing
   leadingSpace: spacing.padding2,
   trailingSpace: spacing.padding2,
 
@@ -33,4 +35,9 @@ export const buttonTokens = css.defineVars({
   outlineColor: palette.outline,
   outlineColor$disabled: palette.onSurface,
   outlineOpacity$disabled: state.outlineOpacity$disabled,
+
+  // focus
+  focusRingColor: palette.primary,
+  focusRingWidth: '2px',
+  focusRingOffset: '3px',
 })

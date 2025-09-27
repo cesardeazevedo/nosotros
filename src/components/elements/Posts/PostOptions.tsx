@@ -1,103 +1,165 @@
+import { statsDialogAtom } from '@/atoms/dialog.atoms'
+import { enqueueToastAtom } from '@/atoms/toaster.atoms'
 import { useContentContext } from '@/components/providers/ContentProvider'
-import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { MenuList } from '@/components/ui/MenuList/MenuList'
 import { Popover } from '@/components/ui/Popover/Popover'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import { usePublishEventMutation } from '@/hooks/mutations/usePublishEventMutation'
+import { useUserState } from '@/hooks/state/useUser'
+import { useCurrentPubkey } from '@/hooks/useAuth'
+import { useNevent } from '@/hooks/useEventUtils'
+import { publishBookmark } from '@/nostr/publish/publishBookmarks'
 import { READ } from '@/nostr/types'
-import type { Note } from '@/stores/notes/note'
-import { dialogStore } from '@/stores/ui/dialogs.store'
-import { toastStore } from '@/stores/ui/toast.store'
 import { spacing } from '@/themes/spacing.stylex'
-import { IconCopy, IconDotsVertical, IconInfoSquareRounded, IconLink, IconQuote, IconShare3 } from '@tabler/icons-react'
+import {
+  IconBookmark,
+  IconCopy,
+  IconDotsVertical,
+  IconExternalLink,
+  IconInfoSquareRounded,
+  IconLink,
+  IconQuote,
+  IconShare3,
+} from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
-import { observer } from 'mobx-react-lite'
-import { useCallback } from 'react'
-import { css } from 'react-strict-dom'
+import { useSetAtom } from 'jotai'
+import { memo, useCallback } from 'react'
+import { css, html } from 'react-strict-dom'
 import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDOMProps'
+import { ContentLink } from '../Content/Link/Link'
 
 type PropsOptions = {
-  note: Note
+  event: NostrEventDB
+  nevent: string | undefined
   onCopyIdClick: (e: StrictClickEvent) => void
   onCopyAuthorIdClick: (e: StrictClickEvent) => void
   onCopyLinkClick: (e: StrictClickEvent) => void
+  onBookmarkClick: (e: StrictClickEvent) => void
   onDetailsClick: (e: StrictClickEvent) => void
 }
 
 const iconProps = { size: 20 }
 
-const Options = observer(function Options(props: PropsOptions) {
-  const { note } = props
+const Options = memo(function Options(props: PropsOptions) {
+  const { event, nevent } = props
+  const itemProps = { interactive: true, size: 'sm' } as const
   return (
     <>
-      <Link to='/feed' search={{ kind: 1, q: note.id, pubkey: note.event.pubkey, permission: READ, type: 'quotes' }}>
-        <MenuItem size='sm' leadingIcon={<IconQuote {...iconProps} />} label='See quotes' onClick={() => {}} />
-      </Link>
-      <Link to='/feed' search={{ kind: 6, e: note.id, pubkey: note.event.pubkey, permission: READ, type: 'reposts' }}>
-        <MenuItem size='sm' leadingIcon={<IconShare3 {...iconProps} />} label='See reposts' onClick={() => {}} />
-      </Link>
+      <html.div style={styles.wrapper}>
+        <Link to='/feed' search={{ kind: 1, q: event.id, pubkey: event.pubkey, permission: READ, type: 'quotes' }}>
+          <MenuItem {...itemProps} leadingIcon={<IconQuote {...iconProps} />} label='See quotes' />
+        </Link>
+        <Link to='/feed' search={{ kind: 6, e: event.id, pubkey: event.pubkey, permission: READ, type: 'reposts' }}>
+          <MenuItem {...itemProps} leadingIcon={<IconShare3 {...iconProps} />} label='See reposts' />
+        </Link>
+      </html.div>
       <Divider />
-      <MenuItem
-        size='sm'
-        leadingIcon={<IconInfoSquareRounded {...iconProps} />}
-        label='Details'
-        onClick={props.onDetailsClick}
-      />
-      <MenuItem size='sm' leadingIcon={<IconCopy {...iconProps} />} label='Copy ID' onClick={props.onCopyIdClick} />
-      <MenuItem
-        size='sm'
-        leadingIcon={<IconCopy {...iconProps} />}
-        label='Copy Author ID'
-        onClick={props.onCopyAuthorIdClick}
-      />
-      <MenuItem size='sm' leadingIcon={<IconLink {...iconProps} />} label='Copy Link' onClick={props.onCopyLinkClick} />
-      {/* <MenuItem disabled leadingIcon={<IconBookmark />} label='Bookmark' /> */}
-      {/* <MenuItem disabled variant='danger' leadingIcon={<IconEyeOff />} label='Mute' /> */}
-      {/* <MenuItem disabled variant='danger' leadingIcon={<IconUserMinus />} label='Unfollow' /> */}
+      <html.div style={styles.wrapper}>
+        <MenuItem
+          {...itemProps}
+          leadingIcon={<IconBookmark {...iconProps} />}
+          label='Bookmark'
+          onClick={props.onBookmarkClick}
+        />
+      </html.div>
+      <Divider />
+      <html.div style={styles.wrapper}>
+        <MenuItem
+          {...itemProps}
+          leadingIcon={<IconInfoSquareRounded {...iconProps} />}
+          label='Details'
+          onClick={props.onDetailsClick}
+        />
+        <MenuItem
+          {...itemProps}
+          leadingIcon={<IconCopy {...iconProps} />}
+          label='Copy ID'
+          onClick={props.onCopyIdClick}
+        />
+        <MenuItem
+          {...itemProps}
+          leadingIcon={<IconCopy {...iconProps} />}
+          label='Copy Author ID'
+          onClick={props.onCopyAuthorIdClick}
+        />
+        <MenuItem
+          {...itemProps}
+          leadingIcon={<IconLink {...iconProps} />}
+          label='Copy Link'
+          onClick={props.onCopyLinkClick}
+        />
+        <ContentLink tooltip={false} underline={false} href={`https://njump.me/${nevent}`} sx={styles.link}>
+          <MenuItem {...itemProps} leadingIcon={<IconExternalLink {...iconProps} />} label='Njump.me' />
+        </ContentLink>
+        {/* <MenuItem disabled leadingIcon={<IconBookmark />} label='Bookmark' /> */}
+        {/* <MenuItem disabled variant='danger' leadingIcon={<IconEyeOff />} label='Mute' /> */}
+        {/* <MenuItem disabled variant='danger' leadingIcon={<IconUserMinus />} label='Unfollow' /> */}
+      </html.div>
     </>
   )
 })
 
-export const PostOptions = observer(function PostOptions() {
+type Props = {
+  event: NostrEventDB
+}
+
+export const PostOptions = memo(function PostOptions(props: Props) {
+  const { event } = props
   const { dense } = useContentContext()
-  const { note } = useNoteContext()
+  const pubkey = useCurrentPubkey()
+  const enqueueToast = useSetAtom(enqueueToastAtom)
+  const setStatsDialog = useSetAtom(statsDialogAtom)
 
-  const handleCopy = useCallback(
-    (value: string | undefined) => {
-      return (e: StrictClickEvent) => {
-        e.stopPropagation()
-        e.preventDefault()
-        if (value) {
-          const type = 'text/plain'
-          const blob = new Blob([value], { type })
-          window.navigator.clipboard.write([new ClipboardItem({ [type]: blob })]).then(() => {
-            toastStore.enqueue('Copied', { duration: 4000 })
-          })
-        }
+  const { mutate: mutateBookMark } = usePublishEventMutation<[id: string, pubkey: string]>({
+    mutationFn:
+      ({ signer }) =>
+      ([id, pubkey]) =>
+        publishBookmark(pubkey, id, { signer }),
+  })
+
+  const handleCopy = useCallback((value: string | undefined) => {
+    return (e: StrictClickEvent) => {
+      e.stopPropagation()
+      e.preventDefault()
+      if (value) {
+        const type = 'text/plain'
+        const blob = new Blob([value], { type })
+        window.navigator.clipboard.write([new ClipboardItem({ [type]: blob })]).then(() => {
+          enqueueToast({ component: 'Copied', duration: 4000 })
+        })
       }
-    },
-    [note],
-  )
+    }
+  }, [])
 
-  const nevent = note?.event.nevent
+  const nevent = useNevent(event)
   const link = window.location.origin + '/' + nevent
+  const user = useUserState(event.pubkey)
 
   return (
     <Popover
       sx={styles.menu}
       placement='bottom-end'
       contentRenderer={(props) => (
-        <MenuList surface='surfaceContainerLow'>
+        <MenuList surface='surfaceContainerLow' sx={styles.menuList}>
           <Options
-            note={note}
+            event={event}
+            nevent={nevent}
             onCopyIdClick={handleCopy(nevent)}
-            onCopyAuthorIdClick={handleCopy(note?.user?.nprofile)}
+            onCopyAuthorIdClick={handleCopy(user?.nprofile)}
             onCopyLinkClick={handleCopy(link)}
+            onBookmarkClick={() => {
+              if (pubkey) {
+                mutateBookMark([event.id, pubkey])
+                props.close()
+              }
+            }}
             onDetailsClick={(e) => {
               e.stopPropagation()
               e.preventDefault()
-              dialogStore.setStats(note.id)
+              setStatsDialog(event.id)
               props.close()
             }}
           />
@@ -108,11 +170,12 @@ export const PostOptions = observer(function PostOptions() {
           {...getProps()}
           ref={setRef}
           onClick={(e) => {
-            open()
             e.preventDefault()
+            e.stopPropagation()
+            open()
           }}
           size={dense ? 'sm' : 'md'}
-          icon={<IconDotsVertical stroke='currentColor' strokeWidth='2.0' size={dense ? 18 : 20} />}
+          icon={<IconDotsVertical stroke='currentColor' strokeWidth='2.0' size={dense ? 16 : 18} opacity={0.8} />}
         />
       )}
     </Popover>
@@ -121,17 +184,18 @@ export const PostOptions = observer(function PostOptions() {
 
 const styles = css.create({
   menu: {
-    width: 200,
+    width: 230,
   },
   label: {
     marginLeft: spacing.margin2,
   },
   menuList: {
-    backgroundColor: 'transparent',
-    width: '100%',
+    paddingInline: 0,
   },
-  clientHeader: {
-    paddingBlock: spacing.padding1,
-    paddingInline: spacing.padding2,
+  wrapper: {
+    paddingInline: spacing.padding1,
+  },
+  link: {
+    width: '100%',
   },
 })

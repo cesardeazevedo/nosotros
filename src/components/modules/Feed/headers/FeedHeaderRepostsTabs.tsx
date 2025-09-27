@@ -15,13 +15,6 @@ export const FeedHeaderRepostsTabs = (props: Props) => {
   return (
     <Stack justify='flex-start' align='flex-start'>
       <Tabs anchor={selected}>
-        {/* <Tab */}
-        {/*   sx={styles.tab} */}
-        {/*   variant='secondary' */}
-        {/*   icon={<IconHeart size={20} strokeWidth='2' />} */}
-        {/*   anchor='reactions' */}
-        {/*   label='Reactions' */}
-        {/* /> */}
         <Link to='.' search={({ e, kind, ...prev }) => ({ ...prev, kind: Kind.Text, q: prev.q || e, type: 'quotes' })}>
           <Tab
             sx={styles.tab}

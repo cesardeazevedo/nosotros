@@ -1,11 +1,11 @@
 import { Chip } from '@/components/ui/Chip/Chip'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
-import type { FeedStore } from '@/stores/feeds/feed.store'
+import type { FeedState } from '@/hooks/state/useFeed'
 import { spacing } from '@/themes/spacing.stylex'
 import type { IconProps } from '@tabler/icons-react'
 import { IconBlur } from '@tabler/icons-react'
-import { observer } from 'mobx-react-lite'
+import { memo } from 'react'
 import { css } from 'react-strict-dom'
 
 const iconProps: IconProps = {
@@ -14,10 +14,10 @@ const iconProps: IconProps = {
 }
 
 type Props = {
-  feed: FeedStore
+  feed: FeedState
 }
 
-export const FeedSettingsSafety = observer(function FeedSettingsSafety(props: Props) {
+export const FeedSettingsSafety = memo(function FeedSettingsSafety(props: Props) {
   const { feed } = props
   return (
     <Stack horizontal={false} gap={0.5}>
@@ -30,7 +30,7 @@ export const FeedSettingsSafety = observer(function FeedSettingsSafety(props: Pr
           variant='filter'
           icon={<IconBlur {...iconProps} />}
           label='Blur Images'
-          onClick={() => feed.toggle('blured')}
+          onClick={() => feed.setBlured((prev) => !prev)}
         />
       </Stack>
     </Stack>

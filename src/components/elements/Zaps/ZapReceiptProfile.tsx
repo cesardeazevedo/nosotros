@@ -2,31 +2,37 @@ import { Avatar } from '@/components/ui/Avatar/Avatar'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import { useEventTag } from '@/hooks/useEventUtils'
+import { useMobile } from '@/hooks/useMobile'
 import { useRelativeDate } from '@/hooks/useRelativeDate'
-import type { ZapReceipt } from '@/stores/zaps/zap.receipt.store'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconBolt } from '@tabler/icons-react'
-import { observer } from 'mobx-react-lite'
+import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 import { UserHeader } from '../User/UserHeader'
 
 type Props = {
-  zap: ZapReceipt
+  event: NostrEventDB
 }
 
 const formatter = new Intl.NumberFormat()
 
-export const ZapReceiptProfile = observer(function ZapReceiptProfile(props: Props) {
-  const { zap } = props
-  const [shortDate, fullDate] = useRelativeDate(zap.event.created_at, 'long')
+export const ZapReceiptProfile = memo(function ZapReceiptProfile(props: Props) {
+  const { event } = props
+  const isMobile = useMobile()
+  const [shortDate, fullDate] = useRelativeDate(event.created_at, 'long')
+  const zapper = useEventTag(event, 'P')
+  const receiver = useEventTag(event, 'p')
+  const amount = event.metadata?.bolt11?.amount?.value || 0
   return (
     <html.div style={styles.root}>
-      <Stack justify='space-between' align='center' gap={1}>
-        {zap.zapper && (
+      <Stack horizontal={!isMobile} justify='space-between' align='center' gap={isMobile ? 4 : 1}>
+        {zapper && (
           <UserHeader
-            pubkey={zap.zapper}
+            pubkey={zapper}
             footer={
               <Tooltip text={fullDate}>
                 <Text variant='body' size='sm' sx={styles.date}>
@@ -36,21 +42,21 @@ export const ZapReceiptProfile = observer(function ZapReceiptProfile(props: Prop
             }
           />
         )}
-        {!zap.zapper && (
+        {!zapper && (
           <Stack justify='flex-start' gap={2}>
             <Avatar>?</Avatar>
-            <Text size='lg'>Anonoymous</Text>
+            <Text size='lg'>Anonymous</Text>
           </Stack>
         )}
         <Stack horizontal={false} gap={0.5}>
           <Stack sx={styles.icon} gap={1} align='center' justify='center'>
             <IconBolt size={22} fill='currentColor' strokeOpacity='0' />
             <Text variant='label' size='lg'>
-              {formatter.format(parseInt(zap.amount || '0') / 1000)}
+              {formatter.format(parseInt(amount || '0') / 1000)}
             </Text>
           </Stack>
         </Stack>
-        <UserHeader pubkey={zap.receiverProfile!} />
+        {receiver && <UserHeader pubkey={receiver} />}
       </Stack>
     </html.div>
   )
@@ -58,10 +64,11 @@ export const ZapReceiptProfile = observer(function ZapReceiptProfile(props: Prop
 
 const styles = css.create({
   root: {
-    paddingBlock: spacing.padding2,
+    padding: spacing.padding2,
   },
   icon: {
     padding: spacing.padding1,
+    paddingInline: spacing.padding2,
     border: '1px solid',
     borderColor: palette.outlineVariant,
     borderRadius: shape.full,

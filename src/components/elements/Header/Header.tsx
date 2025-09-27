@@ -2,8 +2,7 @@ import { AppBar } from '@/components/ui/AppBar/AppBar'
 import { spacing } from '@/themes/spacing.stylex'
 import { useMatch } from '@tanstack/react-router'
 import { useNostrRoute } from 'hooks/useNavigations'
-import { observer } from 'mobx-react-lite'
-import React from 'react'
+import React, { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 import { NavigationHeader } from '../Navigation/NavigationHeader'
 import { SidebarDrawer } from '../Sidebar/SidebarDrawer'
@@ -13,7 +12,7 @@ type Props = {
   children: React.ReactNode
 }
 
-export const Header = observer(function Header(props: Props) {
+export const Header = memo(function Header(props: Props) {
   useMatch({ from: '__root__' })
 
   const isNostrRoute = !!useNostrRoute()

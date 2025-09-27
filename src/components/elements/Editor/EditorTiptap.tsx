@@ -1,49 +1,31 @@
-import { useCurrentPubkey, useCurrentSigner, useGlobalSettings, useRootContext } from '@/hooks/useRootStore'
-import { type EditorStore } from '@/stores/editor/editor.store'
+import { useMobile } from '@/hooks/useMobile'
 import { spacing } from '@/themes/spacing.stylex'
 import { EditorContent as TiptapEditorContent } from '@tiptap/react'
-import { observer } from 'mobx-react-lite'
-import { useEffect, useId, useMemo } from 'react'
+import { memo, useId } from 'react'
 import { css } from 'react-strict-dom'
-import { createEditor } from './utils/createEditor'
-import { createEditorKind20 } from './utils/createEditorKind20'
+import { useEditorSelector } from './hooks/useEditor'
 
 type Props = {
   dense?: boolean
-  placeholder?: string
-  kind20?: boolean
-  store: EditorStore
 }
 
-export const EditorTiptap = observer(function EditorTiptap(props: Props) {
-  const { dense, store, kind20 = false } = props
+export const EditorTiptap = memo(function EditorTiptap(props: Props) {
+  const { dense } = props
+  const mobile = useMobile()
   const id = useId()
-
-  const pubkey = useCurrentPubkey()
-  const context = useRootContext()
-  const signer = useCurrentSigner()
-  const globalSettings = useGlobalSettings()
-  const editor = useMemo(
-    () => store.editor || (kind20 ? createEditorKind20(store) : createEditor(store, globalSettings)),
-    [],
-  )
-
-  useEffect(() => {
-    store.setEditor(editor)
-  }, [store, editor])
-
-  useEffect(() => {
-    if (signer) {
-      store.setSigner(signer)
-    }
-    store.setContext({ ...context, pubkey }, globalSettings)
-  }, [context, pubkey])
+  const open = useEditorSelector((editor) => editor.open)
+  const editor = useEditorSelector((editor) => editor.editor)
 
   return (
     <TiptapEditorContent
       id={id}
       editor={editor}
-      {...css.props([styles.root, dense && styles.root$dense, !store.open && styles.root$disabled])}
+      {...css.props([
+        styles.root,
+        mobile && styles.root$mobile,
+        dense && styles.root$dense,
+        !open && styles.root$disabled,
+      ])}
     />
   )
 })
@@ -51,18 +33,25 @@ export const EditorTiptap = observer(function EditorTiptap(props: Props) {
 const styles = css.create({
   root: {
     flex: '1 1 auto',
-    fontSize: '118%',
+    fontSize: 18,
     fontWeight: 500,
     minHeight: 50,
     width: '100%',
     paddingTop: spacing.padding1,
     paddingBottom: spacing.padding1,
     paddingRight: spacing.padding2,
+    maxHeight: 'calc(100vh - 400px)',
+    overflowY: 'auto',
+  },
+  root$mobile: {
+    fontWeight: 400,
+    maxHeight: 'calc(100vh - 280px)',
   },
   root$disabled: {
     minHeight: 40,
   },
   root$dense: {
     minHeight: 40,
+    fontSize: 16,
   },
 })

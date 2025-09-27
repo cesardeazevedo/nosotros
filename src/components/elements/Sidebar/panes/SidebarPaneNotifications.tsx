@@ -3,53 +3,46 @@ import { NotificationFeed } from '@/components/modules/Notifications/Notificatio
 import { NotificationHeader } from '@/components/modules/Notifications/NotificationHeader'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { SxProps } from '@/components/ui/types'
-import type { FeedModule } from '@/stores/modules/feed.module'
+import { createNotificationFeedModule } from '@/hooks/modules/createNotificationFeedModule'
+import { useNotificationFeedState } from '@/hooks/state/useNotificationFeed'
+import { elevation } from '@/themes/elevation.stylex'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import { Link, useRouterState } from '@tanstack/react-router'
-import { observer } from 'mobx-react-lite'
-import { useContext, type RefObject } from 'react'
+import { memo, useMemo, type RefObject } from 'react'
 import { css } from 'react-strict-dom'
-import { SidebarContext } from '../SidebarContext'
 
 type Props = {
+  pubkey: string
   ref?: RefObject<null>
   sx?: SxProps
 }
 
-export const SidebarPaneNotifications = observer(function SidebarPaneNotifications(props: Props) {
-  const context = useContext(SidebarContext)
-  const module = useRouterState({
-    select: (state) => {
-      const predicate = (x: { routeId: string }) => x.routeId === '/notifications'
-      const match = state.cachedMatches.find(predicate) || state.matches.find(predicate)
-      return match?.loaderData?.module as FeedModule | undefined
-    },
-  })
+export const SidebarPaneNotifications = memo(function SidebarPaneNotifications(props: Props) {
+  const module = useMemo(() => createNotificationFeedModule(props.pubkey), [props.pubkey])
+  const feed = useNotificationFeedState(module)
   return (
     <Stack horizontal={false} ref={props.ref} sx={[styles.root, props.sx]}>
-      <Link resetScroll to='/notifications' onClick={() => context.setPane(false)}>
-        {module && <NotificationHeader module={module} />}
-      </Link>
-      {module && (
-        <DeckScroll>
-          <NotificationFeed column feed={module.feed} />
-        </DeckScroll>
-      )}
+      <div>
+        <NotificationHeader feed={feed} />
+      </div>
+      <DeckScroll>
+        <NotificationFeed column feed={feed} />
+      </DeckScroll>
     </Stack>
   )
 })
 
 const styles = css.create({
   root: {
-    width: 400,
+    width: 420,
     position: 'fixed',
     backgroundColor: palette.surfaceContainerLowest,
     borderRight: '1px solid',
     borderRightColor: palette.outlineVariant,
     borderTopRightRadius: shape.xl,
     borderBottomRightRadius: shape.xl,
+    boxShadow: elevation.shadows1,
     left: 84,
     top: 0,
     bottom: 0,

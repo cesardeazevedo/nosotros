@@ -1,6 +1,7 @@
 import { typeScale } from '@/themes/typeScale.stylex'
 import React from 'react'
 import { css, html } from 'react-strict-dom'
+import type { StrictReactDOMProps } from 'react-strict-dom/dist/types/StrictReactDOMProps'
 import type { SxProps } from '../types'
 
 type StrictDomElements =
@@ -37,7 +38,7 @@ type TextSize = 'lg' | 'md' | 'sm'
 
 type TextVariantSize = `${TextVariant}$${TextSize}`
 
-export type Props = {
+export type Props = StrictReactDOMProps & {
   sx?: SxProps
   variant?: TextVariant
   size?: TextSize
@@ -46,10 +47,14 @@ export type Props = {
 }
 
 export const Text = function Text(props: Props) {
-  const { children, variant = 'body', size = 'sm', sx } = props
+  const { children, variant = 'body', size = 'sm', sx, ...rest } = props
   const key = `${variant}$${size}` as const
   const TextElement = props.element || elementMap[key]
-  return <TextElement style={[styles[key], sx]}>{children}</TextElement>
+  return (
+    <TextElement {...rest} style={[styles[key], sx]}>
+      {children}
+    </TextElement>
+  )
 }
 
 const styles = css.create({

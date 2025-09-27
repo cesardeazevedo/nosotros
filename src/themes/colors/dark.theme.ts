@@ -20,7 +20,7 @@ const darkTheme = css.createTheme(palette, {
   onTertiaryContainer: colors.indigo12,
 
   error: colors.red8,
-  onError: colors.red12,
+  onError: colors.red0,
   errorContainer: colors.red7,
   onErrorContainer: colors.red0,
 
@@ -31,8 +31,8 @@ const darkTheme = css.createTheme(palette, {
   surfaceContainerLowest: '#000',
   surfaceContainerLow: colors.gray11,
   surfaceContainer: colors.gray10,
-  surfaceContainerHigh: colors.gray8,
-  surfaceContainerHighest: colors.gray7,
+  surfaceContainerHigh: colors.gray9,
+  surfaceContainerHighest: colors.gray8,
 
   inverseSurface: colors.gray0,
   inverseOnSurface: colors.gray10,
@@ -43,7 +43,7 @@ const darkTheme = css.createTheme(palette, {
 
   primaryFixed: colors.gray12,
   onPrimaryFixed: colors.gray0,
-  primaryFixedDim: colors.gray10,
+  primaryFixedDim: colors.gray2,
 
   secondaryFixed: colors.gray0,
   onSecondaryFixed: colors.gray12,

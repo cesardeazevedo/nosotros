@@ -3,17 +3,17 @@ import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import React, { memo, useContext } from 'react'
+import React, { memo } from 'react'
 import { css } from 'react-strict-dom'
-import { DeckContext } from '../Deck/DeckContext'
+import { useDeckColumn } from '../Deck/hooks/useDeck'
 
 type Props = {
   rows?: number
 }
 
-export const NotificationLoading = memo(({ rows = 2 }: Props) => {
+export const NotificationLoading = memo(function NotificationLoading({ rows = 2 }: Props) {
   const list = [...Array(rows).keys()]
-  const isDeck = useContext(DeckContext).index !== undefined
+  const isDeck = useDeckColumn()?.index !== undefined
 
   return list.map((key, index) => (
     <React.Fragment key={key}>

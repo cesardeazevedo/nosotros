@@ -2,12 +2,12 @@ import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { prettyRelayUrl } from '@/core/helpers/formatRelayUrl'
-import { relaysStore } from '@/stores/relays/relays.store'
+import { useRelayInfo } from '@/hooks/query/useRelayInfo'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconChevronDown, IconChevronRight } from '@tabler/icons-react'
-import { useMemo, useState } from 'react'
+import { memo, useMemo, useState } from 'react'
 import { css } from 'react-strict-dom'
 import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDOMProps'
 import { LinkRelayFeed } from '../Links/LinkRelayFeed'
@@ -17,17 +17,14 @@ import { RelayIcon } from './RelayIcon'
 import { RelayRowDetails } from './RelayRowDetails'
 
 export type Props = {
-  relay: string
-  relayPubkey?: string
+  url: string
   rtt?: number | string
-  authRequired?: boolean
-  paymentRequired?: boolean
 }
 
-export const RelayListRow = (props: Props) => {
-  const { relay, rtt } = props
+export const RelayListRow = memo(function RelayListRow(props: Props) {
+  const { url: relay, rtt } = props
   const [opened, setOpen] = useState(false)
-  const info = relaysStore.getInfo(relay)
+  const { data: info } = useRelayInfo(relay)
   const pretty = useMemo(() => prettyRelayUrl(relay), [])
 
   const toggle = (e: StrictClickEvent) => {
@@ -66,7 +63,7 @@ export const RelayListRow = (props: Props) => {
       {opened && <RelayRowDetails relay={relay} latency={rtt} />}
     </>
   )
-}
+})
 
 const styles = css.create({
   root: {

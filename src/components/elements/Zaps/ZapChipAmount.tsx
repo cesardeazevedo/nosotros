@@ -1,24 +1,18 @@
+import { updateZapRequestAtom, zapRequestAtom } from '@/atoms/zapRequest.atoms'
 import { Chip } from '@/components/ui/Chip/Chip'
-import type { ZapRequestStore } from '@/stores/zaps/zap.request.store'
-import { observer } from 'mobx-react-lite'
+import { useAtomValue, useSetAtom } from 'jotai'
+import { memo } from 'react'
 
 type Props = {
   amount: number
-  store: ZapRequestStore
 }
 
-export const ZapChipAmount = observer(function ZapChipAmount(props: Props) {
-  const { amount, store } = props
-  const selected = store.amount === amount && !store.custom.value
+export const ZapChipAmount = memo(function ZapChipAmount(props: Props) {
+  const { amount } = props
+  const store = useAtomValue(zapRequestAtom)
+  const updateStore = useSetAtom(updateZapRequestAtom)
+  const selected = store.amount === amount && !store.custom
   return (
-    <Chip
-      selected={selected}
-      variant='filter'
-      label={amount}
-      onClick={() => {
-        store.setAmount(amount)
-        store.custom.toggle(false)
-      }}
-    />
+    <Chip selected={selected} variant='filter' label={amount} onClick={() => updateStore({ amount, custom: false })} />
   )
 })

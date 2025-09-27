@@ -1,34 +1,44 @@
+import { repliesLeftAtomFamily } from '@/atoms/replies.atoms'
 import { Button } from '@/components/ui/Button/Button'
 import { CircularProgress } from '@/components/ui/Progress/CircularProgress'
 import { Stack } from '@/components/ui/Stack/Stack'
-import type { Note } from '@/stores/notes/note'
+import type { NoteState } from '@/hooks/state/useNote'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconDotsVertical } from '@tabler/icons-react'
-import { observer } from 'mobx-react-lite'
+import { useAtomValue } from 'jotai'
 import { css, html } from 'react-strict-dom'
+import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDOMProps'
 
 type Props = {
-  note: Note
+  note: NoteState
   disabled?: boolean
-  onClick?: () => void
 }
 
-export const RepliesLoadMore = observer(function RepliesLoadMore(props: Props) {
-  const { note, onClick, disabled } = props
-  const loading = note.isLoading
-  const noRepliesLeft = !loading && !!note.repliesOpen && note.repliesLeft === 0
+export const RepliesLoadMore = function RepliesLoadMore(props: Props) {
+  const { note, disabled } = props
+  const loading = note.replies.isLoading
+  const repliesLeft = useAtomValue(repliesLeftAtomFamily({ id: note.event.id, limit: note.state.pageSize }))
+  const noRepliesLeft = !loading && !!note.state.repliesOpen && repliesLeft === 0
+  const handleClick = (e: StrictClickEvent) => {
+    e.stopPropagation()
+    if (note.state.repliesOpen) {
+      note.paginate()
+    } else {
+      note.actions.toggleReplies()
+    }
+  }
   return (
     <Stack sx={styles.root} gap={1}>
       <html.span style={styles.leading}>
         {loading ? <CircularProgress size='sm' /> : <IconDotsVertical {...css.props(styles.icon)} />}
       </html.span>
-      <Button variant='filledTonal' onClick={() => onClick?.()} disabled={loading || (disabled ?? noRepliesLeft)}>
-        {loading ? 'Loading replies' : noRepliesLeft ? 'No replies left' : `See More ${note.repliesLeft || ''} replies`}
+      <Button variant='filledTonal' onClick={handleClick} disabled={loading || (disabled ?? noRepliesLeft)}>
+        {loading ? 'Loading replies' : noRepliesLeft ? 'No replies left' : `See More ${repliesLeft || ''} replies`}
       </Button>
     </Stack>
   )
-})
+}
 
 const styles = css.create({
   root: {

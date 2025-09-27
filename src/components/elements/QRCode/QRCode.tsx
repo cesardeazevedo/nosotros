@@ -1,60 +1,65 @@
+import { toggleQRCodeDialogAtom } from '@/atoms/dialog.atoms'
 import { ContentProvider } from '@/components/providers/ContentProvider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
-import { useCurrentUser } from '@/hooks/useRootStore'
+import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
+import { useCopyClipboard } from '@/hooks/useCopyClipboard'
+import { useNprofile } from '@/hooks/useEventUtils'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import { IconX } from '@tabler/icons-react'
-import { observer } from 'mobx-react-lite'
-import { nip19 } from 'nostr-tools'
+import { IconCheck, IconX } from '@tabler/icons-react'
+import { useSetAtom } from 'jotai'
 import { QRCodeCanvas } from 'qrcode.react'
-import { useMemo } from 'react'
+import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
-import { dialogStore } from 'stores/ui/dialogs.store'
-import { encodeSafe } from 'utils/nip19'
 import { UserAvatar } from '../User/UserAvatar'
 import { UserName } from '../User/UserName'
 import { UserNIP05 } from '../User/UserNIP05'
 
-export const QRCode = observer(function QRCode() {
-  const user = useCurrentUser()
-  const npub = useMemo(() => encodeSafe(() => nip19.npubEncode(user?.pubkey || '')), [user])
+type Props = {
+  pubkey: string
+}
+
+export const QRCode = memo(function QRCode(props: Props) {
+  const { pubkey } = props
+  const nprofile = useNprofile(pubkey)
+  const toggleQRCode = useSetAtom(toggleQRCodeDialogAtom)
+  const { copy, copied } = useCopyClipboard(nprofile)
   return (
     <html.div style={styles.root}>
-      <IconButton sx={styles.close} onClick={() => dialogStore.toggleQRCode(false)} icon={<IconX />} />
+      <IconButton sx={styles.close} onClick={() => toggleQRCode(false)} icon={<IconX />} />
       <Stack horizontal={false} gap={2} sx={styles.content}>
-        {user && (
-          <ContentProvider value={{ disablePopover: true, disableLink: true }}>
-            <Stack horizontal={false} gap={2} align='center' justify='center'>
-              <UserAvatar pubkey={user.pubkey} size='xl' sx={styles.avatar} />
-              <Stack horizontal={false} align='center'>
-                <UserName variant='title' size='lg' pubkey={user?.pubkey}></UserName>
-                <UserNIP05 pubkey={user?.pubkey} />
-              </Stack>
+        <ContentProvider value={{ disablePopover: true, disableLink: true }}>
+          <Stack horizontal={false} gap={2} align='center' justify='center'>
+            <UserAvatar pubkey={pubkey} size='xl' sx={styles.avatar} />
+            <Stack horizontal={false} align='center'>
+              <UserName variant='title' size='lg' pubkey={pubkey}></UserName>
+              <UserNIP05 pubkey={pubkey} />
             </Stack>
-          </ContentProvider>
-        )}
-        {npub ? (
-          <html.div style={styles.qrcode}>
-            <QRCodeCanvas value={npub} size={200} />
-          </html.div>
+          </Stack>
+        </ContentProvider>
+        {nprofile ? (
+          <Tooltip
+            text={
+              <Stack gap={0.5}>
+                <IconCheck size={18} />
+                <Text>Copied</Text>
+              </Stack>
+            }
+            placement='bottom'
+            opened={copied}>
+            <html.div style={styles.qrcode}>
+              <QRCodeCanvas value={nprofile} size={200} onClick={copy} />
+            </html.div>
+          </Tooltip>
         ) : (
           <Skeleton variant='rectangular' animation='wave' sx={styles.loading} />
         )}
         <Text size='lg' sx={styles.npub}>
-          {npub}
+          {nprofile}
         </Text>
-        <Text variant='title' size='sm'>
-          Follow me on Nostr
-        </Text>
-        {/* <Button */}
-        {/*   variant='filled' */}
-        {/*   onClick={dialogStore.openCamera} */}
-        {/*   icon={<IconCameraFilled strokeWidth='1.2' size={20} style={{ marginRight: 8 }} />}> */}
-        {/*   Scan QRCode */}
-        {/* </Button> */}
       </Stack>
     </html.div>
   )
@@ -86,7 +91,7 @@ const styles = css.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     height: '100%',
-    paddingTop: spacing.padding9,
+    paddingTop: spacing.padding6,
     position: 'relative',
   },
   loading: {
@@ -94,7 +99,7 @@ const styles = css.create({
     height: 200,
   },
   npub: {
-    maxWidth: '51%',
+    maxWidth: '80%',
     wordBreak: 'break-all',
     fontFamily: 'monospace',
   },

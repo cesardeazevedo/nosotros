@@ -161,6 +161,7 @@ const styles = css.create({
     padding: 0,
     border: 0,
     verticalAlign: 'top',
+    color: palette.onSurface,
     minHeight: textFieldTokens.containerMinHeight,
     [textFieldTokens.outlineLegend]: {
       default: '0.01px',
@@ -194,6 +195,7 @@ const styles = css.create({
     userSelect: 'none',
     pointerEvents: 'auto',
     maxWidth: 'calc(133% - 32px)',
+    color: 'inherit',
     transform: textFieldTokens.labelPosition,
     padding: '0px',
     whiteSpace: 'nowrap',

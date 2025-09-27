@@ -1,6 +1,4 @@
 import { NProfileEditor } from '@/components/elements/Content/NProfile/NProfileEditor'
-import type { EditorStore } from '@/stores/editor/editor.store'
-import { Editor } from '@tiptap/core'
 import DocumentExtension from '@tiptap/extension-document'
 import HardbreakExtension from '@tiptap/extension-hard-break'
 import HistoryExtension from '@tiptap/extension-history'
@@ -12,15 +10,15 @@ import { NostrExtension } from 'nostr-editor'
 import { createSuggestionPlugin } from './createSuggestionPlugin'
 
 // For kind-20,
-export function createEditorKind20(store: EditorStore) {
-  return new Editor({
+export function createEditorKind20(placeholder: string) {
+  return {
     extensions: [
       TextExtension,
       DocumentExtension,
       ParagraphExtension,
       HardbreakExtension,
       HistoryExtension,
-      Placeholder.configure({ placeholder: store.placeholder }),
+      Placeholder.configure({ placeholder }),
       NostrExtension.configure({
         link: {
           openOnClick: false,
@@ -43,8 +41,5 @@ export function createEditorKind20(store: EditorStore) {
         },
       }),
     ],
-    onUpdate({ editor }) {
-      store.onUpdate(editor)
-    },
-  })
+  }
 }

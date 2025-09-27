@@ -1,6 +1,7 @@
 import { DrawerSwipeable } from '@/components/ui/Drawer/DrawerSwipeable'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import type { SxProps } from '@/components/ui/types'
+import { spacing } from '@/themes/spacing.stylex'
 import { IconMenu2 } from '@tabler/icons-react'
 import { useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
@@ -35,5 +36,6 @@ export const SidebarDrawer = (props: Props) => {
 const styles = css.create({
   sidebar: {
     position: 'relative',
+    paddingBottom: spacing.padding6,
   },
 })

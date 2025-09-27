@@ -1,18 +1,15 @@
-import { dedupe } from '@/core/helpers/dedupe'
-import { useFollowingUsers } from '@/hooks/useFollowingUsers'
-import { useCurrentUser } from '@/hooks/useRootStore'
-import { subscribeSearch } from '@/nostr/subscriptions/subscribeSearch'
-import type { User } from '@/stores/users/user'
-import { userStore } from '@/stores/users/users.store'
-import { pluckFirst, useObservable, useObservableState } from 'observable-hooks'
-import { useMemo } from 'react'
-import { debounceTime, map, mergeMap } from 'rxjs'
+import { Kind } from '@/constants/kinds'
+import { SEARCH_RELAYS } from '@/constants/relays'
+import { isAuthorTag } from '@/hooks/parsers/parseTags'
+import { createEventQueryOptions, replaceableEventQueryOptions } from '@/hooks/query/useQueryBase'
+import { useUserFollows } from '@/hooks/query/useQueryUser'
+import { useCurrentPubkey } from '@/hooks/useAuth'
+import { useQueries, useQuery } from '@tanstack/react-query'
 
 type SearchOptions = {
   query: string
   limit: number
   suggestQuery?: boolean
-  // todo
   suggestRelays?: boolean
 }
 
@@ -22,40 +19,47 @@ export type SearchItem =
   | { type: 'query'; query: string }
   | { type: 'relay'; relay: string }
 
-function useSearchRelays(options: SearchOptions) {
-  const user = useCurrentUser()
-  const query$ = useObservable(pluckFirst, [options.query])
-  const [users] = useObservableState<User[]>(
-    () =>
-      query$.pipe(
-        debounceTime(1000, undefined),
-        mergeMap((query) => subscribeSearch(query, options.limit)),
-        map((results) => results.sort((_, b) => (user?.followsPubkey(b.pubkey) ? 1 : -1))),
-        map((events) => {
-          return dedupe(events.map((x) => x.pubkey))
-            .map((pubkey) => userStore.get(pubkey))
-            .filter((x) => !!x)
-        }),
-      ),
-    [],
+function useSearchOnRelays(options: SearchOptions) {
+  return useQuery(
+    createEventQueryOptions({
+      queryKey: ['search', options.query],
+      filter: {
+        kinds: [Kind.Metadata],
+        search: options.query.toLowerCase(),
+        limit: 15,
+      },
+      enabled: !!options.query,
+      ctx: {
+        network: 'REMOTE_ONLY',
+        relays: SEARCH_RELAYS,
+      },
+    }),
   )
-  return users
 }
 
 function useSearchFollowingUsers(options: SearchOptions) {
   const { query, limit } = options
-  const users = useFollowingUsers()
-  return useMemo(() => {
-    let result = users as User[]
-    if (query) {
-      result = users.filter((user) => user?.event.content.toLowerCase().indexOf(query.toLowerCase()) !== -1)
-    }
-    return result.slice(0, options.limit)
-  }, [query, limit, users])
+  const pubkey = useCurrentPubkey()
+  const follows = useUserFollows(pubkey)
+  return useQueries({
+    queries:
+      follows.data?.tags.filter(isAuthorTag).map((tag) => {
+        return replaceableEventQueryOptions(Kind.Metadata, tag[1])
+      }) || [],
+    combine: (results) => {
+      return {
+        data: results
+          .filter((x) => !!x)
+          .map((result) => result.data)
+          .filter((user) => user?.content.toLowerCase().indexOf(query.toLowerCase()) !== -1)
+          .slice(0, limit),
+      }
+    },
+  })
 }
 
 export function useSearchSuggestions(options: SearchOptions) {
-  const usersRelay = useSearchRelays(options)
+  const usersRelay = useSearchOnRelays(options)
   const usersFollowing = useSearchFollowingUsers(options)
   const querySuggestion =
     options.suggestQuery !== false && options.query ? { type: 'query', query: options.query } : undefined
@@ -70,7 +74,7 @@ export function useSearchSuggestions(options: SearchOptions) {
   return [
     querySuggestion,
     relaySuggestion,
-    ...usersFollowing.map((x) => ({ type: 'user' as const, pubkey: x.pubkey })),
-    ...usersRelay.map((x) => ({ type: 'user_relay' as const, pubkey: x.pubkey })),
+    ...usersFollowing.data.filter((x) => !!x).map((user) => ({ type: 'user' as const, pubkey: user.pubkey })),
+    ...(usersRelay.data?.map((x) => ({ type: 'user_relay' as const, pubkey: x.pubkey })) || []),
   ].filter((x) => !!x) as SearchItem[]
 }

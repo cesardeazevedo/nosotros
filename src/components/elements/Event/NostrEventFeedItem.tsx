@@ -1,29 +1,43 @@
-import { ArticleRoot } from '@/components/modules/Articles/ArticleRoot'
+import { ArticleFeedItem } from '@/components/modules/Articles/ArticleFeedItem'
+import { FollowEventRoot } from '@/components/modules/Follows/FollowEventRoot'
+import { FollowSetItem } from '@/components/modules/Lists/FollowSets/FollowSetItem'
+import { Divider } from '@/components/ui/Divider/Divider'
 import { Kind } from '@/constants/kinds'
-import type { NostrEventMetadata } from '@/nostr/types'
-import { observer } from 'mobx-react-lite'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import { memo } from 'react'
 import { PostRoot } from '../Posts/Post'
 import { RepostRoot } from '../Repost/Repost'
+import { Threads } from '../Threads/Threads'
 import { UserRoot } from '../User/UserRoot'
 import { ZapReceiptRoot } from '../Zaps/ZapReceipt'
-import { NostrEventUnsupported } from './NostrEventUnsupported'
+import { NostrEventUnsupportedContent } from './NostrEventUnsupportedContent'
 
 type Props = {
-  event: NostrEventMetadata
+  event: NostrEventDB
 }
 
-export const NostrEventFeedItem = observer(function NostrEventFeedItem(props: Props) {
+export const NostrEventFeedItem = memo(function NostrEventFeedItem(props: Props) {
   const { event } = props
 
   switch (event.kind) {
     case Kind.Metadata: {
-      return <UserRoot event={event} />
+      return <UserRoot border pubkey={event.pubkey} />
     }
     case Kind.Text: {
-      return <PostRoot event={event} />
+      return event.metadata?.isRoot ? (
+        <PostRoot event={event} />
+      ) : (
+        <>
+          <Threads event={event} maxLevel={2} />
+          <Divider />
+        </>
+      )
+    }
+    case Kind.Follows: {
+      return <FollowEventRoot event={event} />
     }
     case Kind.Article: {
-      return <ArticleRoot event={event} />
+      return <ArticleFeedItem border event={event} />
     }
     case Kind.Repost: {
       return <RepostRoot event={event} />
@@ -34,9 +48,12 @@ export const NostrEventFeedItem = observer(function NostrEventFeedItem(props: Pr
     case Kind.ZapReceipt: {
       return <ZapReceiptRoot event={event} />
     }
+    case Kind.FollowSets: {
+      return <FollowSetItem event={event} />
+    }
     default: {
       console.log('Unhandled item to render', event)
-      return <NostrEventUnsupported event={event} />
+      return <NostrEventUnsupportedContent event={event} />
     }
   }
 })
