@@ -18,6 +18,7 @@ export type NostrContext = {
   permission?: number
   queryKey?: QueryKey
   closeOnEose?: boolean
+  ignoreAuth?: boolean
   network?:
     | 'STALE_WHILE_REVALIDATE'
     | 'STALE_WHILE_REVALIDATE_BATCH'

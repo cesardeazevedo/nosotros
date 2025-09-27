@@ -5,7 +5,7 @@ import { distinct, EMPTY, filter, from, map, mergeMap, takeUntil, timer } from '
 import { createSubscription } from './createSubscription'
 
 export function subscribeAfterAuth(ctx: NostrContext, sub: NostrSubscriptionBuilder) {
-  if (ctx.relays) {
+  if (ctx.relays && ctx.ignoreAuth !== true) {
     return from(ctx.relays || []).pipe(
       distinct(),
       map((url) => pool.get(url)),
