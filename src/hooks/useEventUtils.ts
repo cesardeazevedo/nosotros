@@ -1,4 +1,5 @@
 import { Kind } from '@/constants/kinds'
+import { normalizeRelayUrl } from '@/core/helpers/formatRelayUrl'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import type { IMetaFields } from '@/hooks/parsers/parseImeta'
 import { getMimeType } from '@/hooks/parsers/parseImeta'
@@ -61,7 +62,20 @@ export function useEventKey(event: NostrEventDB) {
 }
 
 export function useNevent(event: NostrEventDB | undefined) {
-  const relays = useEventRelays(event?.id).slice(0, 4)
+  const rawRelays = useEventRelays(event?.id)
+  // Filter out invalid relays to prevent issues with external services
+  const relays = rawRelays.filter((relay) => {
+    if (!relay || typeof relay !== 'string' || relay.trim() === '') {
+      return false
+    }
+    try {
+      const normalized = normalizeRelayUrl(relay)
+      new URL(normalized) // Validate URL format
+      return true
+    } catch {
+      return false
+    }
+  }).slice(0, 4)
   return useMemo(() => {
     return encodeSafe(() =>
       event
