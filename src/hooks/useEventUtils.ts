@@ -61,7 +61,14 @@ export function useEventKey(event: NostrEventDB) {
 }
 
 export function useNevent(event: NostrEventDB | undefined) {
-  const relays = useEventRelays(event?.id).slice(0, 4)
+  const rawRelays = useEventRelays(event?.id).slice(0, 4)
+  // Filter out invalid relays to prevent issues with external services like njump.me
+  const relays = rawRelays.filter((relay) => 
+    relay && 
+    typeof relay === 'string' && 
+    relay.trim() !== '' && 
+    (relay.startsWith('wss://') || relay.startsWith('ws://'))
+  )
   return useMemo(() => {
     return encodeSafe(() =>
       event
