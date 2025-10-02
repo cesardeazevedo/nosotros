@@ -12,6 +12,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { NstartModal } from 'nstart-modal'
 import { css } from 'react-strict-dom'
+import { ContentLink } from '../Content/Link/Link'
 import { SignInHeader } from './SignInHeader'
 
 export const SignInSelect = () => {
@@ -82,12 +83,20 @@ export const SignInSelect = () => {
               sx={styles.item}>
               Remote signer
             </ListItem>
-            <ListItem
-              onClick={() => {}}
-              supportingText='nsec is not supported, we do not recommend, never put your nsec'
-              sx={[styles.item, styles.item$disabled]}>
-              Private Key (nsec) 🙅
-            </ListItem>
+            <ContentLink underline={false} href='https://nostrapps.com/#signers' sx={styles.link}>
+              <ListItem
+                interactive
+                supportingText={
+                  <>
+                    nsec is not supported, it's not recommended to put your nsec in any app or website, choose a nostr
+                    signer app
+                    <IconExternalLink size={14} style={{ marginLeft: 4, display: 'inline' }} />
+                  </>
+                }
+                sx={styles.item}>
+                Private Key (nsec) 🙅
+              </ListItem>
+            </ContentLink>
           </Stack>
           <Text size='md'>Don't have an account yet?</Text>
           <Button fullWidth variant='filled' sx={styles.button} onClick={handleSignUpClick}>
@@ -113,6 +122,9 @@ const styles = css.create({
   list: {
     width: '100%',
   },
+  link: {
+    width: '100%',
+  },
   item: {
     width: '100%',
     paddingBlock: spacing.padding1,
@@ -123,10 +135,6 @@ const styles = css.create({
       ':hover': palette.surfaceContainerHighest,
       default: palette.surfaceContainerHigh,
     },
-  },
-  item$disabled: {
-    pointer: 'default',
-    pointerEvents: 'none',
   },
   button: {
     height: 60,
