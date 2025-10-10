@@ -1,10 +1,11 @@
+import { bufferDebounce } from '@/core/operators/bufferDebounce'
 import type { NostrFilter } from '@/core/types'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import type { NostrContext } from '@/nostr/context'
 import { dbSqlite } from '@/nostr/db'
 import type { NostrEvent } from 'nostr-tools'
 import { matchFilter, type Filter } from 'nostr-tools'
-import { bufferTime, EMPTY, from, identity, map, merge, mergeMap, of, filter as rxFilter, takeUntil, timer } from 'rxjs'
+import { EMPTY, from, identity, map, merge, mergeMap, of, filter as rxFilter, takeUntil, timer } from 'rxjs'
 import invariant from 'tiny-invariant'
 import { createSubscription } from './createSubscription'
 import { subscribe } from './subscribe'
@@ -12,7 +13,7 @@ import { subscribe } from './subscribe'
 export function subscribeRemote(ctx: NostrContext, filter: Filter, cached?: NostrEventDB[]) {
   const sub = createSubscription(ctx, filter, cached)
   return subscribe(sub, ctx).pipe(
-    bufferTime(600),
+    bufferDebounce(200),
     rxFilter((events) => events.length > 0),
   )
 }
