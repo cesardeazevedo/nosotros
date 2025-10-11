@@ -1,5 +1,6 @@
 import { openImageDialogAtom } from '@/atoms/dialog.atoms'
 import { addMediaErrorAtom, mediaErrorsAtom } from '@/atoms/media.atoms'
+import { TextClamped } from '@/components/elements/Content/TextClamped'
 import { PostHeaderDate } from '@/components/elements/Posts/PostHeaderDate'
 import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
@@ -43,9 +44,11 @@ export const ArticleHeadline = memo(function ArticleHeadline() {
           {title}
         </Text>
         {summary && (
-          <Text variant='title' size='lg' sx={styles.summary}>
-            {summary}
-          </Text>
+          <TextClamped>
+            <Text variant='title' size='lg' sx={styles.summary}>
+              {summary}
+            </Text>
+          </TextClamped>
         )}
         {publishedAt !== event.created_at && (
           <Stack gap={0.5}>
