@@ -38,7 +38,7 @@ export const Video = memo(function Video(props: Props) {
   const setVideo = useSetAtom(setCurrentVideoAtom)
   const removeVideo = useSetAtom(removeCurrentVideoAtom)
   const currentVideo = useAtomValue(currentVideoAtom)
-  const media = useMediaStore(src, event.metadata?.imeta)
+  const media = useMediaStore(src, event.metadata?.imeta, false)
   const settings = useSettings()
   const autoPlay = contextAutoPlay ?? props.autoPlay ?? settings.autoPlay
 
@@ -83,7 +83,6 @@ export const Video = memo(function Video(props: Props) {
               const element = e.target as HTMLVideoElement
               addMediaDim({ src, dim: [element.videoWidth, element.videoHeight] })
             }}
-            src={src}
             {...media}>
             <source src={src} type={`video/${extension === 'mov' ? 'mp4' : extension}`} />
           </video>
@@ -98,7 +97,9 @@ const styles = css.create({
   video: {
     display: 'block',
     blockSize: 'auto',
-    minWidth: 150,
+    minWidth: 152,
+    width: 'auto',
+    height: 'inherit',
     maxWidth: 'inherit',
     maxHeight: 'inherit',
     backgroundColor: '#000',
