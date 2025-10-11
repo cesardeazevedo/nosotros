@@ -5,9 +5,9 @@ import { CLIENT_TAG } from '@/constants/tags'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { isAuthorTag, isQuoteTag } from '@/hooks/parsers/parseTags'
 import { queryKeys } from '@/hooks/query/queryKeys'
-import type { InfiniteEvents } from '@/hooks/query/useQueryFeeds'
+import { prependEventFeed } from '@/hooks/query/queryUtils'
 import { useUserRelays, useUsersRelays } from '@/hooks/query/useQueryUser'
-import { useUserMetadata } from '@/hooks/state/useUser'
+import { useUserState } from '@/hooks/state/useUser'
 import { useCurrentPubkey, useCurrentSigner } from '@/hooks/useAuth'
 import { useMethods } from '@/hooks/useMethods'
 import { useSettings } from '@/hooks/useSettings'
@@ -156,7 +156,7 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
   const pubkey = useCurrentPubkey()
   const signer = useCurrentSigner()
   const queryClient = useQueryClient()
-  const parentUser = useUserMetadata(parent?.pubkey)
+  const parentUser = useUserState(parent?.pubkey)
 
   const kind = props.kind || (parent && parent.kind !== Kind.Text ? Kind.Comment : Kind.Text)
 
@@ -307,12 +307,7 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
   const setEventCache = useCallback(
     (event: NostrEvent) => {
       if (queryKey) {
-        queryClient.setQueryData(queryKey, (data: InfiniteEvents) => {
-          return {
-            ...data,
-            pages: [[event, ...data.pages[0]], ...data.pages.slice(1)],
-          } as InfiniteEvents
-        })
+        prependEventFeed(queryKey, [event])
       } else if (parent) {
         const rootId = parent.metadata?.rootId || parent.id
         queryClient.setQueryData(queryKeys.tag('e', [rootId], Kind.Text), (events: NostrEventDB[] = []) => [

@@ -70,7 +70,6 @@ const styles = css.create({
     width: '100%',
   },
   actions: {
-    paddingTop: spacing.padding1,
     marginLeft: spacing.margin1,
   },
   rootWrapper: {
@@ -78,7 +77,6 @@ const styles = css.create({
     paddingTop: 0,
     paddingLeft: spacing.padding7,
     paddingRight: spacing.padding2,
-    paddingBottom: spacing.padding2,
   },
   thread: {
     position: 'absolute',
@@ -89,7 +87,7 @@ const styles = css.create({
     ':before': {
       content: '',
       position: 'relative',
-      top: 0,
+      top: 4,
       left: 6,
       width: 3,
       borderRadius: 4,

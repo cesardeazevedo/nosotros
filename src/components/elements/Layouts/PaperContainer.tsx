@@ -30,6 +30,7 @@ export const PaperContainer = memo(function PaperContainer(props: Props) {
   )
 })
 
+const sm = '@media (max-width: 640px)'
 const md = '@media (max-width: 960px)'
 const lg = '@media (max-width: 1299.95px)'
 
@@ -42,16 +43,16 @@ const styles = css.create({
     borderBottomColor: palette.outlineVariant,
     borderBottomWidth: 1,
   },
-  lg: {
-    borderRadius: {
-      default: shape.lg,
-      [lg]: 0,
-    },
-  },
   md: {
     borderRadius: {
       default: shape.lg,
       [md]: 0,
+    },
+  },
+  lg: {
+    borderRadius: {
+      default: shape.lg,
+      [lg]: 0,
     },
   },
   resetTopRadius: {

@@ -10,11 +10,11 @@ export type Props = {
 }
 
 export const CenteredContainer = (props: Props) => {
-  const { maxWidth = 'md', margin, children, sx } = props
+  const { maxWidth = 'sm', margin, children, sx } = props
   return <html.div style={[styles.root, margin && styles.margin, styles[maxWidth], sx]}>{children}</html.div>
 }
 
-const sm = '@media (max-width: 599.95px)'
+const sm = '@media (max-width: 640px)'
 const md = '@media (max-width: 960px)'
 const lg = '@media (max-width: 1299.95px)'
 
@@ -32,9 +32,15 @@ const styles = css.create({
       [sm]: 0,
     },
   },
-  md: {
+  sm: {
     maxWidth: {
       default: 640,
+      [md]: '100%',
+    },
+  },
+  md: {
+    maxWidth: {
+      default: 960,
       [md]: '100%',
     },
   },

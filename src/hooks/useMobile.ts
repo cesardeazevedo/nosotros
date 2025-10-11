@@ -1,7 +1,7 @@
 import { useMediaQuery } from './useMediaQuery'
 
 export function useSM() {
-  return useMediaQuery('(max-width: 720px)')
+  return useMediaQuery('(max-width: 640px)')
 }
 
 export function useMobile() {

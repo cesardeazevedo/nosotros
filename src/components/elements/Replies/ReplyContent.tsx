@@ -39,7 +39,7 @@ export const ReplyContent = memo(function ReplyContent(props: Props) {
           (node.type === 'paragraph' && node.content?.length === 1 && node.content[0].type === 'hardBreak') // removes empty paragraphs
             ? React.Fragment
             : (props: { children: ReactNode }) => (
-                <LinkNEvent block nevent={note.nip19}>
+                <LinkNEvent nevent={note.nip19}>
                   <ContentProvider value={{ disableLink: false }}>
                     <BubbleContainer highlight={highlight}>{props.children}</BubbleContainer>
                   </ContentProvider>
