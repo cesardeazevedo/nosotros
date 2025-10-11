@@ -30,12 +30,10 @@ type Props = {
 export const Image = memo(function Image(props: Props) {
   const { src, proxy = true, index = 0, cover = false, sx, ...rest } = props
   const { event } = useNoteContext()
-  const { dense } = useContentContext()
-  const media = useMediaStore(src, event.metadata?.imeta)
+  const media = useMediaStore(src, event.metadata?.imeta, proxy)
   const addMediaDim = useSetAtom(addMediaDimAtom)
   const hasError = useAtomValue(mediaErrorsAtom).has(src)
   const nevent = useNevent(event)
-  const isMobile = useMobile()
 
   return (
     <BlurContainer>
@@ -50,16 +48,16 @@ export const Image = memo(function Image(props: Props) {
             </ContentLink>
           )}
           {!hasError && (
-            <LinkNEvent media block nevent={nevent} search={{ media: index }}>
-              <html.img
+            <LinkNEvent block nevent={nevent} search={{ media: index }} sx={sx}>
+              <img
                 role='button'
-                style={[styles.img, cover && styles.cover, (dense || isMobile) && styles.img$dense, blurStyles, sx]}
-                src={proxy ? getImgProxyUrl('feed_img', src) : src}
-                onLoad={(e: { target: HTMLImageElement }) => {
-                  addMediaDim({ src, dim: [e.target.naturalWidth, e.target.naturalHeight] })
+                onLoad={(e) => {
+                  const target = e.target as HTMLImageElement
+                  addMediaDim({ src, dim: [media.width || target.naturalWidth, media.height || target.naturalHeight] })
                 }}
                 {...media}
                 {...rest}
+                {...css.props([styles.img, cover && styles.cover, blurStyles, sx])}
               />
             </LinkNEvent>
           )}
@@ -74,7 +72,8 @@ const styles = css.create({
     display: 'block',
     blockSize: 'auto',
     width: 'auto',
-    height: 'auto',
+    height: '100%',
+    maxWidth: 'inherit',
     maxHeight: 'inherit',
     cursor: 'pointer',
     border: '1px solid',
@@ -82,9 +81,6 @@ const styles = css.create({
     borderRadius: shape.xl,
     transition: 'transform 150ms ease',
     ':active': { transform: 'scale(0.985)' },
-  },
-  img$dense: {
-    maxHeight: 340,
   },
   cover: {
     objectFit: 'cover',

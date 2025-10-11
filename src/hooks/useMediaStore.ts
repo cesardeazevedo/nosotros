@@ -49,21 +49,36 @@ export function adjustDimensions(
 }
 
 type MediaProps = {
+  src: string
   width?: number
   height?: number
   onError?: () => void
 }
 
-export function useMediaStore(src: string, imeta: IMetaTags | undefined): MediaProps {
+export function useMediaStore(src: string, imeta: IMetaTags | undefined, proxy: boolean = true): MediaProps {
   const dims = useAtomValue(mediaDimsAtom)
   const addError = useSetAtom(addMediaErrorAtom)
+  const [useFallback, setUseFallback] = useState(false)
+
   const dim = imeta?.[src]?.dim
   const width = dims.get(src)?.[0] || dim?.width
   const height = dims.get(src)?.[1] || dim?.height
-  const bounds = width && height ? adjustDimensions(width, height, MAX_BOUNDS.lg) : {}
+  const bounds = { width, height }
+
+  const proxiedSrc = proxy && !useFallback ? getImgProxyUrl('feed_img', src) : src
+
+  const handleError = () => {
+    if (proxy && !useFallback) {
+      setUseFallback(true)
+    } else {
+      addError(src)
+    }
+  }
+
   return {
     ...bounds,
-    onError: () => addError(src),
+    src: proxiedSrc,
+    onError: handleError,
   }
 }
 
