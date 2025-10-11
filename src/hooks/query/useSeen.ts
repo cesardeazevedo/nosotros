@@ -14,13 +14,18 @@ export function setSeenData(eventId: string, relay: string) {
   })
 }
 
-export function useSeen(id: string, options?: Omit<UseQueryOptions<SeenDB[]>, 'queryKey'>) {
-  return useQuery({
+export function seenQueryOptions(
+  eventId: string | undefined,
+  options?: Omit<UseQueryOptions<SeenDB[]>, 'queryKey'>,
+): UseQueryOptions<SeenDB[]> {
+  return {
+    queryKey: queryKeys.seen(eventId || ''),
+    queryFn: () => dbSqlite.querySeen(eventId || ''),
+    enabled: !!eventId,
     ...options,
-    enabled: !!id,
-    queryKey: queryKeys.seen(id),
-    queryFn: () => {
-      return dbSqlite.querySeen(id)
-    },
-  })
+  }
+}
+
+export function useSeen(eventId: string, options?: Omit<UseQueryOptions<SeenDB[]>, 'queryKey'>) {
+  return useQuery(seenQueryOptions(eventId, options))
 }
