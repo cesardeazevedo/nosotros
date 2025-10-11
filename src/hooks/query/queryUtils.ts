@@ -9,6 +9,7 @@ import type { NostrEvent } from 'nostr-tools'
 import { queryClient } from './queryClient'
 import { eventToQueryKey, queryKeys } from './queryKeys'
 import type { InfiniteEvents } from './useQueryFeeds'
+import { parseEventMetadata } from '../parsers/parseEventMetadata'
 
 async function populateRelayInfo() {
   const res = await dbSqlite.queryRelayInfo([])
@@ -35,6 +36,18 @@ export function setEventData(event: NostrEventDB) {
     case Kind.Text:
     case Kind.Comment: {
       store.set(addReplyAtom, event)
+      break
+    }
+    // add the repost event
+    case Kind.Repost: {
+      if (event.content && event.content !== '{}') {
+        const inner = JSON.parse(event.content) as NostrEvent
+        const parsed = parseEventMetadata(inner)
+        const queryKey = eventToQueryKey(event)
+        if (queryKey) {
+          queryClient.setQueryData(queryKey, [parsed])
+        }
+      }
       break
     }
   }
