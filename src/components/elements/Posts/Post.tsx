@@ -6,8 +6,6 @@ import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { Kind } from '@/constants/kinds'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { useNoteState } from '@/hooks/state/useNote'
-import { duration } from '@/themes/duration.stylex'
-import { easing } from '@/themes/easing.stylex'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { memo, useCallback } from 'react'
@@ -38,7 +36,7 @@ export const PostRoot = memo(function PostRoot(props: Props) {
 
   return (
     <NoteProvider value={{ event }}>
-      <html.article style={[styles.root, isFeed && styles.root$divider]} ref={note.ref}>
+      <html.article style={[isFeed && styles.divider]} ref={note.ref}>
         <PostLink note={note} onClick={openReplies}>
           {note.event.kind === Kind.Article && <ArticleHeadline />}
           {header || <PostHeader event={event} />}
@@ -61,18 +59,8 @@ export const PostRoot = memo(function PostRoot(props: Props) {
   )
 })
 
-const fadeIn = css.keyframes({
-  from: { opacity: 0 },
-  to: { opacity: 1 },
-})
-
 const styles = css.create({
-  root: {
-    animation: fadeIn,
-    animationTimingFunction: easing.emphasizedDecelerate,
-    animationDuration: duration.long3,
-  },
-  root$divider: {
+  divider: {
     borderBottom: '1px solid',
     borderBottomColor: palette.outlineVariant,
   },
