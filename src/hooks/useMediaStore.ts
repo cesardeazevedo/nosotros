@@ -1,25 +1,34 @@
 import { addMediaErrorAtom, mediaDimsAtom } from '@/atoms/media.atoms'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import type { IMetaTags } from '@/hooks/parsers/parseImeta'
+import { getImgProxyUrl } from '@/utils/imgproxy'
 import { useAtomValue, useSetAtom } from 'jotai'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 
-export type MediaSize = keyof typeof MAX_BOUNDS
+export type MediaMode = keyof typeof MAX_BOUNDS
 
 export const MIN_HEIGHT = 180
 
 export const MAX_BOUNDS = {
-  sm: {
-    maxWidth: 320,
-    maxHeight: 340,
+  single: {
+    maxWidth: 550,
+    maxHeight: 520,
   },
-  md: {
-    maxWidth: 460,
-    maxHeight: 480,
+  single_dense: {
+    maxWidth: 500,
+    maxHeight: 400,
   },
-  lg: {
-    maxWidth: 560,
-    maxHeight: 590,
+  single_editor: {
+    maxWidth: 350,
+    maxHeight: 520,
+  },
+  pair: {
+    maxWidth: 400,
+    maxHeight: 520,
+  },
+  carousel: {
+    maxWidth: 350,
+    maxHeight: 350,
   },
 } as const
 
@@ -32,7 +41,7 @@ export function adjustDimensions(
   },
 ): { width: number; height: number } {
   const aspectRatio = width / height
-  const { maxWidth, maxHeight } = bounds || MAX_BOUNDS.lg
+  const { maxWidth, maxHeight } = bounds || MAX_BOUNDS.single
 
   let newWidth = maxWidth
   let newHeight = maxWidth / aspectRatio
@@ -91,7 +100,7 @@ export function useMinHeightFromSources(sources: string[], event: NostrEventDB) 
         const dim = event.metadata?.imeta?.[src]?.dim
         const width = dims.get(src)?.[0] || dim?.width
         const height = dims.get(src)?.[1] || dim?.height || 0
-        return width && height ? adjustDimensions(width, height, MAX_BOUNDS.sm).height : height
+        return width && height ? adjustDimensions(width, height, MAX_BOUNDS.carousel).height : height
       })
       .filter((x): x is number => !!x)
     const minHeight = Math.min(...heights)

@@ -94,6 +94,7 @@ export const LinkNEvent = memo(function LinkNEvent(props: Props) {
       state={{ from: router.latestLocation.pathname } as never}
       {...rest}
       {...css.props(style)}
+      onClick={(e) => e.stopPropagation()}
       onDragStart={handleDragStart}
       params={{ nostr: nevent }}>
       {props.children}
@@ -114,7 +115,7 @@ const styles = css.create({
   block: {
     position: 'relative',
     display: 'block',
-    width: 'auto', // needed because of firefox
+    width: 'fit-content',
     height: 'inherit',
     maxHeight: 'inherit',
     maxWidth: 'inherit',

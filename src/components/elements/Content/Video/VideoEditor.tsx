@@ -1,7 +1,9 @@
+import { addMediaDimAtom } from '@/atoms/media.atoms'
 import { ContentProvider } from '@/components/providers/ContentProvider'
 import type { SxProps } from '@/components/ui/types'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
+import { useSetAtom } from 'jotai'
 import type { VideoAttributes } from 'nostr-editor'
 import { useMemo } from 'react'
 import { css } from 'react-strict-dom'
@@ -22,10 +24,11 @@ type Props = VideoAttributes & {
 export const VideoEditor = (props: Props) => {
   const { src, sx, uploading, error, wrapperProps, cover } = props
   const extension = useMemo(() => new URL(src).pathname.split('.').pop(), [src])
+  const addMediaDim = useSetAtom(addMediaDimAtom)
   return (
     <>
       <ContentProvider value={{ dense: true }}>
-        <MediaWrapper size='md' src={src} sx={styles.wrapper} {...wrapperProps}>
+        <MediaWrapper mode='single_editor' src={src} sx={styles.wrapper} {...wrapperProps}>
           <DeleteButton onClick={() => props.onDelete()} />
           <MediaUploading uploading={uploading}>
             <video
@@ -35,6 +38,10 @@ export const VideoEditor = (props: Props) => {
               autoPlay
               preload='autor'
               controls={false}
+              onLoadedMetadata={(e) => {
+                const element = e.target as HTMLVideoElement
+                addMediaDim({ src, dim: [element.videoWidth, element.videoHeight] })
+              }}
               src={src}>
               <source src={src} type={`video/${extension === 'mov' ? 'mp4' : extension}`} />
             </video>
