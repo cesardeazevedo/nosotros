@@ -3,7 +3,9 @@ import { CenteredContainer } from '@/components/elements/Layouts/CenteredContain
 import { PaperContainer } from '@/components/elements/Layouts/PaperContainer'
 import { setEventData } from '@/hooks/query/queryUtils'
 import { fakeEventMeta } from '@/utils/faker'
+import { getImgProxyUrl } from '@/utils/imgproxy'
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { http, passthrough } from 'msw'
 
 const user1 = fakeEventMeta({
   kind: 0,
@@ -85,6 +87,17 @@ export const Kind1Portrait: Story = {
       kind: 1,
       pubkey: 'p1',
       content: ['Single portrait image', 'https://placehold.co/800x1200.jpg'].join(' '),
+    }),
+  },
+}
+
+export const Kind20Portrait2: Story = {
+  args: {
+    event: fakeEventMeta({
+      kind: 20,
+      pubkey: 'p1',
+      content: ['Single portrait image but kind20'].join(' '),
+      tags: [['imeta', 'url https://cdn.midjourney.com/b8606d1e-73ab-43ef-870b-e5f22ffd4bff/0_0.png']],
     }),
   },
 }
@@ -189,6 +202,34 @@ export const Kind1PairThinLandscapeAndPortrait: Story = {
   },
 }
 
+export const Kind1PairWithVideo: Story = {
+  args: {
+    event: fakeEventMeta({
+      kind: 1,
+      pubkey: 'p1',
+      content: [
+        'With video',
+        'https://placehold.co/420x600.jpg', // portrait
+        'https://blossom.nosotros.app/eaf519203c5bb57aa0b063970838925a80422716d40d95114020b740bb88bbe4.mp4',
+      ].join(' '),
+    }),
+  },
+}
+
+export const Kind1PairTest: Story = {
+  args: {
+    event: fakeEventMeta({
+      kind: 1,
+      pubkey: 'p1',
+      content: [
+        'My photos',
+        'https://blossom.nosotros.app/390eaa51ed4c5a9c947fbe91d5aa5226961b4661a7fa901d098312560ab42586.jpg',
+        'https://blossom.nosotros.app/d7356388a7963f30d999d1c4a3cfeb951b829bc962992938a7240822bbba1e07.jpg',
+      ].join(' '),
+    }),
+  },
+}
+
 export const Kind1ListLandscape: Story = {
   args: {
     event: fakeEventMeta({
@@ -282,6 +323,111 @@ export const Kind1ListMixed3: Story = {
         'https://placehold.co/3200x2800.jpg',
       ].join(' '),
     }),
+  },
+}
+
+export const Kind1ListMixed3SlowWithoutImeta: Story = {
+  args: {
+    event: fakeEventMeta({
+      kind: 1,
+      pubkey: 'p1',
+      content: [
+        'Mixed 3 images',
+        'https://placehold.co/2400x2601.jpg',
+        'https://placehold.co/2600x2801.jpg',
+        'https://placehold.co/2800x2201.jpg',
+        'https://placehold.co/2600x2401.jpg',
+        'https://placehold.co/2800x2801.jpg',
+        'https://placehold.co/3200x2801.jpg',
+      ].join(' '),
+      tags: [],
+    }),
+  },
+  parameters: {
+    msw: {
+      handlers: [
+        http.get(getImgProxyUrl('feed_img', 'https://placehold.co/2400x2601.jpg'), async () => {
+          await new Promise((resolve) => setTimeout(resolve, 1000))
+          return passthrough()
+        }),
+        http.get(getImgProxyUrl('feed_img', 'https://placehold.co/2600x2801.jpg'), async () => {
+          await new Promise((resolve) => setTimeout(resolve, 1500))
+          return passthrough()
+        }),
+        http.get(getImgProxyUrl('feed_img', 'https://placehold.co/2800x2201.jpg'), async () => {
+          await new Promise((resolve) => setTimeout(resolve, 2000))
+          return passthrough()
+        }),
+        http.get(getImgProxyUrl('feed_img', 'https://placehold.co/2600x2401.jpg'), async () => {
+          await new Promise((resolve) => setTimeout(resolve, 3500))
+          return passthrough()
+        }),
+        http.get(getImgProxyUrl('feed_img', 'https://placehold.co/2800x2801.jpg'), async () => {
+          await new Promise((resolve) => setTimeout(resolve, 4000))
+          return passthrough()
+        }),
+        http.get(getImgProxyUrl('feed_img', 'https://placehold.co/3200x2801.jpg'), async () => {
+          await new Promise((resolve) => setTimeout(resolve, 4500))
+          return passthrough()
+        }),
+      ],
+    },
+  },
+}
+
+export const Kind1ListMixed3SlowImeta: Story = {
+  args: {
+    event: fakeEventMeta({
+      kind: 1,
+      pubkey: 'p1',
+      content: [
+        'Mixed 3 images',
+        'https://placehold.co/2400x2601.jpg',
+        'https://placehold.co/2600x2801.jpg',
+        'https://placehold.co/2800x2201.jpg',
+        'https://placehold.co/2600x2401.jpg',
+        'https://placehold.co/2800x2801.jpg',
+        'https://placehold.co/3200x2801.jpg',
+      ].join(' '),
+      tags: [
+        ['imeta', 'url https://placehold.co/2400x2601.jpg', 'm image/jpeg', 'dim 2400x2601'],
+        ['imeta', 'url https://placehold.co/2600x2801.jpg', 'm image/jpeg', 'dim 2600x2801'],
+        ['imeta', 'url https://placehold.co/2800x2201.jpg', 'm image/jpeg', 'dim 2800x2201'],
+        ['imeta', 'url https://placehold.co/2600x2401.jpg', 'm image/jpeg', 'dim 2600x2401'],
+        ['imeta', 'url https://placehold.co/2800x2801.jpg', 'm image/jpeg', 'dim 2800x2801'],
+        ['imeta', 'url https://placehold.co/3200x2801.jpg', 'm image/jpeg', 'dim 3200x2801'],
+      ],
+    }),
+  },
+  parameters: {
+    msw: {
+      handlers: [
+        http.get(getImgProxyUrl('feed_img', 'https://placehold.co/2400x2601.jpg'), async () => {
+          await new Promise((resolve) => setTimeout(resolve, 1000))
+          return passthrough()
+        }),
+        http.get(getImgProxyUrl('feed_img', 'https://placehold.co/2600x2801.jpg'), async () => {
+          await new Promise((resolve) => setTimeout(resolve, 1500))
+          return passthrough()
+        }),
+        http.get(getImgProxyUrl('feed_img', 'https://placehold.co/2800x2201.jpg'), async () => {
+          await new Promise((resolve) => setTimeout(resolve, 2000))
+          return passthrough()
+        }),
+        http.get(getImgProxyUrl('feed_img', 'https://placehold.co/2600x2401.jpg'), async () => {
+          await new Promise((resolve) => setTimeout(resolve, 3500))
+          return passthrough()
+        }),
+        http.get(getImgProxyUrl('feed_img', 'https://placehold.co/2800x2801.jpg'), async () => {
+          await new Promise((resolve) => setTimeout(resolve, 4000))
+          return passthrough()
+        }),
+        http.get(getImgProxyUrl('feed_img', 'https://placehold.co/3200x2801.jpg'), async () => {
+          await new Promise((resolve) => setTimeout(resolve, 4500))
+          return passthrough()
+        }),
+      ],
+    },
   },
 }
 

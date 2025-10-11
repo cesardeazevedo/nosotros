@@ -22,6 +22,6 @@ export function fakeEventMeta(data: Partial<NostrEvent>): NostrEventDB {
   return parseEventMetadata(event)
 }
 
-export function fakeSignature(wrappedEvent: NostrEvent) {
-  return finalizeEvent(fakeEvent(wrappedEvent), generateSecretKey())
+export function fakeSignature(wrappedEvent: NostrEvent, key?: Uint8Array): NostrEventDB {
+  return finalizeEvent(fakeEventMeta(wrappedEvent), key || generateSecretKey()) as NostrEventDB
 }

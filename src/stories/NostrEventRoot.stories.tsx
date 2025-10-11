@@ -86,6 +86,16 @@ export const Kind1TextNote: Story = {
   },
 }
 
+export const Kind1TextNoteImage: Story = {
+  args: {
+    event: fakeEventMeta({
+      kind: 1,
+      pubkey: 'p1',
+      content: 'Hello World https://placehold.co/800x400.jpg',
+    }),
+  },
+}
+
 export const Kind3FollowList: Story = {
   args: {
     event: fakeEventMeta({
@@ -113,7 +123,18 @@ export const Kind24PublicMessage: Story = {
   },
 }
 
-export const Kind20Media: Story = {
+export const Kind20MediaSingle: Story = {
+  args: {
+    event: fakeEventMeta({
+      kind: 20,
+      pubkey: 'p1',
+      content: '',
+      tags: [['imeta', 'url https://cdn.midjourney.com/b8606d1e-73ab-43ef-870b-e5f22ffd4bff/0_0.png', 'm image/jpeg']],
+    }),
+  },
+}
+
+export const Kind20MediaCarousel: Story = {
   args: {
     event: fakeEventMeta({
       kind: 20,

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/Button/Button'
 import { setEventData } from '@/hooks/query/queryUtils'
 import { fakeEventMeta } from '@/utils/faker'
 import type { Meta, StoryObj } from '@storybook/react-vite'
+import { http, passthrough } from 'msw'
 import { useState } from 'react'
 
 const user1 = fakeEventMeta({
@@ -92,6 +93,19 @@ export const VideoPortrait: Story = {
         ],
       ],
     }),
+  },
+  parameters: {
+    msw: {
+      handlers: [
+        http.get(
+          'https://blossom.nosotros.app/eaf519203c5bb57aa0b063970838925a80422716d40d95114020b740bb88bbe4.mp4',
+          async () => {
+            await new Promise((resolve) => setTimeout(resolve, 2000))
+            return passthrough()
+          },
+        ),
+      ],
+    },
   },
 }
 

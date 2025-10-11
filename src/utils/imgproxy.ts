@@ -1,4 +1,4 @@
-const IMGPROXY_URL = import.meta.env.VITE_IMGPROXY_URL
+export const IMGPROXY_URL = import.meta.env.VITE_IMGPROXY_URL
 
 type ImgProxyPreset = 'feed_img' | 'user_avatar' | 'high_res'
 
