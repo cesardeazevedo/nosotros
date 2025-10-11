@@ -3,7 +3,7 @@ import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Button } from '@/components/ui/Button/Button'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { useParentEvent } from '@/hooks/query/useQueryBase'
-import { useUserMetadata } from '@/hooks/state/useUser'
+import { useUserState } from '@/hooks/state/useUser'
 import { useNevent } from '@/hooks/useEventUtils'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
@@ -16,7 +16,7 @@ export const ReplyHeader = memo(function ReplyHeader() {
   const { dense } = useContentContext()
   const { event } = useNoteContext()
   const parent = useParentEvent(event)
-  const parentUser = useUserMetadata(parent.data?.pubkey)
+  const parentUser = useUserState(parent.data?.pubkey)
   const nevent = useNevent(parent.data)
   return (
     <Stack sx={[styles.root, dense && styles.root$dense]} gap={2}>
