@@ -36,7 +36,7 @@ export const PostRoot = memo(function PostRoot(props: Props) {
   return (
     <NoteProvider value={{ event }}>
       <html.article style={[isFeed && styles.divider]} ref={note.ref}>
-        <PostLink note={note} onClick={openReplies}>
+        <PostLink note={note}>
           {note.event.kind === Kind.Article && <ArticleHeadline />}
           {header || <PostHeader event={event} />}
           <PostContent note={note} />
