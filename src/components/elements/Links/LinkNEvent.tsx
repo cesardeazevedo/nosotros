@@ -14,19 +14,17 @@ import { css } from 'react-strict-dom'
 export type Props = {
   nevent?: NEvent | Note | string | undefined
   search?: LinkProps['search']
-  media?: boolean
-  block?: boolean
   underline?: boolean
   children: React.ReactNode
   sx?: SxProps
 }
 
 export const LinkNEvent = memo(function LinkNEvent(props: Props) {
-  const { underline, nevent: neventProp, search, block = false, media = false, sx, ...rest } = props
+  const { underline, nevent: neventProp, search, sx, ...rest } = props
   const { disableLink } = useContentContext()
 
   const router = useRouter()
-  const style = [styles.cursor, block && styles.block, underline && styles.underline, sx]
+  const style = [styles.cursor, underline && styles.underline, sx]
 
   // Swap note1 to nevent as note1 was deprecated
   const nevent = useMemo(() => {
@@ -53,27 +51,8 @@ export const LinkNEvent = memo(function LinkNEvent(props: Props) {
     e.stopPropagation()
   }
 
-  if ((disableLink && !media) || !nevent) {
+  if (disableLink || !nevent) {
     return props.children
-  }
-
-  if (media) {
-    return (
-      <Link
-        to={'.'}
-        search={(s) => ({
-          ...s,
-          media: s.media,
-          ...(typeof search === 'function' ? search(s) : typeof search === 'object' ? search : {}),
-          n: nevent,
-        })}
-        {...rest}
-        {...css.props(style)}
-        onClick={(e) => e.stopPropagation()}
-        onDragStart={handleDragStart}>
-        {props.children}
-      </Link>
-    )
   }
 
   if (deck.isDeck) {
@@ -111,13 +90,5 @@ const styles = css.create({
       default: 'inherit',
       ':hover': 'underline',
     },
-  },
-  block: {
-    position: 'relative',
-    display: 'block',
-    width: 'fit-content',
-    height: 'inherit',
-    maxHeight: 'inherit',
-    maxWidth: 'inherit',
   },
 })

@@ -12,8 +12,8 @@ import { useAtomValue, useSetAtom } from 'jotai'
 import { memo } from 'react'
 import { css } from 'react-strict-dom'
 import { BlurContainer } from '../../Layouts/BlurContainer'
-import { LinkNEvent } from '../../Links/LinkNEvent'
 import { ContentLink } from '../Link/Link'
+import { useMediaLink } from '@/hooks/useMediaLink'
 
 type Props = {
   src: string
@@ -31,6 +31,7 @@ export const Image = memo(function Image(props: Props) {
   const addMediaDim = useSetAtom(addMediaDimAtom)
   const hasError = useAtomValue(mediaErrorsAtom).has(src)
   const nevent = useNevent(event)
+  const onClickMedia = useMediaLink(nevent, index)
 
   return (
     <BlurContainer>
@@ -45,18 +46,19 @@ export const Image = memo(function Image(props: Props) {
             </ContentLink>
           )}
           {!hasError && (
-            <LinkNEvent block nevent={nevent} search={{ media: index }} sx={sx}>
+            <>
               <img
                 role='button'
                 onLoad={(e) => {
                   const target = e.target as HTMLImageElement
                   addMediaDim({ src, dim: [media.width || target.naturalWidth, media.height || target.naturalHeight] })
                 }}
+                onClick={onClickMedia}
                 {...media}
                 {...rest}
                 {...css.props([styles.img, cover && styles.cover, blurStyles, sx])}
               />
-            </LinkNEvent>
+            </>
           )}
         </>
       )}
