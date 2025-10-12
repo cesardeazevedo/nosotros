@@ -5,7 +5,7 @@ import { Kind } from '@/constants/kinds'
 import type { NoteState } from '@/hooks/state/useNote'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import { memo } from 'react'
+import { memo, useDeferredValue } from 'react'
 import { css, html } from 'react-strict-dom'
 import { EditorProvider } from '../Editor/EditorProvider'
 import { NostrEventUnsupportedContent } from '../Event/NostrEventUnsupportedContent'
@@ -23,6 +23,7 @@ type Props = {
 
 export const ThreadRoot = memo(function ThreadRoot(props: Props) {
   const { note, renderEditor, renderReplies = false } = props
+  const isReplyingDeferred = useDeferredValue(note.state.isReplying)
   return (
     <ContentProvider value={{ dense: false }}>
       <Stack gap={2} align='flex-start' sx={styles.root}>
@@ -48,9 +49,11 @@ export const ThreadRoot = memo(function ThreadRoot(props: Props) {
               </Stack>
               {renderEditor && (
                 <html.div style={styles.editor}>
-                  <Expandable expanded={note.state.isReplying || false} trigger={() => <></>}>
-                    <EditorProvider renderBubble initialOpen parent={note.event} />
-                  </Expandable>
+                  {note.state.isReplying && (
+                    <Expandable expanded={isReplyingDeferred} trigger={() => <></>}>
+                      <EditorProvider renderBubble initialOpen parent={note.event} />
+                    </Expandable>
+                  )}
                 </html.div>
               )}
             </>
