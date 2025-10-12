@@ -21,11 +21,10 @@ import { ListsRoute } from './components/modules/Lists/ListRoute'
 import { RelaySetList } from './components/modules/Lists/RelaySets/RelaySetList'
 import { StarterPackList } from './components/modules/Lists/StarterPacks/StarterPackList'
 import { MediaRoute } from './components/modules/Media/MediaRoute'
+import { NostrRoute } from './components/modules/Nostr/NostrRoute'
 import { NostrEventPending } from './components/modules/NostrEvent/NostrEventLoading'
-import { NostrEventRoute } from './components/modules/NostrEvent/NostrEventRoute'
 import { NotificationRoute } from './components/modules/Notifications/NotificationRoute'
 import { NProfileLoading } from './components/modules/NProfile/NProfileLoading'
-import { NProfileRoute } from './components/modules/NProfile/NProfileRoute'
 import { RelayActiveRoute } from './components/modules/RelayActive/RelayActiveRoute'
 import { RelayMonitorRoute } from './components/modules/RelayMonitor/RelayMonitorRoute'
 import { RelayRoute } from './components/modules/Relays/RelaysRoute'
@@ -61,6 +60,8 @@ const rootRoute = createRootRouteWithContext<RouteContext>()({
   validateSearch: z.object({
     zap: z.string().optional(),
     n: z.string().optional(),
+    // for masking and parallel routes
+    nostr: z.string().optional(),
     media: z.number().optional(),
     invoice: z.string().optional(),
     sign_in: z.boolean().optional(),
@@ -429,24 +430,10 @@ export const nostrRoute = createRoute({
       }
     }
   },
-  component: function NostrRoute() {
+  component: function NostrRouteComponent() {
     const { decoded } = nostrRoute.useRouteContext()
     const { nostr } = nostrRoute.useParams()
-    switch (decoded?.type) {
-      case 'npub':
-        return <NProfileRoute pubkey={decoded.data} />
-      case 'nprofile': {
-        return <NProfileRoute pubkey={decoded.data.pubkey} />
-      }
-      case 'note':
-      case 'nevent':
-      case 'naddr': {
-        return <NostrEventRoute nip19={nostr} />
-      }
-      default: {
-        return null
-      }
-    }
+    return <NostrRoute decoded={decoded} nostr={nostr} />
   },
   errorComponent: ErrorBoundary,
 })
@@ -518,7 +505,7 @@ export const searchRoute = createRoute({
   validateSearch: z.object({ q: z.string().optional() }),
   loaderDeps: ({ search: { q } }) => ({ q }),
   beforeLoad: (x) => {
-    if (!x.search.q) {
+    if (!x.search.q && !x.search.nostr) {
       throw redirect({ to: '/', replace: true })
     }
   },

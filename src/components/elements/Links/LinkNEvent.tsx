@@ -2,6 +2,7 @@ import { useDeckAddNextColumn } from '@/components/modules/Deck/hooks/useDeck'
 import { useContentContext } from '@/components/providers/ContentProvider'
 import type { SxProps } from '@/components/ui/types'
 import { createEventModule } from '@/hooks/modules/createEventModule'
+import { useNostrMaskedLinkProps } from '@/hooks/useNostrMasedLinkProps'
 import { decodeNIP19 } from '@/utils/nip19'
 import type { LinkProps } from '@tanstack/react-router'
 import { Link, useRouter } from '@tanstack/react-router'
@@ -44,6 +45,8 @@ export const LinkNEvent = memo(function LinkNEvent(props: Props) {
     }
   }, [neventProp])
 
+  const linkMaskedProps = useNostrMaskedLinkProps(nevent)
+
   const deck = useDeckAddNextColumn(() => createEventModule(nevent))
 
   const handleDragStart: DragEventHandler<HTMLAnchorElement> = (e) => {
@@ -69,13 +72,12 @@ export const LinkNEvent = memo(function LinkNEvent(props: Props) {
 
   return (
     <Link
-      to={`/$nostr`}
       state={{ from: router.latestLocation.pathname } as never}
+      {...linkMaskedProps}
       {...rest}
       {...css.props(style)}
       onClick={(e) => e.stopPropagation()}
-      onDragStart={handleDragStart}
-      params={{ nostr: nevent }}>
+      onDragStart={handleDragStart}>
       {props.children}
     </Link>
   )
