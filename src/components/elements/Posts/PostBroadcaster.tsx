@@ -2,6 +2,7 @@ import { addPublishAtom } from '@/atoms/publish.atoms'
 import { store } from '@/atoms/store'
 import { enqueueToastAtom } from '@/atoms/toaster.atoms'
 import { Divider } from '@/components/ui/Divider/Divider'
+import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { NostrPublisher } from '@/core/NostrPublish'
@@ -14,7 +15,7 @@ import { pool } from '@/nostr/pool'
 import { spacing } from '@/themes/spacing.stylex'
 import { useSetAtom } from 'jotai'
 import type { NostrEvent } from 'nostr-tools'
-import { memo } from 'react'
+import { memo, useDeferredValue } from 'react'
 import { css } from 'react-strict-dom'
 import { ignoreElements, of, tap } from 'rxjs'
 import { RelayChip } from '../Relays/RelayChip'
@@ -28,6 +29,7 @@ type Props = {
 export const PostBroadcaster = memo(function PostBroadcaster(props: Props) {
   const { note } = props
   const enqueueToast = useSetAtom(enqueueToastAtom)
+  const broadcastOpenDeferred = useDeferredValue(note.state.broadcastOpen)
 
   const { mutate } = usePublishEventMutation<[NostrEvent, string]>({
     mutationFn:
@@ -54,21 +56,27 @@ export const PostBroadcaster = memo(function PostBroadcaster(props: Props) {
       },
   })
 
+  if (note.state.broadcastOpen === false) {
+    return null
+  }
+
   return (
-    <Stack horizontal={false}>
-      <Divider />
+    <Expandable expanded={broadcastOpenDeferred}>
       <Stack horizontal={false}>
-        <Stack justify='flex-start' align='flex-start' sx={styles.panel} wrap={false} gap={2}>
-          <Text sx={styles.subheader} variant='title' size='md'>
-            Seen on relays
-          </Text>
-          <Stack horizontal wrap gap={0.5}>
-            {note.seenOn?.map((url) => <RelayChip selected key={url} url={url} />)}
-            <RelaySelectPopover onSubmit={(relay) => mutate([note.event, relay])} label='Broadcast' />
+        <Divider />
+        <Stack horizontal={false}>
+          <Stack justify='flex-start' align='flex-start' sx={styles.panel} wrap={false} gap={2}>
+            <Text sx={styles.subheader} variant='title' size='md'>
+              Seen on relays
+            </Text>
+            <Stack horizontal wrap gap={0.5}>
+              {note.seenOn?.map((url) => <RelayChip selected key={url} url={url} />)}
+              <RelaySelectPopover onSubmit={(relay) => mutate([note.event, relay])} label='Broadcast' />
+            </Stack>
           </Stack>
         </Stack>
       </Stack>
-    </Stack>
+    </Expandable>
   )
 })
 

@@ -13,7 +13,7 @@ import { BubbleContainer } from 'components/elements/Content/Layout/Bubble'
 import { UserAvatar } from 'components/elements/User/UserAvatar'
 import { UserName } from 'components/elements/User/UserName'
 import { useMobile } from 'hooks/useMobile'
-import { memo, useCallback, useLayoutEffect, useRef, useState } from 'react'
+import { memo, useCallback, useDeferredValue, useLayoutEffect, useRef, useState } from 'react'
 import { css, html } from 'react-strict-dom'
 import { EditorProvider } from '../Editor/EditorProvider'
 import { PostActions } from '../Posts/PostActions/PostActions'
@@ -115,6 +115,7 @@ export const Reply = memo(function Reply(props: Props) {
   }, [open, hasReplies])
 
   const handleSeeMore = level < collapsedLevel ? handleOpen : handleOpenNestedDialog
+  const isReplyingDeferred = useDeferredValue(note.state.isReplying)
 
   return (
     <NoteProvider value={{ event }}>
@@ -156,11 +157,11 @@ export const Reply = memo(function Reply(props: Props) {
                 <Stack>
                   <PostActions renderOptions note={note} onReplyClick={() => note.actions.toggleReplying()} />
                 </Stack>
-                <Expandable expanded={note.state.isReplying} trigger={() => <></>}>
-                  {note.state.isReplying && (
+                {note.state.isReplying && (
+                  <Expandable expanded={isReplyingDeferred} trigger={() => <></>}>
                     <EditorProvider sx={styles.editor} initialOpen renderBubble parent={event} />
-                  )}
-                </Expandable>
+                  </Expandable>
+                )}
               </html.div>
               {nested && (
                 <html.div ref={childrenRef} style={styles.children}>

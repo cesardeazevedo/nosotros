@@ -2,7 +2,6 @@ import { ArticleHeadline } from '@/components/modules/Articles/ArticleHeadline'
 import { useNostrContext } from '@/components/providers/NostrContextProvider'
 import { NoteProvider } from '@/components/providers/NoteProvider'
 import { Divider } from '@/components/ui/Divider/Divider'
-import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { Kind } from '@/constants/kinds'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { useNoteState } from '@/hooks/state/useNote'
@@ -44,9 +43,7 @@ export const PostRoot = memo(function PostRoot(props: Props) {
           <PostActions note={note} onReplyClick={openReplies} />
           {note.state.repliesOpen === null && event.kind === Kind.Text && <RepliesPreview note={note} />}
         </PostLink>
-        <Expandable expanded={note.state.broadcastOpen}>
-          <PostBroadcaster note={note} />
-        </Expandable>
+        <PostBroadcaster note={note} />
         {note.state.repliesOpen && (
           <>
             <Divider />
