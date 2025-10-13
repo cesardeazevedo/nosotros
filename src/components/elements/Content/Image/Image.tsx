@@ -3,6 +3,7 @@ import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { SxProps } from '@/components/ui/types'
 import { useNevent } from '@/hooks/useEventUtils'
+import { useMediaLink } from '@/hooks/useMediaLink'
 import { useMediaStore } from '@/hooks/useMediaStore'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
@@ -13,7 +14,6 @@ import { memo } from 'react'
 import { css } from 'react-strict-dom'
 import { BlurContainer } from '../../Layouts/BlurContainer'
 import { ContentLink } from '../Link/Link'
-import { useMediaLink } from '@/hooks/useMediaLink'
 
 type Props = {
   src: string
@@ -51,12 +51,23 @@ export const Image = memo(function Image(props: Props) {
                 role='button'
                 onLoad={(e) => {
                   const target = e.target as HTMLImageElement
-                  addMediaDim({ src, dim: [media.width || target.naturalWidth, media.height || target.naturalHeight] })
+                  addMediaDim({
+                    src,
+                    dim: [media.width || target.naturalWidth, media.height || target.naturalHeight],
+                  })
                 }}
                 onClick={onClickMedia}
                 {...media}
                 {...rest}
-                {...css.props([styles.img, cover && styles.cover, blurStyles, sx])}
+                {...css.props([
+                  styles.img,
+                  cover && styles.cover,
+                  blurStyles,
+                  // this is to make notes with imeta to work and the image haven't loaded yet
+                  media.height && media.width && media.height > media.width ? styles.portrait : styles.landscape,
+                  media.loaded && styles.loaded,
+                  sx,
+                ])}
               />
             </>
           )}
@@ -69,9 +80,6 @@ export const Image = memo(function Image(props: Props) {
 const styles = css.create({
   img: {
     display: 'block',
-    blockSize: 'auto',
-    width: 'auto',
-    height: '100%',
     maxWidth: 'inherit',
     maxHeight: 'inherit',
     cursor: 'pointer',
@@ -80,6 +88,16 @@ const styles = css.create({
     borderRadius: shape.xl,
     transition: 'transform 150ms ease',
     ':active': { transform: 'scale(0.985)' },
+  },
+  portrait: {
+    width: 'auto',
+  },
+  landscape: {
+    height: 'auto',
+  },
+  loaded: {
+    width: 'auto',
+    height: 'auto',
   },
   cover: {
     objectFit: 'cover',

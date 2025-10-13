@@ -60,12 +60,12 @@ export const Content = memo(function Content(props: Props) {
               {node.type === 'heading' && <Heading node={node} />}
               {node.type === 'paragraph' && <Paragraph node={node} />}
               {renderMedia && isImageNode(event.kind, node) && (
-                <MediaWrapper mode={mode} src={node.attrs.src} event={event}>
+                <MediaWrapper mode={mode}>
                   <Image src={node.attrs!.src} index={node.index} />
                 </MediaWrapper>
               )}
               {renderMedia && isVideoNode(event.kind, node) && (
-                <MediaWrapper mode={mode} src={node.attrs.src} event={event}>
+                <MediaWrapper mode={mode}>
                   <Video src={node.attrs.src} index={node.index} />
                 </MediaWrapper>
               )}
@@ -80,7 +80,7 @@ export const Content = memo(function Content(props: Props) {
               {node.type === 'blockquote' && <BlockQuote node={node} />}
               {node.type === 'tweet' && <Tweet src={node.attrs.src} />}
               {node.type === 'youtube' && (
-                <MediaWrapper mode={mode} src={node.attrs.src}>
+                <MediaWrapper mode={mode}>
                   <YoutubeEmbed src={node.attrs.src} />
                 </MediaWrapper>
               )}

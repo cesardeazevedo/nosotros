@@ -28,7 +28,7 @@ export const VideoEditor = (props: Props) => {
   return (
     <>
       <ContentProvider value={{ dense: true }}>
-        <MediaWrapper mode='single_editor' src={src} sx={styles.wrapper} {...wrapperProps}>
+        <MediaWrapper mode='single_editor' sx={styles.wrapper} {...wrapperProps}>
           <DeleteButton onClick={() => props.onDelete()} />
           <MediaUploading uploading={uploading}>
             <video
