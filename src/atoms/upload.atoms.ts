@@ -107,6 +107,9 @@ export const uploadFilesAtom = atom(null, async (get, set) => {
   const signer = get(signerAtom)
   const settings = get(settingsAtom)
   invariant(signer, 'No signer found')
+  if (files.filter((f) => !!f.sha256).length === files.length) {
+    return Promise.resolve(files.flatMap((x) => x.tags))
+  }
   return await lastValueFrom(
     from(files).pipe(
       mergeMap((file) => {
@@ -148,12 +151,12 @@ export const uploadFilesAtom = atom(null, async (get, set) => {
       }),
       toArray(),
       map((responses) => {
-        const sorted = files.map((x) => x.sha256)
+        const sorted = files.map((x) => x.src)
         const imetas = responses
           .map((x) => ({ file: x.file, result: x.response.result! }))
           .filter((x) => !!x.result)
           // This is to guarantee the order of files the user intend to upload
-          .sort((a, b) => sorted.indexOf(a.result.sha256) - sorted.indexOf(b.result.sha256))
+          .sort((a, b) => sorted.indexOf(a.file.src) - sorted.indexOf(b.file.src))
           .map(({ file, result }) => {
             // Provide default imeta based on what we know
             const meta: Record<string, string> = {
@@ -180,11 +183,20 @@ export const uploadFilesAtom = atom(null, async (get, set) => {
                 responses[0].response.result?.tags.find((x) => x[0] === 'x') || [],
               ]
             : []
-        return [
+        const tags = [
           ...imetas,
           ...imetaQueryable,
           ['alt', `This image was publish on nosotros.app ${responses[0].response.result?.url}`],
         ].filter((x) => x.length >= 2)
+
+        responses.forEach(({ response }) => {
+          // update tags for each file
+          if (response.result?.url) {
+            set(setFileDataAtom, { src: response.result.url, attrs: { tags } })
+          }
+        })
+
+        return tags
       }),
     ),
   )
