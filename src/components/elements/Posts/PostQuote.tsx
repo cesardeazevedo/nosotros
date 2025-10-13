@@ -24,7 +24,7 @@ export const PostQuote = memo(function PostQuote(props: Props) {
   const { blured } = useContentContext()
   const nevent = useNevent(event)
   return (
-    <LinkNEvent block nevent={nevent}>
+    <LinkNEvent nevent={nevent}>
       <NoteProvider value={{ event }}>
         <ContentProvider value={{ blured, dense: true, disableLink: true }}>
           <Paper outlined sx={styles.root}>

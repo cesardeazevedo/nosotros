@@ -226,7 +226,7 @@ export class SqliteEventStore {
     return event
   }
 
-  private delete(db: Database, id: string) {
+  delete(db: Database, id: string) {
     db.exec(`DELETE FROM events WHERE id = ?`, { bind: [id] })
   }
 }

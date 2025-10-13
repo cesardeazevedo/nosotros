@@ -52,7 +52,12 @@ export const ThreadItem = memo(function ThreadItem(props: Props) {
             <Stack horizontal={false} sx={styles.wrapper}>
               {isCurrentEvent ? <ReplyContent note={note} highlight={false} /> : <ReplyContent note={note} />}
               <html.div style={styles.root$actions}>
-                <PostActions renderOptions note={note} onReplyClick={() => note.actions.toggleReplying()} />
+                <PostActions
+                  renderOptions
+                  statsPopover
+                  note={note}
+                  onReplyClick={() => note.actions.toggleReplying()}
+                />
               </html.div>
             </Stack>
           </Stack>

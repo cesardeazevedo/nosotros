@@ -13,7 +13,7 @@ export function createMediaFeedModule(pubkey?: string): MediaFeedModule {
     const filter: NostrFilter = {
       kinds: [Kind.Media],
       authors: [pubkey],
-      limit: 51,
+      limit: 150,
     }
     return {
       id: name,
@@ -29,7 +29,7 @@ export function createMediaFeedModule(pubkey?: string): MediaFeedModule {
   const name = 'guest_media'
   const filter: NostrFilter = {
     kinds: [Kind.Media],
-    limit: 51,
+    limit: 150,
   }
   return {
     id: name,
@@ -40,7 +40,8 @@ export function createMediaFeedModule(pubkey?: string): MediaFeedModule {
     ctx: {
       outbox: false,
       negentropy: false,
-      relays: ['wss://nostr.wine'],
+      network: 'REMOTE_ONLY',
+      relays: ['wss://relay.olas.app'],
     },
     layout: 'row',
     scope: 'self',

@@ -5,7 +5,7 @@ import { Kind } from '@/constants/kinds'
 import type { NoteState } from '@/hooks/state/useNote'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import { memo } from 'react'
+import { memo, useDeferredValue } from 'react'
 import { css, html } from 'react-strict-dom'
 import { EditorProvider } from '../Editor/EditorProvider'
 import { NostrEventUnsupportedContent } from '../Event/NostrEventUnsupportedContent'
@@ -23,6 +23,7 @@ type Props = {
 
 export const ThreadRoot = memo(function ThreadRoot(props: Props) {
   const { note, renderEditor, renderReplies = false } = props
+  const isReplyingDeferred = useDeferredValue(note.state.isReplying)
   return (
     <ContentProvider value={{ dense: false }}>
       <Stack gap={2} align='flex-start' sx={styles.root}>
@@ -40,6 +41,7 @@ export const ThreadRoot = memo(function ThreadRoot(props: Props) {
                 <ContentProvider value={{ dense: true }}>
                   <PostActions
                     note={note}
+                    statsPopover
                     renderOptions
                     onReplyClick={() => note.actions.toggleReplying()}
                     sx={styles.actions}
@@ -48,9 +50,11 @@ export const ThreadRoot = memo(function ThreadRoot(props: Props) {
               </Stack>
               {renderEditor && (
                 <html.div style={styles.editor}>
-                  <Expandable expanded={note.state.isReplying || false} trigger={() => <></>}>
-                    <EditorProvider renderBubble initialOpen parent={note.event} />
-                  </Expandable>
+                  {note.state.isReplying && (
+                    <Expandable expanded={isReplyingDeferred} trigger={() => <></>}>
+                      <EditorProvider renderBubble initialOpen parent={note.event} />
+                    </Expandable>
+                  )}
                 </html.div>
               )}
             </>
@@ -70,7 +74,6 @@ const styles = css.create({
     width: '100%',
   },
   actions: {
-    paddingTop: spacing.padding1,
     marginLeft: spacing.margin1,
   },
   rootWrapper: {
@@ -78,7 +81,6 @@ const styles = css.create({
     paddingTop: 0,
     paddingLeft: spacing.padding7,
     paddingRight: spacing.padding2,
-    paddingBottom: spacing.padding2,
   },
   thread: {
     position: 'absolute',
@@ -89,7 +91,7 @@ const styles = css.create({
     ':before': {
       content: '',
       position: 'relative',
-      top: 0,
+      top: 4,
       left: 6,
       width: 3,
       borderRadius: 4,

@@ -19,6 +19,7 @@ export function createTagFeedModule(tag: string): FeedModule {
       network: 'REMOTE_ONLY',
       relays: TOPIC_RELAYS,
       outbox: false,
+      negentropy: false,
     },
     scope: 'self',
   }

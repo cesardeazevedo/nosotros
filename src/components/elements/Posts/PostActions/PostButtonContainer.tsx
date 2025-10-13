@@ -12,13 +12,14 @@ export interface ContainerProps {
 type Props = {
   sx?: SxProps
   children: React.ReactNode
+  ref?: React.Ref<HTMLDivElement>
 }
 
 export const ButtonContainer = (props: Props & ContainerProps) => {
-  const { value, children, sx } = props
+  const { value, children, sx, ref } = props
   if (value) {
     return (
-      <Stack sx={[styles.root, !value && styles.empty, sx]} gap={0.5}>
+      <Stack sx={[styles.root, !value && styles.empty, sx]} gap={0.5} ref={ref}>
         {children}
         {value || ''}
       </Stack>

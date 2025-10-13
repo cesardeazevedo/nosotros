@@ -10,7 +10,7 @@ import { concatMap, EMPTY, firstValueFrom, map, mergeMap, of, shareReplay, tap, 
 import type { Module } from '../modules/module'
 import { subscribeFeed } from '../subscriptions/subscribeFeed'
 import { queryClient } from './queryClient'
-import { setEventData } from './queryUtils'
+import { appendEventFeed, setEventData } from './queryUtils'
 
 export type FeedScope =
   | 'self'
@@ -81,20 +81,27 @@ export function createFeedQueryOptions(
           const feedEmpty = data ? data.pages.flat().length === 0 : true
 
           if (feedEmpty && res.length === 0 && network !== 'REMOTE_ONLY') {
-            // Feed is empty, fetch the database again
+            // Feed is empty, fetch the database again, likely new user with no cache
             return timer(3500).pipe(
               mergeMap(() => subscribeFeed({ ...options.ctx, network: 'CACHE_ONLY' }, options.scope, filter)),
             )
           } else if (!feedEmpty && isFirstPage && network !== 'CACHE_ONLY') {
-            return timer(1500).pipe(
+            // late events from relay
+            return timer(800).pipe(
               mergeMap(() => {
                 const data = queryClient.getQueryData(options.queryKey) as InfiniteEvents | undefined
                 const top = data?.pages[0][0].created_at || 0
-                dedupeById([...(data?.pages.flat() || []), ...res])
-                  .filter((x) => x.created_at > top && x.created_at < (Date.now() + 1000) / 1000)
-                  .forEach((x) => {
-                    options.onStream?.(x)
-                  })
+                dedupeById([...(data?.pages.flat() || []), ...res]).forEach((event) => {
+                  if (event.created_at > top && event.created_at < (Date.now() + 1000) / 1000) {
+                    // This is likely events from relay that are newer than our current top,
+                    // when the user haven't access the app in a while and has a old cache.
+                    // We put them in to the stream as buffer notes instead of directly into the feed
+                    // to avoid shifting the feed while reading.
+                    options.onStream?.(event)
+                  } else {
+                    appendEventFeed(rest.queryKey, [event])
+                  }
+                })
                 return EMPTY
               }),
             )

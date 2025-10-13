@@ -52,7 +52,7 @@ export const Content = memo(function Content(props: Props) {
     <ContentProvider value={{ blured: !!nsfw || blured }}>
       {schema.content.map((node, index) => {
         const Wrapper = wrapper?.(node) || React.Fragment
-        const size = dense ? 'sm' : 'lg'
+        const mode = dense ? 'single_dense' : 'single'
         return (
           <Wrapper key={node.type + index}>
             <>
@@ -60,12 +60,12 @@ export const Content = memo(function Content(props: Props) {
               {node.type === 'heading' && <Heading node={node} />}
               {node.type === 'paragraph' && <Paragraph node={node} />}
               {renderMedia && isImageNode(event.kind, node) && (
-                <MediaWrapper size={size} src={node.attrs.src}>
+                <MediaWrapper mode={mode}>
                   <Image src={node.attrs!.src} index={node.index} />
                 </MediaWrapper>
               )}
               {renderMedia && isVideoNode(event.kind, node) && (
-                <MediaWrapper size={size} src={node.attrs.src}>
+                <MediaWrapper mode={mode}>
                   <Video src={node.attrs.src} index={node.index} />
                 </MediaWrapper>
               )}
@@ -80,7 +80,7 @@ export const Content = memo(function Content(props: Props) {
               {node.type === 'blockquote' && <BlockQuote node={node} />}
               {node.type === 'tweet' && <Tweet src={node.attrs.src} />}
               {node.type === 'youtube' && (
-                <MediaWrapper size={size} src={node.attrs.src}>
+                <MediaWrapper mode={mode}>
                   <YoutubeEmbed src={node.attrs.src} />
                 </MediaWrapper>
               )}

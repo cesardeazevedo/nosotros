@@ -1,46 +1,19 @@
-import { addPublishAtom, resetPublishEventRelayAtom } from '@/atoms/publish.atoms'
-import { dequeueToastAtom } from '@/atoms/toaster.atoms'
 import { EditorTiptap } from '@/components/elements/Editor/EditorTiptap'
 import { useContentContext } from '@/components/providers/ContentProvider'
 import type { Props as StackProps } from '@/components/ui/Stack/Stack'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { SxProps } from '@/components/ui/types'
-import { NostrPublisher } from '@/core/NostrPublish'
-import { createAuthenticator } from '@/core/observable/createAuthenticator'
-import { broadcast } from '@/core/operators/broadcast'
-import { RelayToClient } from '@/core/types'
-import { usePublishEventMutation } from '@/hooks/mutations/usePublishEventMutation'
 import { useCurrentPubkey } from '@/hooks/useAuth'
-import { pool } from '@/nostr/pool'
-import { publish } from '@/nostr/publish/publish'
+import { useXS } from '@/hooks/useMobile'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconChevronRight } from '@tabler/icons-react'
 import { UserAvatar } from 'components/elements/User/UserAvatar'
-import { useSetAtom } from 'jotai'
 import type { NostrEvent } from 'nostr-tools'
 import { useObservableState } from 'observable-hooks'
 import type { ReactNode } from 'react'
 import { memo, useEffect } from 'react'
 import { css } from 'react-strict-dom'
-import {
-  catchError,
-  concat,
-  concatMap,
-  defer,
-  EMPTY,
-  endWith,
-  filter,
-  from,
-  ignoreElements,
-  map,
-  merge,
-  mergeMap,
-  of,
-  shareReplay,
-  startWith,
-  takeUntil,
-  tap,
-} from 'rxjs'
+import { catchError, from, map, mergeMap, of, startWith, switchMap } from 'rxjs'
 import { BubbleContainer } from '../Content/Layout/Bubble'
 import { EditorContainer } from './EditorContainer'
 import { EditorExpandables } from './EditorExpandables'
@@ -51,7 +24,6 @@ import { EditorSubmit } from './EditorSubmit'
 import { EditorToolbar } from './EditorToolbar'
 import { EditorActionsPopover } from './EditorToolbarPopover'
 import { useEditorSelector } from './hooks/useEditor'
-import { cancel$, countDown$ } from './utils/countDown'
 
 export type Props = {
   sx?: SxProps
@@ -60,7 +32,7 @@ export type Props = {
   renderBubble?: boolean
   floatToolbar?: boolean
   headerComponent?: ReactNode
-  onSuccess?: (event: NostrEvent) => void
+  onSubmit: (editor: EditorContextType) => Promise<NostrEvent>
   onDiscard?: () => void
 }
 
@@ -72,62 +44,27 @@ export const Editor = memo(function Editor(props: Props) {
     floatToolbar = renderBubble,
     headerComponent,
     sx,
+    onSubmit,
     onDiscard,
-    onSuccess,
   } = props
   const { dense } = useContentContext()
+  const isXS = useXS()
   const pubkey = useCurrentPubkey()
 
-  const dequeueToast = useSetAtom(dequeueToastAtom)
-  const addPublish = useSetAtom(addPublishAtom)
-  const resetPublishAtom = useSetAtom(resetPublishEventRelayAtom)
   const state = useEditorSelector((editor) => editor)
 
-  const { mutateAsync } = usePublishEventMutation({
-    mutationFn:
-      ({ signer, pubkey }) =>
-      () => {
-        if (state.event) {
-          return merge(
-            publish(
-              { ...state.event, pubkey },
-              { relays: state.allRelays, signer, saveEvent: !state.protectedEvent },
-            ).pipe(
-              mergeMap((signed) => {
-                const { metadata, ...event } = signed
-                return merge(
-                  of(signed),
-                  createAuthenticator({
-                    pool,
-                    auto: true,
-                    whitelist: of(state.allRelays),
-                    signer,
-                  }).pipe(
-                    mergeMap(([relay, res]) => {
-                      if (res.toUpperCase() === RelayToClient.OK) {
-                        return of(new NostrPublisher(undefined, { include: [event], relays: of([relay]) })).pipe(
-                          broadcast(pool),
-                          tap((res) => {
-                            resetPublishAtom([event.id, relay])
-                            addPublish(res)
-                            dequeueToast()
-                            onSuccess?.(event)
-                          }),
-                        )
-                      }
-                      return EMPTY
-                    }),
-                    ignoreElements(),
-                  ),
-                ).pipe(shareReplay())
-              }),
-            ),
-          )
-        }
-        return EMPTY
-      },
-    onSuccess,
-  })
+  const [submitting, submit] = useObservableState<boolean, EditorContextType>((input$) => {
+    return input$.pipe(
+      switchMap((state) => {
+        return from(state.upload()).pipe(
+          mergeMap(() => onSubmit(state)),
+          map(() => false),
+          startWith(true),
+          catchError(() => of(false)),
+        )
+      }),
+    )
+  }, false)
 
   const isEmpty = state.event ? state.event.content === '' : true
 
@@ -139,23 +76,6 @@ export const Editor = memo(function Editor(props: Props) {
     }
   }, [initialOpen])
 
-  const [submitState, submit] = useObservableState<string | number | boolean, EditorContextType | null>((input$) => {
-    return input$.pipe(
-      filter(Boolean),
-      concatMap((state) => {
-        const submit$ = defer(() => {
-          return from(state.upload()).pipe(
-            mergeMap(() => mutateAsync(state.event)),
-            catchError(() => of(false)),
-            map(() => false),
-            startWith(0),
-          )
-        })
-        return concat(countDown$, submit$).pipe(takeUntil(cancel$), endWith(false))
-      }),
-    )
-  }, false)
-
   const Container = renderBubble ? BubbleContainer : Stack
   const ContainerProps = renderBubble
     ? { sx: styles.bubble, highlight: !state.open }
@@ -166,7 +86,7 @@ export const Editor = memo(function Editor(props: Props) {
   return (
     <>
       <EditorContainer open={state.open} onClick={() => state?.setOpen()} renderBubble={renderBubble} sx={sx}>
-        {pubkey && <UserAvatar size='md' pubkey={pubkey} />}
+        {pubkey && !isXS && <UserAvatar size='md' pubkey={pubkey} />}
         <Container {...ContainerProps} sx={styles.wrapper}>
           <Stack horizontal={false} grow>
             <Stack sx={[styles.content, dense && styles.content$dense]} gap={2} align='stretch'>
@@ -186,7 +106,7 @@ export const Editor = memo(function Editor(props: Props) {
             {state.open && (
               <EditorActions>
                 <EditorSubmit
-                  state={submitState}
+                  submitting={submitting}
                   disabled={isEmpty || state.isUploading}
                   renderDiscard={renderDiscard}
                   onSubmit={() => submit(state)}

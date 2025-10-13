@@ -8,6 +8,7 @@ import { BubbleContainer } from '../Content/Layout/Bubble'
 import { LinkNEvent } from '../Links/LinkNEvent'
 import type { Props as PostContentWrapperProps } from '../Posts/PostContentWrapper'
 import { PostContentWrapper } from '../Posts/PostContentWrapper'
+import { PostCountdown } from '../Posts/PostCountdown'
 import { ReplyUserHeader } from './ReplyUserHeader'
 
 type Props = {
@@ -32,6 +33,7 @@ export const ReplyContent = memo(function ReplyContent(props: Props) {
   const { note, size, highlight } = props
   return (
     <PostContentWrapper note={note} size={size}>
+      <PostCountdown dense id={note.id} />
       <Content
         children={(index) => index === 0 && <ReplyUserHeader />}
         wrapper={(node) =>
@@ -39,7 +41,7 @@ export const ReplyContent = memo(function ReplyContent(props: Props) {
           (node.type === 'paragraph' && node.content?.length === 1 && node.content[0].type === 'hardBreak') // removes empty paragraphs
             ? React.Fragment
             : (props: { children: ReactNode }) => (
-                <LinkNEvent block nevent={note.nip19}>
+                <LinkNEvent nevent={note.nip19}>
                   <ContentProvider value={{ disableLink: false }}>
                     <BubbleContainer highlight={highlight}>{props.children}</BubbleContainer>
                   </ContentProvider>

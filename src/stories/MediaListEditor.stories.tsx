@@ -161,7 +161,7 @@ export const PairWithPortraitVideo: Story = {
         'Portrait Video',
         'https://blossom.nosotros.app/eaf519203c5bb57aa0b063970838925a80422716d40d95114020b740bb88bbe4.mp4',
       ),
-      createMockImageFile('Square Image', 'https://placehold.co/500x500'),
+      createMockImageFile('Square Image', 'https://placehold.co/420x600'),
     ],
   },
 }

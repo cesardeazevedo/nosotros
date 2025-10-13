@@ -1,7 +1,7 @@
 import type { Props as AvatarProps } from '@/components/ui/Avatar/Avatar'
 import { Avatar } from '@/components/ui/Avatar/Avatar'
 import type { SxProps } from '@/components/ui/types'
-import { useUserMetadata } from '@/hooks/state/useUser'
+import { useUserState } from '@/hooks/state/useUser'
 import { getImgProxyUrl } from '@/utils/imgproxy'
 import { memo } from 'react'
 import { css } from 'react-strict-dom'
@@ -18,7 +18,7 @@ export type Props = {
 
 export const UserAvatar = memo(function UserAvatar(props: Props) {
   const { sx, pubkey, size = 'md', fallback = true, onClick } = props
-  const user = useUserMetadata(pubkey)
+  const user = useUserState(pubkey)
   const avatarProps = user?.metadata?.picture
     ? { src: getImgProxyUrl('user_avatar', user.metadata.picture) }
     : { src: '/user.jpg' }

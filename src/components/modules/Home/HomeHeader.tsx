@@ -19,7 +19,7 @@ export const HomeHeader = memo(function HomeHeader(props: Props) {
       <FeedHeaderBase feed={feed} leading={<FeedReplyTabs feed={feed} onChange={onChangeTabs} />} />
       <Divider />
       <Stack horizontal={false} align='stretch' justify='space-between'>
-        {renderEditor && <EditorProvider queryKey={feed.options.queryKey} initialOpen={false} />}
+        {renderEditor && <EditorProvider queryKey={feed.queryKey} initialOpen={false} />}
       </Stack>
     </>
   )

@@ -3,14 +3,14 @@ import { createFeedAtoms } from '@/atoms/modules.atoms'
 import { Kind } from '@/constants/kinds'
 import type { NostrFilter } from '@/core/types'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
-import { dedupeById } from '@/utils/utils'
+import type { NostrContext } from '@/nostr/context'
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { useObservable, useObservableCallback, useSubscription } from 'observable-hooks'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { EMPTY, finalize, ignoreElements, filter as rxFilter, Subject, switchMap, tap, throttleTime } from 'rxjs'
+import { EMPTY, filter as rxFilter, Subject, switchMap, tap, throttleTime } from 'rxjs'
 import { queryKeys } from '../query/queryKeys'
-import { setEventData } from '../query/queryUtils'
+import { prependEventFeed, setEventData } from '../query/queryUtils'
 import type { FeedScope } from '../query/useQueryFeeds'
 import { createFeedQueryOptions, type FeedModule, type InfiniteEvents } from '../query/useQueryFeeds'
 import { subscribeLive } from '../subscriptions/subscribeLive'
@@ -60,26 +60,27 @@ export function useFeedStateAtom(feedAtoms: FeedAtoms, extras?: Extras) {
     [autoUpdate],
   )
 
-  const live$ = useObservable<void, [FeedModule, NostrFilter, (event: NostrEventDB) => void]>(
+  const live$ = useObservable<NostrEventDB, [NostrContext, FeedScope, NostrFilter]>(
     (input$) =>
       input$.pipe(
-        switchMap(([options, filter, onStream]) => {
+        switchMap(([ctx, scope, filter]) => {
           if (options.live !== false) {
-            return subscribeLive(options.ctx, options.scope, filter).pipe(
-              tap((event) => {
-                setEventData(event)
-                onStream(event)
-              }),
-              ignoreElements(),
-              finalize(() => flush()),
-            )
+            return subscribeLive(ctx, scope, filter)
           }
           return EMPTY
         }),
       ),
-    [options, filter, onStream],
+    [options.ctx, options.scope, filter],
   )
-  useSubscription(live$)
+  useSubscription(live$, {
+    next: (event) => {
+      setEventData(event)
+      onStream(event)
+    },
+    complete: () => {
+      flush()
+    },
+  })
 
   const queryClient = useQueryClient()
   const queryKey = queryKeys.feed(options.id, filter, options.ctx)
@@ -88,12 +89,12 @@ export function useFeedStateAtom(feedAtoms: FeedAtoms, extras?: Extras) {
       select: useCallback(
         (data: InfiniteEvents) => {
           return {
-            pages: data.pages.map((page = []) =>
-              page.filter((event) => {
+            pages: [
+              data.pages.flat().filter((event) => {
                 switch (event.kind) {
                   case Kind.Text: {
                     if (replies !== undefined) {
-                      return replies ? !event.metadata?.isRoot : event.metadata?.isRoot
+                      return replies ? !event.metadata?.isRoot : !!event.metadata?.isRoot
                     }
                     return true
                   }
@@ -105,7 +106,7 @@ export function useFeedStateAtom(feedAtoms: FeedAtoms, extras?: Extras) {
                   }
                 }
               }),
-            ),
+            ],
             pageParams: data.pageParams,
           }
         },
@@ -132,13 +133,7 @@ export function useFeedStateAtom(feedAtoms: FeedAtoms, extras?: Extras) {
 
   const addNewEvents = useCallback(
     (events: NostrEventDB[]) => {
-      queryClient.setQueryData(queryKey, (older: InfiniteEvents | undefined) => {
-        const sorted = events.sort((a, b) => b.created_at - a.created_at)
-        return {
-          pageParams: older?.pageParams || { limit: filter.limit },
-          pages: [dedupeById([...sorted, ...(older?.pages?.[0] || [])]), ...(older?.pages?.slice(1) || [])],
-        } as InfiniteEvents
-      })
+      prependEventFeed(queryKey, events)
     },
     [queryClient],
   )
@@ -250,6 +245,7 @@ export function useFeedStateAtom(feedAtoms: FeedAtoms, extras?: Extras) {
     saveFeed,
     isEmpty,
     setIsEmpty,
+    onStream,
     paginate: () => paginate([pageSize, query.data, options.scope]),
     addRelay: () => {},
     removeRelay: () => {},

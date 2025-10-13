@@ -1,6 +1,4 @@
-import { ContentProvider, useContentContext } from '@/components/providers/ContentProvider'
-import { useNoteContext } from '@/components/providers/NoteProvider'
-import { useMinHeightFromSources } from '@/hooks/useMediaStore'
+import { useContentContext } from '@/components/providers/ContentProvider'
 import { spacing } from '@/themes/spacing.stylex'
 import type { ReactNode } from 'react'
 import { type MutableRefObject, useRef } from 'react'
@@ -29,7 +27,7 @@ const MediaDraggable = (props: { children: ReactNode }) => {
     applyRubberBandEffect: true,
   })
   return (
-    <div {...css.props([styles.root, dense && styles.root$dense])} {...events} ref={ref}>
+    <div {...css.props([styles.root, dense && styles.root$dense, styles.root$carousel])} {...events} ref={ref}>
       {props.children}
     </div>
   )
@@ -37,36 +35,33 @@ const MediaDraggable = (props: { children: ReactNode }) => {
 
 const MediaList = (props: MediaProps) => {
   const { media } = props
-  const { event } = useNoteContext()
-  const minHeight = useMinHeightFromSources(
-    media.map((x) => x.src),
-    event,
-  )
+  const { dense } = useContentContext()
+  const isPair = media.length == 2
   const isMultiple = media.length > 1
   const isCarousel = media.length > 2
+  const mode = media.length == 1 ? (dense ? 'single_dense' : 'single') : isPair ? 'pair' : 'carousel'
   return (
     <>
       {media.map(({ type, src, index }) => {
         return (
-          <MediaWrapper
-            key={src}
-            fixed={isCarousel}
-            event={event}
-            size='sm'
-            src={src}
-            fixedHeight={isCarousel ? minHeight : undefined}
-            sx={styles.wrapper}>
+          <MediaWrapper key={src} mode={mode} sx={styles.wrapper}>
             {type === 'image' && (
               <Image
                 cover={isMultiple}
                 draggable={false}
                 src={src}
-                sx={[isMultiple && styles.multiple]}
+                sx={[isPair && styles.media$pair, isCarousel && styles.media$carousel]}
                 index={index}
               />
             )}
             {type === 'video' && (
-              <Video preload='auto' src={src} cover={isMultiple} sx={[isMultiple && styles.multiple]} index={index} />
+              <Video
+                preload='auto'
+                src={src}
+                cover={isMultiple}
+                sx={[isPair && styles.media$pair, isCarousel && styles.media$carousel]}
+                index={index}
+              />
             )}
           </MediaWrapper>
         )
@@ -84,11 +79,11 @@ export const MediaGroup = (props: Props) => {
 
   if (!isCarousel) {
     return (
-      <ContentProvider value={{ dense: true }}>
-        <html.div style={[styles.root, isPair && styles.pair, dense && styles.root$dense]}>
+      <>
+        <html.div style={[styles.root, isPair && styles.root$pair, dense && styles.root$dense]}>
           {'children' in props ? props.children : <MediaList {...props} />}
         </html.div>
-      </ContentProvider>
+      </>
     )
   }
 
@@ -115,7 +110,10 @@ const styles = css.create({
     '-ms-overflow-style': 'none',
     scrollbarWidth: 'none',
   },
-  pair: {
+  root$carousel: {
+    paddingRight: spacing.padding6,
+  },
+  root$pair: {
     gridTemplateColumns: '1fr 1fr',
   },
   root$dense: {
@@ -123,11 +121,13 @@ const styles = css.create({
   },
   wrapper: {
     height: '100%',
-    width: '100%',
     marginInline: 0,
   },
-  multiple: {
+  media$pair: {
     height: '100%',
     width: '100%',
+  },
+  media$carousel: {
+    height: '100%',
   },
 })

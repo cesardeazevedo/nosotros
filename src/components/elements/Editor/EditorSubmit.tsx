@@ -1,31 +1,31 @@
 import { useContentContext } from '@/components/providers/ContentProvider'
 import { Button } from '@/components/ui/Button/Button'
 import { Stack } from '@/components/ui/Stack/Stack'
+import { Kind } from '@/constants/kinds'
 import { useCurrentPubkey } from '@/hooks/useAuth'
 import { memo, useCallback } from 'react'
 import { css } from 'react-strict-dom'
 import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDOMProps'
 import { LinkSignIn } from '../Links/LinkSignIn'
 import { useEditorSelector } from './hooks/useEditor'
-import { cancel$ } from './utils/countDown'
-import { Kind } from '@/constants/kinds'
+import { useXS } from '@/hooks/useMobile'
 
 type Props = {
   renderDiscard?: boolean
   onSubmit: () => void
   onDiscard?: () => void
   disabled?: boolean
-  state: number | string | boolean
+  submitting: boolean
 }
 
 export const EditorSubmit = memo(function EditorSubmit(props: Props) {
-  const { state, disabled, renderDiscard, onSubmit, onDiscard } = props
+  const { submitting, disabled, renderDiscard, onSubmit, onDiscard } = props
   const { dense } = useContentContext()
   const pubkey = useCurrentPubkey()
+  const isXS = useXS()
 
   const reset = useEditorSelector((editor) => editor.reset)
   const isReply = useEditorSelector((editor) => !!editor.parent && editor.parent.kind !== Kind.PublicMessage)
-  const isCountDown = typeof state === 'number'
 
   const handleDiscard = useCallback((event: StrictClickEvent) => {
     event.stopPropagation()
@@ -36,7 +36,7 @@ export const EditorSubmit = memo(function EditorSubmit(props: Props) {
 
   return (
     <Stack gap={0.5}>
-      {renderDiscard && !isCountDown && (
+      {renderDiscard && !isXS && !submitting && (
         <Button sx={[dense && styles.button$dense]} onClick={handleDiscard}>
           Discard
         </Button>
@@ -49,20 +49,8 @@ export const EditorSubmit = memo(function EditorSubmit(props: Props) {
         </LinkSignIn>
       )}
       {pubkey && (
-        <Button
-          disabled={disabled}
-          sx={[dense && styles.button$dense]}
-          variant='filled'
-          onClick={() => (isCountDown ? cancel$.next() : onSubmit())}>
-          {isCountDown
-            ? state === 0
-              ? isReply
-                ? 'Replying'
-                : 'Posting'
-              : `${isReply ? 'Replying' : 'Posting'} in ${state} (cancel)`
-            : isReply
-              ? 'Reply'
-              : 'Post'}
+        <Button disabled={disabled} sx={[dense && styles.button$dense]} variant='filled' onClick={() => onSubmit()}>
+          {submitting ? (isReply ? 'Replying' : 'Posting') : isReply ? 'Reply' : 'Post'}
         </Button>
       )}
     </Stack>

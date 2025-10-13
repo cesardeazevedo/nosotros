@@ -7,22 +7,22 @@ import { memo } from 'react'
 import { css } from 'react-strict-dom'
 import { PostOptions } from '../PostOptions'
 import { ButtonReaction } from './PostButtonReaction'
-import { ButtonRelays } from './PostButtonRelay'
 import { ButtonReply } from './PostButtonReply'
 import { ButtonRepost } from './PostButtonRepost'
+import { PostButtonStats } from './PostButtonStats'
 import { ButtonZap } from './PostButtonZap'
 
 type Props = {
   note: NoteState
   onReplyClick?: () => void
-  renderRelays?: boolean
   renderReply?: boolean
   renderOptions?: boolean
+  statsPopover?: boolean
   sx?: SxProps
 }
 
 export const PostActions = memo(function PostActions(props: Props) {
-  const { note, renderReply = true, renderRelays = true, renderOptions = false, sx } = props
+  const { note, renderReply = true, renderOptions = false, statsPopover, sx } = props
   const { dense } = useContentContext()
   const mobile = useMobile()
 
@@ -38,7 +38,7 @@ export const PostActions = memo(function PostActions(props: Props) {
         />
       )}
       <ButtonZap note={note} />
-      {renderRelays && <ButtonRelays note={note} />}
+      <PostButtonStats popover={statsPopover} note={note} />
       {renderOptions && <PostOptions event={note.event} />}
     </Stack>
   )

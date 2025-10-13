@@ -42,16 +42,16 @@ const styles = css.create({
     borderBottomColor: palette.outlineVariant,
     borderBottomWidth: 1,
   },
-  lg: {
-    borderRadius: {
-      default: shape.lg,
-      [lg]: 0,
-    },
-  },
   md: {
     borderRadius: {
       default: shape.lg,
       [md]: 0,
+    },
+  },
+  lg: {
+    borderRadius: {
+      default: shape.lg,
+      [lg]: 0,
     },
   },
   resetTopRadius: {

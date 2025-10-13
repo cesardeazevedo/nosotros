@@ -1,7 +1,7 @@
 import { useDeckAddNextColumn } from '@/components/modules/Deck/hooks/useDeck'
 import { createEventModule } from '@/hooks/modules/createEventModule'
 import type { NoteState } from '@/hooks/state/useNote'
-import { useMobile } from '@/hooks/useMobile'
+import { useNostrMaskedLinkProps } from '@/hooks/useNostrMasedLinkProps'
 import { useMatch, useNavigate, useRouter } from '@tanstack/react-router'
 import React, { memo, useCallback, type ReactNode } from 'react'
 import { css, html } from 'react-strict-dom'
@@ -14,11 +14,11 @@ type Props = {
 }
 
 export const PostLink = memo(function PostLink(props: Props) {
-  const { note, children, onClick } = props
+  const { note, children } = props
   const context = useMatch({ from: '/$nostr', shouldThrow: false })?.context
-  const mobile = useMobile()
   const router = useRouter()
   const navigate = useNavigate()
+  const linkProps = useNostrMaskedLinkProps(note.nip19)
   const deck = useDeckAddNextColumn(() => createEventModule(note.nip19))
   const isCurrentNote = context?.decoded?.type === 'nevent' ? context?.decoded.data.id === note.id : false
   const isActive = isCurrentNote || note.state.repliesOpen === true
@@ -29,18 +29,12 @@ export const PostLink = memo(function PostLink(props: Props) {
         return deck.add(e as React.MouseEvent<HTMLElement>)
       }
 
-      if (!mobile) {
-        note.actions.toggleContent(true)
-        onClick?.()
-      } else {
-        navigate({
-          to: '/$nostr',
-          params: { nostr: note.nip19 as string },
-          state: { from: router.latestLocation.pathname } as never,
-        })
-      }
+      navigate({
+        ...linkProps,
+        state: { from: router.latestLocation.pathname } as never,
+      })
     },
-    [note, deck],
+    [note, deck, linkProps],
   )
 
   return (

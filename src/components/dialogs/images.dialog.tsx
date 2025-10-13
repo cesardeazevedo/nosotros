@@ -3,7 +3,6 @@ import { useDialogControl } from '@/hooks/useDialogs'
 import { useImetaList } from '@/hooks/useEventUtils'
 import { useLG } from '@/hooks/useMobile'
 import { palette } from '@/themes/palette.stylex'
-import { spacing } from '@/themes/spacing.stylex'
 import { getImgProxyUrl } from '@/utils/imgproxy'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconArrowLeft, IconArrowRight, IconX } from '@tabler/icons-react'
@@ -30,6 +29,8 @@ const LightboxPortal = function LightboxPortal(props: { open?: boolean; children
     </html.div>
   )
 }
+
+const WIDTH_SIDEBAR = 640
 
 export const ImagesDialog = memo(function ImagesDialog() {
   const isLG = useLG()
@@ -154,7 +155,7 @@ export const ImagesDialog = memo(function ImagesDialog() {
             width: '100%',
           },
           root: {
-            width: !isLG && nevent ? 'calc(100% - 600px)' : '100%',
+            width: !isLG && nevent ? `calc(100% - ${WIDTH_SIDEBAR}px)` : '100%',
           },
           slide: {
             position: 'relative',
@@ -206,9 +207,8 @@ const portalStyles = css.create({
     position: 'relative',
   },
   repliesPane: {
-    width: 600,
+    width: WIDTH_SIDEBAR,
     backgroundColor: palette.surfaceContainerLowest,
-    padding: spacing.padding1,
     borderLeft: '1px solid',
     borderLeftColor: palette.outline,
     overflowY: 'auto',
