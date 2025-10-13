@@ -99,7 +99,10 @@ export function broadcastEvent(signedEvent: NostrEvent, options: LocalPublisherO
 
 export function publish(unsignedEvent: Omit<UnsignedEvent, 'created_at'>, options: LocalPublisherOptions) {
   return signAndSave(unsignedEvent, options).pipe(
-    mergeMap((signedEvent) => merge(broadcastEvent(signedEvent, options).pipe(ignoreElements()), of(signedEvent))),
+    mergeMap((signedEvent) => {
+      const { metadata, ...event } = signedEvent
+      return merge(broadcastEvent(event, options).pipe(ignoreElements()), of(signedEvent))
+    }),
     shareReplay(),
   )
 }
