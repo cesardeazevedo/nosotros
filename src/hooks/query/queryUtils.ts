@@ -84,3 +84,25 @@ export function appendEventFeed(queryKey: QueryKey, events: NostrEventDB[]) {
     return data
   })
 }
+
+export function removeEventFromFeed(queryKey: QueryKey, eventId: string) {
+  queryClient.setQueryData(queryKey, (data: InfiniteEvents | undefined) => {
+    if (data) {
+      const pages = [data.pages.flat().filter((e) => e.id !== eventId)]
+      return {
+        pageParams: data.pageParams,
+        pages,
+      }
+    }
+    return data
+  })
+}
+
+export function removeEventFromQuery(queryKey: QueryKey, eventId: string) {
+  queryClient.setQueryData(queryKey, (data: NostrEvent[]) => {
+    if (data) {
+      return [data.filter((e) => e.id !== eventId)]
+    }
+    return data
+  })
+}

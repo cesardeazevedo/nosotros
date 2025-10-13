@@ -15,6 +15,7 @@ import { RepliesPreview } from '../Replies/RepliesPreview'
 import { PostActions } from './PostActions/PostActions'
 import { PostBroadcaster } from './PostBroadcaster'
 import { PostContent } from './PostContent'
+import { PostCountdown } from './PostCountdown'
 import { PostHeader } from './PostHeader'
 import { PostLink } from './PostLink'
 
@@ -37,6 +38,7 @@ export const PostRoot = memo(function PostRoot(props: Props) {
     <NoteProvider value={{ event }}>
       <html.article style={[isFeed && styles.divider]} ref={note.ref}>
         <PostLink note={note}>
+          {note.isOwner && <PostCountdown id={event.id} />}
           {note.event.kind === Kind.Article && <ArticleHeadline />}
           {header || <PostHeader event={event} />}
           <PostContent note={note} />

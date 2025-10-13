@@ -13,7 +13,7 @@ import { useReposts } from '../query/useReposts'
 import { useSeen } from '../query/useSeen'
 import { useZaps } from '../query/useZaps'
 import { useCurrentPubkey, useCurrentUser } from '../useAuth'
-import { useEventDTag, useNaddress, useNevent } from '../useEventUtils'
+import { useEventDTag, useNIP19 } from '../useEventUtils'
 
 export type NoteState = ReturnType<typeof useNoteState>
 
@@ -88,8 +88,7 @@ export function useNoteState(event: NostrEventDB, options?: NoteOptions) {
   const reposts = useReposts(event, queryOptions)
   const reactions = useReactions(event, queryOptions)
 
-  const nevent = useNevent(event)
-  const naddress = useNaddress(event)
+  const nip19 = useNIP19(event)
   const currentUser = useCurrentUser()
 
   const { id, metadata } = event
@@ -177,7 +176,8 @@ export function useNoteState(event: NostrEventDB, options?: NoteOptions) {
     inView,
     user,
 
-    nip19: isAddressableKind(event.kind) ? naddress : nevent,
+    nip19,
+    isOwner: currentLoggedPubkey === event.pubkey,
 
     reposts,
     reactions,

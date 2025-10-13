@@ -10,9 +10,7 @@ import { useContentContext } from '@/components/providers/ContentProvider'
 import { ButtonBase } from '@/components/ui/ButtonBase/ButtonBase'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { SxProps } from '@/components/ui/types'
-import { usePublishEventMutation } from '@/hooks/mutations/usePublishEventMutation'
 import { useCurrentPubkey } from '@/hooks/useAuth'
-import { publish } from '@/nostr/publish/publish'
 import { duration } from '@/themes/duration.stylex'
 import { easing } from '@/themes/easing.stylex'
 import { palette } from '@/themes/palette.stylex'
@@ -21,46 +19,33 @@ import { spacing } from '@/themes/spacing.stylex'
 import { IconPhotoPlus } from '@tabler/icons-react'
 import { UserAvatar } from 'components/elements/User/UserAvatar'
 import { useAtomValue, useSetAtom } from 'jotai'
-import type { EventTemplate, NostrEvent } from 'nostr-tools'
+import type { NostrEvent } from 'nostr-tools'
 import { useObservableState } from 'observable-hooks'
 import { memo, useEffect } from 'react'
 import { css } from 'react-strict-dom'
-import {
-  catchError,
-  concat,
-  concatMap,
-  defer,
-  EMPTY,
-  endWith,
-  from,
-  map,
-  mergeMap,
-  startWith,
-  takeUntil,
-  tap,
-} from 'rxjs'
+import { catchError, concatMap, EMPTY, from, map, mergeMap, of, startWith, tap } from 'rxjs'
 import { MediaListEditor } from '../Media/MediaListEditor'
 import { EditorContainer } from './EditorContainer'
 import { EditorExpandables } from './EditorExpandables'
 import { EditorHeader } from './EditorHeader'
 import { EditorPlaceholder } from './EditorPlaceholder'
+import type { EditorContextType } from './EditorProvider'
 import { EditorSubmit } from './EditorSubmit'
 import { EditorTiptap } from './EditorTiptap'
 import { EditorToolbar } from './EditorToolbar'
 import { useEditorSelector } from './hooks/useEditor'
-import { cancel$, countDown$ } from './utils/countDown'
 
 type Props = {
   initialOpen?: boolean
   renderDiscard?: boolean
   sx?: SxProps
   onDiscard?: () => void
-  onSuccess?: (event: NostrEvent) => void
+  onSubmit: (editor: EditorContextType) => Promise<NostrEvent>
 }
 
 // For kind 20 notes
 export const EditorMedia = memo(function EditorMedia(props: Props) {
-  const { initialOpen, renderDiscard = true, onDiscard, onSuccess } = props
+  const { initialOpen, renderDiscard = true, onDiscard, onSubmit } = props
   const { dense } = useContentContext()
   const files = useAtomValue(filesAtom)
   const selectFiles = useSetAtom(selectFilesForUploadAtom)
@@ -72,14 +57,6 @@ export const EditorMedia = memo(function EditorMedia(props: Props) {
   const state = useEditorSelector((editor) => editor)
   const pubkey = useCurrentPubkey()
 
-  const { mutateAsync } = usePublishEventMutation<EventTemplate>({
-    mutationFn:
-      ({ signer, pubkey }) =>
-      (event) =>
-        publish({ ...event, pubkey }, { relays: state.allRelays, signer }),
-    onSuccess,
-  })
-
   useEffect(() => {
     state.toggle('open', initialOpen)
     if (initialOpen && !('ontouchstart' in window)) {
@@ -87,28 +64,30 @@ export const EditorMedia = memo(function EditorMedia(props: Props) {
     }
   }, [initialOpen])
 
-  const [submitState, submit] = useObservableState<string | number | boolean, EventTemplate>((input$) => {
+  const [submitting, submit] = useObservableState<boolean, EditorContextType>((input$) => {
     return input$.pipe(
-      concatMap((event) => {
-        const upload$ = defer(() =>
-          from(uploadFiles()).pipe(
-            mergeMap((imetas) => {
-              return mutateAsync({
-                ...event,
-                tags: [...imetas, ...event.tags],
+      concatMap((state) => {
+        return from(uploadFiles()).pipe(
+          mergeMap((imetas) => {
+            if (state.event) {
+              return onSubmit({
+                ...state,
+                event: {
+                  ...state.event,
+                  tags: [...imetas, ...state.event.tags],
+                },
               })
-            }),
-            tap(() => resetFiles()),
-            map(() => false),
-            startWith(0),
-            catchError((error) => {
-              resetUploadingFiles()
-              enqueueToast({ component: error.toString(), duration: 4000 })
-              return EMPTY
-            }),
-          ),
+            }
+            return EMPTY
+          }),
+          map(() => false),
+          startWith(true),
+          catchError((error) => {
+            resetUploadingFiles()
+            enqueueToast({ component: error.toString(), duration: 4000 })
+            return of(false)
+          }),
         )
-        return concat(countDown$, upload$).pipe(takeUntil(cancel$), endWith(false))
       }),
     )
   }, false)
@@ -137,10 +116,10 @@ export const EditorMedia = memo(function EditorMedia(props: Props) {
           {state.open && (
             <EditorToolbar renderAddMedia={false}>
               <EditorSubmit
-                state={submitState}
+                submitting={submitting}
                 disabled={files.length === 0 || state.isUploading}
                 renderDiscard={renderDiscard}
-                onSubmit={() => state.event && submit(state.event)}
+                onSubmit={() => submit(state)}
                 onDiscard={() => {
                   resetFiles()
                   onDiscard?.()

@@ -1,18 +1,17 @@
-import { buttonTokens } from '@/components/ui/Button/Button.stylex'
+import { SettingsClientTag } from '@/components/modules/Settings/SettingsClientTag'
+import { SettingsDelayBroadcast } from '@/components/modules/Settings/SettingsDelayBroadcast'
+import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Switch } from '@/components/ui/Switch/Switch'
 import { Text } from '@/components/ui/Text/Text'
-import { useSettings, useToggleSettings } from '@/hooks/useSettings'
-import { palette } from '@/themes/palette.stylex'
+import type { SxProps } from '@/components/ui/types'
+import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import { IconBraces } from '@tabler/icons-react'
 import { githubDarkTheme } from '@uiw/react-json-view/githubDark'
 import { lazy, memo, Suspense, useState } from 'react'
 import { css } from 'react-strict-dom'
 import { EditorSettingsUpload } from './EditorSettingsUpload'
 import { useEditorSelector } from './hooks/useEditor'
-import type { SxProps } from '@/components/ui/types'
-import { shape } from '@/themes/shape.stylex'
 
 const jsonTheme = {
   ...githubDarkTheme,
@@ -42,51 +41,26 @@ type Props = {
 
 export const EditorSettings = memo(function EditorSettings(props: Props) {
   const [jsonOpen, setJsonOpen] = useState(false)
-  const toggleSettings = useToggleSettings()
   const toggle = useEditorSelector((editor) => editor.toggle)
-  const settings = useSettings()
   const nsfwEnabled = useEditorSelector((editor) => editor.nsfwEnabled)
 
   return (
     <>
       <Stack horizontal={false} gap={1} sx={styles.root} align='stretch' justify='space-between'>
         <Stack horizontal={false} sx={styles.content} gap={2} align='stretch' justify='space-between'>
-          <Stack grow gap={1} align='stretch' justify='space-between'>
+          <Stack grow gap={1} align='stretch' justify='space-between' sx={styles.header}>
             <Text variant='title' size='lg'>
-              Options
+              Editor settings
             </Text>
           </Stack>
-          <Stack grow gap={1} align='stretch' justify='space-between'>
-            <Text size='lg' sx={styles.label}>
-              Upload servers
-            </Text>
-            <EditorSettingsUpload />
-          </Stack>
-          <Stack grow gap={1} align='stretch' justify='space-between'>
-            <Stack horizontal={false}>
-              <Text size='lg' sx={styles.label}>
-                Client tag
-              </Text>
-              <Text size='md' sx={styles.description}>
-                Client tag will let other users know you are using nosotros
-              </Text>
-            </Stack>
-            <Switch checked={settings.clientTag} onChange={() => toggleSettings('clientTag')} />
-          </Stack>
-          <Stack grow gap={1} align='stretch' justify='space-between'>
-            <Text size='lg' sx={styles.label}>
-              NSFW
-            </Text>
-            <Switch checked={nsfwEnabled} onChange={() => toggle('nsfwEnabled')} />
-          </Stack>
-          <Stack grow gap={1} align='stretch' justify='space-between'>
-            <Text size='lg' sx={styles.label}>
-              <Stack gap={1}>
-                Show raw event <IconBraces strokeWidth='2.0' size={18} />
-              </Stack>
-            </Text>
-            <Switch checked={jsonOpen} onChange={() => setJsonOpen((prev) => !prev)} />
-          </Stack>
+          <MenuItem label='Upload servers' trailing={<EditorSettingsUpload />} />
+          <SettingsDelayBroadcast />
+          <SettingsClientTag />
+          <MenuItem label='NSFW' trailing={<Switch checked={nsfwEnabled} onChange={() => toggle('nsfwEnabled')} />} />
+          <MenuItem
+            label='Show raw event'
+            trailing={<Switch checked={jsonOpen} onChange={() => setJsonOpen((prev) => !prev)} />}
+          />
         </Stack>
         <Stack>
           {jsonOpen && (
@@ -103,17 +77,14 @@ export const EditorSettings = memo(function EditorSettings(props: Props) {
 const styles = css.create({
   root: {
     width: '100%',
-    position: 'relative',
     overflow: 'hidden',
+  },
+  header: {
+    paddingInline: spacing.padding3,
   },
   content: {
     width: '100%',
     paddingBlock: spacing.padding2,
-    paddingInline: spacing.padding3,
-  },
-  sign: {
-    minHeight: 30,
-    [buttonTokens.labelTextColor]: 'white',
   },
   json: {
     paddingTop: spacing.padding1,
@@ -125,13 +96,5 @@ const styles = css.create({
   json$float: {
     borderBottomLeftRadius: shape.lg,
     borderBottomRightRadius: shape.lg,
-  },
-  label: {
-    minWidth: 180,
-    fontWeight: 500,
-  },
-  description: {
-    color: palette.onSurfaceVariant,
-    maxWidth: 300,
   },
 })

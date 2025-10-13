@@ -8,6 +8,7 @@ import { BubbleContainer } from '../Content/Layout/Bubble'
 import { LinkNEvent } from '../Links/LinkNEvent'
 import type { Props as PostContentWrapperProps } from '../Posts/PostContentWrapper'
 import { PostContentWrapper } from '../Posts/PostContentWrapper'
+import { PostCountdown } from '../Posts/PostCountdown'
 import { ReplyUserHeader } from './ReplyUserHeader'
 
 type Props = {
@@ -32,6 +33,7 @@ export const ReplyContent = memo(function ReplyContent(props: Props) {
   const { note, size, highlight } = props
   return (
     <PostContentWrapper note={note} size={size}>
+      <PostCountdown dense id={note.id} />
       <Content
         children={(index) => index === 0 && <ReplyUserHeader />}
         wrapper={(node) =>

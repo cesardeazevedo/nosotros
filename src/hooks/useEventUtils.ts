@@ -83,6 +83,12 @@ export function useNaddress(event: NostrEventDB) {
   )
 }
 
+export function useNIP19(event: NostrEventDB) {
+  const naddress = useNaddress(event)
+  const nevent = useNevent(event)
+  return isAddressableKind(event.kind) ? naddress : nevent
+}
+
 export function useImetaList(event: NostrEventDB | undefined) {
   return useMemo(() => {
     if (event?.metadata?.imeta && event.kind === Kind.Media) {
