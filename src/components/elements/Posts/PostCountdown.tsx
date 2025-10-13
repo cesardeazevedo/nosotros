@@ -32,7 +32,7 @@ const Counter = (props: { count: number; onCancel: () => void }) => {
   }, [])
   return (
     <>
-      {count > 0 ? `in ${count}...` : ''}
+      {count > 0 ? ` in ${count}...` : ''}
       {count > 0 && (
         <Button
           sx={styles.button}
