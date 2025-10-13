@@ -3,6 +3,7 @@ import { useContentContext } from '@/components/providers/ContentProvider'
 import type { SxProps } from '@/components/ui/types'
 import { createProfileModule } from '@/hooks/modules/createProfileFeedModule'
 import { useNprofile } from '@/hooks/useEventUtils'
+import { useNostrMaskedLinkProps } from '@/hooks/useNostrMasedLinkProps'
 import { Link, useRouter } from '@tanstack/react-router'
 import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
@@ -23,6 +24,8 @@ export const LinkProfile = memo(function LinkProfile(props: Props) {
   const deck = useDeckAddNextColumn(() => createProfileModule({ nip19: nprofile }))
   const allStyles = [styles.cursor, underline && !disableLink && styles.underline, sx]
 
+  const linkMaskedProps = useNostrMaskedLinkProps(nprofile)
+
   if (disableLink || !nprofile) {
     return <html.span style={allStyles}>{children}</html.span>
   }
@@ -37,9 +40,9 @@ export const LinkProfile = memo(function LinkProfile(props: Props) {
 
   return (
     <Link
-      to='/$nostr'
-      params={{ nostr: nprofile }}
+      {...linkMaskedProps}
       state={{ from: router.latestLocation.pathname } as never}
+      onClick={(e) => e.stopPropagation()}
       {...rest}
       {...css.props(allStyles)}>
       {children}

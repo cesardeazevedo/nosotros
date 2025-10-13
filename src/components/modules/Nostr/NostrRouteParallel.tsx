@@ -9,5 +9,5 @@ type Props = {
 export const NostrRouteParallel = (props: Props) => {
   const { nostr } = props
   const decoded = useMemo(() => nip19.decode(nostr), [nostr])
-  return <NostrRoute nostr={nostr} decoded={decoded} />
+  return <NostrRoute masked nostr={nostr} decoded={decoded} />
 }
