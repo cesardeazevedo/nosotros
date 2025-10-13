@@ -346,15 +346,15 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
     mutationFn:
       ({ signer, pubkey }) =>
       (state) => {
-        if (state.event) {
+        if (event) {
           if (settings.delayBroadcast) {
             // Delay broadcast
-            return signAndSave({ ...state.event, pubkey }, { signer, saveEvent: !state.protectedEvent }).pipe(
+            return signAndSave({ ...event, pubkey }, { signer, saveEvent: !state.protectedEvent }).pipe(
               tap((event) => {
                 addNoteToQuery(event)
                 store.set(addBroadcastRequestAtom, {
                   event,
-                  relays: state.allRelays,
+                  relays: allRelays,
                   signer,
                   onComplete: () => {
                     onSuccess(event)
@@ -366,10 +366,7 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
               }),
             )
           }
-          return publish(
-            { ...state.event, pubkey },
-            { relays: state.allRelays, signer, saveEvent: !state.protectedEvent },
-          ).pipe(
+          return publish({ ...event, pubkey }, { relays: allRelays, signer, saveEvent: !protectedEvent }).pipe(
             tap((event) => {
               addNoteToQuery(event)
               onSuccess(event)
