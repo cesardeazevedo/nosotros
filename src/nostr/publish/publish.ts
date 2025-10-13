@@ -9,7 +9,7 @@ import { setEventData } from '@/hooks/query/queryUtils'
 import { setSeenData } from '@/hooks/query/useSeen'
 import { subscribeEventRelays } from '@/hooks/subscriptions/subscribeOutbox'
 import type { NostrEvent, UnsignedEvent } from 'nostr-tools'
-import { connect, EMPTY, endWith, ignoreElements, merge, mergeMap, of, shareReplay, takeUntil, tap } from 'rxjs'
+import { connect, EMPTY, endWith, ignoreElements, map, merge, mergeMap, of, shareReplay, takeUntil, tap } from 'rxjs'
 import { parseEventMetadata } from '../../hooks/parsers/parseEventMetadata'
 import { dbSqlite } from '../db'
 import { pool } from '../pool'
@@ -35,11 +35,11 @@ export function signAndSave(unsignedEvent: Omit<UnsignedEvent, 'created_at'>, op
 
   return of(pub).pipe(
     mergeMap((x) => x.signedEvent),
+    map(parseEventMetadata),
+    tap(setEventData),
     tap((event) => {
       if (saveEvent) {
-        const eventMeta = parseEventMetadata(event)
-        setEventData(eventMeta)
-        dbSqlite.insertEvent(eventMeta)
+        dbSqlite.insertEvent(event)
       }
     }),
     shareReplay(),
