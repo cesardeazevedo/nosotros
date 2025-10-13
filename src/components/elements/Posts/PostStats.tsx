@@ -18,18 +18,22 @@ import type { NostrEvent } from 'nostr-tools'
 import { memo, useDeferredValue } from 'react'
 import { css } from 'react-strict-dom'
 import { ignoreElements, of, tap } from 'rxjs'
+import { ReactionsNoteList } from '../Reactions/ReactionsNoteList'
 import { RelayChip } from '../Relays/RelayChip'
 import { RelaySelectPopover } from '../Relays/RelaySelectPopover'
+import { RepostNoteList } from '../Repost/RepostNoteList'
 import { ToastEventPublished } from '../Toasts/ToastEventPublished'
+import { ZapNoteList } from '../Zaps/ZapNoteList'
 
 type Props = {
   note: NoteState
+  renderDivider?: boolean
 }
 
-export const PostBroadcaster = memo(function PostBroadcaster(props: Props) {
-  const { note } = props
+export const PostStats = memo(function PostStats(props: Props) {
+  const { note, renderDivider } = props
   const enqueueToast = useSetAtom(enqueueToastAtom)
-  const broadcastOpenDeferred = useDeferredValue(note.state.broadcastOpen)
+  const statsOpenDeferred = useDeferredValue(note.state.statsOpen)
 
   const { mutate } = usePublishEventMutation<[NostrEvent, string]>({
     mutationFn:
@@ -56,17 +60,22 @@ export const PostBroadcaster = memo(function PostBroadcaster(props: Props) {
       },
   })
 
-  if (note.state.broadcastOpen === false) {
+  if (note.state.statsOpen === false) {
     return null
   }
 
   return (
-    <Expandable expanded={broadcastOpenDeferred}>
-      <Stack horizontal={false}>
-        <Divider />
+    <Expandable expanded={statsOpenDeferred}>
+      <Stack horizontal={false} onClick={(e) => e.stopPropagation()}>
+        {renderDivider && <Divider />}
         <Stack horizontal={false}>
-          <Stack justify='flex-start' align='flex-start' sx={styles.panel} wrap={false} gap={2}>
-            <Text sx={styles.subheader} variant='title' size='md'>
+          <Stack horizontal={false} justify='flex-start' align='flex-start' wrap={false}>
+            <ZapNoteList note={note} />
+            <RepostNoteList note={note} />
+            <ReactionsNoteList event={note.event} />
+          </Stack>
+          <Stack horizontal={false} justify='flex-start' align='flex-start' sx={styles.panel} wrap={false} gap={2}>
+            <Text variant='title' size='md'>
               Seen on relays
             </Text>
             <Stack horizontal wrap gap={0.5}>
@@ -81,16 +90,8 @@ export const PostBroadcaster = memo(function PostBroadcaster(props: Props) {
 })
 
 const styles = css.create({
-  header: {
-    paddingBlock: spacing.padding1,
-    paddingInline: spacing.padding2,
-  },
   panel: {
+    padding: spacing.padding1,
     paddingInline: spacing.padding2,
-    paddingBlock: spacing.padding2,
-  },
-  subheader: {
-    flex: 1,
-    whiteSpace: 'nowrap',
   },
 })

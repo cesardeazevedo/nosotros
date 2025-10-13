@@ -41,6 +41,7 @@ export const ThreadRoot = memo(function ThreadRoot(props: Props) {
                 <ContentProvider value={{ dense: true }}>
                   <PostActions
                     note={note}
+                    statsPopover
                     renderOptions
                     onReplyClick={() => note.actions.toggleReplying()}
                     sx={styles.actions}

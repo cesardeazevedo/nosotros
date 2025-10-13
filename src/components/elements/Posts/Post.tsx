@@ -13,7 +13,7 @@ import { EditorProvider } from '../Editor/EditorProvider'
 import { Replies } from '../Replies/Replies'
 import { RepliesPreview } from '../Replies/RepliesPreview'
 import { PostActions } from './PostActions/PostActions'
-import { PostBroadcaster } from './PostBroadcaster'
+import { PostStats } from './PostStats'
 import { PostContent } from './PostContent'
 import { PostCountdown } from './PostCountdown'
 import { PostHeader } from './PostHeader'
@@ -43,9 +43,9 @@ export const PostRoot = memo(function PostRoot(props: Props) {
           {header || <PostHeader event={event} />}
           <PostContent note={note} />
           <PostActions note={note} onReplyClick={openReplies} />
+          <PostStats note={note} renderDivider />
           {note.state.repliesOpen === null && event.kind === Kind.Text && <RepliesPreview note={note} />}
         </PostLink>
-        <PostBroadcaster note={note} />
         {note.state.repliesOpen && (
           <>
             <Divider />

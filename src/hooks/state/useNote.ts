@@ -19,7 +19,7 @@ export type NoteState = ReturnType<typeof useNoteState>
 
 export type NoteStateToggles = {
   isReplying: boolean
-  broadcastOpen: boolean
+  statsOpen: boolean
   contentOpen: boolean
   repliesOpen: boolean | null
   pageSize: number
@@ -36,9 +36,9 @@ const createMethods = (state: NoteStateToggles) => ({
     ...state,
     repliesOpen: payload ?? !state.repliesOpen,
   }),
-  toggleBroadcast: (payload?: boolean) => ({
+  toggleStats: (payload?: boolean) => ({
     ...state,
-    broadcastOpen: payload ?? !state.broadcastOpen,
+    statsOpen: payload ?? !state.statsOpen,
   }),
   toggleContent: (payload?: boolean) => ({
     ...state,
@@ -64,7 +64,7 @@ export function useNoteState(event: NostrEventDB, options?: NoteOptions) {
 
   const [state, actions] = useMethods(createMethods, {
     isReplying: false,
-    broadcastOpen: false,
+    statsOpen: false,
     contentOpen: options?.contentOpen ?? false,
     repliesOpen: (options?.repliesOpen ?? null) as boolean | null,
     pageSize: PAGINATION_SIZE,

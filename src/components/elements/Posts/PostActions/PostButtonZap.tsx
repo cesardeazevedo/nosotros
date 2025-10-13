@@ -4,7 +4,7 @@ import { useZapsByPubkey } from '@/hooks/query/useZaps'
 import type { NoteState } from '@/hooks/state/useNote'
 import { useCurrentPubkey } from '@/hooks/useAuth'
 import { useCurrentTheme } from '@/hooks/useTheme'
-import { colors } from '@stylexjs/open-props/lib/colors.stylex'
+import { getZapColor } from '@/hooks/useZapColor'
 import { IconBolt } from '@tabler/icons-react'
 import { useRouter } from '@tanstack/react-router'
 import { memo } from 'react'
@@ -18,27 +18,6 @@ type Props = {
   onClick?: () => void
 }
 
-const themes = {
-  light: [colors.violet10, colors.violet10, colors.violet9, colors.violet8, colors.violet7, colors.violet6],
-  dark: [colors.violet1, colors.violet2, colors.violet3, colors.violet4, colors.violet5, colors.violet6],
-} as const
-
-function getZapColor(zapAmount: number, palette: (typeof themes)['light'] | (typeof themes)['dark']): string {
-  if (zapAmount < 1000) {
-    return palette[0]
-  } else if (zapAmount >= 1000 && zapAmount < 5000) {
-    return palette[1]
-  } else if (zapAmount >= 5000 && zapAmount < 10000) {
-    return palette[2]
-  } else if (zapAmount >= 10000 && zapAmount < 50000) {
-    return palette[3]
-  } else if (zapAmount >= 50000 && zapAmount < 100000) {
-    return palette[4]
-  } else {
-    return palette[5]
-  }
-}
-
 const formatter = new Intl.NumberFormat()
 
 export const ButtonZap = memo(function ButtonZap(props: Props & ContainerProps) {
@@ -48,13 +27,12 @@ export const ButtonZap = memo(function ButtonZap(props: Props & ContainerProps) 
   const pubkey = useCurrentPubkey()
   const theme = useCurrentTheme()
   const hasZapped = useZapsByPubkey(pubkey, note.event)
-  const total = note.zapAmount
-  const palette = themes[theme as 'light' | 'dark']
 
-  const color = getZapColor(total || 0, palette)
+  const total = note.zapAmount
+  const color = getZapColor(total, theme)
 
   return (
-    <ButtonContainer {...rest} sx={styles[color]} value={<>{total ? formatter.format(total) : ''}</>}>
+    <ButtonContainer {...rest} sx={styles.color(color)} value={<>{total ? formatter.format(total) : ''}</>}>
       <LinkBase
         disabled={disableLink}
         search={{ zap: note.nip19 }}
@@ -62,7 +40,7 @@ export const ButtonZap = memo(function ButtonZap(props: Props & ContainerProps) 
         <IconButton
           size={dense ? 'sm' : 'md'}
           icon={
-            <html.span style={hasZapped && styles[color]}>
+            <html.span style={hasZapped && styles.color(color)}>
               <IconBolt
                 {...(hasZapped ? { fill: 'currentColor' } : {})}
                 size={dense ? iconProps.size$dense : iconProps.size}
@@ -77,17 +55,5 @@ export const ButtonZap = memo(function ButtonZap(props: Props & ContainerProps) 
 })
 
 const styles = css.create({
-  [colors.violet0]: { color: colors.violet0 },
-  [colors.violet1]: { color: colors.violet1 },
-  [colors.violet2]: { color: colors.violet2 },
-  [colors.violet3]: { color: colors.violet3 },
-  [colors.violet4]: { color: colors.violet4 },
-  [colors.violet5]: { color: colors.violet5 },
-  [colors.violet6]: { color: colors.violet6 },
-  [colors.violet7]: { color: colors.violet7 },
-  [colors.violet8]: { color: colors.violet8 },
-  [colors.violet9]: { color: colors.violet9 },
-  [colors.violet10]: { color: colors.violet10 },
-  [colors.violet11]: { color: colors.violet11 },
-  [colors.violet12]: { color: colors.violet12 },
+  color: (color: string) => ({ color }),
 })

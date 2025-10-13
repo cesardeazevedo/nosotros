@@ -66,6 +66,7 @@ const styles = css.create({
     WebkitLineClamp: 'unset',
   },
   showMore: {
+    lineHeight: '12px',
     color: palette.tertiary,
     cursor: 'pointer',
     textDecoration: {

@@ -155,7 +155,12 @@ export const Reply = memo(function Reply(props: Props) {
               </Stack>
               <html.div style={styles.actions}>
                 <Stack>
-                  <PostActions renderOptions note={note} onReplyClick={() => note.actions.toggleReplying()} />
+                  <PostActions
+                    renderOptions
+                    statsPopover
+                    note={note}
+                    onReplyClick={() => note.actions.toggleReplying()}
+                  />
                 </Stack>
                 {note.state.isReplying && (
                   <Expandable expanded={isReplyingDeferred} trigger={() => <></>}>
