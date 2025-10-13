@@ -4,6 +4,7 @@ import type { Props as StackProps } from '@/components/ui/Stack/Stack'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { SxProps } from '@/components/ui/types'
 import { useCurrentPubkey } from '@/hooks/useAuth'
+import { useXS } from '@/hooks/useMobile'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconChevronRight } from '@tabler/icons-react'
 import { UserAvatar } from 'components/elements/User/UserAvatar'
@@ -47,6 +48,7 @@ export const Editor = memo(function Editor(props: Props) {
     onDiscard,
   } = props
   const { dense } = useContentContext()
+  const isXS = useXS()
   const pubkey = useCurrentPubkey()
 
   const state = useEditorSelector((editor) => editor)
@@ -84,7 +86,7 @@ export const Editor = memo(function Editor(props: Props) {
   return (
     <>
       <EditorContainer open={state.open} onClick={() => state?.setOpen()} renderBubble={renderBubble} sx={sx}>
-        {pubkey && <UserAvatar size='md' pubkey={pubkey} />}
+        {pubkey && !isXS && <UserAvatar size='md' pubkey={pubkey} />}
         <Container {...ContainerProps} sx={styles.wrapper}>
           <Stack horizontal={false} grow>
             <Stack sx={[styles.content, dense && styles.content$dense]} gap={2} align='stretch'>

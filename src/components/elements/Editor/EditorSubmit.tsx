@@ -8,6 +8,7 @@ import { css } from 'react-strict-dom'
 import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDOMProps'
 import { LinkSignIn } from '../Links/LinkSignIn'
 import { useEditorSelector } from './hooks/useEditor'
+import { useXS } from '@/hooks/useMobile'
 
 type Props = {
   renderDiscard?: boolean
@@ -21,6 +22,7 @@ export const EditorSubmit = memo(function EditorSubmit(props: Props) {
   const { submitting, disabled, renderDiscard, onSubmit, onDiscard } = props
   const { dense } = useContentContext()
   const pubkey = useCurrentPubkey()
+  const isXS = useXS()
 
   const reset = useEditorSelector((editor) => editor.reset)
   const isReply = useEditorSelector((editor) => !!editor.parent && editor.parent.kind !== Kind.PublicMessage)
@@ -34,7 +36,7 @@ export const EditorSubmit = memo(function EditorSubmit(props: Props) {
 
   return (
     <Stack gap={0.5}>
-      {renderDiscard && !submitting && (
+      {renderDiscard && !isXS && !submitting && (
         <Button sx={[dense && styles.button$dense]} onClick={handleDiscard}>
           Discard
         </Button>

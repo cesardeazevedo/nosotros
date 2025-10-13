@@ -7,7 +7,7 @@ import { tabTokens } from '@/components/ui/Tab/Tab.stylex'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 import { feedRefresh$ } from '@/hooks/state/useFeed'
 import { useCurrentPubkey, useCurrentUser } from '@/hooks/useAuth'
-import { useMobile } from '@/hooks/useMobile'
+import { useMobile, useXS } from '@/hooks/useMobile'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
@@ -34,6 +34,7 @@ import { UserAvatar } from '../User/UserAvatar'
 export const BottomNavigation = memo(function BottomNavigation() {
   const pubkey = useCurrentPubkey()
   const user = useCurrentUser()
+  const isXS = useXS()
   const mobile = useMobile()
   const router = useRouter()
   const isIndexRoute = !!useMatch({ from: '/', shouldThrow: false })
@@ -75,11 +76,13 @@ export const BottomNavigation = memo(function BottomNavigation() {
           <div>
             <Tab active={isSearch} sx={styles.tab} icon={<IconSearch />} onClick={() => toggleSearch()} />
           </div>
-          <Link to='/media' onClick={handleResetScroll(['/media'], 'media')}>
-            {({ isActive }) => (
-              <Tab active={isActive} sx={styles.tab} icon={<IconPhoto />} activeIcon={<IconPhoto />} />
-            )}
-          </Link>
+          {!isXS && (
+            <Link to='/media' onClick={handleResetScroll(['/media'], 'media')}>
+              {({ isActive }) => (
+                <Tab active={isActive} sx={styles.tab} icon={<IconPhoto />} activeIcon={<IconPhoto />} />
+              )}
+            </Link>
+          )}
           <Link to='/articles' onClick={handleResetScroll(['/articles'], 'articles')}>
             {({ isActive }) => <Tab active={isActive} sx={styles.tab} icon={<IconNews />} />}
           </Link>
