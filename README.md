@@ -17,11 +17,13 @@ Minimalist and fast client for the Nostr protocol, designed for mobile and deskt
 
 ## Getting Started
 
+### Dev Environment Setup
+
 ```bash
 # Install dependencies
 pnpm install
 
-# Run the app
+# Run the app (dev mode)
 pnpm run dev
 
 # Type-check the project
@@ -32,6 +34,20 @@ pnpm run storybook
 
 # Run tests
 pnpm run test
+```
+
+### Running locally
+
+You are more than welcome to run your own instance of the app in a sovereign way, just make sure you run in production mode,
+as is much faster than development mode.
+
+```bash
+
+pnpm run build
+
+# Running in production mode
+pnpm run preview
+
 ```
 
 ---
@@ -67,7 +83,7 @@ pnpm run test
 ## Follow me on Nostr
 
 You can follow me on Nostr at:
-[dev.nosotros.app/nprofile1qy28wumn8ghj7un9d3shjtnyv9kh2uewd9hszrthwden5te0dehhxtnvdakqzxrhwden5te0wfjkccte9ehx7um0w3ex7uewv9c8qqgswaehxw309ahx7um5wgh8w6twv5qzp3nq8v83enlvvfwecz9h20j0wa827lgu7fmfygcjtd0afknjsqv7zldp6m](https://dev.nosotros.app/nprofile1qy28wumn8ghj7un9d3shjtnyv9kh2uewd9hszrthwden5te0dehhxtnvdakqzxrhwden5te0wfjkccte9ehx7um0w3ex7uewv9c8qqgswaehxw309ahx7um5wgh8w6twv5qzp3nq8v83enlvvfwecz9h20j0wa827lgu7fmfygcjtd0afknjsqv7zldp6m)
+[nosotros.app/nprofile1qy28wumn8ghj7un9d3shjtnyv9kh2uewd9hszrthwden5te0dehhxtnvdakqzxrhwden5te0wfjkccte9ehx7um0w3ex7uewv9c8qqgswaehxw309ahx7um5wgh8w6twv5qzp3nq8v83enlvvfwecz9h20j0wa827lgu7fmfygcjtd0afknjsqv7zldp6m](https://dev.nosotros.app/nprofile1qy28wumn8ghj7un9d3shjtnyv9kh2uewd9hszrthwden5te0dehhxtnvdakqzxrhwden5te0wfjkccte9ehx7um0w3ex7uewv9c8qqgswaehxw309ahx7um5wgh8w6twv5qzp3nq8v83enlvvfwecz9h20j0wa827lgu7fmfygcjtd0afknjsqv7zldp6m)
 
 ---
 
