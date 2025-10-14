@@ -64,7 +64,7 @@ export const PostCountdown = (props: Props) => {
         <Text size='md'>
           <Stack gap={1}>
             {request.status === 'cancelled' && 'Undoing'}
-            {request.status === 'pending' && 'Broadcasting'}
+            {(request.status === 'pending' || request.status === 'broadcasting') && 'Broadcasting'}
             {request.status === 'done' && `Broadcasted to ${relaysSuccess} relays`}
             {request.status === 'done' && relaysFailed > 0 ? (
               <span style={{ color: colors.red7 }}> ({relaysFailed} errors)</span>
