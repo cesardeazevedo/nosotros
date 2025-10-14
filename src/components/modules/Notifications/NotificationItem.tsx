@@ -33,6 +33,7 @@ import { UserName } from '../../elements/User/UserName'
 import { NotificationContent } from './NotificationContent'
 import { NotificationLink } from './NotificationLink'
 import { NotificationMedia } from './NotificationMedia'
+import { NotificationZapProfileContent } from './NotificationZapProfileContent'
 
 type Props = {
   event: NostrEventDB
@@ -62,7 +63,10 @@ function getNotificationType(event: NostrEventDB) {
       return 'repost'
     }
     case Kind.ZapReceipt: {
-      return 'zap'
+      if (event.tags.some((t) => t[0] === 'e')) {
+        return 'zap'
+      }
+      return 'zap_profile'
     }
   }
 }
@@ -82,7 +86,7 @@ export const NotificationItem = memo(function NotificationItem(props: Props) {
   const zapper = useEventTag(event, 'P')
   const zapAmount = event.metadata?.bolt11?.amount?.value || '0'
 
-  const author = type === 'zap' ? zapper || event.pubkey : event.pubkey
+  const author = type === 'zap' || type === 'zap_profile' ? zapper || event.pubkey : event.pubkey
 
   const lastSeen = useAtomValue(selectedLastSeenAtom)?.notifications || 0
   const lastSeenRef = useRef<number>(lastSeen)
@@ -119,7 +123,7 @@ export const NotificationItem = memo(function NotificationItem(props: Props) {
         onClick={handleClick}>
         {unseen && <html.div style={styles.unseen} />}
         <Stack sx={styles.type} justify='center' align='flex-start'>
-          {type === 'zap' && (
+          {(type === 'zap' || type === 'zap_profile') && (
             <>
               <Stack horizontal={false} align='center' sx={styles.zapIcon}>
                 <IconBolt fill='currentColor' size={28} strokeWidth='1.5' />
@@ -153,7 +157,7 @@ export const NotificationItem = memo(function NotificationItem(props: Props) {
           {type === 'mention' && <IconAt size={28} strokeWidth='1.5' />}
           {type === 'repost' && <IconShare3 fill='currentColor' size={28} strokeWidth='1.5' />}
         </Stack>
-        <Stack gap={2} justify='flex-start' align={dense ? 'center' : 'flex-start'} grow sx={styles.wrapper}>
+        <Stack gap={2} justify='flex-start' align={dense ? 'center' : 'flex-start'} grow>
           <UserAvatar pubkey={author} size={dense ? 'sm' : 'md'} />
           <ContentProvider value={{ disableLink: true }}>
             <Stack sx={styles.content} wrap grow onClick={onClick} align='center' justify='center'>
@@ -166,32 +170,36 @@ export const NotificationItem = memo(function NotificationItem(props: Props) {
               <>
                 {type === 'zap' && (
                   <>
-                    {<Text size='md'>zapped to your note:</Text>}
+                    <Text size='md'>zapped to your note: </Text>
                     {relatedEvent.data && <NotificationContent dense={dense} event={relatedEvent.data} />}
+                  </>
+                )}
+                {type === 'zap_profile' && (
+                  <>
+                    <Text size='md'>zapped you: </Text>
+                    <NotificationZapProfileContent event={event} />
                   </>
                 )}
                 {type === 'public_message' && (
                   <>
                     <Stack horizontal={false}>
-                      <Text size='md'>sent you a public message:</Text>{' '}
+                      <Text size='md'>sent you a public message: </Text>
                       <NotificationContent dense={dense} event={event} />
                     </Stack>
                   </>
                 )}
                 {type === 'reaction' && (
                   <>
-                    {<Text size='md'>reacted to your note:</Text>}{' '}
+                    <Text size='md'>reacted to your note: </Text>
                     {relatedEvent.data && <NotificationContent dense={dense} event={relatedEvent.data} />}
                   </>
                 )}
                 {type === 'reply' && (
                   <>
-                    {
-                      <Text size='md'>
-                        replied to {event.pubkey === acc?.pubkey ? 'your note' : 'a note you were mentioned'}
-                        {': '}
-                      </Text>
-                    }{' '}
+                    <Text size='md'>
+                      replied to {event.pubkey === acc?.pubkey ? 'your note' : 'a note you were mentioned'}
+                      {': '}
+                    </Text>
                     <NotificationContent dense={dense} event={event} />
                   </>
                 )}
@@ -202,11 +210,9 @@ export const NotificationItem = memo(function NotificationItem(props: Props) {
                 )}
                 {type === 'repost' && (
                   <>
-                    {
-                      <Text size='md'>
-                        reposted {event.pubkey === acc?.pubkey ? 'your note' : 'a note you were mentioned'}
-                      </Text>
-                    }{' '}
+                    <Text size='md'>
+                      reposted {event.pubkey === acc?.pubkey ? 'your note' : 'a note you were mentioned'}
+                    </Text>{' '}
                     {relatedEvent.data && <NotificationContent dense={dense} event={relatedEvent.data} />}
                   </>
                 )}
@@ -255,11 +261,6 @@ const styles = css.create({
       default: 'transparent',
       ':hover': 'rgba(125, 125, 125, 0.08)',
     },
-  },
-  wrapper: {
-    // paddingBlock: spacing.padding1,
-    // paddingInline: spacing.padding2,
-    // lineHeight: 0,
   },
   root$unseen: {
     backgroundColor: palette.surfaceContainerLow,
