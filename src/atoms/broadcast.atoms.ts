@@ -3,7 +3,7 @@ import { dbSqlite } from '@/nostr/db'
 import { broadcastEvent } from '@/nostr/publish/publish'
 import { atom } from 'jotai'
 import type { NostrEvent } from 'nostr-tools'
-import { finalize, ignoreElements, merge } from 'rxjs'
+import { merge, shareReplay, take, tap } from 'rxjs'
 
 export type BroadcastRequest = {
   event: NostrEvent
@@ -32,8 +32,9 @@ export const addBroadcastRequestAtom = atom(
         set(updateBroadcastStatusAtom, { eventId, status: 'broadcasting' })
         merge(
           broadcastEvent(event, { relays }).pipe(
-            ignoreElements(),
-            finalize(() => {
+            shareReplay(),
+            take(1),
+            tap(() => {
               request.onComplete?.()
               set(updateBroadcastStatusAtom, { eventId, status: 'done' })
             }),
