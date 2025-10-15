@@ -67,7 +67,9 @@ export const RepostPopover = memo(function RepostPopover(props: Props) {
               }}
             />
           )}
-          <LinkBase search={{ quoting: note.nip19 }} state={{ from: router.latestLocation.pathname } as never}>
+          <LinkBase
+            search={(rest) => ({ ...rest, quoting: note.nip19 })}
+            state={{ from: router.latestLocation.pathname } as never}>
             <MenuItem leadingIcon={<IconBlockquote strokeWidth='1.5' />} label='Quote' onClick={() => close()} />
           </LinkBase>
         </MenuList>

@@ -35,7 +35,7 @@ export const ButtonZap = memo(function ButtonZap(props: Props & ContainerProps) 
     <ButtonContainer {...rest} sx={styles.color(color)} value={<>{total ? formatter.format(total) : ''}</>}>
       <LinkBase
         disabled={disableLink}
-        search={{ zap: note.nip19 }}
+        search={(rest) => ({ ...rest, zap: note.nip19 })}
         state={{ from: router.latestLocation.pathname } as never}>
         <IconButton
           size={dense ? 'sm' : 'md'}
