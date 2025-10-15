@@ -58,6 +58,7 @@ export function createEditor(options: Options): UseEditorOptions {
         },
         image: {},
         video: {},
+        tag: false,
         fileUpload: {
           immediateUpload: false,
           upload: async (attrs) => {
