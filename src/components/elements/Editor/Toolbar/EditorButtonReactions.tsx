@@ -24,6 +24,7 @@ export const EditorButtonReactions = memo(function EditorButtonReactions(props: 
       contentRenderer={() => (
         <EmojiPicker
           open
+          autoFocusSearch={false}
           theme={Theme.AUTO}
           emojiStyle={EmojiStyle.NATIVE}
           previewConfig={{ showPreview: false }}
