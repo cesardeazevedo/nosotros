@@ -170,7 +170,7 @@ export const NotificationItem = memo(function NotificationItem(props: Props) {
               <>
                 {type === 'zap' && (
                   <>
-                    <Text size='md'>zapped to your note: </Text>
+                    <Text size='md'>zapped your note: </Text>
                     {relatedEvent.data && <NotificationContent dense={dense} event={relatedEvent.data} />}
                   </>
                 )}
