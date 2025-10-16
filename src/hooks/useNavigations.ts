@@ -17,26 +17,26 @@ export function useCurrentRoute() {
 }
 
 export function useNostrRoute() {
-  return useMatch({ from: '/$nostr', shouldThrow: false })?.context
+  const context = useMatch({ from: '/$nostr', shouldThrow: false })?.context
+  const maskedParam = useMatch({ from: '__root__', select: (x) => x.search.nostr, shouldThrow: false })
+  return context || (maskedParam ? { decoded: nip19.decode(maskedParam) } : undefined)
 }
 
 export function useIsCurrentRouteEventID(id: string) {
   const context = useNostrRoute()
-  const maskedParam = useMatch({ from: '__root__', select: (x) => x.search.nostr, shouldThrow: false })
-  const decoded = context ? context.decoded : maskedParam ? nip19.decode(maskedParam) : undefined
-  if (decoded) {
-    switch (decoded.type) {
+  if (context?.decoded) {
+    switch (context.decoded.type) {
       case 'note': {
-        return decoded.data === id
+        return context.decoded.data === id
       }
       case 'nevent': {
-        return decoded.data.id === id
+        return context.decoded.data.id === id
       }
       case 'npub': {
-        return decoded.data === id
+        return context.decoded.data === id
       }
       case 'nprofile': {
-        return decoded.data.pubkey === id
+        return context.decoded.data.pubkey === id
       }
     }
   }
