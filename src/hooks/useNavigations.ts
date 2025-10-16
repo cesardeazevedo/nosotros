@@ -1,4 +1,5 @@
 import { useMatch, useRouter, useRouterState } from '@tanstack/react-router'
+import { nip19 } from 'nostr-tools'
 import { useCallback } from 'react'
 
 export function useGoBack() {
@@ -21,19 +22,21 @@ export function useNostrRoute() {
 
 export function useIsCurrentRouteEventID(id: string) {
   const context = useNostrRoute()
-  if (context?.decoded) {
-    switch (context.decoded.type) {
+  const maskedParam = useMatch({ from: '__root__', select: (x) => x.search.nostr, shouldThrow: false })
+  const decoded = context ? context.decoded : maskedParam ? nip19.decode(maskedParam) : undefined
+  if (decoded) {
+    switch (decoded.type) {
       case 'note': {
-        return context.decoded.data === id
+        return decoded.data === id
       }
       case 'nevent': {
-        return context.decoded.data.id === id
+        return decoded.data.id === id
       }
       case 'npub': {
-        return context.decoded.data === id
+        return decoded.data === id
       }
       case 'nprofile': {
-        return context.decoded.data.pubkey === id
+        return decoded.data.pubkey === id
       }
     }
   }
