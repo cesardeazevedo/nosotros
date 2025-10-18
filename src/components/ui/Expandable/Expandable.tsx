@@ -1,148 +1,90 @@
 import { duration } from '@/themes/duration.stylex'
 import { easing } from '@/themes/easing.stylex'
-import { useMergeRefs } from '@floating-ui/react'
-import { forwardRef, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { css, html } from 'react-strict-dom'
-import { Transition } from 'react-transition-group'
-import { useControlledValue } from '../hooks/useControlledValue'
-import type { ISize } from '../hooks/useElementSize'
-import { useElementSize } from '../hooks/useElementSize'
-import { ExpandableContext, type IExpandableContextValue } from './Expandable.context'
 
-export type ICssSizeValue = number | string
+export interface ExpandableTriggerRenderProps {
+  expanded: boolean
+  toggle: () => void
+}
 
-type IExpandableTriggerRenderProps = {
-  expand: (expanded: boolean) => void
-  disabled?: boolean
+export type Props = {
+  children: React.ReactNode
   expanded?: boolean
-}
-
-type Props = Omit<IExpandableContextValue, 'expand'> & {
-  trigger?: React.ReactNode | ((renderProps: IExpandableTriggerRenderProps) => React.ReactNode)
-  children?: React.ReactNode
+  trigger?: React.ReactNode | ((renderProps: ExpandableTriggerRenderProps) => React.ReactNode)
   onChange?: (expanded: boolean) => void
-  collapsedSize?: ICssSizeValue
+  initiallyExpanded?: boolean
 }
 
-export const Expandable = forwardRef<HTMLDivElement, Props>(function Expandable(props, forwardedRef) {
-  const {
-    trigger,
-    children,
-    onChange,
-    disabled,
-    expanded: expandedProp,
-    defaultExpanded: defaultExpandedProp,
-    initiallyExpanded: initiallyExpandedProp,
-    orientation = 'vertical',
-    collapsedSize: collapsedSizeProp = 0,
-    ...other
-  } = props
+export const Expandable = (props: Props) => {
+  const { children, expanded: controlledExpanded, trigger, onChange, initiallyExpanded = false } = props
+  const [internalExpanded, setInternalExpanded] = useState(initiallyExpanded)
+  const [shouldRenderContent, setShouldRenderContent] = useState(initiallyExpanded)
+  const animationTimeoutRef = useRef<NodeJS.Timeout>(null)
 
-  const initiallyExpandedRef = useRef(initiallyExpandedProp)
-  const defaultExpanded = initiallyExpandedRef.current ?? defaultExpandedProp
-  const [expanded, setExpanded] = useControlledValue({
-    controlled: expandedProp,
-    default: !!defaultExpanded,
-    name: 'Expandable',
-  })
-  const transitionNodeRef = useRef<HTMLDivElement>(null)
-  const contentWrapperRef = useRef<HTMLDivElement>(null)
-  const transitionNodeHandleRef = useMergeRefs([transitionNodeRef, contentWrapperRef, forwardedRef])
-  const contentSize = useElementSize({
-    ref: contentWrapperRef,
-    observe: true,
-    orientation,
-  })
+  const isControlled = controlledExpanded !== undefined
+  const expanded = isControlled ? controlledExpanded : internalExpanded
 
-  const transitionProperty = orientation === 'horizontal' ? 'width opacity' : 'height opacity'
-  const collapsedSize: Partial<ISize<ICssSizeValue>> =
-    orientation === 'horizontal' ? { width: collapsedSizeProp } : { height: collapsedSizeProp }
-  const expandedSize: Partial<ISize<ICssSizeValue>> =
-    orientation === 'horizontal' ? { width: contentSize?.width } : { height: contentSize?.height }
+  useEffect(() => {
+    if (animationTimeoutRef.current) {
+      clearTimeout(animationTimeoutRef.current)
+    }
 
-  const expand = (expanded: boolean): void => {
-    setExpanded(expanded)
-    onChange?.(expanded)
+    if (expanded) {
+      setShouldRenderContent(true)
+    } else {
+      animationTimeoutRef.current = setTimeout(() => {
+        setShouldRenderContent(false)
+      }, 300)
+    }
+
+    return () => {
+      if (animationTimeoutRef.current) {
+        clearTimeout(animationTimeoutRef.current)
+      }
+    }
+  }, [expanded])
+
+  const toggle = () => {
+    const newExpanded = !expanded
+    if (!isControlled) {
+      setInternalExpanded(newExpanded)
+    }
+    onChange?.(newExpanded)
   }
-  const triggerElement =
-    typeof trigger === 'function'
-      ? trigger({
-          expand,
-          expanded,
-          disabled,
-        })
-      : trigger
 
-  const context: IExpandableContextValue = {
-    expand,
-    disabled,
+  const renderProps: ExpandableTriggerRenderProps = {
     expanded,
-    defaultExpanded,
-    orientation,
+    toggle,
   }
+
+  const triggerElement = typeof trigger === 'function' ? trigger(renderProps) : trigger
 
   return (
-    <ExpandableContext.Provider value={context}>
-      {triggerElement}
-      <Transition nodeRef={transitionNodeRef} in={expanded} timeout={650}>
-        {(status) => (
-          <html.div
-            style={[
-              styles.content(expandedSize),
-              status === 'exited'
-                ? styles.animation$exited(collapsedSize)
-                : status === 'entering'
-                  ? styles.animation$entering(expandedSize, transitionProperty)
-                  : status === 'entered'
-                    ? styles.animation$entered(expandedSize)
-                    : status === 'exiting'
-                      ? styles.animation$exiting(collapsedSize, transitionProperty)
-                      : undefined,
-              expanded && status === 'entered' && styles.content$expanded,
-            ]}>
-            <div {...other} aria-expanded={expanded} style={{ overflow: 'hidden' }} ref={transitionNodeHandleRef}>
-              {status !== 'exited' && children}
-            </div>
-          </html.div>
-        )}
-      </Transition>
-    </ExpandableContext.Provider>
+    <html.div style={styles.container}>
+      {triggerElement && <html.div onClick={toggle}>{triggerElement}</html.div>}
+      <html.div style={[styles.content, expanded && styles.contentExpanded]}>
+        <html.div style={styles.contentInner}>{shouldRenderContent && children}</html.div>
+      </html.div>
+    </html.div>
   )
-})
+}
 
 const styles = css.create({
-  content: (expandedSize: Partial<ISize<ICssSizeValue>>) => ({
-    overflow: 'hidden',
-    width: expandedSize.width,
-    height: expandedSize.height,
-  }),
-  content$expanded: {
+  container: {
     overflow: 'hidden',
   },
-  animation$entering: (expandedSize: Partial<ISize<ICssSizeValue>>, transitionProperty: string) => ({
-    opacity: 1,
-    width: expandedSize.width,
-    height: expandedSize.height,
-    transitionProperty,
+  content: {
+    display: 'grid',
+    gridTemplateRows: '0fr',
+    transitionProperty: 'grid-template-rows',
     transitionDuration: duration.short4,
     transitionTimingFunction: easing.emphasizedDecelerate,
-  }),
-  animation$entered: (expandedSize: Partial<ISize<ICssSizeValue>>) => ({
-    opacity: 1,
-    width: expandedSize.width,
-    height: expandedSize.height,
-  }),
-  animation$exiting: (collapsedSize: Partial<ISize<ICssSizeValue>>, transitionProperty: string) => ({
-    opacity: 0,
-    width: collapsedSize.width,
-    height: collapsedSize.height,
-    transitionProperty,
-    transitionDuration: duration.short4,
-    transitionTimingFunction: easing.emphasizedDecelerate,
-  }),
-  animation$exited: (size: Partial<ISize<ICssSizeValue>>) => ({
-    opacity: 0,
-    width: size.width,
-    height: size.height,
-  }),
+  },
+  contentExpanded: {
+    gridTemplateRows: '1fr',
+  },
+  contentInner: {
+    minHeight: 0,
+  },
 })
