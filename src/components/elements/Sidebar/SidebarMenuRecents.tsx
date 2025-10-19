@@ -9,23 +9,21 @@ import { visibleOnHoverStyle } from '@/components/ui/helpers/visibleOnHover.styl
 import { useUserState } from '@/hooks/state/useUser'
 import { useSettings, useToggleSettings } from '@/hooks/useSettings'
 import { spacing } from '@/themes/spacing.stylex'
-import { encodeSafe } from '@/utils/nip19'
 import { IconX } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
 import { useAtomValue, useSetAtom } from 'jotai'
-import { nip19 } from 'nostr-tools'
 import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 import { UserAvatar } from '../User/UserAvatar'
 import { UserName } from '../User/UserName'
 import { SidebarSubheader } from './SidebarSubheader'
 
-const RecentProfileRow = (props: { recent: { id: string } }) => {
+const RecentProfileRow = memo(function RecentProfileRow(props: { recent: { id: string } }) {
   const { recent } = props
   const pubkey = recent.id
   const user = useUserState(pubkey)
   const remove = useSetAtom(removeRecentAtom)
-  const nprofile = user?.nprofile || encodeSafe(() => nip19.nprofileEncode({ pubkey }))
+  const nprofile = user.nprofile
   return (
     <Link to={`/$nostr`} params={{ nostr: nprofile as string }}>
       {({ isActive }) => (
@@ -55,7 +53,7 @@ const RecentProfileRow = (props: { recent: { id: string } }) => {
       )}
     </Link>
   )
-}
+})
 
 export const SidebarMenuRecents = memo(function SidebarMenuRecents() {
   const settings = useSettings()

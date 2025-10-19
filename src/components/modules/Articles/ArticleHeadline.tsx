@@ -11,15 +11,14 @@ import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { getImgProxyUrl } from '@/utils/imgproxy'
-import { useMatchRoute } from '@tanstack/react-router'
+import { useMatch } from '@tanstack/react-router'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 
 export const ArticleHeadline = memo(function ArticleHeadline() {
   const { event } = useNoteContext()
-  const match = useMatchRoute()
-  const isDeck = match({ to: '/deck/$id' })
+  const isDeck = !!useMatch({ from: '/deck/$id', shouldThrow: false })
   const isMobile = useMobile()
   const pushImage = useSetAtom(openImageDialogAtom)
   const title = useEventTag(event, 'title')
