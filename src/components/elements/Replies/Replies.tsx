@@ -1,4 +1,5 @@
 import { Stack } from '@/components/ui/Stack/Stack'
+import { useEventReplies } from '@/hooks/query/useReplies'
 import type { NoteState } from '@/hooks/state/useNote'
 import { spacing } from '@/themes/spacing.stylex'
 import { memo } from 'react'
@@ -12,8 +13,7 @@ type Props = {
 
 export const Replies = memo(function Replies(props: Props) {
   const { note } = props
-
-  const replies = note.repliesChunk
+  const { chunk: replies } = useEventReplies(note.event, { pageSize: note.state.pageSize })
 
   return (
     <Stack horizontal={false} sx={styles.root} justify='flex-start'>

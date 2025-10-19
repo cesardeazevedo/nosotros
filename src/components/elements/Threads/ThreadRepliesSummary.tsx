@@ -1,8 +1,9 @@
 import { Button } from '@/components/ui/Button/Button'
 import { Stack } from '@/components/ui/Stack/Stack'
+import { useEventReplies, useRepliesPubkeys } from '@/hooks/query/useReplies'
 import type { NoteState } from '@/hooks/state/useNote'
 import { spacing } from '@/themes/spacing.stylex'
-import { memo, useMemo } from 'react'
+import { memo } from 'react'
 import { css } from 'react-strict-dom'
 import { LinkNEvent } from '../Links/LinkNEvent'
 import { UsersAvatars } from '../User/UsersAvatars'
@@ -13,8 +14,8 @@ type Props = {
 
 export const ThreadRepliesSummary = memo(function ThreadRepliesSummary(props: Props) {
   const { note } = props
-  const pubkeys = useMemo(() => note.replies.data?.map((x) => x.pubkey) || [], [note.replies.data])
-  const total = note.repliesTotal || ''
+  const pubkeys = useRepliesPubkeys(note.event)
+  const { total } = useEventReplies(note.event)
 
   return (
     <LinkNEvent nevent={note.nip19}>
@@ -23,8 +24,8 @@ export const ThreadRepliesSummary = memo(function ThreadRepliesSummary(props: Pr
           <UsersAvatars renderTooltip={false} pubkeys={pubkeys.slice(0, 3)} />
         </Stack>
         <Button variant='text'>
-          {note.metadata?.isRoot && `See full thread`}
-          {!note.metadata?.isRoot && `${total} replies`}
+          {note.event.metadata?.isRoot && `See full thread`}
+          {!note.event.metadata?.isRoot && `${total} replies`}
         </Button>
       </Stack>
     </LinkNEvent>

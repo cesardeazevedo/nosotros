@@ -1,3 +1,4 @@
+import { useContentContext } from '@/components/providers/ContentProvider'
 import type { Props as AvatarProps } from '@/components/ui/Avatar/Avatar'
 import { Avatar } from '@/components/ui/Avatar/Avatar'
 import type { SxProps } from '@/components/ui/types'
@@ -18,25 +19,25 @@ export type Props = {
 
 export const UserAvatar = memo(function UserAvatar(props: Props) {
   const { sx, pubkey, size = 'md', fallback = true, onClick } = props
+  const { disableLink } = useContentContext()
   const user = useUserState(pubkey)
   const avatarProps = user?.metadata?.picture
     ? { src: getImgProxyUrl('user_avatar', user.metadata.picture) }
     : { src: '/user.jpg' }
   const avatar = (
-    <LinkProfile pubkey={pubkey}>
-      <Avatar
-        {...avatarProps}
-        size={size}
-        sx={[styles.avatar, sx]}
-        onClick={() => onClick?.(user.metadata?.picture || '')}>
-        {fallback ? <Avatar src='/user.jpg' size={size} /> : pubkey?.[0]}
-      </Avatar>
-    </LinkProfile>
+    <Avatar
+      {...avatarProps}
+      size={size}
+      sx={[styles.avatar, sx]}
+      onClick={() => onClick?.(user.metadata?.picture || '')}>
+      {fallback ? <Avatar src='/user.jpg' size={size} /> : pubkey?.[0]}
+    </Avatar>
   )
+  const avatarWithLink = disableLink ? avatar : <LinkProfile pubkey={pubkey}>{avatar}</LinkProfile>
   if (user?.metadata?.picture && pubkey) {
-    return <UserPopover pubkey={pubkey}>{avatar}</UserPopover>
+    return <UserPopover pubkey={pubkey}>{avatarWithLink}</UserPopover>
   }
-  return <>{avatar}</>
+  return <>{avatarWithLink}</>
 })
 
 const styles = css.create({

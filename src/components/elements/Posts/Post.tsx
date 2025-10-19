@@ -13,11 +13,11 @@ import { EditorProvider } from '../Editor/EditorProvider'
 import { Replies } from '../Replies/Replies'
 import { RepliesPreview } from '../Replies/RepliesPreview'
 import { PostActions } from './PostActions/PostActions'
-import { PostStats } from './PostStats'
 import { PostContent } from './PostContent'
 import { PostCountdown } from './PostCountdown'
 import { PostHeader } from './PostHeader'
 import { PostLink } from './PostLink'
+import { PostStats } from './PostStats'
 
 type Props = {
   event: NostrEventDB
@@ -36,7 +36,7 @@ export const PostRoot = memo(function PostRoot(props: Props) {
 
   return (
     <NoteProvider value={{ event }}>
-      <html.article style={[isFeed && styles.divider]} ref={note.ref}>
+      <html.article style={[isFeed && styles.divider]}>
         <PostLink note={note}>
           {note.isOwner && <PostCountdown id={event.id} />}
           {note.event.kind === Kind.Article && <ArticleHeadline />}

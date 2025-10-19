@@ -8,7 +8,7 @@ import { Text } from '@/components/ui/Text/Text'
 import { NostrPublisher } from '@/core/NostrPublish'
 import { broadcast } from '@/core/operators/broadcast'
 import { usePublishEventMutation } from '@/hooks/mutations/usePublishEventMutation'
-import { setSeenData } from '@/hooks/query/useSeen'
+import { setSeenData, useSeenRelays } from '@/hooks/query/useSeen'
 import type { NoteState } from '@/hooks/state/useNote'
 import { dbSqlite } from '@/nostr/db'
 import { pool } from '@/nostr/pool'
@@ -32,6 +32,7 @@ type Props = {
 
 export const PostStats = memo(function PostStats(props: Props) {
   const { note, renderDivider } = props
+  const seenOn = useSeenRelays(note.event.id)
   const enqueueToast = useSetAtom(enqueueToastAtom)
   const statsOpenDeferred = useDeferredValue(note.state.statsOpen)
 
@@ -70,16 +71,16 @@ export const PostStats = memo(function PostStats(props: Props) {
         {renderDivider && <Divider />}
         <Stack horizontal={false}>
           <Stack horizontal={false} justify='flex-start' align='flex-start' wrap={false}>
-            <ZapNoteList note={note} />
-            <RepostNoteList note={note} />
-            <ReactionsNoteList event={note.event} />
+            <ZapNoteList />
+            <RepostNoteList />
+            <ReactionsNoteList />
           </Stack>
           <Stack horizontal={false} justify='flex-start' align='flex-start' sx={styles.panel} wrap={false} gap={2}>
             <Text variant='title' size='md'>
               Seen on relays
             </Text>
             <Stack horizontal wrap gap={0.5}>
-              {note.seenOn?.map((url) => <RelayChip selected key={url} url={url} />)}
+              {seenOn?.map((url) => <RelayChip selected key={url} url={url} />)}
               <RelaySelectPopover onSubmit={(relay) => mutate([note.event, relay])} label='Broadcast' />
             </Stack>
           </Stack>

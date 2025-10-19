@@ -2,6 +2,7 @@ import { useDeckColumn } from '@/components/modules/Deck/hooks/useDeck'
 import { ContentProvider } from '@/components/providers/ContentProvider'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { Stack } from '@/components/ui/Stack/Stack'
+import { useEventReplies } from '@/hooks/query/useReplies'
 import { type NoteState } from '@/hooks/state/useNote'
 import { useIsCurrentRouteEventID } from '@/hooks/useNavigations'
 import { palette } from '@/themes/palette.stylex'
@@ -39,7 +40,8 @@ export const ThreadItem = memo(function ThreadItem(props: Props) {
     }
   }, [isCurrentEvent, note.id])
 
-  const hasReplies = (note.replies.data?.length || 0) > 0
+  const { query: replies } = useEventReplies(note.event, { pageSize: note.state.pageSize })
+  const hasReplies = (replies.data?.length || 0) > 0
 
   return (
     <>

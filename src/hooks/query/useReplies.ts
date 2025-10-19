@@ -1,8 +1,10 @@
+import { repliesFamily } from '@/atoms/repliesQuery.atoms'
 import { Kind } from '@/constants/kinds'
 import { FALLBACK_RELAYS } from '@/constants/relays'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { eventAddress } from '@/utils/nip19'
-import { useQuery } from '@tanstack/react-query'
+import { useAtomValue } from 'jotai'
+import { useMemo } from 'react'
 import { queryKeys } from './queryKeys'
 import type { CustomQueryOptions } from './useQueryBase'
 import { eventQueryOptions } from './useQueryBase'
@@ -22,7 +24,10 @@ export function eventRepliesQueryOptions(event: NostrEventDB, options?: CustomQu
       ...filter,
     },
     ctx: {
+      subId: 'replies',
       network: 'STALE_WHILE_REVALIDATE',
+      negentropy: false,
+      closeOnEose: false,
       // inbox relays are broken and no one writes to the author inbox, so we have to rely on big relays
       relays: FALLBACK_RELAYS,
       relayHints: {
@@ -53,6 +58,11 @@ export function eventRepliesByIdQueryOptions(id: string, options?: CustomQueryOp
   })
 }
 
-export function useEventReplies(event: NostrEventDB, options?: CustomQueryOptions) {
-  return useQuery(eventRepliesQueryOptions(event, options))
+export function useEventReplies(event: NostrEventDB, options?: { pageSize?: number }) {
+  return useAtomValue(repliesFamily({ event, pageSize: options?.pageSize }))
+}
+
+export function useRepliesPubkeys(event: NostrEventDB) {
+  const replies = useEventReplies(event)
+  return useMemo(() => replies.query.data?.map((x) => x.pubkey) || [], [replies.query.data])
 }

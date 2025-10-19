@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/Button/Button'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import { useEventReplies } from '@/hooks/query/useReplies'
 import { useNoteState } from '@/hooks/state/useNote'
 import { useIsCurrentRouteEventID } from '@/hooks/useNavigations'
 import { palette } from '@/themes/palette.stylex'
@@ -57,7 +58,8 @@ export const Reply = memo(function Reply(props: Props) {
     return null
   }
 
-  const hasReplies = note.replies.data?.length !== 0
+  const { query: replies, total, sorted } = useEventReplies(event)
+  const hasReplies = replies.data?.length !== 0
 
   useLayoutEffect(() => {
     const host = rootRef.current
@@ -136,7 +138,7 @@ export const Reply = memo(function Reply(props: Props) {
                 </html.div>
                 <BubbleContainer sx={styles.expandButton}>
                   <UserName pubkey={event.pubkey} />
-                  <Button variant='text'>See more {note.repliesTotal + 1} Replies</Button>
+                  <Button variant='text'>See more {total + 1} Replies</Button>
                 </BubbleContainer>
               </Stack>
             </ContentProvider>
@@ -170,12 +172,7 @@ export const Reply = memo(function Reply(props: Props) {
               </html.div>
               {nested && (
                 <html.div ref={childrenRef} style={styles.children}>
-                  <RepliesTree
-                    replies={note.repliesSorted}
-                    repliesOpen={repliesOpen}
-                    level={level + 1}
-                    nested={nested}
-                  />
+                  <RepliesTree replies={sorted} repliesOpen={repliesOpen} level={level + 1} nested={nested} />
                 </html.div>
               )}
             </>

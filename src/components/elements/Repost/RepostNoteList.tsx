@@ -1,23 +1,21 @@
+import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
-import type { NoteState } from '@/hooks/state/useNote'
+import { useReposts } from '@/hooks/query/useReposts'
+import { spacing } from '@/themes/spacing.stylex'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconRepeat } from '@tabler/icons-react'
 import { memo, useMemo } from 'react'
-import { UserAvatar } from '../User/UserAvatar'
 import { css } from 'react-strict-dom'
-import { spacing } from '@/themes/spacing.stylex'
+import { UserAvatar } from '../User/UserAvatar'
 
-type Props = {
-  note: NoteState
-}
-
-export const RepostNoteList = memo(function RepostNoteList(props: Props) {
-  const { note } = props
+export const RepostNoteList = memo(function RepostNoteList() {
+  const { event } = useNoteContext()
+  const reposts = useReposts(event)
 
   const repostsList = useMemo(() => {
-    return (note.reposts.data || []).map((event) => event.pubkey).filter((pubkey): pubkey is string => !!pubkey)
-  }, [note.reposts.data])
+    return (reposts.data || []).map((event) => event.pubkey).filter((pubkey): pubkey is string => !!pubkey)
+  }, [reposts.data])
 
   if (repostsList.length === 0) {
     return

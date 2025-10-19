@@ -3,6 +3,7 @@ import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Paper } from '@/components/ui/Paper/Paper'
 import { PopoverBase } from '@/components/ui/Popover/PopoverBase'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
+import { useSeenRelays } from '@/hooks/query/useSeen'
 import type { NoteState } from '@/hooks/state/useNote'
 import { IconServerBolt } from '@tabler/icons-react'
 import { useMobile } from 'hooks/useMobile'
@@ -22,6 +23,7 @@ export const PostButtonStats = memo(function PostButtonStats(props: Props) {
   const { note, popover = false } = props
   const { dense } = useContentContext()
   const isMobile = useMobile()
+  const seenOn = useSeenRelays(note.event.id)
 
   const handleClick = useCallback(
     (e: StrictClickEvent) => {
@@ -51,7 +53,7 @@ export const PostButtonStats = memo(function PostButtonStats(props: Props) {
       text={
         <div style={{ whiteSpace: 'pre-wrap' }}>
           Seen on{'\n'}
-          {note.seenOn?.map((relay) => relay.replace('wss://', '')).join('\n')}
+          {seenOn?.map((relay) => relay.replace('wss://', '')).join('\n')}
         </div>
       }>
       {popover ? (
@@ -65,13 +67,13 @@ export const PostButtonStats = memo(function PostButtonStats(props: Props) {
             </Paper>
           )}>
           {({ getProps, setRef }) => (
-            <ButtonContainer {...getProps} ref={setRef} value={note.seenOn?.length || 0} aria-label='Seen on relays'>
+            <ButtonContainer {...getProps} ref={setRef} value={seenOn?.length || 0} aria-label='Seen on relays'>
               {Button}
             </ButtonContainer>
           )}
         </PopoverBase>
       ) : (
-        <ButtonContainer value={note.seenOn?.length || 0} aria-label='Seen on relays'>
+        <ButtonContainer value={seenOn?.length || 0} aria-label='Seen on relays'>
           {Button}
         </ButtonContainer>
       )}
