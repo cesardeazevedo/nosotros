@@ -1,7 +1,7 @@
 import { useDeckAddNextColumn } from '@/components/modules/Deck/hooks/useDeck'
 import { useContentContext } from '@/components/providers/ContentProvider'
 import { createEventModule } from '@/hooks/modules/createEventModule'
-import { useNostrMaskedLinkProps } from '@/hooks/useNostrMasedLinkProps'
+import { useNostrMaskedLinkProps } from '@/hooks/useNostrMaskedLinkProps'
 import { Link, useRouter } from '@tanstack/react-router'
 import type { NAddr } from 'nostr-tools/nip19'
 import type { DragEventHandler } from 'react'

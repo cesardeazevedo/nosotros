@@ -1,5 +1,6 @@
 import type { LinkProps } from '@tanstack/react-router'
 import { useMatch } from '@tanstack/react-router'
+import { useMemo } from 'react'
 
 function useAllowedMaskedRoutes() {
   const isHome = useMatch({ from: '/', shouldThrow: false })
@@ -40,15 +41,17 @@ function useAllowedMaskedRoutes() {
 
 export function useNostrMaskedLinkProps(nostr: string | undefined): LinkProps {
   const allowed = useAllowedMaskedRoutes()
-  if (allowed) {
-    return {
-      to: '.',
-      search: (s) => ({ ...s, nostr }),
-      mask: { to: `/$nostr`, params: { nostr }, unmaskOnReload: true },
+  return useMemo(() => {
+    if (allowed) {
+      return {
+        to: '.',
+        search: (s) => ({ ...s, nostr }),
+        mask: { to: `/$nostr`, params: { nostr }, unmaskOnReload: true },
+      }
     }
-  }
-  return {
-    to: `/$nostr`,
-    params: { nostr },
-  }
+    return {
+      to: `/$nostr`,
+      params: { nostr },
+    }
+  }, [nostr, allowed])
 }

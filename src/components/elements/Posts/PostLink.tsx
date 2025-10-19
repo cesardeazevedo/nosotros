@@ -1,7 +1,7 @@
 import { useDeckAddNextColumn } from '@/components/modules/Deck/hooks/useDeck'
 import { createEventModule } from '@/hooks/modules/createEventModule'
 import type { NoteState } from '@/hooks/state/useNote'
-import { useNostrMaskedLinkProps } from '@/hooks/useNostrMasedLinkProps'
+import { useNostrMaskedLinkProps } from '@/hooks/useNostrMaskedLinkProps'
 import { useMatch, useNavigate, useRouter } from '@tanstack/react-router'
 import React, { memo, useCallback, type ReactNode } from 'react'
 import { css, html } from 'react-strict-dom'
