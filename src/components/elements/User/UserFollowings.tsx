@@ -15,11 +15,14 @@ export const UserFollowings = (props: Props) => {
   const { pubkey } = props
   const user = useUserState(pubkey, { syncFollows: true })
   const nevent = useNevent(user.follows?.data)
+  if (user.follows?.isPending) {
+    return <Skeleton sx={styles.loading} />
+  }
   return (
     <LinkNEvent nevent={nevent}>
       <Stack gap={0.5} sx={styles.underline}>
         <Text variant='label' size='lg'>
-          {user.follows?.isPending ? <Skeleton sx={styles.loading} /> : user.totalFollowing}
+          {user.totalFollowing}
         </Text>
         <Text variant='label' size='lg' sx={styles.secondary}>
           Following
