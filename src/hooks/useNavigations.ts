@@ -12,7 +12,7 @@ export function useGoBack() {
 }
 
 export function useCurrentRoute() {
-  const matches = useRouterState({ select: (x) => x.matches })
+  const matches = useRouterState().matches
   return matches[matches.length - 1]
 }
 
