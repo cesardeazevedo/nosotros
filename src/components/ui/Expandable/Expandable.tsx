@@ -5,7 +5,7 @@ import { css, html } from 'react-strict-dom'
 
 export interface ExpandableTriggerRenderProps {
   expanded: boolean
-  toggle: () => void
+  expand: (value?: boolean) => void
 }
 
 export type Props = {
@@ -45,24 +45,22 @@ export const Expandable = (props: Props) => {
     }
   }, [expanded])
 
-  const toggle = () => {
-    const newExpanded = !expanded
-    if (!isControlled) {
-      setInternalExpanded(newExpanded)
-    }
-    onChange?.(newExpanded)
-  }
-
   const renderProps: ExpandableTriggerRenderProps = {
     expanded,
-    toggle,
+    expand: (value?: boolean) => {
+      const newValue = value ?? !expanded
+      if (!isControlled) {
+        setInternalExpanded(newValue)
+      }
+      onChange?.(newValue)
+    },
   }
 
   const triggerElement = typeof trigger === 'function' ? trigger(renderProps) : trigger
 
   return (
     <html.div style={styles.container}>
-      {triggerElement && <html.div onClick={toggle}>{triggerElement}</html.div>}
+      {triggerElement && <html.div onClick={() => renderProps.expand()}>{triggerElement}</html.div>}
       <html.div style={[styles.content, expanded && styles.contentExpanded]}>
         <html.div style={styles.contentInner}>{shouldRenderContent && children}</html.div>
       </html.div>
