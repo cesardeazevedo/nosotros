@@ -97,7 +97,7 @@ export function useImetaList(event: NostrEventDB | undefined) {
           const mime = getMimeType(src, data as IMetaFields)
           return [mime, src, data] as const
         })
-        .filter((x) => x[0] === 'image' || x[0] === 'video')
+        .filter((x): x is ['image' | 'video', string, IMetaFields] => x[0] === 'image' || x[0] === 'video')
     }
     return (
       event?.metadata?.contentSchema?.content

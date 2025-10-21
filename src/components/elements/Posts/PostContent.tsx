@@ -29,7 +29,7 @@ export const PostContent = memo(function PostContent(props: Props) {
             src: x.url,
           }
         })
-        .filter((x) => !!x)
+        .filter((x): x is { index: number; type: 'image' | 'video'; src: string } => !!x?.type)
     }
     return []
   }, [note.event, imeta])
