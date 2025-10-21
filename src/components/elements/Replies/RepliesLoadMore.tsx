@@ -21,12 +21,13 @@ export const RepliesLoadMore = function RepliesLoadMore(props: Props) {
   const {
     query: { isLoading },
   } = useEventReplies(note.event)
+  const { total } = useEventReplies(note.event)
   const repliesLeft = useAtomValue(repliesLeftAtomFamily({ id: note.event.id, limit: note.state.pageSize }))
   const noRepliesLeft = !isLoading && !!note.state.repliesOpen && repliesLeft === 0
   const handleClick = (e: StrictClickEvent) => {
     e.stopPropagation()
     if (note.state.repliesOpen) {
-      note.paginate()
+      note.paginate(undefined, total)
     } else {
       note.actions.toggleReplies()
     }

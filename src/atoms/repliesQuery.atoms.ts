@@ -8,21 +8,23 @@ import { isAddressableKind } from 'nostr-tools/kinds'
 import { selectedPubkeyAtom } from './auth.atoms'
 import { userFamily } from './users.atoms'
 
-const repliesQueryFamily = atomFamily((params: { event: NostrEventDB }) => {
-  const { event } = params
-  const dTag = event.tags.find((tag) => tag[0] === 'd')?.[1] || ''
-  const address = isAddressableKind(event.kind) ? [event.kind, event.pubkey, dTag].join(':') : undefined
-
-  return atomWithQuery(() => ({
-    ...eventRepliesQueryOptions(event, {
-      select: (events: NostrEventDB[]) => {
-        return events.filter(
-          (e) => e.metadata?.parentId === event.id || (address ? e.metadata?.parentId === address : false),
-        )
-      },
-    }),
-  }))
-})
+const repliesQueryFamily = atomFamily(
+  (params: { event: NostrEventDB }) => {
+    const { event } = params
+    const dTag = event.tags.find((tag) => tag[0] === 'd')?.[1] || ''
+    const address = isAddressableKind(event.kind) ? [event.kind, event.pubkey, dTag].join(':') : undefined
+    return atomWithQuery(() => ({
+      ...eventRepliesQueryOptions(event, {
+        select: (events: NostrEventDB[]) => {
+          return events.filter(
+            (e) => e.metadata?.parentId === event.id || (address ? e.metadata?.parentId === address : false),
+          )
+        },
+      }),
+    }))
+  },
+  (a, b) => a.event.id === b.event.id,
+)
 
 export const repliesFamily = atomFamily(
   (params: { event: NostrEventDB; pageSize?: number }) => {
@@ -75,7 +77,6 @@ export const repliesFamily = atomFamily(
         preview,
         previewByUser,
         total,
-        hasMore: sorted.length > pageSize,
       }
     })
   },

@@ -15,6 +15,7 @@ export function createTagFeedModule(tag: string): FeedModule {
     type: 'tags',
     queryKey: queryKeys.feed(id, filter),
     filter,
+    live: false,
     ctx: {
       network: 'REMOTE_ONLY',
       relays: TOPIC_RELAYS,

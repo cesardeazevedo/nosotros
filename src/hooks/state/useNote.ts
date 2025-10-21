@@ -1,7 +1,6 @@
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { useMethods } from '@/hooks/useMethods'
 import { useCallback } from 'react'
-import { useCurrentPubkey } from '../useAuth'
 import { useNIP19 } from '../useEventUtils'
 
 export type NoteState = ReturnType<typeof useNoteState>
@@ -54,8 +53,6 @@ export function useNoteState(event: NostrEventDB, options?: NoteOptions) {
     pageSize: PAGINATION_SIZE,
   })
 
-  const currentLoggedPubkey = useCurrentPubkey()
-
   const nip19 = useNIP19(event)
 
   const { id, metadata } = event
@@ -73,10 +70,7 @@ export function useNoteState(event: NostrEventDB, options?: NoteOptions) {
     metadata,
     state,
     actions,
-
     nip19,
-    isOwner: currentLoggedPubkey === event.pubkey,
-
     paginate,
   }
 }

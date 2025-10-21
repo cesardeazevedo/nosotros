@@ -5,6 +5,7 @@ import { Divider } from '@/components/ui/Divider/Divider'
 import { Kind } from '@/constants/kinds'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { useNoteState } from '@/hooks/state/useNote'
+import { useCurrentPubkey } from '@/hooks/useAuth'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { memo, useCallback } from 'react'
@@ -29,6 +30,7 @@ export const PostRoot = memo(function PostRoot(props: Props) {
   const { event, header, open } = props
   const isFeed = !!useNostrContext()
   const note = useNoteState(event, { repliesOpen: open, forceSync: open, contentOpen: open })
+  const pubkey = useCurrentPubkey()
 
   const openReplies = useCallback(() => {
     note.actions.toggleReplies()
@@ -38,7 +40,7 @@ export const PostRoot = memo(function PostRoot(props: Props) {
     <NoteProvider value={{ event }}>
       <html.article style={[isFeed && styles.divider]}>
         <PostLink note={note}>
-          {note.isOwner && <PostCountdown id={event.id} />}
+          {event.pubkey === pubkey && <PostCountdown id={event.id} />}
           {note.event.kind === Kind.Article && <ArticleHeadline />}
           {header || <PostHeader event={event} />}
           <PostContent note={note} />
