@@ -32,7 +32,7 @@ export function useFeedStateAtom(feedAtoms: FeedAtoms, extras?: Extras) {
   const [replies, setReplies] = useAtom(feedAtoms.includeReplies)
   const [buffer = [], setBuffer] = useAtom(feedAtoms.buffer)
   const [bufferReplies = [], setBufferReplies] = useAtom(feedAtoms.bufferReplies)
-  const [pageSize = 10, setPageSize] = useAtom(feedAtoms.pageSize)
+  const [pageSize = 20, setPageSize] = useAtom(feedAtoms.pageSize)
 
   const isDirty = useAtomValue(feedAtoms.isDirty)
   const isModified = useAtomValue(feedAtoms.isModified)
@@ -127,7 +127,7 @@ export function useFeedStateAtom(feedAtoms: FeedAtoms, extras?: Extras) {
     const timer = setTimeout(() => {
       const count = query.data?.pages?.[0]?.length ?? 0
       setIsEmpty(count === 0)
-    }, 6000)
+    }, 8000)
     return () => clearTimeout(timer)
   }, [query.data?.pages?.[0]])
 

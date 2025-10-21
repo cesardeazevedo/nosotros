@@ -1,4 +1,5 @@
 import { useMatch, useRouter, useRouterState } from '@tanstack/react-router'
+import { nip19 } from 'nostr-tools'
 import { useCallback } from 'react'
 
 export function useGoBack() {
@@ -11,12 +12,14 @@ export function useGoBack() {
 }
 
 export function useCurrentRoute() {
-  const matches = useRouterState({ select: (x) => x.matches })
+  const matches = useRouterState().matches
   return matches[matches.length - 1]
 }
 
 export function useNostrRoute() {
-  return useMatch({ from: '/$nostr', shouldThrow: false })?.context
+  const context = useMatch({ from: '/$nostr', shouldThrow: false })?.context
+  const maskedParam = useMatch({ from: '__root__', select: (x) => x.search.nostr, shouldThrow: false })
+  return context || (maskedParam ? { decoded: nip19.decode(maskedParam) } : undefined)
 }
 
 export function useIsCurrentRouteEventID(id: string) {

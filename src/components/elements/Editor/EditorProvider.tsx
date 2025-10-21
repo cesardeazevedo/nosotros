@@ -138,7 +138,9 @@ type Props = Omit<EditorProps, 'onSubmit'> & {
   pubkey?: string
   ref?: Ref<EditorRef | null>
   onDiscard?: () => void
-  onSuccess?: (event: NostrEvent) => void
+  onUndoBroadcast?: (event: NostrEvent) => void
+  onSigned?: (event: NostrEvent, relays?: string[]) => void
+  onSuccess?: (event: NostrEvent, relays?: string[]) => void
 }
 
 function getPostKindName(kind: Kind | undefined) {
@@ -327,6 +329,7 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
 
   const onSuccess = (event: NostrEvent) => {
     reset()
+    props.onSuccess?.(event, allRelays)
     store.set(enqueueToastAtom, {
       component: <ToastEventPublished event={event} eventLabel={parent ? 'Comment' : 'Note'} />,
       duration: 10000,
@@ -340,6 +343,7 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
       const rootId = parent.metadata?.rootId || parent.id
       removeEventFromQuery(queryKeys.tag('e', [rootId], Kind.Text), event.id)
     }
+    props.onUndoBroadcast?.(event)
   }
 
   const { mutateAsync: onSubmit } = usePublishEventMutation<EditorContextType>({
@@ -351,6 +355,7 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
             // Delay broadcast
             return signAndSave({ ...event, pubkey }, { signer, saveEvent: !state.protectedEvent }).pipe(
               tap((event) => {
+                props.onSigned?.(event, allRelays)
                 addNoteToQuery(event)
                 store.set(addBroadcastRequestAtom, {
                   event,
@@ -368,6 +373,7 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
           }
           return publish({ ...event, pubkey }, { relays: allRelays, signer, saveEvent: !protectedEvent }).pipe(
             tap((event) => {
+              props.onSigned?.(event, allRelays)
               addNoteToQuery(event)
               onSuccess(event)
             }),

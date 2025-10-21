@@ -1,7 +1,7 @@
 import { useDeckAddNextColumn } from '@/components/modules/Deck/hooks/useDeck'
 import { createEventModule } from '@/hooks/modules/createEventModule'
 import type { NoteState } from '@/hooks/state/useNote'
-import { useNostrMaskedLinkProps } from '@/hooks/useNostrMasedLinkProps'
+import { useNostrMaskedLinkProps } from '@/hooks/useNostrMaskedLinkProps'
 import { useMatch, useNavigate, useRouter } from '@tanstack/react-router'
 import React, { memo, useCallback, type ReactNode } from 'react'
 import { css, html } from 'react-strict-dom'
@@ -21,7 +21,7 @@ export const PostLink = memo(function PostLink(props: Props) {
   const linkProps = useNostrMaskedLinkProps(note.nip19)
   const deck = useDeckAddNextColumn(() => createEventModule(note.nip19))
   const isCurrentNote = context?.decoded?.type === 'nevent' ? context?.decoded.data.id === note.id : false
-  const isActive = isCurrentNote || note.state.repliesOpen === true
+  const isActive = isCurrentNote
 
   const handleClick = useCallback(
     (e: StrictClickEvent) => {

@@ -21,7 +21,7 @@ const userFollowsQueryFamily = atomFamily(
       }),
     )
   },
-  (a, b) => a.pubkey === b.pubkey,
+  (a, b) => a.pubkey === b.pubkey && a.syncFollows === b.syncFollows,
 )
 
 export const userFamily = atomFamily(

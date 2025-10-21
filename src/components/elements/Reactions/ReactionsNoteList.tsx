@@ -1,6 +1,6 @@
+import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
-import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { useReactionsGrouped } from '@/hooks/query/useReactions'
 import { spacing } from '@/themes/spacing.stylex'
 import { fallbackEmoji } from '@/utils/utils'
@@ -8,12 +8,8 @@ import { memo } from 'react'
 import { css } from 'react-strict-dom'
 import { UserAvatar } from '../User/UserAvatar'
 
-type Props = {
-  event: NostrEventDB
-}
-
-export const ReactionsNoteList = memo(function ReactionsNoteList(props: Props) {
-  const { event } = props
+export const ReactionsNoteList = memo(function ReactionsNoteList() {
+  const { event } = useNoteContext()
   const grouped = useReactionsGrouped(event)
   if (!grouped.data || grouped.data.length === 0) {
     return

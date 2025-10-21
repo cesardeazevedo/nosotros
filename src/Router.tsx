@@ -620,6 +620,7 @@ export const router = createRouter({
   defaultPendingMinMs: 0,
   scrollRestoration: false,
   defaultPendingMs: 0,
+  defaultStructuralSharing: true,
   context: {
     queryClient,
   },

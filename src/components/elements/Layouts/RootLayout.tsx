@@ -1,4 +1,5 @@
 import { NostrRouteParallel } from '@/components/modules/Nostr/NostrRouteParallel'
+import { RouteUtilsContextProvider } from '@/components/providers/RouteUtilsProvider'
 import { useMobile } from '@/hooks/useMobile'
 import { useRelayAuthenticator } from '@/hooks/useRelayAuthenticator'
 import { Outlet, useSearch } from '@tanstack/react-router'
@@ -19,7 +20,9 @@ const OutletParallel = () => {
   return (
     <>
       <html.div style={[styles.outlet, !!nostr && styles.hidden]}>
-        <Outlet />
+        <RouteUtilsContextProvider value={{ hiddenRoute: !!nostr }}>
+          <Outlet />
+        </RouteUtilsContextProvider>
       </html.div>
       {!!nostr && <NostrRouteParallel nostr={nostr} />}
     </>

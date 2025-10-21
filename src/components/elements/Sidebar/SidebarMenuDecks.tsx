@@ -5,7 +5,7 @@ import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import { Link, useMatchRoute } from '@tanstack/react-router'
+import { Link, useMatch } from '@tanstack/react-router'
 import { useSetAtom } from 'jotai'
 import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
@@ -16,12 +16,12 @@ type Props = {
 }
 
 export const SidebarMenuDecks = memo(function SidebarMenuDecks(props: Props) {
-  const match = useMatchRoute()
   const decks = useDecks()
+  const isDeckRoute = !!useMatch({ from: '/deck/$id', shouldThrow: false })
   const toggleDeckDialog = useSetAtom(toggleCreateDeckDialogAtom)
   return (
     <Expandable
-      initiallyExpanded={props.expanded ?? !!match({ to: '/deck/$id' })}
+      initiallyExpanded={props.expanded ?? !!isDeckRoute}
       trigger={(triggerProps) => (
         <SidebarSubheader {...triggerProps} label={'Decks'} onCreateClick={() => toggleDeckDialog()} />
       )}>

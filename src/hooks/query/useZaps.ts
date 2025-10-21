@@ -44,3 +44,18 @@ export function useZapsByPubkey(pubkey: string | undefined, event: NostrEventDB)
       : undefined
   }, [pubkey, zaps.data])
 }
+
+export function useZapAmount(event: NostrEventDB) {
+  const zaps = useZaps(event)
+  return useMemo(() => {
+    const { data = [] } = zaps
+    return (
+      data
+        .flatMap((event) => event.metadata?.bolt11)
+        .reduce((acc, current) => {
+          const amount = parseInt(current?.amount?.value || '0')
+          return acc + amount
+        }, 0) / 1000
+    )
+  }, [zaps.data])
+}

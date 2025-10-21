@@ -12,7 +12,7 @@ export function createHomeFeedModule(pubkey?: string): FeedModule {
   const filter = {
     kinds: [Kind.Text, Kind.Repost, Kind.Media, Kind.Article],
     authors: pubkey ? [pubkey] : RECOMMENDED_PUBKEYS,
-    limit: 50,
+    limit: 250,
   }
   return {
     id,

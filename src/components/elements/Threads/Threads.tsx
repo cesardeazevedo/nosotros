@@ -2,6 +2,7 @@ import { NoteProvider } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { useRootEvent } from '@/hooks/query/useQueryBase'
+import { useEventReplies } from '@/hooks/query/useReplies'
 import { useNoteState } from '@/hooks/state/useNote'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
@@ -37,6 +38,7 @@ export const Threads = memo(function RepliesThread(props: Props) {
 
   const note = useNoteState(event, { repliesOpen: true, forceSync: true, contentOpen: false })
   const root = useRootEvent(event)
+  const { total: repliesTotal } = useEventReplies(event)
 
   return (
     <NoteProvider value={{ event }}>
@@ -53,7 +55,7 @@ export const Threads = memo(function RepliesThread(props: Props) {
             // {/* disable the thead line here if renderReplies is true */}
             <ThreadRoot note={note} renderEditor={renderEditor} renderReplies={level === 0} />
           )}
-          {renderRepliesSummary && note.repliesTotal > 0 && level === 0 && (
+          {renderRepliesSummary && repliesTotal > 0 && level === 0 && (
             <html.div style={styles.footer}>
               <ThreadRepliesSummary note={note} />
             </html.div>

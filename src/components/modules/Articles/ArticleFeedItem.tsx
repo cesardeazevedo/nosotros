@@ -34,7 +34,7 @@ export const ArticleFeedItem = memo(function ArticleFeedItem(props: Props) {
   const image = useEventTag(event, 'image')
   const summary = useEventTag(event, 'summary')
   return (
-    <Stack horizontal={false} sx={[styles.root, props.border && styles.root$border]} ref={note.ref}>
+    <Stack horizontal={false} sx={[styles.root, props.border && styles.root$border]}>
       <NoteProvider value={{ event }}>
         <LinkNAddress naddress={note.nip19 as NAddr}>
           <ContentProvider value={{ dense, disableLink: true }}>

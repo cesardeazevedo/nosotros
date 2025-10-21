@@ -1,16 +1,15 @@
 import { Fab } from '@/components/ui/Fab/Fab'
-import type { NoteState } from '@/hooks/state/useNote'
 import { useIsDarkTheme } from '@/hooks/useTheme'
 import { palette } from '@/themes/palette.stylex'
-import React, { memo, useEffect, useRef } from 'react'
+import React, { memo, useEffect, useRef, useState } from 'react'
 import { css, html } from 'react-strict-dom'
-import useMeasure from 'react-use-measure'
 
 export type Props = {
   size?: 'xs' | 'sm' | 'md'
   initialExpanded?: boolean
   children: React.ReactNode
-  note: NoteState
+  expanded: boolean
+  onExpand: () => void
 }
 
 const sizes = {
@@ -20,31 +19,36 @@ const sizes = {
 }
 
 export const PostContentWrapper = memo(function PostContentWrapper(props: Props) {
-  const { note, initialExpanded = false, size = 'md' } = props
-  const [ref, bounds] = useMeasure({ debounce: 100 })
-  const expanded = initialExpanded || note.state.contentOpen
+  const { onExpand, initialExpanded = false, size = 'md' } = props
+  const expanded = initialExpanded || props.expanded
   const maxHeight = sizes[size]
-  const canExpand = bounds.height >= maxHeight && !expanded
+  const [canExpand, setCanExpand] = useState(!expanded)
   const isDarkTheme = useIsDarkTheme()
 
-  const root = useRef<HTMLDivElement | null>(null)
+  const ref = useRef<HTMLDivElement | null>(null)
 
-  // Some very weird issue with this after introducing YARL component,
-  // after closing the YARL dialog, the root div is being suddenly upwards
-  // clipping the content, this needs further investigation
   useEffect(() => {
-    const element = root.current
-    if (element) {
-      const onScroll = () => {
-        element.scrollTop = 0
-      }
-      element.addEventListener('scroll', onScroll)
-      return () => element.removeEventListener('scroll', onScroll)
+    const element = ref.current
+    if (!element || expanded) {
+      setCanExpand(false)
+      return
     }
-  }, [])
+
+    const checkHeight = () => {
+      const contentHeight = element.scrollHeight
+      setCanExpand(contentHeight > maxHeight)
+    }
+
+    checkHeight()
+
+    const resizeObserver = new ResizeObserver(checkHeight)
+    resizeObserver.observe(element)
+
+    return () => resizeObserver.disconnect()
+  }, [maxHeight, expanded])
 
   return (
-    <html.div style={[styles.root, styles[size], expanded && styles.root$expanded]} ref={root}>
+    <html.div style={[styles.root, styles[size], expanded && styles.root$expanded]}>
       <html.div ref={ref}>{props.children}</html.div>
       {canExpand && (
         <html.div style={styles.container}>
@@ -55,7 +59,7 @@ export const PostContentWrapper = memo(function PostContentWrapper(props: Props)
             onClick={(e) => {
               e.preventDefault()
               e.stopPropagation()
-              note.actions.toggleContent(true)
+              onExpand()
             }}
           />
         </html.div>

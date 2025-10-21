@@ -32,7 +32,7 @@ const NonBubbleNodes = [
 export const ReplyContent = memo(function ReplyContent(props: Props) {
   const { note, size, highlight } = props
   return (
-    <PostContentWrapper note={note} size={size}>
+    <PostContentWrapper expanded={note.state.contentOpen} onExpand={() => note.actions.toggleReplies(true)} size={size}>
       <PostCountdown dense id={note.id} />
       <Content
         children={(index) => index === 0 && <ReplyUserHeader />}

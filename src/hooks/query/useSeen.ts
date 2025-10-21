@@ -2,6 +2,7 @@ import type { SeenDB } from '@/db/types'
 import { dbSqlite } from '@/nostr/db'
 import type { UseQueryOptions } from '@tanstack/react-query'
 import { useQuery } from '@tanstack/react-query'
+import { useMemo } from 'react'
 import { queryClient } from './queryClient'
 import { queryKeys } from './queryKeys'
 
@@ -28,4 +29,14 @@ export function seenQueryOptions(
 
 export function useSeen(eventId: string, options?: Omit<UseQueryOptions<SeenDB[]>, 'queryKey'>) {
   return useQuery(seenQueryOptions(eventId, options))
+}
+
+export function useSeenRelays(eventId: string) {
+  const seenQuery = useSeen(eventId)
+  return useMemo(() => seenQuery.data?.map((seen) => seen.relay) || [], [seenQuery.data])
+}
+
+export function useFirstSeenRelay(eventId: string) {
+  const seenQuery = useSeen(eventId)
+  return seenQuery.data?.[0]?.relay
 }

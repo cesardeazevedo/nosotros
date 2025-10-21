@@ -1,7 +1,8 @@
+import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Button } from '@/components/ui/Button/Button'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
-import type { NoteState } from '@/hooks/state/useNote'
+import { useZaps } from '@/hooks/query/useZaps'
 import { useCurrentTheme } from '@/hooks/useTheme'
 import { getZapColor } from '@/hooks/useZapColor'
 import { spacing } from '@/themes/spacing.stylex'
@@ -16,10 +17,6 @@ function formatSats(amount: number) {
   return `${(amount / 1000).toLocaleString()}`
 }
 
-type Props = {
-  note: NoteState
-}
-
 type ZapInfo = {
   id: string
   amount: number
@@ -28,13 +25,14 @@ type ZapInfo = {
   comment: string
 }
 
-export const ZapNoteList = memo(function ZapNoteList(props: Props) {
-  const { note } = props
+export const ZapNoteList = memo(function ZapNoteList() {
+  const { event } = useNoteContext()
+  const zaps = useZaps(event)
   const theme = useCurrentTheme()
   const [pageSize, setPageSize] = useState(10)
 
   const zapsList = useMemo(() => {
-    return (note.zaps.data || [])
+    return (zaps.data || [])
       .map((event) => {
         const amount = parseInt(event.metadata?.bolt11?.amount?.value || '0')
         const description = event.tags.find((t) => t[0] === 'description')?.[1] || ''
@@ -45,7 +43,7 @@ export const ZapNoteList = memo(function ZapNoteList(props: Props) {
       })
       .filter((zap): zap is ZapInfo => !!zap.pubkey && zap.amount > 0)
       .sort((a, b) => b.amount - a.amount)
-  }, [theme, note.zaps.data])
+  }, [theme, zaps.data])
 
   if (zapsList.length === 0) {
     return

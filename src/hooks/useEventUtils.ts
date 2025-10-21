@@ -92,10 +92,12 @@ export function useNIP19(event: NostrEventDB) {
 export function useImetaList(event: NostrEventDB | undefined) {
   return useMemo(() => {
     if (event?.metadata?.imeta && event.kind === Kind.Media) {
-      return Object.entries(event?.metadata?.imeta).map(([src, data]) => {
-        const mime = getMimeType(src, data as IMetaFields)
-        return [mime, src, data] as const
-      })
+      return Object.entries(event?.metadata?.imeta)
+        .map(([src, data]) => {
+          const mime = getMimeType(src, data as IMetaFields)
+          return [mime, src, data] as const
+        })
+        .filter((x): x is ['image' | 'video', string, IMetaFields] => x[0] === 'image' || x[0] === 'video')
     }
     return (
       event?.metadata?.contentSchema?.content

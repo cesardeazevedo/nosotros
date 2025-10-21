@@ -5,7 +5,7 @@ import { queryClient } from '../queryClient'
 import { appendEventFeed, prependEventFeed } from '../queryUtils'
 import type { InfiniteEvents } from '../useQueryFeeds'
 
-test('assert prependEvents', () => {
+test('assert prependEventFeed', () => {
   const queryKey = ['feed']
   const existingData = {
     pageParams: [],

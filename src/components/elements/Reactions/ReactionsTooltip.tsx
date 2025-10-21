@@ -1,4 +1,3 @@
-import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Paper } from '@/components/ui/Paper/Paper'
 import { TooltipRich } from '@/components/ui/TooltipRich/TooltipRich'
 import { spacing } from '@/themes/spacing.stylex'
@@ -12,14 +11,13 @@ type Props = {
 
 export const ReactionsTooltip = memo(function ReactionsTooltip(props: Props) {
   const { children } = props
-  const { event } = useNoteContext()
   return (
     <TooltipRich
       cursor='dot'
       placement='bottom-start'
       content={() => (
         <Paper surface='surfaceContainer' shape='md' sx={styles.root} elevation={2}>
-          <ReactionsNoteList event={event} />
+          <ReactionsNoteList />
         </Paper>
       )}>
       {children}

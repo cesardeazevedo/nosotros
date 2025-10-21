@@ -1,3 +1,4 @@
+import { useContentContext } from '@/components/providers/ContentProvider'
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { Props as TextProps } from '@/components/ui/Text/Text'
@@ -45,18 +46,25 @@ const UserNameSkeletonOrPubkey = memo(function UserNameSkeletonOrPubkey(props: O
 
 export const UserName = memo(function UserName(props: Props) {
   const { pubkey, children, size = 'lg', ...rest } = props
+  const { disableLink } = useContentContext()
   const user = useUserState(pubkey)
   const currentUser = useCurrentUser()
+  const text = (
+    <Text variant='body' {...rest} sx={[styles.text, rest.sx]} size={size} element={html.div}>
+      {user?.displayName}
+    </Text>
+  )
+  const textWithLink = disableLink ? (
+    text
+  ) : (
+    <LinkProfile underline pubkey={pubkey}>
+      {text}
+    </LinkProfile>
+  )
   return (
     <Stack gap={0.5} sx={props.sx}>
       {!user && <UserNameSkeletonOrPubkey pubkey={pubkey} size={size} {...rest} />}
-      <UserPopover pubkey={pubkey}>
-        <LinkProfile underline pubkey={pubkey}>
-          <Text variant='body' {...rest} sx={[styles.text, rest.sx]} size={size} element={html.div}>
-            {user?.displayName}
-          </Text>
-        </LinkProfile>
-      </UserPopover>
+      <UserPopover pubkey={pubkey}>{textWithLink}</UserPopover>
       {currentUser?.followsTag(user?.pubkey) && (
         <IconUserCheck size={14} strokeWidth='2.2' {...css.props(styles.followingIndicator)} />
       )}

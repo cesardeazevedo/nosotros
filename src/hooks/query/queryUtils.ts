@@ -6,10 +6,10 @@ import { dbSqlite } from '@/nostr/db'
 import { dedupeById } from '@/utils/utils'
 import type { QueryKey } from '@tanstack/react-query'
 import type { NostrEvent } from 'nostr-tools'
+import { parseEventMetadata } from '../parsers/parseEventMetadata'
 import { queryClient } from './queryClient'
 import { eventToQueryKey, queryKeys } from './queryKeys'
 import type { InfiniteEvents } from './useQueryFeeds'
-import { parseEventMetadata } from '../parsers/parseEventMetadata'
 
 async function populateRelayInfo() {
   const res = await dbSqlite.queryRelayInfo([])

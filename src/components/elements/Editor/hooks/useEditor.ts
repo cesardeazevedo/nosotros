@@ -2,7 +2,7 @@ import { Kind } from '@/constants/kinds'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { useEvent } from '@/hooks/query/useQueryBase'
 import { useUserRelays } from '@/hooks/query/useQueryUser'
-import { useSeen } from '@/hooks/query/useSeen'
+import { useFirstSeenRelay, useSeen } from '@/hooks/query/useSeen'
 import { WRITE } from '@/nostr/types'
 import { compactArray } from '@/utils/utils'
 import type { NostrEvent } from 'nostr-tools'
@@ -27,7 +27,7 @@ export function useEditorSection() {
 }
 
 export function usePublicMessageTags(pubkey: string | undefined, event?: NostrEventDB | undefined) {
-  const eventHeadRelay = useSeen(event?.id || '').data?.[0]?.relay || ''
+  const eventHeadRelay = useFirstSeenRelay(event?.id || '') || ''
   const userRelays = useUserRelays(pubkey, WRITE)
   const userHeadRelay = userRelays.data?.[0]?.relay || ''
   if (pubkey) {
@@ -41,10 +41,9 @@ export function usePublicMessageTags(pubkey: string | undefined, event?: NostrEv
 }
 
 export function useReplyTags(event: NostrEventDB | undefined) {
-  const eventRelays = useSeen(event?.id || '').data
+  const eventHeadRelay = useFirstSeenRelay(event?.id || '')
   const userRelays = useUserRelays(event?.pubkey, WRITE)
 
-  const eventHeadRelay = eventRelays?.[0]?.relay || ''
   const userHeadRelay = userRelays.data?.[0]?.relay || ''
 
   const rootEvent = useEvent(event?.metadata?.rootId).data

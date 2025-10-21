@@ -80,13 +80,13 @@ export function replaceableEventQueryOptions<Selector = NostrEventDB>(
       authors: [pubkey],
     },
     queryKey: queryKeys.replaceable(kind, pubkey),
+    select: (events) => events[0] as Selector,
+    ...options,
     ctx: {
       network: 'STALE_WHILE_REVALIDATE_BATCH',
       batcher,
       ...options?.ctx,
     },
-    select: (events) => events[0] as Selector,
-    ...options,
   })
 }
 
@@ -103,13 +103,13 @@ export function addressableEventQueryOptions<Selector = NostrEventDB>(
       '#d': [d],
     },
     queryKey: queryKeys.addressable(kind, pubkey, d),
+    select: (events) => events[0] as Selector,
+    ...options,
     ctx: {
       network: 'STALE_WHILE_REVALIDATE_BATCH',
       batcher,
       ...options?.ctx,
     },
-    select: (events) => events[0] as Selector,
-    ...options,
   })
 }
 
