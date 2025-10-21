@@ -23,38 +23,17 @@ export function eventRepliesQueryOptions(event: NostrEventDB, options?: CustomQu
       kinds: [Kind.Text, Kind.Comment],
       ...filter,
     },
+    ...options,
     ctx: {
       subId: 'replies',
-      network: 'STALE_WHILE_REVALIDATE',
-      negentropy: false,
-      closeOnEose: false,
+      network: 'STALE_WHILE_REVALIDATE_BATCH',
       // inbox relays are broken and no one writes to the author inbox, so we have to rely on big relays
       relays: FALLBACK_RELAYS,
       relayHints: {
         idHints: ids.reduce((acc, id) => ({ ...acc, [id]: [event.pubkey] }), {}),
       },
-    },
-    ...options,
-  })
-}
-
-export function eventRepliesByIdQueryOptions(id: string, options?: CustomQueryOptions) {
-  return eventQueryOptions({
-    queryKey: queryKeys.tag('e', [id], Kind.Text),
-    filter: {
-      kinds: [Kind.Text, Kind.Comment],
-      '#e': [id],
-    },
-    ctx: {
-      network: 'STALE_WHILE_REVALIDATE_BATCH',
       ...options?.ctx,
-      relayHints: {
-        ids: {
-          [id]: FALLBACK_RELAYS,
-        },
-      },
     },
-    ...options,
   })
 }
 
