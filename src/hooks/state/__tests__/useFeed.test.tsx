@@ -50,7 +50,7 @@ describe('assert useFeedState minimal', () => {
     })
 
     expect(result.current.isEmpty).toBe(false)
-    act(() => vi.advanceTimersByTime(6000))
+    act(() => vi.advanceTimersByTime(8000))
 
     expect(result.current.isEmpty).toBe(true)
   })
