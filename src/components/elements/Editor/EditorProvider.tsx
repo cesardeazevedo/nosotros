@@ -42,6 +42,7 @@ const initialState = {
   isUploading: false,
   broadcastDirt: false,
   zapSplitsEnabled: false,
+  submitting: false,
   includedRelays: new Set<string>(),
   excludedRelays: new Set<string>(),
   excludedMentions: new Set<string>(),
@@ -329,6 +330,7 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
 
   const onSuccess = (event: NostrEvent) => {
     reset()
+    methods.toggle('submitting', false)
     props.onSuccess?.(event, allRelays)
     store.set(enqueueToastAtom, {
       component: <ToastEventPublished event={event} eventLabel={parent ? 'Comment' : 'Note'} />,
@@ -344,12 +346,14 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
       removeEventFromQuery(queryKeys.tag('e', [rootId], Kind.Text), event.id)
     }
     props.onUndoBroadcast?.(event)
+    methods.toggle('submitting', false)
   }
 
   const { mutateAsync: onSubmit } = usePublishEventMutation<EditorContextType>({
     mutationFn:
       ({ signer, pubkey }) =>
       (state) => {
+        methods.toggle('submitting', true)
         if (event) {
           if (settings.delayBroadcast) {
             // Delay broadcast

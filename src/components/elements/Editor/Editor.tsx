@@ -53,7 +53,7 @@ export const Editor = memo(function Editor(props: Props) {
 
   const state = useEditorSelector((editor) => editor)
 
-  const [submitting, submit] = useObservableState<boolean, EditorContextType>((input$) => {
+  const [, submit] = useObservableState<boolean, EditorContextType>((input$) => {
     return input$.pipe(
       switchMap((state) => {
         return from(state.upload()).pipe(
@@ -106,8 +106,8 @@ export const Editor = memo(function Editor(props: Props) {
             {state.open && (
               <EditorActions>
                 <EditorSubmit
-                  submitting={submitting}
-                  disabled={isEmpty || state.isUploading}
+                  submitting={state.submitting}
+                  disabled={isEmpty || state.submitting || state.isUploading}
                   renderDiscard={renderDiscard}
                   onSubmit={() => submit(state)}
                   onDiscard={onDiscard}
