@@ -42,11 +42,12 @@ type NoteOptions = {
   contentOpen?: boolean
   repliesOpen?: boolean
   forceSync?: boolean
+  replying?: boolean
 }
 
 export function useNoteState(event: NostrEventDB, options?: NoteOptions) {
   const [state, actions] = useMethods(createMethods, {
-    isReplying: false,
+    isReplying: options?.replying ?? false,
     statsOpen: false,
     contentOpen: options?.contentOpen ?? false,
     repliesOpen: (options?.repliesOpen ?? null) as boolean | null,

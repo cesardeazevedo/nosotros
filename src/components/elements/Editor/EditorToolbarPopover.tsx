@@ -1,4 +1,4 @@
-import { ContentProvider } from '@/components/providers/ContentProvider'
+import { ContentProvider, useContentContext } from '@/components/providers/ContentProvider'
 import { Paper } from '@/components/ui/Paper/Paper'
 import { PopoverBase } from '@/components/ui/Popover/PopoverBase'
 import { Stack } from '@/components/ui/Stack/Stack'
@@ -7,11 +7,12 @@ import { memo, type ReactNode } from 'react'
 import { css } from 'react-strict-dom'
 import { EditorBroadcaster } from './EditorBroadcaster'
 import { EditorSettings } from './EditorSettings'
+import { useEditorSelector } from './hooks/useEditor'
 import { EditorButtonAddMedia } from './Toolbar/EditorButtonAddMedia'
 import { EditorButtonBroadcast } from './Toolbar/EditorButtonBroadcast'
+import { EditorButtonMaximize } from './Toolbar/EditorButtonMaximize'
 import { EditorButtonReactions } from './Toolbar/EditorButtonReactions'
 import { EditorButtonSettings } from './Toolbar/EditorButtonSettings'
-import { useEditorSelector } from './hooks/useEditor'
 
 type Props = {
   children?: ReactNode
@@ -19,6 +20,8 @@ type Props = {
 
 export const EditorActionsPopover = memo(function EditorActionsPopover(props: Props) {
   const { children } = props
+  const { isDialog } = useContentContext()
+  const parent = useEditorSelector((editor) => editor.parent)
   const section = useEditorSelector((editor) => editor.section)
   const openSection = useEditorSelector((editor) => editor.openSection)
 
@@ -68,6 +71,7 @@ export const EditorActionsPopover = memo(function EditorActionsPopover(props: Pr
             {/* @ts-ignore */}
             {({ getProps, setRef }) => <EditorButtonSettings {...getProps()} ref={setRef} />}
           </PopoverBase>
+          {parent && !isDialog && <EditorButtonMaximize parent={parent} />}
         </Stack>
       </ContentProvider>
       {children}

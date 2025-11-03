@@ -54,6 +54,13 @@ export const Reply = memo(function Reply(props: Props) {
     })
   }, [navigate, nevent, router.latestLocation.pathname])
 
+  const handleReplyInDialog = useCallback(() => {
+    navigate({
+      to: '.',
+      search: (old) => ({ ...old, replying: nevent }),
+    })
+  }, [navigate, nevent])
+
   if (repliesOpen === null && level >= 3) {
     return null
   }
@@ -156,14 +163,18 @@ export const Reply = memo(function Reply(props: Props) {
                 </ContentProvider>
               </Stack>
               <html.div style={styles.actions}>
-                <Stack>
-                  <PostActions
-                    renderOptions
-                    statsPopover
-                    note={note}
-                    onReplyClick={() => note.actions.toggleReplying()}
-                  />
-                </Stack>
+                <PostActions
+                  renderOptions
+                  statsPopover
+                  note={note}
+                  onReplyClick={() => {
+                    if ((nested && level > 3) || isMobile) {
+                      handleReplyInDialog()
+                    } else {
+                      note.actions.toggleReplying()
+                    }
+                  }}
+                />
                 {note.state.isReplying && (
                   <Expandable expanded={isReplyingDeferred} trigger={() => <></>}>
                     <EditorProvider sx={styles.editor} initialOpen renderBubble parent={event} />
