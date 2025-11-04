@@ -85,6 +85,12 @@ export function appendEventFeed(queryKey: QueryKey, events: NostrEventDB[]) {
   })
 }
 
+export function appendEventToQuery(queryKey: QueryKey, events: NostrEventDB[]) {
+  queryClient.setQueryData(queryKey, (data: NostrEventDB[] | undefined) => {
+    return dedupeById([...(data || []), ...events])
+  })
+}
+
 export function removeEventFromFeed(queryKey: QueryKey, eventId: string) {
   queryClient.setQueryData(queryKey, (data: InfiniteEvents | undefined) => {
     if (data) {
@@ -101,7 +107,7 @@ export function removeEventFromFeed(queryKey: QueryKey, eventId: string) {
 export function removeEventFromQuery(queryKey: QueryKey, eventId: string) {
   queryClient.setQueryData(queryKey, (data: NostrEvent[]) => {
     if (data) {
-      return [data.filter((e) => e.id !== eventId)]
+      return data.filter((e) => e.id !== eventId)
     }
     return data
   })
