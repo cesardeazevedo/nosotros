@@ -2,29 +2,13 @@ import { addReplyAtom } from '@/atoms/replies.atoms'
 import { store } from '@/atoms/store'
 import { Kind } from '@/constants/kinds'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
-import { dbSqlite } from '@/nostr/db'
 import { dedupeById } from '@/utils/utils'
 import type { QueryKey } from '@tanstack/react-query'
 import type { NostrEvent } from 'nostr-tools'
 import { parseEventMetadata } from '../parsers/parseEventMetadata'
 import { queryClient } from './queryClient'
-import { eventToQueryKey, queryKeys } from './queryKeys'
+import { eventToQueryKey } from './queryKeys'
 import type { InfiniteEvents } from './useQueryFeeds'
-
-async function populateRelayInfo() {
-  const res = await dbSqlite.queryRelayInfo([])
-  res.forEach((info) => queryClient.setQueryData(queryKeys.relayInfo(info.url), info))
-}
-
-async function populateRelayStats() {
-  const res = await dbSqlite.queryRelayStats([])
-  queryClient.setQueryData(queryKeys.allRelayStats(), res)
-  Object.values(res).forEach((stats) => queryClient.setQueryData(queryKeys.relayStats(stats.url), stats))
-}
-
-export async function prepopulate() {
-  return Promise.all([populateRelayInfo(), populateRelayStats()])
-}
 
 export function setEventData(event: NostrEventDB) {
   switch (event.kind) {
