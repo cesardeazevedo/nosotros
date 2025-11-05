@@ -1,4 +1,4 @@
-import { replyCountAtomFamily } from '@/atoms/replies.atoms'
+import { replyCountAtomFamily } from '@/atoms/repliesCount.atoms'
 import { Kind } from '@/constants/kinds'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { queryKeys } from '@/hooks/query/queryKeys'

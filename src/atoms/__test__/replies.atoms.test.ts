@@ -1,7 +1,7 @@
 import { Kind } from '@/constants/kinds'
 import { fakeEventMeta } from '@/utils/faker'
 import { createStore } from 'jotai'
-import { addReplyAtom, childrenAtomFamily, repliesLeftAtomFamily, replyCountAtomFamily } from '../replies.atoms'
+import { addReplyAtom, childrenAtomFamily, repliesLeftAtomFamily, replyCountAtomFamily } from '../repliesCount.atoms'
 
 describe('replies atoms', () => {
   test('adds replies, dedupes, counts recursively, and computes remaining beyond limit', () => {

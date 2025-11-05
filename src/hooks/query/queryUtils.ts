@@ -1,4 +1,4 @@
-import { addReplyAtom } from '@/atoms/replies.atoms'
+import { addReplyAtom } from '@/atoms/repliesCount.atoms'
 import { store } from '@/atoms/store'
 import { Kind } from '@/constants/kinds'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'

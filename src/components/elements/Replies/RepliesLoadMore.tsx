@@ -1,4 +1,4 @@
-import { repliesLeftAtomFamily } from '@/atoms/replies.atoms'
+import { repliesLeftAtomFamily } from '@/atoms/repliesCount.atoms'
 import { Button } from '@/components/ui/Button/Button'
 import { CircularProgress } from '@/components/ui/Progress/CircularProgress'
 import { Stack } from '@/components/ui/Stack/Stack'
