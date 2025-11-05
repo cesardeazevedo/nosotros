@@ -21,10 +21,12 @@ type Props = {
   note: NoteState
   renderEditor?: boolean
   renderReplies?: boolean
+  repliesLimit?: number
+  onEditorDiscard?: () => void
 }
 
 export const ThreadItem = memo(function ThreadItem(props: Props) {
-  const { note, renderEditor = true, renderReplies = true } = props
+  const { note, renderEditor = true, renderReplies = true, repliesLimit, onEditorDiscard } = props
   const { event } = note
   const ref = useRef<HTMLDivElement>(null)
   const deck = useDeckColumn()
@@ -45,14 +47,16 @@ export const ThreadItem = memo(function ThreadItem(props: Props) {
 
   return (
     <>
-      <ContentProvider value={{ dense: true, disableLink: isCurrentEvent }}>
+      <ContentProvider value={{ dense: true }}>
         <html.div style={styles.reply} ref={ref}>
           {isCurrentEvent && <html.div style={styles.current}></html.div>}
           <Stack align='flex-start' gap={1} sx={styles.content}>
             {hasReplies && <html.div style={styles.thread} />}
             <UserAvatar pubkey={event.pubkey} />
             <Stack horizontal={false} sx={styles.wrapper}>
-              {isCurrentEvent ? <ReplyContent note={note} highlight={false} /> : <ReplyContent note={note} />}
+              <ContentProvider value={{ disableLink: isCurrentEvent }}>
+                <ReplyContent note={note} highlight={!isCurrentEvent} />
+              </ContentProvider>
               <html.div style={styles.root$actions}>
                 <PostActions
                   renderOptions
@@ -73,14 +77,19 @@ export const ThreadItem = memo(function ThreadItem(props: Props) {
           </Stack>
         )}
         {renderEditor && (
-          <html.div style={styles.editor}>
-            <Expandable expanded={note.state.isReplying || false} trigger={() => <></>}>
-              <EditorProvider renderBubble initialOpen parent={note.event} />
-            </Expandable>
-          </html.div>
+          <Expandable expanded={note.state.isReplying || false} trigger={() => <></>}>
+            <EditorProvider
+              renderBubble
+              initialOpen
+              parent={note.event}
+              onSigned={() => note.actions.toggleReplies(true)}
+              onUndoBroadcast={() => note.actions.toggleReplies(false)}
+              onDiscard={onEditorDiscard}
+            />
+          </Expandable>
         )}
       </ContentProvider>
-      {renderReplies && isCurrentEvent && <Replies note={note} />}
+      {((renderReplies && isCurrentEvent) || note.state.repliesOpen) && <Replies note={note} limit={repliesLimit} />}
     </>
   )
 })
@@ -132,9 +141,5 @@ const styles = css.create({
     paddingBottom: spacing.padding1,
     paddingLeft: 24,
     color: palette.outlineVariant,
-  },
-  editor: {
-    position: 'relative',
-    paddingRight: spacing.padding2,
   },
 })

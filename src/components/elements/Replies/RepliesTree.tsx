@@ -7,7 +7,8 @@ export const RepliesTree = memo(function RepliesTree(props: {
   replies: NostrEventDB[]
   level: number
   nested?: boolean
+  limit?: number
 }) {
-  const { replies, ...rest } = props
-  return replies.map((event) => <Reply key={event.id} event={event} {...rest} />)
+  const { replies, limit = replies.length, ...rest } = props
+  return replies.slice(0, limit).map((event) => <Reply key={event.id} event={event} {...rest} />)
 })

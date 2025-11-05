@@ -15,12 +15,12 @@ import { Divider } from '../ui/Divider/Divider'
 import { Stack } from '../ui/Stack/Stack'
 import { Text } from '../ui/Text/Text'
 
-const ThreadItemInternal = (props: { event: NostrEventDB }) => {
+const ThreadItemInternal = (props: { event: NostrEventDB; onCancel: () => void }) => {
   const note = useNoteState(props.event, { replying: true, repliesOpen: false, contentOpen: false })
   return (
     <NoteProvider value={{ event: props.event }}>
       <ContentProvider value={{ disableLink: false, isDialog: true }}>
-        <ThreadItem note={note} renderEditor renderReplies={false} />
+        <ThreadItem note={note} renderEditor renderReplies={false} repliesLimit={1} onEditorDiscard={props.onCancel} />
       </ContentProvider>
     </NoteProvider>
   )
@@ -54,7 +54,7 @@ export const ReplyDialog = memo(function ReplyDialog() {
           <div style={{ width: 50 }} />
         </Stack>
         <Divider />
-        {event.data && <ThreadItemInternal event={event.data} />}
+        {event.data && <ThreadItemInternal event={event.data} onCancel={handleClose} />}
       </html.div>
     </DialogSheet>
   )
