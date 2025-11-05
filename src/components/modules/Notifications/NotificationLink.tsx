@@ -5,13 +5,6 @@ import { useNevent } from '@/hooks/useEventUtils'
 import type { ReactNode } from 'react'
 import type { NotificationType } from './NotificationItem'
 
-const NotificationLinkInner = (props: Required<Props>) => {
-  const { type, note, related } = props
-  const relatedNevent = useNevent(related)
-  const linkNevent = type === 'reply' || type === 'mention' ? note.nip19 : relatedNevent
-  return <LinkNEvent nevent={linkNevent}>{props.children}</LinkNEvent>
-}
-
 type Props = {
   note: NoteState
   related?: NostrEventDB
@@ -20,9 +13,22 @@ type Props = {
 }
 
 export const NotificationLink = (props: Props) => {
+  const nevent = useNevent(props.note.event)
+  const relatedNevent = useNevent(props.related)
   const { type } = props
-  if (type !== 'public_message') {
-    return props.related ? <NotificationLinkInner {...props} related={props.related} /> : props.children
+  switch (type) {
+    case 'reply':
+    case 'mention':
+      return <LinkNEvent nevent={nevent}>{props.children}</LinkNEvent>
+    case 'zap_profile':
+    case 'public_message': {
+      return props.children
+    }
+    default: {
+      if (props.related) {
+        return <LinkNEvent nevent={relatedNevent}>{props.children}</LinkNEvent>
+      }
+      return props.children
+    }
   }
-  return props.children
 }
