@@ -1,10 +1,12 @@
 import { useDeckColumn } from '@/components/modules/Deck/hooks/useDeck'
 import { ContentProvider } from '@/components/providers/ContentProvider'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
+import { mergeRefs } from '@/components/ui/helpers/mergeRefs'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { useEventReplies } from '@/hooks/query/useReplies'
 import { type NoteState } from '@/hooks/state/useNote'
 import { useIsCurrentRouteEventID } from '@/hooks/useNavigations'
+import { useReplyTreeLayout } from '@/hooks/useReplyTreeLayout'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconDotsVertical } from '@tabler/icons-react'
@@ -42,8 +44,9 @@ export const ThreadItem = memo(function ThreadItem(props: Props) {
     }
   }, [isCurrentEvent, note.id])
 
-  const { query: replies } = useEventReplies(note.event, { pageSize: note.state.pageSize })
-  const hasReplies = (replies.data?.length || 0) > 0
+  const hasReplies = useEventReplies(note.event, { pageSize: note.state.pageSize }).total > 0
+
+  const { rootRef, avatarCellRef, childrenRef } = useReplyTreeLayout(true, hasReplies)
 
   return (
     <>
@@ -68,10 +71,10 @@ export const ThreadItem = memo(function ThreadItem(props: Props) {
             </Stack>
           </Stack>
         </html.div>
-        {renderEditor && isCurrentEvent && note.state.repliesOpen && (
+        {renderEditor && isCurrentEvent && (
           <Stack sx={styles.divider} gap={2}>
             <html.div>
-              <IconDotsVertical strokeWidth='1.8' size={24} />
+              <IconDotsVertical strokeWidth='2.4' size={24} />
             </html.div>
             <WaveDivider />
           </Stack>
@@ -89,7 +92,13 @@ export const ThreadItem = memo(function ThreadItem(props: Props) {
           </Expandable>
         )}
       </ContentProvider>
-      {((renderReplies && isCurrentEvent) || note.state.repliesOpen) && <Replies note={note} limit={repliesLimit} />}
+      {((renderReplies && isCurrentEvent) || note.state.repliesOpen) && (
+        <Stack sx={styles.replies} ref={rootRef}>
+          <html.span style={styles.anchor} ref={avatarCellRef} />
+          <html.span aria-hidden style={styles.connectorDown} />
+          <Replies ref={childrenRef} note={note} limit={repliesLimit} level={2} />
+        </Stack>
+      )}
     </>
   )
 })
@@ -132,6 +141,7 @@ const styles = css.create({
     },
   },
   reply: {
+    '--connector-height': '0px',
     position: 'relative',
     paddingInline: spacing.padding2,
     scrollMargin: 64,
@@ -141,5 +151,30 @@ const styles = css.create({
     paddingBottom: spacing.padding1,
     paddingLeft: 24,
     color: palette.outlineVariant,
+  },
+  replies: {
+    position: 'relative',
+    paddingLeft: spacing.margin2,
+  },
+  anchor: {
+    position: 'absolute',
+    width: 3,
+    height: 3,
+    top: 12,
+    left: 33.5,
+    // backgroundColor: palette.outlineVariant,
+    // borderRadius: '100%',
+    // zIndex: 2,
+  },
+  connectorDown: {
+    position: 'absolute',
+    left: 34,
+    top: 14,
+    width: 3,
+    height: 'calc(var(--connector-height) - 32px)',
+    borderRadius: 4,
+    zIndex: 1,
+    backgroundColor: palette.outlineVariant,
+    cursor: 'pointer',
   },
 })
