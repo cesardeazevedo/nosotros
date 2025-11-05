@@ -23,7 +23,7 @@ const formatter = new Intl.NumberFormat()
 export const ButtonZap = memo(function ButtonZap(props: Props & ContainerProps) {
   const { onClick, ...rest } = props
   const { event } = useNoteContext()
-  const { dense, disableLink } = useContentContext()
+  const { dense } = useContentContext()
 
   const router = useRouter()
   const pubkey = useCurrentPubkey()
@@ -36,10 +36,7 @@ export const ButtonZap = memo(function ButtonZap(props: Props & ContainerProps) 
 
   return (
     <ButtonContainer {...rest} sx={styles.color(color)} value={<>{total ? formatter.format(total) : ''}</>}>
-      <LinkBase
-        disabled={disableLink}
-        search={(rest) => ({ ...rest, zap: nip19 })}
-        state={{ from: router.latestLocation.pathname } as never}>
+      <LinkBase search={(rest) => ({ ...rest, zap: nip19 })} state={{ from: router.latestLocation.pathname } as never}>
         <IconButton
           size={dense ? 'sm' : 'md'}
           icon={
