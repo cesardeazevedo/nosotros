@@ -1,4 +1,3 @@
-import { DeckScroll } from '@/components/modules/Deck/DeckScroll'
 import { NotificationFeed } from '@/components/modules/Notifications/NotificationFeed'
 import { NotificationHeader } from '@/components/modules/Notifications/NotificationHeader'
 import { Stack } from '@/components/ui/Stack/Stack'
@@ -26,9 +25,7 @@ export const SidebarPaneNotifications = memo(function SidebarPaneNotifications(p
       <div>
         <NotificationHeader feed={feed} />
       </div>
-      <DeckScroll>
-        <NotificationFeed column feed={feed} />
-      </DeckScroll>
+      <NotificationFeed column feed={feed} />
     </Stack>
   )
 })
