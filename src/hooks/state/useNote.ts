@@ -1,6 +1,7 @@
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { useMethods } from '@/hooks/useMethods'
 import { useCallback } from 'react'
+import { invalidateReplies } from '../query/useReplies'
 import { useNIP19 } from '../useEventUtils'
 
 export type NoteState = ReturnType<typeof useNoteState>
@@ -42,11 +43,12 @@ type NoteOptions = {
   contentOpen?: boolean
   repliesOpen?: boolean
   forceSync?: boolean
+  replying?: boolean
 }
 
 export function useNoteState(event: NostrEventDB, options?: NoteOptions) {
   const [state, actions] = useMethods(createMethods, {
-    isReplying: false,
+    isReplying: options?.replying ?? false,
     statsOpen: false,
     contentOpen: options?.contentOpen ?? false,
     repliesOpen: (options?.repliesOpen ?? null) as boolean | null,
@@ -64,6 +66,16 @@ export function useNoteState(event: NostrEventDB, options?: NoteOptions) {
     [state, actions.paginateReplies],
   )
 
+  const toggleReplies = useCallback(
+    (open?: boolean | null) => {
+      actions.toggleReplies(open)
+      if (state.repliesOpen !== true) {
+        invalidateReplies(event)
+      }
+    },
+    [actions.toggleReplies],
+  )
+
   return {
     id,
     event,
@@ -72,5 +84,6 @@ export function useNoteState(event: NostrEventDB, options?: NoteOptions) {
     actions,
     nip19,
     paginate,
+    toggleReplies,
   }
 }

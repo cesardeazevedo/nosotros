@@ -1,10 +1,12 @@
 import { useDeckColumn } from '@/components/modules/Deck/hooks/useDeck'
 import { ContentProvider } from '@/components/providers/ContentProvider'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
+import { mergeRefs } from '@/components/ui/helpers/mergeRefs'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { useEventReplies } from '@/hooks/query/useReplies'
 import { type NoteState } from '@/hooks/state/useNote'
 import { useIsCurrentRouteEventID } from '@/hooks/useNavigations'
+import { useReplyTreeLayout } from '@/hooks/useReplyTreeLayout'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconDotsVertical } from '@tabler/icons-react'
@@ -21,10 +23,12 @@ type Props = {
   note: NoteState
   renderEditor?: boolean
   renderReplies?: boolean
+  repliesLimit?: number
+  onEditorDiscard?: () => void
 }
 
 export const ThreadItem = memo(function ThreadItem(props: Props) {
-  const { note, renderEditor = true, renderReplies = true } = props
+  const { note, renderEditor = true, renderReplies = true, repliesLimit, onEditorDiscard } = props
   const { event } = note
   const ref = useRef<HTMLDivElement>(null)
   const deck = useDeckColumn()
@@ -40,19 +44,22 @@ export const ThreadItem = memo(function ThreadItem(props: Props) {
     }
   }, [isCurrentEvent, note.id])
 
-  const { query: replies } = useEventReplies(note.event, { pageSize: note.state.pageSize })
-  const hasReplies = (replies.data?.length || 0) > 0
+  const hasReplies = useEventReplies(note.event, { pageSize: note.state.pageSize }).total > 0
+
+  const { rootRef, avatarCellRef, childrenRef } = useReplyTreeLayout(true, hasReplies)
 
   return (
     <>
-      <ContentProvider value={{ dense: true, disableLink: isCurrentEvent }}>
+      <ContentProvider value={{ dense: true }}>
         <html.div style={styles.reply} ref={ref}>
           {isCurrentEvent && <html.div style={styles.current}></html.div>}
           <Stack align='flex-start' gap={1} sx={styles.content}>
             {hasReplies && <html.div style={styles.thread} />}
             <UserAvatar pubkey={event.pubkey} />
             <Stack horizontal={false} sx={styles.wrapper}>
-              {isCurrentEvent ? <ReplyContent note={note} highlight={false} /> : <ReplyContent note={note} />}
+              <ContentProvider value={{ disableLink: isCurrentEvent }}>
+                <ReplyContent note={note} highlight={!isCurrentEvent} />
+              </ContentProvider>
               <html.div style={styles.root$actions}>
                 <PostActions
                   renderOptions
@@ -64,23 +71,34 @@ export const ThreadItem = memo(function ThreadItem(props: Props) {
             </Stack>
           </Stack>
         </html.div>
-        {renderEditor && isCurrentEvent && note.state.repliesOpen && (
+        {renderEditor && isCurrentEvent && (
           <Stack sx={styles.divider} gap={2}>
             <html.div>
-              <IconDotsVertical strokeWidth='1.8' size={24} />
+              <IconDotsVertical strokeWidth='2.4' size={24} />
             </html.div>
             <WaveDivider />
           </Stack>
         )}
         {renderEditor && (
-          <html.div style={styles.editor}>
-            <Expandable expanded={note.state.isReplying || false} trigger={() => <></>}>
-              <EditorProvider renderBubble initialOpen parent={note.event} />
-            </Expandable>
-          </html.div>
+          <Expandable expanded={note.state.isReplying || false} trigger={() => <></>}>
+            <EditorProvider
+              renderBubble
+              initialOpen
+              parent={note.event}
+              onSigned={() => note.actions.toggleReplies(true)}
+              onUndoBroadcast={() => note.actions.toggleReplies(false)}
+              onDiscard={onEditorDiscard}
+            />
+          </Expandable>
         )}
       </ContentProvider>
-      {renderReplies && isCurrentEvent && <Replies note={note} />}
+      {((renderReplies && isCurrentEvent) || note.state.repliesOpen) && (
+        <Stack sx={styles.replies} ref={rootRef}>
+          <html.span style={styles.anchor} ref={avatarCellRef} />
+          <html.span aria-hidden style={styles.connectorDown} />
+          <Replies ref={childrenRef} note={note} limit={repliesLimit} level={2} />
+        </Stack>
+      )}
     </>
   )
 })
@@ -123,6 +141,7 @@ const styles = css.create({
     },
   },
   reply: {
+    '--connector-height': '0px',
     position: 'relative',
     paddingInline: spacing.padding2,
     scrollMargin: 64,
@@ -133,8 +152,29 @@ const styles = css.create({
     paddingLeft: 24,
     color: palette.outlineVariant,
   },
-  editor: {
+  replies: {
     position: 'relative',
-    paddingRight: spacing.padding2,
+    paddingLeft: spacing.margin2,
+  },
+  anchor: {
+    position: 'absolute',
+    width: 3,
+    height: 3,
+    top: 12,
+    left: 33.5,
+    // backgroundColor: palette.outlineVariant,
+    // borderRadius: '100%',
+    // zIndex: 2,
+  },
+  connectorDown: {
+    position: 'absolute',
+    left: 34,
+    top: 14,
+    width: 3,
+    height: 'calc(var(--connector-height) - 32px)',
+    borderRadius: 4,
+    zIndex: 1,
+    backgroundColor: palette.outlineVariant,
+    cursor: 'pointer',
   },
 })

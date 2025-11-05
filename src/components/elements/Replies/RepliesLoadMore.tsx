@@ -1,4 +1,4 @@
-import { repliesLeftAtomFamily } from '@/atoms/replies.atoms'
+import { repliesLeftAtomFamily } from '@/atoms/repliesCount.atoms'
 import { Button } from '@/components/ui/Button/Button'
 import { CircularProgress } from '@/components/ui/Progress/CircularProgress'
 import { Stack } from '@/components/ui/Stack/Stack'
@@ -29,7 +29,7 @@ export const RepliesLoadMore = function RepliesLoadMore(props: Props) {
     if (note.state.repliesOpen) {
       note.paginate(undefined, total)
     } else {
-      note.actions.toggleReplies()
+      note.toggleReplies()
     }
   }
   return (

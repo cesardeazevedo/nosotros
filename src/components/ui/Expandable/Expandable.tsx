@@ -60,7 +60,8 @@ export const Expandable = (props: Props) => {
 
   return (
     <html.div style={styles.container}>
-      {triggerElement && <html.div onClick={() => renderProps.expand()}>{triggerElement}</html.div>}
+      {triggerElement &&
+        (isControlled ? triggerElement : <html.div onClick={() => renderProps.expand()}>{triggerElement}</html.div>)}
       <html.div style={[styles.content, expanded && styles.contentExpanded]}>
         <html.div style={styles.contentInner}>{shouldRenderContent && children}</html.div>
       </html.div>

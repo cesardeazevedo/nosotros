@@ -29,7 +29,7 @@ export const Feed = memo(function Feed(props: Props) {
           feed={feed}
           onScrollEnd={feed.paginate}
           render={(event) => (render ? render(event) : <NostrEventFeedItem event={event} />)}
-          footer={<>{!feed.isEmpty ? <PostLoading rows={4} /> : <FeedEmpty feed={feed} />}</>}
+          footer={<>{!feed.isEmpty ? loading || <PostLoading rows={4} /> : <FeedEmpty feed={feed} />}</>}
           {...rest}
         />
       </ContentProvider>

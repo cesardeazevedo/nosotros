@@ -64,7 +64,7 @@ export const EditorMedia = memo(function EditorMedia(props: Props) {
     }
   }, [initialOpen])
 
-  const [submitting, submit] = useObservableState<boolean, EditorContextType>((input$) => {
+  const [, submit] = useObservableState<boolean, EditorContextType>((input$) => {
     return input$.pipe(
       concatMap((state) => {
         return from(uploadFiles()).pipe(
@@ -116,8 +116,8 @@ export const EditorMedia = memo(function EditorMedia(props: Props) {
           {state.open && (
             <EditorToolbar renderAddMedia={false}>
               <EditorSubmit
-                submitting={submitting}
-                disabled={files.length === 0 || state.isUploading}
+                submitting={state.submitting}
+                disabled={files.length === 0 || state.submitting || state.isUploading}
                 renderDiscard={renderDiscard}
                 onSubmit={() => submit(state)}
                 onDiscard={() => {
