@@ -33,8 +33,8 @@ export const PostRoot = memo(function PostRoot(props: Props) {
   const pubkey = useCurrentPubkey()
 
   const openReplies = useCallback(() => {
-    note.actions.toggleReplies()
-  }, [])
+    note.toggleReplies()
+  }, [note])
 
   return (
     <NoteProvider value={{ event }}>

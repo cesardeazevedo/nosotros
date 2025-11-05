@@ -4,6 +4,7 @@ import type { NostrFilter, RelayHints } from '@/core/types'
 import type { NostrEvent } from 'nostr-tools'
 import { nip19 } from 'nostr-tools'
 import { isAddressableKind } from 'nostr-tools/kinds'
+import type { AddressPointer } from 'nostr-tools/nip19'
 
 export function decodeNIP19(data?: string) {
   if (data) {
@@ -97,10 +98,10 @@ export function nip19ToRelayHints(decoded?: nip19.DecodedResult): RelayHints {
       }
     }
     case 'naddr': {
-      const { kind, pubkey, identifier } = decoded.data
+      const address = addressFromNIP19(decoded.data)
       return {
         ids: {
-          [[kind, pubkey, identifier].join(':')]: decoded.data.relays || FALLBACK_RELAYS,
+          [address]: decoded.data.relays || FALLBACK_RELAYS,
         },
       }
     }
@@ -108,6 +109,10 @@ export function nip19ToRelayHints(decoded?: nip19.DecodedResult): RelayHints {
       return {}
     }
   }
+}
+
+export function addressFromNIP19(address: AddressPointer) {
+  return [address.kind, address.pubkey, address.identifier].join(':')
 }
 
 export function eventAddress(event: NostrEvent) {

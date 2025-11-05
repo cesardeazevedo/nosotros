@@ -1,10 +1,15 @@
 import { replyCountAtomFamily } from '@/atoms/replies.atoms'
+import { Kind } from '@/constants/kinds'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
-import { eventRepliesQueryOptions } from '@/hooks/query/useReplies'
+import { queryKeys } from '@/hooks/query/queryKeys'
+import { appendEventToQuery, setEventData } from '@/hooks/query/queryUtils'
+import { buildRepliesQueryOptions, eventRepliesQueryOptions } from '@/hooks/query/useReplies'
+import { subscribeLive } from '@/hooks/subscriptions/subscribeLive'
 import { atom } from 'jotai'
 import { atomWithQuery } from 'jotai-tanstack-query'
-import { atomFamily } from 'jotai/utils'
+import { atomFamily, atomWithObservable } from 'jotai/utils'
 import { isAddressableKind } from 'nostr-tools/kinds'
+import { ignoreElements, tap } from 'rxjs'
 import { selectedPubkeyAtom } from './auth.atoms'
 import { userFamily } from './users.atoms'
 
@@ -22,6 +27,28 @@ const repliesQueryFamily = atomFamily(
         },
       }),
     }))
+  },
+  (a, b) => a.event.id === b.event.id,
+)
+
+export const liveRepliesFamily = atomFamily(
+  (params: { event: NostrEventDB }) => {
+    return atomWithObservable(
+      () => {
+        const scope = 'self'
+        const { filter, relayHints } = buildRepliesQueryOptions(params.event)
+        return subscribeLive({ relayHints }, scope, filter).pipe(
+          tap((event) => {
+            setEventData(event)
+            if (event.metadata?.rootId) {
+              appendEventToQuery(queryKeys.tag('e', [event.metadata.rootId], Kind.Text), [event])
+            }
+          }),
+          ignoreElements(),
+        )
+      },
+      { initialValue: [] as NostrEventDB[] },
+    )
   },
   (a, b) => a.event.id === b.event.id,
 )

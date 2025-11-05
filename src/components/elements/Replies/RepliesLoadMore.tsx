@@ -29,7 +29,7 @@ export const RepliesLoadMore = function RepliesLoadMore(props: Props) {
     if (note.state.repliesOpen) {
       note.paginate(undefined, total)
     } else {
-      note.actions.toggleReplies()
+      note.toggleReplies()
     }
   }
   return (
