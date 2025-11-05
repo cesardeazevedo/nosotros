@@ -38,6 +38,10 @@ export function useIsCurrentRouteEventID(id: string) {
       case 'nprofile': {
         return context.decoded.data.pubkey === id
       }
+      default: {
+        return false
+      }
     }
   }
+  return false
 }
