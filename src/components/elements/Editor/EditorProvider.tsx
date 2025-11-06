@@ -244,8 +244,8 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
   }
 
   const setOpen = () => {
-    focus()
     if (!state.open) {
+      focus()
       methods.toggle('open', true)
     }
   }
