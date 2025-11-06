@@ -86,12 +86,7 @@ const styles = css.create({
     position: 'relative',
     alignItems: 'center',
     justifyContent: 'center',
-    // `contain` and `content-visibility` are performance optimizations
-    // important here because progress indicators are often used when a cpu
-    // intensive task is underway so it's especially important to minimize
-    // their cpu consumption.
     contain: 'strict',
-    contentVisibility: 'auto',
     borderColor: circularProgressTokens.color,
   },
   layer: {

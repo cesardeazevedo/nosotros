@@ -11,7 +11,13 @@ import { dbSqlite } from '../../nostr/db'
 export function subscribeRelayStats(relay: Relay) {
   of(relay.url)
     .pipe(
-      filter((url) => !!new URL(url)),
+      filter((url) => {
+        try {
+          return !!new URL(url)
+        } catch {
+          return false
+        }
+      }),
       tap((url) => addRelay(url)),
       mergeMap((url) => {
         return from(

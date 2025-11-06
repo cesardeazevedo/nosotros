@@ -1,9 +1,9 @@
 import { addMediaDimAtom, currentVideoAtom, removeCurrentVideoAtom, setCurrentVideoAtom } from '@/atoms/media.atoms'
 import { useContentContext } from '@/components/providers/ContentProvider'
 import { useNoteContext } from '@/components/providers/NoteProvider'
-import { visibleOnHoverStyle } from '@/components/ui/helpers/visibleOnHover.stylex'
 import type { SxProps } from '@/components/ui/types'
 import { useNevent } from '@/hooks/useEventUtils'
+import { useMediaLink } from '@/hooks/useMediaLink'
 import { useMediaStore } from '@/hooks/useMediaStore'
 import { useSettings } from '@/hooks/useSettings'
 import { palette } from '@/themes/palette.stylex'
@@ -12,7 +12,6 @@ import { useAtomValue, useSetAtom } from 'jotai'
 import { memo, useEffect, useMemo, useRef } from 'react'
 import { css } from 'react-strict-dom'
 import { BlurContainer } from '../../Layouts/BlurContainer'
-import { LinkNEvent } from '../../Links/LinkNEvent'
 import { VideoControls } from './VideoControls'
 
 type Props = {
@@ -31,6 +30,7 @@ export const Video = memo(function Video(props: Props) {
   const { event } = useNoteContext()
   const { autoPlay: contextAutoPlay } = useContentContext()
   const nevent = useNevent(event)
+  const onClickMedia = useMediaLink(nevent, index)
   const ref = useRef<HTMLVideoElement>(null)
   const extension = useMemo(() => new URL(src).pathname.split('.').pop(), [src])
 
@@ -38,7 +38,7 @@ export const Video = memo(function Video(props: Props) {
   const setVideo = useSetAtom(setCurrentVideoAtom)
   const removeVideo = useSetAtom(removeCurrentVideoAtom)
   const currentVideo = useAtomValue(currentVideoAtom)
-  const media = useMediaStore(src, event.metadata?.imeta)
+  const media = useMediaStore(src, event.metadata?.imeta, false)
   const settings = useSettings()
   const autoPlay = contextAutoPlay ?? props.autoPlay ?? settings.autoPlay
 
@@ -67,7 +67,7 @@ export const Video = memo(function Video(props: Props) {
   return (
     <BlurContainer>
       {({ blurStyles }) => (
-        <LinkNEvent media block nevent={nevent} search={{ media: index }} sx={visibleOnHoverStyle.root}>
+        <>
           <video
             {...css.props([styles.video, cover && styles.cover, blurStyles, sx])}
             playsInline
@@ -79,16 +79,16 @@ export const Video = memo(function Video(props: Props) {
             autoPlay={false}
             preload={preload}
             controls={false}
+            onClick={onClickMedia}
             onLoadedMetadata={(e) => {
               const element = e.target as HTMLVideoElement
               addMediaDim({ src, dim: [element.videoWidth, element.videoHeight] })
             }}
-            src={src}
             {...media}>
             <source src={src} type={`video/${extension === 'mov' ? 'mp4' : extension}`} />
           </video>
           <VideoControls sx={styles.controls} ref={ref} />
-        </LinkNEvent>
+        </>
       )}
     </BlurContainer>
   )
@@ -98,7 +98,9 @@ const styles = css.create({
   video: {
     display: 'block',
     blockSize: 'auto',
-    minWidth: 150,
+    minWidth: 152,
+    width: 'auto',
+    height: 'inherit',
     maxWidth: 'inherit',
     maxHeight: 'inherit',
     backgroundColor: '#000',

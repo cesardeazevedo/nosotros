@@ -1,5 +1,6 @@
 import { enqueueToastAtom } from '@/atoms/toaster.atoms'
 import { useNostrContext } from '@/components/providers/NostrContextProvider'
+import { useNoteContext } from '@/components/providers/NoteProvider'
 import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { MenuList } from '@/components/ui/MenuList/MenuList'
 import { Popover } from '@/components/ui/Popover/Popover'
@@ -8,7 +9,7 @@ import { Kind } from '@/constants/kinds'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { usePublishEventMutation } from '@/hooks/mutations/usePublishEventMutation'
 import { queryKeys } from '@/hooks/query/queryKeys'
-import type { NoteState } from '@/hooks/state/useNote'
+import { useNIP19 } from '@/hooks/useEventUtils'
 import { publishRepost } from '@/nostr/publish/publishRepost'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconBlockquote, IconShare3 } from '@tabler/icons-react'
@@ -23,17 +24,18 @@ import { ToastEventPublished } from '../Toasts/ToastEventPublished'
 
 type Props = {
   open?: boolean
-  note: NoteState
   onClose?: () => void
   children: (props: IPopoverBaseTriggerRendererProps) => React.ReactNode
 }
 
 export const RepostPopover = memo(function RepostPopover(props: Props) {
-  const { note, children } = props
+  const { children } = props
+  const { event } = useNoteContext()
   const ctx = useNostrContext()
   const router = useRouter()
   const queryClient = useQueryClient()
   const enqueueToast = useSetAtom(enqueueToastAtom)
+  const nip19 = useNIP19(event)
 
   const { isPending, mutate } = usePublishEventMutation<NostrEvent>({
     mutationFn:
@@ -41,7 +43,7 @@ export const RepostPopover = memo(function RepostPopover(props: Props) {
       (event) =>
         publishRepost(event, { signer, includeRelays: ctx?.relays }),
     onSuccess: (event) => {
-      queryClient.setQueryData(queryKeys.tag('e', [note.id], Kind.Repost), (old: NostrEventDB[] = []) => {
+      queryClient.setQueryData(queryKeys.tag('e', [event.id], Kind.Repost), (old: NostrEventDB[] = []) => {
         return [...old, event]
       })
       enqueueToast({ component: <ToastEventPublished event={event} eventLabel='Repost' />, duration: 5_000_000 })
@@ -54,7 +56,7 @@ export const RepostPopover = memo(function RepostPopover(props: Props) {
       placement='bottom-start'
       contentRenderer={({ close }) => (
         <MenuList sx={styles.menu} surface='surfaceContainerLow'>
-          {note.event.kind === Kind.Text && (
+          {event.kind === Kind.Text && (
             <MenuItem
               disabled={isPending}
               leadingIcon={<IconShare3 size={20} />}
@@ -62,12 +64,14 @@ export const RepostPopover = memo(function RepostPopover(props: Props) {
               onClick={(e) => {
                 e.preventDefault()
                 e.stopPropagation()
-                const { metadata, ...event } = note.event
-                mutate(event)
+                const { metadata, ...rest } = event
+                mutate(rest)
               }}
             />
           )}
-          <LinkBase search={{ quoting: note.nip19 }} state={{ from: router.latestLocation.pathname } as never}>
+          <LinkBase
+            search={(rest) => ({ ...rest, quoting: nip19 })}
+            state={{ from: router.latestLocation.pathname } as never}>
             <MenuItem leadingIcon={<IconBlockquote strokeWidth='1.5' />} label='Quote' onClick={() => close()} />
           </LinkBase>
         </MenuList>

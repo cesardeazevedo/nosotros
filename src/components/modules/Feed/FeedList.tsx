@@ -1,4 +1,4 @@
-import { PullToRefresh } from '@/components/elements/PullToRefresh/PullToRefresh'
+import { useRouteUtilsContext } from '@/components/providers/RouteUtilsProvider'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import type { FeedState } from '@/hooks/state/useFeed'
 import { spacing } from '@/themes/spacing.stylex'
@@ -21,9 +21,7 @@ export type Props = {
 export const FeedList = memo(function FeedList(props: Props) {
   const { feed, render, onScrollEnd, column, renderNewPostsIndicator = true } = props
   const ref = useRef<HTMLDivElement>(null)
-  const pullRefreshProps = {
-    onRefresh: feed.onRefresh,
-  }
+  const { hiddenRoute } = useRouteUtilsContext()
 
   const list = useMemo(
     () => feed.query.data?.pages.flat().slice(0, feed.pageSize) || [],
@@ -39,11 +37,14 @@ export const FeedList = memo(function FeedList(props: Props) {
   })
 
   const handleWindowScroll = useCallback(() => {
+    if (hiddenRoute) {
+      return
+    }
     const offset = document.scrollingElement?.scrollTop || 0
     if (offset >= (document.scrollingElement?.scrollHeight || Infinity) - 2100) {
       onScrollEnd?.()
     }
-  }, [onScrollEnd])
+  }, [onScrollEnd, hiddenRoute])
 
   const handleScrollColumn = useCallback(
     (e: BaseSyntheticEvent) => {
@@ -61,34 +62,32 @@ export const FeedList = memo(function FeedList(props: Props) {
 
   if (column) {
     return (
-      <PullToRefresh {...pullRefreshProps}>
-        <html.div style={styles.column} ref={ref} onScroll={handleScrollColumn}>
-          {props.header}
-          {!props.wrapper && renderNewPostsIndicator && <FeedNewPosts ref={ref} feed={feed} />}
-          {props.wrapper ? (
-            <>
-              {props.wrapper(
-                <>
-                  {renderNewPostsIndicator && <FeedNewPosts ref={ref} feed={feed} />}
-                  {content}
-                </>,
-              )}
-            </>
-          ) : (
-            content
-          )}
-          {props.footer}
-        </html.div>
-      </PullToRefresh>
+      <html.div style={styles.column} ref={ref} onScroll={handleScrollColumn}>
+        {props.header}
+        {!props.wrapper && renderNewPostsIndicator && <FeedNewPosts ref={ref} feed={feed} />}
+        {props.wrapper ? (
+          <>
+            {props.wrapper(
+              <>
+                {renderNewPostsIndicator && <FeedNewPosts ref={ref} feed={feed} />}
+                {content}
+              </>,
+            )}
+          </>
+        ) : (
+          content
+        )}
+        {props.footer}
+      </html.div>
     )
   }
   return (
-    <PullToRefresh {...pullRefreshProps}>
+    <>
       {props.header}
       <FeedNewPosts feed={feed} />
       {props.wrapper ? props.wrapper(<>{content}</>) : content}
       {props.footer}
-    </PullToRefresh>
+    </>
   )
 })
 

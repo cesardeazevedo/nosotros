@@ -47,7 +47,6 @@ const styles = css.create({
   skeleton: {
     paddingInline: spacing.padding2,
     width: '100%',
-    minWidth: 340,
     height: 80,
     borderRadius: shape.lg,
   },

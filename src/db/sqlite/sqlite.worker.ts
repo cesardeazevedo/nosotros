@@ -84,6 +84,10 @@ async function onMessage(e: MessageEvent) {
       store.event.insert(msg.params)
       break
     }
+    case 'deleteEvent': {
+      store.event.delete(db, msg.params)
+      break
+    }
     case 'querySeen': {
       const seen = store.seen.query(db, msg.params)
       postMessage(msg, seen)

@@ -1,3 +1,4 @@
+import { TextClamped } from '@/components/elements/Content/TextClamped'
 import { LinkNAddress } from '@/components/elements/Links/LinkNAddress'
 import { PostActions } from '@/components/elements/Posts/PostActions/PostActions'
 import { PostHeaderDate } from '@/components/elements/Posts/PostHeaderDate'
@@ -33,7 +34,7 @@ export const ArticleFeedItem = memo(function ArticleFeedItem(props: Props) {
   const image = useEventTag(event, 'image')
   const summary = useEventTag(event, 'summary')
   return (
-    <Stack horizontal={false} sx={[styles.root, props.border && styles.root$border]} ref={note.ref}>
+    <Stack horizontal={false} sx={[styles.root, props.border && styles.root$border]}>
       <NoteProvider value={{ event }}>
         <LinkNAddress naddress={note.nip19 as NAddr}>
           <ContentProvider value={{ dense, disableLink: true }}>
@@ -49,9 +50,11 @@ export const ArticleFeedItem = memo(function ArticleFeedItem(props: Props) {
                     {title}
                   </Text>
                   {summary && (
-                    <Text variant='body' size='md'>
-                      {summary}
-                    </Text>
+                    <TextClamped>
+                      <Text variant='body' size='md' sx={styles.summary}>
+                        {summary}
+                      </Text>
+                    </TextClamped>
                   )}
                 </Stack>
                 {dense && <PostActions note={note} />}
@@ -86,13 +89,15 @@ const styles = css.create({
     borderBottomColor: palette.outlineVariant,
   },
   wrapper: {
-    paddingBlock: spacing.padding1,
-    paddingInline: spacing.padding2,
+    paddingBottom: spacing.padding1,
+    paddingLeft: spacing.padding2,
+    paddingRight: spacing.padding1,
   },
   content: {
     paddingTop: spacing.padding1,
     overflow: 'hidden',
   },
+  summary: {},
   image: {
     objectFit: 'cover',
     width: 170,

@@ -39,6 +39,8 @@ export class SqliteNip05 {
         relays = excluded.relays,
         timestamp = excluded.timestamp
     `
-    db.exec(query, { bind: [data.nip05, data.pubkey, JSON.stringify(data.relays), data.timestamp] })
+    if (data.pubkey.length === 64) {
+      db.exec(query, { bind: [data.nip05, data.pubkey, JSON.stringify(data.relays), data.timestamp] })
+    }
   }
 }

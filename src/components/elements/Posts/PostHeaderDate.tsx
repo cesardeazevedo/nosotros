@@ -1,3 +1,4 @@
+import { useContentContext } from '@/components/providers/ContentProvider'
 import { Text } from '@/components/ui/Text/Text'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 import type { SxProps } from '@/components/ui/types'
@@ -17,6 +18,7 @@ type Props = {
 
 export const PostHeaderDate = memo(function PostHeaderDate(props: Props) {
   const { nevent, date, sx, dateStyle } = props
+  const { disableLink } = useContentContext()
   const [shortDate, fullDate] = useRelativeDate(date, dateStyle)
   const content = (
     <Tooltip text={fullDate}>
@@ -26,7 +28,7 @@ export const PostHeaderDate = memo(function PostHeaderDate(props: Props) {
     </Tooltip>
   )
 
-  if (!nevent) {
+  if (!nevent || disableLink) {
     return content
   }
 

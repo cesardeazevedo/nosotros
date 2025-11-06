@@ -39,6 +39,10 @@ export class SqliteStorage {
     return eventMetadata
   }
 
+  async deleteEvent(eventId: string) {
+    this.send({ method: 'deleteEvent', params: eventId })
+  }
+
   async querySeen(eventId: string) {
     return await this.send<SeenDB[]>({
       method: 'querySeen',

@@ -1,5 +1,6 @@
 import type { Preview, ReactRenderer } from '@storybook/react-vite'
 import { createRootRouteWithContext, createRoute, createRouter, RouterProvider } from '@tanstack/react-router'
+import { initialize, mswLoader } from 'msw-storybook-addon'
 import { DARK_MODE_EVENT_NAME } from '@vueless/storybook-dark-mode'
 import { Provider } from 'jotai'
 import React, { useEffect } from 'react'
@@ -16,6 +17,9 @@ import { useSetSettings } from '../src/hooks/useSettings'
 import '../src/styles/stylex.css'
 
 const channel = addons.getChannel()
+
+// Initialize MSW
+initialize()
 
 // eslint-disable-next-line react-refresh/only-export-components
 const App = (props: { Story: PartialStoryFn<ReactRenderer> }) => {
@@ -44,6 +48,7 @@ const preview: Preview = {
       },
     },
   },
+  loaders: [mswLoader],
   // @ts-ignore
   darkMode: {
     dark: { ...themes.dark, appBg: '#000000' },

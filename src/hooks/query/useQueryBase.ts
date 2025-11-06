@@ -5,7 +5,6 @@ import { FALLBACK_RELAYS } from '@/constants/relays'
 import { mergeRelayHints } from '@/core/mergers/mergeRelayHints'
 import type { RelayHints } from '@/core/types'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
-import { parseEventMetadata } from '@/hooks/parsers/parseEventMetadata'
 import type { NostrContext } from '@/nostr/context'
 import { decodeNIP19, decodeRelays, decodeToFilter, nip19ToRelayHints } from '@/utils/nip19'
 import type { UseQueryOptions } from '@tanstack/react-query'
@@ -81,13 +80,13 @@ export function replaceableEventQueryOptions<Selector = NostrEventDB>(
       authors: [pubkey],
     },
     queryKey: queryKeys.replaceable(kind, pubkey),
+    select: (events) => events[0] as Selector,
+    ...options,
     ctx: {
       network: 'STALE_WHILE_REVALIDATE_BATCH',
       batcher,
       ...options?.ctx,
     },
-    select: (events) => events[0] as Selector,
-    ...options,
   })
 }
 
@@ -104,13 +103,13 @@ export function addressableEventQueryOptions<Selector = NostrEventDB>(
       '#d': [d],
     },
     queryKey: queryKeys.addressable(kind, pubkey, d),
+    select: (events) => events[0] as Selector,
+    ...options,
     ctx: {
       network: 'STALE_WHILE_REVALIDATE_BATCH',
       batcher,
       ...options?.ctx,
     },
-    select: (events) => events[0] as Selector,
-    ...options,
   })
 }
 
@@ -170,31 +169,14 @@ export function useEventFromNIP19(nip19: string, relayHints?: RelayHints, keepPr
 
 export function useRepostedEvent(event: NostrEventDB) {
   const id = event.metadata?.mentionedNotes?.[0] || ''
-  let initialData: [NostrEventDB] | undefined
-  try {
-    initialData =
-      event.content && event.content !== '{}' ? [parseEventMetadata(JSON.parse(event.content || '{}'))] : undefined
-  } catch {
-    // invalid content json
-  }
-  return useQuery(
-    eventQueryOptions({
-      queryKey: queryKeys.event(id),
-      filter: { ids: [id] },
-      ctx: {
-        relays: FALLBACK_RELAYS,
-        relayHints: {
-          ...event.metadata?.relayHints,
-          ids: {
-            [id]: [event.pubkey],
-          },
-        },
+  return useEvent(id, {
+    relayHints: {
+      ...event.metadata?.relayHints,
+      ids: {
+        [id]: [event.pubkey],
       },
-      enabled: !!id,
-      initialData,
-      select: (events) => events[0],
-    }),
-  )
+    },
+  })
 }
 
 export function useReplaceableEvent<Selector = NostrEventDB>(

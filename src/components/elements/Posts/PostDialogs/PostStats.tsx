@@ -25,7 +25,7 @@ const Panel = (props: { children: React.ReactNode; label: string; value?: object
   const { label, defaultExpanded, children } = props
   return (
     <Expandable
-      defaultExpanded={defaultExpanded}
+      initiallyExpanded={defaultExpanded}
       trigger={({ expand, expanded }) => (
         <>
           <Stack gap={1} sx={styles.panel} onClick={() => expand(!expanded)}>

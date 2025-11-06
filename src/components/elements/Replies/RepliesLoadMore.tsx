@@ -1,7 +1,8 @@
-import { repliesLeftAtomFamily } from '@/atoms/replies.atoms'
+import { repliesLeftAtomFamily } from '@/atoms/repliesCount.atoms'
 import { Button } from '@/components/ui/Button/Button'
 import { CircularProgress } from '@/components/ui/Progress/CircularProgress'
 import { Stack } from '@/components/ui/Stack/Stack'
+import { useEventReplies } from '@/hooks/query/useReplies'
 import type { NoteState } from '@/hooks/state/useNote'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
@@ -17,24 +18,27 @@ type Props = {
 
 export const RepliesLoadMore = function RepliesLoadMore(props: Props) {
   const { note, disabled } = props
-  const loading = note.replies.isLoading
+  const {
+    query: { isLoading },
+  } = useEventReplies(note.event)
+  const { total } = useEventReplies(note.event)
   const repliesLeft = useAtomValue(repliesLeftAtomFamily({ id: note.event.id, limit: note.state.pageSize }))
-  const noRepliesLeft = !loading && !!note.state.repliesOpen && repliesLeft === 0
+  const noRepliesLeft = !isLoading && !!note.state.repliesOpen && repliesLeft === 0
   const handleClick = (e: StrictClickEvent) => {
     e.stopPropagation()
     if (note.state.repliesOpen) {
-      note.paginate()
+      note.paginate(undefined, total)
     } else {
-      note.actions.toggleReplies()
+      note.toggleReplies()
     }
   }
   return (
     <Stack sx={styles.root} gap={1}>
       <html.span style={styles.leading}>
-        {loading ? <CircularProgress size='sm' /> : <IconDotsVertical {...css.props(styles.icon)} />}
+        {isLoading ? <CircularProgress size='sm' /> : <IconDotsVertical {...css.props(styles.icon)} />}
       </html.span>
-      <Button variant='filledTonal' onClick={handleClick} disabled={loading || (disabled ?? noRepliesLeft)}>
-        {loading ? 'Loading replies' : noRepliesLeft ? 'No replies left' : `See More ${repliesLeft || ''} replies`}
+      <Button variant='filledTonal' onClick={handleClick} disabled={isLoading || (disabled ?? noRepliesLeft)}>
+        {isLoading ? 'Loading replies' : noRepliesLeft ? 'No replies left' : `See More ${repliesLeft || ''} replies`}
       </Button>
     </Stack>
   )

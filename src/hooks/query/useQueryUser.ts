@@ -53,7 +53,7 @@ export function useUserMuteList(pubkey: string, options?: CustomQueryOptions<Nos
   return useReplaceableEvent(Kind.Mutelist, pubkey, options)
 }
 
-function userRelaysQueryOptions(pubkey: string | undefined, permission: number) {
+export function userRelaysQueryOptions(pubkey: string | undefined, permission: number) {
   return replaceableEventQueryOptions(Kind.RelayList, pubkey || '', {
     enabled: !!pubkey,
     ctx: {

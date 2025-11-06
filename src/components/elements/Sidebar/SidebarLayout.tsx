@@ -3,7 +3,7 @@ import { Stack } from '@/components/ui/Stack/Stack'
 import { useCurrentPubkey } from '@/hooks/useAuth'
 import { useSettings } from '@/hooks/useSettings'
 import { spacing } from '@/themes/spacing.stylex'
-import { useMatchRoute } from '@tanstack/react-router'
+import { useMatch } from '@tanstack/react-router'
 import React, { memo, useState } from 'react'
 import { css, html } from 'react-strict-dom'
 import { LinkBase } from '../Links/LinkBase'
@@ -22,10 +22,8 @@ type Props = {
 }
 
 export const SidebarLayout = memo(function SidebarLayout(props: Props) {
-  'use no memo' // causing issue with useMatchRoute not updating https://github.com/TanStack/router/issues/4499
-  const match = useMatchRoute()
   const settings = useSettings()
-  const isDeck = match({ to: '/deck/$id' })
+  const isDeck = useMatch({ from: '/deck/$id', shouldThrow: false })
   const pubkey = useCurrentPubkey()
   const [pane, setPane] = useState<Panes>(false)
   const sidebarCollapsed = settings.sidebarCollapsed || pane !== false

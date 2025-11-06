@@ -1,10 +1,10 @@
 import { enqueueToastAtom } from '@/atoms/toaster.atoms'
 import { useContentContext } from '@/components/providers/ContentProvider'
 import { useNostrContext } from '@/components/providers/NostrContextProvider'
+import { useNoteContext } from '@/components/providers/NoteProvider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { usePublishEventMutation } from '@/hooks/mutations/usePublishEventMutation'
-import { useReactionByPubkey } from '@/hooks/query/useReactions'
-import type { NoteState } from '@/hooks/state/useNote'
+import { useReactionByPubkey, useReactions } from '@/hooks/query/useReactions'
 import { useCurrentPubkey } from '@/hooks/useAuth'
 import { useMobile } from '@/hooks/useMobile'
 import { publishReaction } from '@/nostr/publish/publishReaction'
@@ -34,19 +34,16 @@ const emojiColors: Record<string, string> = {
   '😡': colors.orange7,
 }
 
-type Props = {
-  note: NoteState
-}
-
-export const ButtonReaction = memo(function ButtonReaction(props: Props) {
+export const ButtonReaction = memo(function ButtonReaction() {
   const [mobileOpen, setMobileOpen] = useState(false)
-  const { note } = props
+  const { event } = useNoteContext()
   const { dense } = useContentContext()
   const ctx = useNostrContext()
   const enqueueToast = useSetAtom(enqueueToastAtom)
   const pubkey = useCurrentPubkey()
-  const total = note.reactions.data?.length || 0
-  const myReaction = useReactionByPubkey(pubkey, note.event)?.content
+  const reactions = useReactions(event)
+  const total = reactions.data?.length || 0
+  const myReaction = useReactionByPubkey(pubkey, event)?.content
   const color = myReaction ? emojiColors[fallbackEmoji(myReaction)] || colors.red7 : colors.red7
   const mobile = useMobile()
 
@@ -61,7 +58,7 @@ export const ButtonReaction = memo(function ButtonReaction(props: Props) {
   })
 
   const handleReaction = (reaction: string) => {
-    mutate([reaction, note.event])
+    mutate([reaction, event])
   }
 
   return (

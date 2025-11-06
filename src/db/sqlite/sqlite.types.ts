@@ -43,6 +43,7 @@ export type SqliteMessages =
   | { method: 'getRawEventById'; params: string }
   | { method: 'queryEvent'; params: NostrFilter }
   | { method: 'insertEvent'; params: NostrEventDB }
+  | { method: 'deleteEvent'; params: string }
   | { method: 'querySeen'; params: string }
   | { method: 'insertSeen'; params: SeenDB }
   | { method: 'queryRelayStats'; params: string[] }

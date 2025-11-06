@@ -20,7 +20,7 @@ import {
   IconSettingsFilled,
   IconUser,
 } from '@tabler/icons-react'
-import { Link, useMatchRoute } from '@tanstack/react-router'
+import { Link, useMatch } from '@tanstack/react-router'
 import { memo, useContext } from 'react'
 import { css, html } from 'react-strict-dom'
 import { JoinNostrButton } from '../Buttons/JoinNostrButton'
@@ -41,12 +41,12 @@ const iconProps = {
 export const SidebarMenu = memo(function SidebarMenu() {
   const pubkey = useCurrentPubkey()
   const nprofile = useNprofile(pubkey)
-  const match = useMatchRoute()
   const isMobile = useMobile()
   const context = useContext(SidebarContext)
 
   const user = useCurrentUser()
-  const isNotification = context.pane === '/notifications' || !!match({ to: '/notifications' })
+  const isNotificationsRoute = !!useMatch({ from: '/notifications', shouldThrow: false })
+  const isNotification = context.pane === '/notifications' || isNotificationsRoute
 
   return (
     <Stack horizontal={false} sx={styles.root} gap={1}>

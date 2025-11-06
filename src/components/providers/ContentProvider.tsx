@@ -5,6 +5,7 @@ export type ContentContextValues = {
   disableLink: boolean
   disablePopover: boolean
   autoPlay: boolean | undefined
+  isDialog: boolean
   blured: boolean
 }
 
@@ -13,6 +14,7 @@ const defaults = {
   disableLink: false,
   disablePopover: false,
   autoPlay: undefined,
+  isDialog: false,
   blured: false,
 }
 

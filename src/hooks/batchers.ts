@@ -17,6 +17,19 @@ export const batcher = new SubscriptionBatcher<NostrEventDB>((filter, relayHints
   ),
 )
 
+export const batcherReplies = new SubscriptionBatcher<NostrEventDB>((filter, relayHints, cached) =>
+  subscribeRemote(
+    {
+      outbox: true,
+      relayHints,
+      maxRelaysPerUser: store.get(settingsAtom).maxRelaysPerUser,
+      subId: 'replies',
+    },
+    filter,
+    cached,
+  ),
+)
+
 export const batcherRelayList = new SubscriptionBatcher<NostrEventDB>((filter, relayHints, cached) =>
   subscribeRemote(
     {

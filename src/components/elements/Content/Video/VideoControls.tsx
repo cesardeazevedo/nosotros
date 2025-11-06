@@ -102,21 +102,30 @@ export const VideoControls = function VideoControls(props: Props) {
   }, [ref.current, duration])
 
   useEffect(() => {
-    if (!containerRef.current || !timeDisplayRef.current) return
+    const video = ref.current
+    if (!containerRef.current || !timeDisplayRef.current || !video) return
+
+    const videoResizeObserver = new ResizeObserver((entries) => {
+      const entry = entries[0]
+      if (entry && containerRef.current) {
+        containerRef.current.style.width = `${entry.contentRect.width}px`
+      }
+    })
 
     const resizeObserver = new ResizeObserver((entries) => {
       const entry = entries[0]
       if (entry && timeDisplayRef.current) {
-        timeDisplayRef.current.style.display = entry.contentRect.width < 300 ? 'none' : 'block'
+        timeDisplayRef.current.style.display = entry.contentRect.width < 220 ? 'none' : 'block'
       }
     })
 
+    videoResizeObserver.observe(video)
     resizeObserver.observe(containerRef.current)
 
     return () => {
       resizeObserver.disconnect()
     }
-  }, [])
+  }, [ref.current])
 
   const handleProgressClick = useCallback(
     (event: Readonly<{ pageX: number; preventDefault: () => void; stopPropagation: () => void }> | TouchEvent) => {
@@ -405,7 +414,7 @@ const styles = css.create({
   timeDisplay: {
     color: 'white',
     whiteSpace: 'nowrap',
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: 500,
     userSelect: 'all',
   },

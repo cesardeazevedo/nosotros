@@ -3,12 +3,13 @@ import { SettingsMaxRelaysOutbox } from '@/components/modules/Settings/SettingsM
 import { SettingsNIP05 } from '@/components/modules/Settings/SettingsNIP05'
 import { SettingsSubHeader } from '@/components/modules/Settings/SettingsSubHeader'
 import { SettingsTheme } from '@/components/modules/Settings/SettingsTheme'
-import { Stack } from '@/components/ui/Stack/Stack'
-import { SettingsContent } from './SettingsContent'
-import { Text } from '@/components/ui/Text/Text'
 import { Divider } from '@/components/ui/Divider/Divider'
-import { css } from 'react-strict-dom'
+import { Stack } from '@/components/ui/Stack/Stack'
+import { Text } from '@/components/ui/Text/Text'
 import { spacing } from '@/themes/spacing.stylex'
+import { css } from 'react-strict-dom'
+import { SettingsAutoPlay } from './SettingsAutoPlay'
+import { SettingsDelayBroadcast } from './SettingsDelayBroadcast'
 import { SettingsLayout } from './SettingsLayout'
 
 export const SettingsPreferencesRoute = () => {
@@ -28,7 +29,8 @@ export const SettingsPreferencesRoute = () => {
       <Stack horizontal={false} gap={2} align='flex-start'>
         <SettingsNIP05 />
         <SettingsMaxRelaysOutbox />
-        <SettingsContent />
+        <SettingsDelayBroadcast />
+        <SettingsAutoPlay />
         <SettingsClientTag />
         <SettingsLayout />
       </Stack>

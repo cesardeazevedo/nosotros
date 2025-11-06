@@ -1,32 +1,30 @@
+import { naddrFamily, neventFamily, nprofileFamily } from '@/atoms/nip19.atoms'
 import { Kind } from '@/constants/kinds'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import type { IMetaFields } from '@/hooks/parsers/parseImeta'
 import { getMimeType } from '@/hooks/parsers/parseImeta'
-import { encodeSafe } from '@/utils/nip19'
-import { nip19 } from 'nostr-tools'
+import { useAtomValue } from 'jotai'
 import { isAddressableKind, isReplaceableKind } from 'nostr-tools/kinds'
 import { useMemo } from 'react'
-import { WRITE } from './parsers/parseRelayList'
-import { useUserRelays } from './query/useQueryUser'
 import { useSeen } from './query/useSeen'
 import { useCurrentUser } from './useAuth'
 
 export function useEventTag(event: NostrEventDB | undefined, tagName: string) {
   return useMemo(() => {
     return event?.tags.find((tag) => tag[0] === tagName)?.[1]
-  }, [event, tagName])
+  }, [tagName])
 }
 
 export function useEventLastTag(event: NostrEventDB | undefined, tagName: string) {
   return useMemo(() => {
     return event?.tags.findLast((tag) => tag[0] === tagName)?.[1]
-  }, [event, tagName])
+  }, [tagName])
 }
 
 export function useEventTags(event: NostrEventDB | undefined, tagName: string) {
   return useMemo(() => {
     return event?.tags.filter((tag) => tag[0] === tagName).map((tag) => tag[1]) || []
-  }, [event, tagName])
+  }, [tagName])
 }
 
 export function useEventDTag(event: NostrEventDB) {
@@ -57,63 +55,49 @@ export function useEventKey(event: NostrEventDB) {
     const isAddressable = isAddressableKind(kind)
 
     return isReplaceable ? [kind, pubkey].join(':') : isAddressable ? [kind, pubkey, d].join(':') : id
-  }, [event, d])
+  }, [d])
 }
 
 export function useNevent(event: NostrEventDB | undefined) {
-  const relays = useEventRelays(event?.id).slice(0, 4)
-  return useMemo(() => {
-    return encodeSafe(() =>
-      event
-        ? nip19.neventEncode({
-            id: event.id,
-            author: event.pubkey,
-            kind: event.kind,
-            relays,
-          })
-        : undefined,
-    )
-  }, [event, relays])
+  return useAtomValue(
+    neventFamily({
+      eventId: event?.id || '',
+      pubkey: event?.pubkey || '',
+      kind: event?.kind || 0,
+    }),
+  )
 }
 
 export function useNprofile(pubkey: string = '') {
-  const relays = useUserRelays(pubkey, WRITE)
-    .data?.map((x) => x.relay)
-    .slice(0, 4)
-  return useMemo(
-    () =>
-      encodeSafe(() =>
-        nip19.nprofileEncode({
-          pubkey,
-          relays,
-        }),
-      ),
-    [pubkey, relays],
-  )
+  return useAtomValue(nprofileFamily(pubkey))
 }
 
 export function useNaddress(event: NostrEventDB) {
   const d = useEventDTag(event)
-  const relays = useEventRelays(event.id).slice(0, 4)
-  if (d) {
-    return encodeSafe(() =>
-      nip19.naddrEncode({
-        pubkey: event.pubkey,
-        kind: event.kind,
-        identifier: d,
-        relays,
-      }),
-    )
-  }
+  return useAtomValue(
+    naddrFamily({
+      kind: event?.kind || 0,
+      pubkey: event?.pubkey || '',
+      identifier: d || '',
+    }),
+  )
+}
+
+export function useNIP19(event: NostrEventDB) {
+  const naddress = useNaddress(event)
+  const nevent = useNevent(event)
+  return isAddressableKind(event.kind) ? naddress : nevent
 }
 
 export function useImetaList(event: NostrEventDB | undefined) {
   return useMemo(() => {
     if (event?.metadata?.imeta && event.kind === Kind.Media) {
-      return Object.entries(event?.metadata?.imeta).map(([src, data]) => {
-        const mime = getMimeType(src, data as IMetaFields)
-        return [mime, src, data] as const
-      })
+      return Object.entries(event?.metadata?.imeta)
+        .map(([src, data]) => {
+          const mime = getMimeType(src, data as IMetaFields)
+          return [mime, src, data] as const
+        })
+        .filter((x): x is ['image' | 'video', string, IMetaFields] => x[0] === 'image' || x[0] === 'video')
     }
     return (
       event?.metadata?.contentSchema?.content

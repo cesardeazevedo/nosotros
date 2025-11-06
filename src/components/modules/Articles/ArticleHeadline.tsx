@@ -1,25 +1,24 @@
 import { openImageDialogAtom } from '@/atoms/dialog.atoms'
 import { addMediaErrorAtom, mediaErrorsAtom } from '@/atoms/media.atoms'
+import { TextClamped } from '@/components/elements/Content/TextClamped'
 import { PostHeaderDate } from '@/components/elements/Posts/PostHeaderDate'
 import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { useEventTag } from '@/hooks/useEventUtils'
 import { useMobile } from '@/hooks/useMobile'
-import { publish } from '@/nostr/publish/publish'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { getImgProxyUrl } from '@/utils/imgproxy'
-import { useMatchRoute } from '@tanstack/react-router'
+import { useMatch } from '@tanstack/react-router'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 
 export const ArticleHeadline = memo(function ArticleHeadline() {
   const { event } = useNoteContext()
-  const match = useMatchRoute()
-  const isDeck = match({ to: '/deck/$id' })
+  const isDeck = !!useMatch({ from: '/deck/$id', shouldThrow: false })
   const isMobile = useMobile()
   const pushImage = useSetAtom(openImageDialogAtom)
   const title = useEventTag(event, 'title')
@@ -43,9 +42,11 @@ export const ArticleHeadline = memo(function ArticleHeadline() {
           {title}
         </Text>
         {summary && (
-          <Text variant='title' size='lg' sx={styles.summary}>
-            {summary}
-          </Text>
+          <TextClamped>
+            <Text variant='title' size='lg' sx={styles.summary}>
+              {summary}
+            </Text>
+          </TextClamped>
         )}
         {publishedAt !== event.created_at && (
           <Stack gap={0.5}>

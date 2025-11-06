@@ -26,7 +26,7 @@ export const ImageEditor = (props: Props) => {
   return (
     <>
       <ContentProvider value={{ dense: true }}>
-        <MediaWrapper size='md' src={src} sx={styles.wrapper} {...wrapperProps}>
+        <MediaWrapper mode='single_editor' sx={styles.wrapper} {...wrapperProps}>
           <DeleteButton onClick={() => props.onDelete()} />
           <MediaUploading uploading={uploading}>
             <html.img

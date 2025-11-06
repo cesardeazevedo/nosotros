@@ -1,21 +1,18 @@
 import { addMediaDimAtom, mediaErrorsAtom } from '@/atoms/media.atoms'
-import { useContentContext } from '@/components/providers/ContentProvider'
 import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { SxProps } from '@/components/ui/types'
 import { useNevent } from '@/hooks/useEventUtils'
+import { useMediaLink } from '@/hooks/useMediaLink'
 import { useMediaStore } from '@/hooks/useMediaStore'
-import { useMobile } from '@/hooks/useMobile'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import { getImgProxyUrl } from '@/utils/imgproxy'
 import { IconPhotoOff } from '@tabler/icons-react'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { memo } from 'react'
-import { css, html } from 'react-strict-dom'
+import { css } from 'react-strict-dom'
 import { BlurContainer } from '../../Layouts/BlurContainer'
-import { LinkNEvent } from '../../Links/LinkNEvent'
 import { ContentLink } from '../Link/Link'
 
 type Props = {
@@ -30,12 +27,11 @@ type Props = {
 export const Image = memo(function Image(props: Props) {
   const { src, proxy = true, index = 0, cover = false, sx, ...rest } = props
   const { event } = useNoteContext()
-  const { dense } = useContentContext()
-  const media = useMediaStore(src, event.metadata?.imeta)
+  const media = useMediaStore(src, event.metadata?.imeta, proxy)
   const addMediaDim = useSetAtom(addMediaDimAtom)
   const hasError = useAtomValue(mediaErrorsAtom).has(src)
   const nevent = useNevent(event)
-  const isMobile = useMobile()
+  const onClickMedia = useMediaLink(nevent, index)
 
   return (
     <BlurContainer>
@@ -50,18 +46,30 @@ export const Image = memo(function Image(props: Props) {
             </ContentLink>
           )}
           {!hasError && (
-            <LinkNEvent media block nevent={nevent} search={{ media: index }}>
-              <html.img
+            <>
+              <img
                 role='button'
-                style={[styles.img, cover && styles.cover, (dense || isMobile) && styles.img$dense, blurStyles, sx]}
-                src={proxy ? getImgProxyUrl('feed_img', src) : src}
-                onLoad={(e: { target: HTMLImageElement }) => {
-                  addMediaDim({ src, dim: [e.target.naturalWidth, e.target.naturalHeight] })
+                onLoad={(e) => {
+                  const target = e.target as HTMLImageElement
+                  addMediaDim({
+                    src,
+                    dim: [media.width || target.naturalWidth, media.height || target.naturalHeight],
+                  })
                 }}
+                onClick={onClickMedia}
                 {...media}
                 {...rest}
+                {...css.props([
+                  styles.img,
+                  cover && styles.cover,
+                  blurStyles,
+                  // this is to make notes with imeta to work and the image haven't loaded yet
+                  media.height && media.width && media.height > media.width ? styles.portrait : styles.landscape,
+                  media.loaded && styles.loaded,
+                  sx,
+                ])}
               />
-            </LinkNEvent>
+            </>
           )}
         </>
       )}
@@ -72,9 +80,7 @@ export const Image = memo(function Image(props: Props) {
 const styles = css.create({
   img: {
     display: 'block',
-    blockSize: 'auto',
-    width: 'auto',
-    height: 'auto',
+    maxWidth: 'inherit',
     maxHeight: 'inherit',
     cursor: 'pointer',
     border: '1px solid',
@@ -83,8 +89,15 @@ const styles = css.create({
     transition: 'transform 150ms ease',
     ':active': { transform: 'scale(0.985)' },
   },
-  img$dense: {
-    maxHeight: 340,
+  portrait: {
+    width: 'auto',
+  },
+  landscape: {
+    height: 'auto',
+  },
+  loaded: {
+    width: 'auto',
+    height: 'auto',
   },
   cover: {
     objectFit: 'cover',

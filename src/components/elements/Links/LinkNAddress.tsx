@@ -1,6 +1,7 @@
 import { useDeckAddNextColumn } from '@/components/modules/Deck/hooks/useDeck'
 import { useContentContext } from '@/components/providers/ContentProvider'
 import { createEventModule } from '@/hooks/modules/createEventModule'
+import { useNostrMaskedLinkProps } from '@/hooks/useNostrMaskedLinkProps'
 import { Link, useRouter } from '@tanstack/react-router'
 import type { NAddr } from 'nostr-tools/nip19'
 import type { DragEventHandler } from 'react'
@@ -18,6 +19,7 @@ export const LinkNAddress = memo(function LinkNAddress(props: Props) {
   const { disableLink } = useContentContext()
 
   const router = useRouter()
+  const linkMaskedProps = useNostrMaskedLinkProps(naddress)
   const deck = useDeckAddNextColumn(() => createEventModule(naddress))
 
   const handleDragStart: DragEventHandler<HTMLAnchorElement> = (e) => {
@@ -39,11 +41,10 @@ export const LinkNAddress = memo(function LinkNAddress(props: Props) {
 
   return (
     <Link
-      to={`/$nostr`}
+      {...linkMaskedProps}
       state={{ from: router.latestLocation.pathname } as never}
       {...rest}
       {...css.props([underline && styles.underline])}
-      params={{ nostr: naddress }}
       onDragStart={handleDragStart}>
       {props.children}
     </Link>

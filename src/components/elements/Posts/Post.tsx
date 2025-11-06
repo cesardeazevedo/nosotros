@@ -2,12 +2,10 @@ import { ArticleHeadline } from '@/components/modules/Articles/ArticleHeadline'
 import { useNostrContext } from '@/components/providers/NostrContextProvider'
 import { NoteProvider } from '@/components/providers/NoteProvider'
 import { Divider } from '@/components/ui/Divider/Divider'
-import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { Kind } from '@/constants/kinds'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { useNoteState } from '@/hooks/state/useNote'
-import { duration } from '@/themes/duration.stylex'
-import { easing } from '@/themes/easing.stylex'
+import { useCurrentPubkey } from '@/hooks/useAuth'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { memo, useCallback } from 'react'
@@ -16,10 +14,11 @@ import { EditorProvider } from '../Editor/EditorProvider'
 import { Replies } from '../Replies/Replies'
 import { RepliesPreview } from '../Replies/RepliesPreview'
 import { PostActions } from './PostActions/PostActions'
-import { PostBroadcaster } from './PostBroadcaster'
 import { PostContent } from './PostContent'
+import { PostCountdown } from './PostCountdown'
 import { PostHeader } from './PostHeader'
 import { PostLink } from './PostLink'
+import { PostStats } from './PostStats'
 
 type Props = {
   event: NostrEventDB
@@ -31,24 +30,24 @@ export const PostRoot = memo(function PostRoot(props: Props) {
   const { event, header, open } = props
   const isFeed = !!useNostrContext()
   const note = useNoteState(event, { repliesOpen: open, forceSync: open, contentOpen: open })
+  const pubkey = useCurrentPubkey()
 
   const openReplies = useCallback(() => {
-    note.actions.toggleReplies()
-  }, [])
+    note.toggleReplies()
+  }, [note])
 
   return (
     <NoteProvider value={{ event }}>
-      <html.article style={[styles.root, isFeed && styles.root$divider]} ref={note.ref}>
-        <PostLink note={note} onClick={openReplies}>
+      <html.article style={[isFeed && styles.divider]}>
+        <PostLink note={note}>
+          {event.pubkey === pubkey && <PostCountdown id={event.id} />}
           {note.event.kind === Kind.Article && <ArticleHeadline />}
           {header || <PostHeader event={event} />}
           <PostContent note={note} />
           <PostActions note={note} onReplyClick={openReplies} />
+          <PostStats note={note} renderDivider />
           {note.state.repliesOpen === null && event.kind === Kind.Text && <RepliesPreview note={note} />}
         </PostLink>
-        <Expandable expanded={note.state.broadcastOpen}>
-          <PostBroadcaster note={note} />
-        </Expandable>
         {note.state.repliesOpen && (
           <>
             <Divider />
@@ -61,18 +60,8 @@ export const PostRoot = memo(function PostRoot(props: Props) {
   )
 })
 
-const fadeIn = css.keyframes({
-  from: { opacity: 0 },
-  to: { opacity: 1 },
-})
-
 const styles = css.create({
-  root: {
-    animation: fadeIn,
-    animationTimingFunction: easing.emphasizedDecelerate,
-    animationDuration: duration.long3,
-  },
-  root$divider: {
+  divider: {
     borderBottom: '1px solid',
     borderBottomColor: palette.outlineVariant,
   },

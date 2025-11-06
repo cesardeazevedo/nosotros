@@ -21,23 +21,25 @@ type Props = {
 export const PostQuote = memo(function PostQuote(props: Props) {
   const { event, header } = props
   const note = useNoteState(event)
-  const { blured } = useContentContext()
+  const { blured, disableLink } = useContentContext()
   const nevent = useNevent(event)
-  return (
-    <LinkNEvent block nevent={nevent}>
-      <NoteProvider value={{ event }}>
-        <ContentProvider value={{ blured, dense: true, disableLink: true }}>
-          <Paper outlined sx={styles.root}>
-            <html.div style={styles.wrapper}>
-              {header || <PostUserHeader dense sx={styles.header} event={event} />}
-              <PostContent initialExpanded note={note} />
-              <PostActions note={note} sx={styles.actions} />
-            </html.div>
-          </Paper>
-        </ContentProvider>
-      </NoteProvider>
-    </LinkNEvent>
+  const content = (
+    <NoteProvider value={{ event }}>
+      <ContentProvider value={{ blured, dense: true, disableLink: true }}>
+        <Paper outlined sx={styles.root}>
+          <html.div style={styles.wrapper}>
+            {header || <PostUserHeader dense sx={styles.header} event={event} />}
+            <PostContent initialExpanded note={note} />
+            <PostActions note={note} sx={styles.actions} />
+          </html.div>
+        </Paper>
+      </ContentProvider>
+    </NoteProvider>
   )
+  if (disableLink) {
+    return content
+  }
+  return <LinkNEvent nevent={nevent}>{content}</LinkNEvent>
 })
 
 const styles = css.create({

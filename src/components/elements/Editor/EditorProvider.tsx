@@ -1,16 +1,19 @@
+import { addBroadcastRequestAtom } from '@/atoms/broadcast.atoms'
 import { store } from '@/atoms/store'
 import { enqueueToastAtom } from '@/atoms/toaster.atoms'
 import { Kind } from '@/constants/kinds'
 import { CLIENT_TAG } from '@/constants/tags'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import { usePublishEventMutation } from '@/hooks/mutations/usePublishEventMutation'
 import { isAuthorTag, isQuoteTag } from '@/hooks/parsers/parseTags'
 import { queryKeys } from '@/hooks/query/queryKeys'
-import type { InfiniteEvents } from '@/hooks/query/useQueryFeeds'
+import { prependEventFeed, removeEventFromFeed, removeEventFromQuery } from '@/hooks/query/queryUtils'
 import { useUserRelays, useUsersRelays } from '@/hooks/query/useQueryUser'
-import { useUserMetadata } from '@/hooks/state/useUser'
+import { useUserState } from '@/hooks/state/useUser'
 import { useCurrentPubkey, useCurrentSigner } from '@/hooks/useAuth'
 import { useMethods } from '@/hooks/useMethods'
 import { useSettings } from '@/hooks/useSettings'
+import { publish, signAndSave } from '@/nostr/publish/publish'
 import { READ, WRITE } from '@/nostr/types'
 import { compactArray } from '@/utils/utils'
 import { useQueryClient, type QueryKey } from '@tanstack/react-query'
@@ -20,6 +23,7 @@ import type { FileUploadStorage, ImageAttributes, VideoAttributes } from 'nostr-
 import type { EventTemplate, NostrEvent } from 'nostr-tools'
 import type { Ref } from 'react'
 import { memo, useCallback, useEffect, useImperativeHandle, useMemo, useRef } from 'react'
+import { EMPTY, tap } from 'rxjs'
 import { createContext } from 'use-context-selector'
 import { ToastEventPublished } from '../Toasts/ToastEventPublished'
 import type { Props as EditorProps } from './Editor'
@@ -38,6 +42,7 @@ const initialState = {
   isUploading: false,
   broadcastDirt: false,
   zapSplitsEnabled: false,
+  submitting: false,
   includedRelays: new Set<string>(),
   excludedRelays: new Set<string>(),
   excludedMentions: new Set<string>(),
@@ -125,7 +130,7 @@ export type EditorRef = {
   editor: TiptapEditor | null
 }
 
-type Props = EditorProps & {
+type Props = Omit<EditorProps, 'onSubmit'> & {
   kind?: Kind
   protectedEvent?: boolean
   relays?: string[]
@@ -133,6 +138,10 @@ type Props = EditorProps & {
   queryKey?: QueryKey
   pubkey?: string
   ref?: Ref<EditorRef | null>
+  onDiscard?: () => void
+  onUndoBroadcast?: (event: NostrEvent) => void
+  onSigned?: (event: NostrEvent, relays?: string[]) => void
+  onSuccess?: (event: NostrEvent, relays?: string[]) => void
 }
 
 function getPostKindName(kind: Kind | undefined) {
@@ -156,7 +165,7 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
   const pubkey = useCurrentPubkey()
   const signer = useCurrentSigner()
   const queryClient = useQueryClient()
-  const parentUser = useUserMetadata(parent?.pubkey)
+  const parentUser = useUserState(parent?.pubkey)
 
   const kind = props.kind || (parent && parent.kind !== Kind.Text ? Kind.Comment : Kind.Text)
 
@@ -235,8 +244,8 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
   }
 
   const setOpen = () => {
+    focus()
     if (!state.open) {
-      focus()
       methods.toggle('open', true)
     }
   }
@@ -257,7 +266,7 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
       ...clientTag,
       ...nsfwTag,
     ])
-  }, [editor, relays])
+  }, [editor, relays, state.nsfwEnabled, settings.clientTag, state.excludedMentions])
 
   const replyTags = useReplyTags(parent)
   const publicMessageTags = usePublicMessageTags(publicMessagePubkey, parent)
@@ -276,7 +285,7 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
           tags: [...(kind === Kind.PublicMessage ? publicMessageTags : replyTags), ...getTags()],
         } as EventTemplate
       },
-      [kind, replyTags, publicMessageTags],
+      [kind, replyTags, publicMessageTags, state.nsfwEnabled, settings.clientTag],
     ),
   })
 
@@ -304,15 +313,10 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
     )
   }, [relays, protectedEvent, mentionsInboxRelays, myOutboxRelays, state.includedRelays, state.excludedRelays])
 
-  const setEventCache = useCallback(
+  const addNoteToQuery = useCallback(
     (event: NostrEvent) => {
       if (queryKey) {
-        queryClient.setQueryData(queryKey, (data: InfiniteEvents) => {
-          return {
-            ...data,
-            pages: [[event, ...data.pages[0]], ...data.pages.slice(1)],
-          } as InfiniteEvents
-        })
+        prependEventFeed(queryKey, [event])
       } else if (parent) {
         const rootId = parent.metadata?.rootId || parent.id
         queryClient.setQueryData(queryKeys.tag('e', [rootId], Kind.Text), (events: NostrEventDB[] = []) => [
@@ -326,12 +330,62 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
 
   const onSuccess = (event: NostrEvent) => {
     reset()
-    setEventCache(event)
+    methods.toggle('submitting', false)
+    props.onSuccess?.(event, allRelays)
     store.set(enqueueToastAtom, {
       component: <ToastEventPublished event={event} eventLabel={parent ? 'Comment' : 'Note'} />,
       duration: 10000,
     })
   }
+
+  const onUndo = (event: NostrEvent) => {
+    if (queryKey) {
+      removeEventFromFeed(queryKey, event.id)
+    } else if (parent) {
+      const rootId = parent.metadata?.rootId || parent.id
+      removeEventFromQuery(queryKeys.tag('e', [rootId], Kind.Text), event.id)
+    }
+    props.onUndoBroadcast?.(event)
+    methods.toggle('submitting', false)
+  }
+
+  const { mutateAsync: onSubmit } = usePublishEventMutation<EditorContextType>({
+    mutationFn:
+      ({ signer, pubkey }) =>
+      (state) => {
+        methods.toggle('submitting', true)
+        if (event) {
+          if (settings.delayBroadcast) {
+            // Delay broadcast
+            return signAndSave({ ...event, pubkey }, { signer, saveEvent: !state.protectedEvent }).pipe(
+              tap((event) => {
+                props.onSigned?.(event, allRelays)
+                addNoteToQuery(event)
+                store.set(addBroadcastRequestAtom, {
+                  event,
+                  relays: allRelays,
+                  signer,
+                  onComplete: () => {
+                    onSuccess(event)
+                  },
+                  onCancel: () => {
+                    onUndo(event)
+                  },
+                })
+              }),
+            )
+          }
+          return publish({ ...event, pubkey }, { relays: allRelays, signer, saveEvent: !protectedEvent }).pipe(
+            tap((event) => {
+              props.onSigned?.(event, allRelays)
+              addNoteToQuery(event)
+              onSuccess(event)
+            }),
+          )
+        }
+        return EMPTY
+      },
+  })
 
   useImperativeHandle(ref, () => ({ editor }), [editor])
 
@@ -357,11 +411,7 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
         parent,
         reset,
       }}>
-      {kind === Kind.Media ? (
-        <EditorMedia {...rest} onSuccess={onSuccess} />
-      ) : (
-        <Editor {...rest} onSuccess={onSuccess} />
-      )}
+      {kind === Kind.Media ? <EditorMedia {...rest} onSubmit={onSubmit} /> : <Editor {...rest} onSubmit={onSubmit} />}
     </EditorContext.Provider>
   )
 })

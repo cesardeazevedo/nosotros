@@ -12,7 +12,15 @@ export const FeedHeaderRelayFeed = memo(function FeedHeaderRelayFeed(props: Prop
   return (
     <FeedHeaderBase
       feed={feed}
-      leading={<FeedReplyTabs feed={feed} onChange={(tab) => feed.setReplies(tab === 'replies')} />}
+      leading={
+        <FeedReplyTabs
+          feed={feed}
+          onChange={(tab) => {
+            feed.setReplies(tab === 'replies')
+            feed.setPageSize(feed.options.pageSize || 10)
+          }}
+        />
+      }
     />
   )
 })

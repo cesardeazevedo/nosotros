@@ -4,8 +4,10 @@ import { Button } from '@/components/ui/Button/Button'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import { useEventReplies } from '@/hooks/query/useReplies'
 import { useNoteState } from '@/hooks/state/useNote'
 import { useIsCurrentRouteEventID } from '@/hooks/useNavigations'
+import { useReplyTreeLayout } from '@/hooks/useReplyTreeLayout'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { useNavigate, useRouter } from '@tanstack/react-router'
@@ -13,7 +15,7 @@ import { BubbleContainer } from 'components/elements/Content/Layout/Bubble'
 import { UserAvatar } from 'components/elements/User/UserAvatar'
 import { UserName } from 'components/elements/User/UserName'
 import { useMobile } from 'hooks/useMobile'
-import { memo, useCallback, useLayoutEffect, useRef, useState } from 'react'
+import { memo, useCallback, useDeferredValue, useState } from 'react'
 import { css, html } from 'react-strict-dom'
 import { EditorProvider } from '../Editor/EditorProvider'
 import { PostActions } from '../Posts/PostActions/PostActions'
@@ -38,9 +40,6 @@ export const Reply = memo(function Reply(props: Props) {
   const { blured } = useContentContext()
   const nevent = note.nip19
 
-  const rootRef = useRef<HTMLDivElement | null>(null)
-  const avatarCellRef = useRef<HTMLDivElement | null>(null)
-  const childrenRef = useRef<HTMLDivElement | null>(null)
   const isCurrentEvent = useIsCurrentRouteEventID(event.id)
 
   const handleOpen = useCallback(() => setOpen((v) => !v), [])
@@ -53,68 +52,24 @@ export const Reply = memo(function Reply(props: Props) {
     })
   }, [navigate, nevent, router.latestLocation.pathname])
 
+  const handleReplyInDialog = useCallback(() => {
+    navigate({
+      to: '.',
+      search: (old) => ({ ...old, replying: nevent }),
+    })
+  }, [navigate, nevent])
+
   if (repliesOpen === null && level >= 3) {
     return null
   }
 
-  const hasReplies = note.replies.data?.length !== 0
+  const { total, sorted } = useEventReplies(event)
+  const hasReplies = total > 0
 
-  useLayoutEffect(() => {
-    const host = rootRef.current
-    const parentAvatar = avatarCellRef.current
-    const list = childrenRef.current
-    if (!host) {
-      return
-    }
-
-    const setHeight = (px: number) => host.style.setProperty('--connector-height', `${Math.max(0, Math.round(px))}px`)
-
-    if (!open || !hasReplies || !parentAvatar || !list) {
-      setHeight(0)
-      return
-    }
-
-    const update = () => {
-      const parentBottom = parentAvatar.getBoundingClientRect().bottom
-
-      const lastChild = list.lastElementChild as HTMLElement | null
-      if (!lastChild) {
-        setHeight(0)
-        return
-      }
-      const lastChildAvatar = lastChild.querySelector<HTMLElement>('[data-reply-avatar="1"]')
-      if (!lastChildAvatar) {
-        setHeight(0)
-        return
-      }
-
-      const targetBottom = lastChildAvatar.getBoundingClientRect().bottom
-      const h = targetBottom - parentBottom
-      setHeight(Number.isFinite(h) ? h : 0)
-    }
-
-    update()
-
-    const ro = new ResizeObserver(update)
-    ro.observe(parentAvatar)
-    ro.observe(list)
-    ro.observe(host)
-
-    const mo = new MutationObserver(update)
-    mo.observe(list, { childList: true, subtree: true })
-
-    window.addEventListener('resize', update)
-    const raf = requestAnimationFrame(update)
-
-    return () => {
-      ro.disconnect()
-      mo.disconnect()
-      window.removeEventListener('resize', update)
-      cancelAnimationFrame(raf)
-    }
-  }, [open, hasReplies])
+  const { rootRef, avatarCellRef, childrenRef } = useReplyTreeLayout(open, hasReplies)
 
   const handleSeeMore = level < collapsedLevel ? handleOpen : handleOpenNestedDialog
+  const isReplyingDeferred = useDeferredValue(note.state.isReplying)
 
   return (
     <NoteProvider value={{ event }}>
@@ -135,7 +90,7 @@ export const Reply = memo(function Reply(props: Props) {
                 </html.div>
                 <BubbleContainer sx={styles.expandButton}>
                   <UserName pubkey={event.pubkey} />
-                  <Button variant='text'>See more {note.repliesTotal + 1} Replies</Button>
+                  <Button variant='text'>See more {total + 1} Replies</Button>
                 </BubbleContainer>
               </Stack>
             </ContentProvider>
@@ -153,23 +108,27 @@ export const Reply = memo(function Reply(props: Props) {
                 </ContentProvider>
               </Stack>
               <html.div style={styles.actions}>
-                <Stack>
-                  <PostActions renderOptions note={note} onReplyClick={() => note.actions.toggleReplying()} />
-                </Stack>
-                <Expandable expanded={note.state.isReplying} trigger={() => <></>}>
-                  {note.state.isReplying && (
+                <PostActions
+                  renderOptions
+                  statsPopover
+                  note={note}
+                  onReplyClick={() => {
+                    if ((nested && level > 3) || isMobile) {
+                      handleReplyInDialog()
+                    } else {
+                      note.actions.toggleReplying()
+                    }
+                  }}
+                />
+                {note.state.isReplying && (
+                  <Expandable expanded={isReplyingDeferred} trigger={() => <></>}>
                     <EditorProvider sx={styles.editor} initialOpen renderBubble parent={event} />
-                  )}
-                </Expandable>
+                  </Expandable>
+                )}
               </html.div>
               {nested && (
-                <html.div ref={childrenRef} style={styles.children}>
-                  <RepliesTree
-                    replies={note.repliesSorted}
-                    repliesOpen={repliesOpen}
-                    level={level + 1}
-                    nested={nested}
-                  />
+                <html.div ref={childrenRef}>
+                  <RepliesTree replies={sorted} repliesOpen={repliesOpen} level={level + 1} nested={nested} />
                 </html.div>
               )}
             </>
@@ -239,5 +198,4 @@ const styles = css.create({
     width: 'fit-content',
     marginBottom: spacing.padding1,
   },
-  children: {},
 })

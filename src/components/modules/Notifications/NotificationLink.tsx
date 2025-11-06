@@ -12,17 +12,23 @@ type Props = {
   children: ReactNode
 }
 
-const NotificationLinkInner = (props: Props) => {
-  const { type, note, related } = props
-  const relatedNevent = useNevent(related)
-  const linkNevent = type === 'reply' || type === 'mention' ? note.nip19 : relatedNevent
-  return <LinkNEvent nevent={linkNevent}>{props.children}</LinkNEvent>
-}
-
 export const NotificationLink = (props: Props) => {
+  const nevent = useNevent(props.note.event)
+  const relatedNevent = useNevent(props.related)
   const { type } = props
-  if (type !== 'public_message') {
-    return <NotificationLinkInner {...props} />
+  switch (type) {
+    case 'reply':
+    case 'mention':
+      return <LinkNEvent nevent={nevent}>{props.children}</LinkNEvent>
+    case 'zap_profile':
+    case 'public_message': {
+      return props.children
+    }
+    default: {
+      if (props.related) {
+        return <LinkNEvent nevent={relatedNevent}>{props.children}</LinkNEvent>
+      }
+      return props.children
+    }
   }
-  return props.children
 }

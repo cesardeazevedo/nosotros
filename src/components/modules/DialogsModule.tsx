@@ -7,6 +7,7 @@ import { EditorDialog } from '../dialogs/editor.dialog'
 import { EditorQuoteDialog } from '../dialogs/editor.quote.dialog'
 import { ListFormDialog } from '../dialogs/listform.dialog'
 import { NoteStatsDialog } from '../dialogs/notestats.dialog'
+import { ReplyDialog } from '../dialogs/reply.dialog'
 import { ZapDialog } from '../dialogs/zap.dialog'
 import { ZapRequestInvoiceDialog } from '../dialogs/zapinvoice.dialog'
 import { DeckFormDialog } from './Deck/DeckFormDialog'
@@ -23,6 +24,7 @@ export const Dialogs = React.memo(function Dialogs() {
       <ZapRequestInvoiceDialog />
       <EditorDialog />
       <EditorQuoteDialog />
+      <ReplyDialog />
       <NoteStatsDialog />
       <ListFormDialog />
       <SearchDialog />

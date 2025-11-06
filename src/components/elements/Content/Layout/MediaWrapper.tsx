@@ -1,42 +1,22 @@
-import { mediaDimsAtom } from '@/atoms/media.atoms'
 import { useContentContext } from '@/components/providers/ContentProvider'
 import type { SxProps } from '@/components/ui/types'
-import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
-import { adjustDimensions, MAX_BOUNDS, MIN_HEIGHT } from '@/hooks/useMediaStore'
-import { useMobile } from '@/hooks/useMobile'
+import type { MediaMode } from '@/hooks/useMediaStore'
+import { MAX_BOUNDS } from '@/hooks/useMediaStore'
+import { useSM } from '@/hooks/useMobile'
 import { spacing } from '@/themes/spacing.stylex'
-import { useAtomValue } from 'jotai'
 import React, { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 
 export type Props = {
+  mode?: MediaMode
   children: React.ReactNode
-  src: string
-  size?: keyof typeof MAX_BOUNDS
-  fixed?: boolean
-  fixedHeight?: number
-  event?: NostrEventDB
   sx?: SxProps
 }
 
 export const MediaWrapper = memo(function MediaWrapper(props: Props) {
-  const { src, children, fixedHeight, sx, event, fixed } = props
+  const { children, sx, mode = 'single' } = props
   const { dense } = useContentContext()
-  const isMobile = useMobile()
-  const dim = event?.metadata?.imeta?.[src]?.dim
-  const dims = useAtomValue(mediaDimsAtom)
-  const size = isMobile ? 'sm' : props.size || 'md'
-
-  const width = dims.get(src)?.[0] || dim?.width
-  const height = dims.get(src)?.[1] || dim?.height
-
-  let adjusted = null
-  if (width && height) {
-    adjusted = adjustDimensions(width, height, {
-      maxWidth: MAX_BOUNDS[size].maxWidth,
-      maxHeight: fixedHeight || MAX_BOUNDS[size].maxHeight,
-    })
-  }
+  const isMobile = useSM()
 
   return (
     <html.div
@@ -44,10 +24,8 @@ export const MediaWrapper = memo(function MediaWrapper(props: Props) {
         styles.root,
         styles.padding,
         dense && styles.root$dense,
+        styles.maxBounds(MAX_BOUNDS[mode].maxWidth, MAX_BOUNDS[mode].maxHeight),
         isMobile && styles.root$mobile,
-        fixed && adjusted && adjusted.height < MIN_HEIGHT && styles.minHeight,
-        fixed && adjusted ? styles.bounds(adjusted.width, adjusted.height) : null,
-        styles.maxBounds(MAX_BOUNDS[size].maxWidth, MAX_BOUNDS[size].maxHeight),
         sx,
       ]}>
       {children}
@@ -58,7 +36,8 @@ export const MediaWrapper = memo(function MediaWrapper(props: Props) {
 const styles = css.create({
   root: {
     position: 'relative',
-    width: 'fit-content',
+    width: '100%',
+    height: '100%',
   },
   root$dense: {
     // this is likely rendered on replies
@@ -68,13 +47,10 @@ const styles = css.create({
   root$mobile: {
     maxWidth: 'calc(100vw - 90px)',
   },
-  minHeight: {
-    minHeight: 180,
-  },
   padding: {
     marginBlock: spacing.margin2,
     marginInline: spacing.margin2,
   },
-  bounds: (width: number, height: number) => ({ width, height }),
   maxBounds: (maxWidth: number, maxHeight: number) => ({ maxWidth, maxHeight }),
+  minHeight: (minHeight: number) => ({ minHeight }),
 })

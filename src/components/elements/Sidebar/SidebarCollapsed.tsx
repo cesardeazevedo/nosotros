@@ -23,7 +23,7 @@ import {
   IconUserFilled,
   IconWorldBolt,
 } from '@tabler/icons-react'
-import { Link, useMatchRoute } from '@tanstack/react-router'
+import { Link, useMatch } from '@tanstack/react-router'
 import { memo, useContext, type RefObject } from 'react'
 import { css } from 'react-strict-dom'
 import { IconButtonSearch } from '../Buttons/IconButtonSearch'
@@ -41,7 +41,6 @@ export const SidebarCollapsed = memo(function SidebarCollapsed(props: Props) {
   const user = useCurrentUser()
   const decks = useDecks()
   const pubkey = useCurrentPubkey()
-  const match = useMatchRoute()
   const context = useContext(SidebarContext)
   const toggleSettings = useToggleSettings()
   const iconProps = {
@@ -49,8 +48,10 @@ export const SidebarCollapsed = memo(function SidebarCollapsed(props: Props) {
     strokeWidth: '1.6',
     className: css.props(styles.icon).className,
   }
+  const isListRoute = !!useMatch({ from: '/lists', shouldThrow: false })
+  const isNotificationsRoute = !!useMatch({ from: '/notifications', shouldThrow: false })
   const isNoPane = !context.pane
-  const isNotifications = context.pane === '/notifications' || (!!match({ to: '/notifications' }) && isNoPane)
+  const isNotifications = context.pane === '/notifications' || (isNotificationsRoute && isNoPane)
   return (
     <Stack
       ref={props.ref}
@@ -121,7 +122,7 @@ export const SidebarCollapsed = memo(function SidebarCollapsed(props: Props) {
         </Link>
         <IconButton
           toggle
-          selected={context.pane === '/lists' || !!match({ to: '/lists' })}
+          selected={context.pane === '/lists' || isListRoute}
           sx={styles.iconButton}
           icon={<IconListDetails {...iconProps} strokeWidth={1.4} />}
           onClick={() => context.setPane('/lists')}

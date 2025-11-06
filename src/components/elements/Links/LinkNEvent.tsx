@@ -2,6 +2,7 @@ import { useDeckAddNextColumn } from '@/components/modules/Deck/hooks/useDeck'
 import { useContentContext } from '@/components/providers/ContentProvider'
 import type { SxProps } from '@/components/ui/types'
 import { createEventModule } from '@/hooks/modules/createEventModule'
+import { useNostrMaskedLinkProps } from '@/hooks/useNostrMaskedLinkProps'
 import { decodeNIP19 } from '@/utils/nip19'
 import type { LinkProps } from '@tanstack/react-router'
 import { Link, useRouter } from '@tanstack/react-router'
@@ -14,19 +15,17 @@ import { css } from 'react-strict-dom'
 export type Props = {
   nevent?: NEvent | Note | string | undefined
   search?: LinkProps['search']
-  media?: boolean
-  block?: boolean
   underline?: boolean
   children: React.ReactNode
   sx?: SxProps
 }
 
 export const LinkNEvent = memo(function LinkNEvent(props: Props) {
-  const { underline, nevent: neventProp, search, block = false, media = false, sx, ...rest } = props
+  const { underline, nevent: neventProp, search, sx, ...rest } = props
   const { disableLink } = useContentContext()
 
   const router = useRouter()
-  const style = [styles.cursor, block && styles.block, underline && styles.underline, sx]
+  const style = [styles.cursor, underline && styles.underline, sx]
 
   // Swap note1 to nevent as note1 was deprecated
   const nevent = useMemo(() => {
@@ -46,6 +45,8 @@ export const LinkNEvent = memo(function LinkNEvent(props: Props) {
     }
   }, [neventProp])
 
+  const linkMaskedProps = useNostrMaskedLinkProps(nevent)
+
   const deck = useDeckAddNextColumn(() => createEventModule(nevent))
 
   const handleDragStart: DragEventHandler<HTMLAnchorElement> = (e) => {
@@ -53,27 +54,8 @@ export const LinkNEvent = memo(function LinkNEvent(props: Props) {
     e.stopPropagation()
   }
 
-  if ((disableLink && !media) || !nevent) {
+  if (disableLink || !nevent) {
     return props.children
-  }
-
-  if (media) {
-    return (
-      <Link
-        to={'.'}
-        search={(s) => ({
-          ...s,
-          media: s.media,
-          ...(typeof search === 'function' ? search(s) : typeof search === 'object' ? search : {}),
-          n: nevent,
-        })}
-        {...rest}
-        {...css.props(style)}
-        onClick={(e) => e.stopPropagation()}
-        onDragStart={handleDragStart}>
-        {props.children}
-      </Link>
-    )
   }
 
   if (deck.isDeck) {
@@ -90,12 +72,12 @@ export const LinkNEvent = memo(function LinkNEvent(props: Props) {
 
   return (
     <Link
-      to={`/$nostr`}
       state={{ from: router.latestLocation.pathname } as never}
+      {...linkMaskedProps}
       {...rest}
       {...css.props(style)}
-      onDragStart={handleDragStart}
-      params={{ nostr: nevent }}>
+      onClick={(e) => e.stopPropagation()}
+      onDragStart={handleDragStart}>
       {props.children}
     </Link>
   )
@@ -110,13 +92,5 @@ const styles = css.create({
       default: 'inherit',
       ':hover': 'underline',
     },
-  },
-  block: {
-    position: 'relative',
-    display: 'block',
-    width: 'auto', // needed because of firefox
-    height: 'inherit',
-    maxHeight: 'inherit',
-    maxWidth: 'inherit',
   },
 })

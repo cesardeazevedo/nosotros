@@ -40,7 +40,7 @@ const styles = css.create({
   paper: {
     textAlign: 'center',
     paddingBlock: spacing.padding2,
-    paddingInline: spacing.padding4,
+    paddingInline: spacing.padding3,
   },
   alt: {
     wordBreak: 'break-word',
