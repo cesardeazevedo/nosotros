@@ -24,6 +24,18 @@ export type CustomNode =
       type: 'mediaGroup'
       content: Array<ImageCustomNode | VideoCustomNode>
     }
+  | {
+      type: 'tweet'
+      attrs: { src: string }
+    }
+  | {
+      type: 'youtube'  
+      attrs: { src: string }
+    }
+  | {
+      type: 'spotify'
+      attrs: { src: string }
+    }
 
 export type ContentCustomSchema = Omit<ContentSchema, 'content'> & {
   content: Array<CustomNode>
