@@ -1,10 +1,12 @@
-import { Node } from '@tiptap/core'
-import { ReactNodeViewRenderer } from '@tiptap/react'
+import { Node, nodePasteRule } from '@tiptap/core'
 
 export interface SpotifyOptions {
   inline: boolean
-  HTMLAttributes: Record<string, any>
+  HTMLAttributes: Record<string, unknown>
 }
+
+const SPOTIFY_REGEX_GLOBAL =
+  /(?:https?:\/\/)?(?:open\.)?spotify\.com\/(track|album|playlist|episode|show)\/([a-zA-Z0-9]+)(?:\?[^\s]*)?/g
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
@@ -50,8 +52,26 @@ export const SpotifyExtension = Node.create<SpotifyOptions>({
     ]
   },
 
+  renderText(props) {
+    return props.node.attrs.src
+  },
+
   renderHTML({ HTMLAttributes }) {
     return ['div', { 'data-spotify-embed': '', ...HTMLAttributes }]
+  },
+
+  addPasteRules() {
+    return [
+      nodePasteRule({
+        find: SPOTIFY_REGEX_GLOBAL,
+        type: this.type,
+        getAttributes: (match) => {
+          const type = match[1]
+          const id = match[2]
+          return { src: `https://open.spotify.com/embed/${type}/${id}` }
+        },
+      }),
+    ]
   },
 
   addCommands() {
@@ -67,3 +87,4 @@ export const SpotifyExtension = Node.create<SpotifyOptions>({
     }
   },
 })
+

@@ -80,7 +80,11 @@ export const Content = memo(function Content(props: Props) {
               {node.type === 'codeBlock' && <CodeBlock node={node} />}
               {node.type === 'blockquote' && <BlockQuote node={node} />}
               {node.type === 'tweet' && <Tweet src={node.attrs.src} />}
-              {node.type === 'spotify' && <Spotify src={node.attrs.src} />}
+              {node.type === 'spotify' && (
+                <MediaWrapper mode={mode}>
+                  <Spotify src={node.attrs.src} />
+                </MediaWrapper>
+              )}
               {node.type === 'youtube' && (
                 <MediaWrapper mode={mode}>
                   <YoutubeEmbed src={node.attrs.src} />
