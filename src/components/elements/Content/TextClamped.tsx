@@ -57,6 +57,7 @@ const styles = css.create({
     WebkitBoxOrient: 'vertical',
     textOverflow: 'ellipsis',
     overflow: 'hidden',
+    wordBreak: 'break-word',
   },
   clamp: (lines: number) => ({
     WebkitLineClamp: lines,
