@@ -1,15 +1,21 @@
+import { dbSqlite } from '@/nostr/db'
 import { NostrSubscription } from 'core/NostrSubscription'
 import type { Relay } from 'core/Relay'
 import type { MessageReceived } from 'core/types'
 import { ClientToRelay, RelayToClient } from 'core/types'
-import { catchError, filter, mergeAll, mergeMap, of, pipe, takeWhile, tap, timeout } from 'rxjs'
+import { catchError, EMPTY, mergeAll, mergeMap, of, pipe, reduce, takeWhile, tap, timeout } from 'rxjs'
 import { getNegentropy } from './getNegentropy'
 import { subscribe } from './subscribe'
 
 export function subscribeNeg(relay: Relay) {
   return pipe(
     mergeMap(async (sub: NostrSubscription) => {
-      const negentropy = getNegentropy(sub.events)
+      const events = await dbSqlite.queryNeg({
+        ...sub.filter,
+        // Safety margin for negentropy
+        limit: sub.filter.limit ? sub.filter.limit * 2 : undefined,
+      })
+      const negentropy = getNegentropy(events)
       const msg = await negentropy.initiate()
 
       const subMsg = () => [ClientToRelay.NEG_OPEN, sub.id, sub.filter, msg]
@@ -21,7 +27,7 @@ export function subscribeNeg(relay: Relay) {
         timeout({
           each: 3000,
           with: () => {
-            throw new Error('Negentropy error')
+            throw new Error(`Negentropy timeout error ${relay.url}`)
           },
         }),
 
@@ -35,22 +41,36 @@ export function subscribeNeg(relay: Relay) {
               // We want to know about other relays messages as this has not standard
               if (msg[1].toLowerCase() === 'error: bad msg: negentropy disabled') {
                 // strfry message
-                throw new Error('Negentropy Error')
+                throw new Error(`Negentropy Error: ${relay.url} ${msg[1]}`)
               }
               console.warn('Negentropy Notice', relay.url, msg[1])
             }
           }
         }),
 
-        mergeMap((msg) => negentropy.reconcile(msg[2])),
+        mergeMap(async (msg) => {
+          const result = await negentropy.reconcile(msg[2])
+          const [nextMsg] = result
+
+          if (nextMsg) {
+            // Send next message back to relay
+            // @ts-ignore
+            relay.websocket$.next([ClientToRelay.NEG_MSG, sub.id, nextMsg])
+          }
+
+          return result
+        }),
 
         takeWhile(([msg]) => msg !== null, true),
 
-        filter(([, , ids]) => ids.length > 0),
+        reduce((acc, [, , ids]) => [...acc, ...ids], [] as string[]),
 
-        mergeMap(([, , ids]) => {
-          const sub = new NostrSubscription({ ids })
-          return of(sub).pipe(subscribe(relay))
+        mergeMap((ids) => {
+          if (ids.length > 0) {
+            const sub = new NostrSubscription({ ids }, { id: 'neg-ids' })
+            return of(sub).pipe(subscribe(relay))
+          }
+          return EMPTY
         }),
 
         catchError((error) => {

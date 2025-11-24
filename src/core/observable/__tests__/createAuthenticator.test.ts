@@ -27,7 +27,7 @@ describe('createAuthenticator', () => {
     await spy.onComplete()
     await relay1.close()
     await relay2.close()
-    expect(relay1.received).toStrictEqual([['OK', expect.any(String)]])
+    expect(relay1.received).toStrictEqual([['AUTH', expect.any(Object)]])
     expect(relay2.received).toStrictEqual([])
   })
 

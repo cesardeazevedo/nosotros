@@ -2,6 +2,8 @@ import { settingsAtom } from '@/atoms/settings.atoms'
 import { store } from '@/atoms/store'
 import { NEventEditor } from '@/components/elements/Content/NEvent/NEventEditor'
 import { NProfileEditor } from '@/components/elements/Content/NProfile/NProfileEditor'
+import { SpotifyEditor } from '@/components/elements/Content/Spotify/SpotifyEditor'
+import { SpotifyExtension } from '@/components/elements/Content/Spotify/SpotifyExtension'
 import { TweetEditor } from '@/components/elements/Content/Tweet/TweetEditor'
 import { YoutubeEditor } from '@/components/elements/Content/Youtube/YoutubeEditor'
 import type { BlossomOptions } from '@/utils/uploadBlossom'
@@ -107,6 +109,15 @@ export function createEditor(options: Options): UseEditorOptions {
           naddr: addNodeView(NAddrEditor),
           nevent: addNodeView(NEventEditor),
           tweet: addNodeView(TweetEditor),
+        },
+      }),
+      SpotifyExtension.configure({
+        HTMLAttributes: {
+          class: 'spotify-embed',
+        },
+      }).extend({
+        addNodeView() {
+          return ReactNodeViewRenderer(SpotifyEditor)
         },
       }),
     ],

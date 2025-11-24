@@ -1,5 +1,6 @@
+import { Negentropy, NegentropyStorageVector } from '@/core/operators/Negentropy'
 import type { Signer } from '@/core/signers/signer'
-import type { NostrFilter } from 'core/types'
+import type { RelayReceived } from 'core/types'
 import { ClientToRelay, RelayToClient } from 'core/types'
 import { matchFilters, type NostrEvent } from 'nostr-tools'
 import WS from 'vitest-websocket-mock'
@@ -33,31 +34,44 @@ export class TestSigner implements Signer {
   }
 }
 
+export type MockRelayOptions = {
+  // negentropy options
+  frameSizeLimit?: number
+}
+
 export class RelayServer extends WS {
-  public received = [] as unknown[]
+  public received = [] as RelayReceived[]
   public sent = [] as [keyof typeof RelayToClient, string, NostrEvent][]
 
   private _reqCount = 0
 
+  private negentropyInstances = new Map<string, Negentropy>()
+
   constructor(
     public url: string,
     public db: NostrEvent[],
+    public options?: MockRelayOptions,
   ) {
     super(url)
+    const storage = new NegentropyStorageVector()
+    db.filter((event) => event.id.length === 64).forEach((event) => {
+      storage.insert(event.created_at, event.id)
+    })
+    storage.seal()
 
     this.on('connection', (socket) => {
-      socket.on('message', (msg) => {
-        const data = JSON.parse(msg as string)
+      socket.on('message', async (msg) => {
+        const data = JSON.parse(msg as string) as RelayReceived
         const [verb] = data
         switch (verb) {
           case ClientToRelay.REQ: {
-            const [, req, ..._filters] = data as [keyof typeof ClientToRelay, string, NostrFilter[]]
+            const [, req, ..._filters] = data
             this._reqCount++
             const filters = _filters.flat()
             db.forEach((event) => {
               if (matchFilters(filters, event)) {
                 this.sent.push([RelayToClient.EVENT, this.reqCount, event])
-                const res = [RelayToClient.EVENT, req, event] as [keyof typeof RelayToClient, string, NostrEvent]
+                const res = [RelayToClient.EVENT, req, event]
                 socket.send(JSON.stringify(res))
               }
             })
@@ -66,8 +80,7 @@ export class RelayServer extends WS {
             break
           }
           case ClientToRelay.AUTH: {
-            const [, event] = data as [string, NostrEvent]
-            this.received.push([RelayToClient.OK, event.id])
+            this.received.push(data)
             break
           }
           case ClientToRelay.EVENT: {
@@ -76,11 +89,50 @@ export class RelayServer extends WS {
             socket.send(
               JSON.stringify([RelayToClient.OK, event.id, !exists, exists ? 'status: duplicated event' : 'status: OK']),
             )
-            this.received.push([verb, event])
+            this.received.push(data)
+            break
+          }
+          case ClientToRelay.NEG_OPEN: {
+            const [, reqId, filter, clientMsg] = data
+
+            const negentropy = new Negentropy(storage, options?.frameSizeLimit)
+            this.negentropyInstances.set(reqId, negentropy)
+            const [relayMsg] = await negentropy.reconcile(clientMsg)
+            this.received.push([verb, this.reqCount, filter, clientMsg])
+
+            if (relayMsg) {
+              socket.send(JSON.stringify([RelayToClient.NEG_MSG, reqId, relayMsg]))
+            } else {
+              socket.send(JSON.stringify([RelayToClient.NEG_CLOSE, reqId]))
+            }
+            break
+          }
+          case ClientToRelay.NEG_MSG: {
+            const [, reqId, clientMsg] = data
+            const negentropy = this.negentropyInstances.get(reqId)
+
+            if (!negentropy) {
+              socket.send(JSON.stringify([RelayToClient.NEG_ERR, reqId, 'no negentropy instance']))
+              break
+            }
+
+            const [relayMsg] = await negentropy.reconcile(clientMsg)
+            this.received.push([verb, reqId, clientMsg])
+
+            if (relayMsg) {
+              socket.send(JSON.stringify([RelayToClient.NEG_MSG, reqId, relayMsg]))
+            } else {
+              socket.send(JSON.stringify([RelayToClient.NEG_CLOSE, reqId]))
+              this.negentropyInstances.delete(reqId)
+            }
+            break
+          }
+          case ClientToRelay.NEG_CLOSE: {
+            this.received.push([verb, this.reqCount])
             break
           }
           case ClientToRelay.CLOSE: {
-            this.received.push([ClientToRelay.CLOSE, this.reqCount])
+            this.received.push([verb, this.reqCount])
             break
           }
         }
@@ -93,8 +145,8 @@ export class RelayServer extends WS {
   }
 
   async close() {
+    await new Promise<void>((resolve) => setTimeout(resolve, 500))
     super.close()
     await this.closed
-    await new Promise<void>((resolve) => setTimeout(resolve, 500))
   }
 }

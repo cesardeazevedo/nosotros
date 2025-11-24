@@ -9,8 +9,10 @@ const VIDEO_EXTENSIONS = /\.(webm|mp4|ogg|mov)$/
 const YOUTUBE_EMBED =
   /^(?:(?:https?:)?\/\/)?(?:(?:(?:www|m(?:usic)?)\.)?youtu(?:\.be|be\.com)\/(?:shorts\/|live\/|v\/|e(?:mbed)?\/|watch(?:\/|\?(?:\S+=\S+&)*v=)|oembed\?url=https?%3A\/\/(?:www|m(?:usic)?)\.youtube\.com\/watch\?(?:\S+=\S+&)*v%3D|attribution_link\?(?:\S+=\S+&)*u=(?:\/|%2F)watch(?:\?|%3F)v(?:=|%3D))?|www\.youtube-nocookie\.com\/embed\/)([\w-]{1})[?&#]?\S*$/
 const TWITTER_EMBED = /^https?:\/\/(twitter|x)\.com\/(?:#!\/)?(\w+)\/status(es)?\/(\d+)/
+const SPOTIFY_EMBED =
+  /^https?:\/\/open\.spotify\.com\/embed\/(track|album|playlist|artist|episode|show)\/([a-zA-Z0-9]+)/
 
-type LinkKinds = 'text' | 'image' | 'video' | 'tweet' | 'youtube'
+type LinkKinds = 'text' | 'image' | 'video' | 'tweet' | 'youtube' | 'spotify'
 
 function getLinkKind(url: string): LinkKinds {
   if (YOUTUBE_EMBED.test(url)) {
@@ -18,6 +20,9 @@ function getLinkKind(url: string): LinkKinds {
   }
   if (TWITTER_EMBED.test(url)) {
     return 'tweet'
+  }
+  if (SPOTIFY_EMBED.test(url)) {
+    return 'spotify'
   }
 
   try {
@@ -166,6 +171,11 @@ export function welshmanToProseMirror(welshmanSchema: Parsed[], blockNodesOption
             case 'youtube': {
               pushParagraph()
               result.content.push({ type: 'youtube', attrs: { src: url } })
+              break
+            }
+            case 'spotify': {
+              pushParagraph()
+              result.content.push({ type: 'spotify', attrs: { src: url } })
               break
             }
           }

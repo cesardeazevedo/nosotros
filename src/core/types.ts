@@ -22,6 +22,7 @@ export enum RelayToClient {
   CLOSED = 'CLOSED',
   NEG_MSG = 'NEG-MSG',
   NEG_ERR = 'NEG-ERR',
+  NEG_CLOSE = 'NEG-CLOSE',
 }
 
 export type MessageReceivedEvent = [RelayToClient.EVENT, string, NostrEvent]
@@ -38,6 +39,23 @@ export type MessageReceived =
   | MessageReceivedAuth
   | MessageReceivedNotice
   | MessageReceivedNegError
+
+export type RelayReceivedReq = [ClientToRelay.REQ, string, ...NostrFilter[]]
+export type RelayReceivedEvent = [ClientToRelay.EVENT, NostrEvent]
+export type RelayReceivedClose = [ClientToRelay.CLOSE, string]
+export type RelayReceivedAuth = [ClientToRelay.AUTH, NostrEvent]
+export type RelayReceivedNegOpen = [ClientToRelay.NEG_OPEN, string, NostrFilter, string]
+export type RelayReceivedNegMsg = [ClientToRelay.NEG_MSG, string, string]
+export type RelayReceivedNegClose = [ClientToRelay.NEG_CLOSE, string]
+
+export type RelayReceived =
+  | RelayReceivedReq
+  | RelayReceivedEvent
+  | RelayReceivedClose
+  | RelayReceivedAuth
+  | RelayReceivedNegOpen
+  | RelayReceivedNegMsg
+  | RelayReceivedNegClose
 
 export type RelayHints = {
   authors?: Record<string, string[]>

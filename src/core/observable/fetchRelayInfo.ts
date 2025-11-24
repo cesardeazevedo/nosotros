@@ -2,7 +2,7 @@ import type { RelayInformation } from 'nostr-tools/nip11'
 
 export async function fetchRelayInfo(url: string) {
   try {
-    const res = await fetch('https://' + url.replace('wss://', ''), {
+    const res = await fetch(url.replace('wss://', 'https://'), {
       method: 'GET',
       credentials: 'omit',
       priority: 'low',
@@ -12,6 +12,6 @@ export async function fetchRelayInfo(url: string) {
     })
     return (await res.json()) as RelayInformation
   } catch {
-    return undefined
+    return null
   }
 }

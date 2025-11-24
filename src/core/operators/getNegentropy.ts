@@ -1,7 +1,7 @@
-import type { NostrEvent } from 'nostr-tools'
+import type { NostrEventExists } from '@/db/sqlite/sqlite.types'
 import { Negentropy, NegentropyStorageVector } from './Negentropy'
 
-export function getNegentropy(events: Map<string, NostrEvent>) {
+export function getNegentropy(events: NostrEventExists[]) {
   const storage = new NegentropyStorageVector()
   const negentropy = new Negentropy(storage)
 
