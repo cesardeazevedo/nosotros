@@ -183,4 +183,189 @@ describe('SqliteEventStore.query', () => {
     const res = store.query(db, { kinds: [Kind.Text], limit: 2, '#e': ['1'] })
     expect(res.map((e: NostrEvent) => e.id)).toStrictEqual(['4', '3'])
   })
+
+  test('filters by ids', () => {
+    const e1 = fakeEventMeta({ id: '1', kind: Kind.Text, pubkey: 'p1', created_at: 100 })
+    const e2 = fakeEventMeta({ id: '2', kind: Kind.Text, pubkey: 'p1', created_at: 200 })
+    const e3 = fakeEventMeta({ id: '3', kind: Kind.Text, pubkey: 'p1', created_at: 300 })
+    const e4 = fakeEventMeta({ id: '4', kind: Kind.Text, pubkey: 'p1', created_at: 400 })
+
+    store.insertEvent(db, e1)
+    store.insertEvent(db, e2)
+    store.insertEvent(db, e3)
+    store.insertEvent(db, e4)
+
+    const results = store.query(db, { ids: ['2', '4'] })
+
+    expect(results.map((e) => e.id)).toStrictEqual(['2', '4'])
+  })
+})
+
+describe('SqliteEventStore.queryNeg', () => {
+  beforeAll(async () => {
+    db = (await initializeSQLite('test.sqlite3', false)).db
+    store = new SqliteEventStore(Promise.resolve(db))
+  })
+
+  beforeEach(() => {
+    db.exec('DELETE FROM tags;')
+    db.exec('DELETE FROM events;')
+  })
+
+  test('returns only id and created_at', () => {
+    const e1 = fakeEventMeta({ id: '1', kind: Kind.Text, pubkey: 'p1', created_at: 100, content: 'test content' })
+    store.insertEvent(db, e1)
+
+    const results = store.queryNeg(db, { authors: ['p1'] })
+
+    expect(results).toHaveLength(1)
+    expect(results[0]).toEqual({ id: '1', created_at: 100 })
+    expect(results[0]).not.toHaveProperty('content')
+    expect(results[0]).not.toHaveProperty('pubkey')
+  })
+
+  test('filters by authors', () => {
+    const e1 = fakeEventMeta({ id: '1', kind: Kind.Text, pubkey: 'p1', created_at: 100 })
+    const e2 = fakeEventMeta({ id: '2', kind: Kind.Text, pubkey: 'p2', created_at: 200 })
+    const e3 = fakeEventMeta({ id: '3', kind: Kind.Text, pubkey: 'p1', created_at: 300 })
+
+    store.insertEvent(db, e1)
+    store.insertEvent(db, e2)
+    store.insertEvent(db, e3)
+
+    const results = store.queryNeg(db, { authors: ['p1'] })
+
+    expect(results.map((e) => e.id)).toStrictEqual(['3', '1'])
+  })
+
+  test('filters by kinds', () => {
+    const e1 = fakeEventMeta({ id: '1', kind: Kind.Text, pubkey: 'p1', created_at: 100 })
+    const e2 = fakeEventMeta({ id: '2', kind: Kind.Follows, pubkey: 'p1', created_at: 200 })
+    const e3 = fakeEventMeta({ id: '3', kind: Kind.Text, pubkey: 'p1', created_at: 300 })
+
+    store.insertEvent(db, e1)
+    store.insertEvent(db, e2)
+    store.insertEvent(db, e3)
+
+    const results = store.queryNeg(db, { kinds: [Kind.Text] })
+
+    expect(results.map((e) => e.id)).toStrictEqual(['3', '1'])
+  })
+
+  test('filters by tags', () => {
+    const e1 = fakeEventMeta({ id: '1', kind: Kind.Text, pubkey: 'p1', created_at: 100, tags: [] })
+    const e2 = fakeEventMeta({ id: '2', kind: Kind.Text, pubkey: 'p2', created_at: 200, tags: [['e', '1']] })
+    const e3 = fakeEventMeta({
+      id: '3',
+      kind: Kind.Text,
+      pubkey: 'p1',
+      created_at: 300,
+      tags: [
+        ['e', '1'],
+        ['e', '2'],
+      ],
+    })
+    const e4 = fakeEventMeta({ id: '4', kind: Kind.Text, pubkey: 'p1', created_at: 400, tags: [['e', '1']] })
+
+    store.insertEvent(db, e1)
+    store.insertEvent(db, e2)
+    store.insertEvent(db, e3)
+    store.insertEvent(db, e4)
+
+    const results = store.queryNeg(db, { kinds: [Kind.Text], until: 300, '#e': ['1', '2'] })
+
+    expect(results.map((e) => e.id)).toStrictEqual(['3', '2'])
+  })
+
+  test('respects limit', () => {
+    const e1 = fakeEventMeta({ id: '1', kind: Kind.Text, pubkey: 'p1', created_at: 100 })
+    const e2 = fakeEventMeta({ id: '2', kind: Kind.Text, pubkey: 'p1', created_at: 200 })
+    const e3 = fakeEventMeta({ id: '3', kind: Kind.Text, pubkey: 'p1', created_at: 300 })
+    const e4 = fakeEventMeta({ id: '4', kind: Kind.Text, pubkey: 'p1', created_at: 400 })
+
+    store.insertEvent(db, e1)
+    store.insertEvent(db, e2)
+    store.insertEvent(db, e3)
+    store.insertEvent(db, e4)
+
+    const results = store.queryNeg(db, { kinds: [Kind.Text], authors: ['p1'], limit: 2 })
+
+    expect(results.map((e) => e.id)).toStrictEqual(['4', '3'])
+  })
+
+  test('sorts by created_at DESC, id ASC for deterministic order', () => {
+    const e1 = fakeEventMeta({ id: '1', kind: Kind.Text, pubkey: 'p1', created_at: 100 })
+    const e2 = fakeEventMeta({ id: '3', kind: Kind.Text, pubkey: 'p1', created_at: 100 })
+    const e3 = fakeEventMeta({ id: '2', kind: Kind.Text, pubkey: 'p1', created_at: 100 })
+
+    store.insertEvent(db, e1)
+    store.insertEvent(db, e2)
+    store.insertEvent(db, e3)
+
+    const results = store.queryNeg(db, { kinds: [Kind.Text], authors: ['p1'] })
+
+    expect(results.map((e) => e.id)).toStrictEqual(['1', '2', '3'])
+  })
+
+  test('limit with same timestamps uses id ASC as tiebreaker', () => {
+    const e1 = fakeEventMeta({ id: '1', kind: Kind.Text, pubkey: 'p1', created_at: 100 })
+    const e2 = fakeEventMeta({ id: '4', kind: Kind.Text, pubkey: 'p1', created_at: 100 })
+    const e3 = fakeEventMeta({ id: '3', kind: Kind.Text, pubkey: 'p1', created_at: 100 })
+    const e4 = fakeEventMeta({ id: '2', kind: Kind.Text, pubkey: 'p1', created_at: 100 })
+
+    store.insertEvent(db, e1)
+    store.insertEvent(db, e2)
+    store.insertEvent(db, e3)
+    store.insertEvent(db, e4)
+
+    const results = store.queryNeg(db, { kinds: [Kind.Text], authors: ['p1'], limit: 2 })
+
+    expect(results.map((e) => e.id)).toStrictEqual(['1', '2'])
+  })
+
+  test('filters by since and until', () => {
+    const e1 = fakeEventMeta({ id: '1', kind: Kind.Text, pubkey: 'p1', created_at: 100 })
+    const e2 = fakeEventMeta({ id: '2', kind: Kind.Text, pubkey: 'p1', created_at: 200 })
+    const e3 = fakeEventMeta({ id: '3', kind: Kind.Text, pubkey: 'p1', created_at: 300 })
+    const e4 = fakeEventMeta({ id: '4', kind: Kind.Text, pubkey: 'p1', created_at: 400 })
+
+    store.insertEvent(db, e1)
+    store.insertEvent(db, e2)
+    store.insertEvent(db, e3)
+    store.insertEvent(db, e4)
+
+    const results = store.queryNeg(db, { kinds: [Kind.Text], since: 150, until: 350 })
+
+    expect(results.map((e) => e.id)).toStrictEqual(['3', '2'])
+  })
+
+  test('tag filter with limit', () => {
+    const e1 = fakeEventMeta({ id: '2', kind: Kind.Text, pubkey: 'p2', created_at: 100, tags: [['e', '1']] })
+    const e2 = fakeEventMeta({ id: '3', kind: Kind.Text, pubkey: 'p2', created_at: 200, tags: [['e', '1']] })
+    const e3 = fakeEventMeta({ id: '4', kind: Kind.Text, pubkey: 'p2', created_at: 300, tags: [['e', '1']] })
+
+    store.insertEvent(db, e1)
+    store.insertEvent(db, e2)
+    store.insertEvent(db, e3)
+
+    const results = store.queryNeg(db, { kinds: [Kind.Text], limit: 2, '#e': ['1'] })
+
+    expect(results.map((e) => e.id)).toStrictEqual(['4', '3'])
+  })
+
+  test('filters by ids', () => {
+    const e1 = fakeEventMeta({ id: '1', kind: Kind.Text, pubkey: 'p1', created_at: 100 })
+    const e2 = fakeEventMeta({ id: '2', kind: Kind.Text, pubkey: 'p1', created_at: 200 })
+    const e3 = fakeEventMeta({ id: '3', kind: Kind.Text, pubkey: 'p1', created_at: 300 })
+    const e4 = fakeEventMeta({ id: '4', kind: Kind.Text, pubkey: 'p1', created_at: 400 })
+
+    store.insertEvent(db, e1)
+    store.insertEvent(db, e2)
+    store.insertEvent(db, e3)
+    store.insertEvent(db, e4)
+
+    const results = store.queryNeg(db, { ids: ['2', '4'] })
+
+    expect(results.map((e) => e.id)).toStrictEqual(['4', '2'])
+  })
 })

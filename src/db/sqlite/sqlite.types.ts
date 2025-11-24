@@ -42,6 +42,7 @@ export type SqliteMessages =
   | { method: 'existsAddressable'; params: [Kind, string, string] }
   | { method: 'getRawEventById'; params: string }
   | { method: 'queryEvent'; params: NostrFilter }
+  | { method: 'queryNeg'; params: NostrFilter }
   | { method: 'insertEvent'; params: NostrEventDB }
   | { method: 'deleteEvent'; params: string }
   | { method: 'querySeen'; params: string }

@@ -19,6 +19,7 @@ interface Fixtures {
   pool: Pool
   createMockRelay: (url: string, db: NostrEvent[], options?: MockRelayOptions) => RelayServer
   insertEvent: (event: NostrEventDB) => Promise<void>
+  insertEvents: (events: NostrEventDB[]) => Promise<void>
   reset: () => void
   signer: TestSigner
   renderReactQueryHook: (queryOptions: UseQueryOptions<NostrEventDB[]>) => Promise<UseQueryResult>
@@ -49,6 +50,14 @@ export const test = base.extend<Fixtures>({
   insertEvent: async ({}, use) => {
     await use(async (event: NostrEventDB) => {
       await dbSqlite.insertEvent(event)
+      await new Promise<void>((resolve) => setTimeout(() => resolve(), 1500))
+    })
+  },
+  insertEvents: async ({}, use) => {
+    await use(async (events: NostrEventDB[]) => {
+      for (const event of events) {
+        await dbSqlite.insertEvent(event)
+      }
       await new Promise<void>((resolve) => setTimeout(() => resolve(), 1500))
     })
   },

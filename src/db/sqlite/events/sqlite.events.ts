@@ -69,16 +69,19 @@ export class SqliteEventStore {
     return res.map((event) => this.formatEvent(event as NostrEventStored))
   }
 
-  query(db: Database, filter: NostrFilter, relays: string[] = []) {
-    if (filter.ids && filter.ids.length) {
-      return this.getByIds(db, filter.ids)
-    }
-
+  private buildQuery(filter: NostrFilter, relays: string[] = []) {
     const conditions: string[] = []
     const params: BindableValue[] = []
+    let needsTagJoin = false
+    let tagName = ''
+    let tagValues: BindableValue[] = []
 
     for (const [key, values] of Object.entries(filter)) {
       if (key.startsWith('#') && Array.isArray(values) && values.length > 0) {
+        needsTagJoin = true
+        tagName = key.slice(1)
+        tagValues = values as BindableValue[]
+
         if (filter.kinds?.length) {
           conditions.push(`tags.kind IN (${filter.kinds.map(() => '?').join(',')})`)
           params.push(...filter.kinds)
@@ -91,25 +94,7 @@ export class SqliteEventStore {
           conditions.push('tags.created_at <= ?')
           params.push(filter.until)
         }
-
-        const tagName = key.slice(1)
-        const query = `
-          SELECT distinct e.*
-          FROM tags
-          INNER JOIN events e on e.id = tags.eventId
-          WHERE
-            ${conditions.length ? conditions.join(' AND ') : '1'}
-            AND tags.tag = '${tagName}'
-            AND tags.value IN (${values.map(() => '?')})
-          ORDER BY e.created_at DESC
-          ${filter.limit ? 'LIMIT ?' : ''}
-        `
-        params.push(...values)
-        if (filter.limit) {
-          params.push(filter.limit)
-        }
-        const res = db.selectObjects(query, params)
-        return res.map((event) => this.formatEvent(event as NostrEventStored))
+        return { conditions, params, needsTagJoin, tagName, tagValues }
       }
     }
 
@@ -132,27 +117,101 @@ export class SqliteEventStore {
 
     if (relays.length > 0) {
       conditions.push(`
-        EXISTS (
-          SELECT 1 FROM seen s
-          WHERE s.eventId = events.id
-            AND s.relay IN (${relays.map(() => '?').join(',')})
-        )
-      `)
+      EXISTS (
+        SELECT 1 FROM seen s
+        WHERE s.eventId = events.id
+          AND s.relay IN (${relays.map(() => '?').join(',')})
+      )
+    `)
       params.push(...relays)
     }
 
-    const query = `
-      SELECT * FROM events
-      WHERE ${conditions.length ? conditions.join(' AND ') : '1'}
-      ORDER BY created_at DESC
+    return { conditions, params, needsTagJoin, tagName, tagValues }
+  }
+
+  query(db: Database, filter: NostrFilter, relays: string[] = []) {
+    if (filter.ids && filter.ids.length) {
+      return this.getByIds(db, filter.ids)
+    }
+
+    const { conditions, params, needsTagJoin, tagName, tagValues } = this.buildQuery(filter, relays)
+
+    if (needsTagJoin) {
+      const query = `
+      SELECT DISTINCT e.*
+      FROM tags
+      INNER JOIN events e on e.id = tags.eventId
+      WHERE
+        ${conditions.length ? conditions.join(' AND ') : '1'}
+        AND tags.tag = '${tagName}'
+        AND tags.value IN (${tagValues.map(() => '?')})
+      ORDER BY e.created_at DESC
       ${filter.limit ? 'LIMIT ?' : ''}
     `
+      params.push(...tagValues)
+      if (filter.limit) {
+        params.push(filter.limit)
+      }
+      const res = db.selectObjects(query, params)
+      return res.map((event) => this.formatEvent(event as NostrEventStored))
+    }
+
+    const query = `
+    SELECT * FROM events
+    WHERE ${conditions.length ? conditions.join(' AND ') : '1'}
+    ORDER BY created_at DESC
+    ${filter.limit ? 'LIMIT ?' : ''}
+  `
     if (filter.limit) {
       params.push(filter.limit)
     }
 
     const res = db.selectObjects(query, params) || []
     return res.map((event) => this.formatEvent(event as NostrEventStored))
+  }
+
+  queryNeg(db: Database, filter: NostrFilter) {
+    if (filter.ids && filter.ids.length) {
+      const query = `
+      SELECT id, created_at FROM events
+      WHERE id IN (${filter.ids.map(() => '?').join(',')})
+      ORDER BY created_at DESC, id ASC
+    `
+      return db.selectObjects(query, filter.ids) as NostrEventExists[]
+    }
+
+    const { conditions, params, needsTagJoin, tagName, tagValues } = this.buildQuery(filter)
+
+    if (needsTagJoin) {
+      const query = `
+      SELECT DISTINCT e.id, e.created_at
+      FROM tags
+      INNER JOIN events e on e.id = tags.eventId
+      WHERE
+        ${conditions.length ? conditions.join(' AND ') : '1'}
+        AND tags.tag = '${tagName}'
+        AND tags.value IN (${tagValues.map(() => '?')})
+      ORDER BY e.created_at DESC, e.id DESC
+      ${filter.limit ? 'LIMIT ?' : ''}
+    `
+      params.push(...tagValues)
+      if (filter.limit) {
+        params.push(filter.limit)
+      }
+      return db.selectObjects(query, params) as NostrEventExists[]
+    }
+
+    const query = `
+    SELECT id, created_at FROM events
+    WHERE ${conditions.length ? conditions.join(' AND ') : '1'}
+    ORDER BY created_at DESC, id ASC
+    ${filter.limit ? 'LIMIT ?' : ''}
+  `
+    if (filter.limit) {
+      params.push(filter.limit)
+    }
+
+    return db.selectObjects(query, params) as NostrEventExists[]
   }
 
   count(db: Database, filter: NostrFilter) {

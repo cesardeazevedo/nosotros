@@ -1,3 +1,4 @@
+import { dbSqlite } from '@/nostr/db'
 import { NostrSubscription } from 'core/NostrSubscription'
 import type { Relay } from 'core/Relay'
 import type { MessageReceived } from 'core/types'
@@ -9,7 +10,12 @@ import { subscribe } from './subscribe'
 export function subscribeNeg(relay: Relay) {
   return pipe(
     mergeMap(async (sub: NostrSubscription) => {
-      const negentropy = getNegentropy(sub.events)
+      const events = await dbSqlite.queryNeg({
+        ...sub.filter,
+        // Safety margin for negentropy
+        limit: sub.filter.limit ? sub.filter.limit * 2 : undefined,
+      })
+      const negentropy = getNegentropy(events)
       const msg = await negentropy.initiate()
 
       const subMsg = () => [ClientToRelay.NEG_OPEN, sub.id, sub.filter, msg]
@@ -61,7 +67,7 @@ export function subscribeNeg(relay: Relay) {
 
         mergeMap((ids) => {
           if (ids.length > 0) {
-            const sub = new NostrSubscription({ ids })
+            const sub = new NostrSubscription({ ids }, { id: 'neg-ids' })
             return of(sub).pipe(subscribe(relay))
           }
           return EMPTY

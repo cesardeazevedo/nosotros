@@ -81,7 +81,7 @@ describe('start', () => {
       vi.resetAllMocks()
     })
 
-    test('assert negentropy reconciliation', async ({ pool, createMockRelay }) => {
+    test('assert negentropy reconciliation', async ({ pool, createMockRelay, insertEvent }) => {
       const sk = generateSecretKey()
       const pubkey = getPublicKey(sk)
       const event1 = fakeSignature(fakeEvent({ content: '1', created_at: 1 }), sk)
@@ -89,16 +89,15 @@ describe('start', () => {
       const event3 = fakeSignature(fakeEvent({ content: '3', created_at: 3 }), sk)
       const event4 = fakeSignature(fakeEvent({ content: '4', created_at: 4 }), sk)
 
+      await insertEvent(event1)
+      await insertEvent(event2)
+
       const relay1 = createMockRelay(RELAY_1, [event1, event2, event3, event4])
 
       const filter = { kinds: [1], authors: [pubkey] }
       const sub = new NostrSubscriptionBuilder({
         filter,
         relays: [RELAY_1],
-        events: new Map([
-          [event1.id, { id: event1.id, created_at: event1.created_at }],
-          [event2.id, { id: event2.id, created_at: event2.created_at }],
-        ]),
         negentropy: true,
       })
 
@@ -130,17 +129,17 @@ describe('start', () => {
       expect(receivedEvents[1]).toMatchObject(event4)
     })
 
-    test('assert negentropy fully reconciled', async ({ pool, createMockRelay }) => {
+    test('assert negentropy fully reconciled', async ({ pool, createMockRelay, insertEvent }) => {
       const sk = generateSecretKey()
       const pubkey = getPublicKey(sk)
       const event1 = fakeSignature(fakeEvent({ content: '1', created_at: 1 }), sk)
+      await insertEvent(event1)
       const relay1 = createMockRelay(RELAY_1, [event1])
 
       const filter = { kinds: [1], authors: [pubkey] }
       const sub = new NostrSubscriptionBuilder({
         filter,
         relays: [RELAY_1],
-        events: new Map([[event1.id, { id: event1.id, created_at: event1.created_at }]]),
         negentropy: true,
       })
 
@@ -157,13 +156,15 @@ describe('start', () => {
       expect(spy.getValues()).toHaveLength(0)
     })
 
-    test('assert negentropy multiple rounds', async ({ pool, createMockRelay }) => {
+    test('assert negentropy multiple rounds', async ({ pool, createMockRelay, insertEvents }) => {
       const sk = generateSecretKey()
       const pubkey = getPublicKey(sk)
 
       const events = Array.from({ length: 1000 }, (_, i) =>
         fakeSignature(fakeEvent({ content: `${i}`, created_at: i + 1 }), sk),
       )
+
+      await insertEvents(events.slice(0, 500))
 
       const relay1 = createMockRelay(RELAY_1, events, { frameSizeLimit: 4096 })
 
