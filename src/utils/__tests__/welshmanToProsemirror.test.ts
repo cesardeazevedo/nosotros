@@ -126,4 +126,21 @@ describe('welshmanToProseMirror', () => {
       ],
     })
   })
+
+  test('assert spotify embed', () => {
+    const event = fakeEvent({
+      content: 'https://open.spotify.com/embed/track/123',
+    })
+    const parsed = parse({ content: event.content, tags: event.tags })
+    const { contentSchema } = welshmanToProseMirror(parsed)
+    expect(contentSchema).toStrictEqual({
+      type: 'doc',
+      content: [
+        {
+          type: 'spotify',
+          attrs: { src: 'https://open.spotify.com/embed/track/123' },
+        },
+      ],
+    })
+  })
 })

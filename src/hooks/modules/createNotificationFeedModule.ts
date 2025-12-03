@@ -24,7 +24,7 @@ export function createNotificationFeedModule(pubkey: string): NotificationFeedMo
     },
     scope: 'self',
     pageSize: 30,
-    staleTime: 600000,
+    staleTime: 300000,
     autoUpdate: true,
     includeReplies: true,
     includeMuted: true,

@@ -1,4 +1,4 @@
-import { useNoteContext } from '@/components/providers/NoteProvider'
+import { useContentContext } from '@/components/providers/ContentProvider'
 import type { SxProps } from '@/components/ui/types'
 import { palette } from '@/themes/palette.stylex'
 import type { ReactNode } from 'react'
@@ -10,8 +10,8 @@ type Props = {
 }
 
 export const CodeSpan = (props: Props) => {
-  const isReply = !useNoteContext().event.metadata?.isRoot
-  return <html.span style={[styles.root, isReply && styles.darker, props.sx]}>{props.children}</html.span>
+  const { dense } = useContentContext()
+  return <html.span style={[styles.root, dense && styles.darker, props.sx]}>{props.children}</html.span>
 }
 
 const styles = css.create({
@@ -19,7 +19,6 @@ const styles = css.create({
     padding: '.1em .3em .1em',
     marginInline: 2,
     borderRadius: 6,
-    whiteSpace: 'nowrap',
     backgroundColor: palette.surfaceContainerHigh,
   },
   darker: {

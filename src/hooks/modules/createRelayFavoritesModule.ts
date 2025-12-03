@@ -17,7 +17,7 @@ export function createRelayFavoriteModule(): FeedModule {
     filter,
     ctx: {
       outbox: true,
-      negentropy: false,
+      negentropy: true,
     },
     type: 'relayfavorites',
     scope: 'self',

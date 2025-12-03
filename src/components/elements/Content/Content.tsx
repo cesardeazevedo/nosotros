@@ -17,6 +17,7 @@ import { Heading } from './Markdown/Heading'
 import { List } from './Markdown/List'
 import { NAddr } from './NAddr/NAddr'
 import { NEvent } from './NEvent/NEvent'
+import { Spotify } from './Spotify/Spotify'
 import { Tweet } from './Tweet/Tweet'
 import { Video } from './Video/Video'
 import { YoutubeEmbed } from './Youtube/YoutubeEmbed'
@@ -79,6 +80,11 @@ export const Content = memo(function Content(props: Props) {
               {node.type === 'codeBlock' && <CodeBlock node={node} />}
               {node.type === 'blockquote' && <BlockQuote node={node} />}
               {node.type === 'tweet' && <Tweet src={node.attrs.src} />}
+              {node.type === 'spotify' && (
+                <MediaWrapper mode={mode}>
+                  <Spotify src={node.attrs.src} />
+                </MediaWrapper>
+              )}
               {node.type === 'youtube' && (
                 <MediaWrapper mode={mode}>
                   <YoutubeEmbed src={node.attrs.src} />

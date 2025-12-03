@@ -80,6 +80,11 @@ async function onMessage(e: MessageEvent) {
       postMessage(msg, events)
       break
     }
+    case 'queryNeg': {
+      const events = store.event.queryNeg(db, msg.params)
+      postMessage(msg, events)
+      break
+    }
     case 'insertEvent': {
       store.event.insert(msg.params)
       break

@@ -18,6 +18,10 @@ export class SqliteStorage {
     return await this.send<NostrEventDB[]>({ method: 'queryEvent', params: filter })
   }
 
+  async queryNeg(filter: Filter) {
+    return await this.send<NostrEventExists[]>({ method: 'queryNeg', params: filter })
+  }
+
   async exists(event: NostrEvent) {
     if (isReplaceableKind(event.kind)) {
       return await this.send<NostrEventExists>({ method: 'existsReplaceable', params: [event.kind, event.pubkey] })

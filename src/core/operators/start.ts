@@ -21,7 +21,7 @@ export function start(pool: Pool): OperatorFunction<NostrSubscriptionBuilder, [s
         const relay = pool.get(url)
         if (relay && filters.length > 0) {
           // Create 1 subscription per filter
-          const subs = filters.map((filter) => new NostrSubscription(filter, { id: sub.id || '', events: sub.events }))
+          const subs = filters.map((filter) => new NostrSubscription(filter, { id: sub.id || '' }))
           if (sub.negentropy !== false) {
             return relay.negentropy$.pipe(
               take(1),
