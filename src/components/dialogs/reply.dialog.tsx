@@ -20,7 +20,14 @@ const ThreadItemInternal = (props: { event: NostrEventDB; onCancel: () => void }
   return (
     <NoteProvider value={{ event: props.event }}>
       <ContentProvider value={{ disableLink: false, isDialog: true }}>
-        <ThreadItem note={note} renderEditor renderReplies={false} repliesLimit={1} onEditorDiscard={props.onCancel} />
+        <ThreadItem
+          note={note}
+          renderEditor
+          renderDivider={false}
+          renderReplies={false}
+          repliesLimit={1}
+          onEditorDiscard={props.onCancel}
+        />
       </ContentProvider>
     </NoteProvider>
   )

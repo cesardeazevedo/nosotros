@@ -5,6 +5,7 @@ import { PopoverBase } from '@/components/ui/Popover/PopoverBase'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 import { useSeenRelays } from '@/hooks/query/useSeen'
 import type { NoteState } from '@/hooks/state/useNote'
+import type { ReferenceType } from '@floating-ui/react'
 import { IconServerBolt } from '@tabler/icons-react'
 import { useMobile } from 'hooks/useMobile'
 import { memo, useCallback } from 'react'
@@ -19,12 +20,17 @@ type Props = {
   popover?: boolean
 }
 
-export const PostButtonStats = memo(function PostButtonStats(props: Props) {
-  const { note, popover = false } = props
-  const { dense } = useContentContext()
+type PropsInner = {
+  note: NoteState
+  dense: boolean
+  onClick: (e: StrictClickEvent) => void
+  ref?: ((ref: ReferenceType | null) => void) | null
+}
+
+const PostButtonStatsInner = (props: PropsInner) => {
+  const { note, dense, onClick, ...rest } = props
   const isMobile = useMobile()
   const seenOn = useSeenRelays(note.event.id)
-
   const handleClick = useCallback(
     (e: StrictClickEvent) => {
       e.preventDefault()
@@ -32,17 +38,6 @@ export const PostButtonStats = memo(function PostButtonStats(props: Props) {
       note.actions.toggleStats()
     },
     [isMobile],
-  )
-
-  const Button = (
-    <IconButton
-      variant={note.state.statsOpen ? 'filledTonal' : 'standard'}
-      toggle={note.state.statsOpen}
-      selected={note.state.statsOpen}
-      size={dense ? 'sm' : 'md'}
-      onClick={handleClick}
-      icon={<IconServerBolt size={dense ? iconProps.size$dense : iconProps.size} strokeWidth={iconProps.strokeWidth} />}
-    />
   )
 
   return (
@@ -56,29 +51,54 @@ export const PostButtonStats = memo(function PostButtonStats(props: Props) {
           {seenOn?.map((relay) => relay.replace('wss://', '')).join('\n')}
         </div>
       }>
-      {popover ? (
-        <PopoverBase
-          placement='bottom'
-          opened={note.state.statsOpen}
-          onClose={() => note.actions.toggleStats(false)}
-          contentRenderer={() => (
-            <Paper outlined surface='surfaceContainerLowest' sx={styles.popover}>
-              <PostStats note={note} />
-            </Paper>
-          )}>
-          {({ getProps, setRef }) => (
-            <ButtonContainer {...getProps} ref={setRef} value={seenOn?.length || 0} aria-label='Seen on relays'>
-              {Button}
-            </ButtonContainer>
-          )}
-        </PopoverBase>
-      ) : (
-        <ButtonContainer value={seenOn?.length || 0} aria-label='Seen on relays'>
-          {Button}
-        </ButtonContainer>
-      )}
+      <ButtonContainer value={seenOn?.length || 0} aria-label='Seen on relays' {...rest}>
+        <IconButton
+          variant={note.state.statsOpen ? 'filledTonal' : 'standard'}
+          toggle={note.state.statsOpen}
+          selected={note.state.statsOpen}
+          size={dense ? 'sm' : 'md'}
+          onClick={handleClick}
+          icon={
+            <IconServerBolt size={dense ? iconProps.size$dense : iconProps.size} strokeWidth={iconProps.strokeWidth} />
+          }
+        />
+      </ButtonContainer>
     </Tooltip>
   )
+}
+
+export const PostButtonStats = memo(function PostButtonStats(props: Props) {
+  const { note, popover = false } = props
+  const { dense } = useContentContext()
+  const isMobile = useMobile()
+
+  const handleClick = useCallback(
+    (e: StrictClickEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+      note.actions.toggleStats()
+    },
+    [isMobile],
+  )
+
+  if (popover) {
+    return (
+      <PopoverBase
+        placement='bottom'
+        opened={note.state.statsOpen}
+        onClose={() => note.actions.toggleStats(false)}
+        contentRenderer={() => (
+          <Paper outlined surface='surfaceContainerLowest' sx={styles.popover}>
+            <PostStats note={note} />
+          </Paper>
+        )}>
+        {({ getProps, setRef }) => (
+          <PostButtonStatsInner {...getProps()} ref={setRef} note={note} dense={dense} onClick={handleClick} />
+        )}
+      </PopoverBase>
+    )
+  }
+  return <PostButtonStatsInner note={note} dense={dense} onClick={handleClick} />
 })
 
 const styles = css.create({

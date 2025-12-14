@@ -148,7 +148,7 @@ const styles = css.create({
     '--connector-height': '0px',
   },
   root$deep: {
-    width: 'calc(100% - 18px)',
+    width: 'auto',
     marginLeft: spacing.margin3,
   },
   wrapper: {
