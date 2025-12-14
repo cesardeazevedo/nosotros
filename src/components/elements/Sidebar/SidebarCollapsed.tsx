@@ -3,6 +3,7 @@ import { NotificationBadge } from '@/components/modules/Notifications/Notificati
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
+import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 import type { SxProps } from '@/components/ui/types'
 import { useCurrentPubkey, useCurrentUser } from '@/hooks/useAuth'
 import { useToggleSettings } from '@/hooks/useSettings'
@@ -18,6 +19,7 @@ import {
   IconListDetails,
   IconPhoto,
   IconPhotoFilled,
+  IconPlus,
   IconSettings,
   IconUser,
   IconUserFilled,
@@ -69,11 +71,11 @@ export const SidebarCollapsed = memo(function SidebarCollapsed(props: Props) {
           }}>
           <IconLayoutSidebarLeftExpandFilled {...iconProps} />
         </IconButton>
-        {/* <Tooltip cursor='arrow' enterDelay={0} text='Create note' placement='right'> */}
-        {/*   <Link to='/' search={{ compose: true }}> */}
-        {/*     <Fab flat variant='primary' icon={<IconPencil />} /> */}
-        {/*   </Link> */}
-        {/* </Tooltip> */}
+        <Tooltip cursor='arrow' enterDelay={0} text='Create note' placement='right'>
+          <Link to='/' search={{ compose: true }}>
+            <IconButton variant='filled' sx={styles.iconButton} icon={<IconPlus size={20} strokeWidth='2.5' />} />
+          </Link>
+        </Tooltip>
         <Link to='/'>
           {({ isActive }) => (
             <IconButton
@@ -192,7 +194,6 @@ const styles = css.create({
   iconButton: {
     width: 50,
     height: 50,
-    color: palette.onSurface,
     padding: spacing.padding2,
   },
   deckIconButton: {
