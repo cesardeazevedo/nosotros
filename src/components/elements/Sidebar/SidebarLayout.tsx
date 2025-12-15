@@ -60,9 +60,11 @@ export const SidebarLayout = memo(function SidebarLayout(props: Props) {
             <Stack gap={1}>
               {pubkey ? (
                 <Stack gap={2}>
-                  <LinkBase to='.' search={(rest) => ({ ...rest, compose: true })}>
-                    <Button variant='filled'>Create note</Button>
-                  </LinkBase>
+                  {!isDeck && (
+                    <LinkBase to='.' search={(rest) => ({ ...rest, compose: true })}>
+                      <Button variant='filled'>Create note</Button>
+                    </LinkBase>
+                  )}
                   <ProfilePopover />
                 </Stack>
               ) : (

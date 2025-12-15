@@ -1,7 +1,6 @@
 import { useDeckColumn } from '@/components/modules/Deck/hooks/useDeck'
 import { ContentProvider } from '@/components/providers/ContentProvider'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
-import { mergeRefs } from '@/components/ui/helpers/mergeRefs'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { useEventReplies } from '@/hooks/query/useReplies'
 import { type NoteState } from '@/hooks/state/useNote'
@@ -23,12 +22,13 @@ type Props = {
   note: NoteState
   renderEditor?: boolean
   renderReplies?: boolean
+  renderDivider?: boolean
   repliesLimit?: number
   onEditorDiscard?: () => void
 }
 
 export const ThreadItem = memo(function ThreadItem(props: Props) {
-  const { note, renderEditor = true, renderReplies = true, repliesLimit, onEditorDiscard } = props
+  const { note, renderEditor = true, renderReplies = true, renderDivider = true, repliesLimit, onEditorDiscard } = props
   const { event } = note
   const ref = useRef<HTMLDivElement>(null)
   const deck = useDeckColumn()
@@ -71,7 +71,7 @@ export const ThreadItem = memo(function ThreadItem(props: Props) {
             </Stack>
           </Stack>
         </html.div>
-        {renderEditor && isCurrentEvent && (
+        {renderEditor && isCurrentEvent && renderDivider && (
           <Stack sx={styles.divider} gap={2}>
             <html.div>
               <IconDotsVertical strokeWidth='2.4' size={24} />
