@@ -14,10 +14,10 @@ describe('buildRepliesQueryOptions', () => {
     const result = buildRepliesQueryOptions(event)
     expect(result).toStrictEqual({
       queryKey: queryKeys.tag('e', ['note1'], Kind.Text),
-      filter: {
+      filters: [{
         kinds: [Kind.Text, Kind.Comment],
         '#e': ['note1'],
-      },
+      }],
       relayHints: {
         idHints: {
           note1: ['user1'],
@@ -36,10 +36,10 @@ describe('buildRepliesQueryOptions', () => {
     const result = buildRepliesQueryOptions(event)
     expect(result).toStrictEqual({
       queryKey: queryKeys.tag('e', ['root1'], Kind.Text),
-      filter: {
+      filters: [{
         kinds: [Kind.Text, Kind.Comment],
         '#e': ['root1', 'reply1'],
-      },
+      }],
       relayHints: {
         idHints: {
           root1: ['pubkey_root', 'user1'],
@@ -59,10 +59,16 @@ describe('buildRepliesQueryOptions', () => {
     const result = buildRepliesQueryOptions(event)
     expect(result).toStrictEqual({
       queryKey: queryKeys.tag('e', ['root1'], Kind.Text),
-      filter: {
-        kinds: [Kind.Text, Kind.Comment],
-        '#E': ['root1', 'comment1'],
-      },
+      filters: [
+        {
+          kinds: [Kind.Text, Kind.Comment],
+          '#e': ['root1', 'comment1'],
+        },
+        {
+          kinds: [Kind.Text, Kind.Comment],
+          '#E': ['root1', 'comment1'],
+        },
+      ],
       relayHints: {
         idHints: {
           root1: ['pubkey_root', 'user1'],
@@ -82,11 +88,24 @@ describe('buildRepliesQueryOptions', () => {
     const result = buildRepliesQueryOptions(event)
     expect(result).toStrictEqual({
       queryKey: queryKeys.tag('a', ['30023:pubkey1:123'], Kind.Text),
-      filter: {
-        kinds: [Kind.Text, Kind.Comment],
-        '#E': ['article1'],
-        '#a': ['30023:pubkey1:123'],
-      },
+      filters: [
+        {
+          kinds: [Kind.Text, Kind.Comment],
+          '#e': ['article1'],
+        },
+        {
+          kinds: [Kind.Text, Kind.Comment],
+          '#E': ['article1'],
+        },
+        {
+          kinds: [Kind.Text, Kind.Comment],
+          '#A': ['30023:pubkey1:123'],
+        },
+        {
+          kinds: [Kind.Text, Kind.Comment],
+          '#a': ['30023:pubkey1:123'],
+        }
+      ],
       relayHints: {
         idHints: {
           '30023:pubkey1:123': ['pubkey1'],

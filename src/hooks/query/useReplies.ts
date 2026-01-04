@@ -18,13 +18,18 @@ export function buildRepliesQueryOptions(event: NostrEventDB) {
   const rootId = address || event.metadata?.rootId || event.id
   const ids = [event.metadata?.rootId, event.id].filter((x): x is string => !!x)
 
-  const isComment = event.kind !== Kind.Text
-  const tagName = (isComment ? '#E' : '#e') as `#${string}`
+  const isNonText = event.kind !== Kind.Text
 
-  const filter: NostrFilter = {
-    kinds: [Kind.Text, Kind.Comment],
-    [tagName]: ids,
-    ...(address && { '#a': [address] }),
+  const kinds = [Kind.Text, Kind.Comment]
+  const filters: NostrFilter[] = [{ kinds, "#e": ids }]
+  if (isNonText) {
+    filters.push({ kinds, "#E": ids })
+  }
+  if (address) {
+    filters.push(...[
+      { kinds, '#A': [address] },
+      { kinds, '#a': [address] },
+    ])
   }
 
   const queryKey = queryKeys.tag(address ? 'a' : 'e', [rootId], Kind.Text)
@@ -37,14 +42,14 @@ export function buildRepliesQueryOptions(event: NostrEventDB) {
     },
   ])
 
-  return { queryKey, filter, relayHints }
+  return { queryKey, filters, relayHints }
 }
 
 export function eventRepliesQueryOptions(event: NostrEventDB, options?: CustomQueryOptions) {
-  const { queryKey, filter, relayHints } = buildRepliesQueryOptions(event)
+  const { queryKey, filters, relayHints } = buildRepliesQueryOptions(event)
   return eventQueryOptions({
     queryKey,
-    filter,
+    filters,
     ...options,
     ctx: {
       batcher: batcherReplies,

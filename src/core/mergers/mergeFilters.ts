@@ -3,7 +3,7 @@ import type { NostrFilter } from 'core/types'
 import { isReplaceableKind } from 'nostr-tools/kinds'
 import { pickBy } from '../helpers/pickBy'
 
-export const FILTER_ARRAY_FIELDS = ['kinds', 'authors', 'ids', '#e', '#p'] as (keyof NostrFilter)[]
+export const FILTER_ARRAY_FIELDS = ['kinds', 'authors', 'ids', '#e', '#p', '#a', '#A'] as (keyof NostrFilter)[]
 
 const unmergableFilters = [Kind.Follows, Kind.Mutelist]
 
@@ -32,7 +32,7 @@ export function mergeFilters(filters: NostrFilter[]): NostrFilter[] {
         for (const value of values) {
           if (value) {
             if ((groups[key][filterKey] as unknown[]).indexOf(value) === -1) {
-              ;(groups[key][filterKey] as unknown[]).push(value)
+              ; (groups[key][filterKey] as unknown[]).push(value)
             }
           }
         }

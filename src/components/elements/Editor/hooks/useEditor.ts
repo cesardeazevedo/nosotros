@@ -4,6 +4,7 @@ import { useEvent } from '@/hooks/query/useQueryBase'
 import { useUserRelays } from '@/hooks/query/useQueryUser'
 import { useFirstSeenRelay, useSeen } from '@/hooks/query/useSeen'
 import { WRITE } from '@/nostr/types'
+import { getEventId } from '@/utils/nip19'
 import { compactArray } from '@/utils/utils'
 import type { NostrEvent } from 'nostr-tools'
 import { isAddressableKind } from 'nostr-tools/kinds'
@@ -41,7 +42,7 @@ export function usePublicMessageTags(pubkey: string | undefined, event?: NostrEv
 }
 
 export function useReplyTags(event: NostrEventDB | undefined) {
-  const eventHeadRelay = useFirstSeenRelay(event?.id || '')
+  const eventHeadRelay = useFirstSeenRelay(event ? getEventId(event) || '' : '') || ''
   const userRelays = useUserRelays(event?.pubkey, WRITE)
 
   const userHeadRelay = userRelays.data?.[0]?.relay || ''
@@ -82,8 +83,8 @@ export function useReplyTags(event: NostrEventDB | undefined) {
           )
           if (isAddressableKind(rootEvent.kind)) {
             const dTag = rootEvent.tags.find((tag) => tag[0] === 'd')?.[1]
-            const address = [rootEvent.id, rootEvent.pubkey, dTag].join(':')
-            tags.unshift(['A', address, rootEventHeadRelay || '', rootEvent?.pubkey])
+            const address = [rootEvent.kind, rootEvent.pubkey, dTag].join(':')
+            tags.unshift(['A', address, rootEventHeadRelay || ''])
           }
         } else {
           tags.push(
@@ -95,9 +96,15 @@ export function useReplyTags(event: NostrEventDB | undefined) {
           )
           if (isAddressableKind(event.kind)) {
             const dTag = event.tags.find((tag) => tag[0] === 'd')?.[1]
-            const address = [event.id, event.pubkey, dTag].join(':')
-            tags.unshift(['A', address, eventHeadRelay || '', event.pubkey])
+            const address = [event.kind, event.pubkey, dTag].join(':')
+            tags.unshift(['A', address, eventHeadRelay || ''])
           }
+        }
+        if (isAddressableKind(event.kind)) {
+          tags.push(['a', getEventId(event) || '', eventHeadRelay || ''])
+        }
+        if (rootEvent && isAddressableKind(rootEvent.kind)) {
+          tags.push(['a', getEventId(rootEvent) || '', rootEventHeadRelay || ''])
         }
         tags.push(
           ...[

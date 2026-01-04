@@ -46,7 +46,7 @@ const styles = css.create({
   },
   content$sm: {
     maxWidth: {
-      default: 600,
+      default: 650,
       [MOBILE]: '100%',
     },
   },
