@@ -9,6 +9,7 @@ import { infiniteQueryOptions } from '@tanstack/react-query'
 import { concatMap, EMPTY, firstValueFrom, map, mergeMap, of, shareReplay, tap, timer } from 'rxjs'
 import type { Module } from '../modules/module'
 import { subscribeFeed } from '../subscriptions/subscribeFeed'
+import { subscribeMediaStats } from '../subscriptions/subscribeMediaStats'
 import { queryClient } from './queryClient'
 import { appendEventFeed, setEventData } from './queryUtils'
 
@@ -108,6 +109,8 @@ export function createFeedQueryOptions(
           }
           return of(res)
         }),
+
+        subscribeMediaStats(),
 
         tap((events) => events.forEach(setEventData)),
 

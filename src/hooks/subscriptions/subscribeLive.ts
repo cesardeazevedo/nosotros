@@ -5,6 +5,7 @@ import type { NostrContext } from '@/nostr/context'
 import { delay, identity, mergeMap, filter as rxFilter } from 'rxjs'
 import type { FeedScope } from '../query/useQueryFeeds'
 import { subscribeFeed } from './subscribeFeed'
+import { subscribeMediaStats } from './subscribeMediaStats'
 
 export function subscribeLive(ctx: NostrContext, scope: FeedScope, filter: NostrFilter) {
   const now = Date.now() / 10000
@@ -24,6 +25,7 @@ export function subscribeLive(ctx: NostrContext, scope: FeedScope, filter: Nostr
       since: parseInt((Date.now() / 1000).toString()),
     },
   ).pipe(
+    subscribeMediaStats(),
     delay(1000),
     mergeMap(identity),
     rxFilter((event) => event.created_at > now && event.created_at < (Date.now() + 2000) / 1000),
