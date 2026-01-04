@@ -94,7 +94,6 @@ const Options = memo(function Options(props: PropsOptions) {
         <ContentLink tooltip={false} underline={false} href={`https://njump.me/${nevent}`} sx={styles.link}>
           <MenuItem {...itemProps} leadingIcon={<IconExternalLink {...iconProps} />} label='Njump.me' />
         </ContentLink>
-        {/* <MenuItem disabled leadingIcon={<IconBookmark />} label='Bookmark' /> */}
         {/* <MenuItem disabled variant='danger' leadingIcon={<IconEyeOff />} label='Mute' /> */}
         {/* <MenuItem disabled variant='danger' leadingIcon={<IconUserMinus />} label='Unfollow' /> */}
       </html.div>
@@ -116,8 +115,8 @@ export const PostOptions = memo(function PostOptions(props: Props) {
   const { mutate: mutateBookMark } = usePublishEventMutation<[id: string, pubkey: string]>({
     mutationFn:
       ({ signer }) =>
-      ([id, pubkey]) =>
-        publishBookmark(pubkey, id, { signer }),
+        ([id, pubkey]) =>
+          publishBookmark(pubkey, id, { signer }),
   })
 
   const handleCopy = useCallback((value: string | undefined) => {
@@ -150,7 +149,9 @@ export const PostOptions = memo(function PostOptions(props: Props) {
             onCopyIdClick={handleCopy(nevent)}
             onCopyAuthorIdClick={handleCopy(user?.nprofile)}
             onCopyLinkClick={handleCopy(link)}
-            onBookmarkClick={() => {
+            onBookmarkClick={(e) => {
+              e.stopPropagation()
+              e.preventDefault()
               if (pubkey) {
                 mutateBookMark([event.id, pubkey])
                 props.close()
