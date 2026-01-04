@@ -135,6 +135,7 @@ const styles = css.create({
   wrapper: {
     flex: '1 1 auto',
     width: '100%',
+    overflow: 'auto',
   },
   bubble: {
     width: '100%',
