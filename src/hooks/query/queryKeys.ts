@@ -2,6 +2,7 @@ import { Kind } from '@/constants/kinds'
 import type { NostrFilter } from '@/core/types'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import type { NostrContext } from '@/nostr/context'
+import { getDTag } from '@/utils/nip19'
 import { isAddressableKind, isReplaceableKind } from 'nostr-tools/kinds'
 import type { DecodedResult } from 'nostr-tools/nip19'
 
@@ -50,11 +51,27 @@ export function eventToQueryKey(event: NostrEventDB) {
   if (isReplaceableKind(event.kind)) {
     return queryKeys.replaceable(event.kind, event.pubkey)
   } else if (isAddressableKind(event.kind)) {
-    const dTag = event.tags.find((tag) => tag[0] === 'd')?.[1]
+    const dTag = getDTag(event)
     if (dTag) {
       return queryKeys.addressable(event.kind, event.pubkey, dTag)
     }
   } else {
     return queryKeys.event(event.id)
+  }
+}
+
+export function eventIdToQueryKey(id: string) {
+  if (!id.includes(':')) {
+    return queryKeys.event(id)
+  } else {
+    const parts = id.split(':')
+    if (parts.length === 3) {
+      const [kind, pubkey, identifier] = id.split(':')
+      return queryKeys.addressable(parseInt(kind), pubkey, identifier)
+    } else {
+      // shouldn't really happen
+      const [kind, pubkey] = id.split(':')
+      return queryKeys.replaceable(parseInt(kind), pubkey)
+    }
   }
 }

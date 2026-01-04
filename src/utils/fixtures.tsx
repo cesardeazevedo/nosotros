@@ -8,7 +8,7 @@ import { queryClient } from '@/hooks/query/queryClient'
 import { dbSqlite } from '@/nostr/db'
 import type { UseQueryResult } from '@tanstack/react-query'
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query'
-import { renderHook, waitFor } from '@testing-library/react'
+import { renderHook, RenderHookResult, waitFor } from '@testing-library/react'
 import { type NostrEvent } from 'nostr-tools'
 import { from } from 'rxjs'
 import { test as base } from 'vitest'
@@ -22,24 +22,25 @@ interface Fixtures {
   insertEvents: (events: NostrEventDB[]) => Promise<void>
   reset: () => void
   signer: TestSigner
+  renderHookWithQueryProvider: <Result>(options: (initialProps: unknown) => Result) => RenderHookResult<Result, unknown>,
   renderReactQueryHook: (queryOptions: UseQueryOptions<NostrEventDB[]>) => Promise<UseQueryResult>
 }
 
 export const test = base.extend<Fixtures>({
   reset: [
-    async ({}, use) => {
+    async ({ }, use) => {
       queryClient.clear()
       await dbSqlite.deleteDB()
       await use(() => null)
     },
     { auto: true },
   ],
-  createMockRelay: async ({}, use) => {
+  createMockRelay: async ({ }, use) => {
     await use((url: string, db: NostrEvent[], options?: { frameSizeLimit?: number }) => {
       return new RelayServer(url, db, options)
     })
   },
-  pool: async ({}, use) => {
+  pool: async ({ }, use) => {
     const pool = new Pool({
       blacklist: [],
       open: (url) => new Relay(url, { info$: from(fetchRelayInfo(url)) }),
@@ -47,13 +48,13 @@ export const test = base.extend<Fixtures>({
     await use(pool)
     pool.reset()
   },
-  insertEvent: async ({}, use) => {
+  insertEvent: async ({ }, use) => {
     await use(async (event: NostrEventDB) => {
       await dbSqlite.insertEvent(event)
       await new Promise<void>((resolve) => setTimeout(() => resolve(), 1500))
     })
   },
-  insertEvents: async ({}, use) => {
+  insertEvents: async ({ }, use) => {
     await use(async (events: NostrEventDB[]) => {
       for (const event of events) {
         await dbSqlite.insertEvent(event)
@@ -61,17 +62,21 @@ export const test = base.extend<Fixtures>({
       await new Promise<void>((resolve) => setTimeout(() => resolve(), 1500))
     })
   },
-  signer: async ({}, use) => {
+  signer: async ({ }, use) => {
     const signer = new TestSigner()
     await use(signer)
   },
-  renderReactQueryHook: async ({}, use) => {
-    await use(async (options) => {
+  renderHookWithQueryProvider: async ({ }, use) => {
+    await use((options) => {
       const wrapper = ({ children }: { children: React.ReactNode }) => (
         <QueryProvider client={queryClient}>{children}</QueryProvider>
       )
-
-      const { result } = renderHook(() => useQuery(options), { wrapper })
+      return renderHook(options, { wrapper })
+    })
+  },
+  renderReactQueryHook: async ({ renderHookWithQueryProvider }, use) => {
+    await use(async (options) => {
+      const { result } = renderHookWithQueryProvider(() => useQuery(options))
       await waitFor(() => expect(result.current.isSuccess).toBe(true))
       return result.current
     })

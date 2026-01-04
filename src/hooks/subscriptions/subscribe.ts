@@ -20,7 +20,7 @@ export function subscribe(sub: NostrSubscriptionBuilder, ctx: NostrContext): Obs
     start(pool),
 
     tap(([relay, event]) => {
-      setSeenData(event.id, relay)
+      setSeenData(event, relay)
       if (ctx.network !== 'REMOTE_ONLY' && [Kind.Text, Kind.Comment, Kind.Repost, Kind.Article].includes(event.kind)) {
         dbSqlite.insertSeen(relay, event)
       }

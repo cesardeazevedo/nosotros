@@ -66,7 +66,7 @@ export function broadcastEvent(signedEvent: NostrEvent, options: LocalPublisherO
           tap(([relay, , status, , event]) => {
             if (status) {
               dbSqlite.insertSeen(relay, event)
-              setSeenData(event.id, relay)
+              setSeenData(event, relay)
             }
           }),
         ),

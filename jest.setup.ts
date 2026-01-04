@@ -49,3 +49,16 @@ vi.mock('nostr-tools', async () => {
 
 vi.mock('constants/relays')
 vi.mock('nostr/operators/verifyWorker')
+
+const localStorageMock = {
+  getItem: vi.fn(),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn(),
+  length: 0,
+  key: vi.fn(),
+}
+
+Object.defineProperty(global, 'localStorage', {
+  value: localStorageMock,
+})
