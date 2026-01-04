@@ -124,6 +124,10 @@ export function eventAddress(event: NostrEvent) {
   }
 }
 
+export function getEventId(event: NostrEvent) {
+  return eventAddress(event) || event.id
+}
+
 export function getDTag(event: NostrEvent) {
   return event.tags.find((tag) => tag[0] === 'd')?.[1]
 }

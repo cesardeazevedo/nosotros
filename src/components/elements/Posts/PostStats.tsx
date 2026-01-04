@@ -39,26 +39,26 @@ export const PostStats = memo(function PostStats(props: Props) {
   const { mutate } = usePublishEventMutation<[NostrEvent, string]>({
     mutationFn:
       () =>
-      ([event, relay]) => {
-        const publisher = new NostrPublisher(undefined, { include: [event], relays: of([relay]) })
-        return of(publisher).pipe(
-          broadcast(pool),
-          tap((res) => store.set(addPublishAtom, res)),
-          tap(([relay, , status, , event]) => {
-            if (status) {
-              dbSqlite.insertSeen(relay, event)
-              setSeenData(event.id, relay)
-            }
-          }),
-          tap(() => {
-            enqueueToast({
-              component: <ToastEventPublished event={event} eventLabel='Broadcasted' />,
-              duration: 5_000_000,
-            })
-          }),
-          ignoreElements(),
-        )
-      },
+        ([event, relay]) => {
+          const publisher = new NostrPublisher(undefined, { include: [event], relays: of([relay]) })
+          return of(publisher).pipe(
+            broadcast(pool),
+            tap((res) => store.set(addPublishAtom, res)),
+            tap(([relay, , status, , event]) => {
+              if (status) {
+                dbSqlite.insertSeen(relay, event)
+                setSeenData(event, relay)
+              }
+            }),
+            tap(() => {
+              enqueueToast({
+                component: <ToastEventPublished event={event} eventLabel='Broadcasted' />,
+                duration: 5_000_000,
+              })
+            }),
+            ignoreElements(),
+          )
+        },
   })
 
   if (note.state.statsOpen === false) {

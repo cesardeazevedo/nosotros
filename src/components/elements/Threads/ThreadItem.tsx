@@ -32,7 +32,7 @@ export const ThreadItem = memo(function ThreadItem(props: Props) {
   const { event } = note
   const ref = useRef<HTMLDivElement>(null)
   const deck = useDeckColumn()
-  const isCurrentRoute = useIsCurrentRouteEventID(event.id)
+  const isCurrentRoute = useIsCurrentRouteEventID(event)
   const isDeck = deck?.type === 'event' && deck.filter?.ids?.[0] === event.id
   const isCurrentEvent = isDeck || isCurrentRoute
 

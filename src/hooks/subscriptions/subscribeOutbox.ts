@@ -58,7 +58,7 @@ function subscribeAuthorsRelayList(authors: string[], ctx: NostrContext) {
  * based on each author relay list and relay hints.
  */
 export function subscribeOutbox(filter: NostrFilter, ctx: NostrContext) {
-  function byField(field: 'authors' | '#p', values: string[]) {
+  function byField(field: 'authors' | '#p' | '#P', values: string[]) {
     const permission = field === 'authors' ? WRITE : READ
     return subscribeAuthorsRelayList(values, { ...ctx, permission }).pipe(
       mergeMap(([pubkey, relays]) => {
@@ -68,7 +68,7 @@ export function subscribeOutbox(filter: NostrFilter, ctx: NostrContext) {
     )
   }
 
-  function byId<T extends 'ids' | '#e' | '#a'>(field: T) {
+  function byId<T extends 'ids' | '#e' | '#E' | '#a' | '#A'>(field: T) {
     const values = filter[field]
     if (!values?.length || !ctx.relayHints?.idHints) {
       return EMPTY
@@ -98,12 +98,18 @@ export function subscribeOutbox(filter: NostrFilter, ctx: NostrContext) {
     return byField('authors', filter.authors)
   } else if (filter['#p']) {
     return byField('#p', filter['#p'])
+  } else if (filter['#P']) {
+    return byField('#P', filter['#P'])
   } else if (filter.ids?.length) {
     return byId('ids')
   } else if (filter['#e']?.length) {
     return byId('#e')
+  } else if (filter['#E']?.length) {
+    return byId('#E')
   } else if (filter['#a']?.length) {
     return byId('#a')
+  } else if (filter['#A']?.length) {
+    return byId('#A')
   }
 
   return EMPTY

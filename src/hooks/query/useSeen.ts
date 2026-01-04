@@ -1,15 +1,18 @@
 import type { SeenDB } from '@/db/types'
 import { dbSqlite } from '@/nostr/db'
+import { getEventId } from '@/utils/nip19'
 import type { UseQueryOptions } from '@tanstack/react-query'
 import { useQuery } from '@tanstack/react-query'
+import type { NostrEvent } from 'nostr-tools'
 import { useMemo } from 'react'
 import { queryClient } from './queryClient'
 import { queryKeys } from './queryKeys'
 
-export function setSeenData(eventId: string, relay: string) {
+export function setSeenData(event: NostrEvent, relay: string) {
+  const eventId = getEventId(event)
   queryClient.setQueryData(queryKeys.seen(eventId), (old: SeenDB[] = []) => {
     if (!old.some((seen) => seen.relay === relay)) {
-      return [...old, { relay, eventId }] as SeenDB[]
+      return [...old, { relay, eventId: eventId }] as SeenDB[]
     }
     return old
   })

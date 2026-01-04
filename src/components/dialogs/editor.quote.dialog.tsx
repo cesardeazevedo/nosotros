@@ -66,9 +66,6 @@ const styles = css.create({
   dialog: {
     padding: spacing.padding1,
   },
-  editor: {
-    minHeight: 260,
-  },
   root: {
     position: 'relative',
   },

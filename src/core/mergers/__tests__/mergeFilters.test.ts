@@ -37,6 +37,20 @@ describe('mergeFilters', () => {
     expect(result[1]).toStrictEqual({ kinds: [0], ids: ['2', '3'] })
   })
 
+  test('Should expect #E tags', () => {
+    const result = mergeFilters([
+      { kinds: [1, 1111], '#E': ['1', '2'] },
+      { kinds: [1, 1111], '#e': ['3', '4'] },
+      { kinds: [1, 1111], '#a': ['5', '6'] },
+      { kinds: [1, 1111], '#A': ['7', '8'] },
+    ])
+    expect(result).toHaveLength(4)
+    expect(result[0]).toStrictEqual({ kinds: [1, 1111], '#E': ['1', '2'] })
+    expect(result[1]).toStrictEqual({ kinds: [1, 1111], '#e': ['3', '4'] })
+    expect(result[2]).toStrictEqual({ kinds: [1, 1111], '#a': ['5', '6'] })
+    expect(result[3]).toStrictEqual({ kinds: [1, 1111], '#A': ['7', '8'] })
+  })
+
   test('Should expect #e of kind [0] being merged', () => {
     const result = mergeFilters([
       { kinds: [0], '#e': ['1'] },
