@@ -40,7 +40,7 @@ export const Reply = memo(function Reply(props: Props) {
   const { blured } = useContentContext()
   const nevent = note.nip19
 
-  const isCurrentEvent = useIsCurrentRouteEventID(event.id)
+  const isCurrentEvent = useIsCurrentRouteEventID(event)
 
   const handleOpen = useCallback(() => setOpen((v) => !v), [])
 

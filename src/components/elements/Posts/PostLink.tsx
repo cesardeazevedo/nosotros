@@ -20,7 +20,7 @@ export const PostLink = memo(function PostLink(props: Props) {
   const navigate = useNavigate()
   const linkProps = useNostrMaskedLinkProps(note.nip19)
   const deck = useDeckAddNextColumn(() => createEventModule(note.nip19))
-  const isActive = useIsCurrentRouteEventID(note.event.id)
+  const isActive = useIsCurrentRouteEventID(note.event)
 
   const handleClick = useCallback(
     (e: StrictClickEvent) => {

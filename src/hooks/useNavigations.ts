@@ -1,3 +1,5 @@
+import { NostrEvent } from '@/core/types'
+import { getEventId } from '@/utils/nip19'
 import { useMatch, useRouter, useRouterState } from '@tanstack/react-router'
 import { nip19 } from 'nostr-tools'
 import { useCallback } from 'react'
@@ -22,8 +24,9 @@ export function useNostrRoute() {
   return context || (maskedParam ? { decoded: nip19.decode(maskedParam) } : undefined)
 }
 
-export function useIsCurrentRouteEventID(id: string) {
+export function useIsCurrentRouteEventID(event: NostrEvent) {
   const context = useNostrRoute()
+  const id = getEventId(event)
   if (context?.decoded) {
     switch (context.decoded.type) {
       case 'note': {
@@ -37,6 +40,11 @@ export function useIsCurrentRouteEventID(id: string) {
       }
       case 'nprofile': {
         return context.decoded.data.pubkey === id
+      }
+      case 'naddr': {
+        const { kind, pubkey, identifier } = context.decoded.data
+        const address = [kind, pubkey, identifier].join(':')
+        return address === id
       }
       default: {
         return false
