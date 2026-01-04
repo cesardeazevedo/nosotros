@@ -10,17 +10,16 @@ import { decodeNIP19, decodeRelays, decodeToFilter, nip19ToRelayHints } from '@/
 import type { UseQueryOptions } from '@tanstack/react-query'
 import { keepPreviousData, queryOptions, useQuery } from '@tanstack/react-query'
 import type { Filter } from 'nostr-tools'
-import { defaultIfEmpty, firstValueFrom, shareReplay, takeUntil, tap, timer } from 'rxjs'
+import { defaultIfEmpty, firstValueFrom, from, mergeMap, shareReplay, takeUntil, tap, timer } from 'rxjs'
 import { batcher } from '../batchers'
 import { subscribeStrategy } from '../subscriptions/subscribeStrategy'
 import { queryClient } from './queryClient'
-import { pointerToQueryKey, queryKeys } from './queryKeys'
+import { eventIdToQueryKey, pointerToQueryKey, queryKeys } from './queryKeys'
 import { setEventData } from './queryUtils'
 
 export type UseQueryOptionsWithFilter<Selector = NostrEventDB[]> = UseQueryOptions<NostrEventDB[], Error, Selector> & {
-  filter: Filter
   ctx?: NostrContext
-}
+} & ({ filter: Filter } | { filters: Filter[] })
 
 export type CustomQueryOptions<Selector = NostrEventDB[]> = Omit<
   UseQueryOptionsWithFilter<Selector>,
@@ -28,26 +27,30 @@ export type CustomQueryOptions<Selector = NostrEventDB[]> = Omit<
 >
 
 export function createEventQueryOptions<Selector = NostrEventDB[]>(options: UseQueryOptionsWithFilter<Selector>) {
-  const { filter, ctx = {}, ...opts } = options
+  const { ctx = {}, ...opts } = options
   return queryOptions<NostrEventDB[], Error, Selector>({
     queryFn: async () => {
       const { maxRelaysPerUser } = store.get(settingsAtom)
-      const res = await firstValueFrom(
-        subscribeStrategy({ ...ctx, maxRelaysPerUser }, filter).pipe(
-          tap((res) => res.forEach(setEventData)),
-          tap((res) => {
-            if (res) {
-              queryClient.setQueryData(opts.queryKey, (old: NostrEventDB[] = []) => {
-                const ids = new Set(old.map((x) => x.id))
-                return [...old, ...res.filter((x) => !ids.has(x.id))]
-              })
-            }
-          }),
-          takeUntil(timer(6500)),
-          shareReplay(),
-          defaultIfEmpty([] as NostrEventDB[]),
-        ),
+      const filters = 'filter' in options ? [options.filter] : options.filters
+
+      const stream = from(filters).pipe(
+        mergeMap((filter) => {
+          return subscribeStrategy({ ...ctx, maxRelaysPerUser }, filter)
+        }),
+        tap((res) => res.forEach(setEventData)),
+        tap((res) => {
+          if (res) {
+            queryClient.setQueryData(opts.queryKey, (old: NostrEventDB[] = []) => {
+              const ids = new Set(old.map((x) => x.id))
+              return [...old, ...res.filter((x) => !ids.has(x.id))]
+            })
+          }
+        }),
+        takeUntil(timer(6500)),
+        shareReplay(),
+        defaultIfEmpty([] as NostrEventDB[]),
       )
+      const res = await firstValueFrom(stream)
       return queryClient.getQueryData<NostrEventDB[]>(opts.queryKey) || res
     },
     ...opts,
@@ -132,7 +135,7 @@ export function eventFromNIP19QueryOptions(nip19: string, relayHints?: RelayHint
 export function useEvent(id: string = '', ctx?: NostrContext) {
   return useQuery(
     eventQueryOptions({
-      queryKey: queryKeys.event(id),
+      queryKey: eventIdToQueryKey(id),
       filter: { ids: [id] },
       enabled: !!id,
       placeholderData: keepPreviousData,

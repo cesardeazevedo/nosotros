@@ -9,7 +9,7 @@ import { atom } from 'jotai'
 import { atomWithQuery } from 'jotai-tanstack-query'
 import { atomFamily, atomWithObservable } from 'jotai/utils'
 import { isAddressableKind } from 'nostr-tools/kinds'
-import { ignoreElements, tap } from 'rxjs'
+import { from, ignoreElements, mergeMap, tap } from 'rxjs'
 import { selectedPubkeyAtom } from './auth.atoms'
 import { userFamily } from './users.atoms'
 
@@ -36,8 +36,9 @@ export const liveRepliesFamily = atomFamily(
     return atomWithObservable(
       () => {
         const scope = 'self'
-        const { filter, relayHints } = buildRepliesQueryOptions(params.event)
-        return subscribeLive({ relayHints }, scope, filter).pipe(
+        const { filters, relayHints } = buildRepliesQueryOptions(params.event)
+        return from(filters).pipe(
+          mergeMap((filter) => subscribeLive({ relayHints }, scope, filter)),
           tap((event) => {
             setEventData(event)
             if (event.metadata?.rootId) {

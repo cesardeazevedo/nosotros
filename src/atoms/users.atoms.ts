@@ -24,6 +24,18 @@ const userFollowsQueryFamily = atomFamily(
   (a, b) => a.pubkey === b.pubkey && a.syncFollows === b.syncFollows,
 )
 
+const userMutesQueryFamily = atomFamily(
+  (params: { pubkey: string | undefined; syncFollows: boolean }) => {
+    const { pubkey, syncFollows } = params
+    return atomWithQuery(() =>
+      replaceableEventQueryOptions(Kind.Mutelist, pubkey || '', {
+        enabled: !!pubkey && syncFollows,
+      }),
+    )
+  },
+  (a, b) => a.pubkey === b.pubkey && a.syncFollows === b.syncFollows,
+)
+
 export const userFamily = atomFamily(
   (params: { pubkey: string | undefined; syncFollows: boolean }) => {
     return atom((get) => {
@@ -54,6 +66,12 @@ export const userFamily = atomFamily(
       const follows = get(followsAtom)
       const tags = follows.data?.tags || []
 
+      const mutesAtom = userMutesQueryFamily({ pubkey, syncFollows })
+      const mutes = get(mutesAtom)
+      const muteTags = mutes.data?.tags || []
+      const mutedAuthors = new Set(muteTags.filter((tag) => tag[0] === 'p').map((tag) => tag[1]))
+      const mutedNotes = new Set(muteTags.filter((tag) => tag[0] === 'e').map((tag) => tag[1]))
+
       const followsTag = (value: string | undefined, tagName: string = 'p') => {
         return tags.some((tag) => tagName === tag[0] && tag[1] === value)
       }
@@ -72,8 +90,8 @@ export const userFamily = atomFamily(
         canReceiveZap: !!metadata?.lud06 || !!metadata?.lud16,
         nprofile,
         totalFollowing: tags.length,
-        mutedNotes: new Set(),
-        mutedAuthors: new Set(),
+        mutedNotes,
+        mutedAuthors,
         follows,
         followsTag,
         followsAll,

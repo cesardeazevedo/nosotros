@@ -39,4 +39,35 @@ describe('createEventQueryOptions', () => {
     await act(() => new Promise<void>((resolve) => setTimeout(() => resolve(), 120)))
     expect(queryClient.getQueryData(['events'])).toStrictEqual([event1, event2, event3])
   })
+
+  test('assert multiple filters merge results', async ({ renderReactQueryHook }) => {
+    const event1 = fakeEventMeta({ kind: Kind.Text, id: '1', pubkey: 'p1' })
+    const event2 = fakeEventMeta({ kind: Kind.Text, id: '2', pubkey: 'p2' })
+
+    mockSubscribeStrategy
+      .mockReset()
+      .mockImplementationOnce(() =>
+        of([event1]),
+      )
+      .mockImplementationOnce(() =>
+        of([event2]).pipe(delay(500)),
+      )
+
+    const result = await renderReactQueryHook(
+      createEventQueryOptions({
+        queryKey: ['multi'],
+        ctx: {},
+        filters: [
+          { kinds: [1], authors: ['p1'] },
+          { kinds: [1], authors: ['p2'] },
+        ],
+      }),
+    )
+
+    expect(result.data).toEqual([event1])
+
+    await act(() => new Promise<void>((resolve) => setTimeout(resolve, 600)))
+
+    expect(queryClient.getQueryData(['multi'])).toStrictEqual([event1, event2])
+  })
 })
