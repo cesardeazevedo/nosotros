@@ -4,7 +4,7 @@ import type { NostrFilter } from '@/core/types'
 import type { NostrContext } from '@/nostr/context'
 import { fakeEvent } from '@/utils/faker'
 import { test } from '@/utils/fixtures'
-import { RelayServer } from '@/utils/testHelpers'
+import type { RelayServer } from '@/utils/testHelpers'
 import { subscribeSpyTo } from '@hirez_io/observer-spy'
 import { subscribeOutbox } from '../subscribeOutbox'
 

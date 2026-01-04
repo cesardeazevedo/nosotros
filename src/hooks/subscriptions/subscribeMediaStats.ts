@@ -1,7 +1,7 @@
 import { addMediaDimAtom, addMediaErrorAtom } from '@/atoms/media.atoms'
 import { store } from '@/atoms/store'
 import { Kind } from '@/constants/kinds'
-import { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import {
   catchError,
   defaultIfEmpty,

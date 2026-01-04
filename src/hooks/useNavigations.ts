@@ -1,4 +1,4 @@
-import { NostrEvent } from '@/core/types'
+import type { NostrEvent } from '@/core/types'
 import { getEventId } from '@/utils/nip19'
 import { useMatch, useRouter, useRouterState } from '@tanstack/react-router'
 import { nip19 } from 'nostr-tools'

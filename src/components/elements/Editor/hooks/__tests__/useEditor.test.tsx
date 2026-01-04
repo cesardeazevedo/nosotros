@@ -6,7 +6,7 @@ import { setSeenData } from '@/hooks/query/useSeen'
 import { fakeEventMeta } from '@/utils/faker'
 import { test } from '@/utils/fixtures'
 import { getEventId } from '@/utils/nip19'
-import { NostrEvent } from 'nostr-tools'
+import type { NostrEvent } from 'nostr-tools'
 import { useReplyTags } from '../useEditor'
 
 const setSeenRelays = (event: NostrEvent, relays: string[]) => {
