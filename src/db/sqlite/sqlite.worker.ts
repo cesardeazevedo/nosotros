@@ -1,3 +1,4 @@
+import { Kind } from '@/constants/kinds'
 import { type Database, type SAHPoolUtil } from '@sqlite.org/sqlite-wasm'
 import invariant from 'tiny-invariant'
 import { SqliteEventStore } from './events/sqlite.events'
@@ -5,9 +6,11 @@ import { SqliteNip05 } from './nip05/sqlite.nip05'
 import { SqliteRelayInfo } from './relayInfo/sqlite.relayInfo'
 import { SqliteRelayStats } from './relayStats/sqlite.relayStats'
 import { SqliteSeen } from './seen/sqlite.seen'
+import { SqliteTags } from './tags/sqlite.tags'
 import { initializeSQLite } from './sqlite.schemas'
 import { SqliteStats } from './sqlite.stats'
 import type { SqliteMessages } from './sqlite.types'
+import { SqliteUsers } from './users/sqlite.users'
 
 export class SqliteStorage {
   db: Promise<Database>
@@ -18,6 +21,8 @@ export class SqliteStorage {
   nip05: SqliteNip05
   seen: SqliteSeen
   stats: SqliteStats
+  users: SqliteUsers
+  tags: SqliteTags
 
   constructor(public name: string) {
     const init = initializeSQLite(this.name, false)
@@ -29,6 +34,8 @@ export class SqliteStorage {
     this.nip05 = new SqliteNip05(this.db)
     this.seen = new SqliteSeen(this.db)
     this.stats = new SqliteStats()
+    this.users = new SqliteUsers(this.db)
+    this.tags = new SqliteTags()
   }
 
   async deleteDB() {
@@ -39,6 +46,7 @@ export class SqliteStorage {
     db.exec('DELETE FROM relayInfo')
     db.exec('DELETE FROM seen')
     db.exec('DELETE FROM nip05')
+    db.exec('DELETE FROM users')
   }
 
   async exportDB() {
@@ -87,6 +95,21 @@ async function onMessage(e: MessageEvent) {
     }
     case 'insertEvent': {
       store.event.insert(msg.params)
+      if (msg.params.kind === Kind.Metadata) {
+        const userMetadata = msg.params.metadata?.userMetadata as
+          | { name?: string; display_name?: string }
+          | undefined
+        const name = userMetadata?.name?.trim() || undefined
+        const display_name = userMetadata?.display_name?.trim() || undefined
+        const resolvedName = (name || display_name || '').trim()
+        if (resolvedName) {
+          store.users.upsert({
+            pubkey: msg.params.pubkey,
+            name: resolvedName,
+            display_name,
+          })
+        }
+      }
       break
     }
     case 'deleteEvent': {
@@ -127,6 +150,20 @@ async function onMessage(e: MessageEvent) {
     }
     case 'insertNip05': {
       store.nip05.insert(msg.params)
+      break
+    }
+    case 'queryTags': {
+      const res = store.tags.queryValues(db, msg.params)
+      postMessage(msg, res)
+      break
+    }
+    case 'queryUsers': {
+      const res = store.users.query(db, msg.params)
+      postMessage(msg, res)
+      break
+    }
+    case 'upsertUser': {
+      store.users.upsert(msg.params)
       break
     }
     case 'countEvents': {

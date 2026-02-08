@@ -52,6 +52,14 @@ function build(db: Database) {
       timestamp INTEGER NOT NULL
     );
 
+    CREATE TABLE IF NOT EXISTS users (
+      pubkey TEXT(64) PRIMARY KEY,
+      name TEXT NOT NULL,
+      display_name TEXT
+    );
+    CREATE INDEX IF NOT EXISTS idx_users_name ON users(name COLLATE NOCASE);
+    CREATE INDEX IF NOT EXISTS idx_users_display_name ON users(display_name COLLATE NOCASE);
+
     CREATE TABLE IF NOT EXISTS migrations (
       version INTEGER PRIMARY KEY,
       created_at INTEGER
@@ -62,7 +70,19 @@ function build(db: Database) {
 export async function initializeSQLite(name: string = 'nosotrosdb.sqlite3', tracing = true) {
   try {
     console.log('Loading and initializing SQLite3 module...')
-    const sqlite3 = await sqlite3InitModule({
+    type Sqlite3Runtime = {
+      installOpfsSAHPoolVfs?: (opts: { initialCapacity: number }) => Promise<SAHPoolUtil>
+      oo1: {
+        OpfsDb: new (filename: string, flags: string) => Database
+        DB: new (filename: string, flags: string) => Database
+      }
+      opfs?: unknown
+    }
+
+    const sqlite3 = await (sqlite3InitModule as unknown as (config: {
+      print: typeof console.log
+      printErr: typeof console.error
+    }) => Promise<Sqlite3Runtime>)({
       print: console.log,
       printErr: console.error,
     })
@@ -72,7 +92,7 @@ export async function initializeSQLite(name: string = 'nosotrosdb.sqlite3', trac
 
     try {
       if (typeof sqlite3.installOpfsSAHPoolVfs === 'function') {
-        const pool = (await sqlite3.installOpfsSAHPoolVfs({})) as SAHPoolUtil
+        const pool = (await sqlite3.installOpfsSAHPoolVfs({ initialCapacity: 24 })) as SAHPoolUtil
         const db = new pool.OpfsSAHPoolDb(filename)
         if (tracing) {
           console.log(`Using VFS: opfs-sahpool -> ${filename}`)
