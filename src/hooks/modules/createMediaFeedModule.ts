@@ -11,7 +11,7 @@ export function createMediaFeedModule(pubkey?: string): MediaFeedModule {
   if (pubkey) {
     const name = `media_${pubkey}`
     const filter: NostrFilter = {
-      kinds: [Kind.Media],
+      kinds: [Kind.Media, Kind.Video],
       authors: [pubkey],
       limit: 150,
     }
@@ -28,7 +28,7 @@ export function createMediaFeedModule(pubkey?: string): MediaFeedModule {
   }
   const name = 'guest_media'
   const filter: NostrFilter = {
-    kinds: [Kind.Media],
+    kinds: [Kind.Media, Kind.Video],
     limit: 150,
   }
   return {

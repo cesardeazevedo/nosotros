@@ -5,7 +5,7 @@ import type { FeedModule } from '../query/useQueryFeeds'
 export function createRelayFeedModule(relay: string): FeedModule {
   const id = `${relay}_feed`
   const filter = {
-    kinds: [Kind.Text, Kind.Repost, Kind.Media, Kind.Article],
+    kinds: [Kind.Text, Kind.Repost, Kind.Media, Kind.Video, Kind.Article],
     limit: 250,
   }
   return {

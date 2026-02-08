@@ -42,7 +42,8 @@ export const NostrEventFeedItem = memo(function NostrEventFeedItem(props: Props)
     case Kind.Repost: {
       return <RepostRoot event={event} />
     }
-    case Kind.Media: {
+    case Kind.Media:
+    case Kind.Video: {
       return <PostRoot event={event} />
     }
     case Kind.ZapReceipt: {

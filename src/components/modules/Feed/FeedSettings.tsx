@@ -5,7 +5,16 @@ import { Text } from '@/components/ui/Text/Text'
 import { Kind } from '@/constants/kinds'
 import type { FeedState } from '@/hooks/state/useFeed'
 import { spacing } from '@/themes/spacing.stylex'
-import { IconArticle, IconMessage2, IconPhoto, IconShare3 } from '@tabler/icons-react'
+import {
+  IconArticle,
+  IconArticleFilled,
+  IconMessage2,
+  IconPhoto,
+  IconPhotoFilled,
+  IconPlayerPlay,
+  IconPlayerPlayFilled,
+  IconShare3,
+} from '@tabler/icons-react'
 import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 import { FeedSettingsRelays } from './settings/FeedSettingsRelays'
@@ -25,6 +34,7 @@ export type Props = {
 
 export const FeedSettings = memo(function FeedSettings(props: Props) {
   const { feed, renderRelaySettings = false, onClose } = props
+
   return (
     <html.div style={styles.root}>
       <Divider />
@@ -37,6 +47,7 @@ export const FeedSettings = memo(function FeedSettings(props: Props) {
             variant='filter'
             label='Text Notes'
             selected={feed.hasKind(Kind.Text)}
+            selectedIcon={null}
             icon={<IconMessage2 {...iconProps} />}
             onClick={() => feed.toggleKind(Kind.Text)}
           />
@@ -44,6 +55,7 @@ export const FeedSettings = memo(function FeedSettings(props: Props) {
             label='Reposts'
             variant='filter'
             selected={feed.hasKind(Kind.Repost)}
+            selectedIcon={<IconShare3 fill='currentColor' {...iconProps} />}
             icon={<IconShare3 {...iconProps} />}
             onClick={() => feed.toggleKind(Kind.Repost)}
           />
@@ -51,12 +63,22 @@ export const FeedSettings = memo(function FeedSettings(props: Props) {
             label='Media'
             variant='filter'
             selected={feed.hasKind(Kind.Media)}
+            selectedIcon={<IconPhotoFilled {...iconProps} />}
             icon={<IconPhoto {...iconProps} />}
             onClick={() => feed.toggleKind(Kind.Media)}
           />
           <Chip
-            selected={feed.hasKind(Kind.Article)}
+            label='Video'
             variant='filter'
+            selected={feed.hasKind(Kind.Video)}
+            selectedIcon={<IconPlayerPlayFilled {...iconProps} />}
+            icon={<IconPlayerPlay {...iconProps} />}
+            onClick={() => feed.toggleKind(Kind.Video)}
+          />
+          <Chip
+            variant='filter'
+            selected={feed.hasKind(Kind.Article)}
+            selectedIcon={<IconArticleFilled {...iconProps} />}
             icon={<IconArticle {...iconProps} />}
             label='Articles'
             onClick={() => feed.toggleKind(Kind.Article)}
