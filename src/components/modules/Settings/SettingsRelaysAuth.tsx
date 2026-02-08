@@ -20,14 +20,14 @@ export const SettingsRelayAuth = memo(function SettingsRelayAuth() {
   const authWhitelist = useAtomValue(authWhitelistAtom)
   const relays = dedupe([...authRelays.map((x) => x[0]), ...authWhitelist])
   return (
-    <Stack horizontal={false} grow align='stretch'>
+    <Stack horizontal={false} grow align='stretch' sx={styles.container}>
       <Stack sx={styles.header}>
         <Text variant='title' size='lg'>
           Relay Authentication
         </Text>
       </Stack>
       <Divider />
-      <Stack grow horizontal={false} gap={2} align='flex-start' sx={styles.content}>
+      <Stack grow horizontal={false} gap={2} align='flex-start' sx={styles.root}>
         <Stack sx={styles.description}>
           <Text variant='title' size='sm'>
             Relays asking for authentication when requesting notes, you can choose to automatically authenticate with
@@ -71,6 +71,14 @@ export const SettingsRelayAuth = memo(function SettingsRelayAuth() {
 })
 
 const styles = css.create({
+  container: {
+    height: '100%',
+  },
+  root: {
+    width: '100%',
+    overflowY: 'auto',
+    paddingBottom: spacing.padding3,
+  },
   header: {
     paddingBlock: spacing.padding2,
     paddingInline: spacing.padding4,
@@ -79,9 +87,6 @@ const styles = css.create({
     paddingTop: spacing.padding2,
     paddingInline: spacing.padding2,
     color: palette.onSurfaceVariant,
-  },
-  content: {
-    width: '100%',
   },
   tbody: {
     paddingLeft: spacing.padding1,

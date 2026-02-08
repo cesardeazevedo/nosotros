@@ -27,7 +27,7 @@ export const SettingsAboutRoute = memo(function SettingsAboutRoute() {
   const user = useUserState(PUBKEY)
   const router = useRouter()
   return (
-    <Stack grow horizontal={false}>
+    <Stack grow horizontal={false} sx={styles.container}>
       <Stack sx={styles.header} gap={1}>
         <Text variant='title' size='lg'>
           About nosotros.app
@@ -100,9 +100,13 @@ export const SettingsAboutRoute = memo(function SettingsAboutRoute() {
 })
 
 const styles = css.create({
+  container: {
+    height: '100%',
+  },
   root: {
     width: '100%',
     padding: spacing.padding3,
+    overflowY: 'auto',
   },
   header: {
     padding: spacing.padding2,
