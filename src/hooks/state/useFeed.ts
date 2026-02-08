@@ -24,7 +24,8 @@ type Extras = {
 }
 
 export function useFeedStateAtom(feedAtoms: FeedAtoms, extras?: Extras) {
-  const { options } = feedAtoms
+  const baseOptions = feedAtoms.options
+  const sessionOptions = useAtomValue(feedAtoms.atom)
 
   const [filter, setFilter] = useAtom(feedAtoms.filter)
   const [autoUpdate, setAutoUpdate] = useAtom(feedAtoms.autoUpdate)
@@ -40,11 +41,12 @@ export function useFeedStateAtom(feedAtoms: FeedAtoms, extras?: Extras) {
   const resetFeed = useSetAtom(feedAtoms.reset)
 
   const syncOptions = useSetAtom(feedAtoms.sync)
+  const setOptions = useSetAtom(feedAtoms.atom)
 
   // sync changes from options, these changes comes from url router
   useEffect(() => {
-    syncOptions(options)
-  }, [options.filter, options.includeReplies, syncOptions])
+    syncOptions(baseOptions)
+  }, [baseOptions.filter, baseOptions.includeReplies, syncOptions])
 
   const onStream = useCallback(
     (event: NostrEventDB) => {
@@ -83,7 +85,7 @@ export function useFeedStateAtom(feedAtoms: FeedAtoms, extras?: Extras) {
   })
 
   const queryClient = useQueryClient()
-  const queryKey = queryKeys.feed(options.id, filter, options.ctx)
+  const queryKey = queryKeys.feed(sessionOptions.id, filter, sessionOptions.ctx)
   const query = useInfiniteQuery(
     createFeedQueryOptions({
       select: useCallback(
@@ -112,7 +114,7 @@ export function useFeedStateAtom(feedAtoms: FeedAtoms, extras?: Extras) {
         },
         [replies],
       ),
-      ...options,
+      ...sessionOptions,
       ...extras,
       filter,
       queryKey,
@@ -193,7 +195,7 @@ export function useFeedStateAtom(feedAtoms: FeedAtoms, extras?: Extras) {
       tap(([pageSize, data]) => {
         const total = data?.pages.flat().length || 0
         if (pageSize < total) {
-          setPageSize(pageSize + (options.pageSize || 10))
+          setPageSize(pageSize + (sessionOptions.pageSize || 10))
         }
       }),
       rxFilter(([pageSize, data, scope]) => {
@@ -208,7 +210,7 @@ export function useFeedStateAtom(feedAtoms: FeedAtoms, extras?: Extras) {
 
   const refresh$ = useObservable(() =>
     feedRefresh$.pipe(
-      rxFilter((x) => options.id.startsWith(x)),
+      rxFilter((x) => sessionOptions.id.startsWith(x)),
       tap(() => onRefresh()),
     ),
   )
@@ -218,11 +220,11 @@ export function useFeedStateAtom(feedAtoms: FeedAtoms, extras?: Extras) {
     atoms: feedAtoms,
     query,
     queryKey,
-    options,
+    options: sessionOptions,
     filter,
     isDirty,
     isModified,
-    type: options.type,
+    type: sessionOptions.type,
     setFilter,
     replies,
     setReplies,
@@ -246,7 +248,7 @@ export function useFeedStateAtom(feedAtoms: FeedAtoms, extras?: Extras) {
     isEmpty,
     setIsEmpty,
     onStream,
-    paginate: () => paginate([pageSize, query.data, options.scope]),
+    paginate: () => paginate([pageSize, query.data, sessionOptions.scope]),
     addRelay: () => {},
     removeRelay: () => {},
   }

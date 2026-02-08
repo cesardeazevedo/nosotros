@@ -5,6 +5,7 @@ import { FeedHeaderFollowSet } from './headers/FeedHeaderFollowSet'
 import { FeedHeaderRelayFeed } from './headers/FeedHeaderRelayFeed'
 import { FeedHeaderRelaySets } from './headers/FeedHeaderRelaySets'
 import { FeedHeaderReposts } from './headers/FeedHeaderReposts'
+import { FeedHeaderTags } from './headers/FeedHeaderTags'
 
 type Props = {
   feed: FeedState
@@ -28,6 +29,9 @@ export const FeedHeader = (props: Props) => {
     }
     case 'relaysets': {
       return <FeedHeaderRelaySets feed={feed} />
+    }
+    case 'tags': {
+      return <FeedHeaderTags feed={feed} />
     }
     case 'lists': {
       switch (feed.filter.kinds?.[0]) {

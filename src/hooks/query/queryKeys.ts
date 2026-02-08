@@ -19,7 +19,7 @@ export const queryKeys = {
   allRelayStats: () => ['relayStats'],
 
   feed: (name: string, filter: NostrFilter, ctx?: NostrContext) => {
-    return ['feed', name, filter.kinds, filter.search, ctx?.relays].filter(Boolean)
+    return ['feed', name, filter.kinds, filter.search, filter['#t'], ctx?.relays].filter(Boolean)
   },
 
   seen: (eventId: string) => ['seen', eventId],
