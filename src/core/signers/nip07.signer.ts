@@ -16,7 +16,7 @@ const errorMsg = 'Nostr extension not detected'
 export class NIP07Signer implements Signer {
   name = 'nip07'
 
-  constructor() {}
+  constructor() { }
 
   get nostr() {
     if ('nostr' in window) {
@@ -36,7 +36,7 @@ export class NIP07Signer implements Signer {
 
   encrypt = (pubkey: string, msg: string) => {
     invariant(this.nostr, errorMsg)
-    return Promise.resolve(this.nostr.nip44.decrypt(pubkey, msg))
+    return Promise.resolve(this.nostr.nip44.encrypt(pubkey, msg))
   }
 
   decrypt = (pubkey: string, msg: string) => {
