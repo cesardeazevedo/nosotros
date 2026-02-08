@@ -1,6 +1,7 @@
 import type { FeedAtoms } from '@/atoms/modules.atoms'
 import { createFeedAtoms } from '@/atoms/modules.atoms'
 import { Kind } from '@/constants/kinds'
+import { dedupe } from '@/core/helpers/dedupe'
 import type { NostrFilter } from '@/core/types'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import type { NostrContext } from '@/nostr/context'
@@ -9,6 +10,7 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { useObservable, useObservableCallback, useSubscription } from 'observable-hooks'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { EMPTY, filter as rxFilter, Subject, switchMap, tap, throttleTime } from 'rxjs'
+import { Modules } from '../modules/module'
 import { queryKeys } from '../query/queryKeys'
 import { prependEventFeed, setEventData } from '../query/queryUtils'
 import type { FeedScope } from '../query/useQueryFeeds'
@@ -66,13 +68,13 @@ export function useFeedStateAtom(feedAtoms: FeedAtoms, extras?: Extras) {
     (input$) =>
       input$.pipe(
         switchMap(([ctx, scope, filter]) => {
-          if (options.live !== false) {
+          if (sessionOptions.live !== false) {
             return subscribeLive(ctx, scope, filter)
           }
           return EMPTY
         }),
       ),
-    [options.ctx, options.scope, filter],
+    [sessionOptions.ctx, sessionOptions.scope, filter],
   )
   useSubscription(live$, {
     next: (event) => {
@@ -249,8 +251,30 @@ export function useFeedStateAtom(feedAtoms: FeedAtoms, extras?: Extras) {
     setIsEmpty,
     onStream,
     paginate: () => paginate([pageSize, query.data, sessionOptions.scope]),
-    addRelay: () => {},
-    removeRelay: () => {},
+    addRelay: (relay: string) => {
+      setOptions((prev: Modules) => {
+        const relays = dedupe([...(prev.ctx?.relays || []), relay])
+        return {
+          ...prev,
+          ctx: {
+            ...prev.ctx,
+            relays,
+          },
+        }
+      })
+    },
+    removeRelay: (relay: string) => {
+      setOptions((prev: Modules) => {
+        const relays = (prev.ctx?.relays || []).filter((url: string) => url !== relay)
+        return {
+          ...prev,
+          ctx: {
+            ...prev.ctx,
+            relays,
+          },
+        }
+      })
+    },
   }
 }
 
