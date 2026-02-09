@@ -10,6 +10,7 @@ export enum Kind {
   BadgeAward = 8,
   Media = 20,
   Video = 21,
+  ShortVideo = 22,
   PublicMessage = 24,
   ChannelCreation = 40,
   ChannelMetadata = 41,

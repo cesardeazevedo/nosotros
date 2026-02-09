@@ -43,7 +43,8 @@ export const NostrEventRoot = memo(function NostrEventRoot(props: Props) {
       return <RepostRoot event={event} />
     }
     case Kind.Media:
-    case Kind.Video: {
+    case Kind.Video:
+    case Kind.ShortVideo: {
       return <PostRoot open={open} event={event} />
     }
     case Kind.ZapReceipt: {

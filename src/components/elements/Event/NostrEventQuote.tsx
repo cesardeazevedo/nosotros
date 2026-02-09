@@ -34,6 +34,7 @@ export const NostrEventQuote = memo(function NostrEventQuote(props: Props) {
     case Kind.Text:
     case Kind.Media:
     case Kind.Video:
+    case Kind.ShortVideo:
     case Kind.Comment: {
       return <PostQuote event={event} />
     }

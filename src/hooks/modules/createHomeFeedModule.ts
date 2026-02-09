@@ -11,7 +11,7 @@ export function createHomeFeedModule(pubkey?: string): FeedModule {
   }
   const id = pubkey ? `home_${pubkey}` : 'guest'
   const filter = {
-    kinds: [Kind.Text, Kind.Repost, Kind.Media, Kind.Video, Kind.Article],
+    kinds: [Kind.Text, Kind.Repost, Kind.Media, Kind.Video, Kind.ShortVideo, Kind.Article],
     authors: pubkey ? [pubkey] : RECOMMENDED_PUBKEYS,
     since: DateTime.now().minus({ days: 7 }).toUnixInteger(),
     limit: 250,

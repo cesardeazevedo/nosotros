@@ -17,7 +17,7 @@ export const PostContent = memo(function PostContent(props: Props) {
   const imeta = note.event.metadata?.imeta
 
   const media = useMemo(() => {
-    if ((note.event.kind === Kind.Media || note.event.kind === Kind.Video) && imeta) {
+    if ((note.event.kind === Kind.Media || note.event.kind === Kind.Video || note.event.kind === Kind.ShortVideo) && imeta) {
       return Object.values(imeta || {})
         .map((x, index) => {
           if (!x.url) {
@@ -40,7 +40,7 @@ export const PostContent = memo(function PostContent(props: Props) {
       onExpand={() => note.actions.toggleContent(true)}
       initialExpanded={initialExpanded}>
       {note.metadata?.isRoot === false && <ReplyHeader />}
-      {note.event.kind === Kind.Media || note.event.kind === Kind.Video ? (
+      {note.event.kind === Kind.Media || note.event.kind === Kind.Video || note.event.kind === Kind.ShortVideo ? (
         <>
           <MediaGroup media={media} />
           <Content renderMedia={false} />

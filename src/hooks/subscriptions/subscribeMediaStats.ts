@@ -118,7 +118,8 @@ export function subscribeMediaStats() {
         }
 
         case Kind.Media:
-        case Kind.Video: {
+        case Kind.Video:
+        case Kind.ShortVideo: {
           const meta = event.metadata
           const entries = Object.entries(meta?.imeta || {})
 

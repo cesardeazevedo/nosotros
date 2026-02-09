@@ -29,7 +29,7 @@ export const NProfileColumn = memo(function NProfileColumn(props: Props) {
         return createProfileModule({ nip19, includeReplies: true })
       }
       case 'media': {
-        return createProfileModule({ nip19, filter: { kinds: [Kind.Media] } })
+        return createProfileModule({ nip19, filter: { kinds: [Kind.Media, Kind.Video, Kind.ShortVideo] } })
       }
       case 'articles': {
         return createProfileModule({ nip19, filter: { kinds: [Kind.Article] } })

@@ -34,6 +34,27 @@ export type Props = {
 
 export const FeedSettings = memo(function FeedSettings(props: Props) {
   const { feed, renderRelaySettings = false, onClose } = props
+  const hasVideoKinds = feed.hasKind(Kind.Video) && feed.hasKind(Kind.ShortVideo)
+  const toggleVideoKinds = () => {
+    feed.setFilter((prev) => {
+      const kinds = prev.kinds || []
+      const hasAllVideoKinds = kinds.includes(Kind.Video) && kinds.includes(Kind.ShortVideo)
+
+      if (hasAllVideoKinds) {
+        return {
+          ...prev,
+          kinds: kinds.filter((kind) => kind !== Kind.Video && kind !== Kind.ShortVideo),
+        }
+      }
+
+      return {
+        ...prev,
+        kinds: [...kinds, Kind.Video, Kind.ShortVideo].filter(
+          (kind, index, allKinds) => allKinds.indexOf(kind) === index,
+        ),
+      }
+    })
+  }
 
   return (
     <html.div style={styles.root}>
@@ -70,10 +91,10 @@ export const FeedSettings = memo(function FeedSettings(props: Props) {
           <Chip
             label='Video'
             variant='filter'
-            selected={feed.hasKind(Kind.Video)}
+            selected={hasVideoKinds}
             selectedIcon={<IconPlayerPlayFilled {...iconProps} />}
             icon={<IconPlayerPlay {...iconProps} />}
-            onClick={() => feed.toggleKind(Kind.Video)}
+            onClick={toggleVideoKinds}
           />
           <Chip
             variant='filter'
