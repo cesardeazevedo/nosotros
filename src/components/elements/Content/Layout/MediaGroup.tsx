@@ -15,10 +15,10 @@ type MediaProps = {
 type Props =
   | MediaProps
   | {
-      // needed when rendering for different formats like files
-      children: ReactNode
-      length: number
-    }
+    // needed when rendering for different formats like files
+    children: ReactNode
+    length: number
+  }
 
 const MediaDraggable = (props: { children: ReactNode }) => {
   const { dense } = useContentContext()

@@ -3,7 +3,7 @@ import type { NostrFilter } from '@/core/types'
 import type { NostrContext } from '@/nostr/context'
 import type { Metadata } from '@/nostr/types'
 import type { NostrEvent } from 'nostr-tools'
-import type { Nip05DB, RelayStatsDB, SeenDB } from '../types'
+import type { Nip05DB, RelayStatsDB, SeenDB, UserDB } from '../types'
 
 export type NostrEventStored = Omit<NostrEvent, 'tags'> & {
   tags: string
@@ -53,6 +53,9 @@ export type SqliteMessages =
   | { method: 'insertRelayInfo'; params: RelayInfoStored }
   | { method: 'queryNip05'; params: string[] }
   | { method: 'insertNip05'; params: Nip05DB }
+  | { method: 'queryTags'; params: { tag: string; query?: string; limit?: number } }
+  | { method: 'queryUsers'; params: { prefix: string; limit?: number } }
+  | { method: 'upsertUser'; params: UserDB }
   | { method: 'countEvents' }
   | { method: 'countTags' }
   | { method: 'dbSize ' }

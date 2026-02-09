@@ -199,6 +199,30 @@ describe('SqliteEventStore.query', () => {
 
     expect(results.map((e) => e.id)).toStrictEqual(['2', '4'])
   })
+
+  test('assert empty ids filter returns no events', () => {
+    const e1 = fakeEventMeta({ id: '1', kind: Kind.Text, pubkey: 'p1', created_at: 100 })
+    const e2 = fakeEventMeta({ id: '2', kind: Kind.Text, pubkey: 'p1', created_at: 200 })
+
+    store.insertEvent(db, e1)
+    store.insertEvent(db, e2)
+
+    const results = store.query(db, { ids: [] })
+
+    expect(results).toStrictEqual([])
+  })
+
+  test('assert empty authors filter returns no events', () => {
+    const e1 = fakeEventMeta({ id: '1', kind: Kind.Text, pubkey: 'p1', created_at: 100 })
+    const e2 = fakeEventMeta({ id: '2', kind: Kind.Text, pubkey: 'p2', created_at: 200 })
+
+    store.insertEvent(db, e1)
+    store.insertEvent(db, e2)
+
+    const results = store.query(db, { authors: [] })
+
+    expect(results).toStrictEqual([])
+  })
 })
 
 describe('SqliteEventStore.queryNeg', () => {
@@ -247,7 +271,7 @@ describe('SqliteEventStore.queryNeg', () => {
     store.insertEvent(db, e2)
     store.insertEvent(db, e3)
 
-    const results = store.queryNeg(db, { kinds: [Kind.Text] })
+    const results = store.queryNeg(db, { kinds: [Kind.Text], authors: ['p1'] })
 
     expect(results.map((e) => e.id)).toStrictEqual(['3', '1'])
   })

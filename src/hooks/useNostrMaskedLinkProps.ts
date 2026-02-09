@@ -19,10 +19,6 @@ function useAllowedMaskedRoutes() {
           return true
       }
 
-      if (pathname.startsWith('/tag/')) {
-        return true
-      }
-
       // Check nprofile/npub route
       const nostrMatch = state.matches[state.matches.length - 1]
       if (nostrMatch.routeId === '/$nostr') {

@@ -1,51 +1,77 @@
-import { HeaderBase } from '@/components/elements/Layouts/HeaderBase'
-import { RouteContainer } from '@/components/elements/Layouts/RouteContainer'
+import { CenteredContainer } from '@/components/elements/Layouts/CenteredContainer'
+import { PaperContainer } from '@/components/elements/Layouts/PaperContainer'
 import { Stack } from '@/components/ui/Stack/Stack'
-import { Tab } from '@/components/ui/Tab/Tab'
+import { Text } from '@/components/ui/Text/Text'
+import { Kind, LIST_KIND_MAP } from '@/constants/kinds'
+import { createListModule } from '@/hooks/modules/createListModule'
 import { useCurrentPubkey } from '@/hooks/useAuth'
 import { useResetScroll } from '@/hooks/useResetScroll'
-import { spacing } from '@/themes/spacing.stylex'
-import { Link, Outlet } from '@tanstack/react-router'
-import { memo } from 'react'
-import { css } from 'react-strict-dom'
+import { memo, useMemo, useState } from 'react'
+import { ListsTable } from './ListsTable'
 
 export const ListsRoute = memo(function ListsRoute() {
   useResetScroll()
   const pubkey = useCurrentPubkey()
-  return (
-    <RouteContainer
-      maxWidth='lg'
-      header={
-        <HeaderBase
-          leading={
-            <Stack justify='flex-start' align='flex-start'>
-              <Link to='/lists' activeOptions={{ exact: true }}>
-                {({ isActive }) => <Tab active={isActive} sx={styles.tab} anchor='starter' label='Starter Packs' />}
-              </Link>
-              <Link disabled={!pubkey} to='/lists/followsets' activeOptions={{ exact: true }}>
-                {({ isActive }) => (
-                  <Tab disabled={!pubkey} active={isActive} sx={styles.tab} anchor='followset' label='Follow Sets' />
-                )}
-              </Link>
-              <Link disabled={!pubkey} to='/lists/relaysets'>
-                {({ isActive }) => (
-                  <Tab disabled={!pubkey} active={isActive} sx={styles.tab} anchor='relaysets' label='Relay Sets' />
-                )}
-              </Link>
-            </Stack>
-          }
-        />
-      }>
-      <Outlet />
-    </RouteContainer>
+  const [myKinds, setMyKinds] = useState<number[]>([])
+  const [discoverKinds, setDiscoverKinds] = useState<number[]>([Kind.StarterPack])
+  const defaultKinds = useMemo(
+    () => Object.keys(LIST_KIND_MAP).map((kind) => Number(kind)),
+    [],
   )
-})
 
-const styles = css.create({
-  tab: {
-    height: 48,
-  },
-  headline: {
-    marginBottom: spacing.margin4,
-  },
+  const myListsModule = useMemo(
+    () =>
+      createListModule({
+        kinds: myKinds.length ? myKinds : defaultKinds,
+        pubkey,
+        authors: pubkey ? [pubkey] : [],
+        id: `lists_self_${pubkey || 'anon'}`,
+        pageSize: 50,
+        limit: 200,
+        scope: 'self',
+      }),
+    [defaultKinds, myKinds, pubkey],
+  )
+  const followingListsModule = useMemo(
+    () =>
+      createListModule({
+        kinds: discoverKinds.length ? discoverKinds : defaultKinds,
+        pubkey,
+        id: `lists_following_${pubkey || 'anon'}`,
+        pageSize: 50,
+        limit: 200,
+        scope: 'following',
+      }),
+    [defaultKinds, discoverKinds, pubkey],
+  )
+  return (
+    <>
+      <CenteredContainer margin maxWidth='lg'>
+        {!pubkey ? (
+          <Text variant='body' size='md'>
+            Sign in to see your lists.
+          </Text>
+        ) : (
+          <Stack horizontal={false} gap={5}>
+            <PaperContainer maxWidth='lg'>
+              <ListsTable
+                module={myListsModule}
+                title='Your Lists'
+                selectedKinds={myKinds}
+                onKindsChange={setMyKinds}
+              />
+            </PaperContainer>
+            <PaperContainer maxWidth='lg'>
+              <ListsTable
+                module={followingListsModule}
+                title='Discover Lists'
+                selectedKinds={discoverKinds}
+                onKindsChange={setDiscoverKinds}
+              />
+            </PaperContainer>
+          </Stack>
+        )}
+      </CenteredContainer>
+    </>
+  )
 })

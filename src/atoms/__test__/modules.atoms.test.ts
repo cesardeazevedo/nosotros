@@ -262,4 +262,48 @@ describe('assert module atoms', () => {
     expect(store.get(feedAtoms.filter)).toStrictEqual({ kinds: [1, 6] })
     expect(store.get(feedAtoms.includeReplies)).toBe(true)
   })
+
+  test('assert relay ctx is preserved when persistent ctx is empty', () => {
+    const id = 'relay_feed_bug'
+    const store = createStore()
+    const options = createFeedModule(id, {
+      type: 'relayfeed',
+      ctx: {
+        relays: ['wss://nostr.wine'],
+        network: 'REMOTE_ONLY',
+      } as NostrContext,
+    })
+
+    store.set(persistentFeedStatesAtom, {
+      [id]: {
+        ...options,
+        ctx: {},
+      },
+    })
+
+    const feedAtoms = createFeedAtoms(options)
+    const value = store.get(feedAtoms.atom)
+
+    expect(value.ctx.relays).toStrictEqual(['wss://nostr.wine'])
+  })
+
+  test('assert save preserves relay ctx for relayfeed module', () => {
+    const id = 'relay_feed_save'
+    const store = createStore()
+    const options = createFeedModule(id, {
+      type: 'relayfeed',
+      filter: { kinds: [1], limit: 50 },
+      ctx: {
+        relays: ['wss://nostr.wine'],
+        network: 'REMOTE_ONLY',
+        negentropy: false,
+      } as NostrContext,
+    })
+    const feedAtoms = createFeedAtoms(options)
+
+    store.set(feedAtoms.save)
+    const persisted = store.get(persistentFeedStatesAtom)[id] as FeedModule
+
+    expect(persisted.ctx.relays).toStrictEqual(['wss://nostr.wine'])
+  })
 })

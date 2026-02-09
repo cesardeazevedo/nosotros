@@ -3,7 +3,6 @@ import { NotificationBadge } from '@/components/modules/Notifications/Notificati
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
-import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 import type { SxProps } from '@/components/ui/types'
 import { useCurrentPubkey, useCurrentUser } from '@/hooks/useAuth'
 import { useToggleSettings } from '@/hooks/useSettings'
@@ -33,6 +32,7 @@ import { IconHome } from '../Icons/IconHome'
 import { IconHomeFilled } from '../Icons/IconHomeFilled'
 import { ProfilePopover } from '../Navigation/ProfilePopover'
 import { SidebarContext } from './SidebarContext'
+import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 
 type Props = {
   ref?: RefObject<null>
@@ -71,11 +71,6 @@ export const SidebarCollapsed = memo(function SidebarCollapsed(props: Props) {
           }}>
           <IconLayoutSidebarLeftExpandFilled {...iconProps} />
         </IconButton>
-        <Tooltip cursor='arrow' enterDelay={0} text='Create note' placement='right'>
-          <Link to='/' search={{ compose: true }}>
-            <IconButton variant='filled' sx={styles.iconButton} icon={<IconPlus size={20} strokeWidth='2.5' />} />
-          </Link>
-        </Tooltip>
         <Link to='/'>
           {({ isActive }) => (
             <IconButton
@@ -171,6 +166,11 @@ export const SidebarCollapsed = memo(function SidebarCollapsed(props: Props) {
           )}
         </Link>
         <IconButtonSearch placement='right' sx={styles.iconButton} {...iconProps} />
+        <Tooltip cursor='arrow' enterDelay={0} text='Create note' placement='right'>
+          <Link to='/' search={{ compose: true }}>
+            <IconButton variant='filled' sx={styles.iconButton} icon={<IconPlus size={20} strokeWidth='2.5' />} />
+          </Link>
+        </Tooltip>
         <ProfilePopover />
       </Stack>
     </Stack>

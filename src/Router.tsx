@@ -14,12 +14,8 @@ import { Feed } from './components/modules/Feed/Feed'
 import { FeedHeader } from './components/modules/Feed/FeedHeader'
 import { FeedHeadline } from './components/modules/Feed/FeedHeadline'
 import { FeedRoute } from './components/modules/Feed/FeedRoute'
-import { FeedHeaderBase } from './components/modules/Feed/headers/FeedHeaderBase'
 import { HomeRoute } from './components/modules/Home/HomeRoute'
-import { FollowSetList } from './components/modules/Lists/FollowSets/FollowSetList'
 import { ListsRoute } from './components/modules/Lists/ListRoute'
-import { RelaySetList } from './components/modules/Lists/RelaySets/RelaySetList'
-import { StarterPackList } from './components/modules/Lists/StarterPacks/StarterPackList'
 import { MediaRoute } from './components/modules/Media/MediaRoute'
 import { NostrRoute } from './components/modules/Nostr/NostrRoute'
 import { NostrEventPending } from './components/modules/NostrEvent/NostrEventLoading'
@@ -35,13 +31,11 @@ import { SettingsPreferencesRoute } from './components/modules/Settings/Settings
 import { SettingsRelayAuth } from './components/modules/Settings/SettingsRelaysAuth'
 import { SettingsRoute } from './components/modules/Settings/SettingsRoute'
 import { SettingsStorageRoute } from './components/modules/Settings/SettingsStorage'
-import { TagHeader } from './components/modules/Tag/TagHeader'
 import { Kind } from './constants/kinds'
 import type { NostrFilter } from './core/types'
 import { ErrorBoundary } from './ErrorBoundary'
 import { loadThreads } from './hooks/loaders/loadThreads'
 import { createProfileModule } from './hooks/modules/createProfileFeedModule'
-import { createTagFeedModule } from './hooks/modules/createTagFeedModule'
 import { queryClient } from './hooks/query/queryClient'
 import { queryKeys } from './hooks/query/queryKeys'
 import type { FeedModule, FeedScope } from './hooks/query/useQueryFeeds'
@@ -144,6 +138,7 @@ export const feedRoute = createRoute({
         z.literal('following'),
         z.literal('sets_p'),
         z.literal('sets_e'),
+        z.literal('relay_sets'),
         z.literal('relayfeed'),
         z.literal('inbox'),
       ])
@@ -214,7 +209,7 @@ export const feedRoute = createRoute({
       since,
       live = true,
       scope = 'self',
-      type = 'feed',
+      type = deps.type || 'feed',
       blured,
       relay,
       relaySets,
@@ -482,23 +477,6 @@ const nprofileArticlesRoute = createRoute({
   },
 })
 
-const tagsRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/tag/$tag',
-  component: function () {
-    const params = tagsRoute.useParams()
-    const module = useMemo(() => createTagFeedModule(params.tag), [params.tag])
-    const feed = useFeedState(module)
-    return (
-      <FeedRoute
-        feed={feed}
-        renderEditor={false}
-        header={<FeedHeaderBase feed={feed} renderRelaySettings leading={<TagHeader feed={feed} />} />}
-      />
-    )
-  },
-})
-
 export const searchRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/search',
@@ -516,24 +494,6 @@ const listsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/lists',
   component: ListsRoute,
-})
-
-const starterPackRoute = createRoute({
-  getParentRoute: () => listsRoute,
-  path: '/',
-  component: StarterPackList,
-})
-
-const followSetsRoute = createRoute({
-  getParentRoute: () => listsRoute,
-  path: '/followsets',
-  component: FollowSetList,
-})
-
-const relaySetsRoute = createRoute({
-  getParentRoute: () => listsRoute,
-  path: '/relaysets',
-  component: RelaySetList,
 })
 
 const relaysRoute = createRoute({
@@ -596,9 +556,8 @@ export const routeTree = rootRoute.addChildren([
   feedRoute,
   nostrRoute.addChildren([nprofileIndexRoute, nprofileRepliesRoute, nprofileMediaRoute, nprofileArticlesRoute]),
   deckRoute,
-  tagsRoute,
   searchRoute,
-  listsRoute.addChildren([starterPackRoute, followSetsRoute, relaySetsRoute]),
+  listsRoute,
   notificationsRoute,
   mediaRoute,
   articleRoute,

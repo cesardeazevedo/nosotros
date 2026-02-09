@@ -21,6 +21,7 @@ export type Props = {
 
 export const Feed = memo(function Feed(props: Props) {
   const { feed, render, loading, ...rest } = props
+  const showLoading = feed.options.scope === 'sets_e' ? feed.query.isFetching : !feed.isEmpty
   return (
     <NostrContextProvider value={feed.options.ctx}>
       <ContentProvider value={{ blured: feed.blured }}>
@@ -29,7 +30,7 @@ export const Feed = memo(function Feed(props: Props) {
           feed={feed}
           onScrollEnd={feed.paginate}
           render={(event) => (render ? render(event) : <NostrEventFeedItem event={event} />)}
-          footer={<>{!feed.isEmpty ? loading || <PostLoading rows={4} /> : <FeedEmpty feed={feed} />}</>}
+          footer={<>{showLoading ? loading || <PostLoading rows={4} /> : feed.isEmpty ? <FeedEmpty feed={feed} /> : null}</>}
           {...rest}
         />
       </ContentProvider>

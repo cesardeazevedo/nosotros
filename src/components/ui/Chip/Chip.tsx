@@ -31,6 +31,7 @@ export type Props = {
   avatarUrl?: string
   href?: string
   icon?: React.ReactNode
+  selectedIcon?: React.ReactNode | null
   trailingIcon?: React.ReactNode
   label: string | React.ReactNode
   selected?: boolean
@@ -48,6 +49,7 @@ export const Chip = forwardRef<HTMLButtonElement, Props>(function Chip(props, re
     variant = 'assist',
     label,
     icon,
+    selectedIcon,
     trailingIcon,
     selected,
     disabled = false,
@@ -62,7 +64,10 @@ export const Chip = forwardRef<HTMLButtonElement, Props>(function Chip(props, re
   const isInput = variant === 'input'
   const isFilter = variant === 'filter'
   const isDeletable = (isFilter || isInput) && onDelete
-  const hasLeading = loading || selected || hasIcon
+  const hasSelectedIcon = selected && selectedIcon !== null
+  const resolvedSelectedIcon =
+    selectedIcon === undefined ? <IconCheck size={16} strokeWidth='2.5' /> : selectedIcon
+  const hasLeading = loading || hasSelectedIcon || hasIcon
   const hasTrailing = !!trailingIcon || onDelete
   const { visualState, setRef } = useVisualState(undefined, { disabled })
   const refs = mergeRefs([setRef, ref])
@@ -98,8 +103,8 @@ export const Chip = forwardRef<HTMLButtonElement, Props>(function Chip(props, re
             <html.div style={styles.leading}>
               {loading ? (
                 <CircularProgress size='xs' disabled={disabled} />
-              ) : selected ? (
-                <IconCheck size={16} strokeWidth='2.5' />
+              ) : hasSelectedIcon ? (
+                resolvedSelectedIcon
               ) : avatarUrl ? (
                 <Avatar size='sm' src={avatarUrl} sx={styles.avatar} />
               ) : icon ? (

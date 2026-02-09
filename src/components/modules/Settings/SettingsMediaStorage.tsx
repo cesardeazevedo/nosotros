@@ -34,14 +34,14 @@ export const SettingsMediaStorage = memo(function SettingsMediaStorage() {
   }
 
   return (
-    <Stack grow horizontal={false}>
+    <Stack grow horizontal={false} sx={styles.container}>
       <Stack grow sx={styles.header}>
         <Text variant='title' size='lg'>
           Media Servers
         </Text>
       </Stack>
       <Divider />
-      <Stack grow horizontal={false} gap={1} align='flex-start' sx={styles.content}>
+      <Stack grow horizontal={false} gap={1} align='flex-start' sx={styles.root}>
         <UploadServersTable
           kind={Kind.BlossomServerList}
           servers={blossomServerList.data}
@@ -78,7 +78,15 @@ export const SettingsMediaStorage = memo(function SettingsMediaStorage() {
 })
 
 const styles = css.create({
+  container: {
+    height: '100%',
+  },
   root: {
+    width: '100%',
+    overflowY: 'auto',
+    paddingBottom: spacing.padding3,
+  },
+  content: {
     alignItems: 'flex-start',
   },
   header: {
@@ -89,9 +97,6 @@ const styles = css.create({
     paddingTop: spacing.padding2,
     paddingInline: spacing.padding2,
     color: palette.onSurfaceVariant,
-  },
-  content: {
-    width: '100%',
   },
   section: {
     padding: spacing.padding1,

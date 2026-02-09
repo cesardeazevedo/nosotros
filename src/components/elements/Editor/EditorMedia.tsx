@@ -3,7 +3,6 @@ import {
   filesAtom,
   resetFileUploadAtom,
   resetIsUploadingAtom,
-  selectFilesForUploadAtom,
   uploadFilesAtom,
 } from '@/atoms/upload.atoms'
 import { useContentContext } from '@/components/providers/ContentProvider'
@@ -48,7 +47,6 @@ export const EditorMedia = memo(function EditorMedia(props: Props) {
   const { initialOpen, renderDiscard = true, onDiscard, onSubmit } = props
   const { dense } = useContentContext()
   const files = useAtomValue(filesAtom)
-  const selectFiles = useSetAtom(selectFilesForUploadAtom)
   const uploadFiles = useSetAtom(uploadFilesAtom)
   const resetFiles = useSetAtom(resetFileUploadAtom)
   const resetUploadingFiles = useSetAtom(resetIsUploadingAtom)
@@ -104,7 +102,7 @@ export const EditorMedia = memo(function EditorMedia(props: Props) {
                 <>
                   <EditorTiptap key='editor' dense={dense} />
                   <MediaListEditor />
-                  <ButtonBase sx={styles.mediaBox} onClick={() => selectFiles()}>
+                  <ButtonBase sx={styles.mediaBox} onClick={() => state.selectFiles()}>
                     <IconPhotoPlus size={28} strokeWidth={'1.8'} />
                   </ButtonBase>
                 </>

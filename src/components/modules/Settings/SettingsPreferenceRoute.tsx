@@ -14,36 +14,46 @@ import { SettingsLayout } from './SettingsLayout'
 
 export const SettingsPreferencesRoute = () => {
   return (
-    <Stack grow horizontal={false}>
+    <Stack grow horizontal={false} sx={styles.container}>
       <Stack sx={styles.header}>
         <Text variant='title' size='lg'>
           General
         </Text>
       </Stack>
       <Divider />
-      <Stack horizontal={false} gap={1} align='flex-start' sx={styles.content}>
-        <SettingsSubHeader>Theme</SettingsSubHeader>
-        <SettingsTheme />
-      </Stack>
-      <br />
-      <Stack horizontal={false} gap={2} align='flex-start'>
-        <SettingsNIP05 />
-        <SettingsMaxRelaysOutbox />
-        <SettingsDelayBroadcast />
-        <SettingsAutoPlay />
-        <SettingsClientTag />
-        <SettingsLayout />
+      <Stack grow horizontal={false} sx={styles.root}>
+        <Stack horizontal={false} gap={1} align='flex-start' sx={styles.content}>
+          <SettingsSubHeader>Theme</SettingsSubHeader>
+          <SettingsTheme />
+        </Stack>
+        <br />
+        <Stack horizontal={false} gap={2} align='flex-start'>
+          <SettingsNIP05 />
+          <SettingsMaxRelaysOutbox />
+          <SettingsDelayBroadcast />
+          <SettingsAutoPlay />
+          <SettingsClientTag />
+          <SettingsLayout />
+        </Stack>
       </Stack>
     </Stack>
   )
 }
 
 const styles = css.create({
+  container: {
+    height: '100%',
+  },
+  root: {
+    width: '100%',
+    overflowY: 'auto',
+    paddingBottom: spacing.padding3,
+  },
   header: {
     paddingBlock: spacing.padding2,
     paddingInline: spacing.padding4,
   },
   content: {
-    paddingTop: spacing.padding2,
+    paddingTop: spacing.padding1,
   },
 })

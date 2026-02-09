@@ -1,4 +1,5 @@
 import type { Kind } from '@/constants/kinds'
+import { isFilterValid } from '@/core/helpers/isFilterValid'
 import type { NostrFilter } from '@/core/types'
 import { getDTag } from '@/utils/nip19'
 import type { BindableValue, Database } from '@sqlite.org/sqlite-wasm'
@@ -130,6 +131,11 @@ export class SqliteEventStore {
   }
 
   query(db: Database, filter: NostrFilter, relays: string[] = []) {
+    const hasKinds = (filter.kinds?.length ?? 0) > 0
+    if (!isFilterValid(filter) && !hasKinds) {
+      return []
+    }
+
     if (filter.ids && filter.ids.length) {
       return this.getByIds(db, filter.ids)
     }
@@ -171,6 +177,11 @@ export class SqliteEventStore {
   }
 
   queryNeg(db: Database, filter: NostrFilter) {
+    const hasKinds = (filter.kinds?.length ?? 0) > 0
+    if (!isFilterValid(filter) && !hasKinds) {
+      return []
+    }
+
     if (filter.ids && filter.ids.length) {
       const query = `
       SELECT id, created_at FROM events

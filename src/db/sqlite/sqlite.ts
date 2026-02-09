@@ -2,7 +2,7 @@ import { parseEventMetadata } from '@/hooks/parsers/parseEventMetadata'
 import { getDTag } from '@/utils/nip19'
 import type { Filter, NostrEvent } from 'nostr-tools'
 import { isAddressableKind, isReplaceableKind } from 'nostr-tools/kinds'
-import type { Nip05DB, RelayInfoDB, RelayStatsDB, SeenDB } from '../types'
+import type { Nip05DB, RelayInfoDB, RelayStatsDB, SeenDB, UserDB } from '../types'
 import { SqliteSharedService } from './sqlite.shared'
 import type { NostrEventDB, NostrEventExists } from './sqlite.types'
 import { type SqliteMessages } from './sqlite.types'
@@ -108,6 +108,24 @@ export class SqliteStorage {
       method: 'insertNip05',
       params: nip05,
     })
+  }
+
+  async queryTags(tag: string, query?: string, limit = 100) {
+    return await this.send<string[]>({
+      method: 'queryTags',
+      params: { tag, query, limit },
+    })
+  }
+
+  async queryUsers(prefix: string, limit = 20) {
+    return await this.send<UserDB[]>({
+      method: 'queryUsers',
+      params: { prefix, limit },
+    })
+  }
+
+  async upsertUser(user: UserDB) {
+    return this.send({ method: 'upsertUser', params: user })
   }
 
   async countEvents() {

@@ -31,9 +31,17 @@ export function createModuleAtoms<T extends Modules>(options: T) {
         return sessionState as T
       }
 
-      return {
+      const merged = {
         ...options,
         ...persistentState,
+      } as T
+
+      return {
+        ...merged,
+        ctx: {
+          ...options.ctx,
+          ...persistentState?.ctx,
+        },
       } as T
     },
     (get, set, updates: Partial<T> | ((prev: T) => Partial<T>)) => {
@@ -77,11 +85,12 @@ export function createFeedAtoms<T extends FeedModule>(options: T) {
     const allPersistent = get(persistentFeedStatesAtom)
     set(baseAtoms.atom, sessionState)
     const { buffer, bufferReplies, pageSize, live, ctx, staleTime, ...rest } = sessionState
+    const persistedCtx = sessionState.type === 'relayfeed' ? { relays: sessionState.ctx.relays } : {}
     set(persistentFeedStatesAtom, {
       ...allPersistent,
       [id]: {
         ...rest,
-        ctx: {},
+        ctx: persistedCtx,
       },
     })
   })

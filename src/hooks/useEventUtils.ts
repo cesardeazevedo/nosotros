@@ -12,19 +12,19 @@ import { useCurrentUser } from './useAuth'
 export function useEventTag(event: NostrEventDB | undefined, tagName: string) {
   return useMemo(() => {
     return event?.tags.find((tag) => tag[0] === tagName)?.[1]
-  }, [tagName])
+  }, [event?.tags, tagName])
 }
 
 export function useEventLastTag(event: NostrEventDB | undefined, tagName: string) {
   return useMemo(() => {
     return event?.tags.findLast((tag) => tag[0] === tagName)?.[1]
-  }, [tagName])
+  }, [event?.tags, tagName])
 }
 
 export function useEventTags(event: NostrEventDB | undefined, tagName: string) {
   return useMemo(() => {
     return event?.tags.filter((tag) => tag[0] === tagName).map((tag) => tag[1]) || []
-  }, [tagName])
+  }, [event?.tags, tagName])
 }
 
 export function useEventDTag(event: NostrEventDB) {
@@ -91,7 +91,7 @@ export function useNIP19(event: NostrEventDB) {
 
 export function useImetaList(event: NostrEventDB | undefined) {
   return useMemo(() => {
-    if (event?.metadata?.imeta && event.kind === Kind.Media) {
+    if (event?.metadata?.imeta && (event.kind === Kind.Media || event.kind === Kind.Video || event.kind === Kind.ShortVideo)) {
       return Object.entries(event?.metadata?.imeta)
         .map(([src, data]) => {
           const mime = getMimeType(src, data as IMetaFields)

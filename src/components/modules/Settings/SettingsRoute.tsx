@@ -36,7 +36,10 @@ const styles = css.create({
     padding: spacing.padding2,
   },
   main: {
+    position: 'relative',
     width: '100%',
+    height: '100%',
+    overflow: 'hidden',
     // padding: spacing.padding2,
   },
 })

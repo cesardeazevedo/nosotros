@@ -44,7 +44,7 @@ export const UploadServersMenuList = (props: Props) => {
                   label={formatted.host}
                   onClick={() => {
                     onSelect('blossom', url)
-                    close()
+                    onClose()
                   }}
                 />
               )

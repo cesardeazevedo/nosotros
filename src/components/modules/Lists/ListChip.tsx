@@ -14,14 +14,14 @@ import { spacing } from '@/themes/spacing.stylex'
 import { useSetAtom } from 'jotai'
 import { memo, useState } from 'react'
 import { css } from 'react-strict-dom'
-import { FollowBulkButton } from '../../Follows/FollowBulkButton'
-import { FollowButton } from '../../Follows/FollowButton'
+import { FollowBulkButton } from '../Follows/FollowBulkButton'
+import { FollowButton } from '../Follows/FollowButton'
 
 type Props = {
   event: NostrEventDB
 }
 
-export const FollowSetChip = memo(function FollowSetChip(props: Props) {
+export const ListChip = memo(function ListChip(props: Props) {
   const { event } = props
   const [open, setOpen] = useState(false)
   const setListFormDialog = useSetAtom(setListFormDialogAtom)

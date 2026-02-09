@@ -84,7 +84,7 @@ export const FeedList = memo(function FeedList(props: Props) {
   return (
     <>
       {props.header}
-      <FeedNewPosts feed={feed} />
+      {feed.options.live !== false && <FeedNewPosts feed={feed} />}
       {props.wrapper ? props.wrapper(<>{content}</>) : content}
       {props.footer}
     </>

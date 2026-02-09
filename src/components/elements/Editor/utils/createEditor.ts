@@ -1,16 +1,9 @@
-import { settingsAtom } from '@/atoms/settings.atoms'
-import { store } from '@/atoms/store'
 import { NEventEditor } from '@/components/elements/Content/NEvent/NEventEditor'
 import { NProfileEditor } from '@/components/elements/Content/NProfile/NProfileEditor'
 import { SpotifyEditor } from '@/components/elements/Content/Spotify/SpotifyEditor'
 import { SpotifyExtension } from '@/components/elements/Content/Spotify/SpotifyExtension'
 import { TweetEditor } from '@/components/elements/Content/Tweet/TweetEditor'
 import { YoutubeEditor } from '@/components/elements/Content/Youtube/YoutubeEditor'
-import type { BlossomOptions } from '@/utils/uploadBlossom'
-import { uploadBlossom } from '@/utils/uploadBlossom'
-import type { NIP96Options } from '@/utils/uploadNIP96'
-import { uploadNIP96 } from '@/utils/uploadNIP96'
-import { hashFile } from '@/utils/utils'
 import type { NodeViewProps } from '@tiptap/core'
 import DocumentExtension from '@tiptap/extension-document'
 import DropCursorExtension from '@tiptap/extension-dropcursor'
@@ -23,7 +16,6 @@ import TextExtension from '@tiptap/extension-text'
 import type { UseEditorOptions } from '@tiptap/react'
 import { ReactNodeViewRenderer } from '@tiptap/react'
 import { NostrExtension, editorProps } from 'nostr-editor'
-import type { EventTemplate, NostrEvent } from 'nostr-tools'
 import { ImageNodeViewWrapper } from '../../Content/Image/ImageNodeViewWrapper'
 import { NAddrEditor } from '../../Content/NAddr/NAddrEditor'
 import { VideoNodeViewWrapper } from '../../Content/Video/VideoNodeViewWrapper'
@@ -33,18 +25,54 @@ const addNodeView = (Component: React.ComponentType<NodeViewProps>) => ({
   addNodeView: () => ReactNodeViewRenderer(Component),
 })
 
+const addImageNodeView = (Component: React.ComponentType<NodeViewProps>) => ({
+  addNodeView: () => ReactNodeViewRenderer(Component),
+  addAttributes(this: { parent?: () => Record<string, unknown> }) {
+    return {
+      ...(this.parent?.() ?? {}),
+      quality: { default: 'high' },
+    }
+  },
+})
+const addVideoNodeView = (Component: React.ComponentType<NodeViewProps>) => ({
+  addNodeView: () => ReactNodeViewRenderer(Component),
+  addAttributes(this: { parent?: () => Record<string, unknown> }) {
+    return {
+      ...(this.parent?.() ?? {}),
+      quality: { default: 'high' },
+      includeAudio: { default: true },
+    }
+  },
+})
+
 type Options = {
-  sign: (unsigned: EventTemplate) => Promise<NostrEvent>
   placeholder: () => string
-  onUploadStart: () => void
-  onUploadDrop: () => void
-  onUploadComplete: () => void
-  onUploadError: () => void
+  onFilesSelect: (files: File[], pos?: number) => void
 }
 
 export function createEditor(options: Options): UseEditorOptions {
+  const isMediaFile = (file: File) => {
+    return file.type.startsWith('image/') || file.type.startsWith('video/')
+  }
   return {
-    editorProps,
+    editorProps: {
+      ...editorProps,
+      handleDrop: (view, event) => {
+        const files = Array.from(event.dataTransfer?.files || []).filter(isMediaFile)
+        if (!files.length) return false
+        event.preventDefault()
+        const coords = view.posAtCoords({ left: event.clientX, top: event.clientY })
+        options.onFilesSelect(files, coords?.pos)
+        return true
+      },
+      handlePaste: (view, event) => {
+        const files = Array.from(event.clipboardData?.files || []).filter(isMediaFile)
+        if (!files.length) return false
+        event.preventDefault()
+        options.onFilesSelect(files, view.state.selection.from)
+        return true
+      },
+    },
     extensions: [
       TextExtension,
       DocumentExtension,
@@ -60,45 +88,9 @@ export function createEditor(options: Options): UseEditorOptions {
         },
         image: {},
         video: {},
-        fileUpload: {
-          immediateUpload: false,
-          upload: async (attrs) => {
-            const { defaultUploadType, defaultUploadUrl } = store.get(settingsAtom)
-            const data: BlossomOptions | NIP96Options = {
-              ...attrs,
-              hash: hashFile,
-              sign: (event) => options.sign(event),
-              serverUrl: defaultUploadUrl,
-            }
-            try {
-              if (defaultUploadType === 'nip96') {
-                return await uploadNIP96(data)
-              } else {
-                return await uploadBlossom(data)
-              }
-            } catch (error) {
-              options.onUploadError()
-              return {
-                error: String(error),
-              }
-            }
-          },
-          onStart() {
-            options.onUploadStart()
-          },
-          onDrop() {
-            options.onUploadDrop()
-          },
-          onComplete() {
-            options.onUploadComplete()
-          },
-          onUploadError() {
-            options.onUploadError()
-          },
-        },
         extend: {
-          image: addNodeView(ImageNodeViewWrapper),
-          video: addNodeView(VideoNodeViewWrapper),
+          image: addImageNodeView(ImageNodeViewWrapper),
+          video: addVideoNodeView(VideoNodeViewWrapper),
           youtube: addNodeView(YoutubeEditor),
           nprofile: {
             addNodeView: () => ReactNodeViewRenderer(NProfileEditor),

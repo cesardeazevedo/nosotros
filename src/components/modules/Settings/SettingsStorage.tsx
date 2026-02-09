@@ -72,7 +72,7 @@ export const SettingsStorageRoute = () => {
   }
 
   return (
-    <Stack grow horizontal={false}>
+    <Stack grow horizontal={false} sx={styles.container}>
       <Stack sx={styles.header} gap={1}>
         <Text variant='title' size='lg'>
           Cache Relay
@@ -146,9 +146,13 @@ export const SettingsStorageRoute = () => {
 }
 
 const styles = css.create({
+  container: {
+    height: '100%',
+  },
   root: {
     width: '100%',
-    // padding: spacing.padding3,
+    overflowY: 'auto',
+    paddingBottom: spacing.padding3,
   },
   header: {
     padding: spacing.padding2,

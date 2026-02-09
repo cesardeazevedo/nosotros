@@ -1,5 +1,6 @@
 import { FollowEventRoot } from '@/components/modules/Follows/FollowEventRoot'
-import { Kind } from '@/constants/kinds'
+import { ListEventRoot } from '@/components/modules/Lists/ListEventRoot'
+import { Kind, isListKind } from '@/constants/kinds'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { memo } from 'react'
 import { PostRoot } from '../Posts/Post'
@@ -41,13 +42,18 @@ export const NostrEventRoot = memo(function NostrEventRoot(props: Props) {
     case Kind.Repost: {
       return <RepostRoot event={event} />
     }
-    case Kind.Media: {
+    case Kind.Media:
+    case Kind.Video:
+    case Kind.ShortVideo: {
       return <PostRoot open={open} event={event} />
     }
     case Kind.ZapReceipt: {
       return <ZapReceiptRoot event={event} />
     }
     default: {
+      if (isListKind(event.kind)) {
+        return <ListEventRoot event={event} />
+      }
       console.log('Unhandled item to render', event)
       return <NostrEventUnsupportedContent event={event} />
     }

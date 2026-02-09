@@ -30,7 +30,7 @@ export const ThreadRoot = memo(function ThreadRoot(props: Props) {
         <html.div style={styles.thread} />
         <Stack horizontal={false} sx={styles.content}>
           <PostHeader event={note.event} renderOptions={false} />
-          {![Kind.Text, Kind.Comment, Kind.Article, Kind.Media].includes(note.event.kind) ? (
+          {![Kind.Text, Kind.Comment, Kind.Article, Kind.Media, Kind.Video, Kind.ShortVideo].includes(note.event.kind) ? (
             <NostrEventUnsupportedContent sx={styles.unsupported} event={note.event} />
           ) : (
             <>

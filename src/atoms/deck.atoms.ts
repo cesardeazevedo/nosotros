@@ -52,6 +52,31 @@ export const createDeckAtom = atom(null, (get, set, payload: Omit<DeckState, 'id
   })
 })
 
+export const deleteDeckAtom = atom(null, (get, set, deckId: string) => {
+  if (deckId === DEFAULT_DECK.id) {
+    return
+  }
+
+  const decks = get(decksAtom)
+  const deck = decks[deckId]
+
+  if (!deck) {
+    return
+  }
+
+  const modules = get(persistentFeedStatesAtom)
+  const nextModules = { ...modules }
+  for (const id of deck.columnIds || []) {
+    delete nextModules[id]
+  }
+
+  const nextDecks = { ...decks }
+  delete nextDecks[deckId]
+
+  set(persistentFeedStatesAtom, nextModules)
+  set(decksAtom, nextDecks)
+})
+
 export const selectDeckAtom = (deckId: string) =>
   atom((get) => {
     const decks = get(decksAtom)

@@ -7,7 +7,7 @@ import type { FeedState } from '@/hooks/state/useFeed'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { css } from 'react-strict-dom'
-import { FollowSetChip } from '../../Lists/FollowSets/FollowSetChip'
+import { ListChip } from '../../Lists/ListChip'
 import { FeedHeaderBase } from './FeedHeaderBase'
 
 type Props = {
@@ -27,7 +27,7 @@ export const FeedHeaderFollowSet = function FeedHeaderFollowSet(props: Props) {
       feed={feed}
       leading={
         <Stack gap={2}>
-          {event.data ? <FollowSetChip event={event.data} /> : <Skeleton variant='rectangular' sx={styles.loading} />}
+          {event.data ? <ListChip event={event.data} /> : <Skeleton variant='rectangular' sx={styles.loading} />}
         </Stack>
       }
     />

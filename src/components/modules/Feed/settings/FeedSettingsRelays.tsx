@@ -21,10 +21,9 @@ export const FeedSettingsRelays = memo(function FeedSettingsRelays(props: Props)
       </Text>
       <Stack gap={0.5} wrap>
         {feed.options.ctx.relays?.map((relay) => (
-          <RelayInputChip key={relay} url={relay} onDelete={() => feed.removeRelay()} />
+          <RelayInputChip key={relay} url={relay} onDelete={() => feed.removeRelay(relay)} />
         ))}
-        {/* TODO */}
-        <RelaySelectPopover label={`Add ${name || 'relay'}`} onSubmit={() => feed.addRelay()} />
+        <RelaySelectPopover label={`Add ${name || 'relay'}`} onSubmit={(relay) => feed.addRelay(relay)} />
       </Stack>
     </Stack>
   )
