@@ -55,24 +55,7 @@ export function createEditor(options: Options): UseEditorOptions {
     return file.type.startsWith('image/') || file.type.startsWith('video/')
   }
   return {
-    editorProps: {
-      ...editorProps,
-      handleDrop: (view, event) => {
-        const files = Array.from(event.dataTransfer?.files || []).filter(isMediaFile)
-        if (!files.length) return false
-        event.preventDefault()
-        const coords = view.posAtCoords({ left: event.clientX, top: event.clientY })
-        options.onFilesSelect(files, coords?.pos)
-        return true
-      },
-      handlePaste: (view, event) => {
-        const files = Array.from(event.clipboardData?.files || []).filter(isMediaFile)
-        if (!files.length) return false
-        event.preventDefault()
-        options.onFilesSelect(files, view.state.selection.from)
-        return true
-      },
-    },
+    editorProps,
     extensions: [
       TextExtension,
       DocumentExtension,
