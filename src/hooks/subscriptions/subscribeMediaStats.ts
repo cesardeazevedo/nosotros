@@ -22,7 +22,7 @@ import { getMimeType } from '../parsers/parseImeta'
 function fromImageMetadata(src: string) {
   const img = new Image()
   // We will need to change this when making imgproxy configurable.
-  img.src = `${import.meta.env.VITE_IMGPROXY_URL}/_/feed_img/plain/${src}`
+  img.src = `${import.meta.env.VITE_IMGPROXY_URL}/_/feed_img/plain/${encodeURIComponent(src)}`
 
   return fromEvent(img, 'load').pipe(
     take(1),
@@ -79,7 +79,6 @@ export function subscribeMediaStats() {
         case Kind.Article:
         case Kind.Comment: {
           const meta = event.metadata
-          const imeta = meta?.imeta
           const media =
             meta?.contentSchema?.content.filter((x) => {
               return x.type === 'video' || x.type === 'image'
@@ -89,19 +88,18 @@ export function subscribeMediaStats() {
             const pipeline$ = from(media).pipe(
               mergeMap((node) => {
                 const src = node.attrs.src as string
-                const dim = imeta?.[src]?.dim
 
-                if (dim) {
-                  const width = dim.width
-                  const height = dim.height
-
-                  store.set(addMediaDimAtom, {
-                    src,
-                    dim: [width, height],
-                  })
-
-                  return of(event)
-                }
+                // if (dim) {
+                //   const width = dim.width
+                //   const height = dim.height
+                //
+                //   store.set(addMediaDimAtom, {
+                //     src,
+                //     dim: [width, height],
+                //   })
+                //
+                //   return of(event)
+                // }
 
                 return fromMediaMetadata(node.type, src, event)
               }),
@@ -119,26 +117,25 @@ export function subscribeMediaStats() {
           break
         }
 
-        case Kind.Media: {
+        case Kind.Media:
+        case Kind.Video: {
           const meta = event.metadata
           const entries = Object.entries(meta?.imeta || {})
 
           if (entries.length > 0) {
             const pipeline$ = from(entries).pipe(
               mergeMap(([src, imeta]) => {
-                const dim = imeta.dim
-
-                if (dim) {
-                  const width = dim.width
-                  const height = dim.height
-
-                  store.set(addMediaDimAtom, {
-                    src,
-                    dim: [width, height],
-                  })
-
-                  return of(event)
-                }
+                // if (dim) {
+                //   const width = dim.width
+                //   const height = dim.height
+                //
+                //   store.set(addMediaDimAtom, {
+                //     src,
+                //     dim: [width, height],
+                //   })
+                //
+                //   return of(event)
+                // }
 
                 const mime = getMimeType(src, imeta)
 

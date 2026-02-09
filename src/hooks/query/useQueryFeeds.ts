@@ -6,10 +6,10 @@ import type { NostrContext } from '@/nostr/context'
 import { dedupeById } from '@/utils/utils'
 import type { InfiniteData, UseInfiniteQueryOptions } from '@tanstack/react-query'
 import { infiniteQueryOptions } from '@tanstack/react-query'
-import { concatMap, EMPTY, firstValueFrom, map, mergeMap, of, shareReplay, tap, timer } from 'rxjs'
+import { concatMap, delay, EMPTY, firstValueFrom, map, mergeMap, of, shareReplay, tap, timer } from 'rxjs'
 import type { Module } from '../modules/module'
 import { subscribeFeed } from '../subscriptions/subscribeFeed'
-import { subscribeMediaStats } from '../subscriptions/subscribeMediaStats'
+import { subscribeDependencies } from '../subscriptions/subscribeDependencies'
 import { queryClient } from './queryClient'
 import { appendEventFeed, setEventData } from './queryUtils'
 
@@ -110,7 +110,7 @@ export function createFeedQueryOptions(
           return of(res)
         }),
 
-        subscribeMediaStats(),
+        subscribeDependencies(ctx),
 
         tap((events) => events.forEach(setEventData)),
 
