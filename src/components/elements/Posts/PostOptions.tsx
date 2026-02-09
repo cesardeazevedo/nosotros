@@ -7,11 +7,9 @@ import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { MenuList } from '@/components/ui/MenuList/MenuList'
 import { Popover } from '@/components/ui/Popover/Popover'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
-import { usePublishEventMutation } from '@/hooks/mutations/usePublishEventMutation'
 import { useUserState } from '@/hooks/state/useUser'
 import { useCurrentPubkey } from '@/hooks/useAuth'
 import { useNevent } from '@/hooks/useEventUtils'
-import { publishBookmark } from '@/nostr/publish/publishBookmarks'
 import { READ } from '@/nostr/types'
 import { spacing } from '@/themes/spacing.stylex'
 import {
@@ -26,10 +24,11 @@ import {
 } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
 import { useSetAtom } from 'jotai'
-import { memo, useCallback } from 'react'
+import { memo, useCallback, useState } from 'react'
 import { css, html } from 'react-strict-dom'
 import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDOMProps'
 import { ContentLink } from '../Content/Link/Link'
+import { PostBookmarkOptions } from './PostBookmarkOptions'
 
 type PropsOptions = {
   event: NostrEventDB
@@ -111,13 +110,7 @@ export const PostOptions = memo(function PostOptions(props: Props) {
   const pubkey = useCurrentPubkey()
   const enqueueToast = useSetAtom(enqueueToastAtom)
   const setStatsDialog = useSetAtom(statsDialogAtom)
-
-  const { mutate: mutateBookMark } = usePublishEventMutation<[id: string, pubkey: string]>({
-    mutationFn:
-      ({ signer }) =>
-        ([id, pubkey]) =>
-          publishBookmark(pubkey, id, { signer }),
-  })
+  const [bookmarkDialogOpen, setBookmarkDialogOpen] = useState(false)
 
   const handleCopy = useCallback((value: string | undefined) => {
     return (e: StrictClickEvent) => {
@@ -138,48 +131,57 @@ export const PostOptions = memo(function PostOptions(props: Props) {
   const user = useUserState(event.pubkey)
 
   return (
-    <Popover
-      sx={styles.menu}
-      placement='bottom-end'
-      contentRenderer={(props) => (
-        <MenuList surface='surfaceContainerLow' sx={styles.menuList}>
-          <Options
-            event={event}
-            nevent={nevent}
-            onCopyIdClick={handleCopy(nevent)}
-            onCopyAuthorIdClick={handleCopy(user?.nprofile)}
-            onCopyLinkClick={handleCopy(link)}
-            onBookmarkClick={(e) => {
-              e.stopPropagation()
-              e.preventDefault()
-              if (pubkey) {
-                mutateBookMark([event.id, pubkey])
+    <>
+      <Popover
+        sx={styles.menu}
+        placement='bottom-end'
+        contentRenderer={(props) => (
+          <MenuList surface='surfaceContainerLow' sx={styles.menuList}>
+            <Options
+              event={event}
+              nevent={nevent}
+              onCopyIdClick={handleCopy(nevent)}
+              onCopyAuthorIdClick={handleCopy(user?.nprofile)}
+              onCopyLinkClick={handleCopy(link)}
+              onBookmarkClick={(e) => {
+                e.stopPropagation()
+                e.preventDefault()
+                if (pubkey) {
+                  setBookmarkDialogOpen(true)
+                  props.close()
+                }
+              }}
+              onDetailsClick={(e) => {
+                e.stopPropagation()
+                e.preventDefault()
+                setStatsDialog(event.id)
                 props.close()
-              }
-            }}
-            onDetailsClick={(e) => {
-              e.stopPropagation()
+              }}
+            />
+          </MenuList>
+        )}>
+        {({ getProps, setRef, open }) => (
+          <IconButton
+            {...getProps()}
+            ref={setRef}
+            onClick={(e) => {
               e.preventDefault()
-              setStatsDialog(event.id)
-              props.close()
+              e.stopPropagation()
+              open()
             }}
+            size={dense ? 'sm' : 'md'}
+            icon={<IconDotsVertical stroke='currentColor' strokeWidth='2.0' size={dense ? 16 : 18} opacity={0.8} />}
           />
-        </MenuList>
-      )}>
-      {({ getProps, setRef, open }) => (
-        <IconButton
-          {...getProps()}
-          ref={setRef}
-          onClick={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
-            open()
-          }}
-          size={dense ? 'sm' : 'md'}
-          icon={<IconDotsVertical stroke='currentColor' strokeWidth='2.0' size={dense ? 16 : 18} opacity={0.8} />}
-        />
-      )}
-    </Popover>
+        )}
+      </Popover>
+      <PostBookmarkOptions
+        open={bookmarkDialogOpen}
+        postId={event.id}
+        onClose={() => {
+          setBookmarkDialogOpen(false)
+        }}
+      />
+    </>
   )
 })
 
