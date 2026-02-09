@@ -16,10 +16,7 @@ import { FeedHeadline } from './components/modules/Feed/FeedHeadline'
 import { FeedRoute } from './components/modules/Feed/FeedRoute'
 import { FeedHeaderBase } from './components/modules/Feed/headers/FeedHeaderBase'
 import { HomeRoute } from './components/modules/Home/HomeRoute'
-import { FollowSetList } from './components/modules/Lists/FollowSets/FollowSetList'
 import { ListsRoute } from './components/modules/Lists/ListRoute'
-import { RelaySetList } from './components/modules/Lists/RelaySets/RelaySetList'
-import { StarterPackList } from './components/modules/Lists/StarterPacks/StarterPackList'
 import { MediaRoute } from './components/modules/Media/MediaRoute'
 import { NostrRoute } from './components/modules/Nostr/NostrRoute'
 import { NostrEventPending } from './components/modules/NostrEvent/NostrEventLoading'
@@ -518,24 +515,6 @@ const listsRoute = createRoute({
   component: ListsRoute,
 })
 
-const starterPackRoute = createRoute({
-  getParentRoute: () => listsRoute,
-  path: '/',
-  component: StarterPackList,
-})
-
-const followSetsRoute = createRoute({
-  getParentRoute: () => listsRoute,
-  path: '/followsets',
-  component: FollowSetList,
-})
-
-const relaySetsRoute = createRoute({
-  getParentRoute: () => listsRoute,
-  path: '/relaysets',
-  component: RelaySetList,
-})
-
 const relaysRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/relays',
@@ -598,7 +577,7 @@ export const routeTree = rootRoute.addChildren([
   deckRoute,
   tagsRoute,
   searchRoute,
-  listsRoute.addChildren([starterPackRoute, followSetsRoute, relaySetsRoute]),
+  listsRoute,
   notificationsRoute,
   mediaRoute,
   articleRoute,

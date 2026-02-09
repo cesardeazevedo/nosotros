@@ -5,24 +5,43 @@ import type { FeedModule } from '../query/useQueryFeeds'
 
 export type ListFeedModule = FeedModule & {}
 
-export function createListModule(kind: Kind, pubkey: string | undefined): ListFeedModule {
-  const id = `list_${kind}_feed`
+type CreateListModuleParams = {
+  kinds: Kind[]
+  pubkey?: string
+  authors?: string[]
+  limit?: number
+  pageSize?: number
+  id?: string
+  scope?: FeedModule['scope']
+}
+
+export function createListModule({
+  kinds,
+  pubkey,
+  authors,
+  limit = 50,
+  pageSize = 30,
+  id,
+  scope,
+}: CreateListModuleParams): ListFeedModule {
+  const moduleId = id ?? `list_${kinds.join('_')}_feed`
+  const resolvedAuthors = authors ?? (pubkey ? [pubkey] : RECOMMENDED_PUBKEYS)
   const filter = {
-    kinds: [kind],
-    authors: pubkey ? [pubkey] : RECOMMENDED_PUBKEYS,
-    limit: 50,
+    kinds,
+    authors: resolvedAuthors,
+    limit,
   }
   return {
-    id,
-    queryKey: queryKeys.feed(id, filter),
+    id: moduleId,
+    queryKey: queryKeys.feed(moduleId, filter),
     filter,
-    pageSize: 30,
+    pageSize,
     ctx: {
       outbox: true,
       negentropy: false,
     },
     type: 'lists',
-    scope: pubkey ? 'following' : 'self',
+    scope: scope ?? (pubkey ? 'following' : 'self'),
     live: false,
   }
 }

@@ -1,8 +1,8 @@
 import { ArticleFeedItem } from '@/components/modules/Articles/ArticleFeedItem'
 import { FollowEventRoot } from '@/components/modules/Follows/FollowEventRoot'
-import { FollowSetItem } from '@/components/modules/Lists/FollowSets/FollowSetItem'
+import { ListCard } from '@/components/modules/Lists/ListCard'
 import { Divider } from '@/components/ui/Divider/Divider'
-import { Kind } from '@/constants/kinds'
+import { Kind, isListKind } from '@/constants/kinds'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { memo } from 'react'
 import { PostRoot } from '../Posts/Post'
@@ -49,10 +49,10 @@ export const NostrEventFeedItem = memo(function NostrEventFeedItem(props: Props)
     case Kind.ZapReceipt: {
       return <ZapReceiptRoot event={event} />
     }
-    case Kind.FollowSets: {
-      return <FollowSetItem event={event} />
-    }
     default: {
+      if (isListKind(event.kind)) {
+        return <ListCard event={event} onEdit={() => { }} canEdit={false} />
+      }
       console.log('Unhandled item to render', event)
       return <NostrEventUnsupportedContent event={event} />
     }
