@@ -1,7 +1,7 @@
+import { TagSuggestions } from '@/components/modules/Tag/TagSuggestions'
 import { Button } from '@/components/ui/Button/Button'
 import { SearchField } from '@/components/ui/Search/Search'
 import { Stack } from '@/components/ui/Stack/Stack'
-import { TagSuggestions } from '@/components/modules/Tag/TagSuggestions'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconHash } from '@tabler/icons-react'
 import { useActionState, useState } from 'react'

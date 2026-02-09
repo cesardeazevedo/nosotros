@@ -5,6 +5,7 @@ import {
   filesAtom,
   getUploadFileKey,
   resetFileUploadAtom,
+  resetIsUploadingAtom,
   resetUploadDialogConfigAtom,
   selectFilesForUploadAtom,
   uploadFilesAtom,
@@ -217,6 +218,7 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
   const uploadDialogFiles = useAtomValue(filesAtom)
   const addUploadDialogFile = useSetAtom(addFileUploadAtom)
   const resetUploadDialogFiles = useSetAtom(resetFileUploadAtom)
+  const resetUploadingFlags = useSetAtom(resetIsUploadingAtom)
   const selectFilesForUpload = useSetAtom(selectFilesForUploadAtom)
   const resetUploadDialogConfig = useSetAtom(resetUploadDialogConfigAtom)
   const applyUploadConfigToFiles = useSetAtom(applyUploadConfigToFilesAtom)
@@ -487,6 +489,8 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
         open={uploadDialogOpen}
         uploading={state.isUploading}
         onClose={() => {
+          methodsRef.current.toggle('isUploading', false)
+          resetUploadingFlags()
           resetUploadDialogFiles()
           resetUploadDialogConfig()
           setUploadDialogOpen(false)

@@ -5,7 +5,7 @@ import { hashFile } from '@/utils/utils'
 import { atom } from 'jotai'
 import { type ImageAttributes, type VideoAttributes } from 'nostr-editor'
 import type { EventTemplate, NostrEvent } from 'nostr-tools'
-import { defer, from, lastValueFrom, map, mergeMap, of, retry, tap, throwError, timer, toArray } from 'rxjs'
+import { defer, from, lastValueFrom, map, mergeMap, of, tap, throwError, toArray } from 'rxjs'
 import invariant from 'tiny-invariant'
 import { signerAtom } from './auth.atoms'
 import { clearCompressionStateAtom, setCompressionStateAtom } from './compression.atoms'
@@ -20,9 +20,6 @@ const allowedMimeTypes = [
   'video/mpeg',
   'video/webm',
 ] as const
-
-const UPLOAD_MAX_ATTEMPTS = 3
-const UPLOAD_RETRY_DELAY_SECONDS = 3
 
 export type UploadFile = ImageAttributes | VideoAttributes
 export type UploadConfig = {
@@ -57,8 +54,14 @@ const createDefaultUploadConfig = (settings: Settings) =>
     uploadUrl: settings.defaultUploadUrl,
   }) satisfies UploadConfig
 
-export const resetFileUploadAtom = atom(null, (_, set) => {
+export const resetFileUploadAtom = atom(null, (get, set) => {
+  const files = get(filesAtom)
+  files.forEach((file) => {
+    set(clearCompressionStateAtom, file.src)
+  })
   set(filesAtom, [])
+  set(uploadConfigByBatchAtom, {})
+  set(uploadConfigByFileAtom, {})
 })
 
 export const resetUploadDialogConfigAtom = atom(null, (get, set) => {
@@ -271,23 +274,6 @@ export const uploadFilesAtom = atom(null, async (get, set) => {
                     return throwError(() => new Error(result.error))
                   }
                   return of(result)
-                }),
-                retry({
-                  count: UPLOAD_MAX_ATTEMPTS - 1,
-                  delay: () => {
-                    set(setCompressionStateAtom, {
-                      src: file.src,
-                      state: { progress: 100, label: `Retrying in ${UPLOAD_RETRY_DELAY_SECONDS} seconds` },
-                    })
-                    return timer(UPLOAD_RETRY_DELAY_SECONDS * 1000).pipe(
-                      tap(() => {
-                        set(setCompressionStateAtom, {
-                          src: file.src,
-                          state: { progress: 0, label: 'Uploading 0%' },
-                        })
-                      }),
-                    )
-                  },
                 }),
               ),
             )

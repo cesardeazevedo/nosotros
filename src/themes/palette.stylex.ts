@@ -21,6 +21,7 @@ export const vars = {
   onError: colors.gray0,
   errorContainer: colors.red1,
   onErrorContainer: colors.red12,
+  warning: colors.yellow8,
 
   surface: colors.gray0,
   onSurface: colors.gray11,
