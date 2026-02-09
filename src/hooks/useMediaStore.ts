@@ -22,8 +22,8 @@ export const MAX_BOUNDS = {
     maxHeight: 520,
   },
   pair: {
-    maxWidth: 400,
-    maxHeight: 520,
+    maxWidth: 440,
+    maxHeight: 550,
   },
   carousel: {
     maxWidth: 350,

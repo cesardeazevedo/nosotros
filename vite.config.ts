@@ -21,7 +21,7 @@ export default defineConfig(({ mode }) => {
       hmr: false,
     },
     optimizeDeps: {
-      exclude: ['@sqlite.org/sqlite-wasm'],
+      exclude: ['@sqlite.org/sqlite-wasm', '@jsquash/avif', '@jsquash/jpeg', '@jsquash/png', '@jsquash/webp'],
     },
     build: {
       sourcemap: true,

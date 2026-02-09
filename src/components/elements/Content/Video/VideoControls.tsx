@@ -211,13 +211,13 @@ export const VideoControls = function VideoControls(props: Props) {
       if ('requestFullscreen' in video) {
         video.requestFullscreen()
       } else if ('webkitRequestFullscreen' in video) {
-        ;(video as HTMLVideoElement & { webkitRequestFullscreen: () => void }).webkitRequestFullscreen()
+        ; (video as HTMLVideoElement & { webkitRequestFullscreen: () => void }).webkitRequestFullscreen()
       } else if ('mozRequestFullScreen' in video) {
-        ;(video as HTMLVideoElement & { mozRequestFullScreen: () => void }).mozRequestFullScreen()
+        ; (video as HTMLVideoElement & { mozRequestFullScreen: () => void }).mozRequestFullScreen()
       } else if ('msRequestFullscreen' in video) {
-        ;(video as HTMLVideoElement & { msRequestFullscreen: () => void }).msRequestFullscreen()
+        ; (video as HTMLVideoElement & { msRequestFullscreen: () => void }).msRequestFullscreen()
       } else if ('webkitEnterFullscreen' in video) {
-        ;(video as HTMLVideoElement & { webkitEnterFullscreen: () => void }).webkitEnterFullscreen()
+        ; (video as HTMLVideoElement & { webkitEnterFullscreen: () => void }).webkitEnterFullscreen()
       }
     }
   }, [ref.current])

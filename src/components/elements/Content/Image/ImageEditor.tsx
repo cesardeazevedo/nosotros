@@ -1,18 +1,22 @@
+import { compressionStateAtom } from '@/atoms/compression.atoms'
 import { addMediaDimAtom } from '@/atoms/media.atoms'
 import { ContentProvider } from '@/components/providers/ContentProvider'
 import type { SxProps } from '@/components/ui/types'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
-import { useSetAtom } from 'jotai'
+import type { ImageQuality } from '@/utils/compression'
+import { useAtomValue, useSetAtom } from 'jotai'
 import type { ImageAttributes } from 'nostr-editor'
 import { css, html } from 'react-strict-dom'
 import { DeleteButton } from '../Buttons/DeleteButton'
+import { MediaDownload } from '../Buttons/MediaDownload'
+import { MediaCompressionStatus } from '../Layout/MediaCompressionStatus'
 import { MediaError } from '../Layout/MediaError'
 import { MediaUploading } from '../Layout/MediaUploading'
 import { MediaWrapper, type Props as MediaWrapperProps } from '../Layout/MediaWrapper'
 
 type Props = ImageAttributes & {
-  onUpdate: (attrs: Partial<ImageAttributes>) => void
+  onUpdate: (attrs: Partial<ImageAttributes & { quality?: ImageQuality }>) => void
   onDelete: () => void
   sx?: SxProps
   cover?: boolean
@@ -23,12 +27,16 @@ type Props = ImageAttributes & {
 export const ImageEditor = (props: Props) => {
   const { src, sx, uploading, cover, error, wrapperProps } = props
   const addMediaDim = useSetAtom(addMediaDimAtom)
+  const compression = useAtomValue(compressionStateAtom)[src || '']
+  const showDownload = Boolean(src && !src.startsWith('blob:') && !src.startsWith('data:'))
   return (
     <>
       <ContentProvider value={{ dense: true }}>
         <MediaWrapper mode='single_editor' sx={styles.wrapper} {...wrapperProps}>
           <DeleteButton onClick={() => props.onDelete()} />
-          <MediaUploading uploading={uploading}>
+          {showDownload && <MediaDownload src={src} fallbackName='image' />}
+          <MediaCompressionStatus src={src} />
+          <MediaUploading uploading={uploading && !compression}>
             <html.img
               src={src}
               draggable={false}

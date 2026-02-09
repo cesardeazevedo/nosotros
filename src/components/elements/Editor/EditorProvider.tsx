@@ -1,4 +1,14 @@
 import { addBroadcastRequestAtom } from '@/atoms/broadcast.atoms'
+import {
+  addFileUploadAtom,
+  applyUploadConfigToFilesAtom,
+  filesAtom,
+  getUploadFileKey,
+  resetFileUploadAtom,
+  resetUploadDialogConfigAtom,
+  selectFilesForUploadAtom,
+  uploadFilesAtom,
+} from '@/atoms/upload.atoms'
 import { store } from '@/atoms/store'
 import { enqueueToastAtom } from '@/atoms/toaster.atoms'
 import { Kind } from '@/constants/kinds'
@@ -17,18 +27,20 @@ import { publish, signAndSave } from '@/nostr/publish/publish'
 import { READ, WRITE } from '@/nostr/types'
 import { compactArray } from '@/utils/utils'
 import { useQueryClient, type QueryKey } from '@tanstack/react-query'
-import type { EditorStateSnapshot, Editor as TiptapEditor } from '@tiptap/react'
+import type { EditorStateSnapshot, Editor as TiptapEditor, UseEditorOptions } from '@tiptap/react'
 import { useEditor, useEditorState } from '@tiptap/react'
-import type { FileUploadStorage, ImageAttributes, VideoAttributes } from 'nostr-editor'
+import type { ImageAttributes, VideoAttributes } from 'nostr-editor'
 import type { EventTemplate, NostrEvent } from 'nostr-tools'
 import type { Ref } from 'react'
-import { memo, useCallback, useEffect, useImperativeHandle, useMemo, useRef } from 'react'
+import { memo, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { EMPTY, tap } from 'rxjs'
 import { createContext } from 'use-context-selector'
+import { useAtomValue, useSetAtom } from 'jotai'
 import { ToastEventPublished } from '../Toasts/ToastEventPublished'
 import type { Props as EditorProps } from './Editor'
 import { Editor } from './Editor'
 import { EditorMedia } from './EditorMedia'
+import { EditorUploadDialog } from './EditorUploadDialog'
 import { usePublicMessageTags, useReplyTags } from './hooks/useEditor'
 import { createEditor } from './utils/createEditor'
 import { createEditorKind20 } from './utils/createEditorKind20'
@@ -53,8 +65,8 @@ export type EditorState = typeof initialState
 
 export type EditorMethods =
   ReturnType<typeof useMethods<EditorState, typeof createMethods>> extends [infer State, infer Methods]
-    ? State & Methods
-    : never
+  ? State & Methods
+  : never
 
 export type EditorContextType = EditorMethods & {
   editor: TiptapEditor | null
@@ -72,6 +84,7 @@ export type EditorContextType = EditorMethods & {
   allRelays: string[]
   placeholder: string
   parent: NostrEventDB | undefined
+  addUploadFiles: (files: File[], pos?: number) => void
 }
 
 const createMethods = (state: EditorState) => {
@@ -158,6 +171,10 @@ function getPostKindName(kind: Kind | undefined) {
   }
 }
 
+function removeTrailingNewLines(content: string) {
+  return content.replace(/\n+$/, '')
+}
+
 export const EditorProvider = memo(function EditorProvider(props: Props) {
   const { parent, ref, queryKey, protectedEvent = false, pubkey: publicMessagePubkey, relays, ...rest } = props
 
@@ -184,39 +201,84 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
   }, [kind, parent, parentUser.event])
 
   const placeholderRef = useRef(placeholder)
+  const editorRef = useRef<TiptapEditor | null>(null)
 
   const [state, methods] = useMethods(createMethods, {
     ...initialState,
     includedRelays: new Set(relays),
   })
+  const methodsRef = useRef(methods)
 
-  const sign = async (event: EventTemplate) => {
-    if (signer && pubkey) {
-      try {
-        return await signer.sign({ ...event, pubkey })
-      } catch {
-        methods.toggle('isUploading', false)
-        return Promise.reject('Signing rejected')
+  useEffect(() => {
+    methodsRef.current = methods
+  }, [methods])
+
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false)
+  const uploadDialogFiles = useAtomValue(filesAtom)
+  const addUploadDialogFile = useSetAtom(addFileUploadAtom)
+  const resetUploadDialogFiles = useSetAtom(resetFileUploadAtom)
+  const selectFilesForUpload = useSetAtom(selectFilesForUploadAtom)
+  const resetUploadDialogConfig = useSetAtom(resetUploadDialogConfigAtom)
+  const applyUploadConfigToFiles = useSetAtom(applyUploadConfigToFilesAtom)
+  const uploadDialogFilesNow = useSetAtom(uploadFilesAtom)
+
+  const addUploadFiles = useCallback(
+    (files: File[], pos?: number) => {
+      const currentFiles = store.get(filesAtom)
+      if (!currentFiles.length) {
+        resetUploadDialogConfig()
       }
-    }
-    methods.toggle('isUploading', false)
-    return Promise.reject('Signer not found')
-  }
+      const existing = new Set(currentFiles.map((item) => getUploadFileKey(item.file)))
+      const incoming = new Set<string>()
+      files.forEach((file) => {
+        const key = getUploadFileKey(file)
+        if (existing.has(key) || incoming.has(key)) return
+        incoming.add(key)
+        addUploadDialogFile({
+          file,
+          src: URL.createObjectURL(file),
+          pos,
+        })
+      })
+      setUploadDialogOpen(true)
+    },
+    [addUploadDialogFile, resetUploadDialogConfig],
+  )
 
-  const editorProps = useMemo(() => {
+  useEffect(() => {
+    resetUploadDialogFiles()
+  }, [resetUploadDialogFiles])
+
+  const sign = useCallback(
+    async (event: EventTemplate) => {
+      if (signer && pubkey) {
+        try {
+          return await signer.sign({ ...event, pubkey })
+        } catch {
+          methodsRef.current.toggle('isUploading', false)
+          return Promise.reject('Signing rejected')
+        }
+      }
+      methodsRef.current.toggle('isUploading', false)
+      return Promise.reject('Signer not found')
+    },
+    [signer, pubkey],
+  )
+
+  const editorProps = useMemo<UseEditorOptions>(() => {
     return kind === Kind.Media
       ? createEditorKind20(placeholder)
       : createEditor({
-          sign,
-          placeholder: () => placeholderRef.current,
-          onUploadStart: () => methods.toggle('isUploading', true),
-          onUploadDrop: () => focus(),
-          onUploadComplete: () => methods.toggle('isUploading', false),
-          onUploadError: () => methods.toggle('isUploading', false),
-        })
-  }, [kind])
+        placeholder: () => placeholderRef.current,
+        onFilesSelect: addUploadFiles,
+      })
+  }, [kind, addUploadFiles])
 
   const editor = useEditor(editorProps, [editorProps])
+
+  useEffect(() => {
+    editorRef.current = editor
+  }, [editor])
 
   // https://github.com/ueberdosis/tiptap/issues/3383
   useEffect(() => {
@@ -225,9 +287,8 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
   }, [editor, placeholder])
 
   const upload = useCallback(() => {
-    const uploader = editor?.storage?.fileUpload?.uploader as FileUploadStorage['uploader'] | undefined
-    return uploader!.start()
-  }, [editor])
+    return Promise.resolve([])
+  }, [])
 
   const clear = () => {
     editor?.commands.clearContent()
@@ -240,7 +301,13 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
   }
 
   const selectFiles = () => {
-    editor?.commands.selectFiles()
+    selectFilesForUpload({
+      onSelect: (files) => {
+        if (!files.length) return
+        resetUploadDialogConfig()
+        setUploadDialogOpen(true)
+      },
+    })
   }
 
   const setOpen = () => {
@@ -280,7 +347,7 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
         }
         return {
           kind,
-          content: editor?.getText({ blockSeparator: '\n' }),
+          content: removeTrailingNewLines(editor?.getText({ blockSeparator: '\n' }) || ''),
           created_at: Math.floor(Date.now() / 1000),
           tags: [...(kind === Kind.PublicMessage ? publicMessageTags : replyTags), ...getTags()],
         } as EventTemplate
@@ -352,39 +419,42 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
   const { mutateAsync: onSubmit } = usePublishEventMutation<EditorContextType>({
     mutationFn:
       ({ signer, pubkey }) =>
-      (state) => {
-        methods.toggle('submitting', true)
-        if (event) {
-          if (settings.delayBroadcast) {
-            // Delay broadcast
-            return signAndSave({ ...event, pubkey }, { signer, saveEvent: !state.protectedEvent }).pipe(
+        (state) => {
+          methods.toggle('submitting', true)
+          if (event) {
+            if (settings.delayBroadcast) {
+              // Delay broadcast
+              return signAndSave({ ...event, pubkey }, { signer, saveEvent: !state.protectedEvent }).pipe(
+                tap((event) => {
+                  props.onSigned?.(event, allRelays)
+                  addNoteToQuery(event)
+                  store.set(addBroadcastRequestAtom, {
+                    event,
+                    relays: allRelays,
+                    signer,
+                    onComplete: () => {
+                      onSuccess(event)
+                    },
+                    onCancel: () => {
+                      onUndo(event)
+                    },
+                  })
+                }),
+              )
+            }
+            return publish({ ...event, pubkey }, { relays: allRelays, signer, saveEvent: !protectedEvent }).pipe(
               tap((event) => {
                 props.onSigned?.(event, allRelays)
                 addNoteToQuery(event)
-                store.set(addBroadcastRequestAtom, {
-                  event,
-                  relays: allRelays,
-                  signer,
-                  onComplete: () => {
-                    onSuccess(event)
-                  },
-                  onCancel: () => {
-                    onUndo(event)
-                  },
-                })
+                onSuccess(event)
               }),
             )
           }
-          return publish({ ...event, pubkey }, { relays: allRelays, signer, saveEvent: !protectedEvent }).pipe(
-            tap((event) => {
-              props.onSigned?.(event, allRelays)
-              addNoteToQuery(event)
-              onSuccess(event)
-            }),
-          )
-        }
-        return EMPTY
-      },
+          return EMPTY
+        },
+    onError: () => {
+      methods.toggle('submitting', false)
+    },
   })
 
   useImperativeHandle(ref, () => ({ editor }), [editor])
@@ -410,8 +480,75 @@ export const EditorProvider = memo(function EditorProvider(props: Props) {
         ...methods,
         parent,
         reset,
+        addUploadFiles,
       }}>
       {kind === Kind.Media ? <EditorMedia {...rest} onSubmit={onSubmit} /> : <Editor {...rest} onSubmit={onSubmit} />}
+      <EditorUploadDialog
+        open={uploadDialogOpen}
+        uploading={state.isUploading}
+        onClose={() => {
+          resetUploadDialogFiles()
+          resetUploadDialogConfig()
+          setUploadDialogOpen(false)
+        }}
+        onConfirm={() => {
+          const run = async () => {
+            if (!editorRef.current || !uploadDialogFiles.length) {
+              resetUploadDialogFiles()
+              resetUploadDialogConfig()
+              setUploadDialogOpen(false)
+              return
+            }
+            methodsRef.current.toggle('isUploading', true)
+            applyUploadConfigToFiles()
+            const pendingKeys = new Set(
+              uploadDialogFiles
+                .filter((item) => !item.sha256)
+                .map((item) => getUploadFileKey(item.file)),
+            )
+            try {
+              await uploadDialogFilesNow()
+              if (kind !== Kind.Media) {
+                const uploadedFiles = store
+                  .get(filesAtom)
+                  .filter((item) => item.sha256 && pendingKeys.has(getUploadFileKey(item.file)))
+                const content = uploadedFiles.flatMap((item) => [
+                  { type: 'paragraph' as const },
+                  {
+                    type: item.file.type.startsWith('video/') ? 'video' : 'image',
+                    attrs: {
+                      src: item.src,
+                      alt: item.alt || '',
+                    },
+                  },
+                ])
+                if (content.length) {
+                  const editor = editorRef.current
+                  const insertPos = editor.state.doc.content.size
+                  editor.chain().focus(insertPos).insertContentAt(insertPos, content).run()
+                }
+                resetUploadDialogFiles()
+                resetUploadDialogConfig()
+              }
+              setUploadDialogOpen(false)
+            } catch (error) {
+              store.set(enqueueToastAtom, {
+                component: String(error),
+                duration: 4000,
+              })
+            } finally {
+              methodsRef.current.toggle('isUploading', false)
+            }
+          }
+          run().catch((error) => {
+            store.set(enqueueToastAtom, {
+              component: String(error),
+              duration: 4000,
+            })
+            methodsRef.current.toggle('isUploading', false)
+          })
+        }}
+      />
     </EditorContext.Provider>
   )
 })
