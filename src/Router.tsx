@@ -295,7 +295,16 @@ export const feedRoute = createRoute({
               ? READ | WRITE
               : undefined
     }
-    const id = 'custom_' + JSON.stringify(filter)
+    const id = 'custom_' + JSON.stringify({
+      filter,
+      relay,
+      relaySets,
+      scope,
+      type,
+      pubkey,
+      permission,
+      outbox,
+    })
     return {
       id,
       type,
