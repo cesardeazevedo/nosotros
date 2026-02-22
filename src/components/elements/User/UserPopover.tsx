@@ -9,7 +9,6 @@ import React from 'react'
 import { css, html } from 'react-strict-dom'
 import { UserAvatar } from './UserAvatar'
 import { UserContentAbout } from './UserContentAbout'
-import { UserFollowers } from './UserFollowers'
 import { UserFollowings } from './UserFollowings'
 import { UserName } from './UserName'
 import { UserNIP05 } from './UserNIP05'
@@ -52,7 +51,6 @@ export const UserPopover = function UserPopover(props: Props) {
               </Stack>
               <Stack gap={1} sx={styles.content}>
                 <UserFollowings pubkey={pubkey} />
-                <UserFollowers pubkey={pubkey} />
                 <UserRelays pubkey={pubkey} />
               </Stack>
 
