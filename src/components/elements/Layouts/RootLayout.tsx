@@ -3,8 +3,7 @@ import { RouteUtilsContextProvider } from '@/components/providers/RouteUtilsProv
 import { useMobile } from '@/hooks/useMobile'
 import { useRelayAuthenticator } from '@/hooks/useRelayAuthenticator'
 import { Outlet, useSearch } from '@tanstack/react-router'
-import { Dialogs } from 'components/modules/DialogsModule'
-import { memo } from 'react'
+import { lazy, memo, Suspense } from 'react'
 import { css, html } from 'react-strict-dom'
 import { Header } from '../Header/Header'
 import { BottomNavigation } from '../Navigation/BottomNavigation'
@@ -29,13 +28,17 @@ const OutletParallel = () => {
   )
 }
 
+const Dialogs = lazy(async () => import('components/modules/DialogsModule').then((m) => ({ default: m.Dialogs })))
+
 export const RootLayout = memo(function RootLayout() {
   const isMobile = useMobile()
   useRelayAuthenticator()
 
   return (
     <>
-      <Dialogs />
+      <Suspense fallback={null}>
+        <Dialogs />
+      </Suspense>
       {!isMobile && (
         <SidebarLayout>
           <OutletParallel />
