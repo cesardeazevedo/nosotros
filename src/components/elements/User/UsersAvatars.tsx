@@ -4,6 +4,7 @@ import { Paper } from '@/components/ui/Paper/Paper'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { TooltipRich } from '@/components/ui/TooltipRich/TooltipRich'
+import type { SxProps } from '@/components/ui/types'
 import type { ColorPalette } from '@/themes/palette.stylex'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
@@ -19,13 +20,14 @@ type Props = {
   renderTooltip?: boolean
   onPrimary?: boolean
   borderColor?: keyof ColorPalette
+  sx?: SxProps
 }
 
 export const UsersAvatars = function UserAvatars(props: Props) {
-  const { pubkeys, max = 3, description, borderColor, renderTooltip = true } = props
+  const { pubkeys, max = 3, description, borderColor, renderTooltip = true, sx } = props
   const topUsers = pubkeys.slice(0, max)
   return (
-    <Stack justify='flex-end' gap={0.5} sx={styles.root}>
+    <Stack justify='center' gap={0.5} sx={[styles.root, sx]}>
       {renderTooltip && (
         <TooltipRich
           openEvents={{ click: true, hover: false }}
@@ -46,18 +48,16 @@ export const UsersAvatars = function UserAvatars(props: Props) {
           </ButtonBase>
         </TooltipRich>
       )}
-      <Stack>
-        <ContentProvider value={{ disableLink: true, disablePopover: true }}>
-          {topUsers.map((pubkey, index) => (
-            <UserAvatar
-              key={pubkey + index}
-              sx={[styles.avatar, borderColor ? styles.avatarBorderColor(borderColor) : null]}
-              size='xs'
-              pubkey={pubkey}
-            />
-          ))}
-        </ContentProvider>
-      </Stack>
+      <ContentProvider value={{ disableLink: true, disablePopover: true }}>
+        {topUsers.map((pubkey, index) => (
+          <UserAvatar
+            key={pubkey + index}
+            sx={[styles.avatar, borderColor ? styles.avatarBorderColor(borderColor) : null]}
+            size='xs'
+            pubkey={pubkey}
+          />
+        ))}
+      </ContentProvider>
     </Stack>
   )
 }

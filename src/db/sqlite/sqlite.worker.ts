@@ -9,7 +9,7 @@ import { SqliteSeen } from './seen/sqlite.seen'
 import { SqliteTags } from './tags/sqlite.tags'
 import { initializeSQLite } from './sqlite.schemas'
 import { SqliteStats } from './sqlite.stats'
-import type { SqliteMessages } from './sqlite.types'
+import type { NostrEventDB, SqliteMessages } from './sqlite.types'
 import { SqliteUsers } from './users/sqlite.users'
 
 export class SqliteStorage {
@@ -61,6 +61,22 @@ export class SqliteStorage {
 const DB_NAME = import.meta.env.VITE_DB_NAME
 const store = new SqliteStorage(DB_NAME)
 
+function insertUser(event: NostrEventDB) {
+  const userMetadata = event.metadata?.userMetadata as
+    | { name?: string; display_name?: string }
+    | undefined
+  const name = userMetadata?.name?.trim() || undefined
+  const display_name = userMetadata?.display_name?.trim() || undefined
+  const resolvedName = (name || display_name || '').trim()
+  if (resolvedName) {
+    store.users.upsert({
+      pubkey: event.pubkey,
+      name: resolvedName,
+      display_name,
+    })
+  }
+}
+
 async function onMessage(e: MessageEvent) {
   const db = await store.db
   const msg = JSON.parse(e.data) as SqliteMessages & { id: string }
@@ -96,19 +112,15 @@ async function onMessage(e: MessageEvent) {
     case 'insertEvent': {
       store.event.insert(msg.params)
       if (msg.params.kind === Kind.Metadata) {
-        const userMetadata = msg.params.metadata?.userMetadata as
-          | { name?: string; display_name?: string }
-          | undefined
-        const name = userMetadata?.name?.trim() || undefined
-        const display_name = userMetadata?.display_name?.trim() || undefined
-        const resolvedName = (name || display_name || '').trim()
-        if (resolvedName) {
-          store.users.upsert({
-            pubkey: msg.params.pubkey,
-            name: resolvedName,
-            display_name,
-          })
-        }
+        insertUser(msg.params)
+      }
+      break
+    }
+    // insert event without batch
+    case 'publishEvent': {
+      store.event.insertEvent(db, msg.params)
+      if (msg.params.kind === Kind.Metadata) {
+        insertUser(msg.params)
       }
       break
     }

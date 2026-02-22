@@ -6,6 +6,7 @@ import { atom } from 'jotai'
 import { atomWithQuery } from 'jotai-tanstack-query'
 import { atomFamily } from 'jotai/utils'
 import { nip19 } from 'nostr-tools'
+import { userMutedStateFamily } from './mutes.atoms'
 import { nprofileFamily } from './nip19.atoms'
 
 const userEventQueryFamily = atomFamily((pubkey: string | undefined) => {
@@ -13,33 +14,21 @@ const userEventQueryFamily = atomFamily((pubkey: string | undefined) => {
 })
 
 const userFollowsQueryFamily = atomFamily(
-  (params: { pubkey: string | undefined; syncFollows: boolean }) => {
-    const { pubkey, syncFollows } = params
+  (params: { pubkey: string | undefined; fullUserSync: boolean }) => {
+    const { pubkey, fullUserSync } = params
     return atomWithQuery(() =>
       replaceableEventQueryOptions(Kind.Follows, pubkey || '', {
-        enabled: !!pubkey && syncFollows,
+        enabled: !!pubkey && fullUserSync,
       }),
     )
   },
-  (a, b) => a.pubkey === b.pubkey && a.syncFollows === b.syncFollows,
-)
-
-const userMutesQueryFamily = atomFamily(
-  (params: { pubkey: string | undefined; syncFollows: boolean }) => {
-    const { pubkey, syncFollows } = params
-    return atomWithQuery(() =>
-      replaceableEventQueryOptions(Kind.Mutelist, pubkey || '', {
-        enabled: !!pubkey && syncFollows,
-      }),
-    )
-  },
-  (a, b) => a.pubkey === b.pubkey && a.syncFollows === b.syncFollows,
+  (a, b) => a.pubkey === b.pubkey && a.fullUserSync === b.fullUserSync,
 )
 
 export const userFamily = atomFamily(
-  (params: { pubkey: string | undefined; syncFollows: boolean }) => {
+  (params: { pubkey: string | undefined; fullUserSync: boolean }) => {
     return atom((get) => {
-      const { pubkey, syncFollows = false } = params
+      const { pubkey, fullUserSync = false } = params
       if (!pubkey) {
         return {
           pubkey,
@@ -62,15 +51,11 @@ export const userFamily = atomFamily(
 
       const nprofile = get(nprofileFamily(pubkey))
 
-      const followsAtom = userFollowsQueryFamily({ pubkey, syncFollows })
+      const followsAtom = userFollowsQueryFamily({ pubkey, fullUserSync })
       const follows = get(followsAtom)
       const tags = follows.data?.tags || []
 
-      const mutesAtom = userMutesQueryFamily({ pubkey, syncFollows })
-      const mutes = get(mutesAtom)
-      const muteTags = mutes.data?.tags || []
-      const mutedAuthors = new Set(muteTags.filter((tag) => tag[0] === 'p').map((tag) => tag[1]))
-      const mutedNotes = new Set(muteTags.filter((tag) => tag[0] === 'e').map((tag) => tag[1]))
+      const { mutedAuthors, mutedNotes } = get(userMutedStateFamily({ pubkey, enabled: fullUserSync }))
 
       const followsTag = (value: string | undefined, tagName: string = 'p') => {
         return tags.some((tag) => tagName === tag[0] && tag[1] === value)
@@ -98,5 +83,5 @@ export const userFamily = atomFamily(
       }
     })
   },
-  (a, b) => a.pubkey === b.pubkey && a.syncFollows === b.syncFollows,
+  (a, b) => a.pubkey === b.pubkey && a.fullUserSync === b.fullUserSync,
 )

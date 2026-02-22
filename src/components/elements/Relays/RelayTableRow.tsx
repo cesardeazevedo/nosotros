@@ -37,7 +37,10 @@ export const RelayTableRow = memo(function RelayTableRow(props: Props) {
   const isSM = useSM()
   return (
     <>
-      <tr {...root} onClick={() => setOpen(!open)}>
+      <tr {...root} onClick={(e) => {
+        e.stopPropagation()
+        setOpen(!open)
+      }}>
         <td {...td}>
           <Stack sx={styles.breakWord} gap={2}>
             <IconButton
@@ -64,7 +67,10 @@ export const RelayTableRow = memo(function RelayTableRow(props: Props) {
               url={relay}
               icon={false}
               renderDisconnectedIcon={false}
-              onClick={() => setOpen((prev) => !prev)}
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+              }}
             />
             {info?.limitation?.auth_required && (
               <Tooltip text='Authentication Required' enterDelay={0}>

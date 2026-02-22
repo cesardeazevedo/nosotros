@@ -1,6 +1,7 @@
 import { openImageDialogAtom, toggleQRCodeDialogAtom } from '@/atoms/dialog.atoms'
 import { enqueueToastAtom } from '@/atoms/toaster.atoms'
 import { FollowButton } from '@/components/modules/Follows/FollowButton'
+import { ListMuteOptionsDialog } from '@/components/modules/Lists/ListMuteOptionsDialog'
 import { ContentProvider } from '@/components/providers/ContentProvider'
 import { Button } from '@/components/ui/Button/Button'
 import { Divider } from '@/components/ui/Divider/Divider'
@@ -20,7 +21,7 @@ import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { sanitizeUrl } from '@braintree/sanitize-url'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
-import { IconBoltFilled, IconCopy, IconDotsVertical, IconQrcode, IconSend } from '@tabler/icons-react'
+import { IconBoltFilled, IconCopy, IconDotsVertical, IconQrcode, IconSend, IconUserCancel } from '@tabler/icons-react'
 import { useRouter } from '@tanstack/react-router'
 import { useSetAtom } from 'jotai'
 import { memo, useCallback, useMemo, useState } from 'react'
@@ -43,10 +44,13 @@ type Props = {
 export const UserProfileHeader = memo(function UserProfileHeader(props: Props) {
   const { pubkey } = props
   const [editProfile, setEditProfile] = useState(false)
+  const [muteDialogOpen, setMuteDialogOpen] = useState(false)
   const router = useRouter()
   const isMobile = useMobile()
-  const user = useUserState(pubkey, { syncFollows: true })
+  const user = useUserState(pubkey, { fullUserSync: true })
   const currentPubkey = useCurrentPubkey()
+  const currentUser = useUserState(currentPubkey, { fullUserSync: true })
+  const isUserMuted = !!currentPubkey && currentPubkey !== pubkey && !!currentUser.mutedAuthors?.has(pubkey)
   const doesFollowCurrentUser = user.followsTag(currentPubkey)
   const { nip05, lud16 } = user?.metadata || {}
   const pushImage = useSetAtom(openImageDialogAtom)
@@ -89,8 +93,11 @@ export const UserProfileHeader = memo(function UserProfileHeader(props: Props) {
         <Stack sx={styles.center} horizontal={!isMobile} gap={isMobile ? 1 : 0}>
           <Stack grow horizontal={false}>
             <Text variant='headline' size='sm'>
-              <Stack align='center'>
+              <Stack align='center' gap={1}>
                 {user?.displayName}
+                {/* {user && user.trustedAssertionEvent && ( */}
+                {/*   <UserRank user={user} /> */}
+                {/* )} */}
                 {user.metadata?.pronouns ? (
                   <html.span style={styles.pronouns}>({user.metadata.pronouns})</html.span>
                 ) : (
@@ -111,7 +118,7 @@ export const UserProfileHeader = memo(function UserProfileHeader(props: Props) {
               </Stack>
             )}
           </Stack>
-          <Stack gap={0} horizontal={false} align={isMobile ? 'flex-start' : 'flex-end'}>
+          <Stack gap={0.5} horizontal={false} align={isMobile ? 'flex-start' : 'flex-end'}>
             <UserFollowings pubkey={pubkey} />
             <UserRelays pubkey={pubkey} />
           </Stack>
@@ -134,36 +141,56 @@ export const UserProfileHeader = memo(function UserProfileHeader(props: Props) {
           <Popover
             placement='bottom-end'
             contentRenderer={({ close }) => (
-              <MenuList surface='surfaceContainerLow'>
-                <MenuItem
-                  size='sm'
-                  leadingIcon={<IconCopy size={18} />}
-                  onClick={() => {
-                    close()
-                    handleCopy(user.nprofile)
-                  }}
-                  label='Copy User ID'
-                />
-                <MenuItem
-                  size='sm'
-                  leadingIcon={<IconQrcode size={18} />}
-                  onClick={() => {
-                    close()
-                    toggleQRCodeDialog(pubkey)
-                  }}
-                  label='Show QR Code'
-                />
-                <Divider />
-                <LinkBase search={{ compose_kind: Kind.PublicMessage, compose: true, pubkey }}>
+              <MenuList surface='surfaceContainerLow' sx={styles.menuList}>
+                <html.div style={styles.menuWrapper}>
                   <MenuItem
                     size='sm'
-                    interactive
-                    onClick={() => close()}
-                    leadingIcon={<IconSend size={18} />}
-                    label='Send Public Message'
+                    leadingIcon={<IconCopy size={22} />}
+                    onClick={() => {
+                      close()
+                      handleCopy(user.nprofile)
+                    }}
+                    label='Copy User ID'
                   />
-                </LinkBase>
+                  <MenuItem
+                    size='sm'
+                    leadingIcon={<IconQrcode size={22} strokeWidth='1.5' />}
+                    onClick={() => {
+                      close()
+                      toggleQRCodeDialog(pubkey)
+                    }}
+                    label='Show QR Code'
+                  />
+                </html.div>
+                <Divider />
+                {pubkey !== currentPubkey && (
+                  <html.div style={styles.menuWrapper}>
+                    <MenuItem
+                      size='sm'
+                      variant='danger'
+                      leadingIcon={<IconUserCancel size={22} />}
+                      onClick={() => {
+                        close()
+                        setMuteDialogOpen(true)
+                      }}
+                      label={isUserMuted ? 'Unmute User' : 'Mute User'}
+                    />
+                  </html.div>
+                )}
+                {pubkey !== currentPubkey && <Divider />}
+                <html.div style={styles.menuWrapper}>
+                  <LinkBase search={{ compose_kind: Kind.PublicMessage, compose: true, pubkey }}>
+                    <MenuItem
+                      size='sm'
+                      interactive
+                      onClick={() => close()}
+                      leadingIcon={<IconSend size={22} />}
+                      label='Send Public Message'
+                    />
+                  </LinkBase>
+                </html.div>
               </MenuList>
+
             )}>
             {({ getProps, setRef, open }) => (
               <IconButton
@@ -189,6 +216,13 @@ export const UserProfileHeader = memo(function UserProfileHeader(props: Props) {
           )}
         </Stack>
       </Stack>
+      <ListMuteOptionsDialog
+        open={muteDialogOpen}
+        targetPubkey={pubkey}
+        onClose={() => {
+          setMuteDialogOpen(false)
+        }}
+      />
     </>
   )
 })
@@ -252,6 +286,12 @@ const styles = css.create({
     paddingBlock: 2,
     paddingInline: 6,
     backgroundColor: palette.surfaceContainerHigh,
+  },
+  menuList: {
+    paddingInline: 0,
+  },
+  menuWrapper: {
+    paddingInline: spacing.padding1,
   },
   pronouns: {
     marginLeft: spacing['margin0.5'],

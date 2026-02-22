@@ -5,7 +5,7 @@ import { dedupe } from '@/core/helpers/dedupe'
 import type { NostrFilter } from '@/core/types'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import type { NostrContext } from '@/nostr/context'
-import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { useObservable, useObservableCallback, useSubscription } from 'observable-hooks'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -14,18 +14,14 @@ import type { Modules } from '../modules/module'
 import { queryKeys } from '../query/queryKeys'
 import { prependEventFeed, setEventData } from '../query/queryUtils'
 import type { FeedScope } from '../query/useQueryFeeds'
-import { createFeedQueryOptions, type FeedModule, type InfiniteEvents } from '../query/useQueryFeeds'
+import { type FeedModule, type InfiniteEvents } from '../query/useQueryFeeds'
 import { subscribeLive } from '../subscriptions/subscribeLive'
 
 export const feedRefresh$ = new Subject<string>()
 
 export type FeedState = ReturnType<typeof useFeedState>
 
-type Extras = {
-  select?: (data: InfiniteEvents) => InfiniteEvents
-}
-
-export function useFeedStateAtom(feedAtoms: FeedAtoms, extras?: Extras) {
+export function useFeedStateAtom(feedAtoms: FeedAtoms) {
   const baseOptions = feedAtoms.options
   const sessionOptions = useAtomValue(feedAtoms.atom)
 
@@ -88,41 +84,8 @@ export function useFeedStateAtom(feedAtoms: FeedAtoms, extras?: Extras) {
 
   const queryClient = useQueryClient()
   const queryKey = queryKeys.feed(sessionOptions.id, filter, sessionOptions.ctx)
-  const query = useInfiniteQuery(
-    createFeedQueryOptions({
-      select: useCallback(
-        (data: InfiniteEvents) => {
-          return {
-            pages: [
-              data.pages.flat().filter((event) => {
-                switch (event.kind) {
-                  case Kind.Text: {
-                    if (replies !== undefined) {
-                      return replies ? !event.metadata?.isRoot : !!event.metadata?.isRoot
-                    }
-                    return true
-                  }
-                  case Kind.Repost: {
-                    return !replies
-                  }
-                  default: {
-                    return !replies
-                  }
-                }
-              }),
-            ],
-            pageParams: data.pageParams,
-          }
-        },
-        [replies],
-      ),
-      ...sessionOptions,
-      ...extras,
-      filter,
-      queryKey,
-      onStream,
-    }),
-  )
+  const query = useAtomValue(feedAtoms.query)
+  const data = useAtomValue(feedAtoms.data)
 
   const [isEmpty, setIsEmpty] = useState(false)
 
@@ -221,6 +184,7 @@ export function useFeedStateAtom(feedAtoms: FeedAtoms, extras?: Extras) {
   return {
     atoms: feedAtoms,
     query,
+    data,
     queryKey,
     options: sessionOptions,
     filter,
@@ -278,7 +242,7 @@ export function useFeedStateAtom(feedAtoms: FeedAtoms, extras?: Extras) {
   }
 }
 
-export function useFeedState(module: FeedModule, extras?: Extras) {
+export function useFeedState(module: FeedModule) {
   const feedAtoms = useMemo(() => createFeedAtoms(module), [module])
-  return useFeedStateAtom(feedAtoms, extras)
+  return useFeedStateAtom(feedAtoms)
 }

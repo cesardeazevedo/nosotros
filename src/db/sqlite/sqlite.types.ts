@@ -44,6 +44,7 @@ export type SqliteMessages =
   | { method: 'queryEvent'; params: NostrFilter }
   | { method: 'queryNeg'; params: NostrFilter }
   | { method: 'insertEvent'; params: NostrEventDB }
+  | { method: 'publishEvent'; params: NostrEventDB }
   | { method: 'deleteEvent'; params: string }
   | { method: 'querySeen'; params: string }
   | { method: 'insertSeen'; params: SeenDB }

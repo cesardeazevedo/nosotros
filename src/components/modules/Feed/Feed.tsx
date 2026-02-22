@@ -1,5 +1,7 @@
+import type { ThreadGroup } from '@/atoms/threads.atoms'
 import { NostrEventFeedItem } from '@/components/elements/Event/NostrEventFeedItem'
 import { PostLoading } from '@/components/elements/Posts/PostLoading'
+import { ThreadGroupRoot } from '@/components/elements/Threads/ThreadGroupRoot'
 import type { Props as ListProps } from '@/components/modules/Feed/FeedList'
 import { FeedList } from '@/components/modules/Feed/FeedList'
 import { ContentProvider } from '@/components/providers/ContentProvider'
@@ -22,17 +24,31 @@ export type Props = {
 export const Feed = memo(function Feed(props: Props) {
   const { feed, render, loading, ...rest } = props
   const showLoading = feed.options.scope === 'sets_e' ? feed.query.isFetching : !feed.isEmpty
+  const isThreadsMode = feed.replies === true && feed.options.type !== 'inbox'
+  const footer = <>{showLoading ? loading || <PostLoading rows={4} /> : feed.isEmpty ? <FeedEmpty feed={feed} /> : null}</>
+
   return (
     <NostrContextProvider value={feed.options.ctx}>
       <ContentProvider value={{ blured: feed.blured }}>
         <FeedAuthNotice context={feed.options.ctx} />
-        <FeedList
-          feed={feed}
-          onScrollEnd={feed.paginate}
-          render={(event) => (render ? render(event) : <NostrEventFeedItem event={event} />)}
-          footer={<>{showLoading ? loading || <PostLoading rows={4} /> : feed.isEmpty ? <FeedEmpty feed={feed} /> : null}</>}
-          {...rest}
-        />
+        {isThreadsMode ? (
+          <FeedList<ThreadGroup>
+            feed={feed}
+            onScrollEnd={feed.paginate}
+            getItemKey={(item) => item.rootId}
+            render={(item) => <ThreadGroupRoot group={item} />}
+            footer={footer}
+            {...rest}
+          />
+        ) : (
+          <FeedList<NostrEventDB>
+            feed={feed}
+            onScrollEnd={feed.paginate}
+            render={(item) => (render ? render(item) : <NostrEventFeedItem event={item} />)}
+            footer={footer}
+            {...rest}
+          />
+        )}
       </ContentProvider>
     </NostrContextProvider>
   )

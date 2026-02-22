@@ -1,32 +1,41 @@
 import { useRouteUtilsContext } from '@/components/providers/RouteUtilsProvider'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import type { FeedState } from '@/hooks/state/useFeed'
-import { spacing } from '@/themes/spacing.stylex'
+import { useAtomValue } from 'jotai'
 import type { BaseSyntheticEvent } from 'react'
 import React, { memo, useCallback, useLayoutEffect, useMemo, useRef } from 'react'
 import { css, html } from 'react-strict-dom'
 import { FeedNewPosts } from './FeedNewPosts'
 
-export type Props = {
+type FeedListBaseItem = {
+  id?: string
+}
+
+export type Props<T = NostrEventDB> = {
   feed: FeedState
   column?: boolean
   renderNewPostsIndicator?: boolean
   onScrollEnd?: () => void
-  render: (item: NostrEventDB) => React.ReactNode
+  render: (item: T) => React.ReactNode
+  items?: T[]
+  getItemKey?: (item: T, index: number) => string
+  divider?: boolean
   wrapper?: (children: React.ReactNode) => React.ReactNode
   header?: React.ReactNode
   footer?: React.ReactNode
 }
 
-export const FeedList = memo(function FeedList(props: Props) {
+const FeedListBase = function FeedList<T = NostrEventDB>(props: Props<T>) {
   const { feed, render, onScrollEnd, column, renderNewPostsIndicator = true } = props
   const ref = useRef<HTMLDivElement>(null)
   const { hiddenRoute } = useRouteUtilsContext()
 
-  const list = useMemo(
-    () => feed.query.data?.pages.flat().slice(0, feed.pageSize) || [],
-    [feed.query.data?.pages, feed.pageSize],
+  const data = useAtomValue(feed.atoms.data)
+  const baseList = useMemo(
+    () => data?.pages.flat().slice(0, feed.pageSize) || [],
+    [data?.pages, feed.pageSize],
   )
+  const list = props.items ?? (baseList as unknown as T[])
 
   useLayoutEffect(() => {
     if (!column) {
@@ -57,8 +66,13 @@ export const FeedList = memo(function FeedList(props: Props) {
   )
 
   const content = useMemo(() => {
-    return list.map((item) => <React.Fragment key={item.id}>{render(item)}</React.Fragment>)
-  }, [list, render])
+    return list.map((item, index) => {
+      const key =
+        props.getItemKey?.(item, index) ||
+        ((item as FeedListBaseItem)?.id ?? String(index))
+      return <React.Fragment key={key}>{render(item)}</React.Fragment>
+    })
+  }, [list, props.getItemKey, render])
 
   if (column) {
     return (
@@ -89,15 +103,16 @@ export const FeedList = memo(function FeedList(props: Props) {
       {props.footer}
     </>
   )
-})
+}
+
+export const FeedList = memo(FeedListBase) as <T = NostrEventDB>(
+  props: Props<T>,
+) => React.JSX.Element
 
 const styles = css.create({
   column: {
     position: 'relative',
     height: 'calc(100vh - 70px)',
     overflow: 'scroll',
-  },
-  refreshing: {
-    paddingBlock: spacing.padding2,
   },
 })

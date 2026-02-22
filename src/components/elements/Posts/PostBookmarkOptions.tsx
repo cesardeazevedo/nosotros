@@ -7,7 +7,6 @@ import { Text } from '@/components/ui/Text/Text'
 import { Kind } from '@/constants/kinds'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { usePublishEventMutation } from '@/hooks/mutations/usePublishEventMutation'
-import { invalidateNip51Queries } from '@/hooks/query/invalidations'
 import { eventQueryOptions } from '@/hooks/query/useQueryBase'
 import { useCurrentPubkey, useCurrentSigner } from '@/hooks/useAuth'
 import { useEventDecryptedTags } from '@/hooks/useEventDecrypt'
@@ -121,16 +120,7 @@ export const PostBookmarkOptions = (props: Props) => {
         },
   })
 
-  const invalidateListQueries = async () => {
-    if (!pubkey) {
-      return
-    }
-    await invalidateNip51Queries(queryClient, {
-      pubkey,
-      kind: Kind.BookmarkList,
-      includeBookmarkOptions: true,
-    })
-  }
+  const invalidateListQueries = () => setTimeout(() => queryClient.invalidateQueries({ queryKey: ['bookmark-options', pubkey] }).catch(() => { }), 1000)
 
   const onSubmit = async (target?: NostrEventDB, decryptedTags?: string[][]) => {
     if (!pubkey || !signer) {
@@ -148,7 +138,7 @@ export const PostBookmarkOptions = (props: Props) => {
         content: '',
         created_at: Math.floor(Date.now() / 1000),
       })
-      await invalidateListQueries()
+      invalidateListQueries()
       onClose()
       return
     }
@@ -176,7 +166,7 @@ export const PostBookmarkOptions = (props: Props) => {
         content: encrypted,
         created_at: Math.floor(Date.now() / 1000),
       })
-      await invalidateListQueries()
+      invalidateListQueries()
       onClose()
       return
     }
@@ -195,7 +185,7 @@ export const PostBookmarkOptions = (props: Props) => {
       content: '',
       created_at: Math.floor(Date.now() / 1000),
     })
-    await invalidateListQueries()
+    invalidateListQueries()
     onClose()
   }
 

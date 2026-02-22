@@ -1,6 +1,4 @@
 // from nostr-tools, adapted to use uploadXHRRequest instead of fetch for upload progress
-import { sha256 } from '@noble/hashes/sha256'
-import { bytesToHex } from '@noble/hashes/utils'
 import type { EventTemplate } from 'nostr-tools'
 import { FileServerPreference } from 'nostr-tools/kinds'
 import { uploadXHRRequest } from './uploadXHR'
@@ -555,15 +553,4 @@ export function generateFSPEventTemplate(serverUrls: string[]): EventTemplate {
     tags: serverUrls.map((serverUrl) => ['server', serverUrl]),
     created_at: Math.floor(Date.now() / 1000),
   }
-}
-
-/**
- * Calculates the SHA-256 hash of a given file. This hash is used in various NIP-96 operations,
- * such as file upload, download, and deletion, to uniquely identify files.
- *
- * @param file - The file for which the SHA-256 hash needs to be calculated.
- * @returns A promise that resolves to the SHA-256 hash of the file.
- */
-export async function calculateFileHash(file: Blob): Promise<string> {
-  return bytesToHex(sha256(new Uint8Array(await file.arrayBuffer())))
 }

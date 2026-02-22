@@ -6,6 +6,7 @@ import { useRelay } from '@/hooks/useRelays'
 import { spacing } from '@/themes/spacing.stylex'
 import React, { memo } from 'react'
 import { css } from 'react-strict-dom'
+import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDOMProps'
 import { RelayConnectedIcon } from './RelayConnectedIcon'
 import { RelayIcon } from './RelayIcon'
 import { RelayPopover } from './RelayPopover'
@@ -18,7 +19,7 @@ type Props = {
   renderDisconnectedIcon?: boolean
   onlyRelayIcon?: boolean
   disablePopover?: boolean
-  onClick?: () => void
+  onClick?: (e: StrictClickEvent) => void
   onDelete?: () => void
 }
 

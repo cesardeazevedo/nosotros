@@ -43,6 +43,12 @@ export class SqliteStorage {
     return eventMetadata
   }
 
+  async publishEvent(event: NostrEvent) {
+    const eventMetadata = parseEventMetadata(event)
+    this.send({ method: 'publishEvent', params: eventMetadata })
+    return eventMetadata
+  }
+
   async deleteEvent(eventId: string) {
     this.send({ method: 'deleteEvent', params: eventId })
   }

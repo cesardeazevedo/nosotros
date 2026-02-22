@@ -5,9 +5,10 @@ import { Stack } from '@/components/ui/Stack/Stack'
 import type { FeedModule } from '@/hooks/query/useQueryFeeds'
 import { useFeedState } from '@/hooks/state/useFeed'
 import { palette } from '@/themes/palette.stylex'
-import { memo } from 'react'
+import { memo, useEffect } from 'react'
 import { css } from 'react-strict-dom'
 import { DeckColumnFeed } from '../Deck/DeckColumnFeed'
+import { useRemoveDeckColumn } from '../Deck/hooks/useDeck'
 import { FeedHeader } from '../Feed/FeedHeader'
 import { FeedReplyTabs } from '../Feed/FeedReplyTabs'
 
@@ -16,8 +17,19 @@ type Props = {
 }
 
 export const RelayFeedColumn = memo(function RelayFeedColumn(props: Props) {
+  const url = props.module.ctx?.relays?.[0]
+  const removeColumn = useRemoveDeckColumn(props.module.id)
   const feed = useFeedState(props.module)
-  const url = props.module.ctx.relays![0]
+
+  useEffect(() => {
+    if (!url) {
+      removeColumn()
+    }
+  }, [url, removeColumn])
+
+  if (!url) {
+    return null
+  }
 
   return (
     <DeckColumnFeed

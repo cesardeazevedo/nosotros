@@ -8,6 +8,7 @@ import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Popover } from '@/components/ui/Popover/Popover'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
+import { useMobile } from '@/hooks/useMobile'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconChevronDown, IconX } from '@tabler/icons-react'
 import { useAtomValue, useSetAtom } from 'jotai'
@@ -29,6 +30,7 @@ export const EditorUploadDialog = (props: Props) => {
   const uploadConfig = useAtomValue(uploadDialogConfigAtom)
   const setUploadConfig = useSetAtom(setUploadDialogConfigAtom)
   const selectFiles = useSetAtom(selectFilesForUploadAtom)
+  const isMobile = useMobile()
   const hasVideo = pendingFiles.some((item) => item.file.type.startsWith('video/'))
   const uploadUrlLabel = (() => {
     try {
@@ -39,7 +41,7 @@ export const EditorUploadDialog = (props: Props) => {
   })()
 
   return (
-    <DialogSheet open={open} onClose={onClose} maxWidth={pendingFiles.length > 1 ? 'lg' : 'md'} sx={styles.dialog}>
+    <DialogSheet open={open} onClose={onClose} maxWidth={pendingFiles.length > 1 ? 'lg' : 'md'}>
       <Stack horizontal={false} gap={0} sx={styles.root}>
         <Stack sx={styles.header} justify='space-between' align='center'>
           <IconButton
@@ -56,13 +58,13 @@ export const EditorUploadDialog = (props: Props) => {
           </Button>
         </Stack>
         <Divider />
-        <Stack align='stretch'>
+        <Stack horizontal={!isMobile} align='stretch'>
           <Stack grow sx={styles.mediaColumn}>
             <Stack sx={styles.files}>
               <MediaListEditor files={pendingFiles} onAddMedia={() => selectFiles()} disableAddMedia={Boolean(uploading)} />
             </Stack>
           </Stack>
-          <Divider orientation='vertical' />
+          <Divider orientation={isMobile ? 'horizontal' : 'vertical'} />
           <Stack horizontal={false} gap={3} sx={styles.options} align='flex-start'>
             <Text variant='title' size='lg'>
               Upload Options
@@ -107,9 +109,6 @@ export const EditorUploadDialog = (props: Props) => {
 }
 
 const styles = css.create({
-  dialog: {
-    padding: spacing.padding3,
-  },
   root: {
     width: '100%',
   },
@@ -132,8 +131,7 @@ const styles = css.create({
     minWidth: 0,
   },
   files: {
-    width: '100%',
-    minWidth: 0,
+    width: '100vw',
     overflow: 'hidden',
     padding: spacing.padding3,
   },

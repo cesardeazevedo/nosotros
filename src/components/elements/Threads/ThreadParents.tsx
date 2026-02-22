@@ -7,21 +7,34 @@ import { Threads } from './Threads'
 type Props = {
   level?: number
   maxLevel?: number
+  parentSummaryCount?: number
+  parentSummaryPubkeys?: string[]
+  includeRootParent?: boolean
+  renderThreadIndicator?: boolean
   event: NostrEventDB
   renderEditor?: boolean
 }
 
 export const ThreadParents = memo(function ThreadParent(props: Props) {
-  const { event, renderEditor, level, maxLevel } = props
+  const { event, renderEditor, level, maxLevel, parentSummaryCount, parentSummaryPubkeys, includeRootParent = true, renderThreadIndicator = true } = props
   const parent = useParentEvent(event)
 
   return (
     <>
-      {parent.data ? (
-        <Threads level={level} maxLevel={maxLevel} renderEditor={renderEditor} event={parent.data} />
-      ) : (
+      {!parent.data ? (
         <ThreadLoading />
-      )}
+      ) : includeRootParent || !parent.data.metadata?.isRoot ? (
+        <Threads
+          level={level}
+          maxLevel={maxLevel}
+          parentSummaryCount={parentSummaryCount}
+          parentSummaryPubkeys={parentSummaryPubkeys}
+          includeRootParent={includeRootParent}
+          renderThreadIndicator={renderThreadIndicator}
+          renderEditor={renderEditor}
+          event={parent.data}
+        />
+      ) : null}
     </>
   )
 })

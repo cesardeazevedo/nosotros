@@ -1,6 +1,6 @@
 import { Kind } from '@/constants/kinds'
 import { RECOMMENDED_PUBKEYS } from '@/constants/recommended'
-import { DateTime } from 'luxon'
+import { nowMinusUnix } from '@/utils/dateUtils'
 import { queryKeys } from '../query/queryKeys'
 import type { FeedModule } from '../query/useQueryFeeds'
 import { createRelayFeedModule } from './createRelayFeedModule'
@@ -13,7 +13,7 @@ export function createHomeFeedModule(pubkey?: string): FeedModule {
   const filter = {
     kinds: [Kind.Text, Kind.Repost, Kind.Media, Kind.Video, Kind.ShortVideo, Kind.Article],
     authors: pubkey ? [pubkey] : RECOMMENDED_PUBKEYS,
-    since: DateTime.now().minus({ days: 7 }).toUnixInteger(),
+    since: nowMinusUnix({ days: 7 }),
     limit: 250,
   }
   return {
