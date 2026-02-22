@@ -85,6 +85,7 @@ export function useFeedStateAtom(feedAtoms: FeedAtoms) {
   const queryClient = useQueryClient()
   const queryKey = queryKeys.feed(sessionOptions.id, filter, sessionOptions.ctx)
   const query = useAtomValue(feedAtoms.query)
+  const data = useAtomValue(feedAtoms.data)
 
   const [isEmpty, setIsEmpty] = useState(false)
 
@@ -183,6 +184,7 @@ export function useFeedStateAtom(feedAtoms: FeedAtoms) {
   return {
     atoms: feedAtoms,
     query,
+    data,
     queryKey,
     options: sessionOptions,
     filter,
