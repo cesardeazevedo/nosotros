@@ -4,10 +4,11 @@ import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 import type { SxProps } from '@/components/ui/types'
 import { useRelativeDate } from '@/hooks/useRelativeDate'
 import { palette } from '@/themes/palette.stylex'
-import type { StringUnitLength } from 'luxon'
 import { memo } from 'react'
 import { css } from 'react-strict-dom'
 import { LinkNEvent } from '../Links/LinkNEvent'
+
+export type StringUnitLength = "narrow" | "short" | "long";
 
 type Props = {
   sx?: SxProps

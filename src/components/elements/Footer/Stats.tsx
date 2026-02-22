@@ -2,7 +2,6 @@ import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconBug } from '@tabler/icons-react'
-import { DateTime } from 'luxon'
 import { memo } from 'react'
 import { css } from 'react-strict-dom'
 import { committerDate, sha } from '~build/git'
@@ -10,7 +9,7 @@ import { version } from '~build/package'
 import { IconGithub } from '../Icons/IconGithub'
 import { Link } from '../Links/Link'
 
-const lastUpdated = DateTime.fromJSDate(new Date(committerDate)).toLocaleString()
+const lastUpdated = new Date(committerDate).toLocaleDateString()
 
 export const Stats = memo(function Stats() {
   return (

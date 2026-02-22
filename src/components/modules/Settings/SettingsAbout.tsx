@@ -1,6 +1,6 @@
-import { IconGithub } from '@/components/elements/Icons/IconGithub'
 import { Link } from '@/components/elements/Links/Link'
 import { LinkBase } from '@/components/elements/Links/LinkBase'
+import { Stats } from '@/components/elements/Footer/Stats'
 import { UserName } from '@/components/elements/User/UserName'
 import { UserRoot } from '@/components/elements/User/UserRoot'
 import { Button } from '@/components/ui/Button/Button'
@@ -14,14 +14,10 @@ import { spacing } from '@/themes/spacing.stylex'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconBoltFilled, IconBug } from '@tabler/icons-react'
 import { useRouter } from '@tanstack/react-router'
-import { DateTime } from 'luxon'
 import { memo } from 'react'
 import { css } from 'react-strict-dom'
-import { committerDate, sha } from '~build/git'
-import { version } from '~build/package'
 
 const PUBKEY = 'c6603b0f1ccfec625d9c08b753e4f774eaf7d1cf2769223125b5fd4da728019e'
-const lastUpdated = DateTime.fromJSDate(new Date(committerDate)).toLocaleString()
 
 export const SettingsAboutRoute = memo(function SettingsAboutRoute() {
   const user = useUserState(PUBKEY)
@@ -73,27 +69,7 @@ export const SettingsAboutRoute = memo(function SettingsAboutRoute() {
           </LinkBase>
         </Stack>
 
-        <Stack horizontal={false} gap={2}>
-          <Text size='sm' sx={styles.versionText}>
-            v{version} ({sha.slice(0, 8)})<br />
-            Last update: {lastUpdated}
-          </Text>
-        </Stack>
-
-        <Stack horizontal={false} gap={1} align='flex-start'>
-          <Link href='https://github.com/cesardeazevedo/nosotros/issues'>
-            <Stack gap={0.5} align='flex-start'>
-              <IconBug size={18} strokeWidth='1.5' />
-              Report Issue
-            </Stack>
-          </Link>
-          <Link href='https://github.com/cesardeazevedo/nosotros' target='_blank' rel='noopeneer'>
-            <Stack align='center'>
-              <IconGithub />
-              GitHub Repository
-            </Stack>
-          </Link>
-        </Stack>
+        <Stats />
       </Stack>
     </Stack>
   )
@@ -118,14 +94,6 @@ const styles = css.create({
   },
   center: {
     textAlign: 'center',
-  },
-  versionText: {
-    fontWeight: 500,
-    fontFamily: 'monospace',
-    opacity: 0.8,
-  },
-  linkText: {
-    fontWeight: 500,
   },
   userCard: {
     overflow: 'hidden',
