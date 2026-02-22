@@ -8,10 +8,10 @@ import { useReactionByPubkey, useReactions } from '@/hooks/query/useReactions'
 import { useCurrentPubkey } from '@/hooks/useAuth'
 import { useMobile } from '@/hooks/useMobile'
 import { publishReaction } from '@/nostr/publish/publishReaction'
+import { duration } from '@/themes/duration.stylex'
 import { fallbackEmoji } from '@/utils/utils'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconHeart, IconHeartFilled } from '@tabler/icons-react'
-import { AnimatePresence, motion } from 'framer-motion'
 import { useSetAtom } from 'jotai'
 import type { NostrEvent } from 'nostr-tools'
 import { memo, useState } from 'react'
@@ -36,6 +36,7 @@ const emojiColors: Record<string, string> = {
 
 export const ButtonReaction = memo(function ButtonReaction() {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [bounceTick, setBounceTick] = useState(0)
   const { event } = useNoteContext()
   const { dense } = useContentContext()
   const ctx = useNostrContext()
@@ -45,13 +46,14 @@ export const ButtonReaction = memo(function ButtonReaction() {
   const total = reactions.data?.length || 0
   const myReaction = useReactionByPubkey(pubkey, event)?.content
   const color = myReaction ? emojiColors[fallbackEmoji(myReaction)] || colors.red7 : colors.red7
+  const selectedColorStyle = (color && styles[`button$${color}`]) || styles.button$red
   const mobile = useMobile()
 
   const { mutate } = usePublishEventMutation<[string, NostrEvent]>({
     mutationFn:
       ({ signer, pubkey }) =>
-      ([reaction, event]) =>
-        publishReaction(pubkey, event, reaction, { signer, includeRelays: ctx?.relays }),
+        ([reaction, event]) =>
+          publishReaction(pubkey, event, reaction, { signer, includeRelays: ctx?.relays }),
     onError: (error) => {
       enqueueToast({ component: error.message })
     },
@@ -72,56 +74,49 @@ export const ButtonReaction = memo(function ButtonReaction() {
           )
         }>
         <ReactionPicker mobileOpen={mobileOpen} onClick={handleReaction} onClose={() => setMobileOpen(false)}>
-          <AnimatePresence initial={false}>
-            <IconButton
-              size={dense ? 'sm' : 'md'}
-              selected={!!myReaction}
-              onClick={(e) => {
-                e.stopPropagation()
-                e.preventDefault()
-                if (mobile && !mobileOpen) {
-                  setMobileOpen(true)
-                } else {
-                  handleReaction('❤️')
-                  setMobileOpen(false)
-                }
-              }}
-              sx={[(color && styles[`button$${color}`]) || styles.button$red]}
-              selectedIcon={
-                <motion.div
-                  key='myreaction'
-                  style={{ color }}
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  exit={{ scale: 0 }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 10 }}>
-                  {myReaction === '❤️' ? (
-                    <IconHeartFilled
-                      size={dense ? iconProps.size$dense : iconProps.size}
-                      strokeWidth={iconProps.strokeWidth}
-                    />
-                  ) : (
-                    <html.span style={styles.myCustomReaction}>{myReaction && fallbackEmoji(myReaction)}</html.span>
-                  )}
-                </motion.div>
+          <IconButton
+            size={dense ? 'sm' : 'md'}
+            selected={!!myReaction}
+            onClick={(e) => {
+              e.stopPropagation()
+              e.preventDefault()
+              setBounceTick((tick) => tick + 1)
+              if (mobile && !mobileOpen) {
+                setMobileOpen(true)
+              } else {
+                handleReaction('❤️')
+                setMobileOpen(false)
               }
-              icon={
-                <motion.div
-                  key={'reaction'}
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  exit={{ scale: 0 }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 10 }}
-                  whileTap={{ color: colors.red7, scale: 0.9 }}>
-                  <IconHeart size={dense ? iconProps.size$dense : iconProps.size} strokeWidth={iconProps.strokeWidth} />
-                </motion.div>
-              }
-            />
-          </AnimatePresence>
+            }}
+            sx={selectedColorStyle}
+            selectedIcon={
+              <html.div key={`myreaction-${bounceTick}`} style={[styles.icon, styles.iconBounce]}>
+                {myReaction === '❤️' ? (
+                  <IconHeartFilled
+                    size={dense ? iconProps.size$dense : iconProps.size}
+                    strokeWidth={iconProps.strokeWidth}
+                  />
+                ) : (
+                  <html.span style={styles.myCustomReaction}>{myReaction && fallbackEmoji(myReaction)}</html.span>
+                )}
+              </html.div>
+            }
+            icon={
+              <html.div key={`reaction-${bounceTick}`} style={[styles.icon, styles.iconBounce]}>
+                <IconHeart size={dense ? iconProps.size$dense : iconProps.size} strokeWidth={iconProps.strokeWidth} />
+              </html.div>
+            }
+          />
         </ReactionPicker>
       </ButtonContainer>
     </>
   )
+})
+
+const reactionBounce = css.keyframes({
+  '0%': { transform: 'scale(0.78)' },
+  '65%': { transform: 'scale(1.12)' },
+  '100%': { transform: 'scale(1)' },
 })
 
 const styles = css.create({
@@ -129,6 +124,14 @@ const styles = css.create({
   [colors.yellow7]: { color: colors.yellow7 },
   [colors.orange7]: { color: colors.orange7 },
   [colors.orange9]: { color: colors.orange9 },
+  icon: {
+    display: 'flex',
+  },
+  iconBounce: {
+    animationName: reactionBounce,
+    animationDuration: duration.medium1,
+    animationTimingFunction: 'ease-out',
+  },
   myCustomReaction: {
     fontSize: '130%',
   },

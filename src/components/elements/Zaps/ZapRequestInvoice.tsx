@@ -58,7 +58,6 @@ export const ZapRequestInvoice = (props: Props) => {
       },
       { kinds: [Kind.ZapReceipt], since: parseInt((Date.now() / 1000).toString()) },
     ).pipe(
-      tap((x) => console.log('>', x)),
       mergeMap(identity),
       filter((event) => {
         // Make sure the zap receipt is the one we are looking for
