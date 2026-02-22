@@ -34,6 +34,7 @@ const addImageNodeView = (Component: React.ComponentType<NodeViewProps>) => ({
     }
   },
 })
+
 const addVideoNodeView = (Component: React.ComponentType<NodeViewProps>) => ({
   addNodeView: () => ReactNodeViewRenderer(Component),
   addAttributes(this: { parent?: () => Record<string, unknown> }) {
@@ -51,9 +52,6 @@ type Options = {
 }
 
 export function createEditor(options: Options): UseEditorOptions {
-  const isMediaFile = (file: File) => {
-    return file.type.startsWith('image/') || file.type.startsWith('video/')
-  }
   return {
     editorProps,
     extensions: [

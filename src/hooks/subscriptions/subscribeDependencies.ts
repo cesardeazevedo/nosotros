@@ -84,12 +84,12 @@ const subscribeRepost = (ctx: NostrContext) => {
 
 const subscribeParents = (ctx: NostrContext) => {
   return mergeMap((event: NostrEventDB) => {
-    const { isRoot, rootId, parentId } = event.metadata || {}
-    if (isRoot && (rootId || parentId)) {
-      return EMPTY
-    }
+    const { rootId, parentId } = event.metadata || {}
     const ids = dedupe([rootId, parentId])
-    return subscribeIds(ctx, ids, event.metadata?.relayHints)
+    if (ids.length) {
+      return subscribeIds(ctx, ids, event.metadata?.relayHints)
+    }
+    return EMPTY
   })
 }
 

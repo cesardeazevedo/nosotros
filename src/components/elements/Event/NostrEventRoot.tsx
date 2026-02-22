@@ -6,6 +6,7 @@ import { memo } from 'react'
 import { PostRoot } from '../Posts/Post'
 import { PublicMessageRoot } from '../PublicMessage/PublicMessageRoot'
 import { RepostRoot } from '../Repost/Repost'
+import { ThreadRelated } from '../Threads/ThreadRelated'
 import { Threads } from '../Threads/Threads'
 import { UserRoot } from '../User/UserRoot'
 import { ZapReceiptRoot } from '../Zaps/ZapReceipt'
@@ -28,7 +29,10 @@ export const NostrEventRoot = memo(function NostrEventRoot(props: Props) {
       return event.metadata?.isRoot ? (
         <PostRoot event={event} open={open} />
       ) : (
-        <Threads event={event} renderRepliesSummary={false} />
+        <>
+          <Threads event={event} renderReplies renderRepliesSummary={false} />
+          <ThreadRelated event={event} />
+        </>
       )
     }
     case Kind.Follows: {

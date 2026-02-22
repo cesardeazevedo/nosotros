@@ -18,7 +18,7 @@ import { useObservableState } from 'observable-hooks'
 import { QRCodeCanvas } from 'qrcode.react'
 import { useMemo, useRef } from 'react'
 import { css, html } from 'react-strict-dom'
-import { filter, identity, map, mergeMap, take, tap } from 'rxjs'
+import { filter, identity, map, mergeMap, take } from 'rxjs'
 import { CopyButton } from '../Buttons/CopyButton'
 import type { CopyButtonRef } from '../Buttons/CopyIconButton'
 

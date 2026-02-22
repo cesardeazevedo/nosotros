@@ -3,6 +3,7 @@ import { NotificationBadge } from '@/components/modules/Notifications/Notificati
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
+import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 import type { SxProps } from '@/components/ui/types'
 import { useCurrentPubkey, useCurrentUser } from '@/hooks/useAuth'
 import { useToggleSettings } from '@/hooks/useSettings'
@@ -32,7 +33,6 @@ import { IconHome } from '../Icons/IconHome'
 import { IconHomeFilled } from '../Icons/IconHomeFilled'
 import { ProfilePopover } from '../Navigation/ProfilePopover'
 import { SidebarContext } from './SidebarContext'
-import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 
 type Props = {
   ref?: RefObject<null>
@@ -50,7 +50,6 @@ export const SidebarCollapsed = memo(function SidebarCollapsed(props: Props) {
     strokeWidth: '1.6',
     className: css.props(styles.icon).className,
   }
-  const isListRoute = !!useMatch({ from: '/lists', shouldThrow: false })
   const isNotificationsRoute = !!useMatch({ from: '/notifications', shouldThrow: false })
   const isNoPane = !context.pane
   const isNotifications = context.pane === '/notifications' || (isNotificationsRoute && isNoPane)
@@ -117,13 +116,16 @@ export const SidebarCollapsed = memo(function SidebarCollapsed(props: Props) {
             />
           )}
         </Link>
-        <IconButton
-          toggle
-          selected={context.pane === '/lists' || isListRoute}
-          sx={styles.iconButton}
-          icon={<IconListDetails {...iconProps} strokeWidth={1.4} />}
-          onClick={() => context.setPane('/lists')}
-        />
+        <Link to='/lists'>
+          {({ isActive }) => (
+            <IconButton
+              toggle
+              selected={isActive}
+              sx={styles.iconButton}
+              icon={<IconListDetails {...iconProps} strokeWidth={1.4} />}
+            />
+          )}
+        </Link>
         <Link to='/$nostr' params={{ nostr: `${user?.nprofile}` }}>
           {({ isActive }) => (
             <IconButton

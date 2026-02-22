@@ -24,7 +24,9 @@ export const Tag = (props: Props) => {
     <Link
       to='/feed'
       search={{ t: tag.replace('#', ''), type: 'tags' }}
-      {...css.props(styles.root)}>
+      {...css.props(styles.root)}
+      onClick={(e) => e.stopPropagation()}
+    >
       {children}{' '}
     </Link>
   )

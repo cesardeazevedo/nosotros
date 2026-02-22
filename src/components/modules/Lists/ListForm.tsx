@@ -13,13 +13,14 @@ import { TextField } from '@/components/ui/TextField/TextField'
 import { KIND_LABELS, Kind } from '@/constants/kinds'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { usePublishEventMutation } from '@/hooks/mutations/usePublishEventMutation'
-import { invalidateNip51Queries } from '@/hooks/query/invalidations'
+import { queryKeys } from '@/hooks/query/queryKeys'
 import { replaceableEventQueryOptions } from '@/hooks/query/useQueryBase'
 import { useCurrentPubkey, useCurrentSigner } from '@/hooks/useAuth'
+import { useEventDecrypt } from '@/hooks/useEventDecrypt'
 import { publish } from '@/nostr/publish/publish'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconChevronDown, IconLock, IconX } from '@tabler/icons-react'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient, type QueryKey } from '@tanstack/react-query'
 import { useSetAtom } from 'jotai'
 import type { UnsignedEvent } from 'nostr-tools'
 import { useActionState, useEffect, useMemo, useState } from 'react'
@@ -48,7 +49,6 @@ export const ListForm = (props: Props) => {
   const [kindEditing, setKindEditing] = useState(false)
   const [isPrivate, setIsPrivate] = useState(false)
   const [kindOpen, setKindOpen] = useState(false)
-  const [decryptedTags, setDecryptedTags] = useState<string[][] | null>(null)
   const pubkey = useCurrentPubkey()
   const signer = useCurrentSigner()
   const enqueueToast = useSetAtom(enqueueToastAtom)
@@ -68,6 +68,16 @@ export const ListForm = (props: Props) => {
   const isEditingEffective = !!resolvedEditingEvent
   const hasEncrypted = !!resolvedEditingEvent?.content
   const tagBoxKey = useMemo(() => `${kind ?? 'none'}-${resolvedEditingEvent?.id ?? 'new'}`, [resolvedEditingEvent?.id, kind])
+  const [, decryptedContent] = useEventDecrypt(hasEncrypted ? resolvedEditingEvent || undefined : undefined)
+  const decryptedTags = useMemo(() => {
+    if (!decryptedContent) return null
+    try {
+      const parsed = JSON.parse(decryptedContent)
+      return Array.isArray(parsed) ? (parsed as string[][]) : null
+    } catch {
+      return null
+    }
+  }, [decryptedContent])
 
   const kindLabel = useMemo(() => {
     if (kind === null) return 'Select a kind'
@@ -91,38 +101,10 @@ export const ListForm = (props: Props) => {
   }, [kind, kindDisplayValue, kindEditing])
 
   useEffect(() => {
-    let cancelled = false
-    if (!resolvedEditingEvent || !hasEncrypted || !signer || !pubkey) {
-      setDecryptedTags(null)
-      if (resolvedEditingEvent?.content) {
-        setIsPrivate(true)
-      }
-      return
+    if (hasEncrypted) {
+      setIsPrivate(true)
     }
-    setIsPrivate(true)
-    signer
-      .decrypt(pubkey, resolvedEditingEvent.content)
-      .then((payload) => {
-        if (cancelled) return
-        try {
-          const parsed = JSON.parse(payload)
-          if (Array.isArray(parsed)) {
-            setDecryptedTags(parsed as string[][])
-          } else {
-            setDecryptedTags(null)
-          }
-        } catch {
-          setDecryptedTags(null)
-        }
-      })
-      .catch(() => {
-        if (cancelled) return
-        setDecryptedTags(null)
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [hasEncrypted, pubkey, resolvedEditingEvent, signer])
+  }, [hasEncrypted])
 
   const { isPending, mutateAsync } = usePublishEventMutation<UnsignedEvent>({
     mutationFn:
@@ -191,16 +173,16 @@ export const ListForm = (props: Props) => {
         pubkey,
         tags: isPrivate ? publicTags : [...publicTags, ...tags],
       } as UnsignedEvent
-      console.log('ListForm newEvent', newEvent)
+
       await mutateAsync(newEvent)
 
-      await invalidateNip51Queries(queryClient, {
-        pubkey,
-        kind,
-        dTag: dTag || undefined,
-        includeBookmarkOptions: true,
-      })
       onClose?.()
+      const predicate = (query: { queryKey: QueryKey }) => {
+        return query.queryKey[0] === 'feed' && typeof query.queryKey[1] === 'string' && query.queryKey[1].startsWith('list')
+      }
+      queryClient.resetQueries({ predicate })
+      queryClient.invalidateQueries({ predicate })
+      queryClient.invalidateQueries({ queryKey: queryKeys.author(pubkey || '', kind) })
     } catch (error) {
       const msg = error as Error
       enqueueToast({ component: msg.toString(), duration: 4000 })

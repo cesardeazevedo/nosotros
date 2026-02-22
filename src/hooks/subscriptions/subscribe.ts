@@ -46,6 +46,7 @@ export function subscribe(sub: NostrSubscriptionBuilder, ctx: NostrContext): Obs
               verifyAndInsertEvent(event, sub),
             )
           }
+          return verifyAndInsertEvent(event, sub)
         }
         default: {
           return verifyAndInsertEvent(event, sub)
