@@ -1,7 +1,7 @@
-import { FloatingDelayGroup } from '@floating-ui/react'
 import React from 'react'
 import { css, html } from 'react-strict-dom'
 import { PopoverBase } from '../Popover/PopoverBase'
+import { FloatingDelayGroupLazy } from '../Popover/FloatingDelayGroupLazy'
 import type { IPopoverBaseProps } from '../Popover/PopoverBase.types'
 import { PopoverHoverRender } from '../Popover/PopoverHoverRender'
 import { tooltipTokens } from './Tooltip.stylex'
@@ -17,7 +17,7 @@ export const Tooltip = function Tooltip(props: Props) {
   const { enterDelay = 700, placement = 'bottom', children, text, keepMounted, ...other } = props
   return (
     <PopoverHoverRender content={children}>
-      <FloatingDelayGroup delay={enterDelay}>
+      <FloatingDelayGroupLazy delay={enterDelay}>
         <PopoverBase
           cursor='arrow'
           {...other}
@@ -40,7 +40,7 @@ export const Tooltip = function Tooltip(props: Props) {
             </html.span>
           )}
         </PopoverBase>
-      </FloatingDelayGroup>
+      </FloatingDelayGroupLazy>
     </PopoverHoverRender>
   )
 }
