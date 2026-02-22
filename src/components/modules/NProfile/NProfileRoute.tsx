@@ -5,6 +5,7 @@ import { Outlet } from '@tanstack/react-router'
 import { UserProfileHeader } from 'components/elements/User/UserProfileHeader'
 import { CenteredContainer } from '../../elements/Layouts/CenteredContainer'
 import { PaperContainer } from '../../elements/Layouts/PaperContainer'
+import { NProfileMutedContent } from './NProfileMutedContent'
 
 export type Props = {
   pubkey: string
@@ -19,7 +20,9 @@ export const NProfileRoute = function NProfileRoute(props: Props) {
         <Divider />
         <NProfileFeedTabs />
         <Divider />
-        <Outlet />
+        <NProfileMutedContent pubkey={props.pubkey}>
+          <Outlet />
+        </NProfileMutedContent>
       </PaperContainer>
     </CenteredContainer>
   )

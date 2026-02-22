@@ -6,15 +6,17 @@ import { Kind } from '@/constants/kinds'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { useNoteState } from '@/hooks/state/useNote'
 import { useCurrentPubkey } from '@/hooks/useAuth'
+import { useMuted } from '@/hooks/useMuted'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import { memo, useCallback } from 'react'
+import { memo, useCallback, useState } from 'react'
 import { css, html } from 'react-strict-dom'
 import { EditorProvider } from '../Editor/EditorProvider'
 import { Replies } from '../Replies/Replies'
 import { RepliesPreview } from '../Replies/RepliesPreview'
 import { PostActions } from './PostActions/PostActions'
 import { PostContent } from './PostContent'
+import { PostContentHidden } from './PostContentHidden'
 import { PostCountdown } from './PostCountdown'
 import { PostHeader } from './PostHeader'
 import { PostLink } from './PostLink'
@@ -31,6 +33,9 @@ export const PostRoot = memo(function PostRoot(props: Props) {
   const isFeed = !!useNostrContext()
   const note = useNoteState(event, { repliesOpen: open, forceSync: open, contentOpen: open })
   const pubkey = useCurrentPubkey()
+  const { isMuted } = useMuted(event)
+  const [showMutedContent, setShowMutedContent] = useState(false)
+  const hideContent = !!isMuted && !showMutedContent
 
   const openReplies = useCallback(() => {
     note.toggleReplies()
@@ -41,14 +46,19 @@ export const PostRoot = memo(function PostRoot(props: Props) {
       <html.article style={[isFeed && styles.divider]}>
         <PostLink note={note}>
           {event.pubkey === pubkey && <PostCountdown id={event.id} />}
-          {note.event.kind === Kind.Article && <ArticleHeadline />}
           {header || <PostHeader event={event} />}
-          <PostContent note={note} />
-          <PostActions note={note} onReplyClick={openReplies} />
-          <PostStats note={note} renderDivider />
-          {note.state.repliesOpen === null && event.kind === Kind.Text && <RepliesPreview note={note} />}
+          {hideContent && <PostContentHidden onClick={() => setShowMutedContent(true)} />}
+          {!hideContent && (
+            <>
+              {note.event.kind === Kind.Article && <ArticleHeadline />}
+              <PostContent note={note} />
+              <PostActions note={note} onReplyClick={openReplies} />
+              <PostStats note={note} renderDivider />
+              {note.state.repliesOpen === null && event.kind === Kind.Text && <RepliesPreview note={note} />}
+            </>
+          )}
         </PostLink>
-        {note.state.repliesOpen && (
+        {!hideContent && note.state.repliesOpen && (
           <>
             <Divider />
             <EditorProvider sx={styles.editor} parent={event} renderBubble initialOpen />

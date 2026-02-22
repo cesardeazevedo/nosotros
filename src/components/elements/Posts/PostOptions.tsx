@@ -1,5 +1,6 @@
 import { statsDialogAtom } from '@/atoms/dialog.atoms'
 import { enqueueToastAtom } from '@/atoms/toaster.atoms'
+import { ListMuteOptionsDialog } from '@/components/modules/Lists/ListMuteOptionsDialog'
 import { useContentContext } from '@/components/providers/ContentProvider'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
@@ -19,8 +20,10 @@ import {
   IconExternalLink,
   IconInfoSquareRounded,
   IconLink,
+  IconMessageOff,
   IconQuote,
   IconShare3,
+  IconUserCancel,
 } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
 import { useSetAtom } from 'jotai'
@@ -33,11 +36,14 @@ import { PostBookmarkOptions } from './PostBookmarkOptions'
 type PropsOptions = {
   event: NostrEventDB
   nevent: string | undefined
+  canMute: boolean
   onCopyIdClick: (e: StrictClickEvent) => void
   onCopyAuthorIdClick: (e: StrictClickEvent) => void
   onCopyLinkClick: (e: StrictClickEvent) => void
   onBookmarkClick: (e: StrictClickEvent) => void
   onDetailsClick: (e: StrictClickEvent) => void
+  onMuteClick: (e: StrictClickEvent) => void
+  onMuteNoteClick: (e: StrictClickEvent) => void
 }
 
 const iconProps = { size: 20 }
@@ -93,9 +99,28 @@ const Options = memo(function Options(props: PropsOptions) {
         <ContentLink tooltip={false} underline={false} href={`https://njump.me/${nevent}`} sx={styles.link}>
           <MenuItem {...itemProps} leadingIcon={<IconExternalLink {...iconProps} />} label='Njump.me' />
         </ContentLink>
-        {/* <MenuItem disabled variant='danger' leadingIcon={<IconEyeOff />} label='Mute' /> */}
-        {/* <MenuItem disabled variant='danger' leadingIcon={<IconUserMinus />} label='Unfollow' /> */}
       </html.div>
+      <Divider />
+      {props.canMute && (
+        <html.div style={styles.wrapper}>
+          <MenuItem
+            {...itemProps}
+            label='Mute User'
+            variant='danger'
+            leadingIcon={<IconUserCancel {...iconProps} />}
+            onClick={props.onMuteClick}
+          />
+          <MenuItem
+            {...itemProps}
+            label='Mute Note'
+            variant='danger'
+            leadingIcon={<IconMessageOff {...iconProps} />}
+            onClick={props.onMuteNoteClick}
+          />
+        </html.div>
+      )}
+      {/* <MenuItem disabled variant='danger' leadingIcon={<IconEyeOff />} label='Mute' /> */}
+      {/* <MenuItem disabled variant='danger' leadingIcon={<IconUserMinus />} label='Unfollow' /> */}
     </>
   )
 })
@@ -111,6 +136,7 @@ export const PostOptions = memo(function PostOptions(props: Props) {
   const enqueueToast = useSetAtom(enqueueToastAtom)
   const setStatsDialog = useSetAtom(statsDialogAtom)
   const [bookmarkDialogOpen, setBookmarkDialogOpen] = useState(false)
+  const [muteDialogTarget, setMuteDialogTarget] = useState<{ pubkey: string; eventId?: string } | null>(null)
 
   const handleCopy = useCallback((value: string | undefined) => {
     return (e: StrictClickEvent) => {
@@ -129,6 +155,7 @@ export const PostOptions = memo(function PostOptions(props: Props) {
   const nevent = useNevent(event)
   const link = window.location.origin + '/' + nevent
   const user = useUserState(event.pubkey)
+  const canMute = !!pubkey && event.pubkey !== pubkey
 
   return (
     <>
@@ -140,6 +167,7 @@ export const PostOptions = memo(function PostOptions(props: Props) {
             <Options
               event={event}
               nevent={nevent}
+              canMute={canMute}
               onCopyIdClick={handleCopy(nevent)}
               onCopyAuthorIdClick={handleCopy(user?.nprofile)}
               onCopyLinkClick={handleCopy(link)}
@@ -155,6 +183,18 @@ export const PostOptions = memo(function PostOptions(props: Props) {
                 e.stopPropagation()
                 e.preventDefault()
                 setStatsDialog(event.id)
+                props.close()
+              }}
+              onMuteClick={(e) => {
+                e.stopPropagation()
+                e.preventDefault()
+                setMuteDialogTarget({ pubkey: event.pubkey })
+                props.close()
+              }}
+              onMuteNoteClick={(e) => {
+                e.stopPropagation()
+                e.preventDefault()
+                setMuteDialogTarget({ pubkey: event.pubkey, eventId: event.id })
                 props.close()
               }}
             />
@@ -179,6 +219,14 @@ export const PostOptions = memo(function PostOptions(props: Props) {
         postId={event.id}
         onClose={() => {
           setBookmarkDialogOpen(false)
+        }}
+      />
+      <ListMuteOptionsDialog
+        open={!!muteDialogTarget}
+        targetPubkey={muteDialogTarget?.pubkey}
+        targetEventId={muteDialogTarget?.eventId}
+        onClose={() => {
+          setMuteDialogTarget(null)
         }}
       />
     </>

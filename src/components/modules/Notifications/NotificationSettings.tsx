@@ -15,6 +15,7 @@ import {
   IconHeart,
   IconMessage,
   IconShare3,
+  IconUserCancel,
 } from '@tabler/icons-react'
 import { useSetAtom } from 'jotai'
 import { memo } from 'react'
@@ -47,6 +48,7 @@ export const NotificationSettings = memo(function NotificationSettings(props: Pr
             label='Reactions'
             selected={feed.hasKind(Kind.Reaction)}
             icon={<IconHeart {...iconProps} />}
+            selectedIcon={null}
             onClick={() => feed.toggleKind(Kind.Reaction)}
           />
           <Chip
@@ -54,6 +56,7 @@ export const NotificationSettings = memo(function NotificationSettings(props: Pr
             variant='filter'
             selected={feed.hasKind(Kind.Repost)}
             icon={<IconShare3 {...iconProps} />}
+            selectedIcon={null}
             onClick={() => feed.toggleKind(Kind.Repost)}
           />
           <Chip
@@ -61,6 +64,7 @@ export const NotificationSettings = memo(function NotificationSettings(props: Pr
             variant='filter'
             selected={feed.includeReplies}
             icon={<IconMessage {...iconProps} />}
+            selectedIcon={null}
             onClick={() => feed.setIncludeReplies((prev) => !prev)}
           />
           <Chip
@@ -68,6 +72,7 @@ export const NotificationSettings = memo(function NotificationSettings(props: Pr
             label='Mentions'
             variant='filter'
             icon={<IconAt {...iconProps} />}
+            selectedIcon={null}
             onClick={() => feed.setIncludeMentions((prev) => !prev)}
           />
           <Chip
@@ -75,15 +80,17 @@ export const NotificationSettings = memo(function NotificationSettings(props: Pr
             label='Zaps'
             variant='filter'
             icon={<IconBolt {...iconProps} />}
+            selectedIcon={null}
             onClick={() => feed.toggleKind(Kind.ZapReceipt)}
           />
-          {/* <Chip */}
-          {/*   selected={feed.includeMuted} */}
-          {/*   label='Muted' */}
-          {/*   variant='filter' */}
-          {/*   icon={<IconVolumeOff {...iconProps} />} */}
-          {/*   onClick={() => feed.setIncludeMuted((prev) => !prev)} */}
-          {/* /> */}
+          <Chip
+            selected={feed.includeMuted}
+            label='Muted'
+            variant='filter'
+            icon={<IconUserCancel {...iconProps} />}
+            selectedIcon={null}
+            onClick={() => feed.setIncludeMuted((prev) => !prev)}
+          />
         </Stack>
         <Text variant='label' size='lg' sx={styles.label}>
           Layout
