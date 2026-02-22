@@ -9,6 +9,7 @@ function useAllowedMaskedRoutes() {
 
       switch (pathname) {
         case '/':
+        case '/threads':
         case '/feed':
         case '/search':
         case '/notifications':
