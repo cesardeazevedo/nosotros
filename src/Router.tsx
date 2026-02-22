@@ -1,5 +1,5 @@
 import { type QueryClient } from '@tanstack/react-query'
-import { createRootRouteWithContext, createRoute, createRouter, redirect } from '@tanstack/react-router'
+import { createRootRouteWithContext, createRoute, createRouter, lazyRouteComponent, redirect } from '@tanstack/react-router'
 import { useMemo } from 'react'
 import { z } from 'zod'
 import { selectedPubkeyAtom } from './atoms/auth.atoms'
@@ -25,12 +25,6 @@ import { RelayActiveRoute } from './components/modules/RelayActive/RelayActiveRo
 import { RelayMonitorRoute } from './components/modules/RelayMonitor/RelayMonitorRoute'
 import { RelayRoute } from './components/modules/Relays/RelaysRoute'
 import { SearchRoute } from './components/modules/Search/SearchRoute'
-import { SettingsAboutRoute } from './components/modules/Settings/SettingsAbout'
-import { SettingsMediaStorage } from './components/modules/Settings/SettingsMediaStorage'
-import { SettingsPreferencesRoute } from './components/modules/Settings/SettingsPreferenceRoute'
-import { SettingsRelayAuth } from './components/modules/Settings/SettingsRelaysAuth'
-import { SettingsRoute } from './components/modules/Settings/SettingsRoute'
-import { SettingsStorageRoute } from './components/modules/Settings/SettingsStorage'
 import { Kind } from './constants/kinds'
 import type { NostrFilter } from './core/types'
 import { ErrorBoundary } from './ErrorBoundary'
@@ -523,40 +517,65 @@ const relayMonitorRoute = createRoute({
   component: RelayMonitorRoute,
 })
 
+const SettingsRouteLazy = lazyRouteComponent(
+  () => import('./components/modules/Settings/SettingsRoute'),
+  'SettingsRoute',
+)
+const SettingsPreferencesRouteLazy = lazyRouteComponent(
+  () => import('./components/modules/Settings/SettingsPreferenceRoute'),
+  'SettingsPreferencesRoute',
+)
+const SettingsRelayAuthLazy = lazyRouteComponent(
+  () => import('./components/modules/Settings/SettingsRelaysAuth'),
+  'SettingsRelayAuth',
+)
+const SettingsMediaStorageLazy = lazyRouteComponent(
+  () => import('./components/modules/Settings/SettingsMediaStorage'),
+  'SettingsMediaStorage',
+)
+const SettingsStorageRouteLazy = lazyRouteComponent(
+  () => import('./components/modules/Settings/SettingsStorage'),
+  'SettingsStorageRoute',
+)
+const SettingsAboutRouteLazy = lazyRouteComponent(
+  () => import('./components/modules/Settings/SettingsAbout'),
+  'SettingsAboutRoute',
+)
+
 const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/settings',
-  component: SettingsRoute,
+  component: SettingsRouteLazy,
 })
 
 const settingsPreferenceRoute = createRoute({
   getParentRoute: () => settingsRoute,
   path: '/',
-  component: SettingsPreferencesRoute,
+  component: SettingsPreferencesRouteLazy,
 })
 
 const settingsRelaysAuthRoute = createRoute({
   getParentRoute: () => settingsRoute,
   path: '/relay_auth',
-  component: SettingsRelayAuth,
+  component: SettingsRelayAuthLazy,
 })
 
 const settingsMediaStorage = createRoute({
   getParentRoute: () => settingsRoute,
   path: '/media',
-  component: SettingsMediaStorage,
+  component: SettingsMediaStorageLazy,
 })
 
 const settingsStorageRoute = createRoute({
   getParentRoute: () => settingsRoute,
   path: '/storage',
-  component: SettingsStorageRoute,
+  component: SettingsStorageRouteLazy,
 })
 
 const settingsAboutRoute = createRoute({
   getParentRoute: () => settingsRoute,
   path: '/about',
-  component: SettingsAboutRoute,
+  component: SettingsAboutRouteLazy,
 })
 
 export const routeTree = rootRoute.addChildren([
