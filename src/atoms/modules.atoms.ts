@@ -1,12 +1,18 @@
+import { Kind } from '@/constants/kinds'
 import { STORAGE_MODULES } from '@/constants/storage'
 import type { MediaFeedModule } from '@/hooks/modules/createMediaFeedModule'
 import type { NotificationFeedModule } from '@/hooks/modules/createNotificationFeedModule'
 import type { Modules } from '@/hooks/modules/module'
-import type { FeedModule } from '@/hooks/query/useQueryFeeds'
+import { queryKeys } from '@/hooks/query/queryKeys'
+import { createFeedQueryOptions, type FeedModule, type InfiniteEvents } from '@/hooks/query/useQueryFeeds'
 import { strictDeepEqual } from 'fast-equals'
 import { atom } from 'jotai'
 import { focusAtom } from 'jotai-optics'
+import { atomWithInfiniteQuery } from 'jotai-tanstack-query'
 import { atomWithStorage } from 'jotai/utils'
+import { selectedPubkeyAtom } from './auth.atoms'
+import { threadGroupsAtomFamily } from './threads.atoms'
+import { userFamily } from './users.atoms'
 
 export type FeedAtoms =
   | ReturnType<typeof createFeedAtoms>
@@ -79,6 +85,104 @@ export function createFeedAtoms<T extends FeedModule>(options: T) {
   const includeReplies = focusAtom(baseAtoms.atom, (optic) => optic.prop('includeReplies'))
   const includeMuted = focusAtom(baseAtoms.atom, (optic) => optic.prop('includeMuted'))
 
+  const query = atomWithInfiniteQuery((get) => {
+    const sessionOptions = get(baseAtoms.atom)
+    const currentPubkey = get(selectedPubkeyAtom)
+    const currentUser = currentPubkey ? get(userFamily({ pubkey: currentPubkey, fullUserSync: true })) : undefined
+    const queryKey = queryKeys.feed(sessionOptions.id, sessionOptions.filter, sessionOptions.ctx)
+    const replies = sessionOptions.includeReplies
+    const includeMuted = sessionOptions.includeMuted
+    const includeMentions = (sessionOptions as { includeMentions?: boolean }).includeMentions
+    const isInbox = sessionOptions.type === 'inbox'
+    const isReplyKind = (kind: number) => kind === Kind.Text || kind === Kind.Comment || kind === Kind.PublicMessage
+    const isMutedEvent = (event: { id: string; pubkey: string }) => {
+      if (!currentUser) return false
+      return !!currentUser.mutedNotes?.has(event.id) || !!currentUser.mutedAuthors?.has(event.pubkey)
+    }
+
+    return createFeedQueryOptions({
+      ...sessionOptions,
+      queryKey,
+      select: (data: InfiniteEvents) => {
+        if (isInbox) {
+          return {
+            pages: data.pages.map((page) =>
+              page.filter((event) => {
+                if (includeMuted === false && isMutedEvent(event)) {
+                  return false
+                }
+                if (replies === false && isReplyKind(event.kind) && !event.metadata?.isRoot) {
+                  return false
+                }
+                if (includeMentions === false && isReplyKind(event.kind) && !!event.metadata?.isRoot) {
+                  return false
+                }
+                return true
+              }),
+            ),
+            pageParams: data.pageParams,
+          }
+        }
+
+        const pages = data.pages.flat().filter((event) => {
+          if (includeMuted === false && isMutedEvent(event)) {
+            return false
+          }
+          switch (event.kind) {
+            case Kind.Text: {
+              if (replies !== undefined) {
+                return replies ? !event.metadata?.isRoot : !!event.metadata?.isRoot
+              }
+              return true
+            }
+            case Kind.Repost: {
+              return !replies
+            }
+            default: {
+              return !replies
+            }
+          }
+        })
+        if (replies) {
+          // TODO: group threads
+          const threads = pages
+          return {
+            pages: [threads],
+            pageParams: data.pageParams,
+          }
+        }
+        return {
+          pages: [pages],
+          pageParams: data.pageParams,
+        }
+      },
+    })
+  })
+
+  const data = atom((get) => {
+    const queryResult = get(query)
+    const data = queryResult.data
+    if (!data?.pages) {
+      return {
+        pages: [],
+        pageParams: [],
+      }
+    }
+
+    const sessionOptions = get(baseAtoms.atom)
+    if (sessionOptions.includeReplies && sessionOptions.type !== 'inbox') {
+      return {
+        pages: get(threadGroupsAtomFamily(data)),
+        pageParams: data.pageParams,
+      }
+    }
+
+    return {
+      pages: data.pages,
+      pageParams: data.pageParams,
+    }
+  })
+
   const save = atom(null, (get, set) => {
     const sessionState = get(baseAtoms.atom)
     const id = sessionState.id
@@ -146,6 +250,8 @@ export function createFeedAtoms<T extends FeedModule>(options: T) {
 
   return {
     ...baseAtoms,
+    query,
+    data,
     originalState,
     autoUpdate,
     pageSize,

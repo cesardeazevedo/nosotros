@@ -1,4 +1,6 @@
+import { childrenAtomFamily } from '@/atoms/repliesCount.atoms'
 import { liveRepliesFamily, repliesFamily } from '@/atoms/repliesQuery.atoms'
+import { store } from '@/atoms/store'
 import { Kind } from '@/constants/kinds'
 import { FALLBACK_RELAYS } from '@/constants/relays'
 import { mergeRelayHints } from '@/core/mergers/mergeRelayHints'
@@ -73,7 +75,35 @@ export function useLiveReplies(event: NostrEventDB) {
 
 export function useRepliesPubkeys(event: NostrEventDB) {
   const replies = useEventReplies(event)
-  return useMemo(() => replies.query.data?.map((x) => x.pubkey) || [], [replies.query.data])
+  return useMemo(() => {
+    const collected = new Set<string>()
+    const visited = new Set<string>()
+
+    const walk = (id: string) => {
+      if (visited.has(id)) {
+        return
+      }
+      visited.add(id)
+
+      const children = [...store.get(childrenAtomFamily(id))]
+      for (const childId of children) {
+        const childEntry = queryClient.getQueryData<NostrEventDB[] | NostrEventDB>(queryKeys.event(childId))
+        const child = Array.isArray(childEntry) ? childEntry[0] : childEntry
+        if (child?.pubkey) {
+          collected.add(child.pubkey)
+        }
+        walk(childId)
+      }
+    }
+
+    // include direct replies from query while walking descendants from atoms graph
+    for (const reply of replies.query.data || []) {
+      collected.add(reply.pubkey)
+    }
+    walk(event.id)
+
+    return [...collected]
+  }, [event.id, replies.query.data, replies.total])
 }
 
 export function invalidateReplies(event: NostrEventDB) {
