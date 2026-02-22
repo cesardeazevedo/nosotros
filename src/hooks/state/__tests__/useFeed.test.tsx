@@ -1,6 +1,9 @@
 import { store } from '@/atoms/store'
+import type { ThreadGroup } from '@/atoms/threads.atoms'
 import { Kind } from '@/constants/kinds'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { queryClient } from '@/hooks/query/queryClient'
+import { queryKeys } from '@/hooks/query/queryKeys'
 import type { FeedModule } from '@/hooks/query/useQueryFeeds'
 import { test } from '@/utils/fixtures'
 import type { QueryKey } from '@tanstack/react-query'
@@ -8,6 +11,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import type { RenderHookOptions } from '@testing-library/react'
 import { act, renderHook } from '@testing-library/react'
 import { Provider as JotaiProvider } from 'jotai'
+import { queryClientAtom } from 'jotai-tanstack-query'
 import React, { useMemo } from 'react'
 import { vi } from 'vitest'
 import { useFeedState } from '../useFeed'
@@ -40,6 +44,7 @@ function withProviders(children: React.ReactNode) {
 describe('assert useFeedState minimal', () => {
   beforeEach(() => {
     vi.useFakeTimers()
+    store.set(queryClientAtom, queryClient)
   })
 
   test('assert sets isEmpty=true after 4s when first page is empty', async () => {
@@ -72,7 +77,7 @@ describe('assert useFeedState minimal', () => {
   test('assert feed replies updates after unmount', () => {
     type Props = { includeReplies: boolean }
     const hook = ({ includeReplies }: Props) => {
-      const module = useMemo(() => createModule('home', { includeReplies }), [includeReplies])
+      const module = useMemo(() => createModule('home_unmount', { includeReplies }), [includeReplies])
       return useFeedState(module)
     }
     const options = (props: Props): RenderHookOptions<Props> => ({
@@ -93,25 +98,27 @@ describe('assert useFeedState minimal', () => {
 
   describe('flush', () => {
     test('assert flush adds buffer events to feed', async () => {
-      const module = createModule('feed')
+      const module = createModule('feed_events')
+      const event = fakeEventMeta({ kind: Kind.Text, id: '1', created_at: 1 })
+      const feedQueryKey = queryKeys.feed(module.id, module.filter, module.ctx)
+      queryClient.setQueryData(feedQueryKey, {
+        pages: [[event]],
+        pageParams: [undefined],
+      })
+
       const { result } = renderHook(() => useFeedState(module), {
         wrapper: ({ children }) => withProviders(children),
       })
 
-      const event = fakeEventMeta({ kind: Kind.Text, id: '1', created_at: 1 })
-
       await act(async () => {
-        queryClient.setQueryData(result.current.queryKey, {
-          pages: [[event]],
-          pageParams: [undefined],
-        })
         await vi.waitFor(() => {
-          expect(result.current.query.data?.pages[0]).toHaveLength(1)
+          expect(result.current.data.pages[0]).toHaveLength(1)
         })
       })
 
-      expect(result.current.query.data?.pages[0]).toHaveLength(1)
-      expect(result.current.query.data?.pages[0][0].id).toBe('1')
+      const initialPage = result.current.data.pages[0] as NostrEventDB[]
+      expect(initialPage).toHaveLength(1)
+      expect(initialPage[0].id).toBe('1')
 
       const root1 = fakeEventMeta({ kind: Kind.Text, id: '1', created_at: 1 })
       const root2 = fakeEventMeta({ kind: Kind.Text, id: '2', created_at: 2 })
@@ -132,38 +139,39 @@ describe('assert useFeedState minimal', () => {
 
       await act(async () => {
         result.current.flush()
-        await vi.waitFor(() => {
-          expect(result.current.query.data?.pages[0]).toHaveLength(4)
-        })
       })
 
       expect(result.current.bufferTotal).toBe(0)
-      expect(result.current.query.data?.pages[0][0].id).toBe('4')
-      expect(result.current.query.data?.pages[0][1].id).toBe('3')
-      expect(result.current.query.data?.pages[0][2].id).toBe('2')
-      expect(result.current.query.data?.pages[0][3].id).toBe('1')
+      const page = result.current.data.pages[0] as NostrEventDB[]
+      expect(page).toHaveLength(4)
+      expect(page[0].id).toBe('4')
+      expect(page[1].id).toBe('3')
+      expect(page[2].id).toBe('2')
+      expect(page[3].id).toBe('1')
     })
 
     test('assert flush adds buffer replies to feed', async () => {
-      const module = createModule('feed', { includeReplies: true })
-      const { result } = renderHook(() => useFeedState(module), {
+      const module = createModule('feed_replies', { includeReplies: true, type: 'inbox' })
+      const reply = fakeEventMeta({ kind: Kind.Text, id: '1', created_at: 1, tags: [['e', '0', '', 'root']] })
+      const feedQueryKey = queryKeys.feed(module.id, module.filter, module.ctx)
+      queryClient.setQueryData(feedQueryKey, {
+        pages: [[reply]],
+        pageParams: [undefined],
+      })
+
+      const { result, rerender, unmount } = renderHook(() => useFeedState(module), {
         wrapper: ({ children }) => withProviders(children),
       })
 
-      const reply = fakeEventMeta({ kind: Kind.Text, id: '1', created_at: 1, tags: [['e', '0', '', 'root']] })
-
       await act(async () => {
-        queryClient.setQueryData(result.current.queryKey, {
-          pages: [[reply]],
-          pageParams: [undefined],
-        })
         await vi.waitFor(() => {
-          expect(result.current.query.data?.pages[0]).toHaveLength(1)
+          expect(result.current.data.pages[0]).toHaveLength(1)
         })
       })
 
-      expect(result.current.query.data?.pages[0]).toHaveLength(1)
-      expect(result.current.query.data?.pages[0][0].id).toBe('1')
+      const page = result.current.data.pages[0] as NostrEventDB[]
+      expect(page).toHaveLength(1)
+      expect(page[0].id).toBe('1')
 
       const reply1 = fakeEventMeta({ kind: Kind.Text, id: '2', created_at: 2, tags: [['e', '0', '', 'root']] })
       const reply2 = fakeEventMeta({ kind: Kind.Text, id: '3', created_at: 3, tags: [['e', '0', '', 'root']] })
@@ -177,25 +185,37 @@ describe('assert useFeedState minimal', () => {
         result.current.onStream(rootEvent)
       })
 
-      expect(result.current.bufferTotalReplies).toBe(3)
-
-      await act(async () => {
-        result.current.flush()
-        await vi.waitFor(() => {
-          expect(result.current.query.data?.pages[0]).toHaveLength(4)
-        })
+      await vi.waitFor(() => {
+        expect(result.current.bufferTotalReplies).toBe(3)
       })
 
-      expect(result.current.bufferTotalReplies).toBe(0)
-      expect(result.current.query.data?.pages[0][0].id).toBe('4')
-      expect(result.current.query.data?.pages[0][1].id).toBe('3')
-      expect(result.current.query.data?.pages[0][2].id).toBe('2')
-      expect(result.current.query.data?.pages[0][3].id).toBe('1')
+      await act(async () => {
+        rerender()
+        result.current.flush()
+      })
+
+      await vi.waitFor(() => {
+        expect(result.current.bufferTotalReplies).toBe(0)
+      })
+
+      unmount()
+      const { result: result2 } = renderHook(() => useFeedState(module), {
+        wrapper: ({ children }) => withProviders(children),
+      })
+
+      await vi.waitFor(() => {
+        expect(result2.current.data.pages[0]).toHaveLength(4)
+      })
+      const page2 = result2.current.data.pages[0] as NostrEventDB[]
+      expect(page2[0].id).toBe('4')
+      expect(page2[1].id).toBe('3')
+      expect(page2[2].id).toBe('2')
+      expect(page2[3].id).toBe('1')
     })
 
     test('assert flush replies when switching from root notes to replies feed', async () => {
       const hook = ({ includeReplies }: Partial<FeedModule>) => {
-        const module = useMemo(() => createModule('home', { includeReplies }), [includeReplies])
+        const module = useMemo(() => createModule('home_switch', { includeReplies }), [includeReplies])
         return useFeedState(module)
       }
       const options = (props: Partial<FeedModule>): RenderHookOptions<Partial<FeedModule>> => ({
@@ -203,22 +223,25 @@ describe('assert useFeedState minimal', () => {
         wrapper: ({ children }) => withProviders(children),
       })
 
+      const rootEvent = fakeEventMeta({ kind: Kind.Text, id: '1', created_at: 1 })
+      const rootModule = createModule('home_switch', { includeReplies: false })
+      const feedQueryKey = queryKeys.feed(rootModule.id, rootModule.filter, rootModule.ctx)
+      queryClient.setQueryData(feedQueryKey, {
+        pages: [[rootEvent]],
+        pageParams: [undefined],
+      })
+
       const { result, unmount } = renderHook(hook, options({ includeReplies: false }))
 
-      const rootEvent = fakeEventMeta({ kind: Kind.Text, id: '1', created_at: 1 })
-
       await act(async () => {
-        queryClient.setQueryData(result.current.queryKey, {
-          pages: [[rootEvent]],
-          pageParams: [undefined],
-        })
         await vi.waitFor(() => {
-          expect(result.current.query.data?.pages[0]).toHaveLength(1)
+          expect(result.current.data.pages[0]).toHaveLength(1)
         })
       })
 
-      expect(result.current.query.data?.pages[0]).toHaveLength(1)
-      expect(result.current.query.data?.pages[0][0].id).toBe('1')
+      const rootPage = result.current.data.pages[0] as NostrEventDB[]
+      expect(rootPage).toHaveLength(1)
+      expect(rootPage[0].id).toBe('1')
       expect(result.current.replies).toBe(false)
 
       const note1 = fakeEventMeta({ kind: Kind.Text, id: '11', created_at: 1 })
@@ -234,22 +257,28 @@ describe('assert useFeedState minimal', () => {
         result.current.onStream(repost1)
       })
 
-      expect(result.current.bufferTotalReplies).toBe(2)
+      await vi.waitFor(() => {
+        expect(result.current.bufferTotalReplies).toBe(2)
+      })
 
       unmount()
 
       const { result: result2 } = renderHook(hook, options({ includeReplies: true }))
 
-      await act(async () => {
-        await vi.waitFor(() => {
-          expect(result2.current.query.data?.pages[0]).toHaveLength(2)
-        })
+      await vi.waitFor(() => {
+        expect(result2.current.data.pages[0]).toHaveLength(1)
       })
 
       expect(result2.current.replies).toBe(true)
       expect(result2.current.bufferTotalReplies).toBe(0)
-      expect(result2.current.query.data?.pages[0][0].id).toBe('3')
-      expect(result2.current.query.data?.pages[0][1].id).toBe('2')
+
+      const [group] = result2.current.data.pages[0] as ThreadGroup[]
+      expect(group.rootId).toBe('1')
+
+      const replyIds = group.branches.flatMap((branch) =>
+        branch.items.filter((item) => item.type === 'reply').map((item) => item.eventId),
+      )
+      expect(replyIds).toEqual(expect.arrayContaining(['2', '3']))
     })
   })
 })
