@@ -6,8 +6,7 @@ import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import type { CodeBlockNode } from 'nostr-editor'
-import { useRef } from 'react'
-import ShikiHighlighter from 'react-shiki'
+import { lazy, Suspense, useRef } from 'react'
 import { css, html } from 'react-strict-dom'
 import { CopyIconButton } from '../../Buttons/CopyIconButton'
 
@@ -15,6 +14,11 @@ type Props = {
   sx?: SxProps
   node: CodeBlockNode
 }
+
+const ShikiHighlighter = lazy(async () => {
+  const mod = await import('react-shiki')
+  return { default: mod.default }
+})
 
 export const CodeBlock = (props: Props) => {
   const { dense } = useContentContext()
@@ -32,14 +36,21 @@ export const CodeBlock = (props: Props) => {
           <div>{language}</div>
           <CopyIconButton text={refPre.current?.innerText} title='Copy code' />
         </Stack>
-        <ShikiHighlighter
-          language={language}
-          showLanguage={false}
-          addDefaultStyles={false}
-          className={css.props(styles.pre).className}
-          theme={isDark ? 'github-dark-high-contrast' : 'github-light-default'}>
-          {code}
-        </ShikiHighlighter>
+        <Suspense
+          fallback={
+            <html.pre style={styles.preFallback}>
+              <html.code>{code}</html.code>
+            </html.pre>
+          }>
+          <ShikiHighlighter
+            language={language}
+            showLanguage={false}
+            addDefaultStyles={false}
+            className={css.props(styles.pre).className}
+            theme={isDark ? 'github-dark-high-contrast' : 'github-light-default'}>
+            {code}
+          </ShikiHighlighter>
+        </Suspense>
       </html.div>
     </html.div>
   )
@@ -65,6 +76,16 @@ const styles = css.create({
   pre: {
     wordBreak: 'break-all',
     whiteSpace: 'normal',
+  },
+  preFallback: {
+    margin: 0,
+    marginTop: 36,
+    padding: spacing.padding2,
+    overflowX: 'auto',
+    fontFamily: 'monospace',
+    fontSize: '0.85rem',
+    whiteSpace: 'pre-wrap',
+    wordBreak: 'break-word',
   },
   header: {
     zIndex: 1,
