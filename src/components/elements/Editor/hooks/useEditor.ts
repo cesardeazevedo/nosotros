@@ -1,5 +1,6 @@
 import { Kind } from '@/constants/kinds'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import { useCurrentPubkey } from '@/hooks/useAuth'
 import { useEvent } from '@/hooks/query/useQueryBase'
 import { useUserRelays } from '@/hooks/query/useQueryUser'
 import { useFirstSeenRelay, useSeen } from '@/hooks/query/useSeen'
@@ -42,23 +43,37 @@ export function usePublicMessageTags(pubkey: string | undefined, event?: NostrEv
 }
 
 export function useReplyTags(event: NostrEventDB | undefined) {
+  const currentPubkey = useCurrentPubkey()
   const eventHeadRelay = useFirstSeenRelay(event ? getEventId(event) || '' : '') || ''
   const userRelays = useUserRelays(event?.pubkey, WRITE)
 
   const userHeadRelay = userRelays.data?.[0]?.relay || ''
 
   const rootEvent = useEvent(event?.metadata?.rootId).data
+  const parentEvent = useEvent(event?.metadata?.parentId).data
   const rootEventHeadRelay = useSeen(event?.metadata?.rootId || '').data?.[0]?.relay || ''
   const rootUserHeadRelay = useUserRelays(rootEvent?.pubkey, WRITE)?.data?.[0]?.relay || ''
+  const parentUserHeadRelay = useUserRelays(parentEvent?.pubkey, WRITE)?.data?.[0]?.relay || ''
 
   if (event) {
     switch (event.kind) {
       case Kind.Text: {
+        const replyPTagPubkey = (() => {
+          if (!currentPubkey || event.pubkey !== currentPubkey) {
+            return event.pubkey
+          }
+          if (parentEvent?.pubkey && parentEvent.pubkey !== currentPubkey) {
+            return parentEvent.pubkey
+          }
+          return ''
+        })()
+        const replyPTagRelay = replyPTagPubkey === parentEvent?.pubkey ? parentUserHeadRelay : userHeadRelay
+
         // NIP-10 reply tags
         if (event.metadata?.isRoot) {
           return compactArray([
             ['e', event.id, eventHeadRelay, 'root', event.pubkey],
-            ['p', event.pubkey, userHeadRelay],
+            replyPTagPubkey ? ['p', replyPTagPubkey, replyPTagRelay] : [],
           ])
         }
         const tags = [
@@ -66,7 +81,7 @@ export function useReplyTags(event: NostrEventDB | undefined) {
             ? ['e', event.metadata?.rootId, rootEventHeadRelay || '', 'root', rootEvent?.pubkey]
             : [],
           ['e', event.id, eventHeadRelay || '', 'reply', event.pubkey],
-          ['p', event.pubkey, userHeadRelay],
+          replyPTagPubkey ? ['p', replyPTagPubkey, replyPTagRelay] : [],
         ]
         return compactArray(tags)
       }
