@@ -25,10 +25,10 @@ export const NotificationFeed = memo(function NotificationFeed(props: Props) {
             event={event}
             selected={selected === event.id}
             onClick={() => setSelected(event.id)}
-            dense={feed.layout === 'compact'}
+            dense={feed.compact}
           />
         ),
-        [selected, feed.layout],
+        [selected, feed.compact],
       )}
       {...rest}
     />

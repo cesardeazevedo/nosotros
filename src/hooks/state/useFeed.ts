@@ -1,5 +1,5 @@
 import type { FeedAtoms } from '@/atoms/modules.atoms'
-import { createFeedAtoms } from '@/atoms/modules.atoms'
+import { createFeedAtoms } from '@/atoms/feed.atoms'
 import { Kind } from '@/constants/kinds'
 import { dedupe } from '@/core/helpers/dedupe'
 import type { NostrFilter } from '@/core/types'
@@ -31,7 +31,7 @@ export function useFeedStateAtom(feedAtoms: FeedAtoms) {
   const [replies, setReplies] = useAtom(feedAtoms.includeReplies)
   const [buffer = [], setBuffer] = useAtom(feedAtoms.buffer)
   const [bufferReplies = [], setBufferReplies] = useAtom(feedAtoms.bufferReplies)
-  const [pageSize = 20, setPageSize] = useAtom(feedAtoms.pageSize)
+  const [pageSize = 10, setPageSize] = useAtom(feedAtoms.pageSize)
 
   const isDirty = useAtomValue(feedAtoms.isDirty)
   const isModified = useAtomValue(feedAtoms.isModified)

@@ -1,4 +1,4 @@
-import { createMediaFeedAtoms } from '@/atoms/modules.atoms'
+import { createMediaFeedAtoms } from '@/atoms/feed.media.atoms'
 import { useAtom } from 'jotai'
 import { useMemo } from 'react'
 import { type MediaFeedModule } from '../modules/createMediaFeedModule'
