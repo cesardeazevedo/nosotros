@@ -469,7 +469,7 @@ const HAS_PROTOCOL_REGEX = /^\w+:\/\//
 const IMAGE_EXTENSIONS = /\.(jpg|jpeg|gif|png|bmp|svg|webp)$/
 const VIDEO_EXTENSIONS = /\.(webm|mp4|ogg|mov)$/
 const YOUTUBE_EMBED =
-  /^(?:(?:https?:)?\/\/)?(?:(?:(?:www|m(?:usic)?)\.)?youtu(?:\.be|be\.com)\/(?:shorts\/|live\/|v\/|e(?:mbed)?\/|watch(?:\/|\?(?:\S+=\S+&)*v=)|oembed\?url=https?%3A\/\/(?:www|m(?:usic)?)\.youtube\.com\/watch\?(?:\S+=\S+&)*v%3D|attribution_link\?(?:\S+=\S+&)*u=(?:\/|%2F)watch(?:\?|%3F)v(?:=|%3D))?|www\.youtube-nocookie\.com\/embed\/)([\w-]{1})[?&#]?\S*$/
+  /^(?:(?:https?:)?\/\/)?(?:(?:www\.|m(?:usic)?\.)?youtu(?:\.be|be\.com)|www\.youtube-nocookie\.com)\/(?:watch(?:\/|\?(?:[^#\s]*[?&])?v=)|shorts\/|live\/|v\/|e(?:mbed)?\/)([\w-]+)(?:[?&#][^\s]*)?$/i
 const TWITTER_EMBED = /^https?:\/\/(twitter|x)\.com\/(?:#!\/)?(\w+)\/status(es)?\/(\d+)/
 const SPOTIFY_EMBED =
   /^https?:\/\/open\.spotify\.com\/embed\/(track|album|playlist|artist|episode|show)\/([a-zA-Z0-9]+)/
