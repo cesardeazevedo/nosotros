@@ -33,7 +33,10 @@ export const LinkRelayFeed = memo(function LinkRelayFeed(props: Props) {
       target={target}
       search={{ relay: url, kind: module.filter.kinds, limit: module.filter.limit, type: 'relayfeed' }}
       state={{ from: router.latestLocation.pathname } as never}
-      onClick={onClick}
+      onClick={(e) => {
+        e.stopPropagation()
+        onClick?.()
+      }}
       {...css.props(sx)}>
       {props.children}
     </Link>

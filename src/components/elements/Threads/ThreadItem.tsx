@@ -7,15 +7,14 @@ import { useIsCurrentRouteEventID } from '@/hooks/useNavigations'
 import { useReplyTreeLayout } from '@/hooks/useReplyTreeLayout'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import { IconDotsVertical } from '@tabler/icons-react'
 import { memo, useEffect, useRef } from 'react'
 import { css, html } from 'react-strict-dom'
-import { WaveDivider } from '../Layouts/WaveDivider'
 import { PostActions } from '../Posts/PostActions/PostActions'
 import { Replies } from '../Replies/Replies'
 import { ReplyContent } from '../Replies/ReplyContent'
 import { UserAvatar } from '../User/UserAvatar'
 import { ThreadEditor } from './ThreadEditor'
+import { ThreadHorizontalDivider } from './ThreadHorizontalDivider'
 
 type Props = {
   note: NoteState
@@ -72,24 +71,17 @@ export const ThreadItem = memo(function ThreadItem(props: Props) {
               <ContentProvider value={{ disableLink: isCurrentEvent }}>
                 <ReplyContent note={note} highlight={!isCurrentEvent} />
               </ContentProvider>
-              <html.div style={styles.root$actions}>
-                <PostActions
-                  renderOptions
-                  statsPopover
-                  note={note}
-                  onReplyClick={() => note.actions.toggleReplying()}
-                />
-              </html.div>
+              <PostActions
+                renderOptions
+                statsPopover
+                note={note}
+                onReplyClick={() => note.actions.toggleReplying()}
+              />
             </Stack>
           </Stack>
         </html.div>
         {renderEditor && isCurrentEvent && renderDivider && (
-          <Stack sx={styles.divider} gap={2}>
-            <html.div>
-              <IconDotsVertical strokeWidth='2.4' size={24} />
-            </html.div>
-            <WaveDivider />
-          </Stack>
+          <ThreadHorizontalDivider />
         )}
         {renderEditor && <ThreadEditor note={note} onEditorDiscard={onEditorDiscard} />}
       </ContentProvider>
@@ -146,12 +138,6 @@ const styles = css.create({
     position: 'relative',
     paddingInline: spacing.padding2,
     scrollMargin: 64,
-  },
-  divider: {
-    paddingTop: spacing.padding2,
-    paddingBottom: spacing.padding1,
-    paddingLeft: 24,
-    color: palette.outlineVariant,
   },
   replies: {
     position: 'relative',

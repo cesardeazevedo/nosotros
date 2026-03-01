@@ -75,7 +75,11 @@ const MuteOptionItem = (props: MuteSetItemProps) => {
   )
 }
 
-export const ListMuteOptionsDialog = (props: Props) => {
+type ContentProps = Props & {
+  targetPubkey: string
+}
+
+const ListMuteOptionsContent = (props: ContentProps) => {
   const { open, onClose, targetPubkey, targetEventId } = props
   const pubkey = useCurrentPubkey()
   const signer = useCurrentSigner()
@@ -164,7 +168,7 @@ export const ListMuteOptionsDialog = (props: Props) => {
   const submitAndRefresh = async (event: UnsignedEvent) => {
     await mutateAsync(event)
     onClose()
-    void invalidateMuteQueries()
+    invalidateMuteQueries()
   }
 
   const parseDecryptedTags = (content: string): string[][] | undefined => {
@@ -259,78 +263,87 @@ export const ListMuteOptionsDialog = (props: Props) => {
   }
 
   return (
-    <DialogSheet open={open} onClose={onClose} maxWidth='sm'>
-      <Stack horizontal={false} gap={0}>
-        <Stack sx={styles.header} align='center' justify='space-between'>
-          <IconButton size='md' onClick={onClose} icon={<IconX size={22} />} />
-          <Text variant='title' size='lg'>
-            Mute {targetLabel}
+    <Stack horizontal={false} gap={0}>
+      <Stack sx={styles.header} align='center' justify='space-between'>
+        <IconButton size='md' onClick={onClose} icon={<IconX size={22} />} />
+        <Text variant='title' size='lg'>
+          Mute {targetLabel}
+        </Text>
+        <span style={{ width: 36 }} />
+      </Stack>
+      <Stack horizontal={false} gap={2} sx={styles.content}>
+        <Stack horizontal={false} gap={1}>
+          <Text variant='label' size='md' sx={styles.sectionTitle}>
+            Main Mute List
           </Text>
-          <span style={{ width: 36 }} />
+          <MuteOptionItem
+            label='Public Mutes'
+            event={muteList}
+            targetTagName={targetTagName}
+            targetValue={targetValue}
+            onSubmit={(event, decryptedTags) => {
+              onSubmit(event, decryptedTags)
+            }}
+          />
         </Stack>
-        <Stack horizontal={false} gap={2} sx={styles.content}>
-          <Stack horizontal={false} gap={1}>
-            <Text variant='label' size='md' sx={styles.sectionTitle}>
-              Main Mute List
-            </Text>
-            <MuteOptionItem
-              label='Public Mutes'
-              event={muteList}
-              targetTagName={targetTagName}
-              targetValue={targetValue}
-              onSubmit={(event, decryptedTags) => {
-                void onSubmit(event, decryptedTags)
-              }}
-            />
-          </Stack>
-          <Stack horizontal={false} gap={1}>
-            <Text variant='label' size='md' sx={styles.sectionTitle}>
-              Mute Sets
-            </Text>
-            {muteSetsList.map((set) => {
-              return (
-                <MuteOptionItem
-                  key={set.id}
-                  event={set}
-                  targetTagName={targetTagName}
-                  targetValue={targetValue}
-                  onSubmit={(event, decryptedTags) => {
-                    void onSubmit(event, decryptedTags)
-                  }}
-                />
-              )
-            })}
-            {muteSetsList.length === 0 ? (
-              <Stack horizontal={false} gap={1} align='flex-start'>
-                <Text variant='body' size='md' sx={styles.empty}>
-                  No mute sets yet.
-                </Text>
-                <ListItem
-                  interactive
-                  sx={styles.item}
-                  onClick={() => {
-                    void createMuteSet(false)
-                  }}>
-                  Create custom muted list
-                </ListItem>
-                <ListItem
-                  interactive
-                  sx={styles.item}
-                  trailing={
-                    <span style={{ color: palette.warning }}>
-                      <IconLock size={22} strokeWidth='1.5' />
-                    </span>
-                  }
-                  onClick={() => {
-                    void createMuteSet(true)
-                  }}>
-                  Create private mute list
-                </ListItem>
-              </Stack>
-            ) : null}
-          </Stack>
+        <Stack horizontal={false} gap={1}>
+          <Text variant='label' size='md' sx={styles.sectionTitle}>
+            Mute Sets
+          </Text>
+          {muteSetsList.map((set) => {
+            return (
+              <MuteOptionItem
+                key={set.id}
+                event={set}
+                targetTagName={targetTagName}
+                targetValue={targetValue}
+                onSubmit={(event, decryptedTags) => {
+                  onSubmit(event, decryptedTags)
+                }}
+              />
+            )
+          })}
+          {muteSetsList.length === 0 ? (
+            <Stack horizontal={false} gap={1} align='flex-start'>
+              <Text variant='body' size='md' sx={styles.empty}>
+                No mute sets yet.
+              </Text>
+              <ListItem
+                interactive
+                sx={styles.item}
+                onClick={() => {
+                  createMuteSet(false)
+                }}>
+                Create custom muted list
+              </ListItem>
+              <ListItem
+                interactive
+                sx={styles.item}
+                trailing={
+                  <span style={{ color: palette.warning }}>
+                    <IconLock size={22} strokeWidth='1.5' />
+                  </span>
+                }
+                onClick={() => {
+                  createMuteSet(true)
+                }}>
+                Create private mute list
+              </ListItem>
+            </Stack>
+          ) : null}
         </Stack>
       </Stack>
+    </Stack>
+  )
+}
+
+export const ListMuteOptionsDialog = (props: Props) => {
+  const { open, onClose, targetPubkey, targetEventId } = props
+  return (
+    <DialogSheet open={open} onClose={onClose} maxWidth='sm'>
+      {targetPubkey ? (
+        <ListMuteOptionsContent open={open} onClose={onClose} targetPubkey={targetPubkey} targetEventId={targetEventId} />
+      ) : null}
     </DialogSheet>
   )
 }

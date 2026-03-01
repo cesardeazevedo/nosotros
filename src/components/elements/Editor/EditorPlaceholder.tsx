@@ -2,7 +2,6 @@ import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { typeFace } from '@/themes/typeFace.stylex'
 import { css } from 'react-strict-dom'
-import { useEditorSelector } from './hooks/useEditor'
 
 type Props = {
   placeholder: string

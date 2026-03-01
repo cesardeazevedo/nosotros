@@ -76,7 +76,7 @@ const FeedListBase = function FeedList<T = NostrEventDB>(props: Props<T>) {
 
   if (column) {
     return (
-      <html.div style={styles.column} ref={ref} onScroll={handleScrollColumn}>
+      <html.div data-feed-scroll='1' style={styles.column} ref={ref} onScroll={handleScrollColumn}>
         {props.header}
         {!props.wrapper && renderNewPostsIndicator && <FeedNewPosts ref={ref} feed={feed} />}
         {props.wrapper ? (

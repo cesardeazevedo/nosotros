@@ -68,7 +68,9 @@ const BookmarkOptionItem = (props: BookmarkSetItemProps) => {
   )
 }
 
-export const PostBookmarkOptions = (props: Props) => {
+type ContentProps = Props
+
+const PostBookmarkOptionsContent = (props: ContentProps) => {
   const { open, onClose, postId } = props
   const pubkey = useCurrentPubkey()
   const signer = useCurrentSigner()
@@ -190,51 +192,58 @@ export const PostBookmarkOptions = (props: Props) => {
   }
 
   return (
-    <DialogSheet open={open} onClose={onClose} maxWidth='sm'>
-      <Stack horizontal={false} gap={0}>
-        <Stack sx={styles.header} align='center' justify='space-between'>
-          <IconButton size='md' onClick={onClose} icon={<IconX size={22} />} />
-          <Text variant='title' size='lg'>
-            Save Bookmark
+    <Stack horizontal={false} gap={0}>
+      <Stack sx={styles.header} align='center' justify='space-between'>
+        <IconButton size='md' onClick={onClose} icon={<IconX size={22} />} />
+        <Text variant='title' size='lg'>
+          Save Bookmark
+        </Text>
+        <span style={{ width: 36 }} />
+      </Stack>
+      <Stack horizontal={false} gap={2} sx={styles.content}>
+        <Stack horizontal={false} gap={1}>
+          <Text variant='label' size='md' sx={styles.sectionTitle}>
+            Main Bookmark
           </Text>
-          <span style={{ width: 36 }} />
+          <BookmarkOptionItem
+            label='Public Bookmarks'
+            event={bookmarkList}
+            onSubmit={(event, decryptedTags) => {
+              void onSubmit(event, decryptedTags)
+            }}
+          />
         </Stack>
-        <Stack horizontal={false} gap={2} sx={styles.content}>
-          <Stack horizontal={false} gap={1}>
-            <Text variant='label' size='md' sx={styles.sectionTitle}>
-              Main Bookmark
+        <Stack horizontal={false} gap={1}>
+          <Text variant='label' size='md' sx={styles.sectionTitle}>
+            Bookmark Sets
+          </Text>
+          {bookmarkSets.map((set) => {
+            return (
+              <BookmarkOptionItem
+                key={set.id}
+                event={set}
+                onSubmit={(event, decryptedTags) => {
+                  void onSubmit(event, decryptedTags)
+                }}
+              />
+            )
+          })}
+          {bookmarkSets.length === 0 ? (
+            <Text variant='body' size='md' sx={styles.empty}>
+              No bookmark sets yet.
             </Text>
-            <BookmarkOptionItem
-              label='Public Bookmarks'
-              event={bookmarkList}
-              onSubmit={(event, decryptedTags) => {
-                void onSubmit(event, decryptedTags)
-              }}
-            />
-          </Stack>
-          <Stack horizontal={false} gap={1}>
-            <Text variant='label' size='md' sx={styles.sectionTitle}>
-              Bookmark Sets
-            </Text>
-            {bookmarkSets.map((set) => {
-              return (
-                <BookmarkOptionItem
-                  key={set.id}
-                  event={set}
-                  onSubmit={(event, decryptedTags) => {
-                    void onSubmit(event, decryptedTags)
-                  }}
-                />
-              )
-            })}
-            {bookmarkSets.length === 0 ? (
-              <Text variant='body' size='md' sx={styles.empty}>
-                No bookmark sets yet.
-              </Text>
-            ) : null}
-          </Stack>
+          ) : null}
         </Stack>
       </Stack>
+    </Stack>
+  )
+}
+
+export const PostBookmarkOptions = (props: Props) => {
+  const { open, onClose, postId } = props
+  return (
+    <DialogSheet open={open} onClose={onClose} maxWidth='sm'>
+      <PostBookmarkOptionsContent open={open} postId={postId} onClose={onClose} />
     </DialogSheet>
   )
 }

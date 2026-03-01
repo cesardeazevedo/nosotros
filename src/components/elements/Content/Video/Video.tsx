@@ -79,7 +79,7 @@ export const Video = memo(function Video(props: Props) {
             autoPlay={false}
             preload={preload}
             controls={false}
-            onClick={onClickMedia}
+            onClick={blurStyles ? undefined : onClickMedia}
             onLoadedMetadata={(e) => {
               const element = e.target as HTMLVideoElement
               addMediaDim({ src, dim: [element.videoWidth, element.videoHeight] })
