@@ -3,7 +3,6 @@ import { palette } from '@/themes/palette.stylex'
 import { state } from '@/themes/state.stylex'
 import { css } from 'react-strict-dom'
 import { focusRingTokens } from '../FocusRing/FocusRing.stylex'
-import { rippleTokens } from '../Ripple/Ripple.stylex'
 import { switchStateTokens, switchTokens } from './Switch.stylex'
 
 export const styles = css.create({
@@ -28,17 +27,16 @@ export const styles = css.create({
 
     [switchStateTokens.stateLayerColor$hover]: palette.onSurface,
     [switchStateTokens.stateLayerOpacity$hover]: state.opacity$hover,
+    [switchStateTokens.stateLayerColor$pressed]: palette.onSurface,
+    [switchStateTokens.stateLayerOpacity$pressed]: state.opacity$pressed,
 
     [focusRingTokens.shape]: switchTokens.trackShape,
-
-    [rippleTokens.color$hover]: switchStateTokens.stateLayerColor$hover,
-    [rippleTokens.opacity$hover]: switchStateTokens.stateLayerOpacity$hover,
-    [rippleTokens.color$pressed]: switchStateTokens.stateLayerColor$pressed,
-    [rippleTokens.opacity$pressed]: switchStateTokens.stateLayerOpacity$pressed,
   },
   selected: {
     [switchStateTokens.stateLayerColor$hover]: palette.primary,
     [switchStateTokens.stateLayerOpacity$hover]: state.opacity$hover,
+    [switchStateTokens.stateLayerColor$pressed]: palette.primary,
+    [switchStateTokens.stateLayerOpacity$pressed]: state.opacity$pressed,
   },
   input: {
     appearance: 'none',
@@ -130,6 +128,23 @@ export const styles = css.create({
 
     marginInlineEnd: `calc(${switchTokens.trackWidth} - ${switchTokens.trackHeight})`,
     marginInlineStart: 0,
+  },
+  stateLayer: {
+    position: 'absolute',
+    margin: 'auto',
+    borderRadius: switchTokens.stateLayerShape,
+    width: switchTokens.stateLayerSize,
+    height: switchTokens.stateLayerSize,
+    backgroundColor: switchStateTokens.stateLayerColor$hover,
+    opacity: {
+      default: 0,
+      ':is([data-hovered])': switchStateTokens.stateLayerOpacity$hover,
+      ':is([data-pressed])': switchStateTokens.stateLayerOpacity$pressed,
+    },
+    transitionProperty: 'opacity, background-color',
+    transitionTimingFunction: 'linear',
+    transitionDuration: '67ms',
+    pointerEvents: 'none',
   },
   container$selected: {
     marginInlineEnd: 0,
@@ -276,11 +291,5 @@ export const styles = css.create({
   icon$on$selected$disabled: {
     [switchStateTokens.iconColor]: switchTokens.selectedIconColor$disabled,
     opacity: switchTokens.selectedIconOpacity$disabled,
-  },
-  ripple: {
-    borderRadius: switchTokens.stateLayerShape,
-    width: switchTokens.stateLayerSize,
-    height: switchTokens.stateLayerSize,
-    inset: 'unset',
   },
 })
