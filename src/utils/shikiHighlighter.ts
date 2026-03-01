@@ -1,10 +1,12 @@
+import type { LanguageInput } from 'shiki/core'
+
 type HighlighterTheme = 'github-dark-high-contrast' | 'github-light-default'
 
 type MinimalHighlighter = {
   codeToHtml: (code: string, options: { lang: string; theme: HighlighterTheme }) => string
 }
 
-type LangModule = { default: any[] }
+type LangModule = { default: LanguageInput[] }
 
 type Loader = () => Promise<LangModule>
 

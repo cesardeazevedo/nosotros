@@ -21,9 +21,9 @@ describe('assert notification feed atoms', () => {
         me: { pubkey: 'me' },
       },
     })
-    const createFeedQueryOptions = (
-      await vi.importActual<typeof import('@/hooks/query/useQueryFeeds')>('@/hooks/query/useQueryFeeds')
-    ).createFeedQueryOptions
+    const createFeedQueryOptions = ((await vi.importActual('@/hooks/query/useQueryFeeds')) as {
+      createFeedQueryOptions: typeof feedQueryModule.createFeedQueryOptions
+    }).createFeedQueryOptions
 
     const mentionedRoot = fakeEventMeta({
       id: 'mention-root',

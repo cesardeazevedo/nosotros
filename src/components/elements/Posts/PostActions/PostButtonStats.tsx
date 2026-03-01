@@ -25,12 +25,11 @@ type Props = {
 type PropsInner = {
   note: NoteState
   dense: boolean
-  onClick: (e: StrictClickEvent) => void
   ref?: ((ref: ReferenceType | null) => void) | null
 }
 
 const PostButtonStatsInner = (props: PropsInner) => {
-  const { note, dense, onClick, ...rest } = props
+  const { note, dense } = props
   const isMobile = useMobile()
   const seenOn = useSeenRelays(note.event.id)
   const handleClick = useCallback(
@@ -82,15 +81,6 @@ export const PostButtonStats = memo(function PostButtonStats(props: Props) {
   const { note, popover = false } = props
   const { dense } = useContentContext()
 
-  const handleClick = useCallback(
-    (e: StrictClickEvent) => {
-      e.preventDefault()
-      e.stopPropagation()
-      note.actions.toggleStats()
-    },
-    [note.actions],
-  )
-
   if (popover) {
     return (
       <PopoverBase
@@ -103,12 +93,12 @@ export const PostButtonStats = memo(function PostButtonStats(props: Props) {
           </Paper>
         )}>
         {({ getProps, setRef }) => (
-          <PostButtonStatsInner {...getProps()} ref={setRef} note={note} dense={dense} onClick={handleClick} />
+          <PostButtonStatsInner {...getProps()} ref={setRef} note={note} dense={dense} />
         )}
       </PopoverBase>
     )
   }
-  return <PostButtonStatsInner note={note} dense={dense} onClick={handleClick} />
+  return <PostButtonStatsInner note={note} dense={dense} />
 })
 
 const styles = css.create({
