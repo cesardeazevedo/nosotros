@@ -35,10 +35,9 @@ const subscribeIds = (ctx: NostrContext, ids: string[], relayHints?: NostrContex
     mergeMap((ids) => {
       return subscribeStrategy(depsCtx, { ids }).pipe(
         tap((res) => {
-          // res.forEach(x => console.log('EVENT', x))
           res.forEach(setEventData)
         }),
-        subscribeMediaStats(),
+        // subscribeMediaStats(),
         mergeMap(identity),
       )
     }),
