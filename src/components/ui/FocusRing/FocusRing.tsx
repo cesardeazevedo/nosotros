@@ -4,7 +4,7 @@ import { outline } from '@/themes/outline.stylex'
 import { scale } from '@/themes/scale.stylex'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { css, html } from 'react-strict-dom'
-import type { IVisualState } from '../hooks/useRipple'
+import type { IVisualState } from '../hooks/useVisualState'
 import type { SxProps } from '../types'
 import { focusRingTokens } from './FocusRing.stylex'
 

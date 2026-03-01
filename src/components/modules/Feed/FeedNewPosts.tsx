@@ -104,7 +104,7 @@ const styles = css.create({
   },
   floating: {
     position: 'fixed',
-    top: 32,
+    top: 82,
     textAlign: 'center',
     display: 'flex',
     alignSelf: 'center',

@@ -9,7 +9,9 @@ export const SettingsLayout = function SettingsLayout() {
     <>
       <MenuItem
         label='Compact notifications layout'
-        trailing={<Switch checked={settings.notificationsCompact} onChange={() => toggle('notificationsCompact')} />}
+        trailing={
+          <Switch checked={settings.notificationsCompact} onChange={() => toggle('notificationsCompact')} />
+        }
       />
     </>
   )

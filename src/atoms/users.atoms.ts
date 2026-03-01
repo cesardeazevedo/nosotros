@@ -6,6 +6,7 @@ import { atom } from 'jotai'
 import { atomWithQuery } from 'jotai-tanstack-query'
 import { atomFamily } from 'jotai/utils'
 import { nip19 } from 'nostr-tools'
+import { userRequestDeletesQueryFamily } from './deletion.atoms'
 import { userMutedStateFamily } from './mutes.atoms'
 import { nprofileFamily } from './nip19.atoms'
 
@@ -54,6 +55,10 @@ export const userFamily = atomFamily(
       const followsAtom = userFollowsQueryFamily({ pubkey, fullUserSync })
       const follows = get(followsAtom)
       const tags = follows.data?.tags || []
+
+      if (fullUserSync) {
+        get(userRequestDeletesQueryFamily(pubkey))
+      }
 
       const { mutedAuthors, mutedNotes } = get(userMutedStateFamily({ pubkey, enabled: fullUserSync }))
 

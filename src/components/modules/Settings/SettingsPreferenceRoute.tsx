@@ -11,6 +11,7 @@ import { css } from 'react-strict-dom'
 import { SettingsAutoPlay } from './SettingsAutoPlay'
 import { SettingsDelayBroadcast } from './SettingsDelayBroadcast'
 import { SettingsLayout } from './SettingsLayout'
+import { Paper } from '@/components/ui/Paper/Paper'
 
 export const SettingsPreferencesRoute = () => {
   return (
@@ -21,20 +22,22 @@ export const SettingsPreferencesRoute = () => {
         </Text>
       </Stack>
       <Divider />
-      <Stack grow horizontal={false} sx={styles.root}>
+      <Stack horizontal={false} sx={styles.root}>
         <Stack horizontal={false} gap={1} align='flex-start' sx={styles.content}>
           <SettingsSubHeader>Theme</SettingsSubHeader>
           <SettingsTheme />
         </Stack>
         <br />
-        <Stack horizontal={false} gap={2} align='flex-start'>
-          <SettingsNIP05 />
-          <SettingsMaxRelaysOutbox />
-          <SettingsDelayBroadcast />
-          <SettingsAutoPlay />
-          <SettingsClientTag />
-          <SettingsLayout />
-        </Stack>
+        <Paper outlined sx={styles.paper}>
+          <Stack horizontal={false} gap={2} align='flex-start'>
+            <SettingsNIP05 />
+            <SettingsMaxRelaysOutbox />
+            <SettingsDelayBroadcast />
+            <SettingsAutoPlay />
+            <SettingsClientTag />
+            <SettingsLayout />
+          </Stack>
+        </Paper>
       </Stack>
     </Stack>
   )
@@ -48,12 +51,16 @@ const styles = css.create({
     width: '100%',
     overflowY: 'auto',
     paddingBottom: spacing.padding3,
+    paddingInline: spacing.padding2,
+  },
+  paper: {
+    width: '100%',
   },
   header: {
     paddingBlock: spacing.padding2,
     paddingInline: spacing.padding4,
   },
   content: {
-    paddingTop: spacing.padding1,
+    paddingTop: spacing.padding2,
   },
 })

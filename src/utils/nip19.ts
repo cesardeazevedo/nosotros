@@ -16,6 +16,20 @@ export function decodeNIP19(data?: string) {
   }
 }
 
+export function nip19ToId(data?: string) {
+  const decoded = decodeNIP19(data?.replace('nostr:', ''))
+  switch (decoded?.type) {
+    case 'note':
+      return decoded.data
+    case 'nevent':
+      return decoded.data.id
+    case 'naddr':
+      return addressFromNIP19(decoded.data)
+    default:
+      return undefined
+  }
+}
+
 export function encodeSafe<T>(callback: () => T) {
   try {
     return callback()

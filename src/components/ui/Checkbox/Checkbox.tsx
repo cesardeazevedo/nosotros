@@ -2,14 +2,11 @@ import { IconCheck } from '@tabler/icons-react'
 import type React from 'react'
 import { forwardRef, useCallback, useRef, useState } from 'react'
 import { css, html } from 'react-strict-dom'
-import { shape } from '@/themes/shape.stylex'
 import { FocusRing } from '../FocusRing/FocusRing'
 import { focusRingTokens } from '../FocusRing/FocusRing.stylex'
 import { dataProps } from '../helpers/dataProps'
 import { mergeRefs } from '../helpers/mergeRefs'
 import { useVisualState } from '../hooks/useVisualState'
-import { Ripple } from '../Ripple/Ripple'
-import { rippleTokens } from '../Ripple/Ripple.stylex'
 import type { SxProps } from '../types'
 import { checkboxTokens } from './Checkbox.stylex'
 
@@ -59,7 +56,6 @@ export const Checkbox = forwardRef<HTMLElement, Props>((props, ref) => {
           ref={refs}
         />
         <FocusRing visualState={visualState} />
-        <Ripple element={actionRef} sx={styles.ripple} visualState={visualState} disabled={disabled} />
         {checked && (
           <html.span style={styles.icon}>
             <IconCheck size={14} strokeWidth={3.5} />
@@ -102,10 +98,6 @@ const styles = css.create({
     },
     color: 'currentColor',
     [focusRingTokens.shape]: checkboxTokens.shape,
-    [rippleTokens.color$hover]: checkboxTokens.selectedColor,
-    [rippleTokens.opacity$hover]: '0.08',
-    [rippleTokens.color$pressed]: checkboxTokens.selectedColor,
-    [rippleTokens.opacity$pressed]: '0.12',
   },
   box$checked: {
     borderColor: {
@@ -157,14 +149,5 @@ const styles = css.create({
     alignItems: 'center',
     justifyContent: 'center',
     pointerEvents: 'none',
-  },
-  ripple: {
-    borderRadius: shape.full,
-    width: checkboxTokens.stateLayerSize,
-    height: checkboxTokens.stateLayerSize,
-    inset: 'unset',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
   },
 })

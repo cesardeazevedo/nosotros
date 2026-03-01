@@ -7,7 +7,7 @@ import { useNevent } from '@/hooks/useEventUtils'
 import { duration } from '@/themes/duration.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import React, { memo } from 'react'
-import { css, html } from 'react-strict-dom'
+import { css } from 'react-strict-dom'
 import { LinkNEvent } from '../Links/LinkNEvent'
 import { PostActions } from './PostActions/PostActions'
 import { PostContent } from './PostContent'
@@ -27,11 +27,9 @@ export const PostQuote = memo(function PostQuote(props: Props) {
     <NoteProvider value={{ event }}>
       <ContentProvider value={{ blured, dense: true, disableLink: true }}>
         <Paper outlined sx={styles.root}>
-          <html.div style={styles.wrapper}>
-            {header || <PostUserHeader dense sx={styles.header} event={event} />}
-            <PostContent initialExpanded note={note} />
-            <PostActions note={note} sx={styles.actions} />
-          </html.div>
+          {header || <PostUserHeader dense sx={styles.header} event={event} />}
+          <PostContent initialExpanded note={note} />
+          <PostActions note={note} sx={styles.actions} />
         </Paper>
       </ContentProvider>
     </NoteProvider>
@@ -49,13 +47,11 @@ const styles = css.create({
     transitionTimingFunction: 'ease',
     transitionDuration: duration.short1,
     marginBottom: spacing.padding1,
+    paddingInline: spacing.padding2,
     backgroundColor: {
       default: 'transparent',
       ':hover:not(:has(button:hover, img:hover))': 'rgba(125, 125, 125, 0.04)',
     },
-  },
-  wrapper: {
-    paddingInline: spacing.padding2,
   },
   header: {
     paddingBlock: spacing.padding1,

@@ -1,4 +1,3 @@
-import { toggleSettingAtom } from '@/atoms/settings.atoms'
 import { Chip } from '@/components/ui/Chip/Chip'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { Stack } from '@/components/ui/Stack/Stack'
@@ -17,7 +16,6 @@ import {
   IconShare3,
   IconUserCancel,
 } from '@tabler/icons-react'
-import { useSetAtom } from 'jotai'
 import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 import { FeedSettingsSubmit } from '../Feed/settings/FeedSettingsSubmit'
@@ -34,7 +32,6 @@ const iconProps: IconProps = {
 
 export const NotificationSettings = memo(function NotificationSettings(props: Props) {
   const { feed, onClose } = props
-  const toggleSettings = useSetAtom(toggleSettingAtom)
   return (
     <html.div style={styles.root}>
       <Divider />
@@ -97,24 +94,18 @@ export const NotificationSettings = memo(function NotificationSettings(props: Pr
         </Text>
         <Stack gap={1}>
           <Chip
-            selected={feed.layout === 'normal'}
+            selected={!feed.compact}
             label='Normal'
             variant='filter'
             icon={<IconBaselineDensityLarge {...iconProps} />}
-            onClick={() => {
-              feed.setLayout('normal')
-              toggleSettings('notificationsCompact', false)
-            }}
+            onClick={() => feed.setCompact(false)}
           />
           <Chip
-            selected={feed.layout === 'compact'}
+            selected={feed.compact}
             label='Compact'
             variant='filter'
             icon={<IconBaselineDensitySmall {...iconProps} />}
-            onClick={() => {
-              feed.setLayout('compact')
-              toggleSettings('notificationsCompact', true)
-            }}
+            onClick={() => feed.setCompact(true)}
           />
         </Stack>
         <Stack>

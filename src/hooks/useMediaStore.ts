@@ -33,7 +33,7 @@ export const MAX_BOUNDS = {
 
 type MediaProps = {
   src: string
-  loaded: boolean
+  loaded: string
   width?: number
   height?: number
   onError?: () => void
@@ -45,7 +45,7 @@ export function useMediaStore(src: string, imeta: IMetaTags | undefined, proxy: 
   const [useFallback, setUseFallback] = useState(false)
 
   const dim = imeta?.[src]?.dim
-  const loaded = !!dims.get(src)
+  const loaded = (!!dims.get(src)).toString()
   const width = dims.get(src)?.[0] || dim?.width
   const height = dims.get(src)?.[1] || dim?.height
   const bounds = { width, height }

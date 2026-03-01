@@ -107,7 +107,7 @@ export const EditorMedia = memo(function EditorMedia(props: Props) {
                   </ButtonBase>
                 </>
               ) : (
-                <EditorPlaceholder />
+                <EditorPlaceholder placeholder={state.placeholder} />
               )}
             </Stack>
           </Stack>

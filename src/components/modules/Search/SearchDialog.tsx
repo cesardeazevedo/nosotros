@@ -3,7 +3,9 @@ import { useSearchShortcuts } from '@/components/modules/Search/hooks/useSearchS
 import { Search } from '@/components/modules/Search/Search'
 import { SearchFooterDetails } from '@/components/modules/Search/SearchFooterDetails'
 import { Kind } from '@/constants/kinds'
+import { getUserRelaysFromCache } from '@/hooks/query/useQueryUser'
 import { useMobile } from '@/hooks/useMobile'
+import { WRITE } from '@/nostr/types'
 import { useNavigate } from '@tanstack/react-router'
 import { nip19 } from 'nostr-tools'
 import { memo } from 'react'
@@ -44,7 +46,8 @@ export const SearchDialog = memo(function SearchDialog() {
             }
             case 'user_relay':
             case 'user': {
-              const nostr = nip19.nprofileEncode({ pubkey: item.pubkey })
+              const relays = getUserRelaysFromCache(item.pubkey, WRITE).map((x) => x.relay).slice(0, 4)
+              const nostr = nip19.nprofileEncode({ pubkey: item.pubkey, relays })
               navigate({
                 to: '/$nostr',
                 params: { nostr },

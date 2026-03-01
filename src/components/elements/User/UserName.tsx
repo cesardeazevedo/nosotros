@@ -14,7 +14,7 @@ import { css, html } from 'react-strict-dom'
 import { LinkProfile } from '../Links/LinkProfile'
 import { UserPopover } from './UserPopover'
 
-interface Props extends Omit<TextProps, 'children'> {
+export interface Props extends Omit<TextProps, 'children'> {
   pubkey: string
   children?: React.ReactNode
 }

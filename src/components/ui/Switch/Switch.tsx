@@ -6,7 +6,6 @@ import { FocusRing } from '../FocusRing/FocusRing'
 import { dataProps } from '../helpers/dataProps'
 import { mergeRefs } from '../helpers/mergeRefs'
 import { useVisualState } from '../hooks/useVisualState'
-import { Ripple } from '../Ripple/Ripple'
 import type { SxProps } from '../types'
 import { styles } from './Switch.styles'
 
@@ -25,10 +24,11 @@ type Props = {
 }
 
 export const Switch = forwardRef<HTMLElement, Props>((props, ref) => {
-  const { id, sx, disabled, icon, onChange, showOnlySelectedIcon, selectedIcon } = props
+  const { id, sx, disabled, icon, onChange, showOnlySelectedIcon, selectedIcon, checked: checkedProp, defaultChecked, loading: loadingProp } = props
   const { visualState, setRef } = useVisualState()
-  const [checked, setChecked] = useState(props.checked)
-  const [loading, setLoading] = useState(false)
+  const [checkedState, setCheckedState] = useState(Boolean(defaultChecked ?? checkedProp))
+  const checked = checkedProp ?? checkedState
+  const loading = Boolean(loadingProp)
   const hasIcons = !!icon || !!selectedIcon || loading
   const shouldShowIcons = !!hasIcons || !!showOnlySelectedIcon
 
@@ -36,14 +36,12 @@ export const Switch = forwardRef<HTMLElement, Props>((props, ref) => {
   const refs = mergeRefs([ref, setRef, actionRef])
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const response = onChange?.(e) || Promise.resolve()
-      setLoading(true)
-      response.then(() => {
-        setLoading(false)
-        setChecked((prev) => !prev)
-      })
+      onChange?.(e)
+      if (checkedProp === undefined) {
+        setCheckedState((prev) => !prev)
+      }
     },
-    [onChange],
+    [checkedProp, onChange],
   )
   return (
     <html.div style={[styles.root, disabled && styles.disabled, sx]}>
@@ -71,7 +69,7 @@ export const Switch = forwardRef<HTMLElement, Props>((props, ref) => {
           <html.span
             style={[styles.container, checked && styles.container$selected, disabled && styles.container$disabled]}
             {...dataProps(visualState)}>
-            <Ripple element={actionRef} sx={styles.ripple} visualState={visualState} disabled={disabled} />
+            <html.span aria-hidden style={styles.stateLayer} {...dataProps(visualState)} />
             <html.span
               style={[
                 styles.handle,

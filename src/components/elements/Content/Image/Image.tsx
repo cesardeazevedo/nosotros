@@ -56,7 +56,7 @@ export const Image = memo(function Image(props: Props) {
                     dim: [media.width || target.naturalWidth, media.height || target.naturalHeight],
                   })
                 }}
-                onClick={onClickMedia}
+                onClick={blurStyles ? undefined : onClickMedia}
                 {...media}
                 {...rest}
                 {...css.props([
@@ -65,9 +65,10 @@ export const Image = memo(function Image(props: Props) {
                   blurStyles,
                   // this is to make notes with imeta to work and the image haven't loaded yet
                   media.height && media.width && media.height > media.width ? styles.portrait : styles.landscape,
-                  media.loaded && styles.loaded,
+                  !!media.loaded && styles.loaded,
                   sx,
                 ])}
+                aria-describedby={media.loaded ? 'loaded' : 'loading!!!'}
               />
             </>
           )}
@@ -96,7 +97,7 @@ const styles = css.create({
     height: 'auto',
   },
   loaded: {
-    width: 'auto',
+    // width: 'auto',
     height: 'auto',
   },
   cover: {

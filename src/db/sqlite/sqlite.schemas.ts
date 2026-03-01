@@ -2,6 +2,31 @@ import type { Database, SAHPoolUtil } from '@sqlite.org/sqlite-wasm'
 import sqlite3InitModule from '@sqlite.org/sqlite-wasm'
 import { migrate } from './sqlite.migrations'
 
+export function deleteExpiredEvents(db: Database, nowSec = Math.floor(Date.now() / 1000)) {
+  const tags = db.selectObjects(
+    `
+      SELECT tags.eventId, tags.value
+      FROM tags
+      WHERE tags.tag = 'expiration'
+    `,
+  ) as { eventId: string; value: string }[]
+  let deleted = 0
+
+  for (const tag of tags) {
+    if (!/^\d+$/.test(tag.value)) {
+      continue
+    }
+    const expirationSec = Number(tag.value)
+    if (!Number.isFinite(expirationSec) || expirationSec > nowSec) {
+      continue
+    }
+    db.exec(`DELETE FROM events WHERE id = ?`, { bind: [tag.eventId] })
+    deleted++
+  }
+
+  return deleted
+}
+
 function build(db: Database) {
   db.exec(`
     CREATE TABLE IF NOT EXISTS events (
@@ -99,6 +124,7 @@ export async function initializeSQLite(name: string = 'nosotrosdb.sqlite3', trac
         }
         build(db)
         migrate(db)
+        deleteExpiredEvents(db)
         return { db, pool }
       }
     } catch (e) {
@@ -123,6 +149,7 @@ export async function initializeSQLite(name: string = 'nosotrosdb.sqlite3', trac
 
     build(db)
     migrate(db)
+    deleteExpiredEvents(db)
     return { db }
   } catch (err) {
     const error = err as Error

@@ -1,3 +1,4 @@
+import { addDeletionEventsAtom } from '@/atoms/deletion.atoms'
 import { addReplyAtom } from '@/atoms/repliesCount.atoms'
 import { store } from '@/atoms/store'
 import { Kind } from '@/constants/kinds'
@@ -7,8 +8,15 @@ import type { QueryKey } from '@tanstack/react-query'
 import type { NostrEvent } from 'nostr-tools'
 import { parseEventMetadata } from '../parsers/parseEventMetadata'
 import { queryClient } from './queryClient'
-import { eventToQueryKey } from './queryKeys'
+import { eventToQueryKey, queryKeys } from './queryKeys'
 import type { InfiniteEvents } from './useQueryFeeds'
+
+const deleteEventRequested = (queryKey: readonly unknown[], ownerPubkey: string) => {
+  queryClient.setQueryData(queryKey, (data: unknown) => {
+    const target = (Array.isArray(data) ? data[0] : data) as { pubkey?: string } | undefined
+    return target?.pubkey === ownerPubkey ? null : data
+  })
+}
 
 export function setEventData(event: NostrEventDB) {
   switch (event.kind) {
@@ -20,6 +28,29 @@ export function setEventData(event: NostrEventDB) {
     case Kind.Text:
     case Kind.Comment: {
       store.set(addReplyAtom, event)
+      break
+    }
+    case Kind.EventDeletion: {
+      store.set(addDeletionEventsAtom, [event])
+      for (const tag of event.tags) {
+        switch (tag[0]) {
+          case 'e': {
+            if (tag[1]) deleteEventRequested(queryKeys.event(tag[1]), event.pubkey)
+            break
+          }
+          case 'a': {
+            const [kindRaw, pubkey, dTag] = (tag[1] || '').split(':')
+            const kind = Number(kindRaw)
+            if (pubkey === event.pubkey && dTag.length) {
+              deleteEventRequested(queryKeys.event(tag[1]), event.pubkey)
+              deleteEventRequested(queryKeys.addressable(kind, pubkey, dTag), event.pubkey)
+            }
+            break
+          }
+          default:
+            break
+        }
+      }
       break
     }
     // add the repost event

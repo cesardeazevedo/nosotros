@@ -1,12 +1,12 @@
 import type { NostrFilter } from '@/core/types'
+import { createFeedAtoms } from '../feed.atoms'
+import { createMediaFeedAtoms } from '../feed.media.atoms'
 import type { MediaFeedModule } from '@/hooks/modules/createMediaFeedModule'
 import type { FeedModule, FeedScope } from '@/hooks/query/useQueryFeeds'
 import type { NostrContext } from '@/nostr/context'
 import type { QueryKey } from '@tanstack/react-query'
 import { createStore } from 'jotai'
 import {
-  createFeedAtoms,
-  createMediaFeedAtoms,
   persistentFeedStatesAtom,
   sessionFeedStatesAtom,
 } from '../modules.atoms'

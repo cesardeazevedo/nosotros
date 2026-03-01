@@ -19,7 +19,6 @@ import { dataProps } from '../helpers/dataProps'
 import { mergeRefs } from '../helpers/mergeRefs'
 import { useVisualState } from '../hooks/useVisualState'
 import { CircularProgress } from '../Progress/CircularProgress'
-import { Ripple } from '../Ripple/Ripple'
 import type { SxProps } from '../types'
 import { chipTokens } from './Chip.stylex'
 
@@ -93,7 +92,6 @@ export const Chip = forwardRef<HTMLButtonElement, Props>(function Chip(props, re
         {!!elevated && <Elevation sx={styles.elevation} />}
         {!elevated && !selected && <html.div style={styles.outline} />}
         <FocusRing visualState={visualState} />
-        {!disabled && <Ripple visualState={visualState} />}
         <html.button
           disabled={disabled}
           ref={refs}
