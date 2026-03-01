@@ -1,4 +1,4 @@
-import type { Kind } from '@/constants/kinds'
+import { Kind } from '@/constants/kinds'
 import { isFilterValid } from '@/core/helpers/isFilterValid'
 import type { NostrFilter } from '@/core/types'
 import { getDTag } from '@/utils/nip19'
@@ -240,7 +240,110 @@ export class SqliteEventStore {
     this.batcher.next(event)
   }
 
+  private hasDeleteRequestForEvent(db: Database, event: NostrEventDB) {
+    const byId = db.selectObject(
+      `
+        SELECT 1 as found
+        FROM tags
+        WHERE kind = ? AND tag = 'e' AND value = ? AND pubkey = ? AND created_at >= ?
+        LIMIT 1
+      `,
+      [Kind.EventDeletion, event.id, event.pubkey, event.created_at],
+    ) as { found: number } | undefined
+
+    if (byId?.found) {
+      return true
+    }
+
+    if (isAddressableKind(event.kind)) {
+      const dTag = getDTag(event)
+      if (!dTag) {
+        return false
+      }
+      const address = `${event.kind}:${event.pubkey}:${dTag}`
+      const byAddress = db.selectObject(
+        `
+          SELECT 1 as found
+          FROM tags
+          WHERE kind = ? AND tag = 'a' AND value = ? AND pubkey = ? AND created_at >= ?
+          LIMIT 1
+        `,
+        [Kind.EventDeletion, address, event.pubkey, event.created_at],
+      ) as { found: number } | undefined
+
+      if (byAddress?.found) {
+        return true
+      }
+    }
+
+    return false
+  }
+
+  private applyDeletionRequest(db: Database, event: NostrEventDB) {
+    if (event.kind !== Kind.EventDeletion) {
+      return
+    }
+
+    for (const tag of event.tags) {
+      if (tag[0] === 'e' && tag[1]) {
+        db.exec(
+          `
+            DELETE FROM events
+            WHERE id = ? AND pubkey = ? AND created_at <= ? AND kind != ?
+          `,
+          { bind: [tag[1], event.pubkey, event.created_at, Kind.EventDeletion] },
+        )
+        continue
+      }
+
+      if (tag[0] === 'a' && tag[1]) {
+        const parts = tag[1].split(':')
+        if (parts.length < 3) {
+          continue
+        }
+        const addressKind = Number(parts[0])
+        const addressPubkey = parts[1]
+        const dTag = parts.slice(2).join(':')
+        if (!Number.isFinite(addressKind) || !dTag || addressPubkey !== event.pubkey) {
+          continue
+        }
+
+        db.exec(
+          `
+            DELETE FROM events
+            WHERE id IN (
+              SELECT e.id
+              FROM events e
+              INNER JOIN tags t ON t.eventId = e.id
+              WHERE
+                e.kind = ? AND
+                e.pubkey = ? AND
+                e.created_at <= ? AND
+                t.tag = 'd' AND
+                t.value = ?
+            )
+            AND kind != ?
+          `,
+          { bind: [addressKind, addressPubkey, event.created_at, dTag, Kind.EventDeletion] },
+        )
+      }
+    }
+  }
+
   insertEvent(db: Database, event: NostrEventDB) {
+    const expiration = event.tags.find((tag) => tag[0] === 'expiration')?.[1]
+    if (expiration) {
+      const expirationSec = Number(expiration)
+      const nowSec = Math.floor(Date.now() / 1000)
+      if (Number.isFinite(expirationSec) && expirationSec <= nowSec) {
+        return
+      }
+    }
+
+    if (event.kind !== Kind.EventDeletion && this.hasDeleteRequestForEvent(db, event)) {
+      return
+    }
+
     if (isReplaceableKind(event.kind)) {
       const found = this.getReplaceable(db, event.kind, event.pubkey)
       if (found) {
@@ -293,6 +396,11 @@ export class SqliteEventStore {
         )
       }
     }
+
+    if (event.kind === Kind.EventDeletion) {
+      this.applyDeletionRequest(db, event)
+    }
+
     return event
   }
 

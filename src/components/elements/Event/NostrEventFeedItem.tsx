@@ -1,9 +1,13 @@
+import { isDeletedEventAtomFamily } from '@/atoms/deletion.atoms'
+import { PostDeleted } from '@/components/elements/Posts/PostDeleted'
 import { ArticleFeedItem } from '@/components/modules/Articles/ArticleFeedItem'
 import { FollowEventRoot } from '@/components/modules/Follows/FollowEventRoot'
 import { ListCard } from '@/components/modules/Lists/ListCard'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { Kind, isListKind } from '@/constants/kinds'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import { getEventId } from '@/utils/nip19'
+import { useAtomValue } from 'jotai'
 import { memo } from 'react'
 import { PostRoot } from '../Posts/Post'
 import { RepostRoot } from '../Repost/Repost'
@@ -18,6 +22,14 @@ type Props = {
 
 export const NostrEventFeedItem = memo(function NostrEventFeedItem(props: Props) {
   const { event } = props
+  const deleted = useAtomValue(isDeletedEventAtomFamily(getEventId(event)))
+
+  if (deleted) {
+    return <>
+      <PostDeleted />
+      <Divider />
+    </>
+  }
 
   switch (event.kind) {
     case Kind.Metadata: {
