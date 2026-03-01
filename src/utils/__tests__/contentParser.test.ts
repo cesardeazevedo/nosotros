@@ -139,8 +139,55 @@ describe('welshmanToProseMirror', () => {
     })
   })
 
+  test('assert subdomain bare link', () => {
+    const event = fakeEvent({
+      content: 'Docs: docs.api.nostr.com/path',
+    })
+    const { contentSchema } = parse({ content: event.content, tags: event.tags, markdown: true })
+    expect(contentSchema).toStrictEqual({
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [
+            { type: 'text', text: 'Docs: ' },
+            {
+              type: 'text',
+              text: 'docs.api.nostr.com/path',
+              marks: [{ type: 'link', attrs: { href: 'https://docs.api.nostr.com/path' } }],
+            },
+          ],
+        },
+      ],
+    })
+  })
 
-  test('assert markdown content', ({ }) => {
+  test('assert bare link inside parenthesis', () => {
+    const event = fakeEvent({
+      content: 'Check this out (dev.nosotros.app)',
+    })
+    const { contentSchema } = parse({ content: event.content, tags: event.tags, markdown: true })
+    expect(contentSchema).toStrictEqual({
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [
+            { type: 'text', text: 'Check this out (' },
+            {
+              type: 'text',
+              text: 'dev.nosotros.app',
+              marks: [{ type: 'link', attrs: { href: 'https://dev.nosotros.app/' } }],
+            },
+            { type: 'text', text: ')' },
+          ],
+        },
+      ],
+    })
+  })
+
+
+  test('assert markdown content', () => {
     const event = fakeEvent({
       kind: 30023,
       content: `
@@ -275,7 +322,7 @@ describe('welshmanToProseMirror', () => {
     )
   })
 
-  test('assert nostr links inside markdown', ({ }) => {
+  test('assert nostr links inside markdown', () => {
     const event = fakeEvent({
       kind: 30023,
       content: `### Test nostr:nprofile1qqsvvcpmpuwvlmrztkwq3d6nunmhf6hh688jw6fzxyjmtl2d5u5qr8spz3mhxue69uhhyetvv9ujuerpd46hxtnfdufzkeuj`,

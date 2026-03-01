@@ -34,7 +34,7 @@ export type ProfilePointer = {
 
 export type ParseContext = {
   prevTextEndsWithSlash?: boolean
-  prevTextEndsWithOpenParen?: boolean
+  prevTextEndsWithMarkdownLinkOpen?: boolean
   tags: string[][]
 }
 
@@ -179,7 +179,8 @@ export const isTopic = (parsed: Parsed): parsed is ParsedTopic => parsed.type ==
 
 // Parsers for known formats
 
-export const parseAddress = (text: string, _context: ParseContext): ParsedAddress | void => {
+export const parseAddress = (text: string, context: ParseContext): ParsedAddress | void => {
+  void context
   const [naddr] = text.match(/^(web\+)?(nostr:)naddr1[\d\w]+/i) || []
 
   if (naddr) {
@@ -187,13 +188,14 @@ export const parseAddress = (text: string, _context: ParseContext): ParsedAddres
       const { data } = decode(fromNostrURI(naddr))
 
       return { type: ParsedType.Address, value: data as AddressPointer, raw: naddr }
-    } catch (e) {
+    } catch {
       // Pass
     }
   }
 }
 
-export const parseCashu = (text: string, _context: ParseContext): ParsedCashu | void => {
+export const parseCashu = (text: string, context: ParseContext): ParsedCashu | void => {
+  void context
   const [value] = text.match(/^cashu:cashu[-\d\w=]{50,5000}/i) || []
 
   if (value) {
@@ -201,7 +203,8 @@ export const parseCashu = (text: string, _context: ParseContext): ParsedCashu | 
   }
 }
 
-export const parseCodeBlock = (text: string, _context: ParseContext): ParsedCode | void => {
+export const parseCodeBlock = (text: string, context: ParseContext): ParsedCode | void => {
+  void context
   const [raw, value] = text.match(/^```([^]*?)```/i) || []
 
   if (raw) {
@@ -209,7 +212,8 @@ export const parseCodeBlock = (text: string, _context: ParseContext): ParsedCode
   }
 }
 
-export const parseCodeInline = (text: string, _context: ParseContext): ParsedCode | void => {
+export const parseCodeInline = (text: string, context: ParseContext): ParsedCode | void => {
+  void context
   const [raw, value] = text.match(/^`(.*?)`/i) || []
 
   if (raw) {
@@ -227,7 +231,8 @@ export const parseEmoji = (text: string, context: ParseContext): ParsedEmoji | v
   }
 }
 
-export const parseEvent = (text: string, _context: ParseContext): ParsedEvent | void => {
+export const parseEvent = (text: string, context: ParseContext): ParsedEvent | void => {
+  void context
   const [entity] = text.match(/^(web\+)?(nostr:)n(event|ote)1[\d\w]+/i) || []
 
   if (entity) {
@@ -236,14 +241,15 @@ export const parseEvent = (text: string, _context: ParseContext): ParsedEvent | 
       const value = type === "note" ? { id: data as string, relays: [] } : (data as EventPointer)
 
       return { type: ParsedType.Event, value, raw: entity }
-    } catch (e) {
+    } catch {
       // Pass
     }
   }
 }
 
-export const parseInvoice = (text: string, _context: ParseContext): ParsedInvoice | void => {
-  const [raw, _, value] = text.match(/^(lightning:)(ln(bc|url)[0-9a-z]{10,})/i) || []
+export const parseInvoice = (text: string, context: ParseContext): ParsedInvoice | void => {
+  void context
+  const [raw, , value] = text.match(/^(lightning:)(ln(bc|url)[0-9a-z]{10,})/i) || []
 
   if (raw && value) {
     return { type: ParsedType.Invoice, value, raw }
@@ -252,7 +258,7 @@ export const parseInvoice = (text: string, _context: ParseContext): ParsedInvoic
 
 export const parseLink = (text: string, context: ParseContext): ParsedLink | void => {
   // Skip if it's just the end of a filepath
-  if (context.prevTextEndsWithSlash || context.prevTextEndsWithOpenParen) {
+  if (context.prevTextEndsWithSlash || context.prevTextEndsWithMarkdownLinkOpen) {
     return
   }
 
@@ -278,7 +284,7 @@ export const parseLink = (text: string, context: ParseContext): ParsedLink | voi
   let url: URL
   try {
     url = new URL(HAS_PROTOCOL_REGEX.test(link) ? link : "https://" + link)
-  } catch (e) {
+  } catch {
     return
   }
 
@@ -294,7 +300,8 @@ export const parseLink = (text: string, context: ParseContext): ParsedLink | voi
   return { type: ParsedType.Link, value: { url, meta, kind: getLinkKind(url) }, raw: link }
 }
 
-export const parseNewline = (text: string, _context: ParseContext): ParsedNewline | void => {
+export const parseNewline = (text: string, context: ParseContext): ParsedNewline | void => {
+  void context
   const [value] = text.match(/^\n+/) || []
 
   if (value) {
@@ -302,7 +309,8 @@ export const parseNewline = (text: string, _context: ParseContext): ParsedNewlin
   }
 }
 
-export const parseProfile = (text: string, _context: ParseContext): ParsedProfile | void => {
+export const parseProfile = (text: string, context: ParseContext): ParsedProfile | void => {
+  void context
   const [entity] = text.match(/^@?(web\+)?(nostr:)n(profile|pub)1[\d\w]+/i) || []
 
   if (entity) {
@@ -312,14 +320,15 @@ export const parseProfile = (text: string, _context: ParseContext): ParsedProfil
         type === "npub" ? { pubkey: data as string, relays: [] } : (data as ProfilePointer)
 
       return { type: ParsedType.Profile, value, raw: entity }
-    } catch (e) {
+    } catch {
       // Pass
     }
   }
 }
 
-export const parseTopic = (text: string, _context: ParseContext): ParsedTopic | void => {
-  const [value] = text.match(/^#[^\s!\"#$%&'()*+,-.\/:;<=>?@[\\\]^_`{|}~]+/i) || []
+export const parseTopic = (text: string, context: ParseContext): ParsedTopic | void => {
+  void context
+  const [value] = text.match(/^#[^\s!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]+/i) || []
 
   // Skip numeric topics
   if (value && !value.match(/^#\d+$/)) {
@@ -408,12 +417,8 @@ const likelyLinkStart = (raw: string) => {
   if (segment.includes('://')) {
     return true
   }
-  const dotIndex = segment.indexOf('.')
-  if (dotIndex <= 0 || dotIndex >= segment.length - 2) {
-    return false
-  }
-  const tldLength = segment.length - dotIndex - 1
-  return tldLength >= 2 && tldLength <= 6 && hasAllowedBareTld(segment)
+  const normalized = segment.replace(/[)\].,!?:;]+$/, '')
+  return hasAllowedBareTld(normalized)
 }
 
 export const parseNext = (raw: string, context: ParseContext): Parsed | void => {
@@ -457,8 +462,8 @@ export const parseNext = (raw: string, context: ParseContext): Parsed | void => 
 
 type LinkKinds = 'text' | 'image' | 'video' | 'tweet' | 'youtube' | 'spotify'
 
-const LINK_WITH_PROTOCOL_REGEX = /^([a-z\+:]{2,30}:\/\/)[-\.~\w]+([^\s]*[^<>"'\.!,:\s\)\(]+)?/i
-const LINK_WITHOUT_PROTOCOL_REGEX = /^\w+[-\.~\w]+\.[\w]{2,6}([^\s]*[^<>"'\.!,:\s\)\(]+)?/i
+const LINK_WITH_PROTOCOL_REGEX = /^([a-z+:]{2,30}:\/\/)[-.~\w]+([^\s]*[^<>"'.,:\s)(]+)?/i
+const LINK_WITHOUT_PROTOCOL_REGEX = /^\w+[-.~\w]+\.[\w]{2,6}([^\s]*[^<>"'.,:\s)(]+)?/i
 const HAS_PROTOCOL_REGEX = /^\w+:\/\//
 
 const IMAGE_EXTENSIONS = /\.(jpg|jpeg|gif|png|bmp|svg|webp)$/
@@ -735,11 +740,11 @@ export const parse = ({
     emitParsed(parsed)
     if (parsed.type === ParsedType.Text) {
       context.prevTextEndsWithSlash = parsed.value.endsWith("/")
-      context.prevTextEndsWithOpenParen = parsed.value.endsWith("(")
+      context.prevTextEndsWithMarkdownLinkOpen = parsed.value.endsWith('](')
       return
     }
     context.prevTextEndsWithSlash = false
-    context.prevTextEndsWithOpenParen = false
+    context.prevTextEndsWithMarkdownLinkOpen = false
   }
 
   let buffer = ""
@@ -767,7 +772,7 @@ export const parse = ({
       continue
     }
 
-    if (buffer.endsWith('(') && likelyLinkStart(remaining)) {
+    if (buffer.endsWith('](') && likelyLinkStart(remaining)) {
       const [chunk] = remaining.match(LINK_WITH_PROTOCOL_REGEX) ||
         remaining.match(LINK_WITHOUT_PROTOCOL_REGEX) || [remaining[0]]
       buffer += chunk
@@ -973,7 +978,7 @@ const transformMarkdownBlocks = (nodes: ContentCustomSchema['content']): Content
 
     const current = listStack[listStack.length - 1]
     const listItem = createListItem(lineNodes)
-    ;(current.node.content as AnyNode[]).push(listItem)
+      ; (current.node.content as AnyNode[]).push(listItem)
     current.lastItem = listItem
   }
 
