@@ -4,6 +4,7 @@ import { RelayChip } from '@/components/elements/Relays/RelayChip'
 import { RelayFriendsList } from '@/components/elements/Relays/RelayFriendsList'
 import { RelaySelectPopover } from '@/components/elements/Relays/RelaySelectPopover'
 import { Divider } from '@/components/ui/Divider/Divider'
+import { Paper } from '@/components/ui/Paper/Paper'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Switch } from '@/components/ui/Switch/Switch'
 import { Text } from '@/components/ui/Text/Text'
@@ -27,44 +28,46 @@ export const SettingsRelayAuth = memo(function SettingsRelayAuth() {
         </Text>
       </Stack>
       <Divider />
-      <Stack grow horizontal={false} gap={2} align='flex-start' sx={styles.root}>
+      <Stack horizontal={false} gap={2} align='flex-start' sx={styles.root}>
         <Stack sx={styles.description}>
           <Text variant='title' size='sm'>
             Relays asking for authentication when requesting notes, you can choose to automatically authenticate with
             them.
           </Text>
         </Stack>
-        <table style={{ width: '100%' }} cellPadding={4}>
-          <thead>
-            <th align='left' {...css.props(styles.cell$first)}>
-              Relay
-            </th>
-            <th align='right' {...css.props(styles.cell$last)}>
-              Friends part of relay
-            </th>
-            <th align='right' {...css.props(styles.cell$last)}>
-              Auto Authenticate
-            </th>
-          </thead>
-          <tbody {...css.props(styles.tbody)}>
-            {relays.map((url) => (
-              <tr key={url} {...css.props(styles.row)}>
-                <td {...css.props(styles.cell$first)}>
-                  <RelayChip url={url} />
-                </td>
-                <td>
-                  <RelayFriendsList url={url} />
-                </td>
-                <td align='right' {...css.props(styles.cell$last)}>
-                  <Switch checked={authWhitelist.includes(url)} onChange={() => toggleAuthRelay(url)} />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <Stack sx={styles.footer}>
-          <RelaySelectPopover onSubmit={(url) => toggleAuthRelay(url)} />
-        </Stack>
+        <Paper outlined sx={styles.paper}>
+          <table style={{ width: '100%' }} cellPadding={4}>
+            <thead>
+              <th align='left' {...css.props(styles.cell$first)}>
+                Relay
+              </th>
+              <th align='right' {...css.props(styles.cell$last)}>
+                Friends part of relay
+              </th>
+              <th align='right' {...css.props(styles.cell$last)}>
+                Auto Authenticate
+              </th>
+            </thead>
+            <tbody {...css.props(styles.tbody)}>
+              {relays.map((url) => (
+                <tr key={url} {...css.props(styles.row)}>
+                  <td {...css.props(styles.cell$first)}>
+                    <RelayChip url={url} />
+                  </td>
+                  <td>
+                    <RelayFriendsList url={url} />
+                  </td>
+                  <td align='right' {...css.props(styles.cell$last)}>
+                    <Switch checked={authWhitelist.includes(url)} onChange={() => toggleAuthRelay(url)} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <Stack sx={styles.footer}>
+            <RelaySelectPopover onSubmit={(url) => toggleAuthRelay(url)} />
+          </Stack>
+        </Paper>
       </Stack>
     </Stack>
   )
@@ -77,7 +80,11 @@ const styles = css.create({
   root: {
     width: '100%',
     overflowY: 'auto',
+    paddingInline: spacing.padding2,
     paddingBottom: spacing.padding3,
+  },
+  paper: {
+    width: '100%',
   },
   header: {
     paddingBlock: spacing.padding2,
@@ -103,6 +110,6 @@ const styles = css.create({
     paddingRight: spacing.padding2,
   },
   footer: {
-    paddingInline: spacing.padding2,
+    padding: spacing.padding2,
   },
 })
