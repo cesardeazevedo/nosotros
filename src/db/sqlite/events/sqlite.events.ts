@@ -285,7 +285,7 @@ export class SqliteEventStore {
       },
     )
     for (const tag of event.tags) {
-      if (tag.length >= 2 && tag[0].length === 1) {
+      if (tag.length >= 2 && (tag[0].length === 1 || tag[0] === 'expiration')) {
         db.exec(
           `INSERT OR IGNORE INTO tags (eventId, tag, value, kind, pubkey, created_at)
           VALUES (?, ?, ?, ?, ?, ?)`,
