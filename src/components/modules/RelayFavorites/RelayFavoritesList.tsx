@@ -7,6 +7,7 @@ import { prettyRelayUrl } from '@/core/helpers/formatRelayUrl'
 import { useRelayFavorites } from '@/hooks/state/useRelayFavorites'
 import { IconChevronDown } from '@tabler/icons-react'
 import { memo, useState } from 'react'
+import { css } from 'react-strict-dom'
 
 type Props = {
   limit?: number
@@ -33,6 +34,7 @@ export const RelayFavoritesList = memo(function RelayFavoritesList(props: Props)
               selected={isActive}
               label={prettyRelayUrl(relay)}
               leadingIcon={<RelayIcon size='sm' url={relay} />}
+              sx={styles.menuItem}
             />
           )}
         </LinkRelayFeed>
@@ -47,4 +49,10 @@ export const RelayFavoritesList = memo(function RelayFavoritesList(props: Props)
       )}
     </Stack>
   )
+})
+
+const styles = css.create({
+  menuItem: {
+    maxWidth: 290,
+  },
 })
