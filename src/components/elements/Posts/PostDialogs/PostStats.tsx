@@ -70,7 +70,7 @@ const JsonContent = function PostUserJson(props: { value?: object }) {
 
 export const PostStats = (props: Props) => {
   const { event, onClose } = props
-  const { metadata, ...data } = event
+  const { ...data } = event
   const isMobile = useMobile()
   return (
     <RemoveScroll>

@@ -13,7 +13,7 @@ import { memo, useCallback, useState } from 'react'
 import { css, html } from 'react-strict-dom'
 import { EditorProvider } from '../Editor/EditorProvider'
 import { Replies } from '../Replies/Replies'
-import { RepliesPreview } from '../Replies/RepliesPreview'
+// import { RepliesPreview } from '../Replies/RepliesPreview'
 import { PostActions } from './PostActions/PostActions'
 import { PostContent } from './PostContent'
 import { PostContentHidden } from './PostContentHidden'
@@ -46,15 +46,15 @@ export const PostRoot = memo(function PostRoot(props: Props) {
       <html.article style={[isFeed && styles.divider]}>
         <PostLink note={note}>
           {event.pubkey === pubkey && <PostCountdown id={event.id} />}
+          {note.event.kind === Kind.Article && <ArticleHeadline />}
           {header || <PostHeader event={event} />}
           {hideContent && <PostContentHidden onClick={() => setShowMutedContent(true)} />}
           {!hideContent && (
             <>
-              {note.event.kind === Kind.Article && <ArticleHeadline />}
               <PostContent note={note} />
               <PostActions note={note} onReplyClick={openReplies} />
               <PostStats note={note} renderDivider />
-              {note.state.repliesOpen === null && event.kind === Kind.Text && <RepliesPreview note={note} />}
+              {/* {note.state.repliesOpen === null && event.kind === Kind.Text && <RepliesPreview note={note} />} */}
             </>
           )}
         </PostLink>
