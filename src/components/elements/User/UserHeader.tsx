@@ -34,7 +34,7 @@ export const UserHeader = memo(function UserHeader(props: Props) {
   return (
     <Stack horizontal gap={2} align='center' sx={styles.root} {...rest}>
       {renderAvatar && <UserAvatar pubkey={pubkey} size={dense ? 'sm' : 'md'} {...userAvatarProps} />}
-      <Stack horizontal={false}>
+      <Stack horizontal={false} sx={styles.content}>
         <UserName pubkey={pubkey} size={size}>
           {children}
         </UserName>
@@ -48,6 +48,11 @@ export const UserHeader = memo(function UserHeader(props: Props) {
 const styles = css.create({
   root: {
     height: 40,
+  },
+  content: {
+    minWidth: 0,
+    flex: 1,
+    overflow: 'hidden',
   },
   nip05: {
     opacity: 0.66,

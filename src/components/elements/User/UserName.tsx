@@ -62,7 +62,7 @@ export const UserName = memo(function UserName(props: Props) {
     </LinkProfile>
   )
   return (
-    <Stack gap={0.5} sx={props.sx}>
+    <Stack gap={0.5} sx={[styles.root, props.sx]}>
       {!user && <UserNameSkeletonOrPubkey pubkey={pubkey} size={size} {...rest} />}
       <UserPopover pubkey={pubkey}>{textWithLink}</UserPopover>
       {currentUser?.followsTag(user?.pubkey) && (
@@ -74,6 +74,9 @@ export const UserName = memo(function UserName(props: Props) {
 })
 
 const styles = css.create({
+  root: {
+    minWidth: 0,
+  },
   loading: {
     marginLeft: 0,
     alignSelf: 'center',

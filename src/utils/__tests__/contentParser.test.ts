@@ -44,6 +44,27 @@ describe('welshmanToProseMirror', () => {
     })
   })
 
+  test('assert paragraph then typescript codeblock', () => {
+    const event = fakeEvent({
+      content: 'Intro text\n```ts\nconst x: number = 1\n```',
+    })
+    const { contentSchema } = parse({ content: event.content, tags: event.tags, markdown: true })
+    expect(contentSchema).toStrictEqual({
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [{ type: 'text', text: 'Intro text' }],
+        },
+        {
+          type: 'codeBlock',
+          attrs: { language: 'ts' },
+          content: [{ type: 'text', text: 'const x: number = 1\n' }],
+        },
+      ],
+    })
+  })
+
   test('assert trimParagraph', () => {
     expect(cleanParagraph({ type: 'paragraph' })).toBeNull()
     expect(cleanParagraph({ type: 'paragraph', content: [] })).toBeNull()
@@ -139,6 +160,36 @@ describe('welshmanToProseMirror', () => {
     })
   })
 
+  test('assert emoji tag parses to inline emoji node', () => {
+    const event = fakeEvent({
+      content: ':partyblob:',
+      tags: [
+        ['emoji', 'partyblob', 'https://cdn.example.com/partyblob.webp'],
+        ['client', 'TestClient'],
+      ],
+    })
+
+    const { contentSchema } = parse({ content: event.content, tags: event.tags })
+
+    expect(contentSchema).toStrictEqual({
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [
+            {
+              type: 'emoji',
+              attrs: {
+                name: 'partyblob',
+                src: 'https://cdn.example.com/partyblob.webp',
+              },
+            },
+          ],
+        },
+      ],
+    })
+  })
+
   test('assert subdomain bare link', () => {
     const event = fakeEvent({
       content: 'Docs: docs.api.nostr.com/path',
@@ -180,6 +231,102 @@ describe('welshmanToProseMirror', () => {
               marks: [{ type: 'link', attrs: { href: 'https://dev.nosotros.app/' } }],
             },
             { type: 'text', text: ')' },
+          ],
+        },
+      ],
+    })
+  })
+
+  test('assert markdown link text preserved inside nested list', () => {
+    const event = fakeEvent({
+      kind: 30023,
+      content:
+        '* parent\n  * [seems](https://chromium.googlesource.com/chromium/src/+/HEAD/net/docs/proxy.md#Downloading-PAC-scripts)',
+    })
+    const { contentSchema } = parse({ content: event.content, tags: event.tags, markdown: true })
+    expect(contentSchema).toStrictEqual({
+      type: 'doc',
+      content: [
+        {
+          type: 'bulletList',
+          attrs: { tight: true },
+          content: [
+            {
+              type: 'listItem',
+              content: [
+                {
+                  type: 'paragraph',
+                  content: [{ type: 'text', text: 'parent' }],
+                },
+                {
+                  type: 'bulletList',
+                  attrs: { tight: true },
+                  content: [
+                    {
+                      type: 'listItem',
+                      content: [
+                        {
+                          type: 'paragraph',
+                          content: [
+                            {
+                              type: 'text',
+                              text: 'seems',
+                              marks: [
+                                {
+                                  type: 'link',
+                                  attrs: {
+                                    href: 'https://chromium.googlesource.com/chromium/src/+/HEAD/net/docs/proxy.md#Downloading-PAC-scripts',
+                                    class: null,
+                                    target: '_blank',
+                                    rel: 'noopener noreferrer nofollow',
+                                  },
+                                },
+                              ],
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    })
+  })
+
+  test('assert italic markdown link keeps both marks', () => {
+    const event = fakeEvent({
+      content:
+        '*[seems](https://chromium.googlesource.com/chromium/src/+/HEAD/net/docs/proxy.md#Downloading-PAC-scripts)*',
+    })
+    const { contentSchema } = parse({ content: event.content, tags: event.tags, markdown: true })
+    expect(contentSchema).toStrictEqual({
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [
+            {
+              type: 'text',
+              text: 'seems',
+              marks: [
+                {
+                  type: 'link',
+                  attrs: {
+                    href: 'https://chromium.googlesource.com/chromium/src/+/HEAD/net/docs/proxy.md#Downloading-PAC-scripts',
+                    class: null,
+                    target: '_blank',
+                    rel: 'noopener noreferrer nofollow',
+                  },
+                },
+                {
+                  type: 'italic',
+                },
+              ],
+            },
           ],
         },
       ],
@@ -456,7 +603,7 @@ describe('welshmanToProseMirror', () => {
     })
   })
 
-  test('assert plain text paragraphs keep double hard break', () => {
+  test('assert plain text paragraphs become separate paragraphs in markdown', () => {
     const event = fakeEvent({
       content:
         "It takes a lot of time to learn how to properly prompt to get the results that you want. You have to wear new hats and do things that you're probably not used to doing. I can only say that practice makes perfect or at least helps.\n\nI don't have a video. It was a private session. Perhaps I'll record one and post it.",
@@ -474,13 +621,37 @@ describe('welshmanToProseMirror', () => {
               type: 'text',
               text: "It takes a lot of time to learn how to properly prompt to get the results that you want. You have to wear new hats and do things that you're probably not used to doing. I can only say that practice makes perfect or at least helps.",
             },
-            { type: 'hardBreak' },
-            { type: 'hardBreak' },
+          ],
+        },
+        {
+          type: 'paragraph',
+          content: [
             {
               type: 'text',
               text: "I don't have a video. It was a private session. Perhaps I'll record one and post it.",
             },
           ],
+        },
+      ],
+    })
+  })
+
+  test('assert two markdown paragraphs', () => {
+    const event = fakeEvent({
+      kind: 30023,
+      content: 'line1\n\nline2',
+    })
+    const { contentSchema } = parse({ content: event.content, tags: event.tags, markdown: true })
+    expect(contentSchema).toStrictEqual({
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [{ type: 'text', text: 'line1' }],
+        },
+        {
+          type: 'paragraph',
+          content: [{ type: 'text', text: 'line2' }],
         },
       ],
     })

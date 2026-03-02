@@ -64,6 +64,18 @@ export const TextContent = (props: Props) => {
     <Text size='lg' element={html.div} {...rest} sx={[styles.root, rest.sx]}>
       {node.content?.map((node, index) => (
         <React.Fragment key={node.type + index}>
+          {(() => {
+            const emojiNode = node as unknown as { type?: string; attrs?: { name?: string; src?: string } }
+            if (emojiNode.type !== 'emoji' || !emojiNode.attrs?.src) return null
+            return (
+              <html.img
+                alt={`:${emojiNode.attrs.name || 'emoji'}:`}
+                src={emojiNode.attrs.src}
+                style={styles.emoji}
+                draggable={false}
+              />
+            )
+          })()}
           {node.type === 'nprofile' && <NProfile pubkey={node.attrs.pubkey} />}
           {node.type === 'text' && <TextMark node={node} shrinkLink={shrinkLink} />}
           {node.type === 'nevent' && <NEventInline attrs={node.attrs} />}
@@ -79,5 +91,12 @@ const styles = css.create({
   root: {
     // handle \n
     whiteSpace: 'pre-wrap',
+  },
+  emoji: {
+    display: 'inline-block',
+    width: '1.2em',
+    height: '1.2em',
+    verticalAlign: 'text-bottom',
+    objectFit: 'contain',
   },
 })

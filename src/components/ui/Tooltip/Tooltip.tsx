@@ -1,5 +1,6 @@
 import { duration } from '@/themes/duration.stylex'
 import { easing } from '@/themes/easing.stylex'
+import { useMobile } from '@/hooks/useMobile'
 import type { Placement } from '@floating-ui/react'
 import React, { cloneElement, isValidElement, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import { css } from 'react-strict-dom'
@@ -68,6 +69,15 @@ const getCursorStyle = (placement: Placement): React.CSSProperties => {
   return base
 }
 
+const assignRef = <T,>(ref: React.Ref<T> | undefined, value: T | null) => {
+  if (!ref) return
+  if (typeof ref === 'function') {
+    ref(value)
+    return
+  }
+  ; (ref as React.MutableRefObject<T | null>).current = value
+}
+
 const getPosition = (rect: DOMRect, tipWidth: number, tipHeight: number, placement: Placement): TooltipPosition => {
   const align = getAlignPlacement(placement)
   switch (placement) {
@@ -121,6 +131,7 @@ const getPosition = (rect: DOMRect, tipWidth: number, tipHeight: number, placeme
 
 export const Tooltip = function Tooltip(props: Props) {
   const { children, text, enterDelay = 700, keepMounted, opened: openedProp, placement = 'bottom', cursor = 'arrow' } = props
+  const isMobile = useMobile()
   const id = useId()
   const triggerRef = useRef<HTMLSpanElement | null>(null)
   const popoverRef = useRef<HTMLDivElement | null>(null)
@@ -133,6 +144,10 @@ export const Tooltip = function Tooltip(props: Props) {
 
   const isControlled = openedProp !== undefined
   const isOpen = openedProp ?? opened
+
+  if (isMobile) {
+    return children
+  }
 
   const refreshPosition = useCallback(() => {
     const trigger = triggerRef.current
@@ -312,6 +327,7 @@ export const Tooltip = function Tooltip(props: Props) {
       ref?: React.Ref<HTMLElement>
       'aria-describedby'?: string
     }>
+    const childWithRef = child as React.ReactElement & { ref?: React.Ref<HTMLElement> }
 
     const mergedProps = {
       ...triggerProps,
@@ -333,6 +349,7 @@ export const Tooltip = function Tooltip(props: Props) {
       },
       ref: (node: HTMLElement | null) => {
         setTriggerRef(node as HTMLSpanElement | null)
+        assignRef(childWithRef.ref, node)
       },
     }
 

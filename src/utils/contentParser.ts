@@ -212,6 +212,26 @@ export const parseCodeBlock = (text: string, context: ParseContext): ParsedCode 
   }
 }
 
+const CODE_BLOCK_LANGUAGE_REGEX = /^[a-z0-9][\w+-]*$/i
+
+const parseCodeBlockValue = (raw: string) => {
+  const inner = raw.slice(3, -3)
+  const firstNewline = inner.indexOf('\n')
+  if (firstNewline > -1) {
+    const firstLine = inner.slice(0, firstNewline).trim()
+    if (CODE_BLOCK_LANGUAGE_REGEX.test(firstLine)) {
+      return {
+        language: firstLine,
+        code: inner.slice(firstNewline + 1),
+      }
+    }
+  }
+  return {
+    language: '',
+    code: inner,
+  }
+}
+
 export const parseCodeInline = (text: string, context: ParseContext): ParsedCode | void => {
   void context
   const [raw, value] = text.match(/^`(.*?)`/i) || []
@@ -621,13 +641,14 @@ export const parse = ({
       case ParsedType.Code: {
         const isBlock = parsed.raw.startsWith('```')
         if (isBlock) {
+          const { language, code } = parseCodeBlockValue(parsed.raw)
           pushParagraph()
           pushBlockNode({
             type: 'codeBlock',
             attrs: {
-              language: '',
+              language,
             },
-            content: [{ type: 'text', text: parsed.value }],
+            content: [{ type: 'text', text: code }],
           })
         } else {
           currentParagraph.content.push({ type: 'text', text: parsed.value, marks: [{ type: 'code' }] })
@@ -728,7 +749,17 @@ export const parse = ({
         break
       }
       case ParsedType.Emoji: {
-        currentParagraph.content.push({ type: 'text', text: parsed.raw })
+        if (parsed.value.url) {
+          currentParagraph.content.push({
+            type: 'emoji',
+            attrs: {
+              name: parsed.value.name,
+              src: parsed.value.url,
+            },
+          } as never)
+        } else {
+          currentParagraph.content.push({ type: 'text', text: parsed.raw })
+        }
         break
       }
       default:
@@ -879,36 +910,50 @@ const splitParagraphLines = (paragraph: AnyNode): AnyNode[][] => {
 }
 
 const parseInlineMarkdownText = (value: string): AnyNode[] => {
+  const withMark = (nodes: AnyNode[], type: 'bold' | 'italic') =>
+    nodes.map((node) => {
+      if (node.type !== 'text') {
+        return node
+      }
+      const marks = Array.isArray(node.marks) ? node.marks : []
+      return { ...node, marks: [...marks, { type }] }
+    })
+
   const output: AnyNode[] = []
   let remaining = value
   while (remaining.length > 0) {
-    const linkMatch = remaining.match(MD_LINK_REGEX)
-    const boldMatch = remaining.match(BOLD_REGEX)
-    const italicMatch = remaining.match(ITALIC_REGEX)
+    const candidates = [
+      { kind: 'link' as const, match: remaining.match(MD_LINK_REGEX) },
+      { kind: 'bold' as const, match: remaining.match(BOLD_REGEX) },
+      { kind: 'italic' as const, match: remaining.match(ITALIC_REGEX) },
+    ].filter((item) => !!item.match) as Array<{
+      kind: 'link' | 'bold' | 'italic'
+      match: RegExpMatchArray
+    }>
 
-    const candidates = [linkMatch, boldMatch, italicMatch].filter(Boolean) as RegExpMatchArray[]
     if (candidates.length === 0) {
       output.push({ type: 'text', text: remaining })
       break
     }
 
-    candidates.sort((a, b) => (a.index || 0) - (b.index || 0))
-    const match = candidates[0]
+    candidates.sort((a, b) => (a.match.index || 0) - (b.match.index || 0))
+    const candidate = candidates[0]
+    const match = candidate.match
     const index = match.index || 0
     if (index > 0) {
       output.push({ type: 'text', text: remaining.slice(0, index) })
     }
 
-    if (match[0] === linkMatch?.[0]) {
+    if (candidate.kind === 'link') {
       output.push({
         type: 'text',
         text: match[1],
         marks: [{ type: 'link', attrs: { href: match[2], ...LINK_MARK_ATTRS } }],
       })
-    } else if (match[0] === boldMatch?.[0]) {
-      output.push({ type: 'text', text: match[1], marks: [{ type: 'bold' }] })
+    } else if (candidate.kind === 'bold') {
+      output.push(...withMark(parseInlineMarkdownText(match[1]), 'bold'))
     } else {
-      output.push({ type: 'text', text: match[1], marks: [{ type: 'italic' }] })
+      output.push(...withMark(parseInlineMarkdownText(match[1]), 'italic'))
     }
 
     remaining = remaining.slice(index + match[0].length)
@@ -939,7 +984,7 @@ const createListItem = (lineNodes: AnyNode[]) => {
 
 const transformMarkdownBlocks = (nodes: ContentCustomSchema['content']): ContentCustomSchema['content'] => {
   const output: AnyNode[] = []
-  const listStack: Array<{ indent: number; node: AnyNode; lastItem: AnyNode | null }> = []
+  const listStack: Array<{ indent: number; node: AnyNode; lastItem: AnyNode | null; isRoot: boolean }> = []
   let paragraphBuffer: AnyNode[] = []
   let markdownMode = false
 
@@ -954,7 +999,7 @@ const transformMarkdownBlocks = (nodes: ContentCustomSchema['content']): Content
   const flushLists = () => {
     while (listStack.length > 0) {
       const list = listStack.shift()
-      if (list) {
+      if (list?.isRoot) {
         output.push(list.node)
       }
     }
@@ -966,35 +1011,21 @@ const transformMarkdownBlocks = (nodes: ContentCustomSchema['content']): Content
     }
 
     if (listStack.length === 0 || indent > listStack[listStack.length - 1].indent) {
+      const isRoot = listStack.length === 0
       const newList: AnyNode = { type: 'bulletList', attrs: { tight: true }, content: [] }
-      if (listStack.length > 0 && listStack[listStack.length - 1].lastItem) {
+      if (!isRoot && listStack[listStack.length - 1].lastItem) {
         const parentItem = listStack[listStack.length - 1].lastItem!
         const parentContent = (parentItem.content as AnyNode[]) || []
         parentContent.push(newList)
         parentItem.content = parentContent
       }
-      listStack.push({ indent, node: newList, lastItem: null })
+      listStack.push({ indent, node: newList, lastItem: null, isRoot })
     }
 
     const current = listStack[listStack.length - 1]
     const listItem = createListItem(lineNodes)
       ; (current.node.content as AnyNode[]).push(listItem)
     current.lastItem = listItem
-  }
-
-  const isMarkdownBlockLine = (lineNodes: AnyNode[]) => {
-    if (lineNodes.length === 0) {
-      return false
-    }
-    const firstText = getText(lineNodes[0])
-    if (firstText.length === 0) {
-      return false
-    }
-    return (
-      HEADING_PREFIX_REGEX.test(firstText) ||
-      BULLET_PREFIX_REGEX.test(firstText) ||
-      (HORIZONTAL_RULE_REGEX.test(firstText) && lineNodes.every((n) => n.type === 'text'))
-    )
   }
 
   for (let i = 0; i < nodes.length; i++) {
@@ -1011,18 +1042,6 @@ const transformMarkdownBlocks = (nodes: ContentCustomSchema['content']): Content
     for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
       const lineNodes = lines[lineIndex]
       if (lineNodes.length === 0) {
-        const nextNonEmptyLine = lines.slice(lineIndex + 1).find((nextLine) => nextLine.length > 0)
-        const shouldPreservePlainSpacing =
-          !markdownMode &&
-          listStack.length === 0 &&
-          paragraphBuffer.length > 0 &&
-          !!nextNonEmptyLine &&
-          !isMarkdownBlockLine(nextNonEmptyLine)
-        if (shouldPreservePlainSpacing) {
-          // Preserve plain-text paragraph spacing as double hard breaks.
-          paragraphBuffer.push({ type: 'hardBreak' }, { type: 'hardBreak' })
-          continue
-        }
         flushParagraph()
         flushLists()
         continue
@@ -1085,6 +1104,7 @@ const transformMarkdownBlocks = (nodes: ContentCustomSchema['content']): Content
   flushLists()
   return output as ContentCustomSchema['content']
 }
+
 
 type TruncateOpts = {
   minLength?: number
