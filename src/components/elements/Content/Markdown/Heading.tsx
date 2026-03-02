@@ -22,7 +22,7 @@ export const Heading = (props: Props) => {
 
 const styles = css.create({
   root: {
-    marginTop: spacing.margin6,
+    marginTop: spacing.margin4,
     marginBottom: spacing.margin1,
     paddingLeft: spacing.padding2,
   },
