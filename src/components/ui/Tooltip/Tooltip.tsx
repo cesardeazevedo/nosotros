@@ -145,10 +145,6 @@ export const Tooltip = function Tooltip(props: Props) {
   const isControlled = openedProp !== undefined
   const isOpen = openedProp ?? opened
 
-  if (isMobile) {
-    return children
-  }
-
   const refreshPosition = useCallback(() => {
     const trigger = triggerRef.current
     const popover = popoverRef.current
@@ -355,6 +351,10 @@ export const Tooltip = function Tooltip(props: Props) {
 
     return cloneElement(child, mergedProps)
   }, [children, handleLeave, id, isOpen, scheduleOpen, setTriggerRef])
+
+  if (isMobile) {
+    return children
+  }
 
   return (
     <>
