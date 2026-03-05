@@ -108,4 +108,25 @@ describe('assert feed atoms', () => {
     unsubscribe()
     createFeedQueryOptionsSpy.mockRestore()
   })
+
+  test('assert sync updates includeReplies from route options', () => {
+    const testStore = createStore()
+    const feedAtoms = createFeedAtoms(
+      createFeedModule('feed/sync-replies', {
+        includeReplies: true,
+        filter: { kinds: [Kind.Text] },
+      }),
+    )
+
+    expect(testStore.get(feedAtoms.atom).includeReplies).toBe(true)
+
+    testStore.set(feedAtoms.sync, {
+      ...createFeedModule('feed/sync-replies', {
+        includeReplies: false,
+        filter: { kinds: [Kind.Text] },
+      }),
+    })
+
+    expect(testStore.get(feedAtoms.atom).includeReplies).toBe(false)
+  })
 })
