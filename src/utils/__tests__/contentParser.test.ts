@@ -294,6 +294,78 @@ describe('welshmanToProseMirror', () => {
     })
   })
 
+  test('assert strikethrough markdown', () => {
+    const event = fakeEvent({
+      content: 'Before ~~removed~~ after',
+    })
+    const { contentSchema } = parse({ content: event.content, tags: event.tags, markdown: true })
+    expect(contentSchema).toStrictEqual({
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [
+            { type: 'text', text: 'Before ' },
+            {
+              type: 'text',
+              text: 'removed',
+              marks: [{ type: 'strike' }],
+            },
+            { type: 'text', text: ' after' },
+          ],
+        },
+      ],
+    })
+  })
+
+  test('assert italic underscore markdown', () => {
+    const event = fakeEvent({
+      content: 'Before _soft_ after',
+    })
+    const { contentSchema } = parse({ content: event.content, tags: event.tags, markdown: true })
+    expect(contentSchema).toStrictEqual({
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [
+            { type: 'text', text: 'Before ' },
+            {
+              type: 'text',
+              text: 'soft',
+              marks: [{ type: 'italic' }],
+            },
+            { type: 'text', text: ' after' },
+          ],
+        },
+      ],
+    })
+  })
+
+  test('assert bold underscore markdown', () => {
+    const event = fakeEvent({
+      content: 'Before __strong__ after',
+    })
+    const { contentSchema } = parse({ content: event.content, tags: event.tags, markdown: true })
+    expect(contentSchema).toStrictEqual({
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [
+            { type: 'text', text: 'Before ' },
+            {
+              type: 'text',
+              text: 'strong',
+              marks: [{ type: 'bold' }],
+            },
+            { type: 'text', text: ' after' },
+          ],
+        },
+      ],
+    })
+  })
+
   test('assert markdown link text preserved inside nested list', () => {
     const event = fakeEvent({
       kind: 30023,
