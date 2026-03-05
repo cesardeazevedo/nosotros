@@ -522,7 +522,7 @@ export function cleanParagraph(paragraph: ParagraphNode): ParagraphNode | null {
     return null
   }
   const nodes = paragraph.content
-  const isEmptyText = (node: Node) => node.type === 'text' && (node.text === '' || node.text === ' ')
+  const isEmptyText = (node: Node) => node.type === 'text' && node.text.trim() === ''
 
   let start = 0
   while (start < nodes.length) {
@@ -864,7 +864,10 @@ const HEADING_PREFIX_REGEX = /^(\s{0,3})(#{1,6})\s+/
 const BULLET_PREFIX_REGEX = /^(\s*)([*-])\s+/
 const HORIZONTAL_RULE_REGEX = /^\s{0,3}(?:(?:\*\s*){3,}|(?:-\s*){3,}|(?:_\s*){3,})$/
 const BOLD_REGEX = /\*\*([^*\n]+)\*\*/
+const BOLD_UNDERSCORE_REGEX = /__([^_\n]+)__/
 const ITALIC_REGEX = /\*([^*\n]+)\*/
+const ITALIC_UNDERSCORE_REGEX = /_([^_\n]+)_/
+const STRIKE_REGEX = /~~([^~\n]+)~~/
 const MD_LINK_REGEX = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/
 
 const getText = (node: AnyNode) => (node.type === 'text' && typeof node.text === 'string' ? node.text : '')
@@ -910,7 +913,7 @@ const splitParagraphLines = (paragraph: AnyNode): AnyNode[][] => {
 }
 
 const parseInlineMarkdownText = (value: string): AnyNode[] => {
-  const withMark = (nodes: AnyNode[], type: 'bold' | 'italic') =>
+  const withMark = (nodes: AnyNode[], type: 'bold' | 'italic' | 'strike') =>
     nodes.map((node) => {
       if (node.type !== 'text') {
         return node
@@ -925,9 +928,12 @@ const parseInlineMarkdownText = (value: string): AnyNode[] => {
     const candidates = [
       { kind: 'link' as const, match: remaining.match(MD_LINK_REGEX) },
       { kind: 'bold' as const, match: remaining.match(BOLD_REGEX) },
+      { kind: 'bold' as const, match: remaining.match(BOLD_UNDERSCORE_REGEX) },
       { kind: 'italic' as const, match: remaining.match(ITALIC_REGEX) },
+      { kind: 'italic' as const, match: remaining.match(ITALIC_UNDERSCORE_REGEX) },
+      { kind: 'strike' as const, match: remaining.match(STRIKE_REGEX) },
     ].filter((item) => !!item.match) as Array<{
-      kind: 'link' | 'bold' | 'italic'
+      kind: 'link' | 'bold' | 'italic' | 'strike'
       match: RegExpMatchArray
     }>
 
@@ -952,6 +958,8 @@ const parseInlineMarkdownText = (value: string): AnyNode[] => {
       })
     } else if (candidate.kind === 'bold') {
       output.push(...withMark(parseInlineMarkdownText(match[1]), 'bold'))
+    } else if (candidate.kind === 'strike') {
+      output.push(...withMark(parseInlineMarkdownText(match[1]), 'strike'))
     } else {
       output.push(...withMark(parseInlineMarkdownText(match[1]), 'italic'))
     }

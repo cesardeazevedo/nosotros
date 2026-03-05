@@ -102,9 +102,13 @@ const styles = css.create({
   },
   content: {
     paddingBlock: spacing.padding1,
+    width: '100%',
+    minWidth: 0,
   },
   wrapper: {
+    flex: 1,
     width: '100%',
+    minWidth: 0,
   },
   current: {
     position: 'absolute',

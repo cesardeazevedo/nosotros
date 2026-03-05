@@ -1,5 +1,4 @@
 import { setCurrentVideoAtom } from '@/atoms/media.atoms'
-import { visibleOnHoverStyle } from '@/components/ui/helpers/visibleOnHover.stylex'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { TooltipRich } from '@/components/ui/TooltipRich/TooltipRich'
@@ -8,7 +7,7 @@ import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconMaximize, IconPictureInPicture } from '@tabler/icons-react'
 import { useSetAtom } from 'jotai'
-import type { ChangeEvent, SyntheticEvent } from 'react'
+import type { ChangeEvent, MouseEvent as ReactMouseEvent, SyntheticEvent } from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { css, html } from 'react-strict-dom'
 import { IconPause } from '../../Icons/IconPause'
@@ -34,6 +33,7 @@ export const VideoControls = function VideoControls(props: Props) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [isMuted, setIsMuted] = useState(false)
   const [isHovering, setIsHovering] = useState(false)
+  const [isPointerOverMedia, setIsPointerOverMedia] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
 
   const containerRef = useRef<HTMLDivElement>(null)
@@ -100,6 +100,28 @@ export const VideoControls = function VideoControls(props: Props) {
       video.removeEventListener('volumechange', updateMuted)
     }
   }, [ref.current, duration])
+
+  useEffect(() => {
+    const video = ref.current
+    if (!video) return
+
+    const onEnter = () => setIsPointerOverMedia(true)
+    const onLeave = (event: MouseEvent) => {
+      const nextTarget = event.relatedTarget as Node | null
+      if (nextTarget && containerRef.current?.contains(nextTarget)) {
+        return
+      }
+      setIsPointerOverMedia(false)
+    }
+
+    video.addEventListener('mouseenter', onEnter)
+    video.addEventListener('mouseleave', onLeave)
+
+    return () => {
+      video.removeEventListener('mouseenter', onEnter)
+      video.removeEventListener('mouseleave', onLeave)
+    }
+  }, [ref])
 
   useEffect(() => {
     const video = ref.current
@@ -259,7 +281,15 @@ export const VideoControls = function VideoControls(props: Props) {
   return (
     <html.div
       ref={containerRef}
-      style={[styles.container, (isPlaying || (ref.current?.currentTime || 0) === 0) && visibleOnHoverStyle.item, sx]}
+      style={[styles.container, !isPointerOverMedia && styles.container$hidden, sx]}
+      onMouseEnter={() => setIsPointerOverMedia(true)}
+      onMouseLeave={(event: ReactMouseEvent<HTMLDivElement>) => {
+        const nextTarget = event.relatedTarget as Node | null
+        if (nextTarget && ref.current?.contains(nextTarget)) {
+          return
+        }
+        setIsPointerOverMedia(false)
+      }}
       onClick={(event) => {
         event.preventDefault()
         event.stopPropagation()
@@ -342,6 +372,9 @@ const styles = css.create({
     paddingBottom: 8,
     cursor: 'default',
     pointerEvents: 'auto',
+  },
+  container$hidden: {
+    opacity: 0,
   },
   progressContainer: {
     width: '100%',

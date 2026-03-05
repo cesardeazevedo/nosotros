@@ -181,13 +181,14 @@ export function createFeedAtoms<T extends FeedModule>(options: T) {
   })
 
   const sync = atom(null, (get, set, newOptions: T) => {
+    const currentState = get(baseAtoms.atom)
     const persistentState = get(persistentFeedStatesAtom)[options.id] as T
     const updates = {} as Partial<T>
 
-    if (!persistentState?.filter) {
+    if (!persistentState?.filter || !strictDeepEqual(currentState.filter, newOptions.filter)) {
       updates.filter = newOptions.filter
     }
-    if (persistentState?.includeReplies !== newOptions.includeReplies) {
+    if (currentState.includeReplies !== newOptions.includeReplies) {
       updates.includeReplies = newOptions.includeReplies
     }
 
