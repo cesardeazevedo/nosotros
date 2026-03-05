@@ -144,6 +144,63 @@ describe('welshmanToProseMirror', () => {
     })
   })
 
+  test('assert groups consecutive blossom images after text', () => {
+    const event = fakeEvent({
+      content:
+        'Here you go, been at it for 30+ years, help run local classes - still learning!\n\n  https://blossom.primal.net/6c767220ad6fa5c45158af8758d642b704d6ba5cfdec17a234dc362f808ab00d.jpg  https://blossom.primal.net/e35cee65a9a13e0d8ef1b9f36f1cf4e4ff3a193984f901cd48548baefd1c9637.jpg  https://blossom.primal.net/a4f1326185b06776e0790ef52a25b4214ce58b318fd852f2907ae72d6732967f.jpg  https://blossom.primal.net/8fd53bc6b0185493a806c78fbb53bfef9a2f471a74dbe7d7a2aa024328373f5c.jpg ',
+    })
+
+    const { contentSchema } = parse({ content: event.content, tags: event.tags })
+
+    expect(contentSchema).toStrictEqual({
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [
+            {
+              type: 'text',
+              text: 'Here you go, been at it for 30+ years, help run local classes - still learning!',
+            },
+          ],
+        },
+        {
+          type: 'mediaGroup',
+          content: [
+            {
+              type: 'image',
+              attrs: {
+                src: 'https://blossom.primal.net/6c767220ad6fa5c45158af8758d642b704d6ba5cfdec17a234dc362f808ab00d.jpg',
+              },
+              index: 0,
+            },
+            {
+              type: 'image',
+              attrs: {
+                src: 'https://blossom.primal.net/e35cee65a9a13e0d8ef1b9f36f1cf4e4ff3a193984f901cd48548baefd1c9637.jpg',
+              },
+              index: 1,
+            },
+            {
+              type: 'image',
+              attrs: {
+                src: 'https://blossom.primal.net/a4f1326185b06776e0790ef52a25b4214ce58b318fd852f2907ae72d6732967f.jpg',
+              },
+              index: 2,
+            },
+            {
+              type: 'image',
+              attrs: {
+                src: 'https://blossom.primal.net/8fd53bc6b0185493a806c78fbb53bfef9a2f471a74dbe7d7a2aa024328373f5c.jpg',
+              },
+              index: 3,
+            },
+          ],
+        },
+      ],
+    })
+  })
+
   test('assert spotify embed', () => {
     const event = fakeEvent({
       content: 'https://open.spotify.com/embed/track/123',

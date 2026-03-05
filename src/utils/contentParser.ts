@@ -522,7 +522,7 @@ export function cleanParagraph(paragraph: ParagraphNode): ParagraphNode | null {
     return null
   }
   const nodes = paragraph.content
-  const isEmptyText = (node: Node) => node.type === 'text' && (node.text === '' || node.text === ' ')
+  const isEmptyText = (node: Node) => node.type === 'text' && node.text.trim() === ''
 
   let start = 0
   while (start < nodes.length) {
