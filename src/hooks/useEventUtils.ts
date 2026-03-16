@@ -99,10 +99,20 @@ export function useImetaList(event: NostrEventDB | undefined) {
         })
         .filter((x): x is ['image' | 'video', string, IMetaFields] => x[0] === 'image' || x[0] === 'video')
     }
+
+    const media =
+      event?.metadata?.contentSchema?.content.flatMap((x) => {
+        if (x.type === 'image' || x.type === 'video') {
+          return [x]
+        }
+        if (x.type === 'mediaGroup') {
+          return x.content.filter((node) => node.type === 'image' || node.type === 'video')
+        }
+        return []
+      }) || []
+
     return (
-      event?.metadata?.contentSchema?.content
-        .filter((x) => x.type === 'image' || x.type === 'video')
-        .map((x) => [x.type, x.attrs.src as string, event.metadata?.imeta?.[x.attrs.src]] as const) || ([] as const)
+      media.map((x) => [x.type, x.attrs.src as string, event?.metadata?.imeta?.[x.attrs.src]] as const) || ([] as const)
     )
   }, [event])
 }

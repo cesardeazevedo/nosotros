@@ -368,15 +368,11 @@ export const Tooltip = function Tooltip(props: Props) {
           popover='manual'
           onMouseLeave={handleLeave}
           style={{ ...inlineStyle }}
-          className={css.props(styles.content, visible && styles.content$open, closing && styles.content$close).className}>
+          {...css.props(styles.content, visible && styles.content$open, closing && styles.content$close)}>
           {cursor === 'arrow' && (
-            <span
-              className={css.props(styles.cursor).className}
-              style={cursorStyle}
-              aria-hidden
-            />
+            <span {...css.props(styles.cursor)} style={cursorStyle} aria-hidden />
           )}
-          <span className={css.props(styles.text).className}>{text}</span>
+          <span {...css.props(styles.text)}>{text}</span>
         </div>
       )}
     </>

@@ -3,10 +3,12 @@ import type { Database } from '@sqlite.org/sqlite-wasm'
 import { type NostrEvent } from 'nostr-tools'
 import { fakeEventMeta } from 'utils/faker'
 import { initializeSQLite } from '../../sqlite.schemas'
+import { SqliteEventSearch } from '../sqlite.events.fts'
 import { SqliteEventStore } from '../sqlite.events'
 
 let db: Database
 let store: SqliteEventStore
+let search: SqliteEventSearch
 
 function selectEvents(): NostrEvent[] {
   return db.selectObjects(`SELECT * FROM events`) as unknown as NostrEvent[]
@@ -25,6 +27,7 @@ describe('SqliteEventStore.insertEvent', () => {
     db = (await initializeSQLite('test.sqlite3', false)).db
     db.exec('PRAGMA foreign_keys = ON;')
     store = new SqliteEventStore(Promise.resolve(db))
+    search = new SqliteEventSearch(Promise.resolve(db))
   })
 
   beforeEach(() => {
@@ -325,6 +328,27 @@ describe('SqliteEventStore.query', () => {
     const results = store.query(db, { authors: [] })
 
     expect(results).toStrictEqual([])
+  })
+
+  test('assert search filter returns fts results', () => {
+    const e1 = fakeEventMeta({ id: '1', kind: Kind.Text, pubkey: 'p1', created_at: 100, content: 'garden update' })
+    const e2 = fakeEventMeta({
+      id: '2',
+      kind: Kind.Article,
+      pubkey: 'p2',
+      created_at: 200,
+      content: 'garden update',
+      tags: [['d', 'article-2']],
+    })
+
+    store.insertEvent(db, e1)
+    store.insertEvent(db, e2)
+    search.indexEvent(db, e1)
+    search.indexEvent(db, e2)
+
+    const results = store.query(db, { search: 'garden', kinds: [Kind.Text, Kind.Article], limit: 10 })
+
+    expect(results.map((event) => event.id)).toStrictEqual(['2', '1'])
   })
 })
 

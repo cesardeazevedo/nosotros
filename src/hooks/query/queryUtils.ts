@@ -3,9 +3,11 @@ import { addReplyAtom } from '@/atoms/repliesCount.atoms'
 import { store } from '@/atoms/store'
 import { Kind } from '@/constants/kinds'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import { eventAddress } from '@/utils/nip19'
 import { dedupeById } from '@/utils/utils'
 import type { QueryKey } from '@tanstack/react-query'
 import type { NostrEvent } from 'nostr-tools'
+import { isAddressableKind, isReplaceableKind } from 'nostr-tools/kinds'
 import { parseEventMetadata } from '../parsers/parseEventMetadata'
 import { queryClient } from './queryClient'
 import { eventToQueryKey, queryKeys } from './queryKeys'
@@ -72,18 +74,23 @@ export function setEventData(event: NostrEventDB) {
   }
 }
 
-export function prependEventFeed(queryKey: QueryKey, events: Array<NostrEvent | NostrEventDB>) {
+export function prependEventFeed(queryKey: QueryKey, events: Array<NostrEventDB>) {
   queryClient.setQueryData(queryKey, (data: InfiniteEvents | undefined) => {
+    const sorted = dedupeById([...events].toSorted((a, b) => b.created_at - a.created_at))
+
     if (data) {
       return {
         ...data,
         pages: [
-          dedupeById([...events.toSorted((a, b) => b.created_at - a.created_at), ...data.pages[0]]),
+          dedupeById([...sorted, ...data.pages[0]]),
           ...data.pages.slice(1),
         ],
       }
     }
-    return data
+    return {
+      pageParams: [],
+      pages: [sorted],
+    } satisfies InfiniteEvents
   })
 }
 
@@ -104,6 +111,47 @@ export function appendEventToQuery(queryKey: QueryKey, events: NostrEventDB[]) {
   queryClient.setQueryData(queryKey, (data: NostrEventDB[] | undefined) => {
     return dedupeById([...(data || []), ...events])
   })
+}
+
+function getEventIdentity(event: NostrEventDB) {
+  if (isAddressableKind(event.kind)) {
+    return eventAddress(event) || event.id
+  }
+
+  if (isReplaceableKind(event.kind)) {
+    return `${event.kind}:${event.pubkey}`
+  }
+
+  return event.id
+}
+
+export function dedupeEvents(events: NostrEventDB[]) {
+  const deduped = new Map<string, NostrEventDB>()
+
+  for (const event of events) {
+    const identity = getEventIdentity(event)
+    const previous = deduped.get(identity)
+    if (!previous || previous.created_at <= event.created_at) {
+      deduped.set(identity, event)
+    }
+  }
+
+  return [...deduped.values()].sort((a, b) => b.created_at - a.created_at)
+}
+
+export function getDeletedRefs(events: NostrEventDB[]) {
+  const deletedRefs = new Set<string>()
+
+  for (const event of events) {
+    if (event.kind !== Kind.EventDeletion) continue
+    for (const tag of event.tags) {
+      if ((tag[0] === 'e' || tag[0] === 'a') && tag[1]) {
+        deletedRefs.add(tag[1])
+      }
+    }
+  }
+
+  return deletedRefs
 }
 
 export function removeEventFromFeed(queryKey: QueryKey, eventId: string) {

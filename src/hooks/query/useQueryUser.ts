@@ -5,12 +5,14 @@ import { selectRelays } from '@/hooks/parsers/selectRelays'
 import { dbSqlite } from '@/nostr/db'
 import type { UserRelay } from '@/nostr/types'
 import { READ, WRITE } from '@/nostr/types'
+import { eventAddress } from '@/utils/nip19'
 import { useQueries, useQuery } from '@tanstack/react-query'
 import { batcherRelayList } from '../batchers'
 import { queryClient } from './queryClient'
 import { queryKeys } from './queryKeys'
+import { getDeletedRefs } from './queryUtils'
 import type { CustomQueryOptions } from './useQueryBase'
-import { replaceableEventQueryOptions, useReplaceableEvent } from './useQueryBase'
+import { eventQueryOptions, replaceableEventQueryOptions, useReplaceableEvent } from './useQueryBase'
 
 export function useEventMetadata(pubkey: string | undefined, options?: CustomQueryOptions<NostrEventDB>) {
   return useReplaceableEvent(Kind.Metadata, pubkey || '', {
@@ -53,10 +55,39 @@ export function useUserMuteList(pubkey: string, options?: CustomQueryOptions<Nos
   return useReplaceableEvent(Kind.Mutelist, pubkey, options)
 }
 
+export function userDraftsQueryOptions(pubkey: string | undefined) {
+  return eventQueryOptions<NostrEventDB[]>({
+    queryKey: queryKeys.author(pubkey || '', Kind.DraftWrap),
+    filter: {
+      kinds: [Kind.DraftWrap, Kind.EventDeletion],
+      authors: pubkey ? [pubkey] : [],
+    },
+    enabled: !!pubkey,
+    ctx: {
+      subId: 'drafts',
+      closeOnEose: false,
+      network: 'STALE_WHILE_REVALIDATE',
+    },
+    select: (events) => {
+      const deletedRefs = getDeletedRefs(events)
+      return events
+        .filter((event) => {
+          if (event.kind !== Kind.DraftWrap) {
+            return false
+          }
+          const address = eventAddress(event)
+          return !deletedRefs.has(event.id) && (!address || !deletedRefs.has(address))
+        })
+        .sort((a, b) => b.created_at - a.created_at)
+    },
+  })
+}
+
 export function userRelaysQueryOptions(pubkey: string | undefined, permission: number) {
   return replaceableEventQueryOptions(Kind.RelayList, pubkey || '', {
     enabled: !!pubkey,
     ctx: {
+      subId: 'user-relays',
       batcher: batcherRelayList,
       network: 'STALE_WHILE_REVALIDATE_BATCH',
     },

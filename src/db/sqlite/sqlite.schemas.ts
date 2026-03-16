@@ -24,6 +24,13 @@ export function deleteExpiredEvents(db: Database, nowSec = Math.floor(Date.now()
     deleted++
   }
 
+  if (deleted > 0) {
+    db.exec(`
+      DELETE FROM events_fts
+      WHERE eventId NOT IN (SELECT id FROM events)
+    `)
+  }
+
   return deleted
 }
 
@@ -85,6 +92,13 @@ function build(db: Database) {
     CREATE INDEX IF NOT EXISTS idx_users_name ON users(name COLLATE NOCASE);
     CREATE INDEX IF NOT EXISTS idx_users_display_name ON users(display_name COLLATE NOCASE);
 
+    CREATE VIRTUAL TABLE IF NOT EXISTS events_fts USING fts5(
+      eventId UNINDEXED,
+      content,
+      tokenize = 'unicode61 remove_diacritics 2',
+      detail = none
+    );
+
     CREATE TABLE IF NOT EXISTS migrations (
       version INTEGER PRIMARY KEY,
       created_at INTEGER
@@ -122,6 +136,8 @@ export async function initializeSQLite(name: string = 'nosotrosdb.sqlite3', trac
         if (tracing) {
           console.log(`Using VFS: opfs-sahpool -> ${filename}`)
         }
+        // console.log(db.exec('DELETE FROM relayStats'))
+        // console.log(db.exec('DELETE FROM events'))
         build(db)
         migrate(db)
         deleteExpiredEvents(db)

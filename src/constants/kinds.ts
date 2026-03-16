@@ -65,6 +65,7 @@ export enum Kind {
   MediaStarterPack = 39092,
   RelayMonitor = 30166,
   NostrConnect = 24133,
+  DraftWrap = 31234,
 }
 
 export const KIND_LABELS: Record<number, string> = {

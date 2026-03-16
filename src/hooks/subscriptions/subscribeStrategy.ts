@@ -13,7 +13,7 @@ import { subscribe } from './subscribe'
 export function subscribeRemote(ctx: NostrContext, filter: Filter, cached?: NostrEventDB[]) {
   const sub = createSubscription(ctx, filter, cached)
   return subscribe(sub, ctx).pipe(
-    bufferDebounce(200),
+    bufferDebounce(500),
     rxFilter((events) => events.length > 0),
   )
 }

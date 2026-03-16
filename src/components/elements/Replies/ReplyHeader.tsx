@@ -3,6 +3,7 @@ import { useNoteContext } from '@/components/providers/NoteProvider'
 import { Button } from '@/components/ui/Button/Button'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { useParentEvent } from '@/hooks/query/useQueryBase'
+import type { UserState } from '@/hooks/state/useUser'
 import { useUserState } from '@/hooks/state/useUser'
 import { useNevent } from '@/hooks/useEventUtils'
 import { palette } from '@/themes/palette.stylex'
@@ -12,12 +13,14 @@ import { memo } from 'react'
 import { css } from 'react-strict-dom'
 import { LinkNEvent } from '../Links/LinkNEvent'
 
-export const ReplyHeader = memo(function ReplyHeader() {
-  const { dense } = useContentContext()
-  const { event } = useNoteContext()
-  const parent = useParentEvent(event)
-  const parentUser = useUserState(parent.data?.pubkey)
-  const nevent = useNevent(parent.data)
+type ReplyHeaderInnerProps = {
+  parentUser: UserState
+  nevent?: string
+  dense?: boolean
+}
+
+export const ReplyHeaderInner = memo(function ReplyHeaderInner(props: ReplyHeaderInnerProps) {
+  const { parentUser, nevent, dense } = props
   return (
     <Stack sx={[styles.root, dense && styles.root$dense]} gap={2}>
       <IconDotsVertical size={20} {...css.props(styles.icon)} />
@@ -28,6 +31,15 @@ export const ReplyHeader = memo(function ReplyHeader() {
       </LinkNEvent>
     </Stack>
   )
+})
+
+export const ReplyHeader = memo(function ReplyHeader() {
+  const { dense } = useContentContext()
+  const { event } = useNoteContext()
+  const parent = useParentEvent(event)
+  const parentUser = useUserState(parent.data?.pubkey)
+  const nevent = useNevent(parent.data)
+  return <ReplyHeaderInner parentUser={parentUser} nevent={nevent} dense={dense} />
 })
 
 const styles = css.create({

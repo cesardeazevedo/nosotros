@@ -29,6 +29,10 @@ export const EditorDialog = memo(function EditorDialog() {
     from: '__root__',
     select: (x) => x.search.pubkey,
   })
+  const draftId = useMatch({
+    from: '__root__',
+    select: (x) => x.search.n,
+  })
   const goBack = useGoBack()
 
   const navigate = useNavigate()
@@ -46,7 +50,7 @@ export const EditorDialog = memo(function EditorDialog() {
   )
 
   const handleClose = useCallback(() => {
-    navigate({ to: '.', search: ({ compose, ...rest }) => rest })
+    navigate({ to: '.', search: ({ compose, n, ...rest }) => rest })
   }, [goBack])
 
   const handleUndo = (event: NostrEvent) => {
@@ -90,6 +94,7 @@ export const EditorDialog = memo(function EditorDialog() {
         ref={ref}
         kind={kind}
         pubkey={pubkey}
+        queryKey={['compose', draftId || 'root']}
         onSigned={handleSigned}
         onDiscard={handleClose}
         onUndoBroadcast={handleUndo}

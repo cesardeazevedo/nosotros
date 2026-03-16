@@ -7,6 +7,7 @@ import type { NostrEvent } from 'nostr-tools'
 import { isAddressableKind, isReplaceableKind } from 'nostr-tools/kinds'
 import { InsertBatcher } from '../batcher'
 import type { NostrEventDB, NostrEventExists, NostrEventStored } from '../sqlite.types'
+import { queryEventSearch } from './sqlite.events.fts'
 
 export class SqliteEventStore {
   batcher: InsertBatcher<NostrEventDB>
@@ -29,7 +30,7 @@ export class SqliteEventStore {
     if (isReplaceableKind(event.kind)) {
       return this.getReplaceable(db, event.kind, event.pubkey)
     } else if (isAddressableKind(event.kind)) {
-      const dTag = event.tags.find((tag) => tag[1] === 'd')?.[1]
+      const dTag = event.tags.find((tag) => tag[0] === 'd')?.[1]
       if (dTag) {
         return this.getAddressable(db, event.kind, event.pubkey, dTag)
       }
@@ -56,6 +57,7 @@ export class SqliteEventStore {
           tags.tag = 'd' AND
           tags.pubkey = ? AND
           tags.value = ?
+      ORDER BY e.created_at DESC
       LIMIT 1
       `
     return db.selectObject(query, [kind, pubkey, dTag]) as NostrEventExists | undefined
@@ -70,7 +72,7 @@ export class SqliteEventStore {
     return res.map((event) => this.formatEvent(event as NostrEventStored))
   }
 
-  private buildQuery(filter: NostrFilter, relays: string[] = []) {
+  private buildQuery(filter: NostrFilter, relays: string[] = [], table = 'events') {
     const conditions: string[] = []
     const params: BindableValue[] = []
     let needsTagJoin = false
@@ -82,45 +84,34 @@ export class SqliteEventStore {
         needsTagJoin = true
         tagName = key.slice(1)
         tagValues = values as BindableValue[]
-
-        if (filter.kinds?.length) {
-          conditions.push(`tags.kind IN (${filter.kinds.map(() => '?').join(',')})`)
-          params.push(...filter.kinds)
-        }
-        if (typeof filter.since === 'number') {
-          conditions.push('tags.created_at >= ?')
-          params.push(filter.since)
-        }
-        if (typeof filter.until === 'number') {
-          conditions.push('tags.created_at <= ?')
-          params.push(filter.until)
-        }
-        return { conditions, params, needsTagJoin, tagName, tagValues }
+        break
       }
     }
 
+    const conditionTable = needsTagJoin ? 'tags' : table
+
     if (filter.kinds?.length) {
-      conditions.push(`kind IN (${filter.kinds.map(() => '?').join(',')})`)
+      conditions.push(`${conditionTable}.kind IN (${filter.kinds.map(() => '?').join(',')})`)
       params.push(...filter.kinds)
     }
-    if (filter.authors?.length) {
-      conditions.push(`pubkey IN (${filter.authors.map(() => '?').join(',')})`)
+    if (!needsTagJoin && filter.authors?.length) {
+      conditions.push(`${table}.pubkey IN (${filter.authors.map(() => '?').join(',')})`)
       params.push(...filter.authors)
     }
     if (typeof filter.since === 'number') {
-      conditions.push('created_at >= ?')
+      conditions.push(`${conditionTable}.created_at >= ?`)
       params.push(filter.since)
     }
     if (typeof filter.until === 'number') {
-      conditions.push('created_at <= ?')
+      conditions.push(`${conditionTable}.created_at <= ?`)
       params.push(filter.until)
     }
 
-    if (relays.length > 0) {
+    if (!needsTagJoin && relays.length > 0) {
       conditions.push(`
       EXISTS (
         SELECT 1 FROM seen s
-        WHERE s.eventId = events.id
+        WHERE s.eventId = ${table}.id
           AND s.relay IN (${relays.map(() => '?').join(',')})
       )
     `)
@@ -138,6 +129,9 @@ export class SqliteEventStore {
 
     if (filter.ids && filter.ids.length) {
       return this.getByIds(db, filter.ids)
+    }
+    if (filter.search) {
+      return queryEventSearch(db, filter, relays, this.buildQuery.bind(this), this.formatEvent.bind(this))
     }
 
     const { conditions, params, needsTagJoin, tagName, tagValues } = this.buildQuery(filter, relays)
@@ -328,6 +322,7 @@ export class SqliteEventStore {
         )
       }
     }
+
   }
 
   insertEvent(db: Database, event: NostrEventDB) {

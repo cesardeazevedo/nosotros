@@ -50,7 +50,7 @@ describe('createEventQueryOptions', () => {
         of([event1]),
       )
       .mockImplementationOnce(() =>
-        of([event2]).pipe(delay(500)),
+        of([event2]).pipe(delay(50)),
       )
 
     const result = await renderReactQueryHook(
@@ -66,7 +66,7 @@ describe('createEventQueryOptions', () => {
 
     expect(result.data).toEqual([event1])
 
-    await act(() => new Promise<void>((resolve) => setTimeout(resolve, 600)))
+    await act(() => new Promise<void>((resolve) => setTimeout(resolve, 60)))
 
     expect(queryClient.getQueryData(['multi'])).toStrictEqual([event1, event2])
   })

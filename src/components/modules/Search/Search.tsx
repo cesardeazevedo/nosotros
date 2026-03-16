@@ -4,9 +4,11 @@ import { SearchField } from '@/components/ui/Search/Search'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
+import { useObservableState } from 'observable-hooks'
 import type { ReactNode } from 'react'
-import { useRef, useState } from 'react'
+import { useRef } from 'react'
 import { css } from 'react-strict-dom'
+import { debounceTime, distinctUntilChanged, startWith } from 'rxjs'
 
 type Props = Omit<SearchContentProps, 'query' | 'ref'> & {
   placeholder?: string
@@ -16,7 +18,13 @@ type Props = Omit<SearchContentProps, 'query' | 'ref'> & {
 
 export const Search = (props: Props) => {
   const { sx, placeholder, trailing, onCancel, onSelect, ...rest } = props
-  const [query, setQuery] = useState('')
+  const [query, updateQuery] = useObservableState<string, string>((input$) => {
+    return input$.pipe(
+      debounceTime(500),
+      distinctUntilChanged(),
+      startWith(''),
+    )
+  }, '')
 
   const searchRef = useRef<OnKeyDownRef>(null)
 
@@ -31,16 +39,15 @@ export const Search = (props: Props) => {
       header={
         <Stack horizontal={false} sx={styles.header}>
           <SearchField
-            value={query}
             sx={styles.search}
             placeholder={placeholder || 'Search Users'}
             trailing={trailing}
             onKeyDown={(event) => searchRef.current?.onKeyDown({ event })}
             onCancel={() => {
-              setQuery('')
+              updateQuery('')
               onCancel?.()
             }}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => updateQuery(e.target.value)}
           />
         </Stack>
       }

@@ -8,7 +8,7 @@ import type { Ref } from 'react'
 import { createContext } from 'use-context-selector'
 import type { Props as EditorProps } from './Editor'
 
-type Sections = 'broadcast' | 'pow' | 'settings' | 'zaps' | 'reactions'
+type Sections = 'broadcast' | 'pow' | 'settings' | 'zaps' | 'reactions' | 'drafts'
 
 export type EditorState = {
   section: Sections | false
@@ -47,6 +47,8 @@ export type EditorContextType = EditorState & {
   allRelays: string[]
   placeholder: string
   parent: NostrEventDB | undefined
+  draftId?: string
+  setDraftId: (draftId?: string) => void
   addUploadFiles: (files: File[], pos?: number) => void
 }
 

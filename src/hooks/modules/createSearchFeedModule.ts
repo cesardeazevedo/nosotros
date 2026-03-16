@@ -8,7 +8,7 @@ export function createSearchFeedModule(search: string): FeedModule {
   const filter = {
     kinds: [Kind.Text],
     search,
-    limit: 500,
+    limit: 100,
   }
   return {
     id,
@@ -17,7 +17,7 @@ export function createSearchFeedModule(search: string): FeedModule {
     filter,
     includeReplies: undefined,
     ctx: {
-      network: 'REMOTE_ONLY',
+      network: 'STALE_WHILE_REVALIDATE',
       relays: SEARCH_RELAYS,
       outbox: false,
     },

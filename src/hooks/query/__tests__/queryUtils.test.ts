@@ -37,6 +37,19 @@ test('assert prependEventFeed', () => {
   expect(result.pages[1]).toHaveLength(1)
 })
 
+test('assert prependEventFeed with no existing data', () => {
+  const queryKey = ['feed']
+  prependEventFeed(queryKey, [
+    fakeEventMeta({ id: '4', kind: Kind.Text, content: 'note4' }),
+    fakeEventMeta({ id: '1', kind: Kind.Text, content: 'note3' }),
+  ])
+
+  const result = queryClient.getQueryData(queryKey) as InfiniteEvents
+
+  expect(result.pages).toHaveLength(1)
+  expect(result.pages[0]).toHaveLength(2)
+})
+
 test('assert appendEvents', () => {
   const queryKey = ['feed']
   const existingData = {

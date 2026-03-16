@@ -1,6 +1,7 @@
 import { Kind } from '@/constants/kinds'
 import { type Database, type SAHPoolUtil } from '@sqlite.org/sqlite-wasm'
 import invariant from 'tiny-invariant'
+import { SqliteEventSearch } from './events/sqlite.events.fts'
 import { SqliteEventStore } from './events/sqlite.events'
 import { SqliteNip05 } from './nip05/sqlite.nip05'
 import { SqliteRelayInfo } from './relayInfo/sqlite.relayInfo'
@@ -16,6 +17,7 @@ export class SqliteStorage {
   db: Promise<Database>
   pool: Promise<SAHPoolUtil | undefined>
   event: SqliteEventStore
+  eventSearch: SqliteEventSearch
   relayStats: SqliteRelayStats
   relayInfo: SqliteRelayInfo
   nip05: SqliteNip05
@@ -29,6 +31,7 @@ export class SqliteStorage {
     this.db = init.then((r) => r.db)
     this.pool = init.then((r) => r.pool)
     this.event = new SqliteEventStore(this.db)
+    this.eventSearch = new SqliteEventSearch(this.db)
     this.relayInfo = new SqliteRelayInfo(this.db)
     this.relayStats = new SqliteRelayStats(this.db)
     this.nip05 = new SqliteNip05(this.db)
@@ -41,6 +44,7 @@ export class SqliteStorage {
   async deleteDB() {
     const db = await this.db
     db.exec('DELETE FROM events')
+    db.exec('DELETE FROM events_fts')
     db.exec('DELETE FROM tags')
     db.exec('DELETE FROM relayStats')
     db.exec('DELETE FROM relayInfo')
@@ -111,6 +115,7 @@ async function onMessage(e: MessageEvent) {
     }
     case 'insertEvent': {
       store.event.insert(msg.params)
+      store.eventSearch.index(msg.params)
       if (msg.params.kind === Kind.Metadata) {
         insertUser(msg.params)
       }
@@ -119,6 +124,7 @@ async function onMessage(e: MessageEvent) {
     // insert event without batch
     case 'publishEvent': {
       store.event.insertEvent(db, msg.params)
+      store.eventSearch.indexEvent(db, msg.params)
       if (msg.params.kind === Kind.Metadata) {
         insertUser(msg.params)
       }
@@ -126,6 +132,7 @@ async function onMessage(e: MessageEvent) {
     }
     case 'deleteEvent': {
       store.event.delete(db, msg.params)
+      store.eventSearch.delete(db, msg.params)
       break
     }
     case 'querySeen': {

@@ -1,7 +1,6 @@
 import { enqueueToastAtom } from '@/atoms/toaster.atoms'
 import {
   filesAtom,
-  resetFileUploadAtom,
   resetIsUploadingAtom,
   uploadFilesAtom,
 } from '@/atoms/upload.atoms'
@@ -48,7 +47,6 @@ export const EditorMedia = memo(function EditorMedia(props: Props) {
   const { dense } = useContentContext()
   const files = useAtomValue(filesAtom)
   const uploadFiles = useSetAtom(uploadFilesAtom)
-  const resetFiles = useSetAtom(resetFileUploadAtom)
   const resetUploadingFiles = useSetAtom(resetIsUploadingAtom)
   const enqueueToast = useSetAtom(enqueueToastAtom)
 
@@ -119,7 +117,6 @@ export const EditorMedia = memo(function EditorMedia(props: Props) {
                 renderDiscard={renderDiscard}
                 onSubmit={() => submit(state)}
                 onDiscard={() => {
-                  resetFiles()
                   onDiscard?.()
                 }}
               />

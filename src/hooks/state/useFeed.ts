@@ -119,10 +119,21 @@ export function useFeedStateAtom(feedAtoms: FeedAtoms) {
     flush()
   }, [replies, autoUpdate])
 
+  const distinctTopPubkeys = (events: NostrEventDB[], ktop: number) => {
+    const pubkeys = new Set<string>()
+    for (const event of events) {
+      if (pubkeys.size >= ktop) break
+      if (!pubkeys.has(event.pubkey)) {
+        pubkeys.add(event.pubkey)
+      }
+    }
+    return Array.from(pubkeys)
+  }
+
   const bufferTotal = useMemo(() => buffer.length, [buffer])
   const bufferTotalReplies = useMemo(() => bufferReplies.length, [bufferReplies])
-  const bufferPubkeys = useMemo(() => buffer.slice(0, 3).map((event) => event.pubkey), [buffer])
-  const bufferPubkeysReplies = useMemo(() => bufferReplies.slice(0, 3).map((event) => event.pubkey), [bufferReplies])
+  const bufferPubkeys = useMemo(() => distinctTopPubkeys(buffer, 3), [buffer])
+  const bufferPubkeysReplies = useMemo(() => distinctTopPubkeys(bufferReplies, 3), [bufferReplies])
 
   const resetBuffers = useCallback(() => {
     if (replies === true) {

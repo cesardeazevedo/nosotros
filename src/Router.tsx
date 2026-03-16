@@ -9,6 +9,7 @@ import { store } from './atoms/store'
 import { RootLayout } from './components/elements/Layouts/RootLayout'
 import { ArticlesRoute } from './components/modules/Articles/ArticlesRoute'
 import { DeckRoute } from './components/modules/Deck/DeckRoute'
+import { DraftsRoute } from './components/modules/Drafts/DraftsRoute'
 import { EditorRoute } from './components/modules/Editor/EditorRoute'
 import { Feed } from './components/modules/Feed/Feed'
 import { FeedHeader } from './components/modules/Feed/FeedHeader'
@@ -367,6 +368,12 @@ export const composeRoute = createRoute({
   component: () => <EditorRoute />,
 })
 
+export const draftsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/drafts',
+  component: DraftsRoute,
+})
+
 export const nostrRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '$nostr',
@@ -590,6 +597,7 @@ export const routeTree = rootRoute.addChildren([
   mediaRoute,
   articleRoute,
   composeRoute,
+  draftsRoute,
   relaysRoute.addChildren([relayActiveRoute, relayMonitorRoute]),
   settingsRoute.addChildren([
     settingsPreferenceRoute,
