@@ -665,10 +665,10 @@ export const EditorProviderImpl = memo(function EditorProviderImpl(props: Editor
       ({ signer, pubkey }) =>
         (state) => {
           methods.toggle('submitting', true)
-          if (event) {
+          if (state.event) {
             if (settings.delayBroadcast) {
               // Delay broadcast
-              return signAndSave({ ...event, pubkey }, { signer, saveEvent: !state.protectedEvent }).pipe(
+              return signAndSave({ ...state.event, pubkey }, { signer, saveEvent: !state.protectedEvent }).pipe(
                 tap((event) => {
                   props.onSigned?.(event, allRelays)
                   addNoteToQuery(event)
@@ -686,7 +686,7 @@ export const EditorProviderImpl = memo(function EditorProviderImpl(props: Editor
                 }),
               )
             }
-            return publish({ ...event, pubkey }, { relays: allRelays, signer, saveEvent: !protectedEvent }).pipe(
+            return publish({ ...state.event, pubkey }, { relays: allRelays, signer, saveEvent: !protectedEvent }).pipe(
               tap((event) => {
                 props.onSigned?.(event, allRelays)
                 addNoteToQuery(event)
@@ -789,6 +789,11 @@ export const EditorProviderImpl = memo(function EditorProviderImpl(props: Editor
                     attrs: {
                       src: item.src,
                       alt: item.alt || '',
+                      file: item.file,
+                      tags: item.tags,
+                      sha256: item.sha256,
+                      uploading: item.uploading,
+                      error: item.error,
                     },
                   },
                 ])
