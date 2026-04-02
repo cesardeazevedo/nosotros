@@ -63,6 +63,7 @@ export async function deleteSQLiteFile(filename: string, pool?: SAHPoolUtil) {
     return
   }
 
+  console.log(`Attempting to delete SQLite file at ${filename} via OPFS`)
   const root = await storage.getDirectory()
   const file = filename.replace(/^\//, '')
   if (!file) {
