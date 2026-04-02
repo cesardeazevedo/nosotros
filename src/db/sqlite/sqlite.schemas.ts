@@ -53,6 +53,7 @@ function runStartupMaintenance(db: Database) {
 }
 
 export async function deleteSQLiteFile(filename: string, pool?: SAHPoolUtil) {
+  console.log(`Attempting to delete SQLite file at ${filename} via OPFS`)
   if (pool) {
     await pool.wipeFiles()
     return
