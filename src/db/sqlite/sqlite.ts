@@ -143,11 +143,15 @@ export class SqliteStorage {
   }
 
   async dbSizeBytes() {
-    return this.send<number>({ method: 'dbSize ' })
+    return this.send<number>({ method: 'dbSize' })
   }
 
   async exportDB() {
     return await this.send<Uint8Array<ArrayBufferLike>>({ method: 'exportDB' })
+  }
+
+  async clearDB() {
+    await this.send({ method: 'clearDB' })
   }
 
   async deleteDB() {

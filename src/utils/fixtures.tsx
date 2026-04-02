@@ -30,7 +30,7 @@ export const test = base.extend<Fixtures>({
   reset: [
     async ({ }, use) => {
       queryClient.clear()
-      await dbSqlite.deleteDB()
+      await dbSqlite.clearDB()
       await use(() => null)
     },
     { auto: true },
