@@ -21,14 +21,14 @@ export const FeedReplyTabs = memo(function FeedReplyTabs(props: Props) {
           sx={styles.tab}
           anchor='notes'
           label='Notes'
-          badge={feed.bufferTotal && <Badge dot={!feed.replies} variant='secondary' value={feed.bufferTotal} />}
+          badge={feed.bufferTotal && <Badge variant='secondary' value={feed.bufferTotal} />}
         />
         <Tab
           sx={styles.tab}
           anchor='replies'
           label='Threads'
           badge={
-            feed.bufferTotalReplies && <Badge dot={feed.replies} variant='secondary' value={feed.bufferTotalReplies} />
+            feed.bufferTotalReplies && <Badge variant='secondary' value={feed.bufferTotalReplies} />
           }
         />
       </Tabs>

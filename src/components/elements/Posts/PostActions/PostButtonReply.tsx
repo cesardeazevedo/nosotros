@@ -1,5 +1,5 @@
 import { useContentContext } from '@/components/providers/ContentProvider'
-import { useNoteContext } from '@/components/providers/NoteProvider'
+import { useEventContext } from '@/components/providers/NoteProvider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { useEventReplies } from '@/hooks/query/useReplies'
@@ -19,13 +19,12 @@ type Props = {
 export const ButtonReply = memo(function ButtonReply(props: Props & ContainerProps) {
   const { selected = false, onClick, ...rest } = props
   const { dense } = useContentContext()
-  const { event } = useNoteContext()
+  const { event } = useEventContext()
   const { total: queryTotal } = useEventReplies(event)
   const count = typeof rest.value === 'number' ? rest.value : queryTotal
 
   const button = (
     <IconButton
-      toggle={selected}
       selected={selected}
       size={dense ? 'sm' : 'md'}
       onClick={(e) => {
@@ -34,10 +33,7 @@ export const ButtonReply = memo(function ButtonReply(props: Props & ContainerPro
         onClick?.()
       }}
       icon={
-        <IconMessageCircle
-          size={dense ? iconProps.size$dense : iconProps.size}
-          strokeWidth={iconProps.strokeWidth}
-        />
+        <IconMessageCircle size={dense ? iconProps.size$dense : iconProps.size} strokeWidth={iconProps.strokeWidth} />
       }
       selectedIcon={
         <IconMessageCircle2Filled

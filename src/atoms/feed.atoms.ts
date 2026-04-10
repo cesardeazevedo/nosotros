@@ -28,6 +28,7 @@ export function createFeedAtoms<T extends FeedModule>(options: T) {
   const bufferReplies = focusAtom(baseAtoms.atom, (optic) => optic.prop('bufferReplies'))
   const includeReplies = focusAtom(baseAtoms.atom, (optic) => optic.prop('includeReplies'))
   const includeMuted = focusAtom(baseAtoms.atom, (optic) => optic.prop('includeMuted'))
+  const selectedAuthor = focusAtom(baseAtoms.atom, (optic) => optic.prop('selectedAuthor'))
   const onStream = atom(null, (get, set, event: NostrEventDB) => {
     const sessionOptions = get(baseAtoms.atom)
     const queryKey = queryKeys.feed(sessionOptions.id, sessionOptions.filter, sessionOptions.ctx)
@@ -52,7 +53,7 @@ export function createFeedAtoms<T extends FeedModule>(options: T) {
     const includeMuted = sessionOptions.includeMuted
     const isInbox = sessionOptions.type === 'inbox'
     const filter =
-      Array.isArray(sessionOptions.filter.kinds)
+      Array.isArray(sessionOptions.filter.kinds) && sessionOptions.type !== 'search'
         ? { ...sessionOptions.filter, kinds: dedupe(sessionOptions.filter.kinds, [Kind.EventDeletion]) }
         : sessionOptions.filter
     const isMutedEvent = (event: { id: string; pubkey: string }) => {
@@ -137,16 +138,24 @@ export function createFeedAtoms<T extends FeedModule>(options: T) {
     }
 
     const sessionOptions = get(baseAtoms.atom)
+    const selectedAuthor = sessionOptions.selectedAuthor
+    const filteredData = selectedAuthor
+      ? {
+          pages: data.pages.map((page) => page.filter((event) => event.pubkey === selectedAuthor)),
+          pageParams: data.pageParams,
+        }
+      : data
+
     if (sessionOptions.includeReplies && sessionOptions.type !== 'inbox') {
       return {
-        pages: get(threadGroupsAtomFamily(data)),
-        pageParams: data.pageParams,
+        pages: get(threadGroupsAtomFamily(filteredData)),
+        pageParams: filteredData.pageParams,
       }
     }
 
     return {
-      pages: data.pages,
-      pageParams: data.pageParams,
+      pages: filteredData.pages,
+      pageParams: filteredData.pageParams,
     }
   })
 
@@ -155,7 +164,7 @@ export function createFeedAtoms<T extends FeedModule>(options: T) {
     const id = sessionState.id
     const allPersistent = get(persistentFeedStatesAtom)
     set(baseAtoms.atom, sessionState)
-    const { buffer, bufferReplies, pageSize, live, ctx, staleTime, ...rest } = sessionState
+    const { buffer, bufferReplies, pageSize, live, ctx, staleTime, selectedAuthor, ...rest } = sessionState
     const persistedCtx = sessionState.type === 'relayfeed' ? { relays: sessionState.ctx.relays } : {}
     set(persistentFeedStatesAtom, {
       ...allPersistent,
@@ -191,6 +200,12 @@ export function createFeedAtoms<T extends FeedModule>(options: T) {
     if (currentState.includeReplies !== newOptions.includeReplies) {
       updates.includeReplies = newOptions.includeReplies
     }
+    if (currentState.live !== newOptions.live) {
+      updates.live = newOptions.live
+    }
+    if (currentState.selectedAuthor !== newOptions.selectedAuthor) {
+      updates.selectedAuthor = newOptions.selectedAuthor
+    }
 
     if (Object.keys(updates).length > 0) {
       set(baseAtoms.atom, updates)
@@ -224,6 +239,7 @@ export function createFeedAtoms<T extends FeedModule>(options: T) {
     blured,
     includeReplies,
     includeMuted,
+    selectedAuthor,
     onStream,
     buffer,
     bufferReplies,

@@ -1,9 +1,7 @@
 import { forwardRef, lazy, Suspense } from 'react'
 import type { IPopoverBaseProps, IPopoverBaseTriggerRendererProps } from './PopoverBase.types'
 
-const PopoverBaseInternal = lazy(async () =>
-  import('./PopoverBaseLazy').then((m) => ({ default: m.PopoverBaseLazy })),
-)
+const PopoverBaseInternal = lazy(async () => import('./PopoverBaseLazy').then((m) => ({ default: m.PopoverBaseLazy })))
 
 const noop = () => {}
 

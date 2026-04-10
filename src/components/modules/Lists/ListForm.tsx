@@ -27,10 +27,7 @@ import { useActionState, useEffect, useMemo, useState } from 'react'
 import { css } from 'react-strict-dom'
 import { ListTagBox } from './ListTagBox'
 
-type Props = (
-  | { isEditing: true; event: NostrEventDB }
-  | { isEditing: false; kind?: number }
-) & {
+type Props = ({ isEditing: true; event: NostrEventDB } | { isEditing: false; kind?: number }) & {
   onClose?: () => void
 }
 
@@ -67,7 +64,10 @@ export const ListForm = (props: Props) => {
       : null
   const isEditingEffective = !!resolvedEditingEvent
   const hasEncrypted = !!resolvedEditingEvent?.content
-  const tagBoxKey = useMemo(() => `${kind ?? 'none'}-${resolvedEditingEvent?.id ?? 'new'}`, [resolvedEditingEvent?.id, kind])
+  const tagBoxKey = useMemo(
+    () => `${kind ?? 'none'}-${resolvedEditingEvent?.id ?? 'new'}`,
+    [resolvedEditingEvent?.id, kind],
+  )
   const [, decryptedContent] = useEventDecrypt(hasEncrypted ? resolvedEditingEvent || undefined : undefined)
   const decryptedTags = useMemo(() => {
     if (!decryptedContent) return null
@@ -109,9 +109,9 @@ export const ListForm = (props: Props) => {
   const { isPending, mutateAsync } = usePublishEventMutation<UnsignedEvent>({
     mutationFn:
       ({ signer }) =>
-        (newEvent) => {
-          return publish(newEvent, { signer })
-        },
+      (newEvent) => {
+        return publish(newEvent, { signer })
+      },
   })
 
   const normalizeTagValue = (tag: string, value: string) => {
@@ -178,7 +178,9 @@ export const ListForm = (props: Props) => {
 
       onClose?.()
       const predicate = (query: { queryKey: QueryKey }) => {
-        return query.queryKey[0] === 'feed' && typeof query.queryKey[1] === 'string' && query.queryKey[1].startsWith('list')
+        return (
+          query.queryKey[0] === 'feed' && typeof query.queryKey[1] === 'string' && query.queryKey[1].startsWith('list')
+        )
       }
       queryClient.resetQueries({ predicate })
       queryClient.invalidateQueries({ predicate })
@@ -343,9 +345,7 @@ export const ListForm = (props: Props) => {
           <MenuItem
             label='Private List'
             sx={styles.privateItem}
-            trailing={
-              <Checkbox checked={isPrivate} onChange={() => setIsPrivate((prev) => !prev)} />
-            }
+            trailing={<Checkbox checked={isPrivate} onChange={() => setIsPrivate((prev) => !prev)} />}
           />
         </Stack>
       </Stack>

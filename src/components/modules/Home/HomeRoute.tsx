@@ -1,34 +1,32 @@
+import { EditorProvider } from '@/components/elements/Editor/EditorProvider'
 import { RouteContainer } from '@/components/elements/Layouts/RouteContainer'
-import { createHomeFeedModule } from '@/hooks/modules/createHomeFeedModule'
-import { useFeedState } from '@/hooks/state/useFeed'
-import { useCurrentPubkey } from '@/hooks/useAuth'
+import { Divider } from '@/components/ui/Divider/Divider'
+import { Text } from '@/components/ui/Text/Text'
+import type { FeedState } from '@/hooks/state/useFeed'
+import { useCurrentUser } from '@/hooks/useAuth'
 import { useResetScroll } from '@/hooks/useResetScroll'
 import { useMatch, useNavigate } from '@tanstack/react-router'
-import { memo, useMemo } from 'react'
+import { memo } from 'react'
+import { css, html } from 'react-strict-dom'
 import { Feed } from '../Feed/Feed'
-import { FeedHeadline } from '../Feed/FeedHeadline'
+import { FeedsPaneToggleButton } from '../Feed/FeedsPaneToggleButton'
+import { FeedSelectedAuthorChip } from '../Feed/FeedSelectedAuthorChip'
 import { HomeHeader } from './HomeHeader'
 
 type Props = {
+  feed: FeedState
   replies?: boolean
 }
 
 export const HomeRoute = memo(function HomeRoute(props: Props) {
   useResetScroll()
-  const { replies = false } = props
+  const { feed } = props
   const navigate = useNavigate()
-  const pubkey = useCurrentPubkey()
-  const isThreadsRoute = !!useMatch({ from: '/threads', shouldThrow: false })
-  const module = useMemo(() => {
-    return {
-      ...createHomeFeedModule(pubkey),
-      includeReplies: replies,
-    }
-  }, [pubkey, replies])
-  const feed = useFeedState(module)
+  const user = useCurrentUser()
+  const isThreadsRoute = !!useMatch({ from: '/feeds-layout/threads', shouldThrow: false })
 
   const handleChangeTabs = (anchor: string | undefined) => {
-    feed.setPageSize(module.pageSize)
+    feed.setPageSize(feed.options.pageSize || 10)
     navigate({ to: anchor === 'replies' ? '/threads' : '/' })
     if ((anchor === 'replies' && isThreadsRoute) || (anchor !== 'replies' && !isThreadsRoute)) {
       feed.onRefresh()
@@ -37,9 +35,32 @@ export const HomeRoute = memo(function HomeRoute(props: Props) {
 
   return (
     <RouteContainer
-      headline={<FeedHeadline feed={feed} />}
-      header={<HomeHeader feed={feed} onChangeTabs={handleChangeTabs} />}>
+      header={
+        <HomeHeader
+          feed={feed}
+          leading={
+            <Text variant='title' size='lg'>
+              Following{' '}
+              <html.span style={styles.gray}>
+                ({user?.totalFollowing || 0})
+              </html.span>
+            </Text>
+          }
+          leadingPrefix={<FeedsPaneToggleButton />}
+          onChangeTabs={handleChangeTabs}
+        />
+      }>
+      <EditorProvider queryKey={feed.queryKey} initialOpen />
+      <br />
+      <FeedSelectedAuthorChip feed={feed} />
+      <Divider />
       <Feed feed={feed} />
     </RouteContainer>
   )
+})
+
+const styles = css.create({
+  gray: {
+    opacity: 0.5,
+  },
 })

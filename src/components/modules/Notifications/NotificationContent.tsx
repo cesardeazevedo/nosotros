@@ -1,4 +1,4 @@
-import { NoteProvider } from '@/components/providers/NoteProvider'
+import { EventProvider } from '@/components/providers/NoteProvider'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import React, { memo } from 'react'
 import { css, html } from 'react-strict-dom'
@@ -13,7 +13,7 @@ type Props = {
 export const NotificationContent = memo(function NotificationContent(props: Props) {
   const { event, dense } = props
   return (
-    <NoteProvider value={{ event }}>
+    <EventProvider value={{ event }}>
       <html.div style={[styles.root, dense && styles.root$dense]}>
         {event.metadata?.contentSchema?.content.map((node, index) => (
           <React.Fragment key={node.type + index}>
@@ -29,7 +29,7 @@ export const NotificationContent = memo(function NotificationContent(props: Prop
           </React.Fragment>
         ))}
       </html.div>
-    </NoteProvider>
+    </EventProvider>
   )
 })
 

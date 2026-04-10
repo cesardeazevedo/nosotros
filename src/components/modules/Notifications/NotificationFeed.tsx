@@ -8,7 +8,7 @@ import { NotificationLoading } from './NotificationLoading'
 
 type Props = {
   feed: NotificationFeedState
-} & Pick<ListProps, 'column' | 'header'>
+} & Pick<ListProps, 'header'>
 
 export const NotificationFeed = memo(function NotificationFeed(props: Props) {
   const { feed, ...rest } = props

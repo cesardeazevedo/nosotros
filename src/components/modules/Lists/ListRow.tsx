@@ -11,7 +11,6 @@ import { useEventDecryptedTags } from '@/hooks/useEventDecrypt'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconLock, IconLockOpen, IconPencil } from '@tabler/icons-react'
-import { useNevent } from '@/hooks/useEventUtils'
 import { LinkNEvent } from '@/components/elements/Links/LinkNEvent'
 import { useEffect, useState } from 'react'
 import { css, html } from 'react-strict-dom'
@@ -26,19 +25,18 @@ type Props = {
 
 export const ListRow = (props: Props) => {
   const { event, onEdit, isLast, canEdit, decryptAllSignal } = props
-  const nevent = useNevent(event)
   const [decryptRequested, setDecryptRequested] = useState(false)
   const decryptedTags = useEventDecryptedTags(decryptRequested ? event : undefined)
   const title = event.tags.find((tag) => tag[0] === 'title')?.[1]
   const dTag = event.tags.find((tag) => tag[0] === 'd')?.[1]
   const label = title || dTag || '-'
-  const displayKind = KIND_LABELS[event.kind]
-    ? `${KIND_LABELS[event.kind]} (${event.kind})`
-    : `Kind ${event.kind}`
+  const displayKind = KIND_LABELS[event.kind] ? `${KIND_LABELS[event.kind]} (${event.kind})` : `Kind ${event.kind}`
   const listTags = event.tags.filter((tag) => !['title', 'description', 'd'].includes(tag[0]))
   const pubkeys = listTags.filter((tag) => tag[0] === 'p').map((tag) => tag[1])
   const hasEncrypted = !!event.content
-  const tagsCount = hasEncrypted ? (decryptedTags?.filter((tag) => tag[0] !== 'title' && tag[0] !== 'description' && tag[0] !== 'd').length || 0) : listTags.length
+  const tagsCount = hasEncrypted
+    ? decryptedTags?.filter((tag) => tag[0] !== 'title' && tag[0] !== 'description' && tag[0] !== 'd').length || 0
+    : listTags.length
 
   useEffect(() => {
     if (!hasEncrypted) {
@@ -56,7 +54,7 @@ export const ListRow = (props: Props) => {
   }
 
   return (
-    <LinkNEvent nevent={nevent} sx={styles.rowLink}>
+    <LinkNEvent event={event} sx={styles.rowLink}>
       <html.div style={[styles.row, isLast && styles.rowLast]}>
         <html.div style={[styles.cell, styles.cellFirst]}>
           <Stack gap={1} align='center'>

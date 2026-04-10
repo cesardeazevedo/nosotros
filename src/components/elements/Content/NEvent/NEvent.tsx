@@ -36,7 +36,7 @@ export const NEvent = memo(function NEvent(props: Props) {
         <Skeleton variant='rectangular' animation='wave' sx={[styles.skeleton, dense && styles.skeleton$dense]} />
       )}
       {!deleted && data && (
-        <ContentProvider value={{ dense: true, disableLink }}>
+        <ContentProvider value={{ dense: true, disableLink, mediaObject: false }}>
           <NostrEventQuote event={data} />
         </ContentProvider>
       )}
@@ -48,7 +48,7 @@ const styles = css.create({
   root: {
     width: '100%',
     paddingBlock: spacing.padding1,
-    paddingInline: spacing.padding2,
+    // paddingInline: spacing.padding2,
   },
   root$dense: {
     paddingInline: 0,

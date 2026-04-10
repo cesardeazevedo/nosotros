@@ -2,7 +2,6 @@ import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { useUserState } from '@/hooks/state/useUser'
-import { useNevent } from '@/hooks/useEventUtils'
 import { palette } from '@/themes/palette.stylex'
 import { css } from 'react-strict-dom'
 import { LinkNEvent } from '../Links/LinkNEvent'
@@ -14,12 +13,11 @@ type Props = {
 export const UserFollowings = (props: Props) => {
   const { pubkey } = props
   const user = useUserState(pubkey, { fullUserSync: true })
-  const nevent = useNevent(user.follows?.data)
   if (user.follows?.isPending) {
     return <Skeleton sx={styles.loading} />
   }
   return (
-    <LinkNEvent nevent={nevent}>
+    <LinkNEvent event={user.follows?.data}>
       <Stack gap={0.5} sx={styles.underline}>
         <Text variant='label' size='lg'>
           {user.totalFollowing}

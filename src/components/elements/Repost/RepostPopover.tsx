@@ -1,6 +1,6 @@
 import { enqueueToastAtom } from '@/atoms/toaster.atoms'
 import { useNostrContext } from '@/components/providers/NostrContextProvider'
-import { useNoteContext } from '@/components/providers/NoteProvider'
+import { useEventContext } from '@/components/providers/NoteProvider'
 import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { MenuList } from '@/components/ui/MenuList/MenuList'
 import { Popover } from '@/components/ui/Popover/Popover'
@@ -30,7 +30,7 @@ type Props = {
 
 export const RepostPopover = memo(function RepostPopover(props: Props) {
   const { children } = props
-  const { event } = useNoteContext()
+  const { event } = useEventContext()
   const ctx = useNostrContext()
   const router = useRouter()
   const queryClient = useQueryClient()

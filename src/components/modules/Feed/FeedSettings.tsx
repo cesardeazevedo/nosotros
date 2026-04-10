@@ -58,7 +58,6 @@ export const FeedSettings = memo(function FeedSettings(props: Props) {
 
   return (
     <html.div style={styles.root}>
-      <Divider />
       <Stack horizontal={false} sx={styles.content} gap={1}>
         <Text variant='label' size='lg' sx={styles.label}>
           Content

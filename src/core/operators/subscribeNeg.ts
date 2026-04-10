@@ -69,8 +69,11 @@ export function subscribeNeg(relay: Relay) {
 
         mergeMap((ids) => {
           if (ids.length > 0) {
-            const sub = new NostrSubscription({ ids }, { id: 'neg-ids' })
-            return of(sub).pipe(subscribe(relay))
+            const requestSub = new NostrSubscription(
+              { ids },
+              { id: 'neg-ids', groupId: sub.groupId, childId: sub.childId },
+            )
+            return of(requestSub).pipe(subscribe(relay))
           }
           return EMPTY
         }),

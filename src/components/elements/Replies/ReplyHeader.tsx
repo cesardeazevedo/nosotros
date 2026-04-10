@@ -1,11 +1,11 @@
 import { useContentContext } from '@/components/providers/ContentProvider'
-import { useNoteContext } from '@/components/providers/NoteProvider'
+import { useEventContext } from '@/components/providers/NoteProvider'
 import { Button } from '@/components/ui/Button/Button'
 import { Stack } from '@/components/ui/Stack/Stack'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { useParentEvent } from '@/hooks/query/useQueryBase'
 import type { UserState } from '@/hooks/state/useUser'
 import { useUserState } from '@/hooks/state/useUser'
-import { useNevent } from '@/hooks/useEventUtils'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconDotsVertical } from '@tabler/icons-react'
@@ -15,16 +15,16 @@ import { LinkNEvent } from '../Links/LinkNEvent'
 
 type ReplyHeaderInnerProps = {
   parentUser: UserState
-  nevent?: string
+  event?: NostrEventDB
   dense?: boolean
 }
 
 export const ReplyHeaderInner = memo(function ReplyHeaderInner(props: ReplyHeaderInnerProps) {
-  const { parentUser, nevent, dense } = props
+  const { parentUser, event, dense } = props
   return (
     <Stack sx={[styles.root, dense && styles.root$dense]} gap={2}>
       <IconDotsVertical size={20} {...css.props(styles.icon)} />
-      <LinkNEvent nevent={nevent}>
+      <LinkNEvent event={event}>
         <Button variant='filledTonal' sx={styles.button}>
           Replying to {parentUser.displayName}
         </Button>
@@ -35,11 +35,10 @@ export const ReplyHeaderInner = memo(function ReplyHeaderInner(props: ReplyHeade
 
 export const ReplyHeader = memo(function ReplyHeader() {
   const { dense } = useContentContext()
-  const { event } = useNoteContext()
+  const { event } = useEventContext()
   const parent = useParentEvent(event)
   const parentUser = useUserState(parent.data?.pubkey)
-  const nevent = useNevent(parent.data)
-  return <ReplyHeaderInner parentUser={parentUser} nevent={nevent} dense={dense} />
+  return <ReplyHeaderInner parentUser={parentUser} event={parent.data} dense={dense} />
 })
 
 const styles = css.create({

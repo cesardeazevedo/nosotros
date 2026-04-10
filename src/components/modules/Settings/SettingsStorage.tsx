@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/Button/Button'
 import { Chip } from '@/components/ui/Chip/Chip'
 import { Divider } from '@/components/ui/Divider/Divider'
+import { HeaderBase } from '@/components/elements/Layouts/HeaderBase'
 import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
 import { Stack } from '@/components/ui/Stack/Stack'
@@ -73,12 +74,9 @@ export const SettingsStorageRoute = () => {
 
   return (
     <Stack grow horizontal={false} sx={styles.container}>
-      <Stack sx={styles.header} gap={1}>
-        <Text variant='title' size='lg'>
-          Cache Relay
-        </Text>
+      <HeaderBase leading='Cache Relay'>
         <Chip icon={<IconDatabase size={18} strokeWidth='1.5' />} label='SQLite (WASM)' />
-      </Stack>
+      </HeaderBase>
       <Divider />
       <Stack grow sx={styles.root} horizontal={false}>
         <Stack horizontal={false} align='stretch'>
@@ -153,10 +151,6 @@ const styles = css.create({
     width: '100%',
     overflowY: 'auto',
     paddingBottom: spacing.padding3,
-  },
-  header: {
-    padding: spacing.padding2,
-    height: 60,
   },
   middle: {
     paddingBlock: spacing.padding2,

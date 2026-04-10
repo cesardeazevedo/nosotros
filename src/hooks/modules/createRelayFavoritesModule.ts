@@ -4,11 +4,12 @@ import type { NostrFilter } from '@/core/types'
 import { queryKeys } from '../query/queryKeys'
 import type { FeedModule } from '../query/useQueryFeeds'
 
-export function createRelayFavoriteModule(): FeedModule {
-  const id = 'relay_favorites'
+export function createRelayFavoriteModule(pubkey?: string): FeedModule {
+  const authors = pubkey ? [pubkey] : RECOMMENDED_PUBKEYS
+  const id = `relay_favorites_${pubkey || 'recommended'}`
   const filter: NostrFilter = {
     kinds: [Kind.RelayFavorites],
-    authors: RECOMMENDED_PUBKEYS,
+    authors,
     limit: 100,
   }
   return {

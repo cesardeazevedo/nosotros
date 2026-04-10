@@ -18,7 +18,7 @@ export const MediaColumn = memo(function MediaColumn(props: Props) {
       <Stack horizontal={false}>
         <MediaHeader feed={feed} />
         <Divider />
-        <MediaFeed column feed={feed} />
+        <MediaFeed feed={feed} />
       </Stack>
     </div>
   )

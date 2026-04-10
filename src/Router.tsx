@@ -1,21 +1,23 @@
 import { type QueryClient } from '@tanstack/react-query'
-import { createRootRouteWithContext, createRoute, createRouter, lazyRouteComponent, redirect } from '@tanstack/react-router'
+import {
+  createRootRouteWithContext,
+  createRoute,
+  createRouter,
+  lazyRouteComponent,
+  redirect,
+} from '@tanstack/react-router'
 import { useMemo } from 'react'
 import { z } from 'zod'
 import { selectedPubkeyAtom } from './atoms/auth.atoms'
-import { decksAtom } from './atoms/deck.atoms'
 import { addRecentAtom } from './atoms/recent.atoms'
 import { store } from './atoms/store'
 import { RootLayout } from './components/elements/Layouts/RootLayout'
 import { ArticlesRoute } from './components/modules/Articles/ArticlesRoute'
-import { DeckRoute } from './components/modules/Deck/DeckRoute'
 import { DraftsRoute } from './components/modules/Drafts/DraftsRoute'
 import { EditorRoute } from './components/modules/Editor/EditorRoute'
+import { ExploreRoute } from './components/modules/Explore/ExploreRoute'
 import { Feed } from './components/modules/Feed/Feed'
-import { FeedHeader } from './components/modules/Feed/FeedHeader'
-import { FeedHeadline } from './components/modules/Feed/FeedHeadline'
-import { FeedRoute } from './components/modules/Feed/FeedRoute'
-import { HomeRoute } from './components/modules/Home/HomeRoute'
+import { FeedsLayout } from './components/modules/Feed/FeedsLayout'
 import { ListsRoute } from './components/modules/Lists/ListRoute'
 import { MediaRoute } from './components/modules/Media/MediaRoute'
 import { NostrRoute } from './components/modules/Nostr/NostrRoute'
@@ -24,9 +26,11 @@ import { NotificationRoute } from './components/modules/Notifications/Notificati
 import { NProfileLoading } from './components/modules/NProfile/NProfileLoading'
 import { RelayActiveRoute } from './components/modules/RelayActive/RelayActiveRoute'
 import { RelayMonitorRoute } from './components/modules/RelayMonitor/RelayMonitorRoute'
+import { RelaySettingsRoute } from './components/modules/Relays/RelaySettingsRoute'
 import { RelayRoute } from './components/modules/Relays/RelaysRoute'
 import { SearchRoute } from './components/modules/Search/SearchRoute'
 import { Kind } from './constants/kinds'
+import { SEARCH_RELAYS } from './constants/relays'
 import type { NostrFilter } from './core/types'
 import { ErrorBoundary } from './ErrorBoundary'
 import { loadThreads } from './hooks/loaders/loadThreads'
@@ -51,6 +55,8 @@ const rootRoute = createRootRouteWithContext<RouteContext>()({
     n: z.string().optional(),
     // for masking and parallel routes
     nostr: z.string().optional(),
+    column: z.string().optional(),
+    column_size: z.enum(['sm', 'md', 'lg']).optional(),
     media: z.number().optional(),
     invoice: z.string().optional(),
     sign_in: z.boolean().optional(),
@@ -59,178 +65,203 @@ const rootRoute = createRootRouteWithContext<RouteContext>()({
     compose: z.boolean().optional(),
     quoting: z.string().optional(),
     replying: z.string().optional(),
+    view_author: z.string().optional(),
   }),
 })
 
 export const homeRoute = createRoute({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => feedsLayoutRoute,
   path: '/',
-  component: HomeRoute,
+  component: () => null,
 })
 
 export const homeRepliesRoute = createRoute({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => feedsLayoutRoute,
   path: '/threads',
-  component: () => <HomeRoute replies />,
+  component: () => null,
+})
+
+const feedsLayoutRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  id: 'feeds-layout',
+  component: FeedsLayout,
+})
+
+const exploreRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/explore',
+  validateSearch: z.object({
+    anchor_pubkey: z.string().optional(),
+  }),
+  component: ExploreRoute,
 })
 
 const zNumberArray = z.union([z.number(), z.array(z.number())]).optional()
 const zStringArray = z.union([z.string(), z.array(z.string())]).optional()
 
-export const feedRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/feed',
-  validateSearch: z.object({
-    pubkey: z.string().optional(),
-    permission: z
-      .preprocess(
-        (value) => {
-          switch (value) {
-            case 1: {
-              return 'read'
-            }
-            case 2: {
-              return 'write'
-            }
-            case 3: {
-              return 'readwrite'
-            }
-            default: {
-              return value
-            }
+const feedSearchSchema = z.object({
+  pubkey: z.string().optional(),
+  permission: z
+    .preprocess(
+      (value) => {
+        switch (value) {
+          case 1: {
+            return 'read'
           }
-        },
-        z.enum(['read', 'write', 'readwrite']),
-      )
-      .optional(),
-    relay: zStringArray,
-    relaySets: zStringArray,
-    outbox: z.boolean().optional(),
+          case 2: {
+            return 'write'
+          }
+          case 3: {
+            return 'readwrite'
+          }
+          default: {
+            return value
+          }
+        }
+      },
+      z.enum(['read', 'write', 'readwrite']),
+    )
+    .optional(),
+  relay: zStringArray,
+  relaySets: zStringArray,
+  outbox: z.boolean().optional(),
+  network: z.enum(['STALE_WHILE_REVALIDATE', 'REMOTE_ONLY', 'CACHE_ONLY']).optional(),
 
-    // nostr filters
-    kind: zNumberArray.default(1),
-    author: z.union([z.string(), z.array(z.string())]).optional(),
-    limit: z.number().optional(),
-    search: z.string().optional(),
-    until: z.number().optional(),
-    since: z.number().optional(),
-    a: zStringArray,
-    A: zStringArray,
-    e: zStringArray,
-    q: zStringArray,
-    E: zStringArray,
-    k: zStringArray,
-    K: zStringArray,
-    p: zStringArray,
-    t: zStringArray,
-    d: zStringArray,
+  kind: zNumberArray,
+  author: z.union([z.string(), z.array(z.string())]).optional(),
+  limit: z.number().optional(),
+  search: z.string().optional(),
+  until: z.number().optional(),
+  since: z.number().optional(),
+  a: zStringArray,
+  A: zStringArray,
+  e: zStringArray,
+  q: zStringArray,
+  E: zStringArray,
+  k: zStringArray,
+  K: zStringArray,
+  p: zStringArray,
+  t: zStringArray,
+  d: zStringArray,
 
-    // feed filters
-    live: z.boolean().optional(),
-    scope: z
-      .union([
-        z.literal('self'),
-        z.literal('following'),
-        z.literal('sets_p'),
-        z.literal('sets_e'),
-        z.literal('relay_sets'),
-        z.literal('relayfeed'),
-        z.literal('inbox'),
-      ])
-      .optional(),
-    blured: z.boolean().optional(),
-    includeReplies: z.boolean().optional(),
+  live: z.boolean().optional(),
+  scope: z
+    .union([
+      z.literal('self'),
+      z.literal('following'),
+      z.literal('sets_p'),
+      z.literal('sets_e'),
+      z.literal('relay_sets'),
+      z.literal('relayfeed'),
+      z.literal('inbox'),
+    ])
+    .optional(),
+  blured: z.boolean().optional(),
+  includeReplies: z.boolean().optional(),
 
-    type: z
-      .enum([
-        'home',
-        'feed',
-        'media',
-        'quotes',
-        'reposts',
-        'search',
-        'tags',
-        'lists',
-        'articles',
-        'relaysets',
-        'relayfeed',
-        'followset',
-        'starterpack',
-        'notifications',
-      ])
-      .optional(),
-  }),
-  loaderDeps: ({ search }) => ({
-    // context
-    relay: search.relay,
-    relaySets: search.relaySets,
-    pubkey: search.pubkey,
-    permission: search.permission,
-    outbox: search.outbox,
+  type: z
+    .enum([
+      'home',
+      'feed',
+      'media',
+      'quotes',
+      'reposts',
+      'search',
+      'tags',
+      'lists',
+      'articles',
+      'relaysets',
+      'relayfeed',
+      'followset',
+      'starterpack',
+      'notifications',
+    ])
+    .optional(),
+})
 
-    // nostr filters
-    kind: search.kind,
-    author: search.author,
-    limit: search.limit,
-    search: search.search,
-    until: search.until,
-    since: search.since,
-    e: search.e,
-    E: search.E,
-    q: search.q,
-    a: search.a,
-    A: search.A,
-    k: search.k,
-    K: search.K,
-    p: search.p,
-    t: search.t,
-    d: search.d,
+const getFeedLoaderDeps = ({ search }: { search: z.infer<typeof feedSearchSchema> }) => ({
+  relay: search.relay,
+  relaySets: search.relaySets,
+  pubkey: search.pubkey,
+  permission: search.permission,
+  outbox: search.outbox,
+  network: search.network,
 
-    // feed filters
-    live: search.live,
-    scope: search.scope,
-    blured: search.blured,
-    includeReplies: search.includeReplies,
-    type: search.type,
-  }),
-  loader: (options) => {
+  kind: search.kind,
+  author: search.author,
+  limit: search.limit,
+  search: search.search,
+  until: search.until,
+  since: search.since,
+  e: search.e,
+  E: search.E,
+  q: search.q,
+  a: search.a,
+  A: search.A,
+  k: search.k,
+  K: search.K,
+  p: search.p,
+  t: search.t,
+  d: search.d,
+
+  live: search.live,
+  scope: search.scope,
+  blured: search.blured,
+  includeReplies: search.includeReplies,
+  type: search.type,
+})
+
+function createFeedLoader(
+  defaults?: Partial<{
+    kind: number | number[]
+    limit: number
+    live: boolean
+    outbox: boolean
+    scope: FeedScope
+    type: FeedModule['type']
+    relays: string[]
+    network: NostrContext['network']
+  }>,
+) {
+  return (options: { deps: ReturnType<typeof getFeedLoaderDeps> }) => {
     const { deps } = options
     const {
-      kind,
+      kind = defaults?.kind,
       author,
-      limit = 50,
+      limit = defaults?.limit ?? 50,
       search,
       until,
       since,
-      live = true,
-      scope = 'self',
-      type = deps.type || 'feed',
+      live = defaults?.live ?? true,
+      scope = defaults?.scope ?? 'self',
+      type = deps.type || defaults?.type || 'feed',
       blured,
       relay,
       relaySets,
-      outbox = true,
+      outbox = defaults?.outbox ?? true,
+      network = defaults?.network,
       pubkey,
       permission,
       includeReplies = false,
     } = deps
 
     const filter = {} as NostrFilter
-    if (kind) {
+    if (kind !== undefined) {
       filter.kinds = [kind].flat()
     }
     if (author) {
       filter.authors = [author].flat()
     }
-    if (limit) {
+    if (limit !== undefined) {
       filter.limit = limit
     }
     if (search) {
       filter.search = search
     }
-    if (until) {
+    if (until !== undefined) {
       filter.until = until
     }
-    if (since) {
+    if (since !== undefined) {
       filter.since = since
     }
     if (deps.e) {
@@ -267,8 +298,13 @@ export const feedRoute = createRoute({
     const ctx: NostrContext = {}
     if (relay) {
       ctx.relays = [relay].flat()
-      ctx.network = 'REMOTE_ONLY'
-      // We don't want negentropy for relay feeds
+      ctx.network = network || 'REMOTE_ONLY'
+      ctx.negentropy = false
+    } else if (defaults?.relays?.length) {
+      ctx.relays = defaults.relays
+      if (network) {
+        ctx.network = network
+      }
       ctx.negentropy = false
     }
     if (relaySets) {
@@ -290,16 +326,19 @@ export const feedRoute = createRoute({
               ? READ | WRITE
               : undefined
     }
-    const id = 'custom_' + JSON.stringify({
-      filter,
-      relay,
-      relaySets,
-      scope,
-      type,
-      pubkey,
-      permission,
-      outbox,
-    })
+    const id =
+      'custom_' +
+      JSON.stringify({
+        filter,
+        relay: ctx.relays,
+        relaySets,
+        network: ctx.network,
+        scope,
+        type,
+        pubkey,
+        permission,
+        outbox,
+      })
     return {
       id,
       type,
@@ -307,30 +346,37 @@ export const feedRoute = createRoute({
       includeReplies,
       filter,
       blured,
+      pageSize: type === 'relayfeed' ? limit : undefined,
       scope: scope as FeedScope,
       queryKey: queryKeys.feed(id, filter, ctx),
       ctx,
     } as FeedModule
-  },
-  component: () => {
-    const module = feedRoute.useLoaderData()
-    const feed = useFeedState(module)
-    return <FeedRoute feed={feed} headline={<FeedHeadline feed={feed} />} header={<FeedHeader feed={feed} />} />
-  },
+  }
+}
+
+export const feedRoute = createRoute({
+  getParentRoute: () => feedsLayoutRoute,
+  path: '/feed',
+  validateSearch: feedSearchSchema,
+  loaderDeps: getFeedLoaderDeps,
+  loader: createFeedLoader({
+    kind: Kind.Text,
+  }),
+  component: () => null,
 })
 
-export const deckRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/deck/$id',
-  beforeLoad: (options) => {
-    const { id } = options.params
-    const decks = store.get(decksAtom)
-    if (!(id in decks)) {
-      throw redirect({ to: '/deck/$id', params: { id: 'default' } })
-    }
-  },
-  component: DeckRoute,
-})
+// export const deckRoute = createRoute({
+//   getParentRoute: () => rootRoute,
+//   path: '/deck/$id',
+//   beforeLoad: (options) => {
+//     const { id } = options.params
+//     const decks = store.get(decksAtom)
+//     if (!(id in decks)) {
+//       throw redirect({ to: '/deck/$id', params: { id: 'default' } })
+//     }
+//   },
+//   component: DeckRoute,
+// })
 
 export const notificationsRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -490,10 +536,19 @@ const nprofileArticlesRoute = createRoute({
 export const searchRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/search',
-  validateSearch: z.object({ q: z.string().optional() }),
-  loaderDeps: ({ search: { q } }) => ({ q }),
+  validateSearch: feedSearchSchema,
+  loaderDeps: getFeedLoaderDeps,
+  loader: createFeedLoader({
+    kind: Kind.Metadata,
+    limit: 100,
+    live: true,
+    outbox: false,
+    type: 'search',
+    relays: SEARCH_RELAYS,
+    network: 'REMOTE_ONLY',
+  }),
   beforeLoad: (x) => {
-    if (!x.search.q && !x.search.nostr) {
+    if (!x.search.search && !x.search.nostr) {
       throw redirect({ to: '/', replace: true })
     }
   },
@@ -506,15 +561,27 @@ const listsRoute = createRoute({
   component: ListsRoute,
 })
 
+const listsDiscoverRoute = createRoute({
+  getParentRoute: () => listsRoute,
+  path: '/discover',
+  component: () => null,
+})
+
 const relaysRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/relays',
   component: RelayRoute,
 })
 
-const relayActiveRoute = createRoute({
+const relaySettingsRoute = createRoute({
   getParentRoute: () => relaysRoute,
   path: '/',
+  component: RelaySettingsRoute,
+})
+
+const relayActiveRoute = createRoute({
+  getParentRoute: () => relaysRoute,
+  path: '/active',
   component: RelayActiveRoute,
 })
 
@@ -586,19 +653,17 @@ const settingsAboutRoute = createRoute({
 })
 
 export const routeTree = rootRoute.addChildren([
-  homeRoute,
-  homeRepliesRoute,
-  feedRoute,
+  feedsLayoutRoute.addChildren([homeRoute, homeRepliesRoute, feedRoute]),
   nostrRoute.addChildren([nprofileIndexRoute, nprofileRepliesRoute, nprofileMediaRoute, nprofileArticlesRoute]),
-  deckRoute,
   searchRoute,
-  listsRoute,
+  exploreRoute,
+  listsRoute.addChildren([listsDiscoverRoute]),
   notificationsRoute,
   mediaRoute,
   articleRoute,
   composeRoute,
   draftsRoute,
-  relaysRoute.addChildren([relayActiveRoute, relayMonitorRoute]),
+  relaysRoute.addChildren([relaySettingsRoute, relayActiveRoute, relayMonitorRoute]),
   settingsRoute.addChildren([
     settingsPreferenceRoute,
     settingsRelaysAuthRoute,

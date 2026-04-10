@@ -47,9 +47,9 @@ describe('repliesQuery atoms', () => {
           ['e', 'muted-note'],
         ],
       }),
-    ]);
+    ])
 
-    [mine, followed, stranger, mutedAuthor, mutedNote].forEach((reply) => {
+    ;[mine, followed, stranger, mutedAuthor, mutedNote].forEach((reply) => {
       store.set(addReplyAtom, reply)
     })
 

@@ -1,6 +1,6 @@
 import { isDeletedEventAtomFamily } from '@/atoms/deletion.atoms'
 import { ContentProvider, useContentContext } from '@/components/providers/ContentProvider'
-import { NoteProvider } from '@/components/providers/NoteProvider'
+import { EventProvider } from '@/components/providers/NoteProvider'
 import { Button } from '@/components/ui/Button/Button'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { Stack } from '@/components/ui/Stack/Stack'
@@ -38,7 +38,7 @@ export const Reply = memo(function Reply(props: Props) {
   const navigate = useNavigate()
   const router = useRouter()
   const isMobile = useMobile()
-  const collapsedLevel = isMobile ? 5 : 6
+  const collapsedLevel = isMobile ? 6 : 8
   const [open, setOpen] = useState(level < collapsedLevel)
   const { blured } = useContentContext()
   const nevent = note.nip19
@@ -80,7 +80,7 @@ export const Reply = memo(function Reply(props: Props) {
   }
 
   return (
-    <NoteProvider value={{ event }}>
+    <EventProvider value={{ event }}>
       <ContentProvider value={{ blured, dense: true }}>
         <html.div
           ref={rootRef}
@@ -119,7 +119,6 @@ export const Reply = memo(function Reply(props: Props) {
                 <PostActions
                   renderOptions
                   statsPopover
-                  note={note}
                   onReplyClick={() => {
                     if ((nested && level > 3) || isMobile) {
                       handleReplyInDialog()
@@ -143,7 +142,7 @@ export const Reply = memo(function Reply(props: Props) {
           )}
         </html.div>
       </ContentProvider>
-    </NoteProvider>
+    </EventProvider>
   )
 })
 

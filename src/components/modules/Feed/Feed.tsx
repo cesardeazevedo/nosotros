@@ -19,13 +19,15 @@ export type Props = {
   loading?: React.ReactNode
   divider?: boolean
   wrapper?: (children: React.ReactNode) => React.ReactNode
-} & Pick<ListProps, 'column' | 'header'>
+} & Pick<ListProps, 'header'>
 
 export const Feed = memo(function Feed(props: Props) {
   const { feed, render, loading, ...rest } = props
   const showLoading = feed.options.scope === 'sets_e' ? feed.query.isFetching : !feed.isEmpty
   const isThreadsMode = feed.replies === true && feed.options.type !== 'inbox'
-  const footer = <>{showLoading ? loading || <PostLoading rows={4} /> : feed.isEmpty ? <FeedEmpty feed={feed} /> : null}</>
+  const footer = (
+    <>{showLoading ? loading || <PostLoading rows={4} /> : feed.isEmpty ? <FeedEmpty feed={feed} /> : null}</>
+  )
 
   return (
     <NostrContextProvider value={feed.options.ctx}>

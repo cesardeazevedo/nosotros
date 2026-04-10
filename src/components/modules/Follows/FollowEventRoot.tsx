@@ -1,6 +1,7 @@
 import { PostHeader } from '@/components/elements/Posts/PostHeader'
+import { UserFeedItem, UserItem } from '@/components/elements/User/UserFeedItem'
 import { UserRoot } from '@/components/elements/User/UserRoot'
-import { NoteProvider } from '@/components/providers/NoteProvider'
+import { EventProvider } from '@/components/providers/NoteProvider'
 import { Button } from '@/components/ui/Button/Button'
 import { Chip } from '@/components/ui/Chip/Chip'
 import { Divider } from '@/components/ui/Divider/Divider'
@@ -76,10 +77,9 @@ export const FollowEventRoot = (props: Props) => {
   const isOwnFollowList = event.pubkey === user.pubkey
 
   return (
-    <NoteProvider value={{ event }}>
-      <PostHeader event={event} />
+    <>
       <Stack sx={styles.header} justify='space-between'>
-        <Text variant='headline' size='md'>
+        <Text variant='headline' size='sm'>
           Follow List
         </Text>
         {!isOwnFollowList && <FollowBulkButton values={values} />}
@@ -111,7 +111,12 @@ export const FollowEventRoot = (props: Props) => {
         {limitedTags.map(([tag, value]) => {
           const key = tag + value
           if (tag === 'p') {
-            return <UserRoot border key={key} pubkey={value} />
+            return (
+              <>
+                <UserItem key={key} pubkey={value} />
+                <Divider />
+              </>
+            )
           }
           return (
             <Stack key={key} sx={styles.tag} justify='space-between'>
@@ -131,7 +136,7 @@ export const FollowEventRoot = (props: Props) => {
           Load More
         </Button>
       </Stack>
-    </NoteProvider>
+    </>
   )
 }
 

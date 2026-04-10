@@ -1,114 +1,123 @@
-import { Button } from '@/components/ui/Button/Button'
-import { Stack } from '@/components/ui/Stack/Stack'
-import { useCurrentPubkey } from '@/hooks/useAuth'
-import { useSettings } from '@/hooks/useSettings'
-import { spacing } from '@/themes/spacing.stylex'
-import { useMatch } from '@tanstack/react-router'
-import React, { memo, useState } from 'react'
+import { useSetSettings, useSettings } from '@/hooks/useSettings'
+import { palette } from '@/themes/palette.stylex'
+import React, { memo, useRef } from 'react'
+import type { PanelImperativeHandle } from 'react-resizable-panels'
+import { Group, Panel, Separator } from 'react-resizable-panels'
 import { css, html } from 'react-strict-dom'
-import { LinkBase } from '../Links/LinkBase'
-import { LinkSignIn } from '../Links/LinkSignIn'
-import { ProfilePopover } from '../Navigation/ProfilePopover'
 import { Sidebar } from './Sidebar'
-import { SidebarCollapsed } from './SidebarCollapsed'
-import type { Panes } from './SidebarContext'
 import { SidebarContext } from './SidebarContext'
-import { SidebarTransition } from './SidebarTransition'
-import { SidebarPaneNotifications } from './panes/SidebarPaneNotifications'
 
 type Props = {
   children: React.ReactNode
 }
 
+const SIDEBAR_COLLAPSED_WIDTH = 78
+const SIDEBAR_DEFAULT_WIDTH = 250
+const SIDEBAR_MIN_WIDTH = 230
+const SIDEBAR_MAX_WIDTH = 300
 export const SidebarLayout = memo(function SidebarLayout(props: Props) {
-  const settings = useSettings()
-  const isDeck = useMatch({ from: '/deck/$id', shouldThrow: false })
-  const pubkey = useCurrentPubkey()
-  const [pane, setPane] = useState<Panes>(false)
-  const sidebarCollapsed = settings.sidebarCollapsed || pane !== false
+  const setSettings = useSetSettings()
+  const { sidebarCollapsed } = useSettings()
+  const sidebarPanelRef = useRef<PanelImperativeHandle | null>(null)
+
   return (
     <SidebarContext.Provider
       value={{
-        pane,
-        setPane: (pane) => setPane((prev) => (prev === pane ? false : pane)),
         renderCollapsedButton: true,
+        toggleCollapsed: () => {
+          const panel = sidebarPanelRef.current
+          if (!panel) return
+
+          if (panel.isCollapsed()) {
+            panel.expand()
+            return
+          }
+
+          panel.collapse()
+        },
       }}>
-      <>
-        <SidebarTransition open={!sidebarCollapsed}>{(sx, ref) => <Sidebar ref={ref} sx={sx} />}</SidebarTransition>
-        <SidebarTransition open={sidebarCollapsed}>
-          {(sx, ref) => <SidebarCollapsed ref={ref} sx={sx} />}
-        </SidebarTransition>
-        {pubkey && (
-          <SidebarTransition open={pane === '/notifications'}>
-            {(sx, ref) => <SidebarPaneNotifications ref={ref} sx={sx} pubkey={pubkey} />}
-          </SidebarTransition>
-        )}
-        <html.main
-          style={[
-            !isDeck && !settings.sidebarCollapsed && styles.main,
-            isDeck && styles.main$deck,
-            isDeck && !settings.sidebarCollapsed && styles.main$deck$expanded,
-          ]}>
-          <html.div
-            style={[styles.leading, settings.sidebarCollapsed && styles.leading$collapsed]}
-            id='header_lead'></html.div>
-          <html.div style={styles.trailing}>
-            <Stack gap={1}>
-              {pubkey ? (
-                <Stack gap={2}>
-                  {!isDeck && (
-                    <LinkBase to='.' search={(rest) => ({ ...rest, compose: true })}>
-                      <Button variant='filled'>Create note</Button>
-                    </LinkBase>
-                  )}
-                  <ProfilePopover />
-                </Stack>
-              ) : (
-                <LinkSignIn>
-                  <Button variant='filled'>Sign In</Button>
-                </LinkSignIn>
-              )}
-            </Stack>
-          </html.div>
-          {props.children}
-        </html.main>
-      </>
+      <html.div style={styles.root}>
+        <Group orientation='horizontal' resizeTargetMinimumSize={{ coarse: 24, fine: 12 }} style={panelStyles.root}>
+          <Panel
+            defaultSize={sidebarCollapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_DEFAULT_WIDTH}
+            id='sidebar'
+            collapsible
+            collapsedSize={SIDEBAR_COLLAPSED_WIDTH}
+            groupResizeBehavior='preserve-pixel-size'
+            panelRef={sidebarPanelRef}
+            onResize={(size, _id, prevSize) => {
+              const isCollapsed = size.inPixels <= SIDEBAR_COLLAPSED_WIDTH + 1
+              const wasCollapsed = prevSize ? prevSize.inPixels <= SIDEBAR_COLLAPSED_WIDTH + 1 : sidebarCollapsed
+
+              if (isCollapsed !== wasCollapsed) {
+                setSettings({ sidebarCollapsed: isCollapsed })
+              }
+            }}
+            maxSize={SIDEBAR_MAX_WIDTH}
+            minSize={SIDEBAR_MIN_WIDTH}>
+            <Sidebar />
+          </Panel>
+          <Separator
+            data-sidebar-layout-separator
+            onDoubleClick={() => {
+              sidebarPanelRef.current?.resize(SIDEBAR_DEFAULT_WIDTH)
+            }}
+            {...css.props(styles.resizeHandle)}
+          />
+          <Panel id='main' minSize='40%'>
+            <html.main style={styles.main}>{props.children}</html.main>
+          </Panel>
+        </Group>
+      </html.div>
     </SidebarContext.Provider>
   )
 })
 
 const styles = css.create({
-  leading: {
-    position: 'fixed',
-    top: 0,
-    marginLeft: spacing.margin1,
-  },
-  leading$collapsed: {
-    marginLeft: 90,
-  },
-  trailing: {
-    position: 'fixed',
-    top: spacing.margin2,
-    right: spacing.margin2,
-    zIndex: 1,
-  },
-  main: {
-    overflowX: 'hidden',
-    marginLeft: 315,
-    paddingRight: {
-      default: 315,
-      '@media (max-width: 1920px)': 0,
+  root: {
+    width: '100%',
+    height: '100vh',
+    ':has([data-sidebar-layout-separator]:hover) main': {
+      borderLeftWidth: 2,
+      borderLeftColor: palette.outline,
+    },
+    ':has([data-sidebar-layout-separator]:focus-visible) main': {
+      borderLeftWidth: 2,
+      borderLeftColor: palette.outline,
     },
   },
-  main$deck: {
-    position: 'static',
-    overflowX: 'auto',
-    overflowY: 'hidden',
-    width: 'fit-content',
+  resizeHandle: {
+    width: 12,
     height: '100%',
-    marginLeft: 84,
+    marginInline: -6,
+    position: 'relative',
+    zIndex: 1,
+    cursor: 'col-resize',
   },
-  main$deck$expanded: {
-    marginLeft: 315,
+  main: {
+    display: 'flex',
+    flexDirection: 'column',
+    flex: 1,
+    minWidth: 0,
+    position: 'relative',
+    // overflow: 'hidden',
+    marginTop: 18,
+    marginRight: 18,
+    // marginBottom: 24,
+    borderRadius: 12,
+    // marginLeft: 315,
+    height: 'calc(100vh - 34px)',
+    backgroundColor: palette.surfaceContainerLowest,
+    borderStyle: 'solid',
+    borderWidth: 1,
+    borderColor: palette.outlineVariant,
+    // boxShadow: elevation.shadows1,
   },
 })
+
+const panelStyles = {
+  root: {
+    width: '100%',
+    height: '100vh',
+  } as const,
+}

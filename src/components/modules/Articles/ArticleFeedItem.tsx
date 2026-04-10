@@ -1,28 +1,22 @@
 import { TextClamped } from '@/components/elements/Content/TextClamped'
-import { LinkNAddress } from '@/components/elements/Links/LinkNAddress'
 import { PostActions } from '@/components/elements/Posts/PostActions/PostActions'
-import { PostHeaderDate } from '@/components/elements/Posts/PostHeaderDate'
-import { UserHeader } from '@/components/elements/User/UserHeader'
+import { PostHeader } from '@/components/elements/Posts/PostHeader'
 import { ContentProvider, useContentContext } from '@/components/providers/ContentProvider'
-import { NoteProvider } from '@/components/providers/NoteProvider'
+import { Paper } from '@/components/ui/Paper/Paper'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { useNoteState } from '@/hooks/state/useNote'
 import { useEventTag } from '@/hooks/useEventUtils'
 import { useMobile } from '@/hooks/useMobile'
-import { palette } from '@/themes/palette.stylex'
-import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { getImgProxyUrl } from '@/utils/imgproxy'
-import type { NAddr } from 'nostr-tools/nip19'
 import React, { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 
 type Props = {
   event: NostrEventDB
   header?: React.ReactNode
-  border?: boolean
 }
 
 export const ArticleFeedItem = memo(function ArticleFeedItem(props: Props) {
@@ -34,31 +28,11 @@ export const ArticleFeedItem = memo(function ArticleFeedItem(props: Props) {
   const image = useEventTag(event, 'image')
   const summary = useEventTag(event, 'summary')
   return (
-    <Stack horizontal={false} sx={[styles.root, props.border && styles.root$border]}>
-      <NoteProvider value={{ event }}>
-        <LinkNAddress naddress={note.nip19 as NAddr}>
-          <ContentProvider value={{ dense, disableLink: true }}>
-            <Stack sx={styles.wrapper} align='center' gap={2}>
-              <Stack grow gap={1} horizontal={false} sx={styles.content} align='flex-start'>
-                <Stack horizontal={false} gap={2}>
-                  {props.header || (
-                    <UserHeader pubkey={note.event.pubkey}>
-                      <PostHeaderDate dateStyle='long' nevent={note.nip19} date={event.created_at} />
-                    </UserHeader>
-                  )}
-                  <Text variant='headline' size='sm'>
-                    {title}
-                  </Text>
-                  {summary && (
-                    <TextClamped>
-                      <Text variant='body' size='md' sx={styles.summary}>
-                        {summary}
-                      </Text>
-                    </TextClamped>
-                  )}
-                </Stack>
-                {dense && <PostActions note={note} />}
-              </Stack>
+    <Stack horizontal={false} sx={styles.root}>
+      <ContentProvider value={{ dense, disableLink: true }}>
+        <Stack grow gap={1} horizontal={false} sx={styles.wrapper} align='flex-start'>
+          <>
+            <Paper outlined sx={styles.paper}>
               {image && (
                 <html.img
                   loading='lazy'
@@ -67,11 +41,23 @@ export const ArticleFeedItem = memo(function ArticleFeedItem(props: Props) {
                   style={[styles.image, isMobile && styles.image$mobile]}
                 />
               )}
-            </Stack>
-          </ContentProvider>
-        </LinkNAddress>
-        {!dense && <PostActions note={note} />}
-      </NoteProvider>
+              <Stack horizontal={false} gap={1} sx={styles.content}>
+                <Text variant='headline' size='sm'>
+                  {title}
+                </Text>
+                {summary && (
+                  <TextClamped>
+                    <Text variant='body' size='lg' sx={styles.summary}>
+                      {summary}
+                    </Text>
+                  </TextClamped>
+                )}
+              </Stack>
+            </Paper>
+            {/* <PostActions note={note} /> */}
+          </>
+        </Stack>
+      </ContentProvider>
     </Stack>
   )
 })
@@ -79,42 +65,29 @@ export const ArticleFeedItem = memo(function ArticleFeedItem(props: Props) {
 const styles = css.create({
   root: {
     cursor: 'pointer',
-    backgroundColor: {
-      default: 'transparent',
-      ':hover': 'rgba(125, 125, 125, 0.08)',
-    },
-  },
-  root$border: {
-    borderBottom: '1px solid',
-    borderBottomColor: palette.outlineVariant,
   },
   wrapper: {
-    paddingBottom: spacing.padding1,
-    paddingLeft: spacing.padding2,
-    paddingRight: spacing.padding1,
+    width: '100%',
+    overflow: 'hidden',
+  },
+  paper: {
+    marginTop: spacing.margin2,
+    width: '100%',
+    overflow: 'hidden',
   },
   content: {
-    paddingTop: spacing.padding1,
-    overflow: 'hidden',
+    width: '100%',
+    padding: spacing.padding2,
   },
   summary: {},
   image: {
+    width: '100%',
     objectFit: 'cover',
-    width: 170,
-    height: 150,
-    marginTop: spacing.margin1,
+    maxHeight: 240,
     marginBottom: 0,
-    borderRadius: shape.lg,
   },
   image$mobile: {
     width: 120,
     height: 100,
-  },
-  topic: {
-    paddingInline: spacing.padding1,
-    paddingBlock: '2px',
-    backgroundColor: palette.surfaceContainer,
-    borderRadius: shape.full,
-    fontSize: '90%',
   },
 })

@@ -17,6 +17,7 @@ export const UserChip = memo((props: Props) => {
     <Chip
       variant='input'
       selected={selected}
+      selectedIcon={null}
       icon={<UserAvatar size='xs' pubkey={pubkey} />}
       label={user?.displayName}
       onClick={onClick}

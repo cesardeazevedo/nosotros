@@ -29,7 +29,7 @@ export const SearchDialog = memo(function SearchDialog() {
         onSelect={(item) => {
           switch (item.type) {
             case 'query': {
-              navigate({ to: '/search', search: { q: item.query } })
+              navigate({ to: '/search', search: { search: item.query } })
               break
             }
             case 'relay': {
@@ -46,7 +46,9 @@ export const SearchDialog = memo(function SearchDialog() {
             }
             case 'user_relay':
             case 'user': {
-              const relays = getUserRelaysFromCache(item.pubkey, WRITE).map((x) => x.relay).slice(0, 4)
+              const relays = getUserRelaysFromCache(item.pubkey, WRITE)
+                .map((x) => x.relay)
+                .slice(0, 4)
               const nostr = nip19.nprofileEncode({ pubkey: item.pubkey, relays })
               navigate({
                 to: '/$nostr',

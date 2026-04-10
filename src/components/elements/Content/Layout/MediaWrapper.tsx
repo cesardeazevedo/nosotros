@@ -15,14 +15,14 @@ export type Props = {
 
 export const MediaWrapper = memo(function MediaWrapper(props: Props) {
   const { children, sx, mode = 'single' } = props
-  const { dense } = useContentContext()
+  const { dense, mediaObject } = useContentContext()
   const isMobile = useSM()
 
   return (
     <html.div
       style={[
         styles.root,
-        styles.padding,
+        !mediaObject && styles.padding,
         dense && styles.root$dense,
         styles.maxBounds(MAX_BOUNDS[mode].maxWidth, MAX_BOUNDS[mode].maxHeight),
         isMobile && styles.root$mobile,

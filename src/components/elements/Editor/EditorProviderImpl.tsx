@@ -42,14 +42,16 @@ import { memo, useCallback, useEffect, useImperativeHandle, useMemo, useRef, use
 import { EMPTY, tap } from 'rxjs'
 import { ToastEventPublished } from '../Toasts/ToastEventPublished'
 import { Editor } from './Editor'
+import { EditorInline } from './EditorInline'
 import type { EditorContextType, EditorProviderProps, EditorState } from './EditorContext'
 import { EditorContext } from './EditorContext'
 import { EditorDraftDialog } from './EditorDraftDialog'
-import { EditorMedia } from './EditorMedia'
 import { EditorUploadDialog } from './EditorUploadDialog'
 import { usePublicMessageTags, useReplyTags } from './hooks/useEditor'
+import { useInstalledCustomEmojis } from './hooks/useInstalledCustomEmojis'
 import { createEditor } from './utils/createEditor'
-import { createEditorKind20 } from './utils/createEditorKind20'
+import { createEditorInline } from './utils/createEditorInline'
+import { getEditorEmojiTags } from './utils/getEditorEmojiTags'
 
 type DraftSavePayload = {
   event: Pick<NostrEvent, 'id' | 'pubkey' | 'created_at' | 'kind' | 'tags' | 'content' | 'sig'>
@@ -74,8 +76,8 @@ const initialState: EditorState = {
 
 export type EditorMethods =
   ReturnType<typeof useMethods<EditorState, typeof createMethods>> extends [infer State, infer Methods]
-  ? State & Methods
-  : never
+    ? State & Methods
+    : never
 
 const createMethods = (state: EditorState) => {
   return {
@@ -157,7 +159,9 @@ function getDraftEvent(
     kind,
     created_at: Math.floor(Date.now() / 1000),
     content: removeTrailingNewLines(editor.getText({ blockSeparator: '\n' }) || ''),
-    tags: [...(kind === Kind.PublicMessage ? publicMessageTags : replyTags), ...extraTags].filter((tag) => tag[0] !== 'client'),
+    tags: [...(kind === Kind.PublicMessage ? publicMessageTags : replyTags), ...extraTags].filter(
+      (tag) => tag[0] !== 'client',
+    ),
   }
 
   return {
@@ -209,9 +213,7 @@ export const EditorProviderImpl = memo(function EditorProviderImpl(props: Editor
           events
             .filter((event) => event.kind === Kind.EventDeletion)
             .flatMap((event) => {
-              return event.tags
-                .filter((tag) => (tag[0] === 'e' || tag[0] === 'a') && !!tag[1])
-                .map((tag) => tag[1])
+              return event.tags.filter((tag) => (tag[0] === 'e' || tag[0] === 'a') && !!tag[1]).map((tag) => tag[1])
             }),
         )
 
@@ -263,11 +265,11 @@ export const EditorProviderImpl = memo(function EditorProviderImpl(props: Editor
     ...initialState,
     includedRelays: new Set(relays),
   })
+  const { emojiMap } = useInstalledCustomEmojis()
+  const emojiMapRef = useRef(emojiMap)
   const methodsRef = useRef(methods)
-
-  useEffect(() => {
-    methodsRef.current = methods
-  }, [methods])
+  emojiMapRef.current = emojiMap
+  methodsRef.current = methods
 
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false)
   const [draftDialogOpen, setDraftDialogOpen] = useState(false)
@@ -308,22 +310,25 @@ export const EditorProviderImpl = memo(function EditorProviderImpl(props: Editor
     } satisfies DraftSavePayload
   }, [])
 
-  const persistDraftPayload = useCallback(async (payload: DraftSavePayload) => {
-    if (isDraftEventEmpty(payload.event)) {
-      return
-    }
-    if (lastDraftSignatureRef.current === payload.signature) {
-      return
-    }
-    lastDraftSignatureRef.current = payload.signature
-    if (!pubkey || !signer) {
-      return
-    }
+  const persistDraftPayload = useCallback(
+    async (payload: DraftSavePayload) => {
+      if (isDraftEventEmpty(payload.event)) {
+        return
+      }
+      if (lastDraftSignatureRef.current === payload.signature) {
+        return
+      }
+      lastDraftSignatureRef.current = payload.signature
+      if (!pubkey || !signer) {
+        return
+      }
 
-    const identifier = createDraftIdentifier(draftIdRef.current)
-    setDraftId(identifier)
-    await publishDraftEvent(pubkey, payload.event, identifier, { signer })
-  }, [pubkey, signer])
+      const identifier = createDraftIdentifier(draftIdRef.current)
+      setDraftId(identifier)
+      await publishDraftEvent(pubkey, payload.event, identifier, { signer })
+    },
+    [pubkey, signer],
+  )
 
   const addUploadFiles = useCallback(
     (files: File[], pos?: number) => {
@@ -368,14 +373,29 @@ export const EditorProviderImpl = memo(function EditorProviderImpl(props: Editor
     [signer, pubkey],
   )
 
+  const resolveEmoji = useCallback((name: string) => {
+    const src = emojiMapRef.current.get(name)
+    return src ? { name, src } : null
+  }, [])
+
+  const getEmojiSuggestions = useCallback((query: string) => {
+    const normalized = query.trim().toLowerCase()
+    return [...emojiMapRef.current.entries()]
+      .filter(([name]) => !normalized || name.toLowerCase().includes(normalized))
+      .slice(0, 8)
+      .map(([name, src]) => ({ name, src }))
+  }, [])
+
   const editorProps = useMemo<UseEditorOptions>(() => {
     const base =
       kind === Kind.Media
-        ? createEditorKind20(placeholder)
+        ? createEditorInline(placeholder, resolveEmoji, getEmojiSuggestions)
         : createEditor({
-          placeholder: () => placeholderRef.current,
-          onFilesSelect: addUploadFiles,
-        })
+            placeholder: () => placeholderRef.current,
+            onFilesSelect: addUploadFiles,
+            resolveEmoji,
+            getEmojiSuggestions,
+          })
 
     return {
       ...base,
@@ -397,7 +417,7 @@ export const EditorProviderImpl = memo(function EditorProviderImpl(props: Editor
         lastDraftSignatureRef.current = JSON.stringify(draft)
       },
     }
-  }, [kind, addUploadFiles, placeholder, draft])
+  }, [kind, addUploadFiles, placeholder, draft, resolveEmoji, getEmojiSuggestions])
 
   const editor = useEditor(editorProps, [editorProps])
 
@@ -566,9 +586,12 @@ export const EditorProviderImpl = memo(function EditorProviderImpl(props: Editor
     const nsfwTag = state.nsfwEnabled ? [['content-warning', '']] : []
     const protectedTag = relays ? [['-']] : []
     const editorTags = (editor?.storage?.nostr.getEditorTags?.() || []) as NostrEvent['tags']
+    const emojiTags = getEditorEmojiTags(editor)
+
     return compactArray([
       ...protectedTag,
       ...editorTags.filter((tag) => (isAuthorTag(tag) ? !state.excludedMentions.has(tag[1]) : true)),
+      ...emojiTags,
       ...clientTag,
       ...nsfwTag,
     ])
@@ -595,7 +618,7 @@ export const EditorProviderImpl = memo(function EditorProviderImpl(props: Editor
           tags: [...(kind === Kind.PublicMessage ? publicMessageTags : replyTags), ...getTags()],
         } as EventTemplate
       },
-      [kind, replyTags, publicMessageTags, state.nsfwEnabled, settings.clientTag],
+      [kind, replyTags, publicMessageTags, getTags],
     ),
   })
 
@@ -663,39 +686,39 @@ export const EditorProviderImpl = memo(function EditorProviderImpl(props: Editor
   const { mutateAsync: onSubmit } = usePublishEventMutation<EditorContextType>({
     mutationFn:
       ({ signer, pubkey }) =>
-        (state) => {
-          methods.toggle('submitting', true)
-          if (state.event) {
-            if (settings.delayBroadcast) {
-              // Delay broadcast
-              return signAndSave({ ...state.event, pubkey }, { signer, saveEvent: !state.protectedEvent }).pipe(
-                tap((event) => {
-                  props.onSigned?.(event, allRelays)
-                  addNoteToQuery(event)
-                  store.set(addBroadcastRequestAtom, {
-                    event,
-                    relays: allRelays,
-                    signer,
-                    onComplete: () => {
-                      onSuccess(event)
-                    },
-                    onCancel: () => {
-                      onUndo(event)
-                    },
-                  })
-                }),
-              )
-            }
-            return publish({ ...state.event, pubkey }, { relays: allRelays, signer, saveEvent: !protectedEvent }).pipe(
+      (state) => {
+        methods.toggle('submitting', true)
+        if (state.event) {
+          if (settings.delayBroadcast) {
+            // Delay broadcast
+            return signAndSave({ ...state.event, pubkey }, { signer, saveEvent: !state.protectedEvent }).pipe(
               tap((event) => {
                 props.onSigned?.(event, allRelays)
                 addNoteToQuery(event)
-                onSuccess(event)
+                store.set(addBroadcastRequestAtom, {
+                  event,
+                  relays: allRelays,
+                  signer,
+                  onComplete: () => {
+                    onSuccess(event)
+                  },
+                  onCancel: () => {
+                    onUndo(event)
+                  },
+                })
               }),
             )
           }
-          return EMPTY
-        },
+          return publish({ ...state.event, pubkey }, { relays: allRelays, signer, saveEvent: !protectedEvent }).pipe(
+            tap((event) => {
+              props.onSigned?.(event, allRelays)
+              addNoteToQuery(event)
+              onSuccess(event)
+            }),
+          )
+        }
+        return EMPTY
+      },
     onError: () => {
       methods.toggle('submitting', false)
     },
@@ -729,7 +752,7 @@ export const EditorProviderImpl = memo(function EditorProviderImpl(props: Editor
         addUploadFiles,
       }}>
       {kind === Kind.Media ? (
-        <EditorMedia
+        <EditorInline
           {...rest}
           onSubmit={onSubmit}
           onDiscard={() => {
@@ -772,9 +795,7 @@ export const EditorProviderImpl = memo(function EditorProviderImpl(props: Editor
             methodsRef.current.toggle('isUploading', true)
             applyUploadConfigToFiles()
             const pendingKeys = new Set(
-              uploadDialogFiles
-                .filter((item) => !item.sha256)
-                .map((item) => getUploadFileKey(item.file)),
+              uploadDialogFiles.filter((item) => !item.sha256).map((item) => getUploadFileKey(item.file)),
             )
             try {
               await uploadDialogFilesNow()

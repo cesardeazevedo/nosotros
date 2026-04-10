@@ -32,7 +32,7 @@ export const UserHeader = memo(function UserHeader(props: Props) {
     ...rest
   } = props
   return (
-    <Stack horizontal gap={2} align='center' sx={styles.root} {...rest}>
+    <Stack horizontal gap={2} align='center' {...rest} sx={[styles.root, rest.sx]}>
       {renderAvatar && <UserAvatar pubkey={pubkey} size={dense ? 'sm' : 'md'} {...userAvatarProps} />}
       <Stack horizontal={false} sx={styles.content}>
         <UserName pubkey={pubkey} size={size}>

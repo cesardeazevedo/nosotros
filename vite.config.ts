@@ -18,10 +18,18 @@ export default defineConfig(({ mode }) => {
     server: {
       host: true,
       port: 8000,
-      hmr: false,
+      hmr: true,
     },
     optimizeDeps: {
-      exclude: ['@sqlite.org/sqlite-wasm', '@jsquash/avif', '@jsquash/jpeg', '@jsquash/png', '@jsquash/webp'],
+      exclude: [
+        '@sqlite.org/sqlite-wasm',
+        '@sqliteai/sqlite-wasm',
+        '@jsquash/avif',
+        '@jsquash/jpeg',
+        '@jsquash/png',
+        '@jsquash/webp',
+        'react-resizable-panels',
+      ],
     },
     build: {
       sourcemap: true,

@@ -6,7 +6,6 @@ import type { FeedModule } from '@/hooks/query/useQueryFeeds'
 import { Link } from '@tanstack/react-router'
 import { memo, useMemo, type ReactNode } from 'react'
 import { css, html } from 'react-strict-dom'
-import { useDeckAddNextColumn } from '../Deck/hooks/useDeck'
 
 type ListFeedType = 'lists' | 'followset' | 'relaysets' | 'starterpack'
 type ListFeedScope = 'sets_p' | 'sets_e' | 'relay_sets'
@@ -112,20 +111,9 @@ const getListFeedConfig = (event: NostrEventDB): ListFeedConfig | null => {
 export const ListFeedLink = memo(function ListFeedLink(props: Props) {
   const { event, children, sx } = props
   const config = useMemo(() => getListFeedConfig(event), [event])
-  const deck = useDeckAddNextColumn(() => {
-    return config?.module ?? createListFeedModule(event, 'sets_p')
-  })
 
   if (!config) {
     return <>{children}</>
-  }
-
-  if (deck.isDeck) {
-    return (
-      <html.a href='' onClick={deck.add} {...css.props(sx)}>
-        {children}
-      </html.a>
-    )
   }
 
   return (

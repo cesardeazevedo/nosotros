@@ -1,44 +1,51 @@
-import { useDeckAddNextColumn } from '@/components/modules/Deck/hooks/useDeck'
-import { createEventModule } from '@/hooks/modules/createEventModule'
-import type { NoteState } from '@/hooks/state/useNote'
+import { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import { useNIP19 } from '@/hooks/useEventUtils'
 import { useIsCurrentRouteEventID } from '@/hooks/useNavigations'
-import { useNostrMaskedLinkProps } from '@/hooks/useNostrMaskedLinkProps'
+import { useNostrMaskedLinkProps, useNostrNavigationScope } from '@/hooks/useNostrMaskedLinkProps'
+import { shape } from '@/themes/shape.stylex'
 import { useNavigate, useRouter } from '@tanstack/react-router'
-import React, { memo, useCallback, type ReactNode } from 'react'
+import { memo, useCallback, type ReactNode } from 'react'
 import { css, html } from 'react-strict-dom'
 import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDOMProps'
 
 type Props = {
-  note: NoteState
+  event: NostrEventDB
   children: ReactNode
   onClick?: () => void
 }
 
 export const PostLink = memo(function PostLink(props: Props) {
-  const { note, children } = props
+  const { event, children } = props
   const router = useRouter()
   const navigate = useNavigate()
-  const linkProps = useNostrMaskedLinkProps(note.nip19)
-  const deck = useDeckAddNextColumn(() => createEventModule(note.nip19))
-  const isActive = useIsCurrentRouteEventID(note.event)
+  const scope = useNostrNavigationScope()
+  const nip19 = useNIP19(event)
+  const linkProps = useNostrMaskedLinkProps(nip19, scope)
+  const columnLinkProps = useNostrMaskedLinkProps(nip19, 'column')
+  const isActive = useIsCurrentRouteEventID(event)
 
   const handleClick = useCallback(
     (e: StrictClickEvent) => {
-      if (deck.isDeck) {
-        return deck.add(e as React.MouseEvent<HTMLElement>)
-      }
-
       if (e.metaKey) {
         const { href } = router.buildLocation(linkProps)
         window.open(href, '_blank', 'noopener, noreferrer')
         return
       }
+
+      if (e.shiftKey) {
+        navigate({
+          ...columnLinkProps,
+          state: { from: router.latestLocation.pathname, scope: 'column' } as never,
+        })
+        return
+      }
+
       navigate({
         ...linkProps,
-        state: { from: router.latestLocation.pathname } as never,
+        state: { from: router.latestLocation.pathname, scope } as never,
       })
     },
-    [note, deck, linkProps],
+    [event, linkProps, columnLinkProps, scope],
   )
 
   return (
@@ -54,9 +61,10 @@ const styles = css.create({
   },
   action: {
     cursor: 'pointer',
+    borderRadius: shape.lg,
     backgroundColor: {
       default: 'transparent',
-      ':hover:not(:has(button:hover, img:hover))': 'rgba(125, 125, 125, 0.06)',
+      ':hover': 'rgba(125, 125, 125, 0.06)',
     },
   },
 })

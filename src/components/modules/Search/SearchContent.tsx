@@ -80,7 +80,8 @@ export const SearchContent = memo(function SearchContent(props: Props) {
           handleKeyDown()
           return true
         }
-        case 'Enter': {
+        case 'Enter':
+        case 'Tab': {
           event.preventDefault()
           const item = items[selectedIndex]
           if (item) {

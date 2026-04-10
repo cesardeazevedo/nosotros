@@ -20,7 +20,6 @@ export const EditorButtonSettings = memo(function EditorButtonSettings(props: Pr
       <IconButton
         {...rest}
         selected={section === 'settings'}
-        toggle={section === 'settings'}
         size={dense ? 'sm' : 'md'}
         icon={<IconSettings size={dense ? 20 : 22} strokeWidth='1.6' />}
         onClick={() => openSection('settings')}

@@ -1,37 +1,36 @@
+import { toggleSearchDialogAtom } from '@/atoms/dialog.atoms'
 import { NotificationBadge } from '@/components/modules/Notifications/NotificationBadge'
-import { Divider } from '@/components/ui/Divider/Divider'
 import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { Stack } from '@/components/ui/Stack/Stack'
-import { Text } from '@/components/ui/Text/Text'
-import { useCurrentPubkey, useCurrentUser } from '@/hooks/useAuth'
+import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
+import { useCurrentPubkey } from '@/hooks/useAuth'
 import { useNprofile } from '@/hooks/useEventUtils'
 import { useMobile } from '@/hooks/useMobile'
+import { useSettings } from '@/hooks/useSettings'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import {
-  IconArticle,
-  IconArticleFilled,
   IconBell,
   IconBellFilled,
+  IconEdit,
+  IconGlobe,
   IconListDetails,
-  IconPhoto,
-  IconPhotoFilled,
+  IconSearch,
   IconSettings,
   IconSettingsFilled,
+  IconSparkles,
+  IconStar,
   IconUser,
 } from '@tabler/icons-react'
 import { Link, useMatch } from '@tanstack/react-router'
-import { memo, useContext } from 'react'
-import { css, html } from 'react-strict-dom'
+import { useSetAtom } from 'jotai'
+import { memo } from 'react'
+import { css } from 'react-strict-dom'
 import { JoinNostrButton } from '../Buttons/JoinNostrButton'
 import { IconHome } from '../Icons/IconHome'
 import { IconHomeFilled } from '../Icons/IconHomeFilled'
-import { SidebarContext } from './SidebarContext'
-import { SidebarMenuDecks } from './SidebarMenuDecks'
 import { SidebarMenuLogout } from './SidebarMenuLogout'
-import { SidebarMenuRecents } from './SidebarMenuRecents'
 import { SidebarMenuRelays } from './SidebarMenuRelays'
-import { SidebarRelayFavorites } from './SidebarRelayFavorites'
 
 const iconProps = {
   size: 24,
@@ -42,79 +41,96 @@ export const SidebarMenu = memo(function SidebarMenu() {
   const pubkey = useCurrentPubkey()
   const nprofile = useNprofile(pubkey)
   const isMobile = useMobile()
-  const context = useContext(SidebarContext)
+  const { sidebarCollapsed } = useSettings()
+  const toggleSearch = useSetAtom(toggleSearchDialogAtom)
 
-  const user = useCurrentUser()
   const isNotificationsRoute = !!useMatch({ from: '/notifications', shouldThrow: false })
-  const isNotification = context.pane === '/notifications' || isNotificationsRoute
+  const isNotification = isNotificationsRoute
 
   return (
     <Stack horizontal={false} sx={styles.root} gap={1}>
-      <Stack horizontal={false} gap={0.5} sx={styles.wrapper}>
+      <Stack horizontal={false} sx={styles.wrapper}>
         {!pubkey && (
           <>
             <JoinNostrButton />
             {!isMobile && <br />}
           </>
         )}
+        <Link to='.' search={{ compose: true }}>
+          <SidebarTooltip collapsed={sidebarCollapsed} text='New note'>
+            <MenuItem
+              interactive
+              collapsed={sidebarCollapsed}
+              leadingIcon={<IconEdit {...iconProps} />}
+              label='New note'
+            />
+          </SidebarTooltip>
+        </Link>
         {pubkey && (
           <Link tabIndex={-1} to='/'>
             {({ isActive }) => (
-              <MenuItem
-                selected={isActive}
-                onClick={() => context.setPane(false)}
-                leadingIcon={isActive ? <IconHomeFilled {...iconProps} /> : <IconHome {...iconProps} />}
-                label={
-                  <>
-                    Following{' '}
-                    {user?.totalFollowing ? <Text size='md' sx={styles.gray}>{`(${user.totalFollowing})`}</Text> : ''}
-                  </>
-                }
-              />
+              <SidebarTooltip collapsed={sidebarCollapsed} text='Following'>
+                <MenuItem
+                  interactive
+                  collapsed={sidebarCollapsed}
+                  selected={isActive}
+                  leadingIcon={isActive ? <IconHomeFilled {...iconProps} /> : <IconHome {...iconProps} />}
+                  label={'Feeds'}
+                />
+              </SidebarTooltip>
             )}
           </Link>
         )}
+        <Link to='/explore'>
+          <SidebarTooltip collapsed={sidebarCollapsed} text='Explore'>
+            <MenuItem
+              interactive
+              collapsed={sidebarCollapsed}
+              leadingIcon={<IconSparkles {...iconProps} />}
+              label='Explore'
+            />
+          </SidebarTooltip>
+        </Link>
         {pubkey && (
+          <Link to='/notifications'>
+            <SidebarTooltip collapsed={sidebarCollapsed} text='Notifications'>
+              <MenuItem
+                interactive
+                collapsed={sidebarCollapsed}
+                selected={isNotification}
+                leadingIcon={
+                  <NotificationBadge>
+                    {isNotification ? <IconBellFilled {...iconProps} /> : <IconBell {...iconProps} />}
+                  </NotificationBadge>
+                }
+                onClick={() => { }}
+                label='Notifications'
+                trailingIcon
+              />
+            </SidebarTooltip>
+          </Link>
+        )}
+        <SidebarTooltip collapsed={sidebarCollapsed} text='Search'>
           <MenuItem
-            selected={isNotification}
-            leadingIcon={
-              <NotificationBadge>
-                {isNotification ? <IconBellFilled {...iconProps} /> : <IconBell {...iconProps} />}
-              </NotificationBadge>
-            }
-            onClick={() => context.setPane('/notifications')}
-            label={'Notifications'}
+            interactive
+            collapsed={sidebarCollapsed}
+            leadingIcon={<IconSearch {...iconProps} />}
+            onClick={() => toggleSearch()}
+            label='Search'
             trailingIcon
           />
-        )}
-        <Link to='/media'>
-          {({ isActive }) => (
-            <MenuItem
-              label='Media'
-              selected={isActive}
-              leadingIcon={isActive ? <IconPhotoFilled {...iconProps} /> : <IconPhoto {...iconProps} />}
-              onClick={() => context.setPane(false)}
-            />
-          )}
-        </Link>
-        <Link to='/articles'>
-          {({ isActive }) => (
-            <MenuItem
-              selected={isActive}
-              leadingIcon={isActive ? <IconArticleFilled {...iconProps} /> : <IconArticle {...iconProps} />}
-              label='Articles'
-              onClick={() => context.setPane(false)}
-            />
-          )}
-        </Link>
+        </SidebarTooltip>
         <Link to='/lists'>
           {({ isActive }) => (
-            <MenuItem
-              selected={isActive}
-              onClick={() => context.setPane(false)}
-              leadingIcon={<IconListDetails {...iconProps} />}
-              label='Lists'
-            />
+            <SidebarTooltip collapsed={sidebarCollapsed} text='Lists'>
+              <MenuItem
+                interactive
+                collapsed={sidebarCollapsed}
+                selected={isActive}
+                leadingIcon={<IconListDetails {...iconProps} />}
+                label='Lists'
+              />
+            </SidebarTooltip>
           )}
         </Link>
         {pubkey && (
@@ -124,58 +140,58 @@ export const SidebarMenu = memo(function SidebarMenu() {
               nostr: nprofile || '',
             }}>
             {({ isActive }) => (
-              <MenuItem
-                selected={isActive}
-                leadingIcon={<IconUser {...iconProps} />}
-                label='Profile'
-                onClick={() => context.setPane(false)}
-              />
+              <SidebarTooltip collapsed={sidebarCollapsed} text='Profile'>
+                <MenuItem
+                  interactive
+                  collapsed={sidebarCollapsed}
+                  selected={isActive}
+                  leadingIcon={<IconUser {...iconProps} />}
+                  label='Profile'
+                />
+              </SidebarTooltip>
             )}
           </Link>
         )}
-      </Stack>
-      <Divider />
-      <Stack horizontal={false} sx={styles.wrapper}>
-        <SidebarRelayFavorites />
-      </Stack>
-      {!isMobile && (
-        <>
-          <Divider />
-          <html.div style={styles.wrapper}>
-            <SidebarMenuDecks expanded />
-          </html.div>
-        </>
-      )}
-      <Divider />
-      <SidebarMenuRecents />
-      <Stack horizontal={false} gap={0.5} sx={styles.wrapper}>
-        <SidebarMenuRelays />
+        <SidebarMenuRelays iconProps={iconProps} />
         <Link to='/settings'>
           {({ isActive }) => (
-            <MenuItem
-              selected={isActive}
-              leadingIcon={isActive ? <IconSettingsFilled {...iconProps} /> : <IconSettings {...iconProps} />}
-              label='Settings'
-              onClick={() => context.setPane(false)}
-            />
+            <SidebarTooltip collapsed={sidebarCollapsed} text='Settings'>
+              <MenuItem
+                interactive
+                collapsed={sidebarCollapsed}
+                selected={isActive}
+                leadingIcon={isActive ? <IconSettingsFilled {...iconProps} /> : <IconSettings {...iconProps} />}
+                label='Settings'
+              />
+            </SidebarTooltip>
           )}
         </Link>
-        {isMobile && <SidebarMenuLogout />}
       </Stack>
+      {isMobile && <SidebarMenuLogout />}
     </Stack>
   )
 })
 
+const SidebarTooltip = (props: { collapsed: boolean; text: React.ReactNode; children: React.ReactNode }) => {
+  const { collapsed, text, children } = props
+  return (
+    <Tooltip enterDelay={0} placement='right' text={text} opened={collapsed ? undefined : false}>
+      {children}
+    </Tooltip>
+  )
+}
+
 const styles = css.create({
   root: {
+    flex: 1,
     width: '100%',
     borderRadius: shape.lg,
     backgroundColor: 'transparent',
-    paddingTop: 14,
   },
   wrapper: {
     width: '100%',
     paddingInline: 12,
+    gap: 4,
   },
   gray: {
     color: palette.onSurfaceVariant,

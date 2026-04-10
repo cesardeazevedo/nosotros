@@ -16,7 +16,11 @@ type Props = {
   node: CodeBlockNode
 }
 
-const ShikiHighlighter = memo(function ShikiHighlighter(props: { code: string; language?: string; theme: HighlighterTheme }) {
+const ShikiHighlighter = memo(function ShikiHighlighter(props: {
+  code: string
+  language?: string
+  theme: HighlighterTheme
+}) {
   const [content, setContent] = useState<string | null>(null)
   const normalizedLanguage = useMemo(() => normalizeCodeLanguage(props.language), [props.language])
 
@@ -70,7 +74,11 @@ export const CodeBlock = (props: Props) => {
           <div>{language}</div>
           <CopyIconButton text={refPre.current?.innerText} title='Copy code' />
         </Stack>
-        <ShikiHighlighter language={language} code={code} theme={isDark ? 'github-dark-high-contrast' : 'github-light-default'} />
+        <ShikiHighlighter
+          language={language}
+          code={code}
+          theme={isDark ? 'github-dark-high-contrast' : 'github-light-default'}
+        />
       </html.div>
     </html.div>
   )

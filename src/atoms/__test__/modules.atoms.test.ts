@@ -6,10 +6,7 @@ import type { FeedModule, FeedScope } from '@/hooks/query/useQueryFeeds'
 import type { NostrContext } from '@/nostr/context'
 import type { QueryKey } from '@tanstack/react-query'
 import { createStore } from 'jotai'
-import {
-  persistentFeedStatesAtom,
-  sessionFeedStatesAtom,
-} from '../modules.atoms'
+import { persistentFeedStatesAtom, sessionFeedStatesAtom } from '../modules.atoms'
 
 function createFeedModule(id: string, extras?: Partial<FeedModule>): FeedModule {
   const base: FeedModule = {

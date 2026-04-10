@@ -18,14 +18,10 @@ export const SearchColumn = memo(function SearchColumn(props: Props) {
   const feed = useFeedState(module)
   return (
     <Stack horizontal={false}>
-      <FeedHeaderBase
-        feed={feed}
-        leading={<SearchHeader feed={feed} />}
-        customSettings={<SearchSettings feed={feed} />}
-      />
+      <FeedHeaderBase feed={feed} leading={<SearchHeader feed={feed} />} customSettings={<SearchSettings feed={feed} />} />
       <Divider />
       <DeckScroll>
-        <Feed column feed={feed} />
+        <Feed feed={feed} />
       </DeckScroll>
     </Stack>
   )

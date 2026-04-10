@@ -27,7 +27,7 @@ export function useEventTags(event: NostrEventDB | undefined, tagName: string) {
   }, [event?.tags, tagName])
 }
 
-export function useEventDTag(event: NostrEventDB) {
+export function useEventDTag(event: NostrEventDB | undefined) {
   return useEventTag(event, 'd')
 }
 
@@ -72,7 +72,7 @@ export function useNprofile(pubkey: string = '') {
   return useAtomValue(nprofileFamily(pubkey))
 }
 
-export function useNaddress(event: NostrEventDB) {
+export function useNaddress(event: NostrEventDB | undefined) {
   const d = useEventDTag(event)
   return useAtomValue(
     naddrFamily({
@@ -91,7 +91,10 @@ export function useNIP19(event: NostrEventDB) {
 
 export function useImetaList(event: NostrEventDB | undefined) {
   return useMemo(() => {
-    if (event?.metadata?.imeta && (event.kind === Kind.Media || event.kind === Kind.Video || event.kind === Kind.ShortVideo)) {
+    if (
+      event?.metadata?.imeta &&
+      (event.kind === Kind.Media || event.kind === Kind.Video || event.kind === Kind.ShortVideo)
+    ) {
       return Object.entries(event?.metadata?.imeta)
         .map(([src, data]) => {
           const mime = getMimeType(src, data as IMetaFields)

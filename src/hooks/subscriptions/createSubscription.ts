@@ -7,6 +7,7 @@ import { subscribeOutbox } from './subscribeOutbox'
 
 export function createSubscription(ctx: NostrContext, filter: NostrFilter, cached?: NostrEventDB[]) {
   const sub = createSubscriptionBuilder({
+    groupId: ctx.subscriptionGroupId,
     id: ctx.subId,
     filter,
     events: new Map(cached?.map((event) => [event.id, event] as const)),

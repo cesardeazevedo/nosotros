@@ -117,12 +117,13 @@ const PostBookmarkOptionsContent = (props: ContentProps) => {
   const { mutateAsync } = usePublishEventMutation<UnsignedEvent>({
     mutationFn:
       ({ signer: localSigner }) =>
-        (newEvent) => {
-          return publish(newEvent, { signer: localSigner })
-        },
+      (newEvent) => {
+        return publish(newEvent, { signer: localSigner })
+      },
   })
 
-  const invalidateListQueries = () => setTimeout(() => queryClient.invalidateQueries({ queryKey: ['bookmark-options', pubkey] }).catch(() => { }), 1000)
+  const invalidateListQueries = () =>
+    setTimeout(() => queryClient.invalidateQueries({ queryKey: ['bookmark-options', pubkey] }).catch(() => {}), 1000)
 
   const onSubmit = async (target?: NostrEventDB, decryptedTags?: string[][]) => {
     if (!pubkey || !signer) {

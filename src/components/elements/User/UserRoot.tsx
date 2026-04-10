@@ -1,55 +1,48 @@
 import { FollowButton } from '@/components/modules/Follows/FollowButton'
-import { ContentProvider } from '@/components/providers/ContentProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
-import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { memo } from 'react'
 import { css } from 'react-strict-dom'
-import { LinkProfile } from '../Links/LinkProfile'
+import { UserAvatar } from './UserAvatar'
 import { UserContentAbout } from './UserContentAbout'
-import { UserHeader } from './UserHeader'
+import { UserName } from './UserName'
 import { UserProfileBanner } from './UserProfileBanner'
 
 type Props = {
   pubkey: string
-  border?: boolean
-  renderBanner?: boolean
 }
 
 export const UserRoot = memo(function UserRoot(props: Props) {
-  const { pubkey, border = false, renderBanner = false } = props
+  const { pubkey } = props
   return (
-    <LinkProfile pubkey={pubkey}>
-      <ContentProvider value={{ disableLink: true }}>
-        {renderBanner && <UserProfileBanner dense pubkey={pubkey} />}
-        <Stack sx={[styles.root, styles.action, border && styles.border]} align='flex-start' gap={2}>
-          <Stack grow horizontal={false} gap={4}>
-            <UserHeader pubkey={pubkey} />
-            <UserContentAbout pubkey={pubkey} />
-          </Stack>
-          <FollowButton value={pubkey} />
+    <>
+      <UserProfileBanner dense pubkey={pubkey} />
+      <Stack sx={styles.root} justify='space-between' gap={2}>
+        <UserAvatar size='lg' sx={styles.avatar} pubkey={pubkey} />
+        <Stack grow horizontal={false} sx={styles.name}>
+          <UserName variant='title' size='lg' pubkey={pubkey} />
+          <UserContentAbout pubkey={pubkey} />
         </Stack>
-      </ContentProvider>
-    </LinkProfile>
+        <FollowButton value={pubkey} />
+      </Stack>
+    </>
   )
 })
 
 const styles = css.create({
   root: {
+    position: 'relative',
     padding: spacing.padding2,
-  },
-  action: {
-    cursor: 'pointer',
-    backgroundColor: {
-      default: 'transparent',
-      ':hover': 'rgba(125, 125, 125, 0.08)',
-    },
   },
   about: {
     marginLeft: spacing.margin7,
   },
-  border: {
-    borderBottomWidth: 1,
-    borderBottomColor: palette.outlineVariant,
+  avatar: {
+    position: 'absolute',
+    top: -30,
+    left: 30,
   },
+  name: {
+    marginTop: spacing.margin4,
+  }
 })

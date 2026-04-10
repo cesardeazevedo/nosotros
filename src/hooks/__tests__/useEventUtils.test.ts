@@ -8,7 +8,8 @@ test('assert useImetaList', () => {
     kind: 1,
     pubkey: 'pubkey-1',
     created_at: 100,
-    content: 'Lorem ipsum dolor sit amet.\n\nhttps://cdn.example.com/image-1.jpg\n\nhttps://cdn.example.com/image-2.jpg',
+    content:
+      'Lorem ipsum dolor sit amet.\n\nhttps://cdn.example.com/image-1.jpg\n\nhttps://cdn.example.com/image-2.jpg',
     tags: [
       [
         'imeta',
@@ -39,15 +40,7 @@ test('assert useImetaList', () => {
   expect(event.metadata?.imeta).toBeDefined()
   expect(event.metadata?.contentSchema?.content[1]?.type).toBe('mediaGroup')
   expect(result.current).toStrictEqual([
-    [
-      'image',
-      'https://cdn.example.com/image-1.jpg',
-      event.metadata?.imeta?.['https://cdn.example.com/image-1.jpg'],
-    ],
-    [
-      'image',
-      'https://cdn.example.com/image-2.jpg',
-      event.metadata?.imeta?.['https://cdn.example.com/image-2.jpg'],
-    ],
+    ['image', 'https://cdn.example.com/image-1.jpg', event.metadata?.imeta?.['https://cdn.example.com/image-1.jpg']],
+    ['image', 'https://cdn.example.com/image-2.jpg', event.metadata?.imeta?.['https://cdn.example.com/image-2.jpg']],
   ])
 })

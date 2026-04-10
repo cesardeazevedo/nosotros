@@ -64,8 +64,7 @@ export const Chip = forwardRef<HTMLButtonElement, Props>(function Chip(props, re
   const isFilter = variant === 'filter'
   const isDeletable = (isFilter || isInput) && onDelete
   const hasSelectedIcon = selected && selectedIcon !== null
-  const resolvedSelectedIcon =
-    selectedIcon === undefined ? <IconCheck size={16} strokeWidth='2.5' /> : selectedIcon
+  const resolvedSelectedIcon = selectedIcon === undefined ? <IconCheck size={16} strokeWidth='2.5' /> : selectedIcon
   const hasLeading = loading || hasSelectedIcon || hasIcon
   const hasTrailing = !!trailingIcon || onDelete
   const { visualState, setRef } = useVisualState(undefined, { disabled })

@@ -16,7 +16,7 @@ const errorMsg = 'Nostr extension not detected'
 export class NIP07Signer implements Signer {
   name = 'nip07'
 
-  constructor() { }
+  constructor() {}
 
   get nostr() {
     if ('nostr' in window) {

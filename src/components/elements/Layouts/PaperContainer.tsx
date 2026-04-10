@@ -21,9 +21,11 @@ export const PaperContainer = memo(function PaperContainer(props: Props) {
   return (
     <Paper
       {...rest}
-      outlined={isDark && !isMobile}
-      elevation={isDark ? 0 : 1}
-      surface='surfaceContainerLowest'
+      // outlined={isDark && !isMobile}
+      // elevation={isDark ? 0 : 1}
+      // outlined
+      elevation={0}
+      //surface='surfaceContainerLow'
       sx={[styles.root, styles[maxWidth], !topRadius && styles.resetTopRadius, rest.sx]}>
       {children}
     </Paper>
@@ -39,8 +41,8 @@ const styles = css.create({
     flexDirection: 'column',
     marginBottom: 0,
     // borderTopWidth: 0,
-    borderBottomColor: palette.outlineVariant,
-    borderBottomWidth: 1,
+    // borderColor: palette.outlineVariant,
+    // borderWidth: 1,
   },
   md: {
     borderRadius: {

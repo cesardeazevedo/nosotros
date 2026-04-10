@@ -12,6 +12,7 @@ import { lazy, memo, Suspense, useState } from 'react'
 import { css } from 'react-strict-dom'
 import { EditorSettingsUpload } from './EditorSettingsUpload'
 import { useEditorSelector } from './hooks/useEditor'
+import { Divider } from '@/components/ui/Divider/Divider'
 
 const jsonTheme = {
   ...githubDarkTheme,
@@ -80,7 +81,7 @@ const styles = css.create({
     overflow: 'hidden',
   },
   header: {
-    paddingInline: spacing.padding3,
+    paddingInline: spacing.padding2,
   },
   content: {
     width: '100%',

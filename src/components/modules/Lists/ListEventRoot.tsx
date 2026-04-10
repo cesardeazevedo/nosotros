@@ -1,6 +1,6 @@
 import { PostHeader } from '@/components/elements/Posts/PostHeader'
 import { UserRoot } from '@/components/elements/User/UserRoot'
-import { NoteProvider } from '@/components/providers/NoteProvider'
+import { EventProvider } from '@/components/providers/NoteProvider'
 import { Button } from '@/components/ui/Button/Button'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { Stack } from '@/components/ui/Stack/Stack'
@@ -14,6 +14,7 @@ import { IconLock } from '@tabler/icons-react'
 import { memo, useMemo, useState } from 'react'
 import { css } from 'react-strict-dom'
 import { ListFeedLink } from './ListFeedLink'
+import { UserItem } from '@/components/elements/User/UserFeedItem'
 
 type Props = {
   event: NostrEventDB
@@ -35,9 +36,7 @@ export const ListEventRoot = memo(function ListEventRoot(props: Props) {
   const dTag = event.tags.find((tag) => tag[0] === 'd')?.[1]
   const label = title || dTag || '-'
 
-  const displayKind = KIND_LABELS[event.kind]
-    ? `${KIND_LABELS[event.kind]} (${event.kind})`
-    : `Kind ${event.kind}`
+  const displayKind = KIND_LABELS[event.kind] ? `${KIND_LABELS[event.kind]} (${event.kind})` : `Kind ${event.kind}`
 
   const canSeeFeed = useMemo(() => {
     switch (event.kind) {
@@ -82,8 +81,8 @@ export const ListEventRoot = memo(function ListEventRoot(props: Props) {
   const limitedTags = useMemo(() => listTags.slice(0, limit), [listTags, limit])
 
   return (
-    <NoteProvider value={{ event }}>
-      <PostHeader event={event} />
+    <EventProvider value={{ event }}>
+      {/* <PostHeader event={event} /> */}
       <Stack sx={styles.header} justify='space-between'>
         <Stack horizontal={false} gap={0.5} sx={styles.headerContent}>
           <Text variant='headline' size='md'>
@@ -114,7 +113,7 @@ export const ListEventRoot = memo(function ListEventRoot(props: Props) {
             if (!value) {
               return null
             }
-            return <UserRoot border key={key} pubkey={value} />
+            return <UserItem key={key} pubkey={value} />
           }
           const withDivider = limitedTags.length > 1 && index !== limitedTags.length - 1
           return (
@@ -153,7 +152,7 @@ export const ListEventRoot = memo(function ListEventRoot(props: Props) {
           </Button>
         </Stack>
       )}
-    </NoteProvider>
+    </EventProvider>
   )
 })
 

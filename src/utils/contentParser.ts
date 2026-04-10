@@ -2,9 +2,9 @@
 import type { ContentCustomSchema, ImageCustomNode, VideoCustomNode } from '@/nostr/types'
 import type { NAddrAttributes, NEventAttributes, Node, NProfileAttributes, ParagraphNode } from 'nostr-editor'
 import { decode as decodeBolt11 } from 'light-bolt11-decoder'
-import { decode } from "nostr-tools/nip19"
+import { decode } from 'nostr-tools/nip19'
 
-const fromNostrURI = (s: string) => s.replace(/^nostr:\/?\/?/, "")
+const fromNostrURI = (s: string) => s.replace(/^nostr:\/?\/?/, '')
 
 export const urlIsMedia = (url: string) =>
   Boolean(url.match(/\.(jpe?g|png|wav|mp3|mp4|mov|avi|webm|webp|gif|bmp|svg)$/))
@@ -39,19 +39,19 @@ export type ParseContext = {
 }
 
 export enum ParsedType {
-  Address = "address",
-  Cashu = "cashu",
-  Code = "code",
-  Ellipsis = "ellipsis",
-  Emoji = "emoji",
-  Event = "event",
-  Invoice = "invoice",
-  Link = "link",
-  LinkGrid = "link-grid",
-  Newline = "newline",
-  Profile = "profile",
-  Text = "text",
-  Topic = "topic",
+  Address = 'address',
+  Cashu = 'cashu',
+  Code = 'code',
+  Ellipsis = 'ellipsis',
+  Emoji = 'emoji',
+  Event = 'event',
+  Invoice = 'invoice',
+  Link = 'link',
+  LinkGrid = 'link-grid',
+  Newline = 'newline',
+  Profile = 'profile',
+  Text = 'text',
+  Topic = 'topic',
 }
 
 export type ParsedBase = {
@@ -155,25 +155,19 @@ export type Parsed =
 
 // Matchers
 
-export const isAddress = (parsed: Parsed): parsed is ParsedAddress =>
-  parsed.type === ParsedType.Address
+export const isAddress = (parsed: Parsed): parsed is ParsedAddress => parsed.type === ParsedType.Address
 export const isCashu = (parsed: Parsed): parsed is ParsedCashu => parsed.type === ParsedType.Cashu
 export const isCode = (parsed: Parsed): parsed is ParsedCode => parsed.type === ParsedType.Code
-export const isEllipsis = (parsed: Parsed): parsed is ParsedEllipsis =>
-  parsed.type === ParsedType.Ellipsis
+export const isEllipsis = (parsed: Parsed): parsed is ParsedEllipsis => parsed.type === ParsedType.Ellipsis
 export const isEmoji = (parsed: Parsed): parsed is ParsedEmoji => parsed.type === ParsedType.Emoji
 export const isEvent = (parsed: Parsed): parsed is ParsedEvent => parsed.type === ParsedType.Event
-export const isInvoice = (parsed: Parsed): parsed is ParsedInvoice =>
-  parsed.type === ParsedType.Invoice
+export const isInvoice = (parsed: Parsed): parsed is ParsedInvoice => parsed.type === ParsedType.Invoice
 export const isLink = (parsed: Parsed): parsed is ParsedLink => parsed.type === ParsedType.Link
 export const isImage = (parsed: Parsed): parsed is ParsedLink =>
   isLink(parsed) && Boolean(parsed.value.url.toString().match(/\.(jpe?g|png|gif|webp)$/))
-export const isLinkGrid = (parsed: Parsed): parsed is ParsedLinkGrid =>
-  parsed.type === ParsedType.LinkGrid
-export const isNewline = (parsed: Parsed): parsed is ParsedNewline =>
-  parsed.type === ParsedType.Newline
-export const isProfile = (parsed: Parsed): parsed is ParsedProfile =>
-  parsed.type === ParsedType.Profile
+export const isLinkGrid = (parsed: Parsed): parsed is ParsedLinkGrid => parsed.type === ParsedType.LinkGrid
+export const isNewline = (parsed: Parsed): parsed is ParsedNewline => parsed.type === ParsedType.Newline
+export const isProfile = (parsed: Parsed): parsed is ParsedProfile => parsed.type === ParsedType.Profile
 export const isText = (parsed: Parsed): parsed is ParsedText => parsed.type === ParsedType.Text
 export const isTopic = (parsed: Parsed): parsed is ParsedTopic => parsed.type === ParsedType.Topic
 
@@ -242,10 +236,10 @@ export const parseCodeInline = (text: string, context: ParseContext): ParsedCode
 }
 
 export const parseEmoji = (text: string, context: ParseContext): ParsedEmoji | void => {
-  const [raw, name] = text.match(/^:(\w+):/i) || []
+  const [raw, name] = text.match(/^:([\w-]+):/i) || []
 
   if (raw) {
-    const url = context.tags.find(t => t[0] === "emoji" && t[1] === name)?.[2]
+    const url = context.tags.find((t) => t[0] === 'emoji' && t[1] === name)?.[2]
 
     return { type: ParsedType.Emoji, value: { name, url }, raw }
   }
@@ -258,7 +252,7 @@ export const parseEvent = (text: string, context: ParseContext): ParsedEvent | v
   if (entity) {
     try {
       const { type, data } = decode(fromNostrURI(entity))
-      const value = type === "note" ? { id: data as string, relays: [] } : (data as EventPointer)
+      const value = type === 'note' ? { id: data as string, relays: [] } : (data as EventPointer)
 
       return { type: ParsedType.Event, value, raw: entity }
     } catch {
@@ -284,7 +278,7 @@ export const parseLink = (text: string, context: ParseContext): ParsedLink | voi
 
   const matchWithProtocol = text.match(LINK_WITH_PROTOCOL_REGEX)
   const matchWithoutProtocol = text.match(LINK_WITHOUT_PROTOCOL_REGEX)
-  const link = matchWithProtocol?.[0] || matchWithoutProtocol?.[0] || ""
+  const link = matchWithProtocol?.[0] || matchWithoutProtocol?.[0] || ''
   const isBareLink = !matchWithProtocol && !!matchWithoutProtocol
 
   // Skip url if it's an ellipse
@@ -296,14 +290,14 @@ export const parseLink = (text: string, context: ParseContext): ParsedLink | voi
   }
 
   // Skip it if it looks like an IP address but doesn't have a protocol
-  if (link.match(/\d+\.\d+/) && !link.includes("://")) {
+  if (link.match(/\d+\.\d+/) && !link.includes('://')) {
     return
   }
 
   // Parse using URL, make sure there's a protocol.
   let url: URL
   try {
-    url = new URL(HAS_PROTOCOL_REGEX.test(link) ? link : "https://" + link)
+    url = new URL(HAS_PROTOCOL_REGEX.test(link) ? link : 'https://' + link)
   } catch {
     return
   }
@@ -312,8 +306,8 @@ export const parseLink = (text: string, context: ParseContext): ParsedLink | voi
     url.hash.length > 1 ? Object.fromEntries(new URLSearchParams(url.hash.slice(1)).entries()) : {}
 
   for (const tag of context.tags) {
-    if (tag[0] === "imeta" && tag.find(t => t.includes(`url ${link}`))) {
-      Object.assign(meta, Object.fromEntries(tag.slice(1).map((m: string) => m.split(" "))))
+    if (tag[0] === 'imeta' && tag.find((t) => t.includes(`url ${link}`))) {
+      Object.assign(meta, Object.fromEntries(tag.slice(1).map((m: string) => m.split(' '))))
     }
   }
 
@@ -335,9 +329,8 @@ export const parseProfile = (text: string, context: ParseContext): ParsedProfile
 
   if (entity) {
     try {
-      const { type, data } = decode(fromNostrURI(entity.replace("@", "")))
-      const value =
-        type === "npub" ? { pubkey: data as string, relays: [] } : (data as ProfilePointer)
+      const { type, data } = decode(fromNostrURI(entity.replace('@', '')))
+      const value = type === 'npub' ? { pubkey: data as string, relays: [] } : (data as ProfilePointer)
 
       return { type: ParsedType.Profile, value, raw: entity }
     } catch {
@@ -358,21 +351,18 @@ export const parseTopic = (text: string, context: ParseContext): ParsedTopic | v
 
 // Parse other formats to known types
 
-export const parseLegacyMention = (
-  text: string,
-  context: ParseContext,
-): ParsedProfile | ParsedEvent | void => {
+export const parseLegacyMention = (text: string, context: ParseContext): ParsedProfile | ParsedEvent | void => {
   const mentionMatch = text.match(/^#\[(\d+)\]/i) || []
 
   if (mentionMatch) {
     const [tag, value, url] = context.tags[parseInt(mentionMatch[1])] || []
     const relays = url ? [url] : []
 
-    if (tag === "p") {
+    if (tag === 'p') {
       return { type: ParsedType.Profile, value: { pubkey: value, relays }, raw: mentionMatch[0]! }
     }
 
-    if (tag === "e") {
+    if (tag === 'e') {
       return { type: ParsedType.Event, value: { id: value, relays }, raw: mentionMatch[0]! }
     }
   }
@@ -563,7 +553,7 @@ export function cleanParagraph(paragraph: ParagraphNode): ParagraphNode | null {
 // Main exports
 
 export const parse = ({
-  content = "",
+  content = '',
   tags = [],
   markdown = false,
 }: {
@@ -770,7 +760,7 @@ export const parse = ({
   const commitParsed = (parsed: Parsed) => {
     emitParsed(parsed)
     if (parsed.type === ParsedType.Text) {
-      context.prevTextEndsWithSlash = parsed.value.endsWith("/")
+      context.prevTextEndsWithSlash = parsed.value.endsWith('/')
       context.prevTextEndsWithMarkdownLinkOpen = parsed.value.endsWith('](')
       return
     }
@@ -778,8 +768,8 @@ export const parse = ({
     context.prevTextEndsWithMarkdownLinkOpen = false
   }
 
-  let buffer = ""
-  let remaining = content.trim() || tags.find(t => t[0] === "alt")?.[1] || ""
+  let buffer = ''
+  let remaining = content.trim() || tags.find((t) => t[0] === 'alt')?.[1] || ''
 
   while (remaining) {
     const firstCharCode = remaining.charCodeAt(0)
@@ -817,7 +807,7 @@ export const parse = ({
       if (buffer) {
         const textParsed = { type: ParsedType.Text, value: buffer, raw: buffer } as ParsedText
         commitParsed(textParsed)
-        buffer = ""
+        buffer = ''
       }
 
       commitParsed(parsed)
@@ -1032,7 +1022,7 @@ const transformMarkdownBlocks = (nodes: ContentCustomSchema['content']): Content
 
     const current = listStack[listStack.length - 1]
     const listItem = createListItem(lineNodes)
-      ; (current.node.content as AnyNode[]).push(listItem)
+    ;(current.node.content as AnyNode[]).push(listItem)
     current.lastItem = listItem
   }
 
@@ -1113,7 +1103,6 @@ const transformMarkdownBlocks = (nodes: ContentCustomSchema['content']): Content
   return output as ContentCustomSchema['content']
 }
 
-
 type TruncateOpts = {
   minLength?: number
   maxLength?: number
@@ -1158,9 +1147,7 @@ export const truncate = (
     currentSize += size
 
     if (currentSize > minLength) {
-      content = content
-        .slice(0, Math.max(1, i + 1))
-        .concat({ type: ParsedType.Ellipsis, value: "…", raw: "" })
+      content = content.slice(0, Math.max(1, i + 1)).concat({ type: ParsedType.Ellipsis, value: '…', raw: '' })
 
       return false
     }
@@ -1189,14 +1176,14 @@ export const reduceLinks = (content: Parsed[]): Parsed[] => {
     if (isText(parsed) && !parsed.value.trim() && buffer.length > 0) continue
 
     if (buffer.length > 0) {
-      result.push({ type: ParsedType.LinkGrid, value: { links: buffer.splice(0) }, raw: "" })
+      result.push({ type: ParsedType.LinkGrid, value: { links: buffer.splice(0) }, raw: '' })
     }
 
     result.push(parsed)
   }
 
   if (buffer.length > 0) {
-    result.push({ type: ParsedType.LinkGrid, value: { links: buffer.splice(0) }, raw: "" })
+    result.push({ type: ParsedType.LinkGrid, value: { links: buffer.splice(0) }, raw: '' })
   }
 
   return result

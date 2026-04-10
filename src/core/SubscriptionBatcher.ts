@@ -9,12 +9,26 @@ type SubscriptionBatcherOptions = {
   batcherTime: number
 }
 
+export type SubscriptionBatchMeta = {
+  subId?: string
+  queryKey?: unknown
+  maxRelaysPerUser?: number
+  subscriptionGroupId?: string
+}
+
 export class SubscriptionBatcher<T = NostrEvent> {
-  private queue = new Subject<[NostrFilter, RelayHints | undefined, cached: T[] | undefined]>()
+  private queue = new Subject<
+    [NostrFilter, RelayHints | undefined, cached: T[] | undefined, meta?: SubscriptionBatchMeta]
+  >()
   $: Observable<T[]>
 
   constructor(
-    subscriber: (filter: NostrFilter, relayHints: RelayHints, cached: T[]) => Observable<T[]>,
+    subscriber: (
+      filter: NostrFilter,
+      relayHints: RelayHints,
+      cached: T[],
+      meta?: SubscriptionBatchMeta,
+    ) => Observable<T[]>,
     options?: SubscriptionBatcherOptions,
   ) {
     this.queue = new Subject()
@@ -24,12 +38,13 @@ export class SubscriptionBatcher<T = NostrEvent> {
       mergeMap((data) => {
         const filters = mergeFilters(data.map(([filter]) => filter))
         const relayHints = mergeRelayHints(data.map(([, hints]) => hints || {}))
+        const meta = data[data.length - 1]?.[3]
         const cached = data
           .map(([, , cached]) => cached || [])
           .filter(Boolean)
           .flat()
 
-        return from(filters).pipe(mergeMap((filter) => subscriber(filter, relayHints, cached)))
+        return from(filters).pipe(mergeMap((filter) => subscriber(filter, relayHints, cached, meta)))
       }),
 
       share(),
@@ -37,7 +52,7 @@ export class SubscriptionBatcher<T = NostrEvent> {
     this.$.subscribe()
   }
 
-  next(filter: NostrFilter, relayHints?: RelayHints, cached?: T[]) {
-    this.queue.next([filter, relayHints, cached])
+  next(filter: NostrFilter, relayHints?: RelayHints, cached?: T[], meta?: SubscriptionBatchMeta) {
+    this.queue.next([filter, relayHints, cached, meta])
   }
 }

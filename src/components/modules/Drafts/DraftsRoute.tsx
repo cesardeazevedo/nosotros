@@ -53,21 +53,18 @@ const DraftCard = memo(function DraftCard(props: DraftCardProps) {
     }
   }, [decryptedContent])
 
-  const parsed = useMemo(
-    () => {
-      if (!draft) {
-        return
-      }
-      return parseNote({
-        ...draft,
-        id: `draft:${draftId}`,
-        pubkey: pubkey || '',
-        created_at: event.created_at,
-        sig: '',
-      })
-    },
-    [draft, draftId, event.created_at, pubkey],
-  )
+  const parsed = useMemo(() => {
+    if (!draft) {
+      return
+    }
+    return parseNote({
+      ...draft,
+      id: `draft:${draftId}`,
+      pubkey: pubkey || '',
+      created_at: event.created_at,
+      sig: '',
+    })
+  }, [draft, draftId, event.created_at, pubkey])
 
   const parentId = parsed?.parentId || parsed?.rootId
   const parent = useEvent(parentId || '', undefined)
@@ -123,7 +120,7 @@ const DraftCard = memo(function DraftCard(props: DraftCardProps) {
             <UserHeader pubkey={pubkey} renderNIP05={false} />
           </Stack>
         )}
-        {isReplyDraft && parent.data && <ReplyHeaderInner parentUser={parentUser} nevent={nevent} dense />}
+        {isReplyDraft && parent.data && <ReplyHeaderInner parentUser={parentUser} event={parent.data} dense />}
         <Stack horizontal={false} gap={0.5} sx={styles.body}>
           <Text size='lg' sx={styles.content}>
             {draft.content || 'Media draft'}
@@ -133,7 +130,11 @@ const DraftCard = memo(function DraftCard(props: DraftCardProps) {
     </Paper>
   )
 
-  return <Stack horizontal={false} gap={1}>{card}</Stack>
+  return (
+    <Stack horizontal={false} gap={1}>
+      {card}
+    </Stack>
+  )
 })
 
 export const DraftsRoute = memo(function DraftsRoute() {

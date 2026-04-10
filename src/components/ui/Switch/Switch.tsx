@@ -24,7 +24,18 @@ type Props = {
 }
 
 export const Switch = forwardRef<HTMLElement, Props>((props, ref) => {
-  const { id, sx, disabled, icon, onChange, showOnlySelectedIcon, selectedIcon, checked: checkedProp, defaultChecked, loading: loadingProp } = props
+  const {
+    id,
+    sx,
+    disabled,
+    icon,
+    onChange,
+    showOnlySelectedIcon,
+    selectedIcon,
+    checked: checkedProp,
+    defaultChecked,
+    loading: loadingProp,
+  } = props
   const { visualState, setRef } = useVisualState()
   const [checkedState, setCheckedState] = useState(Boolean(defaultChecked ?? checkedProp))
   const checked = checkedProp ?? checkedState

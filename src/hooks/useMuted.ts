@@ -7,9 +7,7 @@ export function useMuted(event: NostrEventDB) {
   const currentUser = useUserState(currentPubkey, { fullUserSync: true })
 
   const isMutedAuthor =
-    !!currentPubkey &&
-    currentPubkey !== event.pubkey &&
-    !!currentUser.mutedAuthors?.has(event.pubkey)
+    !!currentPubkey && currentPubkey !== event.pubkey && !!currentUser.mutedAuthors?.has(event.pubkey)
   const isMutedNote = !!currentPubkey && !!currentUser.mutedNotes?.has(event.id)
 
   return {

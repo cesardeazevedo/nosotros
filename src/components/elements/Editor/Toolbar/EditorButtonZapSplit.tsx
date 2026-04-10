@@ -22,7 +22,6 @@ export const EditorButtonZapSplits = memo(function EditorButtonMentions(props: P
     <Tooltip cursor='arrow' text='Zap Splits' enterDelay={200}>
       <IconButton
         {...rest}
-        toggle={section === 'zaps' || zapSplitsEnabled}
         selected={section === 'zaps' || zapSplitsEnabled}
         size={dense ? 'sm' : 'md'}
         icon={<IconBolt {...css.props(zapSplitsEnabled && styles.fill)} size={dense ? 20 : 22} strokeWidth='1.6' />}

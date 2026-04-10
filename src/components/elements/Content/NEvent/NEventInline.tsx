@@ -4,10 +4,10 @@ import { spacing } from '@/themes/spacing.stylex'
 import type { NEventAttributes } from 'nostr-editor'
 import type { NEvent } from 'nostr-tools/nip19'
 import { css, html } from 'react-strict-dom'
-import type { Props as LinkNEventProps } from '../../Links/LinkNEvent'
-import { LinkNEvent } from '../../Links/LinkNEvent'
+import type { ExternalProps as LinkNEventExternalProps } from '../../Links/LinkNEvent'
+import { LinkNEventExternal } from '../../Links/LinkNEvent'
 
-type Props = Omit<LinkNEventProps, 'children'> & {
+type Props = Omit<LinkNEventExternalProps, 'children'> & {
   attrs: NEventAttributes
 }
 
@@ -17,9 +17,9 @@ export const NEventInline = (props: Props) => {
   const nevent = ('nevent' in attrs ? attrs.nevent : attrs.bech32) as NEvent
   const label = nevent.replace('nostr:', '')
   return (
-    <LinkNEvent nevent={nevent} {...rest}>
+    <LinkNEventExternal nevent={nevent} {...rest}>
       <html.span style={styles.root}>@nevent1:{label.slice(-8)}</html.span>
-    </LinkNEvent>
+    </LinkNEventExternal>
   )
 }
 

@@ -8,6 +8,7 @@ export type RelayFilters = [string, NostrFilter]
 export type RelayFiltersMerged = [string, NostrFilter[]][]
 
 export type SubscriptionOutboxOptions = {
+  groupId?: string
   id?: string
   filter: NostrFilter
   relays?: string[]
@@ -19,6 +20,7 @@ export type SubscriptionOutboxOptions = {
 }
 
 export class NostrSubscriptionBuilder {
+  readonly groupId: string | undefined
   readonly id: string | undefined
   readonly filter: NostrFilter | undefined
   readonly relays: string[]
@@ -29,6 +31,7 @@ export class NostrSubscriptionBuilder {
   closeOnEose: boolean
 
   constructor(options: SubscriptionOutboxOptions) {
+    this.groupId = options.groupId
     this.id = options.id
     this.filter = options.filter
     this.relays = options.relays || []

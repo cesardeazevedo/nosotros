@@ -7,6 +7,9 @@ export type ContentContextValues = {
   autoPlay: boolean | undefined
   isDialog: boolean
   blured: boolean
+  // Media object is a term coined by Nicole Sullivan in 2010
+  // https://www.stubbornella.org/2010/06/25/the-media-object-saves-hundreds-of-lines-of-code/
+  mediaObject: boolean
 }
 
 const defaults = {
@@ -16,6 +19,7 @@ const defaults = {
   autoPlay: undefined,
   isDialog: false,
   blured: false,
+  mediaObject: false,
 }
 
 const ContentContext = createContext<ContentContextValues | null>(null)

@@ -75,6 +75,7 @@ export const selectAccountAtom = atom(null, (get, set, pubkey: string) => {
   if (!state.accounts[pubkey]) {
     return
   }
+  console.log('SLEECTED?', pubkey)
   set(authAtom, { ...state, selected: pubkey })
 })
 

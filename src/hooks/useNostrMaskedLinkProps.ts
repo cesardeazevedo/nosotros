@@ -2,6 +2,8 @@ import type { LinkProps } from '@tanstack/react-router'
 import { useRouterState } from '@tanstack/react-router'
 import { useMemo } from 'react'
 
+type NostrNavigationMode = 'nostr' | 'column'
+
 function useAllowedMaskedRoutes() {
   return useRouterState({
     select: (state) => {
@@ -34,13 +36,17 @@ function useAllowedMaskedRoutes() {
   })
 }
 
-export function useNostrMaskedLinkProps(nostr: string | undefined): LinkProps {
+export function useNostrMaskedLinkProps(nostr: string | undefined, mode: NostrNavigationMode = 'nostr'): LinkProps {
   const allowed = useAllowedMaskedRoutes()
   return useMemo(() => {
     if (allowed) {
       return {
         to: '.',
-        search: (s) => ({ ...s, nostr }),
+        search: (s) => ({
+          ...s,
+          nostr: mode === 'nostr' ? nostr : undefined,
+          column: mode === 'column' ? nostr : undefined,
+        }),
         mask: { to: `/$nostr`, params: { nostr }, unmaskOnReload: true },
       }
     }
@@ -48,5 +54,14 @@ export function useNostrMaskedLinkProps(nostr: string | undefined): LinkProps {
       to: `/$nostr`,
       params: { nostr },
     }
-  }, [nostr, allowed])
+  }, [nostr, allowed, mode])
+}
+
+export function useNostrNavigationScope(): NostrNavigationMode {
+  return useRouterState({
+    select: (state) => {
+      const scope = (state.location.state as { scope?: string } | undefined)?.scope
+      return scope === 'column' ? 'column' : 'nostr'
+    },
+  })
 }

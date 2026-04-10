@@ -21,7 +21,7 @@ export const DeckColumnFeed = memo(function DeckColumnFeed(props: Props) {
     <html.div>
       {header}
       {renderDivider && <Divider />}
-      <Feed column feed={feed} loading={loading} wrapper={wrapper} render={render} />
+      <Feed feed={feed} loading={loading} wrapper={wrapper} render={render} />
     </html.div>
   )
 })

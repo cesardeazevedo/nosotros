@@ -8,7 +8,6 @@ import type { Props as ButtonProps } from '../Button/Button'
 import { Button } from '../Button/Button'
 import { buttonTokens } from '../Button/Button.stylex'
 import type { SxProps } from '../types'
-import { iconButtonTokens } from './IconButton.stylex'
 
 type IconButtonVariant = 'standard' | 'filled' | 'filledTonal' | 'outlined'
 type IconButtonSize = 'sm' | 'md'
@@ -17,7 +16,6 @@ export interface Props extends Omit<ButtonProps, 'variant'> {
   sx?: SxProps
   icon?: React.ReactNode
   variant?: IconButtonVariant
-  toggle?: boolean
   selected?: boolean
   size?: IconButtonSize
   selectedIcon?: React.ReactNode
@@ -34,7 +32,6 @@ export const IconButton = (props: Props) => {
     variant = 'standard',
     selectedIcon,
     selected,
-    toggle,
     'aria-label': ariaLabel,
     'aria-label-selected': ariaLabelSelected,
     ref,
@@ -44,12 +41,13 @@ export const IconButton = (props: Props) => {
   return (
     <Button
       ref={ref}
-      aria-label={toggle && selected ? (ariaLabelSelected ?? ariaLabel) : ariaLabel}
+      aria-label={selected ? (ariaLabelSelected ?? ariaLabel) : ariaLabel}
       sx={[
         styles.root,
         sizes[size],
         variants[variant],
-        toggle ? (selected ? styles.selected : styles.toggle) : null,
+        selected && styles.selected,
+        selected && variant === 'standard' && styles.selected$standard,
         sx,
       ]}
       variant={variant === 'standard' ? undefined : (variant as ButtonProps['variant'])}
@@ -115,12 +113,15 @@ const styles = css.create({
     [buttonTokens.containerElevation]: elevation.shadows0,
     [buttonTokens.containerShape]: shape.full,
   },
-  toggle: {
-    [buttonTokens.containerColor]: iconButtonTokens.toggleContainerColor,
-    [buttonTokens.labelTextColor]: iconButtonTokens.toggleIconColor,
-  },
   selected: {
-    [buttonTokens.containerColor]: iconButtonTokens.toggleContainerColorSelected,
-    [buttonTokens.labelTextColor]: iconButtonTokens.toggleIconColorSelected,
+    [buttonTokens.labelTextColor]: palette.onSecondaryContainer,
+    [buttonTokens.labelTextColor$hover]: palette.onSecondaryContainer,
+    [buttonTokens.labelTextColor$pressed]: palette.onSecondaryContainer,
+    [buttonTokens.labelTextColor$focus]: palette.onSecondaryContainer,
+  },
+  selected$standard: {
+    [buttonTokens.containerColor]: palette.surfaceContainer,
+    [buttonTokens.containerColor$hover]: palette.surfaceContainer,
+    [buttonTokens.containerColor$pressed]: palette.surfaceContainer,
   },
 })

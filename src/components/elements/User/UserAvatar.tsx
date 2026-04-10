@@ -30,7 +30,7 @@ export const UserAvatar = memo(function UserAvatar(props: Props) {
       size={size}
       sx={[styles.avatar, sx]}
       onClick={() => onClick?.(user.metadata?.picture || '')}>
-      {fallback ? <Avatar src='/user.jpg' size={size} /> : pubkey?.[0]}
+      {fallback ? <Avatar src='/user.jpg' size={size} sx={sx} /> : pubkey?.[0]}
     </Avatar>
   )
   const avatarWithLink = disableLink ? avatar : <LinkProfile pubkey={pubkey}>{avatar}</LinkProfile>

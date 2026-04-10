@@ -1,9 +1,5 @@
 import { enqueueToastAtom } from '@/atoms/toaster.atoms'
-import {
-  filesAtom,
-  resetIsUploadingAtom,
-  uploadFilesAtom,
-} from '@/atoms/upload.atoms'
+import { filesAtom, resetIsUploadingAtom, uploadFilesAtom } from '@/atoms/upload.atoms'
 import { useContentContext } from '@/components/providers/ContentProvider'
 import { ButtonBase } from '@/components/ui/ButtonBase/ButtonBase'
 import { Stack } from '@/components/ui/Stack/Stack'
@@ -41,8 +37,7 @@ type Props = {
   onSubmit: (editor: EditorContextType) => Promise<NostrEvent>
 }
 
-// For kind 20 notes
-export const EditorMedia = memo(function EditorMedia(props: Props) {
+export const EditorInline = memo(function EditorInline(props: Props) {
   const { initialOpen, renderDiscard = true, onDiscard, onSubmit } = props
   const { dense } = useContentContext()
   const files = useAtomValue(filesAtom)

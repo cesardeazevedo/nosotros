@@ -7,6 +7,7 @@ import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconAlertCircleFilled } from '@tabler/icons-react'
 import { css } from 'react-strict-dom'
+import { PostUserHeader } from '../Posts/PostUserHeader'
 
 type Props = {
   event?: NostrEventDB
@@ -18,19 +19,22 @@ export const NostrEventUnsupportedContent = (props: Props) => {
   const alt = event?.tags.filter((x) => x[0] === 'alt')?.[1] || ''
   return (
     <Stack sx={[styles.root, sx]}>
-      <Paper sx={styles.paper} surface='surfaceContainer'>
-        <Stack horizontal={false} gap={1} align='center' justify='center'>
-          <IconAlertCircleFilled size={28} strokeWidth='1.0' />
-          <Text size='lg'>
-            Can't display {(event && Kind[event?.kind]?.toString()) || ''} event (kind:{event?.kind})
-          </Text>
-          {alt && (
-            <Text size='lg' sx={styles.alt}>
-              Description: {alt}
+      <Stack grow horizontal={false}>
+        <Paper sx={styles.paper} outlined>
+          {event && <PostUserHeader userAvatarProps={{ size: 'sm' }} event={event} />}
+          <Stack gap={1} align='center' justify='center' sx={styles.content}>
+            <IconAlertCircleFilled size={28} strokeWidth='1.0' />
+            <Text size='lg'>
+              Can't display {(event && Kind[event?.kind]?.toString()) || ''} event (kind:{event?.kind})
             </Text>
-          )}
-        </Stack>
-      </Paper>
+            {alt && (
+              <Text size='lg' sx={styles.alt}>
+                Description: {alt}
+              </Text>
+            )}
+          </Stack>
+        </Paper>
+      </Stack>
     </Stack>
   )
 }
@@ -38,9 +42,11 @@ export const NostrEventUnsupportedContent = (props: Props) => {
 const styles = css.create({
   root: {},
   paper: {
-    textAlign: 'center',
+    paddingBlock: spacing.padding1,
+    paddingInline: spacing.padding1,
+  },
+  content: {
     paddingBlock: spacing.padding2,
-    paddingInline: spacing.padding3,
   },
   alt: {
     wordBreak: 'break-word',

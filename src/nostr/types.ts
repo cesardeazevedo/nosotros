@@ -32,7 +32,7 @@ export type CustomNode =
       attrs: { src: string }
     }
   | {
-      type: 'youtube'  
+      type: 'youtube'
       attrs: { src: string }
     }
   | {

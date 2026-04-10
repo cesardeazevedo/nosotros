@@ -15,7 +15,7 @@ export const UserNIP05 = memo(function UserNIP05(props: Props) {
   const { pubkey, ...rest } = props
   const user = useUserState(pubkey)
   const validNIP05 = useNip05(pubkey, user.metadata?.nip05).data
-  const nip05 = user.metadata?.nip05?.replace(/^_@/, '')
+  const nip05 = typeof user.metadata?.nip05 === 'string' ? user.metadata.nip05.replace(/^_@/, '') : ''
   if (!nip05) {
     return
   }

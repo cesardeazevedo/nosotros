@@ -1,5 +1,6 @@
 import { authRelaysAtom } from '@/atoms/relay.atoms'
 import { authWhitelistAtom, toggleAuthRelayAtom } from '@/atoms/relayAuth.atoms'
+import { HeaderBase } from '@/components/elements/Layouts/HeaderBase'
 import { RelayChip } from '@/components/elements/Relays/RelayChip'
 import { RelayFriendsList } from '@/components/elements/Relays/RelayFriendsList'
 import { RelaySelectPopover } from '@/components/elements/Relays/RelaySelectPopover'
@@ -22,11 +23,7 @@ export const SettingsRelayAuth = memo(function SettingsRelayAuth() {
   const relays = dedupe([...authRelays.map((x) => x[0]), ...authWhitelist])
   return (
     <Stack horizontal={false} grow align='stretch' sx={styles.container}>
-      <Stack sx={styles.header}>
-        <Text variant='title' size='lg'>
-          Relay Authentication
-        </Text>
-      </Stack>
+      <HeaderBase leading='Relay Authentication' />
       <Divider />
       <Stack horizontal={false} gap={2} align='flex-start' sx={styles.root}>
         <Stack sx={styles.description}>
@@ -85,10 +82,6 @@ const styles = css.create({
   },
   paper: {
     width: '100%',
-  },
-  header: {
-    paddingBlock: spacing.padding2,
-    paddingInline: spacing.padding4,
   },
   description: {
     paddingTop: spacing.padding2,

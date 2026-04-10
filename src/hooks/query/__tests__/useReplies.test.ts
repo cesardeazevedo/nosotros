@@ -14,10 +14,12 @@ describe('buildRepliesQueryOptions', () => {
     const result = buildRepliesQueryOptions(event)
     expect(result).toStrictEqual({
       queryKey: queryKeys.tag('e', ['note1'], Kind.Text),
-      filters: [{
-        kinds: [Kind.Text, Kind.Comment],
-        '#e': ['note1'],
-      }],
+      filters: [
+        {
+          kinds: [Kind.Text, Kind.Comment],
+          '#e': ['note1'],
+        },
+      ],
       relayHints: {
         idHints: {
           note1: ['user1'],
@@ -36,10 +38,12 @@ describe('buildRepliesQueryOptions', () => {
     const result = buildRepliesQueryOptions(event)
     expect(result).toStrictEqual({
       queryKey: queryKeys.tag('e', ['root1'], Kind.Text),
-      filters: [{
-        kinds: [Kind.Text, Kind.Comment],
-        '#e': ['root1', 'reply1'],
-      }],
+      filters: [
+        {
+          kinds: [Kind.Text, Kind.Comment],
+          '#e': ['root1', 'reply1'],
+        },
+      ],
       relayHints: {
         idHints: {
           root1: ['pubkey_root', 'user1'],
@@ -104,7 +108,7 @@ describe('buildRepliesQueryOptions', () => {
         {
           kinds: [Kind.Text, Kind.Comment],
           '#a': ['30023:pubkey1:123'],
-        }
+        },
       ],
       relayHints: {
         idHints: {

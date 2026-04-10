@@ -32,10 +32,13 @@ import { LinkBase } from '../Links/LinkBase'
 import { UserAvatar } from './UserAvatar'
 import { UserContentAbout } from './UserContentAbout'
 import { UserFollowings } from './UserFollowings'
+import { UserMutes } from './UserMutes'
 import { UserNIP05 } from './UserNIP05'
 import { UserProfileBanner } from './UserProfileBanner'
+import { UserProfileBannerVibrancy } from './UserProfileBannerVibrancy'
 import { UserProfileForm } from './UserProfileForm'
 import { UserRelays } from './UserRelays'
+import { UserRank } from './UserRank'
 
 type Props = {
   pubkey: string
@@ -51,7 +54,7 @@ export const UserProfileHeader = memo(function UserProfileHeader(props: Props) {
   const currentPubkey = useCurrentPubkey()
   const currentUser = useUserState(currentPubkey, { fullUserSync: true })
   const isUserMuted = !!currentPubkey && currentPubkey !== pubkey && !!currentUser.mutedAuthors?.has(pubkey)
-  const doesFollowCurrentUser = user.followsTag(currentPubkey)
+  const doesFollowCurrentUser = user.followsTag(currentPubkey) && user.pubkey !== currentPubkey
   const { nip05, lud16 } = user?.metadata || {}
   const pushImage = useSetAtom(openImageDialogAtom)
   const toggleQRCodeDialog = useSetAtom(toggleQRCodeDialogAtom)
@@ -82,9 +85,12 @@ export const UserProfileHeader = memo(function UserProfileHeader(props: Props) {
     }
   }, [user.metadata?.website])
 
+  console.log(user)
+
   return (
     <>
-      <UserProfileBanner pubkey={pubkey} />
+      {/* <UserProfileBannerVibrancy pubkey={pubkey} /> */}
+      <UserProfileBanner pubkey={pubkey} sx={styles.banner} />
       <Divider />
       <Stack horizontal={false} gap={1} sx={styles.content}>
         <ContentProvider value={{ disableLink: true, disablePopover: true }}>
@@ -95,9 +101,9 @@ export const UserProfileHeader = memo(function UserProfileHeader(props: Props) {
             <Text variant='headline' size='sm'>
               <Stack align='center' gap={1}>
                 {user?.displayName}
-                {/* {user && user.trustedAssertionEvent && ( */}
-                {/*   <UserRank user={user} /> */}
-                {/* )} */}
+                {user && (user.trustedAssertionEvent || user.embeddings?.data?.length) && (
+                  <UserRank pubkey={pubkey} event={user.trustedAssertionEvent} />
+                )}
                 {user.metadata?.pronouns ? (
                   <html.span style={styles.pronouns}>({user.metadata.pronouns})</html.span>
                 ) : (
@@ -120,6 +126,7 @@ export const UserProfileHeader = memo(function UserProfileHeader(props: Props) {
           </Stack>
           <Stack gap={0.5} horizontal={false} align={isMobile ? 'flex-start' : 'flex-end'}>
             <UserFollowings pubkey={pubkey} />
+            <UserMutes pubkey={pubkey} />
             <UserRelays pubkey={pubkey} />
           </Stack>
         </Stack>
@@ -190,7 +197,6 @@ export const UserProfileHeader = memo(function UserProfileHeader(props: Props) {
                   </LinkBase>
                 </html.div>
               </MenuList>
-
             )}>
             {({ getProps, setRef, open }) => (
               <IconButton
@@ -228,16 +234,16 @@ export const UserProfileHeader = memo(function UserProfileHeader(props: Props) {
 })
 
 const styles = css.create({
-  root: {
-    margin: 0,
-    padding: 0,
-  },
-  paper: {},
   content: {
     position: 'relative',
+    zIndex: 1,
     paddingInline: spacing.padding3,
     paddingTop: spacing.padding8,
     paddingBottom: spacing.padding3,
+  },
+  banner: {
+    position: 'relative',
+    zIndex: 1,
   },
   center: {
     paddingBlock: spacing.padding1,

@@ -25,14 +25,7 @@ type Props = VideoAttributes & {
 }
 
 export const VideoEditor = (props: Props) => {
-  const {
-    src,
-    sx,
-    uploading,
-    error,
-    wrapperProps,
-    cover,
-  } = props
+  const { src, sx, uploading, error, wrapperProps, cover } = props
   const extension = useMemo(() => new URL(src).pathname.split('.').pop(), [src])
   const showDownload = Boolean(src && !src.startsWith('blob:') && !src.startsWith('data:'))
   const addMediaDim = useSetAtom(addMediaDimAtom)

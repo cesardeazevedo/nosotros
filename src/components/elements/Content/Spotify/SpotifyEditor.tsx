@@ -22,4 +22,3 @@ const styles = css.create({
     marginBlock: spacing.margin1,
   },
 })
-

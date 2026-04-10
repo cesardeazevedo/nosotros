@@ -36,10 +36,15 @@ export const UserPopover = function UserPopover(props: Props) {
       cursor='dot'
       content={() => (
         <ContentProvider value={{ disableLink: true, disablePopover: true }}>
-          <Paper outlined shape='lg' surface='surfaceContainerLowest' sx={styles.root} onClick={e => {
-            e.stopPropagation()
-            e.preventDefault()
-          }}>
+          <Paper
+            outlined
+            shape='lg'
+            surface='surfaceContainerLowest'
+            sx={styles.root}
+            onClick={(e) => {
+              e.stopPropagation()
+              e.preventDefault()
+            }}>
             <Stack justify='space-between' sx={styles.header}>
               <UserAvatar size='lg' pubkey={pubkey} />
               <Stack gap={0.5}>

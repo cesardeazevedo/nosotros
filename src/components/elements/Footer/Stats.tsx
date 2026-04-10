@@ -36,7 +36,6 @@ export const Stats = memo(function Stats() {
 const styles = css.create({
   root: {
     opacity: 0.6,
-    padding: spacing.padding2,
   },
   text: {
     fontWeight: 500,

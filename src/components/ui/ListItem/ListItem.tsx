@@ -6,6 +6,7 @@ import { css, html } from 'react-strict-dom'
 import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDOMProps'
 import { Button } from '../Button/Button'
 import type { SxProps } from '../types'
+import { buttonTokens } from '../Button/Button.stylex'
 
 type Size = 'sm' | 'md'
 type Variant = 'standard' | 'danger'
@@ -13,6 +14,7 @@ type Variant = 'standard' | 'danger'
 export type Props = {
   sx?: SxProps
   variant?: Variant
+  collapsed?: boolean
   disabled?: boolean
   selected?: boolean
   interactive?: boolean
@@ -36,6 +38,7 @@ export const ListItem = (props: Props) => {
   const {
     sx,
     variant = 'standard',
+    collapsed,
     disabled,
     selected,
     onClick,
@@ -72,13 +75,13 @@ export const ListItem = (props: Props) => {
   const content = (
     <>
       {hasLeading && <html.span style={styles.leadingIcon}>{leading ?? leadingIcon}</html.span>}
-      <html.span style={styles.content}>
+      <html.span style={[styles.content, collapsed && styles.content$collapsed]}>
         {overline && <html.span style={styles.overline}>{overline}</html.span>}
-        <html.span style={styles.label}>{children}</html.span>
+        <html.span style={[styles.label, selected && styles.selected$label]}>{children}</html.span>
         {supportingText && <html.span style={styles.supporting}>{supportingText}</html.span>}
       </html.span>
       {hasTrailing && (
-        <html.span style={styles.trailing}>
+        <html.span style={[styles.trailing, collapsed && styles.trailing$collapsed]}>
           {trailingIcon ? <html.span style={styles.trailingIcon}>{trailingIcon}</html.span> : trailing}
         </html.span>
       )}
@@ -134,9 +137,9 @@ const sizes = css.create({
     paddingInlineEnd: spacing.padding2,
   },
   md: {
-    minHeight: 48,
-    paddingInlineStart: spacing.padding3,
-    paddingInlineEnd: spacing.padding3,
+    minHeight: 46,
+    paddingInlineStart: 16,
+    paddingInlineEnd: 16,
   },
 })
 
@@ -144,10 +147,13 @@ const styles = css.create({
   root: {
     display: 'flex',
     alignItems: 'center',
+    justifyContent: 'flex-start',
     gap: spacing.padding2,
     height: 'unset',
     width: '100%',
     textAlign: 'left',
+    minWidth: 40,
+    [buttonTokens.containerMinWidth]: 40,
   },
   interactive: {
     transform: {
@@ -184,20 +190,37 @@ const styles = css.create({
   leadingIcon: {
     display: 'inline-flex',
     flexShrink: 0,
+    // width: 24,
+    // minWidth: 24,
+    // justifyContent: 'center',
+    // alignItems: 'center',
   },
   content: {
     display: 'flex',
     flexDirection: 'column',
     flex: 1,
     overflow: 'hidden',
+    opacity: 1,
+    maxWidth: '100%',
+    transitionProperty: 'opacity, max-width',
+    transitionDuration: '180ms',
+  },
+  content$collapsed: {
+    opacity: 0,
+    maxWidth: 0,
   },
   label: {
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
-    fontSize: typeScale.bodySize$lg,
+    color: palette.onSurfaceVariant,
+    fontSize: typeScale.bodySize$md,
+    // fontSize: typeScale.bodySize$lg,
     lineHeight: typeScale.titleLineHeight$md,
     fontWeight: typeScale.titleWeight$md,
+  },
+  selected$label: {
+    color: palette.onSurface,
   },
   supporting: {
     textAlign: 'left',
@@ -222,6 +245,15 @@ const styles = css.create({
     alignItems: 'center',
     marginInlineStart: 'auto',
     flexShrink: 0,
+    opacity: 1,
+    transitionProperty: 'opacity',
+    transitionDuration: '180ms',
+  },
+  trailing$collapsed: {
+    opacity: 0,
+    width: 0,
+    marginInlineStart: 0,
+    overflow: 'hidden',
   },
   trailingIcon: {
     display: 'inline-flex',

@@ -23,15 +23,17 @@ export function buildRepliesQueryOptions(event: NostrEventDB) {
   const isNonText = event.kind !== Kind.Text
 
   const kinds = [Kind.Text, Kind.Comment]
-  const filters: NostrFilter[] = [{ kinds, "#e": ids }]
+  const filters: NostrFilter[] = [{ kinds, '#e': ids }]
   if (isNonText) {
-    filters.push({ kinds, "#E": ids })
+    filters.push({ kinds, '#E': ids })
   }
   if (address) {
-    filters.push(...[
-      { kinds, '#A': [address] },
-      { kinds, '#a': [address] },
-    ])
+    filters.push(
+      ...[
+        { kinds, '#A': [address] },
+        { kinds, '#a': [address] },
+      ],
+    )
   }
 
   const queryKey = queryKeys.tag(address ? 'a' : 'e', [rootId], Kind.Text)

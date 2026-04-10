@@ -1,4 +1,4 @@
-import { NoteProvider } from '@/components/providers/NoteProvider'
+import { EventProvider } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { useParentEvent } from '@/hooks/query/useQueryBase'
@@ -48,13 +48,11 @@ export const Threads = memo(function RepliesThread(props: Props) {
   const isParentRootReference = !!event.metadata?.parentId && event.metadata?.parentId === event.metadata?.rootId
   const requiresLoadedParent = renderParents && (includeRootParent || !isParentRootReference)
   const parentReady = !hasParentId || !requiresLoadedParent || !!parent.data
-  // At capped depth we still render the current note even if its own parent is missing.
-  // Otherwise parent rows can disappear and make child rows look orphaned.
   const shouldRenderNoteItem = !renderParents || parentReady || level >= maxLevel
   const shouldShowParentSummary = parentSummaryCount > 0 && !showFullParents
 
   return (
-    <NoteProvider value={{ event }}>
+    <EventProvider value={{ event }}>
       {level < maxLevel ? (
         <>
           {note.metadata?.isRoot === false ? (
@@ -88,7 +86,9 @@ export const Threads = memo(function RepliesThread(props: Props) {
         </>
       ) : (
         <>
-          {event.metadata?.isRoot === true && <ThreadRoot note={note} renderEditor={renderEditor} renderReplies={renderReplies} />}
+          {event.metadata?.isRoot === true && (
+            <ThreadRoot note={note} renderEditor={renderEditor} renderReplies={renderReplies} />
+          )}
           {event.metadata?.isRoot === false && (
             <>
               {shouldShowParentSummary && (
@@ -132,7 +132,7 @@ export const Threads = memo(function RepliesThread(props: Props) {
           )}
         </>
       )}
-    </NoteProvider>
+    </EventProvider>
   )
 })
 

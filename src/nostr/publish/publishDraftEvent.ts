@@ -109,11 +109,7 @@ export async function publishDraftEvent(
   )
 }
 
-export async function publishDraftDelete(
-  pubkey: string,
-  event: NostrEventDB,
-  options: LocalPublisherOptions,
-) {
+export async function publishDraftDelete(pubkey: string, event: NostrEventDB, options: LocalPublisherOptions) {
   return await lastValueFrom(
     publishDeleteRequest(pubkey, event, {
       ...options,

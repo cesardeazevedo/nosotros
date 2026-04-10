@@ -1,5 +1,5 @@
 import type { ThreadBranch, ThreadBranchItem, ThreadGroup } from '@/atoms/threads.atoms'
-import { NoteProvider } from '@/components/providers/NoteProvider'
+import { EventProvider } from '@/components/providers/NoteProvider'
 import { Divider } from '@/components/ui/Divider/Divider'
 import type { SxProps } from '@/components/ui/types'
 import { FALLBACK_RELAYS } from '@/constants/relays'
@@ -18,13 +18,12 @@ import { ThreadLoading } from './ThreadRootLoading'
 import { ThreadRootStickyHeader } from './ThreadRootStickyHeader'
 import { ThreadSummary } from './ThreadSummary'
 
-
 const ThreadGroupRootLoaded = memo(function ThreadGroupRootLoaded(props: { event: NostrEventDB }) {
   const note = useNoteState(props.event, { repliesOpen: false, forceSync: true, contentOpen: false })
   return (
-    <NoteProvider value={{ event: props.event }}>
+    <EventProvider value={{ event: props.event }}>
       <ThreadRoot note={note} renderEditor />
-    </NoteProvider>
+    </EventProvider>
   )
 })
 
@@ -50,7 +49,10 @@ const ThreadBranches = memo(function ThreadBranches(props: { branches: ThreadBra
           <React.Fragment key={key}>
             {index > 0 && <ThreadHorizontalDivider />}
             {branch.items.map((item, i) => (
-              <BranchItem key={item.type === 'summary' ? `summary-${i}` : ('eventId' in item ? item.eventId : i)} item={item} />
+              <BranchItem
+                key={item.type === 'summary' ? `summary-${i}` : 'eventId' in item ? item.eventId : i}
+                item={item}
+              />
             ))}
           </React.Fragment>
         )
@@ -72,12 +74,10 @@ const ExpandableSummary = memo(function ExpandableSummary(props: { eventIds: str
     )
   }
 
-  return (
-    <SummaryItem sx={styles.parentSummary} eventIds={props.eventIds} onExpand={() => setExpanded(true)} />
-  )
+  return <SummaryItem sx={styles.parentSummary} eventIds={props.eventIds} onExpand={() => setExpanded(true)} />
 })
 
-const SummaryItem = memo(function SummaryItem(props: { sx?: SxProps, eventIds: string[]; onExpand: () => void }) {
+const SummaryItem = memo(function SummaryItem(props: { sx?: SxProps; eventIds: string[]; onExpand: () => void }) {
   const hiddenEvents = useQueries({
     queries: props.eventIds.map((eventId) =>
       eventQueryOptions<NostrEventDB | undefined>({
@@ -136,19 +136,16 @@ const ParentItem = memo(function ParentItem(props: { eventId: string }) {
   return <ThreadGroupItemEvent event={event} />
 })
 
-const ThreadGroupItemEvent = memo(function ParentItemLoaded(props: { event: NostrEventDB, children?: React.ReactNode }) {
+const ThreadGroupItemEvent = memo(function ParentItemLoaded(props: {
+  event: NostrEventDB
+  children?: React.ReactNode
+}) {
   const note = useNoteState(props.event, { repliesOpen: false, forceSync: true, contentOpen: false })
   return (
-    <NoteProvider value={{ event: props.event }}>
-      <ThreadItem
-        note={note}
-        renderEditor
-        renderReplies={false}
-        renderThreadIndicator
-        forceThreadIndicator
-      />
+    <EventProvider value={{ event: props.event }}>
+      <ThreadItem note={note} renderEditor renderReplies={false} renderThreadIndicator forceThreadIndicator />
       {props.children}
-    </NoteProvider>
+    </EventProvider>
   )
 })
 
@@ -163,7 +160,7 @@ const FeedReplyItem = memo(function FeedReplyItem(props: { eventId: string; hasC
 const FeedReplyItemLoaded = memo(function FeedReplyItemLoaded(props: { event: NostrEventDB; hasChildren: boolean }) {
   const note = useNoteState(props.event, { repliesOpen: false, forceSync: true, contentOpen: false })
   return (
-    <NoteProvider value={{ event: props.event }}>
+    <EventProvider value={{ event: props.event }}>
       <ThreadItem
         note={note}
         renderEditor
@@ -174,7 +171,7 @@ const FeedReplyItemLoaded = memo(function FeedReplyItemLoaded(props: { event: No
       {!props.hasChildren && !note.state.repliesOpen && (
         <ThreadSummary sx={styles.repliesSummary} note={note} mode='replies' onClick={() => note.toggleReplies(true)} />
       )}
-    </NoteProvider>
+    </EventProvider>
   )
 })
 

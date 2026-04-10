@@ -9,7 +9,6 @@ import { Text } from '@/components/ui/Text/Text'
 import { KIND_LABELS } from '@/constants/kinds'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { useEventDecryptedTags } from '@/hooks/useEventDecrypt'
-import { useNevent } from '@/hooks/useEventUtils'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
@@ -26,22 +25,19 @@ type Props = {
 
 export const ListCard = (props: Props) => {
   const { event, onEdit, canEdit, decryptAllSignal } = props
-  const nevent = useNevent(event)
   const [decryptRequested, setDecryptRequested] = useState(false)
   const decryptedTags = useEventDecryptedTags(decryptRequested ? event : undefined)
   const title = event.tags.find((tag) => tag[0] === 'title')?.[1]
   const dTag = event.tags.find((tag) => tag[0] === 'd')?.[1]
   const label = title || dTag || '-'
-  const displayKind = KIND_LABELS[event.kind]
-    ? `${KIND_LABELS[event.kind]} (${event.kind})`
-    : `Kind ${event.kind}`
+  const displayKind = KIND_LABELS[event.kind] ? `${KIND_LABELS[event.kind]} (${event.kind})` : `Kind ${event.kind}`
   const image = event.tags.find((tag) => tag[0] === 'image')?.[1]
   const listTags = event.tags.filter((tag) => !['title', 'description', 'd'].includes(tag[0]))
   const pubkeys = listTags.filter((tag) => tag[0] === 'p').map((tag) => tag[1])
   const description = event.tags.find((tag) => tag[0] === 'description')?.[1]
   const hasEncrypted = !!event.content
   const tagsCount = hasEncrypted
-    ? (decryptedTags?.filter((tag) => tag[0] !== 'title' && tag[0] !== 'description' && tag[0] !== 'd').length || 0)
+    ? decryptedTags?.filter((tag) => tag[0] !== 'title' && tag[0] !== 'description' && tag[0] !== 'd').length || 0
     : listTags.length
 
   useEffect(() => {
@@ -60,7 +56,7 @@ export const ListCard = (props: Props) => {
   }
 
   return (
-    <LinkNEvent nevent={nevent} sx={styles.cardLink}>
+    <LinkNEvent event={event} sx={styles.cardLink}>
       <Stack horizontal={false} sx={styles.card}>
         {image && (
           <html.div style={styles.cardMedia}>

@@ -25,3 +25,49 @@ export function fakeEventMeta(data: Partial<NostrEvent>): NostrEventDB {
 export function fakeSignature(wrappedEvent: NostrEvent, key?: Uint8Array): NostrEventDB {
   return finalizeEvent(fakeEventMeta(wrappedEvent), key || generateSecretKey()) as NostrEventDB
 }
+
+const WORD_BANK = [
+  'lorem',
+  'ipsum',
+  'dolor',
+  'sit',
+  'amet',
+  'consectetur',
+  'adipiscing',
+  'elit',
+  'sed',
+  'do',
+  'eiusmod',
+  'tempor',
+  'incididunt',
+  'ut',
+  'labore',
+  'et',
+  'dolore',
+  'magna',
+  'aliqua',
+  'enim',
+  'ad',
+  'minim',
+  'veniam',
+  'quis',
+  'nostrud',
+  'exercitation',
+  'ullamco',
+  'laboris',
+  'nisi',
+  'aliquip',
+]
+
+const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slice(1)
+
+export function fakeText(paragraphs = 2, sentencesPerParagraph = 4, wordsPerSentence = 12) {
+  const nextWord = () => WORD_BANK[Math.floor(Math.random() * WORD_BANK.length)] || 'nostr'
+
+  return Array.from({ length: paragraphs }, () =>
+    Array.from(
+      { length: sentencesPerParagraph },
+      () => `${capitalize(Array.from({ length: wordsPerSentence }, nextWord).join(' '))}.`,
+    ).join(' '),
+  ).join('\n\n')
+}

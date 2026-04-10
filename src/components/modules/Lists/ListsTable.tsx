@@ -1,4 +1,5 @@
 import { listFormDialogAtom } from '@/atoms/dialog.atoms'
+import { HeaderBase } from '@/components/elements/Layouts/HeaderBase'
 import { PaperContainer } from '@/components/elements/Layouts/PaperContainer'
 import { Button } from '@/components/ui/Button/Button'
 import { Chip } from '@/components/ui/Chip/Chip'
@@ -15,7 +16,14 @@ import { useCurrentPubkey } from '@/hooks/useAuth'
 import { useSM } from '@/hooks/useMobile'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import { IconFilter, IconFilterFilled, IconLayoutGrid, IconLayoutRows, IconLockOpen, IconPlus } from '@tabler/icons-react'
+import {
+  IconFilter,
+  IconFilterFilled,
+  IconLayoutGrid,
+  IconLayoutRows,
+  IconLockOpen,
+  IconPlus,
+} from '@tabler/icons-react'
 import { useSetAtom } from 'jotai'
 import { useMemo, useState } from 'react'
 import { css, html } from 'react-strict-dom'
@@ -90,10 +98,7 @@ export const ListsTable = (props: Props) => {
     <>
       <>
         <Stack horizontal={false}>
-          <Stack sx={styles.header} justify='space-between' align='center'>
-            <Text variant='title' size='lg'>
-              {title}
-            </Text>
+          <HeaderBase leading={title}>
             <Stack gap={1} align='center'>
               {module.scope === 'self' && (
                 <Chip
@@ -134,7 +139,7 @@ export const ListsTable = (props: Props) => {
                 Create List
               </Button>
             </Stack>
-          </Stack>
+          </HeaderBase>
           <Divider />
           <Expandable expanded={filterOpen}>
             <Stack horizontal={false} gap={1} sx={styles.filterBar}>
@@ -188,7 +193,11 @@ export const ListsTable = (props: Props) => {
             feed.query.isFetching ? (
               layout === 'cards' ? (
                 <html.div
-                  style={[styles.cardGrid, singleColumnCards && styles.cardGrid$single, isMobile && styles.cardGrid$mobile]}>
+                  style={[
+                    styles.cardGrid,
+                    singleColumnCards && styles.cardGrid$single,
+                    isMobile && styles.cardGrid$mobile,
+                  ]}>
                   <ListCardLoading rows={isMobile ? 3 : 6} />
                 </html.div>
               ) : (
@@ -234,7 +243,11 @@ export const ListsTable = (props: Props) => {
             layout === 'cards' ? (
               list.length ? (
                 <html.div
-                  style={[styles.cardGrid, singleColumnCards && styles.cardGrid$single, isMobile && styles.cardGrid$mobile]}>
+                  style={[
+                    styles.cardGrid,
+                    singleColumnCards && styles.cardGrid$single,
+                    isMobile && styles.cardGrid$mobile,
+                  ]}>
                   {children}
                 </html.div>
               ) : null
@@ -267,10 +280,6 @@ export const ListsTable = (props: Props) => {
 }
 
 const styles = css.create({
-  header: {
-    paddingBlock: spacing.padding1,
-    paddingInline: spacing.padding2,
-  },
   table: {
     display: 'flex',
     flexDirection: 'column',

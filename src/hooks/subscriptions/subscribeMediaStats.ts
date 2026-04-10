@@ -54,9 +54,7 @@ function fromVideoMetadata(src: string) {
 }
 
 function fromMediaMetadata(mime: 'image' | 'video', src: string, event: NostrEventDB) {
-  const $ = mime === 'image'
-    ? fromImageMetadata(src)
-    : fromVideoMetadata(src)
+  const $ = mime === 'image' ? fromImageMetadata(src) : fromVideoMetadata(src)
 
   return $.pipe(
     takeUntil(timer(2000)),

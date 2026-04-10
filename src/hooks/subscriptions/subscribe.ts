@@ -41,10 +41,7 @@ export function subscribe(sub: NostrSubscriptionBuilder, ctx: NostrContext): Obs
         case Kind.Repost: {
           const innerEvent = parseEventContent(event)
           if (innerEvent) {
-            return merge(
-              verifyAndInsertEvent(innerEvent, sub).pipe(ignoreElements()),
-              verifyAndInsertEvent(event, sub),
-            )
+            return merge(verifyAndInsertEvent(innerEvent, sub).pipe(ignoreElements()), verifyAndInsertEvent(event, sub))
           }
           return verifyAndInsertEvent(event, sub)
         }

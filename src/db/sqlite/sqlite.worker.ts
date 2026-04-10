@@ -1,16 +1,16 @@
 import { Kind } from '@/constants/kinds'
 import { type Database, type SAHPoolUtil } from '@sqlite.org/sqlite-wasm'
 import invariant from 'tiny-invariant'
-import { SqliteEventSearch } from './events/sqlite.events.fts'
 import { SqliteEventStore } from './events/sqlite.events'
+import { SqliteEventSearch } from './events/sqlite.events.fts'
 import { SqliteNip05 } from './nip05/sqlite.nip05'
 import { SqliteRelayInfo } from './relayInfo/sqlite.relayInfo'
 import { SqliteRelayStats } from './relayStats/sqlite.relayStats'
 import { SqliteSeen } from './seen/sqlite.seen'
-import { SqliteTags } from './tags/sqlite.tags'
 import { deleteSQLiteFile, initializeSQLite } from './sqlite.schemas'
 import { SqliteStats } from './sqlite.stats'
 import type { NostrEventDB, SqliteMessages } from './sqlite.types'
+import { SqliteTags } from './tags/sqlite.tags'
 import { SqliteUsers } from './users/sqlite.users'
 
 export class SqliteStorage {
@@ -27,7 +27,7 @@ export class SqliteStorage {
   tags: SqliteTags
 
   constructor(public name: string) {
-    const init = initializeSQLite(this.name, false)
+    const init = initializeSQLite(this.name, true)
     this.db = init.then((r) => r.db)
     this.pool = init.then((r) => r.pool)
     this.event = new SqliteEventStore(this.db)
@@ -39,6 +39,46 @@ export class SqliteStorage {
     this.stats = new SqliteStats()
     this.users = new SqliteUsers(this.db)
     this.tags = new SqliteTags()
+    //
+    // void this.db.then((db) => {
+    //   const existing = (db.selectValue(`SELECT COUNT(*) FROM user_embeddings`) as number) || 0
+    //   if (existing > 0) {
+    //     return
+    //   }
+    //
+    //   const rows =
+    //     (db.selectObjects(
+    //       `
+    //         SELECT id, kind, pubkey, created_at, content, tags, sig, metadata
+    //         FROM events
+    //         WHERE kind = ?
+    //       `,
+    //       [Kind.UserEmbeddings],
+    //     ) as Array<{
+    //       id: string
+    //       kind: number
+    //       pubkey: string
+    //       created_at: number
+    //       content: string
+    //       tags: string
+    //       sig: string
+    //       metadata: string
+    //     }>) || []
+    //
+    //   if (!rows.length) {
+    //     return
+    //   }
+    //
+    //   db.transaction((tx) => {
+    //     for (const row of rows) {
+    //       this.event.embeddings.insertEvent(tx, {
+    //         ...row,
+    //         tags: JSON.parse(row.tags || '[]'),
+    //         metadata: JSON.parse(row.metadata || 'null'),
+    //       } as NostrEventDB)
+    //     }
+    //   })
+    // })
   }
 
   async deleteDB() {
@@ -56,6 +96,7 @@ export class SqliteStorage {
     const db = await this.db
     db.exec('DELETE FROM events')
     db.exec('DELETE FROM events_fts')
+    db.exec('DELETE FROM user_embeddings')
     db.exec('DELETE FROM tags')
     db.exec('DELETE FROM relayStats')
     db.exec('DELETE FROM relayInfo')
@@ -187,6 +228,26 @@ async function onMessage(e: MessageEvent) {
     }
     case 'queryUsers': {
       const res = store.users.query(db, msg.params)
+      postMessage(msg, res)
+      break
+    }
+    case 'queryUsersWithEmbeddings': {
+      const res = store.users.queryWithEmbeddings(db, msg.params)
+      postMessage(msg, res)
+      break
+    }
+    case 'queryEmbeddedPubkeys': {
+      const res = store.users.queryEmbeddedPubkeys(db, msg.params)
+      postMessage(msg, res)
+      break
+    }
+    case 'queryUsersByEmbedding': {
+      const res = store.users.queryByEmbedding(db, msg.params)
+      postMessage(msg, res)
+      break
+    }
+    case 'queryNearestUserEmbeddings': {
+      const res = store.event.embeddings.queryNearestToPubkey(db, msg.params.pubkey, msg.params.limit, msg.params.offset)
       postMessage(msg, res)
       break
     }

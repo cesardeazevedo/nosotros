@@ -37,10 +37,12 @@ export const RelayTableRow = memo(function RelayTableRow(props: Props) {
   const isSM = useSM()
   return (
     <>
-      <tr {...root} onClick={(e) => {
-        e.stopPropagation()
-        setOpen(!open)
-      }}>
+      <tr
+        {...root}
+        onClick={(e) => {
+          e.stopPropagation()
+          setOpen(!open)
+        }}>
         <td {...td}>
           <Stack sx={styles.breakWord} gap={2}>
             <IconButton

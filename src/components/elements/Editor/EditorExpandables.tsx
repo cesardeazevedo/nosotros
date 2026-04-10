@@ -22,10 +22,10 @@ export const EditorExpandables = memo(function EditorExpandables() {
         <Divider />
         <EditorDrafts />
       </Expandable>
-      <Expandable expanded={section === 'zaps'}>
-        <Divider />
-        {/* <EditorZapSplits key='json' /> */}
-      </Expandable>
+      {/* <Expandable expanded={section === 'zaps'}> */}
+      {/*   <Divider /> */}
+      {/*   <EditorZapSplits key='json' /> */}
+      {/* </Expandable> */}
       {/* <Expandable expanded={store.section === 'pow'}> */}
       {/* <Divider /> */}
       {/* <EditorPow key='pow' editor={store} /> */}

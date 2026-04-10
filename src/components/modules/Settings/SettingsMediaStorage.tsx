@@ -1,7 +1,7 @@
 import { UploadServersTable } from '@/components/elements/Upload/UploadServersTable'
 import { Divider } from '@/components/ui/Divider/Divider'
+import { HeaderBase } from '@/components/elements/Layouts/HeaderBase'
 import { Stack } from '@/components/ui/Stack/Stack'
-import { Text } from '@/components/ui/Text/Text'
 import { Kind } from '@/constants/kinds'
 import { DEFAULT_NIP96_SERVERS } from '@/constants/relays'
 import { usePublishEventMutation } from '@/hooks/mutations/usePublishEventMutation'
@@ -18,15 +18,15 @@ export const SettingsMediaStorage = memo(function SettingsMediaStorage() {
   const { mutate } = usePublishEventMutation<[Kind.BlossomServerList | Kind.NIP96ServerList, string, string]>({
     mutationFn:
       ({ signer }) =>
-        ([kind, url, pubkey]) =>
-          publishMediaServer(kind, url, pubkey, signer),
+      ([kind, url, pubkey]) =>
+        publishMediaServer(kind, url, pubkey, signer),
   })
 
   const nip96ServerList = useUserNIP96Servers(pubkey)
   const blossomServerList = useUserBlossomServers<string[]>(pubkey)
-  const nip96Suggestions = DEFAULT_NIP96_SERVERS
-    .map((url) => `https://${url}`)
-    .filter((url) => !nip96ServerList.data?.some((server) => server === url))
+  const nip96Suggestions = DEFAULT_NIP96_SERVERS.map((url) => `https://${url}`).filter(
+    (url) => !nip96ServerList.data?.some((server) => server === url),
+  )
 
   const submit = (kind: Kind.BlossomServerList | Kind.NIP96ServerList) => (url: string) => {
     if (pubkey) {
@@ -36,11 +36,7 @@ export const SettingsMediaStorage = memo(function SettingsMediaStorage() {
 
   return (
     <Stack grow horizontal={false} sx={styles.container}>
-      <Stack sx={styles.header}>
-        <Text variant='title' size='lg'>
-          Media Servers
-        </Text>
-      </Stack>
+      <HeaderBase leading='Media Servers' />
       <Divider />
       <Stack horizontal={false} gap={1} align='flex-start' sx={styles.root}>
         <UploadServersTable
@@ -72,10 +68,6 @@ const styles = css.create({
   },
   content: {
     alignItems: 'flex-start',
-  },
-  header: {
-    paddingBlock: spacing.padding2,
-    paddingInline: spacing.padding4,
   },
   description: {
     paddingTop: spacing.padding2,

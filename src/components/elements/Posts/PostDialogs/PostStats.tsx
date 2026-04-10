@@ -138,6 +138,6 @@ const styles = css.create({
     margin: 10,
     '::before': {
       backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    }
+    },
   },
 })

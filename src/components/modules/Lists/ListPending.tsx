@@ -11,7 +11,7 @@ const rows = [...Array(4).keys()]
 export const ListsPending = () => {
   return (
     <>
-      <RouteContainer maxWidth='lg' renderDivider={false} header={<HeaderBase label='Lists' />}>
+      <RouteContainer maxWidth='lg' renderDivider={false} header={<HeaderBase leading='Lists' />}>
         <Text variant='title' size='lg' sx={styles.subheader}>
           My custom follow lists
         </Text>

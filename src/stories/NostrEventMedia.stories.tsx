@@ -1,6 +1,7 @@
 import { NostrEventRoot } from '@/components/elements/Event/NostrEventRoot'
 import { CenteredContainer } from '@/components/elements/Layouts/CenteredContainer'
 import { PaperContainer } from '@/components/elements/Layouts/PaperContainer'
+import { Paper } from '@/components/ui/Paper/Paper'
 import { setEventData } from '@/hooks/query/queryUtils'
 import { fakeEventMeta } from '@/utils/faker'
 import { getImgProxyUrl } from '@/utils/imgproxy'
@@ -35,15 +36,14 @@ const meta = {
       setEventData(event)
       return (
         <CenteredContainer margin>
-          <PaperContainer>
+          <Paper outlined>
             <Story />
-          </PaperContainer>
+          </Paper>
         </CenteredContainer>
       )
     },
   ],
   args: {
-    open: false,
     event: fakeEventMeta({ kind: 1, content: 'Hello World' }),
   },
 } satisfies Meta<typeof NostrEventRoot>

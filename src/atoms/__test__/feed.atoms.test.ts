@@ -56,7 +56,7 @@ describe('assert feed atoms', () => {
       )
 
     const feedAtoms = createFeedAtoms(createFeedModule('feed/onstream-query', { autoUpdate: false }))
-    const unsubscribe = store.sub(feedAtoms.query, () => { })
+    const unsubscribe = store.sub(feedAtoms.query, () => {})
     store.get(feedAtoms.query)
 
     await vi.waitFor(() => {
@@ -96,7 +96,7 @@ describe('assert feed atoms', () => {
         includeReplies: false,
       }),
     )
-    const unsubscribe = testStore.sub(feedAtoms.query, () => { })
+    const unsubscribe = testStore.sub(feedAtoms.query, () => {})
     testStore.get(feedAtoms.query)
 
     await vi.waitFor(() => {

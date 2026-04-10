@@ -1,22 +1,19 @@
-import { IconExpandable } from '@/components/elements/Icons/IconExpandable'
 import type { Props as HeaderBaseProps } from '@/components/elements/Layouts/HeaderBase'
 import { HeaderBase } from '@/components/elements/Layouts/HeaderBase'
 import { Anchored } from '@/components/ui/Anchored/Anchored'
 import { Badge } from '@/components/ui/Badge/Badge'
-import { Button } from '@/components/ui/Button/Button'
-import { Divider } from '@/components/ui/Divider/Divider'
-import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { visibleOnHoverStyle } from '@/components/ui/helpers/visibleOnHover.stylex'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
+import { Paper } from '@/components/ui/Paper/Paper'
+import { Popover } from '@/components/ui/Popover/Popover'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { FeedState } from '@/hooks/state/useFeed'
 import { spacing } from '@/themes/spacing.stylex'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
-import { IconTrash } from '@tabler/icons-react'
+import { IconAdjustments, IconTrash } from '@tabler/icons-react'
 import type { ReactNode } from 'react'
-import { memo, useState } from 'react'
+import { memo } from 'react'
 import { css } from 'react-strict-dom'
-import { useDeckColumn, useRemoveDeckColumn } from '../../Deck/hooks/useDeck'
 import type { Props as FeedSettingsProps } from '../FeedSettings'
 import { FeedSettings } from '../FeedSettings'
 
@@ -29,60 +26,48 @@ type Props = HeaderBaseProps &
   }
 
 export const FeedHeaderBase = memo(function FeedHeaderBase(props: Props) {
-  const [expanded, setExpanded] = useState(false)
   const { feed, customSettings, renderRelaySettings, onDelete, renderSetting = true, ...rest } = props
-  const column = useDeckColumn()
-  const isDeck = !!column
-  const removeDeckColumn = useRemoveDeckColumn(column?.id)
 
   const handleDelete = () => {
-    removeDeckColumn()
   }
   return (
     <>
       <HeaderBase {...rest} sx={[rest.sx, visibleOnHoverStyle.root]}>
-        <Stack gap={1}>
-          {(isDeck || onDelete) && (
-            <IconButton sx={visibleOnHoverStyle.item} onClick={onDelete || handleDelete}>
-              <IconTrash size={22} strokeWidth='1.5' color={colors.red8} />
-            </IconButton>
-          )}
-          {feed && (
-            <Button variant='filledTonal' onClick={() => setExpanded((prev) => !prev)}>
-              <Anchored content={feed.isDirty && <Badge dot />}>
-                <Stack gap={0.5}>
-                  <IconExpandable upwards strokeWidth='2.5' expanded={expanded} />
-                  Feed Settings
-                </Stack>
-              </Anchored>
-            </Button>
-          )}
-        </Stack>
-      </HeaderBase>
-      <Expandable expanded={expanded}>
-        {feed &&
-          renderSetting &&
-          ((typeof customSettings === 'function'
-            ? customSettings({ close: () => setExpanded(false) })
-            : customSettings) || (
-            <FeedSettings feed={feed} renderRelaySettings={renderRelaySettings} onClose={() => setExpanded(false)} />
-          ))}
-        {isDeck && (
-          <>
-            <Divider />
-            <Stack sx={styles.footer}>
-              <Button variant='danger' onClick={handleDelete}>
-                Delete column
-              </Button>
-            </Stack>
-          </>
+        {(onDelete) && (
+          <IconButton sx={visibleOnHoverStyle.item} onClick={onDelete || handleDelete}>
+            <IconTrash size={22} strokeWidth='1.5' color={colors.red8} />
+          </IconButton>
         )}
-      </Expandable>
+        {feed && renderSetting && (
+          <Popover
+            placement='bottom-end'
+            contentRenderer={({ close }) => (
+              <Paper outlined elevation={2} surface='surfaceContainerLow' sx={styles.popover}>
+                {(typeof customSettings === 'function' ? customSettings({ close }) : customSettings) || (
+                  <FeedSettings feed={feed} renderRelaySettings={renderRelaySettings} onClose={close} />
+                )}
+              </Paper>
+            )}>
+            {({ getProps, open, opened, setRef }) => (
+              <IconButton ref={setRef} selected={opened} onClick={open} {...getProps()}>
+                <Anchored content={feed.isDirty && <Badge dot />}>
+                  <Stack gap={0.5}>
+                    <IconAdjustments size={18} strokeWidth='1.5' />
+                  </Stack>
+                </Anchored>
+              </IconButton>
+            )}
+          </Popover>
+        )}
+      </HeaderBase>
     </>
   )
 })
 
 const styles = css.create({
+  popover: {
+    minWidth: 280,
+  },
   footer: {
     padding: spacing.padding1,
   },

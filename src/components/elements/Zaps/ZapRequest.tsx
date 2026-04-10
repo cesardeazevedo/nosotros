@@ -24,13 +24,14 @@ import { nip19 } from 'nostr-tools'
 import { Bech32MaxSize } from 'nostr-tools/nip19'
 import { getZapEndpoint, makeZapRequest } from 'nostr-tools/nip57'
 import { useObservableState } from 'observable-hooks'
-import { memo } from 'react'
+import { memo, useRef } from 'react'
 import { css } from 'react-strict-dom'
 import { catchError, filter, first, from, map, merge, mergeMap, of, startWith, tap, throwError } from 'rxjs'
 import { fromFetch } from 'rxjs/fetch'
 import { UserAvatar } from '../User/UserAvatar'
 import { UserName } from '../User/UserName'
 import { ZapChipAmount } from './ZapChipAmount'
+import { ZapRequestComment, type ZapRequestCommentRef } from './ZapRequestComment'
 
 type ZapEvent = { toEvent: NostrEventDB }
 type ZapProfile = { toPubkey: string }
@@ -55,19 +56,19 @@ export const ZapRequest = memo(function ZapRequest(props: Props) {
   const currentUserRelays = useUserRelays(pubkey, WRITE).data?.map((x) => x.relay) || []
   const relays = dedupe(userRelays, currentUserRelays)
   const zapEnabled = user.canReceiveZap
+  const commentRef = useRef<ZapRequestCommentRef>(null)
 
   const [pending, onSubmit] = useObservableState<
     boolean,
-    [signer: Signer, userEvent: NostrEvent, ZapRequestStore, string[]] | undefined
+    [signer: Signer, userEvent: NostrEvent, ZapRequestStore, string[], string, NostrEvent['tags']] | undefined
   >((input$) => {
     return input$.pipe(
       filter((x) => !!x),
-      mergeMap(([signer, userEvent, store, relays]) => {
+      mergeMap(([signer, userEvent, store, relays, comment, commentTags]) => {
         return from(getZapEndpoint(userEvent)).pipe(
           mergeMap((callback) => {
             if (!callback) return throwError(() => new Error('Error when getting zap endpoint'))
 
-            const comment = store.comment
             const amount = store.amount * 1000
 
             let zapEvent: EventTemplate
@@ -91,7 +92,7 @@ export const ZapRequest = memo(function ZapRequest(props: Props) {
             const lnurl = bech32.encode('lnurl', bech32.toWords(utf8.decode(callback)), Bech32MaxSize)
             const signed = signer.sign({
               ...zapEvent,
-              tags: [...zapEvent.tags, ['lnurl', lnurl]],
+              tags: [...zapEvent.tags, ...commentTags, ['lnurl', lnurl]],
             })
 
             return from(signed).pipe(
@@ -207,14 +208,7 @@ export const ZapRequest = memo(function ZapRequest(props: Props) {
             }}
           />
         )}
-        <TextField
-          fullWidth
-          shrink
-          label='Comment'
-          placeholder='Add a zap comment'
-          sx={styles.comment}
-          onChange={(e) => updateStore({ comment: e.target.value })}
-        />
+        <ZapRequestComment ref={commentRef} />
       </Stack>
       <br />
       <Button
@@ -222,7 +216,12 @@ export const ZapRequest = memo(function ZapRequest(props: Props) {
         fullWidth
         variant='filled'
         sx={styles.button}
-        onClick={() => signer && user.event && onSubmit([signer, user.event, store, relays])}>
+        onClick={() => {
+          const value = commentRef.current?.getValue()
+          if (signer && user.event) {
+            onSubmit([signer, user.event, store, relays, value?.comment || '', value?.tags || []])
+          }
+        }}>
         <Stack gap={1} justify='center'>
           {pending && <CircularProgress size='xs' />}
           {pending ? 'Generating Invoice...' : `Zap ${formatter.format(store.amount)} sats`}
@@ -255,9 +254,6 @@ const styles = css.create({
   chips: {
     gap: 6,
     paddingInline: spacing.padding2,
-  },
-  comment: {
-    marginTop: spacing.margin4,
   },
   custom: {
     width: 150,

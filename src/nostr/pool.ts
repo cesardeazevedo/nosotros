@@ -5,6 +5,7 @@ import { Pool } from 'core/pool'
 import { Relay } from 'core/Relay'
 import { from } from 'rxjs'
 import { subscribeRelayStats } from '../hooks/subscriptions/subscribeRelayStats'
+import { subscribeDevTools } from './devtools/subscribeDevTools'
 
 export const pool = new Pool({
   blacklist: [],
@@ -12,6 +13,7 @@ export const pool = new Pool({
   open(url) {
     const relay = new Relay(url, { info$: from(queryClient.fetchQuery(relayInfoQueryOptions(url))) })
     subscribeRelayStats(relay)
+    subscribeDevTools(relay)
     return relay
   },
 })

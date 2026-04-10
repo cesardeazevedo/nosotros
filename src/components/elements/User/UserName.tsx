@@ -13,6 +13,7 @@ import React, { memo, useEffect, useState } from 'react'
 import { css, html } from 'react-strict-dom'
 import { LinkProfile } from '../Links/LinkProfile'
 import { UserPopover } from './UserPopover'
+import { UserRank } from './UserRank'
 
 export interface Props extends Omit<TextProps, 'children'> {
   pubkey: string
@@ -65,6 +66,9 @@ export const UserName = memo(function UserName(props: Props) {
     <Stack gap={0.5} sx={[styles.root, props.sx]}>
       {!user && <UserNameSkeletonOrPubkey pubkey={pubkey} size={size} {...rest} />}
       <UserPopover pubkey={pubkey}>{textWithLink}</UserPopover>
+      {(user?.trustedAssertionEvent || user?.embeddings?.data?.length) && (
+        <UserRank pubkey={pubkey} event={user?.trustedAssertionEvent} />
+      )}
       {currentUser?.followsTag(user?.pubkey) && (
         <IconUserCheck size={14} strokeWidth='2.2' {...css.props(styles.followingIndicator)} />
       )}

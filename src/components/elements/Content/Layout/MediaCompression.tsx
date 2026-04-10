@@ -47,7 +47,6 @@ export const MediaCompression = (props: Props) => {
               checked={!!includeAudio}
               onChange={() => onToggleAudio()}
             />
-
           }
         />
       )}

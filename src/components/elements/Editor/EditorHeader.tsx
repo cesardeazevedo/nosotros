@@ -32,13 +32,11 @@ export const EditorHeader = memo(function EditorHeader() {
   }
 
   if (parent) {
-    return (
-      <UserName pubkey={pubkey} />
-    )
+    return <UserName pubkey={pubkey} />
   }
 
   return (
-    <Stack grow justify='space-between'>
+    <Stack justify='space-between'>
       <UserName pubkey={pubkey} />
       <Button
         variant={section === 'drafts' ? 'filledTonal' : 'text'}
@@ -47,7 +45,6 @@ export const EditorHeader = memo(function EditorHeader() {
         Drafts
       </Button>
     </Stack>
-
   )
 })
 

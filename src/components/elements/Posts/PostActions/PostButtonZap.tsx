@@ -1,5 +1,5 @@
 import { useContentContext } from '@/components/providers/ContentProvider'
-import { useNoteContext } from '@/components/providers/NoteProvider'
+import { useEventContext } from '@/components/providers/NoteProvider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { useZapAmount, useZapsByPubkey } from '@/hooks/query/useZaps'
@@ -19,7 +19,7 @@ import { iconProps } from './utils'
 const formatter = new Intl.NumberFormat()
 
 export const ButtonZap = memo(function ButtonZap() {
-  const { event } = useNoteContext()
+  const { event } = useEventContext()
   const { dense } = useContentContext()
 
   const router = useRouter()
