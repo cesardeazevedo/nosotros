@@ -1,4 +1,3 @@
-import { Stack } from '@/components/ui/Stack/Stack'
 import type { Props as TextProps } from '@/components/ui/Text/Text'
 import { Text } from '@/components/ui/Text/Text'
 import { useNip05 } from '@/hooks/query/useNIP05'
@@ -23,21 +22,25 @@ export const UserNIP05 = memo(function UserNIP05(props: Props) {
   return (
     <Text variant='label' size='sm' {...rest} sx={[styles.root, validNIP05 === false && styles.root$invalid, rest.sx]}>
       {validNIP05 !== false ? (
-        <Stack>
-          {!nip05.includes('@') && <IconAt size={12} />}
+        <>
+          {!nip05.includes('@') && <IconAt size={12} {...css.props(styles.icon)} />}
           {nip05}
-        </Stack>
+        </>
       ) : (
-        <Stack>
-          <IconExclamationCircle size={12} strokeWidth={2.2} />
+        <>
+          <IconExclamationCircle size={12} strokeWidth={2.2} {...css.props(styles.icon)} />
           {nip05.replace(/^_@/, '')}
-        </Stack>
+        </>
       )}
     </Text>
   )
 })
 
 const styles = css.create({
+  icon: {
+    display: 'inline-block',
+    verticalAlign: 'text-bottom',
+  },
   root: {
     whiteSpace: 'nowrap',
     maxWidth: 250,

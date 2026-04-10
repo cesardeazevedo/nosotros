@@ -168,7 +168,7 @@ export const SearchContent = memo(function SearchContent(props: Props) {
                   {isFollowingSearchDivider && (
                     <Stack sx={styles.subheader}>
                       <Text variant='label' size='md'>
-                        Following
+                        Users
                       </Text>
                     </Stack>
                   )}

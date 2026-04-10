@@ -26,6 +26,8 @@ export function parseMetadata(event: NostrEvent): Metadata | null {
     case Kind.Repost:
       return parseRepost(event)
     case Kind.Media:
+    case Kind.Video:
+    case Kind.ShortVideo:
       return parseMedia(event)
     case Kind.RelayList:
       return parseRelayList(event)

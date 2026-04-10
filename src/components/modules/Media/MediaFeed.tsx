@@ -6,8 +6,9 @@ import { FeedList } from '@/components/modules/Feed/FeedList'
 import { ContentProvider } from '@/components/providers/ContentProvider'
 import { NostrContextProvider } from '@/components/providers/NostrContextProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import type { MediaFeedState } from '@/hooks/state/useMediaFeed'
-import { memo, useCallback, type ReactNode } from 'react'
+import { memo, type ReactNode } from 'react'
 import { css } from 'react-strict-dom'
 
 type Props = {
@@ -37,10 +38,9 @@ export const MediaFeed = memo(function MediaFeed(props: Props) {
               children
             )
           }
-          render={useCallback(
-            (event) => (feed.layout === 'row' ? <NostrEventFeedItem event={event} /> : <MediaCell event={event} />),
-            [feed.layout],
-          )}
+          render={(event: NostrEventDB) =>
+            feed.layout === 'row' ? <NostrEventFeedItem event={event} /> : <MediaCell event={event} />
+          }
           footer={feed.layout === 'row' ? <PostLoading rows={4} /> : <PostMediaLoading rows={3} />}
         />
       </ContentProvider>

@@ -1,10 +1,12 @@
 import { FollowEventRoot } from '@/components/modules/Follows/FollowEventRoot'
-import { Kind } from '@/constants/kinds'
+import { ListEventRoot } from '@/components/modules/Lists/ListEventRoot'
+import { Kind, isListKind } from '@/constants/kinds'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { memo } from 'react'
 import { PostRoot } from '../Posts/Post'
 import { PublicMessageRoot } from '../PublicMessage/PublicMessageRoot'
 import { RepostRoot } from '../Repost/Repost'
+import { ThreadRelated } from '../Threads/ThreadRelated'
 import { Threads } from '../Threads/Threads'
 import { UserRoot } from '../User/UserRoot'
 import { ZapReceiptRoot } from '../Zaps/ZapReceipt'
@@ -27,7 +29,10 @@ export const NostrEventRoot = memo(function NostrEventRoot(props: Props) {
       return event.metadata?.isRoot ? (
         <PostRoot event={event} open={open} />
       ) : (
-        <Threads event={event} renderRepliesSummary={false} />
+        <>
+          <Threads event={event} renderReplies renderRepliesSummary={false} />
+          <ThreadRelated event={event} />
+        </>
       )
     }
     case Kind.Follows: {
@@ -41,13 +46,18 @@ export const NostrEventRoot = memo(function NostrEventRoot(props: Props) {
     case Kind.Repost: {
       return <RepostRoot event={event} />
     }
-    case Kind.Media: {
+    case Kind.Media:
+    case Kind.Video:
+    case Kind.ShortVideo: {
       return <PostRoot open={open} event={event} />
     }
     case Kind.ZapReceipt: {
       return <ZapReceiptRoot event={event} />
     }
     default: {
+      if (isListKind(event.kind)) {
+        return <ListEventRoot event={event} />
+      }
       console.log('Unhandled item to render', event)
       return <NostrEventUnsupportedContent event={event} />
     }

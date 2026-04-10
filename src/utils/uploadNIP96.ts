@@ -9,6 +9,7 @@ export interface NIP96Options {
   serverUrl: string
   expiration?: number
   sign?: (event: EventTemplate) => Promise<NostrEvent> | NostrEvent
+  onProgress?: (progress: number) => void
 }
 
 export async function uploadNIP96(options: NIP96Options): Promise<UploadTask> {
@@ -21,7 +22,7 @@ export async function uploadNIP96(options: NIP96Options): Promise<UploadTask> {
     alt: options.alt || '',
     expiration: options.expiration?.toString() || '',
     content_type: options.file.type,
-  })
+  }, options.onProgress)
   const url = res.nip94_event?.tags.find((x) => x[0] === 'url')?.[1] || ''
   const sha256 = res.nip94_event?.tags.find((x) => x[0] === 'x')?.[1] || ''
   return {

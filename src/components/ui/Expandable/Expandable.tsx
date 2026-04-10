@@ -84,6 +84,7 @@ const styles = css.create({
     gridTemplateRows: '1fr',
   },
   contentInner: {
+    overflow: 'hidden',
     minHeight: 0,
   },
 })

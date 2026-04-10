@@ -2,7 +2,7 @@ import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { atom } from 'jotai'
 import { atomWithReset } from 'jotai/utils'
 
-export type DialogListForm = NostrEventDB | number | false
+export type DialogListForm = NostrEventDB | number | { kind?: number } | false
 export type DialogImage = { eventId?: string; src: string } | false
 export type DialogStats = string | false
 

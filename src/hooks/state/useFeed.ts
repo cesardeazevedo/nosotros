@@ -1,30 +1,29 @@
 import type { FeedAtoms } from '@/atoms/modules.atoms'
-import { createFeedAtoms } from '@/atoms/modules.atoms'
+import { createFeedAtoms } from '@/atoms/feed.atoms'
 import { Kind } from '@/constants/kinds'
+import { dedupe } from '@/core/helpers/dedupe'
 import type { NostrFilter } from '@/core/types'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import type { NostrContext } from '@/nostr/context'
-import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { useObservable, useObservableCallback, useSubscription } from 'observable-hooks'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { EMPTY, filter as rxFilter, Subject, switchMap, tap, throttleTime } from 'rxjs'
+import type { Modules } from '../modules/module'
 import { queryKeys } from '../query/queryKeys'
 import { prependEventFeed, setEventData } from '../query/queryUtils'
 import type { FeedScope } from '../query/useQueryFeeds'
-import { createFeedQueryOptions, type FeedModule, type InfiniteEvents } from '../query/useQueryFeeds'
+import { type FeedModule, type InfiniteEvents } from '../query/useQueryFeeds'
 import { subscribeLive } from '../subscriptions/subscribeLive'
 
 export const feedRefresh$ = new Subject<string>()
 
 export type FeedState = ReturnType<typeof useFeedState>
 
-type Extras = {
-  select?: (data: InfiniteEvents) => InfiniteEvents
-}
-
-export function useFeedStateAtom(feedAtoms: FeedAtoms, extras?: Extras) {
-  const { options } = feedAtoms
+export function useFeedStateAtom(feedAtoms: FeedAtoms) {
+  const baseOptions = feedAtoms.options
+  const sessionOptions = useAtomValue(feedAtoms.atom)
 
   const [filter, setFilter] = useAtom(feedAtoms.filter)
   const [autoUpdate, setAutoUpdate] = useAtom(feedAtoms.autoUpdate)
@@ -32,7 +31,7 @@ export function useFeedStateAtom(feedAtoms: FeedAtoms, extras?: Extras) {
   const [replies, setReplies] = useAtom(feedAtoms.includeReplies)
   const [buffer = [], setBuffer] = useAtom(feedAtoms.buffer)
   const [bufferReplies = [], setBufferReplies] = useAtom(feedAtoms.bufferReplies)
-  const [pageSize = 20, setPageSize] = useAtom(feedAtoms.pageSize)
+  const [pageSize = 10, setPageSize] = useAtom(feedAtoms.pageSize)
 
   const isDirty = useAtomValue(feedAtoms.isDirty)
   const isModified = useAtomValue(feedAtoms.isModified)
@@ -40,11 +39,12 @@ export function useFeedStateAtom(feedAtoms: FeedAtoms, extras?: Extras) {
   const resetFeed = useSetAtom(feedAtoms.reset)
 
   const syncOptions = useSetAtom(feedAtoms.sync)
+  const setOptions = useSetAtom(feedAtoms.atom)
 
   // sync changes from options, these changes comes from url router
   useEffect(() => {
-    syncOptions(options)
-  }, [options.filter, options.includeReplies, syncOptions])
+    syncOptions(baseOptions)
+  }, [baseOptions.filter, baseOptions.includeReplies, syncOptions])
 
   const onStream = useCallback(
     (event: NostrEventDB) => {
@@ -64,13 +64,13 @@ export function useFeedStateAtom(feedAtoms: FeedAtoms, extras?: Extras) {
     (input$) =>
       input$.pipe(
         switchMap(([ctx, scope, filter]) => {
-          if (options.live !== false) {
+          if (sessionOptions.live !== false) {
             return subscribeLive(ctx, scope, filter)
           }
           return EMPTY
         }),
       ),
-    [options.ctx, options.scope, filter],
+    [sessionOptions.ctx, sessionOptions.scope, filter],
   )
   useSubscription(live$, {
     next: (event) => {
@@ -83,42 +83,9 @@ export function useFeedStateAtom(feedAtoms: FeedAtoms, extras?: Extras) {
   })
 
   const queryClient = useQueryClient()
-  const queryKey = queryKeys.feed(options.id, filter, options.ctx)
-  const query = useInfiniteQuery(
-    createFeedQueryOptions({
-      select: useCallback(
-        (data: InfiniteEvents) => {
-          return {
-            pages: [
-              data.pages.flat().filter((event) => {
-                switch (event.kind) {
-                  case Kind.Text: {
-                    if (replies !== undefined) {
-                      return replies ? !event.metadata?.isRoot : !!event.metadata?.isRoot
-                    }
-                    return true
-                  }
-                  case Kind.Repost: {
-                    return !replies
-                  }
-                  default: {
-                    return !replies
-                  }
-                }
-              }),
-            ],
-            pageParams: data.pageParams,
-          }
-        },
-        [replies],
-      ),
-      ...options,
-      ...extras,
-      filter,
-      queryKey,
-      onStream,
-    }),
-  )
+  const queryKey = queryKeys.feed(sessionOptions.id, filter, sessionOptions.ctx)
+  const query = useAtomValue(feedAtoms.query)
+  const data = useAtomValue(feedAtoms.data)
 
   const [isEmpty, setIsEmpty] = useState(false)
 
@@ -152,10 +119,21 @@ export function useFeedStateAtom(feedAtoms: FeedAtoms, extras?: Extras) {
     flush()
   }, [replies, autoUpdate])
 
+  const distinctTopPubkeys = (events: NostrEventDB[], ktop: number) => {
+    const pubkeys = new Set<string>()
+    for (const event of events) {
+      if (pubkeys.size >= ktop) break
+      if (!pubkeys.has(event.pubkey)) {
+        pubkeys.add(event.pubkey)
+      }
+    }
+    return Array.from(pubkeys)
+  }
+
   const bufferTotal = useMemo(() => buffer.length, [buffer])
   const bufferTotalReplies = useMemo(() => bufferReplies.length, [bufferReplies])
-  const bufferPubkeys = useMemo(() => buffer.slice(0, 3).map((event) => event.pubkey), [buffer])
-  const bufferPubkeysReplies = useMemo(() => bufferReplies.slice(0, 3).map((event) => event.pubkey), [bufferReplies])
+  const bufferPubkeys = useMemo(() => distinctTopPubkeys(buffer, 3), [buffer])
+  const bufferPubkeysReplies = useMemo(() => distinctTopPubkeys(bufferReplies, 3), [bufferReplies])
 
   const resetBuffers = useCallback(() => {
     if (replies === true) {
@@ -193,7 +171,7 @@ export function useFeedStateAtom(feedAtoms: FeedAtoms, extras?: Extras) {
       tap(([pageSize, data]) => {
         const total = data?.pages.flat().length || 0
         if (pageSize < total) {
-          setPageSize(pageSize + (options.pageSize || 10))
+          setPageSize(pageSize + (sessionOptions.pageSize || 10))
         }
       }),
       rxFilter(([pageSize, data, scope]) => {
@@ -208,7 +186,7 @@ export function useFeedStateAtom(feedAtoms: FeedAtoms, extras?: Extras) {
 
   const refresh$ = useObservable(() =>
     feedRefresh$.pipe(
-      rxFilter((x) => options.id.startsWith(x)),
+      rxFilter((x) => sessionOptions.id.startsWith(x)),
       tap(() => onRefresh()),
     ),
   )
@@ -217,12 +195,13 @@ export function useFeedStateAtom(feedAtoms: FeedAtoms, extras?: Extras) {
   return {
     atoms: feedAtoms,
     query,
+    data,
     queryKey,
-    options,
+    options: sessionOptions,
     filter,
     isDirty,
     isModified,
-    type: options.type,
+    type: sessionOptions.type,
     setFilter,
     replies,
     setReplies,
@@ -246,13 +225,35 @@ export function useFeedStateAtom(feedAtoms: FeedAtoms, extras?: Extras) {
     isEmpty,
     setIsEmpty,
     onStream,
-    paginate: () => paginate([pageSize, query.data, options.scope]),
-    addRelay: () => {},
-    removeRelay: () => {},
+    paginate: () => paginate([pageSize, query.data, sessionOptions.scope]),
+    addRelay: (relay: string) => {
+      setOptions((prev: Modules) => {
+        const relays = dedupe([...(prev.ctx?.relays || []), relay])
+        return {
+          ...prev,
+          ctx: {
+            ...prev.ctx,
+            relays,
+          },
+        }
+      })
+    },
+    removeRelay: (relay: string) => {
+      setOptions((prev: Modules) => {
+        const relays = (prev.ctx?.relays || []).filter((url: string) => url !== relay)
+        return {
+          ...prev,
+          ctx: {
+            ...prev.ctx,
+            relays,
+          },
+        }
+      })
+    },
   }
 }
 
-export function useFeedState(module: FeedModule, extras?: Extras) {
+export function useFeedState(module: FeedModule) {
   const feedAtoms = useMemo(() => createFeedAtoms(module), [module])
-  return useFeedStateAtom(feedAtoms, extras)
+  return useFeedStateAtom(feedAtoms)
 }

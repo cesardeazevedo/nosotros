@@ -1,7 +1,6 @@
 import { mergeRelayHints } from '@/core/mergers/mergeRelayHints'
 import type { NostrEvent, RelayHints } from '@/core/types'
-import { welshmanToProseMirror } from '@/utils/welshmanToProsemirror'
-import { parse } from '@welshman/content'
+import { parse } from '@/utils/contentParser'
 import type { Metadata } from '../../nostr/types'
 import { getMentionedAuthors } from './getMentionedAuthors'
 import { getMentionedNotes } from './getMentionedNotes'
@@ -10,8 +9,7 @@ import { parseRelayHintsFromNIP19 } from './parseRelayHints'
 
 export function parseContent(event: NostrEvent): Metadata {
   const imeta = parseImeta(event.tags)
-  const parsed = parse({ content: event.content, tags: event.tags })
-  const { contentSchema, nprofiles, nevents, naddresses } = welshmanToProseMirror(parsed)
+  const { contentSchema, nprofiles, nevents, naddresses } = parse({ content: event.content, tags: event.tags })
 
   const relayHints = parseRelayHintsFromNIP19(nevents, nprofiles, naddresses)
   const mentionedNotes = getMentionedNotes(event.tags, nevents, naddresses)

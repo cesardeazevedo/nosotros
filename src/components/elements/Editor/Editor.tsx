@@ -100,7 +100,7 @@ export const Editor = memo(function Editor(props: Props) {
                     </Stack>
                   )}
                 </Stack>
-                {state.open ? <EditorTiptap key='editor' dense={dense} /> : <EditorPlaceholder />}
+                {state.open ? <EditorTiptap key='editor' dense={dense} /> : <EditorPlaceholder placeholder={state.placeholder} />}
               </Stack>
             </Stack>
             {state.open && (

@@ -4,7 +4,6 @@ import type { SxProps } from '@/components/ui/types'
 import { useCopyClipboard } from '@/hooks/useCopyClipboard'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconCheck, IconCopy } from '@tabler/icons-react'
-import { AnimatePresence, motion, MotionConfig } from 'framer-motion'
 import type { Ref } from 'react'
 import { useImperativeHandle } from 'react'
 import { css, html } from 'react-strict-dom'
@@ -21,11 +20,6 @@ type CopyButtonRef = {
   copy: () => void
 }
 
-const variants = {
-  visible: { opacity: 1, scale: 1 },
-  hidden: { opacity: 0, scale: 0.8 },
-}
-
 export const CopyButton = (props: Props) => {
   const { ref, text, title = 'Copy text', ...rest } = props
   const { copy, copied } = useCopyClipboard(text)
@@ -35,25 +29,17 @@ export const CopyButton = (props: Props) => {
   return (
     <html.div style={props.sx}>
       <Button variant='filledTonal' sx={styles.button} onClick={copy} {...rest}>
-        <MotionConfig transition={{ duration: 0.08 }}>
-          <AnimatePresence initial={false} mode='wait'>
-            {copied ? (
-              <motion.div animate='visible' exit='hidden' initial='hidden' key='check' variants={variants}>
-                <Stack gap={1} justify='center' sx={styles.copied}>
-                  <IconCheck size={20} strokeWidth='2' />
-                  Copied
-                </Stack>
-              </motion.div>
-            ) : (
-              <motion.div animate='visible' exit='hidden' initial='hidden' key='copy' variants={variants}>
-                <Stack gap={1} justify='center'>
-                  <IconCopy size={20} strokeWidth='1.9' />
-                  {title}
-                </Stack>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </MotionConfig>
+        {copied ? (
+          <Stack gap={1} justify='center' sx={styles.copied}>
+            <IconCheck size={20} strokeWidth='2' />
+            Copied
+          </Stack>
+        ) : (
+          <Stack gap={1} justify='center'>
+            <IconCopy size={20} strokeWidth='1.9' />
+            {title}
+          </Stack>
+        )}
       </Button>
     </html.div>
   )

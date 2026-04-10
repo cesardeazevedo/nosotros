@@ -6,15 +6,53 @@ import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import type { CodeBlockNode } from 'nostr-editor'
-import { useRef } from 'react'
-import ShikiHighlighter from 'react-shiki'
+import { memo, useEffect, useMemo, useRef, useState } from 'react'
 import { css, html } from 'react-strict-dom'
 import { CopyIconButton } from '../../Buttons/CopyIconButton'
+import { getShikiHighlighter, normalizeCodeLanguage, type HighlighterTheme } from '@/utils/shikiHighlighter'
 
 type Props = {
   sx?: SxProps
   node: CodeBlockNode
 }
+
+const ShikiHighlighter = memo(function ShikiHighlighter(props: { code: string; language?: string; theme: HighlighterTheme }) {
+  const [content, setContent] = useState<string | null>(null)
+  const normalizedLanguage = useMemo(() => normalizeCodeLanguage(props.language), [props.language])
+
+  useEffect(() => {
+    let active = true
+
+    const run = async () => {
+      const highlighter = await getShikiHighlighter()
+      const html = highlighter.codeToHtml(props.code, {
+        lang: normalizedLanguage,
+        theme: props.theme,
+      })
+      if (active) {
+        setContent(html)
+      }
+    }
+
+    run().catch(() => {
+      if (active) setContent(null)
+    })
+
+    return () => {
+      active = false
+    }
+  }, [props.code, props.theme, normalizedLanguage])
+
+  if (!content) {
+    return (
+      <html.pre style={styles.preFallback}>
+        <html.code>{props.code}</html.code>
+      </html.pre>
+    )
+  }
+
+  return <div className={css.props(styles.pre).className} dangerouslySetInnerHTML={{ __html: content }} />
+})
 
 export const CodeBlock = (props: Props) => {
   const { dense } = useContentContext()
@@ -32,14 +70,7 @@ export const CodeBlock = (props: Props) => {
           <div>{language}</div>
           <CopyIconButton text={refPre.current?.innerText} title='Copy code' />
         </Stack>
-        <ShikiHighlighter
-          language={language}
-          showLanguage={false}
-          addDefaultStyles={false}
-          className={css.props(styles.pre).className}
-          theme={isDark ? 'github-dark-high-contrast' : 'github-light-default'}>
-          {code}
-        </ShikiHighlighter>
+        <ShikiHighlighter language={language} code={code} theme={isDark ? 'github-dark-high-contrast' : 'github-light-default'} />
       </html.div>
     </html.div>
   )
@@ -65,6 +96,16 @@ const styles = css.create({
   pre: {
     wordBreak: 'break-all',
     whiteSpace: 'normal',
+  },
+  preFallback: {
+    margin: 0,
+    marginTop: 36,
+    padding: spacing.padding2,
+    overflowX: 'auto',
+    fontFamily: 'monospace',
+    fontSize: '0.85rem',
+    whiteSpace: 'pre-wrap',
+    wordBreak: 'break-word',
   },
   header: {
     zIndex: 1,

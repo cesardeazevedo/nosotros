@@ -3,10 +3,12 @@ import type { Database } from '@sqlite.org/sqlite-wasm'
 import { type NostrEvent } from 'nostr-tools'
 import { fakeEventMeta } from 'utils/faker'
 import { initializeSQLite } from '../../sqlite.schemas'
+import { SqliteEventSearch } from '../sqlite.events.fts'
 import { SqliteEventStore } from '../sqlite.events'
 
 let db: Database
 let store: SqliteEventStore
+let search: SqliteEventSearch
 
 function selectEvents(): NostrEvent[] {
   return db.selectObjects(`SELECT * FROM events`) as unknown as NostrEvent[]
@@ -25,6 +27,7 @@ describe('SqliteEventStore.insertEvent', () => {
     db = (await initializeSQLite('test.sqlite3', false)).db
     db.exec('PRAGMA foreign_keys = ON;')
     store = new SqliteEventStore(Promise.resolve(db))
+    search = new SqliteEventSearch(Promise.resolve(db))
   })
 
   beforeEach(() => {
@@ -118,6 +121,109 @@ describe('SqliteEventStore.insertEvent', () => {
     const tags = selectTags()
     expect(tags.length).toBe(2)
   })
+
+  test('assert expired event', () => {
+    const expired = fakeEventMeta({
+      id: 'expired1',
+      kind: Kind.Text,
+      created_at: 100,
+      tags: [['expiration', '50']],
+    })
+
+    store.insertEvent(db, expired)
+
+    const events = selectEvents()
+    const tags = selectTags()
+
+    expect(events).toHaveLength(0)
+    expect(tags).toHaveLength(0)
+  })
+
+  test('assert nip-09 deletes only referenced events from same pubkey and keeps delete event', () => {
+    const mine = fakeEventMeta({
+      id: 'note_mine_1',
+      kind: Kind.Text,
+      pubkey: 'author_a',
+      created_at: 100,
+      tags: [],
+    })
+    const other = fakeEventMeta({
+      id: 'note_other_1',
+      kind: Kind.Text,
+      pubkey: 'author_b',
+      created_at: 101,
+      tags: [],
+    })
+    const deletion = fakeEventMeta({
+      id: 'delete_1',
+      kind: 5,
+      pubkey: 'author_a',
+      created_at: 102,
+      tags: [
+        ['e', 'note_mine_1'],
+        ['e', 'note_other_1'],
+        ['k', String(Kind.Text)],
+      ],
+      content: 'cleanup',
+    })
+
+    store.insertEvent(db, mine)
+    store.insertEvent(db, other)
+    store.insertEvent(db, deletion)
+
+    const ids = selectEvents().map((e) => e.id)
+
+    expect(ids).toContain('delete_1')
+    expect(ids).toContain('note_other_1')
+    expect(ids).not.toContain('note_mine_1')
+  })
+
+  test('assert nip-09 a-tag deletes addressable versions and blocks older rebroadcast', () => {
+    const v1 = fakeEventMeta({
+      id: 'article_v1',
+      kind: Kind.Article,
+      pubkey: 'author_a',
+      created_at: 100,
+      tags: [['d', 'slug-1']],
+    })
+    const v2 = fakeEventMeta({
+      id: 'article_v2',
+      kind: Kind.Article,
+      pubkey: 'author_a',
+      created_at: 120,
+      tags: [['d', 'slug-1']],
+    })
+    const deletion = fakeEventMeta({
+      id: 'delete_article',
+      kind: Kind.EventDeletion,
+      pubkey: 'author_a',
+      created_at: 130,
+      tags: [
+        ['a', `${Kind.Article}:author_a:slug-1`],
+        ['k', String(Kind.Article)],
+      ],
+    })
+    const rebroadcastOld = fakeEventMeta({
+      id: 'article_old_rebroadcast',
+      kind: Kind.Article,
+      pubkey: 'author_a',
+      created_at: 110,
+      tags: [['d', 'slug-1']],
+    })
+
+    store.insertEvent(db, v1)
+    store.insertEvent(db, v2)
+    store.insertEvent(db, deletion)
+
+    let ids = selectEvents().map((e) => e.id)
+    expect(ids).toContain('delete_article')
+    expect(ids).not.toContain('article_v1')
+    expect(ids).not.toContain('article_v2')
+
+    store.insertEvent(db, rebroadcastOld)
+    ids = selectEvents().map((e) => e.id)
+    expect(ids).not.toContain('article_old_rebroadcast')
+  })
 })
 
 describe('SqliteEventStore.query', () => {
@@ -199,6 +305,51 @@ describe('SqliteEventStore.query', () => {
 
     expect(results.map((e) => e.id)).toStrictEqual(['2', '4'])
   })
+
+  test('assert empty ids filter returns no events', () => {
+    const e1 = fakeEventMeta({ id: '1', kind: Kind.Text, pubkey: 'p1', created_at: 100 })
+    const e2 = fakeEventMeta({ id: '2', kind: Kind.Text, pubkey: 'p1', created_at: 200 })
+
+    store.insertEvent(db, e1)
+    store.insertEvent(db, e2)
+
+    const results = store.query(db, { ids: [] })
+
+    expect(results).toStrictEqual([])
+  })
+
+  test('assert empty authors filter returns no events', () => {
+    const e1 = fakeEventMeta({ id: '1', kind: Kind.Text, pubkey: 'p1', created_at: 100 })
+    const e2 = fakeEventMeta({ id: '2', kind: Kind.Text, pubkey: 'p2', created_at: 200 })
+
+    store.insertEvent(db, e1)
+    store.insertEvent(db, e2)
+
+    const results = store.query(db, { authors: [] })
+
+    expect(results).toStrictEqual([])
+  })
+
+  test('assert search filter returns fts results', () => {
+    const e1 = fakeEventMeta({ id: '1', kind: Kind.Text, pubkey: 'p1', created_at: 100, content: 'garden update' })
+    const e2 = fakeEventMeta({
+      id: '2',
+      kind: Kind.Article,
+      pubkey: 'p2',
+      created_at: 200,
+      content: 'garden update',
+      tags: [['d', 'article-2']],
+    })
+
+    store.insertEvent(db, e1)
+    store.insertEvent(db, e2)
+    search.indexEvent(db, e1)
+    search.indexEvent(db, e2)
+
+    const results = store.query(db, { search: 'garden', kinds: [Kind.Text, Kind.Article], limit: 10 })
+
+    expect(results.map((event) => event.id)).toStrictEqual(['2', '1'])
+  })
 })
 
 describe('SqliteEventStore.queryNeg', () => {
@@ -247,7 +398,7 @@ describe('SqliteEventStore.queryNeg', () => {
     store.insertEvent(db, e2)
     store.insertEvent(db, e3)
 
-    const results = store.queryNeg(db, { kinds: [Kind.Text] })
+    const results = store.queryNeg(db, { kinds: [Kind.Text], authors: ['p1'] })
 
     expect(results.map((e) => e.id)).toStrictEqual(['3', '1'])
   })

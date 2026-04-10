@@ -3,12 +3,14 @@ import { NostrSubscription } from 'core/NostrSubscription'
 import type { Relay } from 'core/Relay'
 import type { MessageReceived } from 'core/types'
 import { ClientToRelay, RelayToClient } from 'core/types'
-import { catchError, EMPTY, mergeAll, mergeMap, of, pipe, reduce, takeWhile, tap, timeout } from 'rxjs'
+import { catchError, EMPTY, filter, mergeAll, mergeMap, of, pipe, reduce, takeWhile, tap, timeout } from 'rxjs'
+import { isFilterValid } from '../helpers/isFilterValid'
 import { getNegentropy } from './getNegentropy'
 import { subscribe } from './subscribe'
 
 export function subscribeNeg(relay: Relay) {
   return pipe(
+    filter((sub: NostrSubscription) => isFilterValid(sub.filter)),
     mergeMap(async (sub: NostrSubscription) => {
       const events = await dbSqlite.queryNeg({
         ...sub.filter,

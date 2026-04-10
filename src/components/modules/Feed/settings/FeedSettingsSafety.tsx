@@ -29,6 +29,7 @@ export const FeedSettingsSafety = memo(function FeedSettingsSafety(props: Props)
           selected={feed.blured}
           variant='filter'
           icon={<IconBlur {...iconProps} />}
+          selectedIcon={null}
           label='Blur Images'
           onClick={() => feed.setBlured((prev) => !prev)}
         />

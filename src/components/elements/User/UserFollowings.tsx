@@ -13,7 +13,7 @@ type Props = {
 
 export const UserFollowings = (props: Props) => {
   const { pubkey } = props
-  const user = useUserState(pubkey, { syncFollows: true })
+  const user = useUserState(pubkey, { fullUserSync: true })
   const nevent = useNevent(user.follows?.data)
   if (user.follows?.isPending) {
     return <Skeleton sx={styles.loading} />

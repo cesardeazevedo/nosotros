@@ -43,7 +43,7 @@ export const ReplyDialog = memo(function ReplyDialog() {
   const user = useUserState(event.data?.pubkey || '')
 
   const handleClose = useCallback(() => {
-    navigate({ to: '.', search: ({ replying, ...rest }) => rest })
+    navigate({ to: '.', search: ({ replying, n, ...rest }) => rest })
   }, [])
 
   return (

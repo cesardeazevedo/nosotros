@@ -36,7 +36,7 @@ const styles = css.create({
   root: {
     width: '100%',
     alignItems: 'flex-end',
-    paddingTop: spacing.padding1,
+    padding: spacing['padding0.5'],
   },
   root$dense: {
     paddingInline: 0,

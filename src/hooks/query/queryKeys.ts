@@ -10,6 +10,7 @@ export const queryKeys = {
   event: (eventId: string) => ['event', eventId],
   replaceable: (kind: number, pubkey: string) => ['event', 'replaceable', pubkey, kind],
   addressable: (kind: number, pubkey: string, identifier: string) => ['event', 'addressable', pubkey, kind, identifier],
+  author: (pubkey: string, kind: number) => ['events', 'author', pubkey, kind],
   tag: (tag: string, values: string[], kind: number) => ['events', tag, values, kind],
 
   nip05: (pubkey: string) => ['nip05', pubkey],
@@ -19,7 +20,7 @@ export const queryKeys = {
   allRelayStats: () => ['relayStats'],
 
   feed: (name: string, filter: NostrFilter, ctx?: NostrContext) => {
-    return ['feed', name, filter.kinds, filter.search, ctx?.relays].filter(Boolean)
+    return ['feed', name, filter.kinds, filter.search, filter['#t'], ctx?.relays].filter(Boolean)
   },
 
   seen: (eventId: string) => ['seen', eventId],

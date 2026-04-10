@@ -1,13 +1,15 @@
+import { compressImage, compressVideo, type ImageQuality } from '@/utils/compression'
 import { uploadBlossom } from '@/utils/uploadBlossom'
 import { uploadNIP96 } from '@/utils/uploadNIP96'
 import { hashFile } from '@/utils/utils'
 import { atom } from 'jotai'
 import { type ImageAttributes, type VideoAttributes } from 'nostr-editor'
 import type { EventTemplate, NostrEvent } from 'nostr-tools'
-import { from, lastValueFrom, map, mergeMap, tap, toArray } from 'rxjs'
+import { defer, from, lastValueFrom, map, mergeMap, of, tap, throwError, toArray } from 'rxjs'
 import invariant from 'tiny-invariant'
 import { signerAtom } from './auth.atoms'
-import { settingsAtom } from './settings.atoms'
+import { clearCompressionStateAtom, setCompressionStateAtom } from './compression.atoms'
+import { settingsAtom, type Settings } from './settings.atoms'
 
 const allowedMimeTypes = [
   'image/jpeg',
@@ -20,11 +22,84 @@ const allowedMimeTypes = [
 ] as const
 
 export type UploadFile = ImageAttributes | VideoAttributes
+export type UploadConfig = {
+  quality: ImageQuality
+  includeAudio: boolean
+  uploadType: 'blossom' | 'nip96'
+  uploadUrl: string
+}
+export type UploadEditorFile = UploadFile & {
+  id?: string
+  pos?: number
+  batchId?: string
+}
 
-export const filesAtom = atom<UploadFile[]>([])
+export const filesAtom = atom<UploadEditorFile[]>([])
+export const uploadConfigByBatchAtom = atom<Record<string, UploadConfig>>({})
+export const uploadConfigByFileAtom = atom<Record<string, UploadConfig>>({})
+export const uploadDialogConfigAtom = atom<UploadConfig>({
+  quality: 'high',
+  includeAudio: true,
+  uploadType: 'nip96',
+  uploadUrl: '',
+})
 
-export const resetFileUploadAtom = atom(null, (_, set) => {
+export const getUploadFileKey = (file: File) => `${file.name}:${file.size}:${file.lastModified}:${file.type}`
+
+const createDefaultUploadConfig = (settings: Settings) =>
+  ({
+    quality: 'high',
+    includeAudio: true,
+    uploadType: settings.defaultUploadType,
+    uploadUrl: settings.defaultUploadUrl,
+  }) satisfies UploadConfig
+
+export const resetFileUploadAtom = atom(null, (get, set) => {
+  const files = get(filesAtom)
+  files.forEach((file) => {
+    set(clearCompressionStateAtom, file.src)
+  })
   set(filesAtom, [])
+  set(uploadConfigByBatchAtom, {})
+  set(uploadConfigByFileAtom, {})
+})
+
+export const resetUploadDialogConfigAtom = atom(null, (get, set) => {
+  const settings = get(settingsAtom)
+  set(uploadDialogConfigAtom, createDefaultUploadConfig(settings))
+})
+
+export const setUploadDialogConfigAtom = atom(null, (get, set, config: Partial<UploadConfig>) => {
+  const current = get(uploadDialogConfigAtom)
+  set(uploadDialogConfigAtom, { ...current, ...config })
+})
+
+export const applyUploadConfigToFilesAtom = atom(null, (get, set) => {
+  const files = get(filesAtom)
+  const config = get(uploadDialogConfigAtom)
+  const configByBatch = get(uploadConfigByBatchAtom)
+  const configByFile = get(uploadConfigByFileAtom)
+  const nextByBatch = { ...configByBatch }
+  const nextByFile = { ...configByFile }
+
+  files.forEach((file) => {
+    if (file.batchId) {
+      nextByBatch[file.batchId] = config
+    }
+    nextByFile[getUploadFileKey(file.file)] = config
+  })
+
+  set(uploadConfigByBatchAtom, nextByBatch)
+  set(uploadConfigByFileAtom, nextByFile)
+})
+
+export const removeUploadConfigByFileAtom = atom(null, (get, set, file: File) => {
+  const configByFile = get(uploadConfigByFileAtom)
+  const key = getUploadFileKey(file)
+  if (!configByFile[key]) return
+  const next = { ...configByFile }
+  delete next[key]
+  set(uploadConfigByFileAtom, next)
 })
 
 export const resetIsUploadingAtom = atom(null, (get, set) => {
@@ -53,6 +128,32 @@ export const setFileDataAtom = atom(null, (get, set, args: { src: string; attrs:
   )
 })
 
+export const addFileUploadAtom = atom(
+  null,
+  (get, set, args: { file: File; src: string; pos?: number }) => {
+    const files = get(filesAtom)
+    const batchId = crypto.randomUUID()
+    if (files.some((item) => item.src === args.src)) {
+      return
+    }
+    set(filesAtom, [
+      ...files,
+      {
+        id: crypto.randomUUID(),
+        file: args.file,
+        src: args.src,
+        alt: '',
+        tags: [],
+        sha256: '',
+        uploading: false,
+        error: '',
+        pos: args.pos,
+        batchId,
+      } as UploadEditorFile,
+    ])
+  },
+)
+
 export const selectFilesForUploadAtom = atom(
   null,
   (
@@ -72,6 +173,7 @@ export const selectFilesForUploadAtom = atom(
     input.onchange = (event) => {
       const files = (event.target as HTMLInputElement).files
       if (files) {
+        const batchId = crypto.randomUUID()
         const newFiles = Array.from(files)
           .filter((file) => {
             if (!allowedMimeTypes.includes(file.type as (typeof allowedMimeTypes)[number])) {
@@ -88,6 +190,7 @@ export const selectFilesForUploadAtom = atom(
               sha256: '',
               uploading: false,
               error: '',
+              batchId,
             } as UploadFile
           })
         const current = get(filesAtom)
@@ -104,26 +207,92 @@ export const selectFilesForUploadAtom = atom(
 
 export const uploadFilesAtom = atom(null, async (get, set) => {
   const files = get(filesAtom)
+  const pendingFiles = files.filter((file) => !file.sha256)
   const signer = get(signerAtom)
   const settings = get(settingsAtom)
   invariant(signer, 'No signer found')
-  if (files.filter((f) => !!f.sha256).length === files.length) {
+  if (pendingFiles.length === 0) {
     return Promise.resolve(files.flatMap((x) => x.tags))
   }
   return await lastValueFrom(
-    from(files).pipe(
+    from(pendingFiles).pipe(
       mergeMap((file) => {
-        const data = {
-          file: file.file,
-          hash: hashFile,
-          serverUrl: settings.defaultUploadUrl,
-          expiration: 10 * 365 * 24 * 3600, // 10 years, this should be optional on blossom
-          sign: signer.sign as (event: EventTemplate) => Promise<NostrEvent>,
+        const run = async () => {
+          const fileConfig = get(uploadConfigByFileAtom)[getUploadFileKey(file.file)] || createDefaultUploadConfig(settings)
+          const isVideo = file.file.type.startsWith('video/')
+          let phase: 'compressing' | 'uploading' = 'compressing'
+          const qualityLabel =
+            fileConfig.quality === 'uncompressed'
+              ? 'Uncompressed'
+              : fileConfig.quality === 'low'
+                ? 'Low Quality'
+                : fileConfig.quality === 'medium'
+                  ? 'Medium Quality'
+                  : 'High Quality'
+          const setCompression = (progress: number) => {
+            if (phase !== 'compressing') return
+            set(setCompressionStateAtom, {
+              src: file.src,
+              state: { progress, label: `Compressing to ${qualityLabel}` },
+            })
+          }
+          const clearCompression = () => {
+            set(clearCompressionStateAtom, file.src)
+          }
+          const setUploadProgress = (progress: number) => {
+            set(setCompressionStateAtom, {
+              src: file.src,
+              state: {
+                progress: Math.min(100, Math.max(0, progress)),
+                label: `Uploading ${Math.round(progress)}%`,
+              },
+            })
+          }
+
+          set(setFileDataAtom, { src: file.src, attrs: { uploading: true, error: '' } })
+          try {
+            const compressedFile = isVideo
+              ? await compressVideo(file.file, fileConfig.quality, fileConfig.includeAudio, setCompression)
+              : await compressImage(file.file, fileConfig.quality, setCompression)
+            phase = 'uploading'
+            setUploadProgress(0)
+            const data = {
+              file: compressedFile,
+              hash: hashFile,
+              serverUrl: fileConfig.uploadUrl || settings.defaultUploadUrl,
+              expiration: 10 * 365 * 24 * 3600, // 10 years, this should be optional on blossom
+              sign: signer.sign as (event: EventTemplate) => Promise<NostrEvent>,
+              onProgress: setUploadProgress,
+            }
+            const uploadRequest = () =>
+              fileConfig.uploadType === 'blossom' ? uploadBlossom(data) : uploadNIP96(data)
+
+            const response = await lastValueFrom(
+              defer(uploadRequest).pipe(
+                mergeMap((result) => {
+                  if (result.error) {
+                    return throwError(() => new Error(result.error))
+                  }
+                  return of(result)
+                }),
+              ),
+            )
+            return { file, response }
+          } catch (error) {
+            const message = error instanceof Error ? error.message : String(error)
+            set(setFileDataAtom, {
+              src: file.src,
+              attrs: {
+                error: message,
+                uploading: false,
+              },
+            })
+            throw error
+          } finally {
+            clearCompression()
+          }
         }
-        set(setFileDataAtom, { src: file.src, attrs: { uploading: true } })
-        return from(settings.defaultUploadType === 'blossom' ? uploadBlossom(data) : uploadNIP96(data)).pipe(
-          map((response) => ({ file, response })),
-        )
+        return from(run())
       }),
       tap(({ file, response }) => {
         if (response.result && !response.error) {
@@ -179,9 +348,9 @@ export const uploadFilesAtom = atom(null, async (get, set) => {
         const imetaQueryable =
           responses.length === 1
             ? [
-                responses[0].response.result?.tags.find((x) => x[0] === 'm') || [],
-                responses[0].response.result?.tags.find((x) => x[0] === 'x') || [],
-              ]
+              responses[0].response.result?.tags.find((x) => x[0] === 'm') || [],
+              responses[0].response.result?.tags.find((x) => x[0] === 'x') || [],
+            ]
             : []
         const tags = [
           ...imetas,

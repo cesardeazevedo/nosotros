@@ -14,7 +14,6 @@ import { SidebarCollapsed } from './SidebarCollapsed'
 import type { Panes } from './SidebarContext'
 import { SidebarContext } from './SidebarContext'
 import { SidebarTransition } from './SidebarTransition'
-import { SidebarPaneLists } from './panes/SidebarPaneLists'
 import { SidebarPaneNotifications } from './panes/SidebarPaneNotifications'
 
 type Props = {
@@ -38,9 +37,6 @@ export const SidebarLayout = memo(function SidebarLayout(props: Props) {
         <SidebarTransition open={!sidebarCollapsed}>{(sx, ref) => <Sidebar ref={ref} sx={sx} />}</SidebarTransition>
         <SidebarTransition open={sidebarCollapsed}>
           {(sx, ref) => <SidebarCollapsed ref={ref} sx={sx} />}
-        </SidebarTransition>
-        <SidebarTransition open={pane === '/lists'}>
-          {(sx, ref) => <SidebarPaneLists ref={ref} sx={sx} />}
         </SidebarTransition>
         {pubkey && (
           <SidebarTransition open={pane === '/notifications'}>

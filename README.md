@@ -69,6 +69,7 @@ pnpm run preview
 - [x] NIP-25 – Reactions
 - [x] NIP-27 – Text Note References
 - [x] NIP-36 – Sensitive Content
+- [x] NIP-37 – Draft Wraps
 - [x] NIP-42 – Authentication of clients to relays
 - [ ] NIP-47 – Nostr Wallet Connect
 - [x] NIP-50 – Search Capability

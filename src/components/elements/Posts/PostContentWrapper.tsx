@@ -48,8 +48,8 @@ export const PostContentWrapper = memo(function PostContentWrapper(props: Props)
   }, [maxHeight, expanded])
 
   return (
-    <html.div style={[styles.root, styles[size], expanded && styles.root$expanded]}>
-      <html.div ref={ref}>{props.children}</html.div>
+    <html.div ref={ref} style={[styles.root, styles[size], expanded && styles.root$expanded]}>
+      {props.children}
       {canExpand && (
         <html.div style={styles.container}>
           <html.div style={[styles.shadow, isDarkTheme && styles.shadow$dark]} />

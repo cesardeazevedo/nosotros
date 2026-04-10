@@ -43,11 +43,10 @@ export const Paper = forwardRef<HTMLDivElement, Props>(function Paper(props, ref
   const text = getContainerTextColor(surface)
   return (
     <html.div
-      style={[styles.root, surface && surfaces[surface], shapes[shape], textColors[text], props.sx]}
+      style={[styles.root, outlined && styles.root$outlined, surface && surfaces[surface], shapes[shape], textColors[text], props.sx]}
       ref={ref}
       onClick={onClick}>
       {!!elevation && <Elevation elevation={elevation} />}
-      {outlined && <html.div style={styles.outline} />}
       {children}
     </html.div>
   )
@@ -98,13 +97,9 @@ const styles = css.create({
     zIndex: 0,
     flexGrow: 1,
   },
-  outline: {
-    inset: 0,
-    pointerEvents: 'none',
+  root$outlined: {
     borderStyle: 'solid',
     borderWidth: 1,
-    position: 'absolute',
     borderColor: palette.outlineVariant,
-    borderRadius: 'inherit',
   },
 })

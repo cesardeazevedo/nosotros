@@ -38,6 +38,7 @@ const styles = css.create({
     position: 'relative',
     width: '100%',
     height: '100%',
+    // border: '1px solid red',
   },
   root$dense: {
     // this is likely rendered on replies

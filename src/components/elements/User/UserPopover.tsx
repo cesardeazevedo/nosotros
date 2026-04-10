@@ -35,8 +35,11 @@ export const UserPopover = function UserPopover(props: Props) {
       placement='bottom-start'
       cursor='dot'
       content={() => (
-        <ContentProvider value={{ disablePopover: true }}>
-          <Paper outlined shape='lg' surface='surfaceContainerLowest' sx={styles.root}>
+        <ContentProvider value={{ disableLink: true, disablePopover: true }}>
+          <Paper outlined shape='lg' surface='surfaceContainerLowest' sx={styles.root} onClick={e => {
+            e.stopPropagation()
+            e.preventDefault()
+          }}>
             <Stack justify='space-between' sx={styles.header}>
               <UserAvatar size='lg' pubkey={pubkey} />
               <Stack gap={0.5}>
@@ -70,7 +73,7 @@ const styles = css.create({
   root: {
     width: 350,
     maxHeight: 510,
-    pointerEvents: 'auto',
+    // pointerEvents: 'none',
   },
   header: {
     padding: spacing.padding1,

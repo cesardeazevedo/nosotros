@@ -1,3 +1,4 @@
+import { isDeletedEventAtomFamily } from '@/atoms/deletion.atoms'
 import { ContentProvider, useContentContext } from '@/components/providers/ContentProvider'
 import { NoteProvider } from '@/components/providers/NoteProvider'
 import { Button } from '@/components/ui/Button/Button'
@@ -8,9 +9,11 @@ import { useEventReplies } from '@/hooks/query/useReplies'
 import { useNoteState } from '@/hooks/state/useNote'
 import { useIsCurrentRouteEventID } from '@/hooks/useNavigations'
 import { useReplyTreeLayout } from '@/hooks/useReplyTreeLayout'
+import { getEventId } from '@/utils/nip19'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { useNavigate, useRouter } from '@tanstack/react-router'
+import { useAtomValue } from 'jotai'
 import { BubbleContainer } from 'components/elements/Content/Layout/Bubble'
 import { UserAvatar } from 'components/elements/User/UserAvatar'
 import { UserName } from 'components/elements/User/UserName'
@@ -39,6 +42,7 @@ export const Reply = memo(function Reply(props: Props) {
   const [open, setOpen] = useState(level < collapsedLevel)
   const { blured } = useContentContext()
   const nevent = note.nip19
+  const deleted = useAtomValue(isDeletedEventAtomFamily(getEventId(event)))
 
   const isCurrentEvent = useIsCurrentRouteEventID(event)
 
@@ -70,6 +74,10 @@ export const Reply = memo(function Reply(props: Props) {
 
   const handleSeeMore = level < collapsedLevel ? handleOpen : handleOpenNestedDialog
   const isReplyingDeferred = useDeferredValue(note.state.isReplying)
+
+  if (deleted) {
+    return null
+  }
 
   return (
     <NoteProvider value={{ event }}>

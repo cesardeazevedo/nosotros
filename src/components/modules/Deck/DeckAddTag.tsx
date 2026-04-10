@@ -1,5 +1,5 @@
+import { TagSuggestions } from '@/components/modules/Tag/TagSuggestions'
 import { Button } from '@/components/ui/Button/Button'
-import { Chip } from '@/components/ui/Chip/Chip'
 import { SearchField } from '@/components/ui/Search/Search'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { spacing } from '@/themes/spacing.stylex'
@@ -10,69 +10,6 @@ import { css } from 'react-strict-dom'
 type Props = {
   onSelect: (tag: string) => void
 }
-
-const SUGGESTIONS: string[] = [
-  'nostr',
-  'bitcoin',
-  'puravida',
-  'privacy',
-  'news',
-  'dev',
-  'art',
-  'memes',
-  'music',
-  'freedom',
-  'tech',
-  'opensource',
-  'webdev',
-  'security',
-  'education',
-  'ai',
-  'rust',
-  'typescript',
-  'golang',
-  'python',
-  'react',
-  'design',
-  'ux',
-  'startups',
-  'investing',
-  'finance',
-  'economy',
-  'science',
-  'history',
-  'philosophy',
-  'gaming',
-  'movies',
-  'books',
-  'photography',
-  'nature',
-  'fitness',
-  'health',
-  'space',
-  'astronomy',
-  'climate',
-  'travel',
-  'food',
-  'coffee',
-  'tea',
-  'wine',
-  'beer',
-  'cats',
-  'dogs',
-  'birds',
-  'sports',
-  'football',
-  'basketball',
-  'cycling',
-  'climbing',
-  'running',
-  'linux',
-  'docker',
-  'kubernetes',
-  'graphql',
-  'sql',
-]
 
 export const DeckAddTags = (props: Props) => {
   const [query, setQuery] = useState('')
@@ -85,14 +22,6 @@ export const DeckAddTags = (props: Props) => {
     }
     return null
   }, [])
-
-  const list = (() => {
-    if (query.trim().length === 0) {
-      return SUGGESTIONS.slice(0, 50)
-    }
-    const q = query.toLowerCase()
-    return SUGGESTIONS.filter((t) => t.toLowerCase().includes(q)).slice(0, 50)
-  })()
 
   return (
     <form action={submit}>
@@ -112,18 +41,7 @@ export const DeckAddTags = (props: Props) => {
             </Button>
           </Stack>
 
-          <Stack gap={0.5} wrap sx={styles.tags}>
-            {list.map((tag) => (
-              <Chip
-                key={tag}
-                variant='suggestion'
-                onClick={() => {
-                  props.onSelect(tag)
-                }}
-                label={`#${tag}`}
-              />
-            ))}
-          </Stack>
+          <TagSuggestions query={query} onSelect={(tag) => props.onSelect(tag)} limit={50} />
         </Stack>
       </Stack>
     </form>
@@ -136,8 +54,5 @@ const styles = css.create({
   },
   button: {
     height: 50,
-  },
-  tags: {
-    paddingTop: spacing.padding1,
   },
 })

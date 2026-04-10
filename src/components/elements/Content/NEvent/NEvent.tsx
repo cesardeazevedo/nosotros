@@ -1,9 +1,14 @@
+import { isDeletedEventAtomFamily } from '@/atoms/deletion.atoms'
+import { PostDeleted } from '@/components/elements/Posts/PostDeleted'
 import { ContentProvider, useContentContext } from '@/components/providers/ContentProvider'
+import { Paper } from '@/components/ui/Paper/Paper'
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { useEventFromNIP19 } from '@/hooks/query/useQueryBase'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
+import { nip19ToId } from '@/utils/nip19'
+import { useAtomValue } from 'jotai'
 import type { NEventAttributes } from 'nostr-editor'
 import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
@@ -18,12 +23,19 @@ export const NEvent = memo(function NEvent(props: Props) {
   const { pointer, event } = props
   const { dense, disableLink } = useContentContext()
   const { data } = useEventFromNIP19(pointer.bech32, event?.metadata?.relayHints)
+  const id = nip19ToId(pointer.bech32)
+  const deleted = useAtomValue(isDeletedEventAtomFamily(id))
   return (
     <html.div style={[styles.root, dense && styles.root$dense]}>
-      {!data && (
+      {deleted && (
+        <Paper outlined>
+          <PostDeleted />
+        </Paper>
+      )}
+      {!deleted && !data && (
         <Skeleton variant='rectangular' animation='wave' sx={[styles.skeleton, dense && styles.skeleton$dense]} />
       )}
-      {data && (
+      {!deleted && data && (
         <ContentProvider value={{ dense: true, disableLink }}>
           <NostrEventQuote event={data} />
         </ContentProvider>

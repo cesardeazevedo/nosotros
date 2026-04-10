@@ -4,8 +4,7 @@ import { Kind } from '@/constants/kinds'
 import { getMimeFromExtension } from '@/hooks/parsers/parseImeta'
 import { useEventTag } from '@/hooks/useEventUtils'
 import type { CustomNode, ImageCustomNode, VideoCustomNode } from '@/nostr/types'
-import { groupProsemirrorMedia } from '@/utils/welshmanToProsemirror'
-import React, { memo, useMemo } from 'react'
+import React, { memo } from 'react'
 import { Image } from './Image/Image'
 import { MediaGroup } from './Layout/MediaGroup'
 import { MediaWrapper } from './Layout/MediaWrapper'
@@ -14,6 +13,7 @@ import { LNInvoice } from './LNInvoice/LNInvoice'
 import { BlockQuote } from './Markdown/BlockQuote'
 import { CodeBlock } from './Markdown/CodeBlock'
 import { Heading } from './Markdown/Heading'
+import { HorizontalRule } from './Markdown/HorizontalRule'
 import { List } from './Markdown/List'
 import { NAddr } from './NAddr/NAddr'
 import { NEvent } from './NEvent/NEvent'
@@ -43,12 +43,7 @@ export const Content = memo(function Content(props: Props) {
   const { event } = useNoteContext()
   const { dense, blured } = useContentContext()
   const nsfw = useEventTag(event, 'content-warning')
-  const schema = useMemo(() => {
-    if (event.metadata?.contentSchema) {
-      return groupProsemirrorMedia(event.metadata?.contentSchema)
-    }
-    return { content: [] }
-  }, [event])
+  const schema = event.metadata?.contentSchema || { content: [] }
   return (
     <ContentProvider value={{ blured: !!nsfw || blured }}>
       {schema.content.map((node, index) => {
@@ -59,6 +54,7 @@ export const Content = memo(function Content(props: Props) {
             <>
               {children?.(index)}
               {node.type === 'heading' && <Heading node={node} />}
+              {node.type === 'horizontalRule' && <HorizontalRule />}
               {node.type === 'paragraph' && <Paragraph node={node} />}
               {renderMedia && isImageNode(event.kind, node) && (
                 <MediaWrapper mode={mode}>

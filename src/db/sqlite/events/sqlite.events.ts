@@ -1,4 +1,5 @@
-import type { Kind } from '@/constants/kinds'
+import { Kind } from '@/constants/kinds'
+import { isFilterValid } from '@/core/helpers/isFilterValid'
 import type { NostrFilter } from '@/core/types'
 import { getDTag } from '@/utils/nip19'
 import type { BindableValue, Database } from '@sqlite.org/sqlite-wasm'
@@ -6,6 +7,7 @@ import type { NostrEvent } from 'nostr-tools'
 import { isAddressableKind, isReplaceableKind } from 'nostr-tools/kinds'
 import { InsertBatcher } from '../batcher'
 import type { NostrEventDB, NostrEventExists, NostrEventStored } from '../sqlite.types'
+import { queryEventSearch } from './sqlite.events.fts'
 
 export class SqliteEventStore {
   batcher: InsertBatcher<NostrEventDB>
@@ -28,7 +30,7 @@ export class SqliteEventStore {
     if (isReplaceableKind(event.kind)) {
       return this.getReplaceable(db, event.kind, event.pubkey)
     } else if (isAddressableKind(event.kind)) {
-      const dTag = event.tags.find((tag) => tag[1] === 'd')?.[1]
+      const dTag = event.tags.find((tag) => tag[0] === 'd')?.[1]
       if (dTag) {
         return this.getAddressable(db, event.kind, event.pubkey, dTag)
       }
@@ -55,6 +57,7 @@ export class SqliteEventStore {
           tags.tag = 'd' AND
           tags.pubkey = ? AND
           tags.value = ?
+      ORDER BY e.created_at DESC
       LIMIT 1
       `
     return db.selectObject(query, [kind, pubkey, dTag]) as NostrEventExists | undefined
@@ -69,7 +72,7 @@ export class SqliteEventStore {
     return res.map((event) => this.formatEvent(event as NostrEventStored))
   }
 
-  private buildQuery(filter: NostrFilter, relays: string[] = []) {
+  private buildQuery(filter: NostrFilter, relays: string[] = [], table = 'events') {
     const conditions: string[] = []
     const params: BindableValue[] = []
     let needsTagJoin = false
@@ -81,45 +84,34 @@ export class SqliteEventStore {
         needsTagJoin = true
         tagName = key.slice(1)
         tagValues = values as BindableValue[]
-
-        if (filter.kinds?.length) {
-          conditions.push(`tags.kind IN (${filter.kinds.map(() => '?').join(',')})`)
-          params.push(...filter.kinds)
-        }
-        if (typeof filter.since === 'number') {
-          conditions.push('tags.created_at >= ?')
-          params.push(filter.since)
-        }
-        if (typeof filter.until === 'number') {
-          conditions.push('tags.created_at <= ?')
-          params.push(filter.until)
-        }
-        return { conditions, params, needsTagJoin, tagName, tagValues }
+        break
       }
     }
 
+    const conditionTable = needsTagJoin ? 'tags' : table
+
     if (filter.kinds?.length) {
-      conditions.push(`kind IN (${filter.kinds.map(() => '?').join(',')})`)
+      conditions.push(`${conditionTable}.kind IN (${filter.kinds.map(() => '?').join(',')})`)
       params.push(...filter.kinds)
     }
-    if (filter.authors?.length) {
-      conditions.push(`pubkey IN (${filter.authors.map(() => '?').join(',')})`)
+    if (!needsTagJoin && filter.authors?.length) {
+      conditions.push(`${table}.pubkey IN (${filter.authors.map(() => '?').join(',')})`)
       params.push(...filter.authors)
     }
     if (typeof filter.since === 'number') {
-      conditions.push('created_at >= ?')
+      conditions.push(`${conditionTable}.created_at >= ?`)
       params.push(filter.since)
     }
     if (typeof filter.until === 'number') {
-      conditions.push('created_at <= ?')
+      conditions.push(`${conditionTable}.created_at <= ?`)
       params.push(filter.until)
     }
 
-    if (relays.length > 0) {
+    if (!needsTagJoin && relays.length > 0) {
       conditions.push(`
       EXISTS (
         SELECT 1 FROM seen s
-        WHERE s.eventId = events.id
+        WHERE s.eventId = ${table}.id
           AND s.relay IN (${relays.map(() => '?').join(',')})
       )
     `)
@@ -130,8 +122,16 @@ export class SqliteEventStore {
   }
 
   query(db: Database, filter: NostrFilter, relays: string[] = []) {
+    const hasKinds = (filter.kinds?.length ?? 0) > 0
+    if (!isFilterValid(filter) && !hasKinds) {
+      return []
+    }
+
     if (filter.ids && filter.ids.length) {
       return this.getByIds(db, filter.ids)
+    }
+    if (filter.search) {
+      return queryEventSearch(db, filter, relays, this.buildQuery.bind(this), this.formatEvent.bind(this))
     }
 
     const { conditions, params, needsTagJoin, tagName, tagValues } = this.buildQuery(filter, relays)
@@ -171,6 +171,11 @@ export class SqliteEventStore {
   }
 
   queryNeg(db: Database, filter: NostrFilter) {
+    const hasKinds = (filter.kinds?.length ?? 0) > 0
+    if (!isFilterValid(filter) && !hasKinds) {
+      return []
+    }
+
     if (filter.ids && filter.ids.length) {
       const query = `
       SELECT id, created_at FROM events
@@ -229,7 +234,111 @@ export class SqliteEventStore {
     this.batcher.next(event)
   }
 
+  private hasDeleteRequestForEvent(db: Database, event: NostrEventDB) {
+    const byId = db.selectObject(
+      `
+        SELECT 1 as found
+        FROM tags
+        WHERE kind = ? AND tag = 'e' AND value = ? AND pubkey = ? AND created_at >= ?
+        LIMIT 1
+      `,
+      [Kind.EventDeletion, event.id, event.pubkey, event.created_at],
+    ) as { found: number } | undefined
+
+    if (byId?.found) {
+      return true
+    }
+
+    if (isAddressableKind(event.kind)) {
+      const dTag = getDTag(event)
+      if (!dTag) {
+        return false
+      }
+      const address = `${event.kind}:${event.pubkey}:${dTag}`
+      const byAddress = db.selectObject(
+        `
+          SELECT 1 as found
+          FROM tags
+          WHERE kind = ? AND tag = 'a' AND value = ? AND pubkey = ? AND created_at >= ?
+          LIMIT 1
+        `,
+        [Kind.EventDeletion, address, event.pubkey, event.created_at],
+      ) as { found: number } | undefined
+
+      if (byAddress?.found) {
+        return true
+      }
+    }
+
+    return false
+  }
+
+  private applyDeletionRequest(db: Database, event: NostrEventDB) {
+    if (event.kind !== Kind.EventDeletion) {
+      return
+    }
+
+    for (const tag of event.tags) {
+      if (tag[0] === 'e' && tag[1]) {
+        db.exec(
+          `
+            DELETE FROM events
+            WHERE id = ? AND pubkey = ? AND created_at <= ? AND kind != ?
+          `,
+          { bind: [tag[1], event.pubkey, event.created_at, Kind.EventDeletion] },
+        )
+        continue
+      }
+
+      if (tag[0] === 'a' && tag[1]) {
+        const parts = tag[1].split(':')
+        if (parts.length < 3) {
+          continue
+        }
+        const addressKind = Number(parts[0])
+        const addressPubkey = parts[1]
+        const dTag = parts.slice(2).join(':')
+        if (!Number.isFinite(addressKind) || !dTag || addressPubkey !== event.pubkey) {
+          continue
+        }
+
+        db.exec(
+          `
+            DELETE FROM events
+            WHERE id IN (
+              SELECT e.id
+              FROM events e
+              INNER JOIN tags t ON t.eventId = e.id
+              WHERE
+                e.kind = ? AND
+                e.pubkey = ? AND
+                e.created_at <= ? AND
+                t.tag = 'd' AND
+                t.value = ?
+            )
+            AND kind != ?
+          `,
+          { bind: [addressKind, addressPubkey, event.created_at, dTag, Kind.EventDeletion] },
+        )
+      }
+    }
+
+  }
+
   insertEvent(db: Database, event: NostrEventDB) {
+    const expiration = event.tags.find((tag) => tag[0] === 'expiration')?.[1]
+    if (expiration) {
+      const expirationSec = Number(expiration)
+      const nowSec = Math.floor(Date.now() / 1000)
+      if (Number.isFinite(expirationSec) && expirationSec <= nowSec) {
+        return
+      }
+    }
+
+    if (event.kind !== Kind.EventDeletion && this.hasDeleteRequestForEvent(db, event)) {
+      return
+    }
+
     if (isReplaceableKind(event.kind)) {
       const found = this.getReplaceable(db, event.kind, event.pubkey)
       if (found) {
@@ -274,7 +383,7 @@ export class SqliteEventStore {
       },
     )
     for (const tag of event.tags) {
-      if (tag.length >= 2 && tag[0].length === 1) {
+      if (tag.length >= 2 && (tag[0].length === 1 || tag[0] === 'expiration')) {
         db.exec(
           `INSERT OR IGNORE INTO tags (eventId, tag, value, kind, pubkey, created_at)
           VALUES (?, ?, ?, ?, ?, ?)`,
@@ -282,6 +391,11 @@ export class SqliteEventStore {
         )
       }
     }
+
+    if (event.kind === Kind.EventDeletion) {
+      this.applyDeletionRequest(db, event)
+    }
+
     return event
   }
 

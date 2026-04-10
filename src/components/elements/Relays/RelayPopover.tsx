@@ -16,7 +16,7 @@ const PopoverContent = memo(function PopoverContent(props: { url: string }) {
   const { url } = props
 
   return (
-    <Paper outlined surface='surfaceContainerLowest' sx={styles.root}>
+    <Paper outlined surface='surfaceContainerLowest' sx={styles.root} onClick={(e) => e.stopPropagation()}>
       <RelayHeader url={url} />
     </Paper>
   )

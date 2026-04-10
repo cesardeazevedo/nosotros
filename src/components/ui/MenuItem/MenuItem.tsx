@@ -1,10 +1,6 @@
-import { useListItem, useMergeRefs } from '@floating-ui/react'
-import React, { forwardRef, useContext } from 'react'
+import React from 'react'
 import type { Props as ListItemProps } from '../ListItem/ListItem'
 import { ListItem } from '../ListItem/ListItem'
-import { Menu } from '../Menu/Menu'
-import { MenuItemContext } from './MenuItemContext'
-import { MenuNestedItem } from './MenuNestedItem'
 
 export type Props = ListItemProps & {
   label: React.ReactNode
@@ -12,17 +8,13 @@ export type Props = ListItemProps & {
   keepOpenOnClick?: boolean
 }
 
-export const MenuItem = forwardRef<HTMLElement, Props>((props, ref) => {
-  const { label, children, keepOpenOnClick, ...other } = props
-  const menuItemContext = useContext(MenuItemContext)
-  const item = useListItem({ label: props.disabled ? null : undefined })
-  const isActive = item.index === menuItemContext.activeIndex
-  const refs = useMergeRefs([item.ref, ref])
-  return children ? (
-    <Menu trigger={() => <MenuNestedItem label={label} {...other} />}>{children}</Menu>
-  ) : (
-    <ListItem tabIndex={isActive ? 0 : -1} {...other} ref={refs}>
+// Dumb component due migration
+// TODO: remove this component entirely
+export const MenuItem = (props: Props) => {
+  const { label, htmlFor, keepOpenOnClick, ...other } = props
+  return (
+    <ListItem {...other}>
       {label}
     </ListItem>
   )
-})
+}

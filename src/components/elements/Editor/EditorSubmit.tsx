@@ -3,12 +3,12 @@ import { Button } from '@/components/ui/Button/Button'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Kind } from '@/constants/kinds'
 import { useCurrentPubkey } from '@/hooks/useAuth'
+import { useXS } from '@/hooks/useMobile'
 import { memo, useCallback } from 'react'
 import { css } from 'react-strict-dom'
 import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDOMProps'
 import { LinkSignIn } from '../Links/LinkSignIn'
 import { useEditorSelector } from './hooks/useEditor'
-import { useXS } from '@/hooks/useMobile'
 
 type Props = {
   renderDiscard?: boolean
@@ -24,15 +24,13 @@ export const EditorSubmit = memo(function EditorSubmit(props: Props) {
   const pubkey = useCurrentPubkey()
   const isXS = useXS()
 
-  const reset = useEditorSelector((editor) => editor.reset)
   const isReply = useEditorSelector((editor) => !!editor.parent && editor.parent.kind !== Kind.PublicMessage)
 
   const handleDiscard = useCallback((event: StrictClickEvent) => {
     event.stopPropagation()
     event.preventDefault()
-    reset()
     onDiscard?.()
-  }, [])
+  }, [onDiscard])
 
   return (
     <Stack gap={0.5}>

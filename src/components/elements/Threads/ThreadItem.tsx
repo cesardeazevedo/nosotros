@@ -1,34 +1,43 @@
 import { useDeckColumn } from '@/components/modules/Deck/hooks/useDeck'
 import { ContentProvider } from '@/components/providers/ContentProvider'
-import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { useEventReplies } from '@/hooks/query/useReplies'
-import { type NoteState } from '@/hooks/state/useNote'
+import type { NoteState } from '@/hooks/state/useNote'
 import { useIsCurrentRouteEventID } from '@/hooks/useNavigations'
 import { useReplyTreeLayout } from '@/hooks/useReplyTreeLayout'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import { IconDotsVertical } from '@tabler/icons-react'
 import { memo, useEffect, useRef } from 'react'
 import { css, html } from 'react-strict-dom'
-import { EditorProvider } from '../Editor/EditorProvider'
-import { WaveDivider } from '../Layouts/WaveDivider'
 import { PostActions } from '../Posts/PostActions/PostActions'
 import { Replies } from '../Replies/Replies'
 import { ReplyContent } from '../Replies/ReplyContent'
 import { UserAvatar } from '../User/UserAvatar'
+import { ThreadEditor } from './ThreadEditor'
+import { ThreadHorizontalDivider } from './ThreadHorizontalDivider'
 
 type Props = {
   note: NoteState
   renderEditor?: boolean
   renderReplies?: boolean
+  renderThreadIndicator?: boolean
+  forceThreadIndicator?: boolean
   renderDivider?: boolean
   repliesLimit?: number
   onEditorDiscard?: () => void
 }
 
 export const ThreadItem = memo(function ThreadItem(props: Props) {
-  const { note, renderEditor = true, renderReplies = true, renderDivider = true, repliesLimit, onEditorDiscard } = props
+  const {
+    note,
+    renderEditor = true,
+    renderReplies = true,
+    renderThreadIndicator = true,
+    forceThreadIndicator = false,
+    renderDivider = true,
+    repliesLimit,
+    onEditorDiscard,
+  } = props
   const { event } = note
   const ref = useRef<HTMLDivElement>(null)
   const deck = useDeckColumn()
@@ -51,52 +60,36 @@ export const ThreadItem = memo(function ThreadItem(props: Props) {
   return (
     <>
       <ContentProvider value={{ dense: true }}>
-        <html.div style={styles.reply} ref={ref}>
+        <html.div style={styles.reply} ref={ref} data-reply-root='1'>
           {isCurrentEvent && <html.div style={styles.current}></html.div>}
           <Stack align='flex-start' gap={1} sx={styles.content}>
-            {hasReplies && <html.div style={styles.thread} />}
-            <UserAvatar pubkey={event.pubkey} />
+            {renderThreadIndicator && (hasReplies || forceThreadIndicator) && <html.div style={styles.thread} />}
+            <html.div data-reply-avatar='1'>
+              <UserAvatar pubkey={event.pubkey} />
+            </html.div>
             <Stack horizontal={false} sx={styles.wrapper}>
               <ContentProvider value={{ disableLink: isCurrentEvent }}>
                 <ReplyContent note={note} highlight={!isCurrentEvent} />
               </ContentProvider>
-              <html.div style={styles.root$actions}>
-                <PostActions
-                  renderOptions
-                  statsPopover
-                  note={note}
-                  onReplyClick={() => note.actions.toggleReplying()}
-                />
-              </html.div>
+              <PostActions
+                renderOptions
+                statsPopover
+                note={note}
+                onReplyClick={() => note.actions.toggleReplying()}
+              />
             </Stack>
           </Stack>
         </html.div>
         {renderEditor && isCurrentEvent && renderDivider && (
-          <Stack sx={styles.divider} gap={2}>
-            <html.div>
-              <IconDotsVertical strokeWidth='2.4' size={24} />
-            </html.div>
-            <WaveDivider />
-          </Stack>
+          <ThreadHorizontalDivider />
         )}
-        {renderEditor && (
-          <Expandable expanded={note.state.isReplying || false} trigger={() => <></>}>
-            <EditorProvider
-              renderBubble
-              initialOpen
-              parent={note.event}
-              onSigned={() => note.actions.toggleReplies(true)}
-              onUndoBroadcast={() => note.actions.toggleReplies(false)}
-              onDiscard={onEditorDiscard}
-            />
-          </Expandable>
-        )}
+        {renderEditor && <ThreadEditor note={note} onEditorDiscard={onEditorDiscard} />}
       </ContentProvider>
-      {((renderReplies && isCurrentEvent) || note.state.repliesOpen) && (
+      {(renderReplies || note.state.repliesOpen === true) && (
         <Stack sx={styles.replies} ref={rootRef}>
           <html.span style={styles.anchor} ref={avatarCellRef} />
           <html.span aria-hidden style={styles.connectorDown} />
-          <Replies ref={childrenRef} note={note} limit={repliesLimit} level={2} />
+          <Replies ref={childrenRef} note={note} limit={repliesLimit} level={2} renderLoadMore={false} />
         </Stack>
       )}
     </>
@@ -109,9 +102,13 @@ const styles = css.create({
   },
   content: {
     paddingBlock: spacing.padding1,
+    width: '100%',
+    minWidth: 0,
   },
   wrapper: {
+    flex: 1,
     width: '100%',
+    minWidth: 0,
   },
   current: {
     position: 'absolute',
@@ -146,12 +143,6 @@ const styles = css.create({
     paddingInline: spacing.padding2,
     scrollMargin: 64,
   },
-  divider: {
-    paddingTop: spacing.padding2,
-    paddingBottom: spacing.padding1,
-    paddingLeft: 24,
-    color: palette.outlineVariant,
-  },
   replies: {
     position: 'relative',
     paddingLeft: spacing.margin2,
@@ -162,9 +153,6 @@ const styles = css.create({
     height: 3,
     top: 12,
     left: 33.5,
-    // backgroundColor: palette.outlineVariant,
-    // borderRadius: '100%',
-    // zIndex: 2,
   },
   connectorDown: {
     position: 'absolute',

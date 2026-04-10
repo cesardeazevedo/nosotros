@@ -73,6 +73,7 @@ export const FollowEventRoot = (props: Props) => {
 
   const limitedTags = useMemo(() => filteredTags.slice(0, limit), [limit, filteredTags])
   const values = useMemo(() => tags.map(([, pubkey]) => pubkey), [tags])
+  const isOwnFollowList = event.pubkey === user.pubkey
 
   return (
     <NoteProvider value={{ event }}>
@@ -81,7 +82,7 @@ export const FollowEventRoot = (props: Props) => {
         <Text variant='headline' size='md'>
           Follow List
         </Text>
-        <FollowBulkButton values={values} />
+        {!isOwnFollowList && <FollowBulkButton values={values} />}
       </Stack>
       <Divider />
       <Stack sx={styles.filters} gap={0.5}>

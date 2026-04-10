@@ -13,10 +13,11 @@ type Props = {
   level?: number
   limit?: number
   ref?: RefObject<HTMLDivElement | null>
+  renderLoadMore?: boolean
 }
 
 export const Replies = memo(function Replies(props: Props) {
-  const { note, limit, level = 1, ref } = props
+  const { note, limit, level = 1, ref, renderLoadMore = true } = props
   const { chunk: replies } = useEventReplies(note.event, { pageSize: note.state.pageSize })
   useLiveReplies(note.event)
 
@@ -26,7 +27,7 @@ export const Replies = memo(function Replies(props: Props) {
         <RepliesTree limit={limit} replies={replies} repliesOpen={note.state.repliesOpen} level={level} />
       )}
       {/* <RepliesMuted level={0} /> */}
-      <RepliesLoadMore note={note} />
+      {renderLoadMore && <RepliesLoadMore note={note} />}
     </Stack>
   )
 })

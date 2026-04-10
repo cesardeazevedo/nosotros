@@ -107,12 +107,16 @@ export const SidebarMenu = memo(function SidebarMenu() {
             />
           )}
         </Link>
-        <MenuItem
-          selected={context.pane === '/lists'}
-          onClick={() => context.setPane('/lists')}
-          leadingIcon={<IconListDetails {...iconProps} />}
-          label='Lists'
-        />
+        <Link to='/lists'>
+          {({ isActive }) => (
+            <MenuItem
+              selected={isActive}
+              onClick={() => context.setPane(false)}
+              leadingIcon={<IconListDetails {...iconProps} />}
+              label='Lists'
+            />
+          )}
+        </Link>
         {pubkey && (
           <Link
             to={`/$nostr`}
@@ -167,6 +171,7 @@ const styles = css.create({
     width: '100%',
     borderRadius: shape.lg,
     backgroundColor: 'transparent',
+    paddingTop: 14,
   },
   wrapper: {
     width: '100%',

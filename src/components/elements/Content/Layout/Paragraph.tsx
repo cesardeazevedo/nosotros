@@ -18,7 +18,7 @@ export const Paragraph = (props: Props) => {
     <TextContent
       shrinkLink={event.kind !== Kind.Article}
       node={node}
-      sx={[styles.container, dense && styles.container$dense]}
+      sx={[styles.container, dense && styles.container$dense, event.kind === Kind.Article && styles.containerMarkdown]}
     />
   )
 }
@@ -31,6 +31,9 @@ const styles = css.create({
     lineHeight: 1.7,
     wordBreak: 'break-word',
     height: 'auto',
+  },
+  containerMarkdown: {
+    marginBottom: spacing.margin2,
   },
   container$dense: {
     padding: 0,

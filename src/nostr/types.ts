@@ -21,6 +21,9 @@ export type VideoCustomNode = VideoNode & {
 export type CustomNode =
   | Node
   | {
+      type: 'horizontalRule'
+    }
+  | {
       type: 'mediaGroup'
       content: Array<ImageCustomNode | VideoCustomNode>
     }

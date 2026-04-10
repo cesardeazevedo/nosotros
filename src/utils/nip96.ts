@@ -1,8 +1,7 @@
-// from nostr-tools
-import { sha256 } from '@noble/hashes/sha256'
-import { bytesToHex } from '@noble/hashes/utils'
+// from nostr-tools, adapted to use uploadXHRRequest instead of fetch for upload progress
 import type { EventTemplate } from 'nostr-tools'
 import { FileServerPreference } from 'nostr-tools/kinds'
+import { uploadXHRRequest } from './uploadXHR'
 
 /**
  * Represents the configuration for a server compliant with NIP-96.
@@ -329,6 +328,7 @@ export async function uploadFile(
   serverApiUrl: string,
   nip98AuthorizationHeader: string,
   optionalFormDataFields?: OptionalFormDataFields,
+  onProgress?: (progress: number) => void,
 ): Promise<FileUploadResponse> {
   // Create FormData object
   const formData = new FormData()
@@ -345,16 +345,19 @@ export async function uploadFile(
   // Append the file to FormData as the last field
   formData.append('file', file)
 
-  // Make the POST request to the server
-  const response = await fetch(serverApiUrl, {
-    method: 'POST',
-    headers: {
-      Authorization: nip98AuthorizationHeader,
+  const response = await uploadXHRRequest<FileUploadResponse>(
+    {
+      method: 'POST',
+      url: serverApiUrl,
+      headers: {
+        Authorization: nip98AuthorizationHeader,
+      },
+      body: formData,
+      parseResponse: (xhr) => JSON.parse(xhr.responseText) as FileUploadResponse,
     },
-    body: formData,
-  })
-
-  if (response.ok === false) {
+    onProgress,
+  )
+  if (response.status < 200 || response.status >= 300) {
     // 413 Payload Too Large
     if (response.status === 413) {
       throw new Error('File too large!')
@@ -378,8 +381,7 @@ export async function uploadFile(
     // unknown error
     throw new Error('Unknown error in uploading file!')
   }
-
-  const parsedResponse = await response.json()
+  const parsedResponse = response.body
 
   if (!validateFileUploadResponse(parsedResponse)) {
     throw new Error('Failed to validate upload response!')
@@ -551,15 +553,4 @@ export function generateFSPEventTemplate(serverUrls: string[]): EventTemplate {
     tags: serverUrls.map((serverUrl) => ['server', serverUrl]),
     created_at: Math.floor(Date.now() / 1000),
   }
-}
-
-/**
- * Calculates the SHA-256 hash of a given file. This hash is used in various NIP-96 operations,
- * such as file upload, download, and deletion, to uniquely identify files.
- *
- * @param file - The file for which the SHA-256 hash needs to be calculated.
- * @returns A promise that resolves to the SHA-256 hash of the file.
- */
-export async function calculateFileHash(file: Blob): Promise<string> {
-  return bytesToHex(sha256(new Uint8Array(await file.arrayBuffer())))
 }

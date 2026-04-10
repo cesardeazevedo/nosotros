@@ -2,6 +2,7 @@ import { Divider } from '@/components/ui/Divider/Divider'
 import { Expandable } from '@/components/ui/Expandable/Expandable'
 import { memo } from 'react'
 import { EditorBroadcaster } from './EditorBroadcaster'
+import { EditorDrafts } from './EditorDrafts'
 import { EditorSettings } from './EditorSettings'
 import { useEditorSelector } from './hooks/useEditor'
 
@@ -16,6 +17,10 @@ export const EditorExpandables = memo(function EditorExpandables() {
       <Expandable expanded={section === 'settings'}>
         <Divider />
         <EditorSettings key='json' />
+      </Expandable>
+      <Expandable expanded={section === 'drafts'}>
+        <Divider />
+        <EditorDrafts />
       </Expandable>
       <Expandable expanded={section === 'zaps'}>
         <Divider />

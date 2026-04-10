@@ -6,7 +6,6 @@ import { useCopyClipboard } from '@/hooks/useCopyClipboard'
 import { spacing } from '@/themes/spacing.stylex'
 import { colors } from '@stylexjs/open-props/lib/colors.stylex'
 import { IconCheck, IconCopy } from '@tabler/icons-react'
-import { AnimatePresence, motion, MotionConfig } from 'framer-motion'
 import { forwardRef, useImperativeHandle } from 'react'
 import { css, html } from 'react-strict-dom'
 
@@ -18,11 +17,6 @@ type Props = {
 
 export type CopyButtonRef = {
   copy: () => void
-}
-
-const variants = {
-  visible: { opacity: 1, scale: 1 },
-  hidden: { opacity: 0, scale: 0.5 },
 }
 
 export const CopyIconButton = forwardRef<CopyButtonRef, Props>((props, ref) => {
@@ -51,31 +45,7 @@ export const CopyIconButton = forwardRef<CopyButtonRef, Props>((props, ref) => {
           sx={styles.button}
           onClick={copy}
           icon={
-            <MotionConfig transition={{ duration: 0.2 }}>
-              <AnimatePresence initial={false} mode='wait'>
-                {copied ? (
-                  <motion.div
-                    animate='visible'
-                    exit='hidden'
-                    initial='hidden'
-                    key='check'
-                    variants={variants}
-                    style={{ display: 'flex' }}>
-                    <IconCheck size={18} strokeWidth='2.5' />
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    animate='visible'
-                    exit='hidden'
-                    initial='hidden'
-                    key='copy'
-                    variants={variants}
-                    style={{ display: 'flex' }}>
-                    <IconCopy size={18} strokeWidth='1.8' />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </MotionConfig>
+            copied ? <IconCheck size={18} strokeWidth='2.5' /> : <IconCopy size={18} strokeWidth='1.8' />
           }
         />
       </Tooltip>

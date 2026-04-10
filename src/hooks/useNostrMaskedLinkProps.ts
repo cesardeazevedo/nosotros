@@ -9,6 +9,7 @@ function useAllowedMaskedRoutes() {
 
       switch (pathname) {
         case '/':
+        case '/threads':
         case '/feed':
         case '/search':
         case '/notifications':
@@ -17,10 +18,6 @@ function useAllowedMaskedRoutes() {
         case '/lists/followsets':
         case '/lists/relaysets':
           return true
-      }
-
-      if (pathname.startsWith('/tag/')) {
-        return true
       }
 
       // Check nprofile/npub route

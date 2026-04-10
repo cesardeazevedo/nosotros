@@ -51,6 +51,7 @@ const JsonContent = function PostUserJson(props: { value?: object }) {
           <JsonView
             value={value}
             collapsed={false}
+            shortenTextAfterLength={64}
             style={{
               backgroundColor: 'black',
               overflow: 'auto',
@@ -113,7 +114,7 @@ const styles = css.create({
   },
   content: {
     paddingTop: spacing.padding2,
-    paddingInline: spacing.padding3,
+    paddingInline: spacing.padding2,
     paddingBottom: spacing.padding2,
   },
   content$mobile: {
@@ -122,6 +123,7 @@ const styles = css.create({
   jsonview: {
     overflow: 'auto',
     width: '100%',
+    backgroundColor: '#000',
   },
   paper: {
     overflow: 'hidden',
@@ -131,7 +133,11 @@ const styles = css.create({
     padding: spacing.padding1,
   },
   loading: {
-    width: 550,
-    height: 300,
+    width: 500,
+    height: 250,
+    margin: 10,
+    '::before': {
+      backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    }
   },
 })

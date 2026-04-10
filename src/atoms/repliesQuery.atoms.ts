@@ -60,7 +60,7 @@ export const repliesFamily = atomFamily(
       const { event, pageSize = 10 } = params
 
       const currentPubkey = get(selectedPubkeyAtom)
-      const currentUser = get(userFamily({ pubkey: currentPubkey, syncFollows: true }))
+      const currentUser = get(userFamily({ pubkey: currentPubkey, fullUserSync: true }))
 
       const query = get(repliesQueryFamily({ event }))
       const allReplies = (query.data as NostrEventDB[]) || []

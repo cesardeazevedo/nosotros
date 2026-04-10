@@ -39,7 +39,7 @@ export function signAndSave(unsignedEvent: Omit<UnsignedEvent, 'created_at'>, op
     tap(setEventData),
     tap((event) => {
       if (saveEvent) {
-        dbSqlite.insertEvent(event)
+        dbSqlite.publishEvent(event)
       }
     }),
     shareReplay(),

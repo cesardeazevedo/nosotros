@@ -10,13 +10,14 @@ import { decodeNIP19, decodeRelays, decodeToFilter, nip19ToRelayHints } from '@/
 import type { UseQueryOptions } from '@tanstack/react-query'
 import { keepPreviousData, queryOptions, useQuery } from '@tanstack/react-query'
 import type { Filter } from 'nostr-tools'
-import { defaultIfEmpty, firstValueFrom, from, mergeMap, shareReplay, takeUntil, tap, timer } from 'rxjs'
+import { isAddressableKind, isReplaceableKind } from 'nostr-tools/kinds'
+import { defaultIfEmpty, firstValueFrom, from, mergeMap, shareReplay, tap } from 'rxjs'
 import { batcher } from '../batchers'
 import { subscribeMediaStats } from '../subscriptions/subscribeMediaStats'
 import { subscribeStrategy } from '../subscriptions/subscribeStrategy'
 import { queryClient } from './queryClient'
 import { eventIdToQueryKey, pointerToQueryKey, queryKeys } from './queryKeys'
-import { setEventData } from './queryUtils'
+import { dedupeEvents, setEventData } from './queryUtils'
 
 export type UseQueryOptionsWithFilter<Selector = NostrEventDB[]> = UseQueryOptions<NostrEventDB[], Error, Selector> & {
   ctx?: NostrContext
@@ -33,20 +34,25 @@ export function createEventQueryOptions<Selector = NostrEventDB[]>(options: UseQ
     queryFn: async () => {
       const { maxRelaysPerUser } = store.get(settingsAtom)
       const filters = 'filter' in options ? [options.filter] : options.filters
+      const shouldDedupe = filters.some((filter) =>
+        (filter.kinds || []).some((kind) => isReplaceableKind(kind) || isAddressableKind(kind)),
+      )
 
       const stream = from(filters).pipe(
-        mergeMap((filter) => subscribeStrategy({ ...ctx, maxRelaysPerUser }, filter)),
+        mergeMap((filter) => subscribeStrategy({ ...ctx, maxRelaysPerUser, queryKey: opts.queryKey }, filter)),
         tap((res) => res.forEach(setEventData)),
         tap((res) => {
           if (res) {
             queryClient.setQueryData(opts.queryKey, (old: NostrEventDB[] = []) => {
+              if (shouldDedupe) {
+                return dedupeEvents([...old, ...res])
+              }
               const ids = new Set(old.map((x) => x.id))
               return [...old, ...res.filter((x) => !ids.has(x.id))]
             })
           }
         }),
         subscribeMediaStats(),
-        takeUntil(timer(6500)),
         shareReplay(),
         defaultIfEmpty([] as NostrEventDB[]),
       )

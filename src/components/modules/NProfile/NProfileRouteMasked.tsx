@@ -8,6 +8,7 @@ import { useMemo } from 'react'
 import { CenteredContainer } from '../../elements/Layouts/CenteredContainer'
 import { PaperContainer } from '../../elements/Layouts/PaperContainer'
 import { Feed } from '../Feed/Feed'
+import { NProfileMutedContent } from './NProfileMutedContent'
 import { NProfileFeedTabsState } from './NProfileFeedTabsState'
 
 export type Props = {
@@ -37,7 +38,9 @@ export const NProfileRouteMasked = function NProfileRouteMasked(props: Props) {
           }}
         />
         <Divider />
-        <Feed feed={feed} />
+        <NProfileMutedContent pubkey={pubkey}>
+          <Feed feed={feed} />
+        </NProfileMutedContent>
         <Divider />
       </PaperContainer>
     </CenteredContainer>

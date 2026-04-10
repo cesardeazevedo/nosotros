@@ -87,3 +87,9 @@ export interface Nip05DB {
 export type Nip05Stored = Nip05DB & {
   relays: string
 }
+
+export interface UserDB {
+  pubkey: string
+  name: string
+  display_name?: string
+}

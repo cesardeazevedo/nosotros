@@ -1,14 +1,14 @@
 import { ArticleFeedItem } from '@/components/modules/Articles/ArticleFeedItem'
 import { FollowEventRoot } from '@/components/modules/Follows/FollowEventRoot'
-import { Kind } from '@/constants/kinds'
+import { ListCard } from '@/components/modules/Lists/ListCard'
+import { Paper } from '@/components/ui/Paper/Paper'
+import { Kind, isListKind } from '@/constants/kinds'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { memo } from 'react'
 import { PostQuote } from '../Posts/PostQuote'
 import { UserRoot } from '../User/UserRoot'
 import { ZapReceiptRoot } from '../Zaps/ZapReceipt'
 import { NostrEventUnsupportedContent } from './NostrEventUnsupportedContent'
-import { StarterPackCard } from '@/components/modules/Lists/StarterPacks/StarterPackCard'
-import { Paper } from '@/components/ui/Paper/Paper'
 
 type Props = {
   event: NostrEventDB
@@ -33,6 +33,8 @@ export const NostrEventQuote = memo(function NostrEventQuote(props: Props) {
     }
     case Kind.Text:
     case Kind.Media:
+    case Kind.Video:
+    case Kind.ShortVideo:
     case Kind.Comment: {
       return <PostQuote event={event} />
     }
@@ -50,10 +52,10 @@ export const NostrEventQuote = memo(function NostrEventQuote(props: Props) {
         </Paper>
       )
     }
-    case Kind.StarterPack: {
-      return <StarterPackCard event={event} />
-    }
     default: {
+      if (isListKind(event.kind)) {
+        return <ListCard event={event} onEdit={() => { }} canEdit={false} />
+      }
       console.log('Unhandled item to render', event)
       return <NostrEventUnsupportedContent event={event} />
     }

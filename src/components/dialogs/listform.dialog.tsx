@@ -5,15 +5,18 @@ import { ListForm } from '../modules/Lists/ListForm'
 
 export const ListFormDialog = memo(function ListFormDialog() {
   const [value, onClose] = useDialogControl('listForm')
+
   return (
     <>
-      <DialogSheet maxWidth='xs' open={!!value} onClose={onClose}>
+      <DialogSheet maxWidth='md' open={!!value} onClose={onClose}>
         {value && (
           <>
-            {typeof value !== 'number' ? (
+            {typeof value === 'number' ? (
+              <ListForm isEditing={false} kind={value} onClose={onClose} />
+            ) : 'id' in value ? (
               <ListForm isEditing event={value} onClose={onClose} />
             ) : (
-              <ListForm isEditing={false} kind={value} onClose={onClose} />
+              <ListForm isEditing={false} kind={value.kind} onClose={onClose} />
             )}
           </>
         )}

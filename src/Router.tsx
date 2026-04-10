@@ -1,5 +1,5 @@
 import { type QueryClient } from '@tanstack/react-query'
-import { createRootRouteWithContext, createRoute, createRouter, redirect } from '@tanstack/react-router'
+import { createRootRouteWithContext, createRoute, createRouter, lazyRouteComponent, redirect } from '@tanstack/react-router'
 import { useMemo } from 'react'
 import { z } from 'zod'
 import { selectedPubkeyAtom } from './atoms/auth.atoms'
@@ -9,17 +9,14 @@ import { store } from './atoms/store'
 import { RootLayout } from './components/elements/Layouts/RootLayout'
 import { ArticlesRoute } from './components/modules/Articles/ArticlesRoute'
 import { DeckRoute } from './components/modules/Deck/DeckRoute'
+import { DraftsRoute } from './components/modules/Drafts/DraftsRoute'
 import { EditorRoute } from './components/modules/Editor/EditorRoute'
 import { Feed } from './components/modules/Feed/Feed'
 import { FeedHeader } from './components/modules/Feed/FeedHeader'
 import { FeedHeadline } from './components/modules/Feed/FeedHeadline'
 import { FeedRoute } from './components/modules/Feed/FeedRoute'
-import { FeedHeaderBase } from './components/modules/Feed/headers/FeedHeaderBase'
 import { HomeRoute } from './components/modules/Home/HomeRoute'
-import { FollowSetList } from './components/modules/Lists/FollowSets/FollowSetList'
 import { ListsRoute } from './components/modules/Lists/ListRoute'
-import { RelaySetList } from './components/modules/Lists/RelaySets/RelaySetList'
-import { StarterPackList } from './components/modules/Lists/StarterPacks/StarterPackList'
 import { MediaRoute } from './components/modules/Media/MediaRoute'
 import { NostrRoute } from './components/modules/Nostr/NostrRoute'
 import { NostrEventPending } from './components/modules/NostrEvent/NostrEventLoading'
@@ -29,19 +26,11 @@ import { RelayActiveRoute } from './components/modules/RelayActive/RelayActiveRo
 import { RelayMonitorRoute } from './components/modules/RelayMonitor/RelayMonitorRoute'
 import { RelayRoute } from './components/modules/Relays/RelaysRoute'
 import { SearchRoute } from './components/modules/Search/SearchRoute'
-import { SettingsAboutRoute } from './components/modules/Settings/SettingsAbout'
-import { SettingsMediaStorage } from './components/modules/Settings/SettingsMediaStorage'
-import { SettingsPreferencesRoute } from './components/modules/Settings/SettingsPreferenceRoute'
-import { SettingsRelayAuth } from './components/modules/Settings/SettingsRelaysAuth'
-import { SettingsRoute } from './components/modules/Settings/SettingsRoute'
-import { SettingsStorageRoute } from './components/modules/Settings/SettingsStorage'
-import { TagHeader } from './components/modules/Tag/TagHeader'
 import { Kind } from './constants/kinds'
 import type { NostrFilter } from './core/types'
 import { ErrorBoundary } from './ErrorBoundary'
 import { loadThreads } from './hooks/loaders/loadThreads'
 import { createProfileModule } from './hooks/modules/createProfileFeedModule'
-import { createTagFeedModule } from './hooks/modules/createTagFeedModule'
 import { queryClient } from './hooks/query/queryClient'
 import { queryKeys } from './hooks/query/queryKeys'
 import type { FeedModule, FeedScope } from './hooks/query/useQueryFeeds'
@@ -144,6 +133,7 @@ export const feedRoute = createRoute({
         z.literal('following'),
         z.literal('sets_p'),
         z.literal('sets_e'),
+        z.literal('relay_sets'),
         z.literal('relayfeed'),
         z.literal('inbox'),
       ])
@@ -214,7 +204,7 @@ export const feedRoute = createRoute({
       since,
       live = true,
       scope = 'self',
-      type = 'feed',
+      type = deps.type || 'feed',
       blured,
       relay,
       relaySets,
@@ -300,7 +290,16 @@ export const feedRoute = createRoute({
               ? READ | WRITE
               : undefined
     }
-    const id = 'custom_' + JSON.stringify(filter)
+    const id = 'custom_' + JSON.stringify({
+      filter,
+      relay,
+      relaySets,
+      scope,
+      type,
+      pubkey,
+      permission,
+      outbox,
+    })
     return {
       id,
       type,
@@ -367,6 +366,12 @@ export const composeRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/compose',
   component: () => <EditorRoute />,
+})
+
+export const draftsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/drafts',
+  component: DraftsRoute,
 })
 
 export const nostrRoute = createRoute({
@@ -482,23 +487,6 @@ const nprofileArticlesRoute = createRoute({
   },
 })
 
-const tagsRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/tag/$tag',
-  component: function () {
-    const params = tagsRoute.useParams()
-    const module = useMemo(() => createTagFeedModule(params.tag), [params.tag])
-    const feed = useFeedState(module)
-    return (
-      <FeedRoute
-        feed={feed}
-        renderEditor={false}
-        header={<FeedHeaderBase feed={feed} renderRelaySettings leading={<TagHeader feed={feed} />} />}
-      />
-    )
-  },
-})
-
 export const searchRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/search',
@@ -516,24 +504,6 @@ const listsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/lists',
   component: ListsRoute,
-})
-
-const starterPackRoute = createRoute({
-  getParentRoute: () => listsRoute,
-  path: '/',
-  component: StarterPackList,
-})
-
-const followSetsRoute = createRoute({
-  getParentRoute: () => listsRoute,
-  path: '/followsets',
-  component: FollowSetList,
-})
-
-const relaySetsRoute = createRoute({
-  getParentRoute: () => listsRoute,
-  path: '/relaysets',
-  component: RelaySetList,
 })
 
 const relaysRoute = createRoute({
@@ -554,40 +524,65 @@ const relayMonitorRoute = createRoute({
   component: RelayMonitorRoute,
 })
 
+const SettingsRouteLazy = lazyRouteComponent(
+  () => import('./components/modules/Settings/SettingsRoute'),
+  'SettingsRoute',
+)
+const SettingsPreferencesRouteLazy = lazyRouteComponent(
+  () => import('./components/modules/Settings/SettingsPreferenceRoute'),
+  'SettingsPreferencesRoute',
+)
+const SettingsRelayAuthLazy = lazyRouteComponent(
+  () => import('./components/modules/Settings/SettingsRelaysAuth'),
+  'SettingsRelayAuth',
+)
+const SettingsMediaStorageLazy = lazyRouteComponent(
+  () => import('./components/modules/Settings/SettingsMediaStorage'),
+  'SettingsMediaStorage',
+)
+const SettingsStorageRouteLazy = lazyRouteComponent(
+  () => import('./components/modules/Settings/SettingsStorage'),
+  'SettingsStorageRoute',
+)
+const SettingsAboutRouteLazy = lazyRouteComponent(
+  () => import('./components/modules/Settings/SettingsAbout'),
+  'SettingsAboutRoute',
+)
+
 const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/settings',
-  component: SettingsRoute,
+  component: SettingsRouteLazy,
 })
 
 const settingsPreferenceRoute = createRoute({
   getParentRoute: () => settingsRoute,
   path: '/',
-  component: SettingsPreferencesRoute,
+  component: SettingsPreferencesRouteLazy,
 })
 
 const settingsRelaysAuthRoute = createRoute({
   getParentRoute: () => settingsRoute,
   path: '/relay_auth',
-  component: SettingsRelayAuth,
+  component: SettingsRelayAuthLazy,
 })
 
 const settingsMediaStorage = createRoute({
   getParentRoute: () => settingsRoute,
   path: '/media',
-  component: SettingsMediaStorage,
+  component: SettingsMediaStorageLazy,
 })
 
 const settingsStorageRoute = createRoute({
   getParentRoute: () => settingsRoute,
   path: '/storage',
-  component: SettingsStorageRoute,
+  component: SettingsStorageRouteLazy,
 })
 
 const settingsAboutRoute = createRoute({
   getParentRoute: () => settingsRoute,
   path: '/about',
-  component: SettingsAboutRoute,
+  component: SettingsAboutRouteLazy,
 })
 
 export const routeTree = rootRoute.addChildren([
@@ -596,13 +591,13 @@ export const routeTree = rootRoute.addChildren([
   feedRoute,
   nostrRoute.addChildren([nprofileIndexRoute, nprofileRepliesRoute, nprofileMediaRoute, nprofileArticlesRoute]),
   deckRoute,
-  tagsRoute,
   searchRoute,
-  listsRoute.addChildren([starterPackRoute, followSetsRoute, relaySetsRoute]),
+  listsRoute,
   notificationsRoute,
   mediaRoute,
   articleRoute,
   composeRoute,
+  draftsRoute,
   relaysRoute.addChildren([relayActiveRoute, relayMonitorRoute]),
   settingsRoute.addChildren([
     settingsPreferenceRoute,

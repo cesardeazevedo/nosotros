@@ -26,7 +26,9 @@ export function createProfileModule(
     queryKey: queryKeys.feed(options.nip19, filter),
     filter,
     includeReplies: options.includeReplies,
-    ctx: {},
+    ctx: {
+      network: 'STALE_WHILE_REVALIDATE',
+    },
     autoUpdate: true,
     scope: 'self',
   }

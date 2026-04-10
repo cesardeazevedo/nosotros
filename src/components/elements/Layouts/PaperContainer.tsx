@@ -38,7 +38,7 @@ const styles = css.create({
     display: 'flex',
     flexDirection: 'column',
     marginBottom: 0,
-    borderTopWidth: 0,
+    // borderTopWidth: 0,
     borderBottomColor: palette.outlineVariant,
     borderBottomWidth: 1,
   },

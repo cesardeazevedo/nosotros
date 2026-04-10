@@ -27,7 +27,7 @@ export function createNotificationFeedModule(pubkey: string): NotificationFeedMo
     staleTime: 300000,
     autoUpdate: true,
     includeReplies: true,
-    includeMuted: true,
+    includeMuted: false,
     includeMentions: true,
   }
 }

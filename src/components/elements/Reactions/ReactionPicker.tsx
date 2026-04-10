@@ -6,8 +6,7 @@ import { elevation } from '@/themes/elevation.stylex'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import { motion, useMotionValue, useTransform, type MotionValue } from 'framer-motion'
-import React, { memo, useRef } from 'react'
+import React, { memo, useState } from 'react'
 import { css } from 'react-strict-dom'
 
 type Props = {
@@ -29,42 +28,37 @@ const reactions = {
   angry: { title: 'Angry', reaction: '😡' },
 } as const
 
-const ReactionIconMotion = (props: {
-  reaction: keyof typeof reactions
-  mouseX: MotionValue<number>
-  onClick?: (emoji: string) => void
-}) => {
-  const { mouseX, onClick } = props
-  const ref = useRef<HTMLDivElement | null>(null)
-  const distance = useTransform(mouseX, (value: number) => {
-    const bounds = ref.current?.getBoundingClientRect() ?? { x: 0, width: 0 }
-    return value - bounds.x - bounds.width / 2
-  })
-  const scale = useTransform(distance, [-50, 0, 50], [0.8, 1.8, 0.8])
-  const marginRight = useTransform(distance, [-100, 0, 100], [12, 38, 12])
-  const rotateZ = useTransform(distance, [-100, 0, 100], [0, -8, 0])
-  const rotateZText = useTransform(distance, [-100, 0, 100], [0, 16, 0])
-  const opacity = useTransform(distance, [-50, 0, 50], [0, 1, 0])
+const reactionKeys = Object.keys(reactions) as Array<keyof typeof reactions>
 
+const ReactionIconDesktop = (props: {
+  reaction: keyof typeof reactions
+  onClick?: (emoji: string) => void
+  onHover?: () => void
+  onLeave?: () => void
+  style: React.CSSProperties
+  titleStyle: React.CSSProperties
+}) => {
+  const { onClick } = props
   const { title, reaction } = reactions[props.reaction]
 
   return (
-    <motion.div
-      ref={ref}
+    <div
       onClick={(e) => {
         e.preventDefault()
         e.stopPropagation()
         onClick?.(reaction)
       }}
+      onMouseEnter={props.onHover}
+      onMouseLeave={props.onLeave}
       {...css.props(styles.reaction)}
-      style={{ scale, marginRight, rotateZ }}>
+      style={props.style}>
       {title && (
-        <motion.div {...css.props(styles.title)} style={{ rotateZ: rotateZText, opacity }}>
+        <div {...css.props(styles.title)} style={props.titleStyle}>
           {title}
-        </motion.div>
+        </div>
       )}
       <span>{reaction}</span>
-    </motion.div>
+    </div>
   )
 }
 
@@ -103,19 +97,31 @@ const ReactionDockMobile = ({ onClick }: { onClick: Props['onClick'] }) => {
 }
 
 const ReactionDockMotion = ({ onClick }: { onClick: Props['onClick'] }) => {
-  const mouseX = useMotionValue(250)
-  const props = { mouseX, onClick }
+  const [hovered, setHovered] = useState<keyof typeof reactions | null>(null)
+
   return (
-    <div {...css.props(styles.dock)} onMouseMove={(e) => mouseX.set(e.pageX)}>
-      <ReactionIconMotion reaction='like' {...props} />
-      <ReactionIconMotion reaction='heart' {...props} />
-      <ReactionIconMotion reaction='lfg' {...props} />
-      <ReactionIconMotion reaction='fire' {...props} />
-      <ReactionIconMotion reaction='watching' {...props} />
-      <ReactionIconMotion reaction='haha' {...props} />
-      <ReactionIconMotion reaction='salute' {...props} />
-      <ReactionIconMotion reaction='hugs' {...props} />
-      <ReactionIconMotion reaction='angry' {...props} />
+    <div {...css.props(styles.dock)}>
+      {reactionKeys.map((reactionKey) => {
+        const isHovered = hovered === reactionKey
+
+        return (
+          <ReactionIconDesktop
+            key={reactionKey}
+            reaction={reactionKey}
+            onClick={onClick}
+            onHover={() => setHovered(reactionKey)}
+            onLeave={() => setHovered(null)}
+            style={{
+              transform: isHovered ? 'scale(1.6) rotate(-6deg)' : 'scale(0.9)',
+              marginRight: isHovered ? 32 : 12,
+            }}
+            titleStyle={{
+              opacity: isHovered ? 1 : 0,
+              transform: isHovered ? 'rotate(16deg) scale(0.28)' : 'rotate(0deg) scale(0.28)',
+            }}
+          />
+        )
+      })}
     </div>
   )
 }
@@ -199,6 +205,7 @@ const styles = css.create({
     position: 'relative',
     userSelect: 'none',
     cursor: 'pointer',
+    transition: 'transform 70ms linear, margin-right 70ms linear',
   },
   reaction$mobile: {
     padding: 16,
@@ -212,8 +219,10 @@ const styles = css.create({
     borderRadius: 24,
     top: -30,
     left: -25,
-    scale: 0.28,
+    transformOrigin: 'center',
     fontWeight: 600,
     whiteSpace: 'nowrap',
+    pointerEvents: 'none',
+    transition: 'opacity 70ms linear, transform 70ms linear',
   },
 })

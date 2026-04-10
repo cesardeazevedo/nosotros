@@ -21,10 +21,13 @@ export default defineConfig(({ mode }) => {
       hmr: false,
     },
     optimizeDeps: {
-      exclude: ['@sqlite.org/sqlite-wasm'],
+      exclude: ['@sqlite.org/sqlite-wasm', '@jsquash/avif', '@jsquash/jpeg', '@jsquash/png', '@jsquash/webp'],
     },
     build: {
       sourcemap: true,
+    },
+    worker: {
+      format: 'es',
     },
     define: {
       global: {},
@@ -123,7 +126,7 @@ export default defineConfig(({ mode }) => {
         },
         workbox: {
           sourcemap: true,
-          maximumFileSizeToCacheInBytes: 2800000,
+          maximumFileSizeToCacheInBytes: 2950000,
           globPatterns: ['**/*.{js,css,svg,ico}'],
           globIgnores: [
             'assets/clarity-*.js', // this file from shiki is crashing for some reason

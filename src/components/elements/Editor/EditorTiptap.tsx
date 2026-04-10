@@ -3,6 +3,7 @@ import { spacing } from '@/themes/spacing.stylex'
 import { EditorContent as TiptapEditorContent } from '@tiptap/react'
 import { memo, useId } from 'react'
 import { css } from 'react-strict-dom'
+import { EditorDropArea } from './EditorDropArea'
 import { useEditorSelector } from './hooks/useEditor'
 
 type Props = {
@@ -15,18 +16,21 @@ export const EditorTiptap = memo(function EditorTiptap(props: Props) {
   const id = useId()
   const open = useEditorSelector((editor) => editor.open)
   const editor = useEditorSelector((editor) => editor.editor)
+  const addUploadFiles = useEditorSelector((editor) => editor.addUploadFiles)
 
   return (
-    <TiptapEditorContent
-      id={id}
-      editor={editor}
-      {...css.props([
-        styles.root,
-        mobile && styles.root$mobile,
-        dense && styles.root$dense,
-        !open && styles.root$disabled,
-      ])}
-    />
+    <EditorDropArea onFilesDrop={(files) => addUploadFiles(files, editor?.state.selection.from)}>
+      <TiptapEditorContent
+        id={id}
+        editor={editor}
+        {...css.props([
+          styles.root,
+          mobile && styles.root$mobile,
+          dense && styles.root$dense,
+          !open && styles.root$disabled,
+        ])}
+      />
+    </EditorDropArea>
   )
 })
 

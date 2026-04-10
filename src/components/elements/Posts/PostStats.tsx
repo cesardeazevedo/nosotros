@@ -81,7 +81,13 @@ export const PostStats = memo(function PostStats(props: Props) {
             </Text>
             <Stack horizontal wrap gap={0.5}>
               {seenOn?.map((url) => <RelayChip selected key={url} url={url} />)}
-              <RelaySelectPopover onSubmit={(relay) => mutate([note.event, relay])} label='Broadcast' />
+              <RelaySelectPopover
+                onSubmit={(relay) => {
+                  const { metadata, ...event } = note.event as NostrEvent & { metadata?: unknown }
+                  mutate([event, relay])
+                }}
+                label='Broadcast'
+              />
             </Stack>
           </Stack>
         </Stack>

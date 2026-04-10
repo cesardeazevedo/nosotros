@@ -6,12 +6,12 @@ import { useCurrentPubkey } from '../useAuth'
 export type UserState = ReturnType<typeof useUserState>
 
 type UserStateOptions = {
-  syncFollows?: boolean
+  fullUserSync?: boolean
 }
 
 export function useUserState(pubkey?: string, options?: UserStateOptions) {
   const currentPubkey = useCurrentPubkey()
-  const syncFollows = currentPubkey === pubkey ? true : !!options?.syncFollows
-  const params = useMemo(() => ({ pubkey, syncFollows }), [pubkey, syncFollows])
+  const fullUserSync = currentPubkey === pubkey ? true : !!options?.fullUserSync
+  const params = useMemo(() => ({ pubkey, fullUserSync }), [pubkey, fullUserSync])
   return useAtomValue(userFamily(params))
 }

@@ -50,7 +50,6 @@ export const SidebarCollapsed = memo(function SidebarCollapsed(props: Props) {
     strokeWidth: '1.6',
     className: css.props(styles.icon).className,
   }
-  const isListRoute = !!useMatch({ from: '/lists', shouldThrow: false })
   const isNotificationsRoute = !!useMatch({ from: '/notifications', shouldThrow: false })
   const isNoPane = !context.pane
   const isNotifications = context.pane === '/notifications' || (isNotificationsRoute && isNoPane)
@@ -71,11 +70,6 @@ export const SidebarCollapsed = memo(function SidebarCollapsed(props: Props) {
           }}>
           <IconLayoutSidebarLeftExpandFilled {...iconProps} />
         </IconButton>
-        <Tooltip cursor='arrow' enterDelay={0} text='Create note' placement='right'>
-          <Link to='/' search={{ compose: true }}>
-            <IconButton variant='filled' sx={styles.iconButton} icon={<IconPlus size={20} strokeWidth='2.5' />} />
-          </Link>
-        </Tooltip>
         <Link to='/'>
           {({ isActive }) => (
             <IconButton
@@ -122,13 +116,16 @@ export const SidebarCollapsed = memo(function SidebarCollapsed(props: Props) {
             />
           )}
         </Link>
-        <IconButton
-          toggle
-          selected={context.pane === '/lists' || isListRoute}
-          sx={styles.iconButton}
-          icon={<IconListDetails {...iconProps} strokeWidth={1.4} />}
-          onClick={() => context.setPane('/lists')}
-        />
+        <Link to='/lists'>
+          {({ isActive }) => (
+            <IconButton
+              toggle
+              selected={isActive}
+              sx={styles.iconButton}
+              icon={<IconListDetails {...iconProps} strokeWidth={1.4} />}
+            />
+          )}
+        </Link>
         <Link to='/$nostr' params={{ nostr: `${user?.nprofile}` }}>
           {({ isActive }) => (
             <IconButton
@@ -171,6 +168,11 @@ export const SidebarCollapsed = memo(function SidebarCollapsed(props: Props) {
           )}
         </Link>
         <IconButtonSearch placement='right' sx={styles.iconButton} {...iconProps} />
+        <Tooltip cursor='arrow' enterDelay={0} text='Create note' placement='right'>
+          <Link to='/' search={{ compose: true }}>
+            <IconButton variant='filled' sx={styles.iconButton} icon={<IconPlus size={20} strokeWidth='2.5' />} />
+          </Link>
+        </Tooltip>
         <ProfilePopover />
       </Stack>
     </Stack>

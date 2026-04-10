@@ -7,6 +7,7 @@ import { useFeedState } from '@/hooks/state/useFeed'
 import { memo, useMemo, useState } from 'react'
 import { Feed } from '../Feed/Feed'
 import { FeedHeaderNprofile } from '../Feed/headers/FeedHeaderNprofile'
+import { NProfileMutedContent } from './NProfileMutedContent'
 import type { NProfileTabs } from './NProfileFeedTabsState'
 import { NProfileFeedTabsState } from './NProfileFeedTabsState'
 
@@ -29,7 +30,7 @@ export const NProfileColumn = memo(function NProfileColumn(props: Props) {
         return createProfileModule({ nip19, includeReplies: true })
       }
       case 'media': {
-        return createProfileModule({ nip19, filter: { kinds: [Kind.Media] } })
+        return createProfileModule({ nip19, filter: { kinds: [Kind.Media, Kind.Video, Kind.ShortVideo] } })
       }
       case 'articles': {
         return createProfileModule({ nip19, filter: { kinds: [Kind.Article] } })
@@ -43,19 +44,21 @@ export const NProfileColumn = memo(function NProfileColumn(props: Props) {
     <>
       <FeedHeaderNprofile pubkey={pubkey} />
       <Divider />
-      <Feed
-        key={selected}
-        column
-        header={
-          <>
-            <UserProfileHeader pubkey={pubkey} />
-            <Divider />
-            <NProfileFeedTabsState active={selected} onChange={(selected) => setSelected(selected)} />
-            <Divider />
-          </>
-        }
-        feed={feed}
-      />
+      <NProfileMutedContent pubkey={pubkey}>
+        <Feed
+          key={selected}
+          column
+          header={
+            <>
+              <UserProfileHeader pubkey={pubkey} />
+              <Divider />
+              <NProfileFeedTabsState active={selected} onChange={(selected) => setSelected(selected)} />
+              <Divider />
+            </>
+          }
+          feed={feed}
+        />
+      </NProfileMutedContent>
     </>
   )
 })

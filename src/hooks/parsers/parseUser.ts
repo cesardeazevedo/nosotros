@@ -1,5 +1,4 @@
-import { welshmanToProseMirror } from '@/utils/welshmanToProsemirror'
-import { parse } from '@welshman/content'
+import { parse } from '@/utils/contentParser'
 import type { NostrEvent } from 'nostr-tools'
 import type { ContentCustomSchema, Metadata } from '../../nostr/types'
 
@@ -23,7 +22,7 @@ export type UserSchema = Partial<{
 
 function parseUserMetadata(event: NostrEvent) {
   const parsed = JSON.parse(event.content || '{}') as UserSchema
-  const { contentSchema: aboutParsed } = welshmanToProseMirror(parse({ content: parsed.about || '' }), [])
+  const { contentSchema: aboutParsed } = parse({ content: parsed.about || '' })
   const { displayName, username, ...rest } = parsed
   return {
     ...rest,

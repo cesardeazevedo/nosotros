@@ -6,9 +6,7 @@ import { FocusRing } from '../FocusRing/FocusRing'
 import { focusRingTokens } from '../FocusRing/FocusRing.stylex'
 import { dataProps } from '../helpers/dataProps'
 import { mergeRefs } from '../helpers/mergeRefs'
-import type { IVisualState } from '../hooks/useRipple'
-import { useVisualState } from '../hooks/useVisualState'
-import { Ripple } from '../Ripple/Ripple'
+import { useVisualState, type IVisualState } from '../hooks/useVisualState'
 import type { SxProps } from '../types'
 import type { StrictReactDOMButtonProps } from 'react-strict-dom/dist/types/StrictReactDOMButtonProps'
 
@@ -18,13 +16,12 @@ export type Props = StrictReactDOMButtonProps & {
   children?: React.ReactNode
   outlined?: boolean
   disabled?: boolean
-  disabledRipple?: boolean
   visualState?: IVisualState
   onClick?: (e: StrictClickEvent) => void
 }
 
 export const ButtonBase = forwardRef<HTMLButtonElement, Props>(function ButtonBase(props, ref) {
-  const { children, sx, outlined, disabled = false, disabledRipple = false, onClick, tabIndex, ...rest } = props
+  const { children, sx, outlined, disabled = false, onClick, tabIndex, ...rest } = props
   const visualStateRef = useRef<HTMLElement>(null)
   const { visualState, setRef } = useVisualState(props.visualState)
   const allRefs = mergeRefs([setRef, ref, visualStateRef])
@@ -40,7 +37,6 @@ export const ButtonBase = forwardRef<HTMLButtonElement, Props>(function ButtonBa
       {!!outlined && <html.div style={[styles.outline, disabled && styles.outline$disabled]} />}
       <html.div style={[styles.background, disabled && styles.background$disabled]} />
       {!disabled && <FocusRing />}
-      {!disabledRipple && <Ripple disabled={disabled} visualState={visualState} element={visualStateRef} />}
       {children}
     </html.button>
   )

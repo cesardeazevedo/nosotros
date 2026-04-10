@@ -1,5 +1,6 @@
 import { useContentContext } from '@/components/providers/ContentProvider'
 import type { SxProps } from '@/components/ui/types'
+import { shape } from '@/themes/shape.stylex'
 import { useCallback, useState, type ReactNode } from 'react'
 import { css, html } from 'react-strict-dom'
 import type { StrictClickEvent } from 'react-strict-dom/dist/types/StrictReactDOMProps'
@@ -24,15 +25,21 @@ export const BlurContainer = (props: Props) => {
   }
 
   return (
-    <html.div onClick={handleClick}>
-      <html.span style={styles.content}>{props.children({ blurStyles: styles.blur })}</html.span>
+    <html.div style={styles.root} onClick={handleClick}>
+      {props.children({ blurStyles: styles.blur })}
     </html.div>
   )
 }
 
 const styles = css.create({
-  content: {
-    pointerEvents: 'none',
+  root: {
+    position: 'relative',
+    width: 'inherit',
+    height: 'inherit',
+    maxWidth: 'fit-content',
+    maxHeight: 'inherit',
+    borderRadius: shape.lg,
+    overflow: 'hidden',
   },
   blur: {
     filter: 'blur(40px)',

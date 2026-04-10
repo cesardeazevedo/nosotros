@@ -8,14 +8,22 @@ import { TooltipRich } from '@/components/ui/TooltipRich/TooltipRich'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import EmojiPicker, { EmojiStyle, Theme as EmojiTheme } from 'emoji-picker-react'
 import { useSetAtom } from 'jotai'
-import { useActionState, useState } from 'react'
+import type { ComponentProps } from 'react'
+import { lazy, Suspense, useActionState, useState } from 'react'
 import { css } from 'react-strict-dom'
 
 type Props = {
   onCancel?: () => void
 }
+
+const EmojiPicker = lazy(async () => {
+  const mod = await import('emoji-picker-react')
+  const Picker = (props: Omit<ComponentProps<typeof mod.default>, 'theme' | 'emojiStyle'>) => (
+    <mod.default {...props} theme={mod.Theme.AUTO} emojiStyle={mod.EmojiStyle.NATIVE} />
+  )
+  return { default: Picker }
+})
 
 export const DeckForm = (props: Props) => {
   const createDeck = useSetAtom(createDeckAtom)
@@ -45,16 +53,21 @@ export const DeckForm = (props: Props) => {
               placement='bottom-start'
               openEvents={{ click: true, hover: false }}
               content={({ close }) => (
-                <EmojiPicker
-                  open
-                  theme={EmojiTheme.AUTO}
-                  emojiStyle={EmojiStyle.NATIVE}
-                  previewConfig={{ showPreview: false }}
-                  onEmojiClick={({ emoji }) => {
-                    close()
-                    setIcon(emoji)
-                  }}
-                />
+                <Suspense
+                  fallback={
+                    <Stack sx={styles.loading} justify='center' align='center'>
+                      <Text size='sm'>Loading...</Text>
+                    </Stack>
+                  }>
+                  <EmojiPicker
+                    open
+                    previewConfig={{ showPreview: false }}
+                    onEmojiClick={({ emoji }) => {
+                      close()
+                      setIcon(emoji)
+                    }}
+                  />
+                </Suspense>
               )}>
               <ButtonBase sx={styles.emojiButton}>{icon}</ButtonBase>
             </TooltipRich>
@@ -92,5 +105,12 @@ const styles = css.create({
     fontSize: 34,
     width: 80,
     height: 80,
+  },
+  loading: {
+    minWidth: 320,
+    minHeight: 390,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 })

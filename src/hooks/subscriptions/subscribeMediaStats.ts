@@ -4,25 +4,24 @@ import { Kind } from '@/constants/kinds'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import {
   catchError,
-  defaultIfEmpty,
   EMPTY,
   from,
   fromEvent,
-  map,
+  ignoreElements,
+  merge,
   mergeMap,
   of,
   take,
   takeUntil,
   tap,
   timer,
-  toArray,
 } from 'rxjs'
 import { getMimeType } from '../parsers/parseImeta'
 
 function fromImageMetadata(src: string) {
   const img = new Image()
   // We will need to change this when making imgproxy configurable.
-  img.src = `${import.meta.env.VITE_IMGPROXY_URL}/_/feed_img/plain/${src}`
+  img.src = `${import.meta.env.VITE_IMGPROXY_URL}/_/feed_img/plain/${encodeURIComponent(src)}`
 
   return fromEvent(img, 'load').pipe(
     take(1),
@@ -72,100 +71,47 @@ function fromMediaMetadata(mime: 'image' | 'video', src: string, event: NostrEve
 // to avoid content jumping when rendering images and videos
 // Now works on NostrEventDB[]
 export function subscribeMediaStats() {
-  return tap((events: NostrEventDB[]) => {
-    events.forEach((event) => {
-      switch (event.kind) {
-        case Kind.Text:
-        case Kind.Article:
-        case Kind.Comment: {
-          const meta = event.metadata
-          const imeta = meta?.imeta
-          const media =
-            meta?.contentSchema?.content.filter((x) => {
-              return x.type === 'video' || x.type === 'image'
-            }) || []
-
-          if (media.length > 0) {
-            const pipeline$ = from(media).pipe(
-              mergeMap((node) => {
-                const src = node.attrs.src as string
-                const dim = imeta?.[src]?.dim
-
-                if (dim) {
-                  const width = dim.width
-                  const height = dim.height
-
-                  store.set(addMediaDimAtom, {
-                    src,
-                    dim: [width, height],
-                  })
-
-                  return of(event)
-                }
-
-                return fromMediaMetadata(node.type, src, event)
-              }),
-              toArray(),
-              map(() => event),
-              defaultIfEmpty(event),
-              catchError(() => {
+  return mergeMap((events: NostrEventDB[]) =>
+    merge(
+      of(events),
+      from(events).pipe(
+        mergeMap((event) => {
+          switch (event.kind) {
+            case Kind.Text:
+            case Kind.Article:
+            case Kind.Comment: {
+              const media =
+                event.metadata?.contentSchema?.content.filter((x) => x.type === 'video' || x.type === 'image') || []
+              if (!media.length) {
                 return EMPTY
-              }),
-            )
-
-            pipeline$.subscribe()
+              }
+              return from(media).pipe(
+                mergeMap((node) => fromMediaMetadata(node.type, node.attrs.src as string, event)),
+                catchError(() => EMPTY),
+              )
+            }
+            case Kind.Media:
+            case Kind.Video:
+            case Kind.ShortVideo: {
+              const entries = Object.entries(event.metadata?.imeta || {})
+              if (!entries.length) {
+                return EMPTY
+              }
+              return from(entries).pipe(
+                mergeMap(([src, imeta]) => {
+                  const mime = getMimeType(src, imeta)
+                  return mime ? fromMediaMetadata(mime, src, event) : EMPTY
+                }),
+                catchError(() => EMPTY),
+              )
+            }
+            default: {
+              return EMPTY
+            }
           }
-
-          break
-        }
-
-        case Kind.Media: {
-          const meta = event.metadata
-          const entries = Object.entries(meta?.imeta || {})
-
-          if (entries.length > 0) {
-            const pipeline$ = from(entries).pipe(
-              mergeMap(([src, imeta]) => {
-                const dim = imeta.dim
-
-                if (dim) {
-                  const width = dim.width
-                  const height = dim.height
-
-                  store.set(addMediaDimAtom, {
-                    src,
-                    dim: [width, height],
-                  })
-
-                  return of(event)
-                }
-
-                const mime = getMimeType(src, imeta)
-
-                if (mime) {
-                  return fromMediaMetadata(mime, src, event)
-                }
-
-                return EMPTY
-              }),
-              toArray(),
-              map(() => event),
-              defaultIfEmpty(event),
-              catchError(() => {
-                return EMPTY
-              }),
-            )
-
-            pipeline$.subscribe()
-          }
-
-          break
-        }
-
-        default: {
-          break
-        }
-      }
-    })
-  })
+        }),
+        ignoreElements(),
+      ),
+    ),
+  )
 }

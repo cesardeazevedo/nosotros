@@ -1,44 +1,67 @@
+import { Kind } from '@/constants/kinds'
 import { type Database, type SAHPoolUtil } from '@sqlite.org/sqlite-wasm'
 import invariant from 'tiny-invariant'
+import { SqliteEventSearch } from './events/sqlite.events.fts'
 import { SqliteEventStore } from './events/sqlite.events'
 import { SqliteNip05 } from './nip05/sqlite.nip05'
 import { SqliteRelayInfo } from './relayInfo/sqlite.relayInfo'
 import { SqliteRelayStats } from './relayStats/sqlite.relayStats'
 import { SqliteSeen } from './seen/sqlite.seen'
-import { initializeSQLite } from './sqlite.schemas'
+import { SqliteTags } from './tags/sqlite.tags'
+import { deleteSQLiteFile, initializeSQLite } from './sqlite.schemas'
 import { SqliteStats } from './sqlite.stats'
-import type { SqliteMessages } from './sqlite.types'
+import type { NostrEventDB, SqliteMessages } from './sqlite.types'
+import { SqliteUsers } from './users/sqlite.users'
 
 export class SqliteStorage {
   db: Promise<Database>
   pool: Promise<SAHPoolUtil | undefined>
   event: SqliteEventStore
+  eventSearch: SqliteEventSearch
   relayStats: SqliteRelayStats
   relayInfo: SqliteRelayInfo
   nip05: SqliteNip05
   seen: SqliteSeen
   stats: SqliteStats
+  users: SqliteUsers
+  tags: SqliteTags
 
   constructor(public name: string) {
     const init = initializeSQLite(this.name, false)
     this.db = init.then((r) => r.db)
     this.pool = init.then((r) => r.pool)
     this.event = new SqliteEventStore(this.db)
+    this.eventSearch = new SqliteEventSearch(this.db)
     this.relayInfo = new SqliteRelayInfo(this.db)
     this.relayStats = new SqliteRelayStats(this.db)
     this.nip05 = new SqliteNip05(this.db)
     this.seen = new SqliteSeen(this.db)
     this.stats = new SqliteStats()
+    this.users = new SqliteUsers(this.db)
+    this.tags = new SqliteTags()
   }
 
   async deleteDB() {
     const db = await this.db
+    const pool = await this.pool
+
+    if (db.isOpen()) {
+      db.close()
+    }
+
+    await deleteSQLiteFile(`/${this.name}`, pool)
+  }
+
+  async clearDB() {
+    const db = await this.db
     db.exec('DELETE FROM events')
+    db.exec('DELETE FROM events_fts')
     db.exec('DELETE FROM tags')
     db.exec('DELETE FROM relayStats')
     db.exec('DELETE FROM relayInfo')
     db.exec('DELETE FROM seen')
     db.exec('DELETE FROM nip05')
+    db.exec('DELETE FROM users')
   }
 
   async exportDB() {
@@ -52,6 +75,20 @@ export class SqliteStorage {
 
 const DB_NAME = import.meta.env.VITE_DB_NAME
 const store = new SqliteStorage(DB_NAME)
+
+function insertUser(event: NostrEventDB) {
+  const userMetadata = event.metadata?.userMetadata as { name?: string; display_name?: string } | undefined
+  const name = userMetadata?.name?.trim() || undefined
+  const display_name = userMetadata?.display_name?.trim() || undefined
+  const resolvedName = (name || display_name || '').trim()
+  if (resolvedName) {
+    store.users.upsert({
+      pubkey: event.pubkey,
+      name: resolvedName,
+      display_name,
+    })
+  }
+}
 
 async function onMessage(e: MessageEvent) {
   const db = await store.db
@@ -87,10 +124,24 @@ async function onMessage(e: MessageEvent) {
     }
     case 'insertEvent': {
       store.event.insert(msg.params)
+      store.eventSearch.index(msg.params)
+      if (msg.params.kind === Kind.Metadata) {
+        insertUser(msg.params)
+      }
+      break
+    }
+    // insert event without batch
+    case 'publishEvent': {
+      store.event.insertEvent(db, msg.params)
+      store.eventSearch.indexEvent(db, msg.params)
+      if (msg.params.kind === Kind.Metadata) {
+        insertUser(msg.params)
+      }
       break
     }
     case 'deleteEvent': {
       store.event.delete(db, msg.params)
+      store.eventSearch.delete(db, msg.params)
       break
     }
     case 'querySeen': {
@@ -129,6 +180,20 @@ async function onMessage(e: MessageEvent) {
       store.nip05.insert(msg.params)
       break
     }
+    case 'queryTags': {
+      const res = store.tags.queryValues(db, msg.params)
+      postMessage(msg, res)
+      break
+    }
+    case 'queryUsers': {
+      const res = store.users.query(db, msg.params)
+      postMessage(msg, res)
+      break
+    }
+    case 'upsertUser': {
+      store.users.upsert(msg.params)
+      break
+    }
     case 'countEvents': {
       const res = store.stats.countEvents(db)
       postMessage(msg, res)
@@ -139,7 +204,7 @@ async function onMessage(e: MessageEvent) {
       postMessage(msg, res)
       break
     }
-    case 'dbSize ': {
+    case 'dbSize': {
       const bytes = store.stats.dbSizeBytes(db)
       postMessage(msg, bytes)
       break
@@ -147,6 +212,11 @@ async function onMessage(e: MessageEvent) {
     case 'exportDB': {
       const res = await store.exportDB()
       postMessage(msg, res)
+      break
+    }
+    case 'clearDB': {
+      await store.clearDB()
+      postMessage(msg, { success: true })
       break
     }
     case 'deleteDB': {

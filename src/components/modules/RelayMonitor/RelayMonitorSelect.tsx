@@ -14,9 +14,10 @@ export const RelayMonitorSelect = memo(function RelayMonitorSelect(props: Props)
   const { feed } = props
   return (
     <>
-      <Stack sx={styles.root} gap={0.5}>
+      <Stack sx={styles.root} gap={0.5} wrap>
         {feed.listMonitors.map((monitor) => (
           <UserChip
+            key={monitor}
             selected={feed.selected === monitor}
             pubkey={monitor}
             onClick={() => feed.setSelectedMonitor(monitor)}

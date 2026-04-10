@@ -29,7 +29,7 @@ export const PostActions = memo(function PostActions(props: Props) {
   const mobile = useMobile()
 
   return (
-    <Stack horizontal sx={[styles.root, dense && styles.root$dense, sx]} gap={dense ? 0 : mobile ? 0 : 1}>
+    <Stack horizontal justify='space-between' sx={[styles.root, dense && styles.root$dense, sx]} gap={dense ? 0 : mobile ? 0 : 1}>
       <ButtonReaction />
       <ButtonRepost />
       {renderReply && (
@@ -49,7 +49,6 @@ export const PostActions = memo(function PostActions(props: Props) {
 const styles = css.create({
   root: {
     padding: 16,
-    justifyContent: 'space-between',
   },
   root$dense: {
     padding: 0,

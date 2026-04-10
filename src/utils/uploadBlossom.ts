@@ -1,6 +1,7 @@
 import { Base64 } from 'js-base64'
 import type { UploadTask } from 'nostr-editor'
 import type { EventTemplate, NostrEvent } from 'nostr-tools/core'
+import { uploadXHRRequest } from './uploadXHR'
 
 export interface BlossomOptions {
   file: File
@@ -8,6 +9,7 @@ export interface BlossomOptions {
   expiration?: number
   hash?: (file: File) => Promise<string>
   sign?: (event: EventTemplate) => Promise<NostrEvent> | NostrEvent
+  onProgress?: (progress: number) => void
 }
 
 export interface BlossomResponse {
@@ -24,6 +26,11 @@ export interface BlossomResponseError {
 }
 
 const mapUrlWithExtension = (url: string) => (tag: string[]) => (tag[0] === 'url' ? [tag[0], url] : tag)
+
+const getBlossomUploadUrl = (serverUrl: string) => {
+  const base = serverUrl.endsWith('/') ? serverUrl : `${serverUrl}/`
+  return new URL('upload', base).toString()
+}
 
 export async function uploadBlossom(options: BlossomOptions): Promise<UploadTask> {
   if (!options.hash) {
@@ -49,18 +56,23 @@ export async function uploadBlossom(options: BlossomOptions): Promise<UploadTask
   })
   const base64 = Base64.encode(JSON.stringify(event))
   const authorization = `Nostr ${base64}`
-  const res = await fetch(options.serverUrl + '/upload', {
-    method: 'PUT',
-    body: options.file,
-    headers: {
-      authorization,
+  const response = await uploadXHRRequest<BlossomResponse>(
+    {
+      method: 'PUT',
+      url: getBlossomUploadUrl(options.serverUrl),
+      headers: {
+        authorization,
+      },
+      body: options.file,
+      parseResponse: (xhr) => JSON.parse(xhr.responseText) as BlossomResponse,
     },
-  })
-  if (res.status !== 200) {
-    const reason = res.headers.get('X-Reason')
+    options.onProgress,
+  )
+  if (response.status !== 200) {
+    const reason = response.xhr.getResponseHeader('X-Reason')
     throw new Error(reason || 'Error on blossom upload')
   }
-  const data = await res.json()
+  const data = response.body
   const { nip94, ...json } = data as BlossomResponse
   // Always append file extension if missing
   const { pathname } = new URL(json.url)

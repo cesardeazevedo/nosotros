@@ -3,7 +3,7 @@ import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { useCurrentPubkey } from '@/hooks/useAuth'
 import { spacing } from '@/themes/spacing.stylex'
-import { IconServerBolt, IconSettings, IconUser } from '@tabler/icons-react'
+import { IconFileDescription, IconServerBolt, IconSettings, IconUser } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
 import { css } from 'react-strict-dom'
 import { LinkProfile } from '../Links/LinkProfile'
@@ -33,6 +33,14 @@ export const ProfilePopoverMenu = (props: Props) => {
       )}
       <Link to='/relays'>
         <MenuItem size='sm' leadingIcon={<IconServerBolt {...iconProps} />} onClick={props.onAction} label='Relays' />
+      </Link>
+      <Link to='/drafts'>
+        <MenuItem
+          size='sm'
+          leadingIcon={<IconFileDescription {...iconProps} />}
+          onClick={props.onAction}
+          label='Drafts'
+        />
       </Link>
       <Link to='/settings'>
         <MenuItem size='sm' leadingIcon={<IconSettings {...iconProps} />} onClick={props.onAction} label='Settings' />
