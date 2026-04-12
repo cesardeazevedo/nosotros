@@ -64,7 +64,10 @@ describe('subscribeOutbox', () => {
     expect(spy.getValues()).toStrictEqual([[RELAY_FALLBACK_1, { ...filter }]])
   })
 
-  async function assertField(field: '#p' | '#P', createMockRelay: (relayUrl: string, events: ReturnType<typeof fakeEvent>[]) => RelayServer) {
+  async function assertField(
+    field: '#p' | '#P',
+    createMockRelay: (relayUrl: string, events: ReturnType<typeof fakeEvent>[]) => RelayServer,
+  ) {
     const pubkey = 'p1' as string
     const filter = { kinds: [Kind.Metadata], [field]: [pubkey] } as NostrFilter
     const ctx = {} as NostrContext
@@ -100,15 +103,20 @@ describe('subscribeOutbox', () => {
   })
 
   // assert tags ids
-  async function testTagIds(tag: Record<string, string[]>, createMockRelay: (relayUrl: string, events: ReturnType<typeof fakeEvent>[]) => RelayServer) {
+  async function testTagIds(
+    tag: Record<string, string[]>,
+    createMockRelay: (relayUrl: string, events: ReturnType<typeof fakeEvent>[]) => RelayServer,
+  ) {
     const pubkey = 'p2'
     const filter: NostrFilter = { kinds: [Kind.Metadata], ...tag }
     const ctx = {
       relayHints: {
-        idHints: Object.values(tag).flat().reduce((acc, id) => {
-          return { ...acc, [id]: [pubkey] }
-        }, {})
-      }
+        idHints: Object.values(tag)
+          .flat()
+          .reduce((acc, id) => {
+            return { ...acc, [id]: [pubkey] }
+          }, {}),
+      },
     } as NostrContext
 
     const relayOutbox = createMockRelay(RELAY_OUTBOX_1, [
@@ -133,19 +141,19 @@ describe('subscribeOutbox', () => {
     expect(spy.getValues()).toStrictEqual([[RELAY_3, { ...filter }]])
   }
 
-  test("assert #a tags to READ relays", async ({ createMockRelay }) => {
+  test('assert #a tags to READ relays', async ({ createMockRelay }) => {
     await testTagIds({ '#a': ['30023:p2:123'] }, createMockRelay)
   })
 
-  test("assert #e tags to READ relays", async ({ createMockRelay }) => {
+  test('assert #e tags to READ relays', async ({ createMockRelay }) => {
     await testTagIds({ '#e': ['e1'] }, createMockRelay)
   })
 
-  test("assert #E tags to READ relays", async ({ createMockRelay }) => {
+  test('assert #E tags to READ relays', async ({ createMockRelay }) => {
     await testTagIds({ '#E': ['E1'] }, createMockRelay)
   })
 
-  test("assert #A tags to READ relays", async ({ createMockRelay }) => {
+  test('assert #A tags to READ relays', async ({ createMockRelay }) => {
     await testTagIds({ '#A': ['30023:p2:123'] }, createMockRelay)
   })
 })

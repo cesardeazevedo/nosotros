@@ -5,6 +5,7 @@ import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { queryClient } from '@/hooks/query/queryClient'
 import { queryKeys } from '@/hooks/query/queryKeys'
 import type { FeedModule } from '@/hooks/query/useQueryFeeds'
+import { fakeEventMeta } from '@/utils/faker'
 import { test } from '@/utils/fixtures'
 import type { QueryKey } from '@tanstack/react-query'
 import { QueryClientProvider } from '@tanstack/react-query'
@@ -15,7 +16,6 @@ import { queryClientAtom } from 'jotai-tanstack-query'
 import React, { useMemo } from 'react'
 import { vi } from 'vitest'
 import { useFeedState } from '../useFeed'
-import { fakeEventMeta } from '@/utils/faker'
 
 function createModule(id: string, extras?: Partial<FeedModule>): FeedModule {
   return {
@@ -55,7 +55,7 @@ describe('assert useFeedState minimal', () => {
     })
 
     expect(result.current.isEmpty).toBe(false)
-    act(() => vi.advanceTimersByTime(8000))
+    act(() => vi.advanceTimersByTime(17000))
 
     expect(result.current.isEmpty).toBe(true)
   })

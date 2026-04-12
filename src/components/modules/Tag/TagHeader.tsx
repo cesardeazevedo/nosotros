@@ -10,7 +10,7 @@ import { dedupe } from '@/core/helpers/dedupe'
 import type { FeedState } from '@/hooks/state/useFeed'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconPlus } from '@tabler/icons-react'
-import { useMatch, useNavigate } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router'
 import { memo, useActionState, useMemo, useState } from 'react'
 import { css, html } from 'react-strict-dom'
 
@@ -26,11 +26,9 @@ export const TagHeader = memo(function TagHeader(props: Props) {
   const [activeTag, setActiveTag] = useState<string | null>(null)
   const [tagsOpen, setTagsOpen] = useState(false)
   const [query, setQuery] = useState('')
-  const isDeck = !!useMatch({ from: '/deck/$id', shouldThrow: false })
   const navigate = useNavigate()
 
   const updateUrlTags = (next: string[]) => {
-    if (isDeck) return
     navigate({
       to: '.',
       replace: true,
@@ -112,12 +110,7 @@ export const TagHeader = memo(function TagHeader(props: Props) {
             <Paper elevation={2} surface='surfaceContainerLow' sx={styles.tagsPopover}>
               <form action={submit}>
                 <Stack gap={0.5}>
-                  <SearchField
-                    name='tag'
-                    placeholder='#tag'
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                  />
+                  <SearchField name='tag' placeholder='#tag' value={query} onChange={(e) => setQuery(e.target.value)} />
                 </Stack>
               </form>
               <Stack gap={0.5} wrap sx={styles.tagsList}>
@@ -164,12 +157,7 @@ export const TagHeader = memo(function TagHeader(props: Props) {
             <Paper elevation={2} surface='surfaceContainerLow' sx={styles.popover}>
               <form action={submit}>
                 <Stack gap={0.5}>
-                  <SearchField
-                    name='tag'
-                    placeholder='#tag'
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                  />
+                  <SearchField name='tag' placeholder='#tag' value={query} onChange={(e) => setQuery(e.target.value)} />
                 </Stack>
               </form>
               <TagSuggestions query={query} onSelect={addTag} exclude={existing} limit={50} />

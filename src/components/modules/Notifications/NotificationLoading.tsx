@@ -5,7 +5,6 @@ import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import React, { memo } from 'react'
 import { css } from 'react-strict-dom'
-import { useDeckColumn } from '../Deck/hooks/useDeck'
 
 type Props = {
   rows?: number
@@ -13,7 +12,6 @@ type Props = {
 
 export const NotificationLoading = memo(function NotificationLoading({ rows = 2 }: Props) {
   const list = [...Array(rows).keys()]
-  const isDeck = useDeckColumn()?.index !== undefined
 
   return list.map((key, index) => (
     <React.Fragment key={key}>
@@ -21,7 +19,7 @@ export const NotificationLoading = memo(function NotificationLoading({ rows = 2 
         <Skeleton variant='circular' animation='wave' sx={styles.circle} />
         <Skeleton variant='rectangular' animation='wave' sx={styles.content} />
       </Stack>
-      {(index !== list.length - 1 || isDeck) && <Divider />}
+      {(index !== list.length - 1) && <Divider />}
     </React.Fragment>
   ))
 })

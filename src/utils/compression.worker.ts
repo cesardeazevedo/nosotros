@@ -214,10 +214,7 @@ const calculateOptimalResolution = (width: number, height: number, maxWidth: num
   return { width: evenWidth, height: evenHeight }
 }
 
-const calculateCompressionSettings = (
-  targetSize: number,
-  metadata: VideoMetadata,
-) => {
+const calculateCompressionSettings = (targetSize: number, metadata: VideoMetadata) => {
   const efficiency = metadata.hasMotion ? 0.8 : 0.85
   const targetBitrate = Math.round(((targetSize * 8) / metadata.duration / 1000) * efficiency)
   const audioBitrate = Math.min(128, Math.round(targetBitrate * 0.12))
@@ -350,7 +347,9 @@ self.onmessage = async (event: MessageEvent<RequestMessage>) => {
   const payload = event.data
   try {
     if (payload.type === 'compress-image') {
-      const file = await compressImageInWorker(payload.file, payload.quality, (progress) => postProgress(payload.id, progress))
+      const file = await compressImageInWorker(payload.file, payload.quality, (progress) =>
+        postProgress(payload.id, progress),
+      )
       self.postMessage({ type: 'done', id: payload.id, file })
       return
     }

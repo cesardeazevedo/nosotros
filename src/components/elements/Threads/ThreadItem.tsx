@@ -1,4 +1,3 @@
-import { useDeckColumn } from '@/components/modules/Deck/hooks/useDeck'
 import { ContentProvider } from '@/components/providers/ContentProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { useEventReplies } from '@/hooks/query/useReplies'
@@ -40,10 +39,7 @@ export const ThreadItem = memo(function ThreadItem(props: Props) {
   } = props
   const { event } = note
   const ref = useRef<HTMLDivElement>(null)
-  const deck = useDeckColumn()
-  const isCurrentRoute = useIsCurrentRouteEventID(event)
-  const isDeck = deck?.type === 'event' && deck.filter?.ids?.[0] === event.id
-  const isCurrentEvent = isDeck || isCurrentRoute
+  const isCurrentEvent = useIsCurrentRouteEventID(event)
 
   useEffect(() => {
     if (isCurrentEvent && ref.current) {
@@ -74,15 +70,12 @@ export const ThreadItem = memo(function ThreadItem(props: Props) {
               <PostActions
                 renderOptions
                 statsPopover
-                note={note}
                 onReplyClick={() => note.actions.toggleReplying()}
               />
             </Stack>
           </Stack>
         </html.div>
-        {renderEditor && isCurrentEvent && renderDivider && (
-          <ThreadHorizontalDivider />
-        )}
+        {renderEditor && isCurrentEvent && renderDivider && <ThreadHorizontalDivider />}
         {renderEditor && <ThreadEditor note={note} onEditorDiscard={onEditorDiscard} />}
       </ContentProvider>
       {(renderReplies || note.state.repliesOpen === true) && (

@@ -16,7 +16,16 @@ type Props = {
 }
 
 export const ThreadParents = memo(function ThreadParent(props: Props) {
-  const { event, renderEditor, level, maxLevel, parentSummaryCount, parentSummaryPubkeys, includeRootParent = true, renderThreadIndicator = true } = props
+  const {
+    event,
+    renderEditor,
+    level,
+    maxLevel,
+    parentSummaryCount,
+    parentSummaryPubkeys,
+    includeRootParent = true,
+    renderThreadIndicator = true,
+  } = props
   const parent = useParentEvent(event)
 
   return (

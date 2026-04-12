@@ -1,5 +1,5 @@
 import { useContentContext } from '@/components/providers/ContentProvider'
-import { useNoteContext } from '@/components/providers/NoteProvider'
+import { useEventContext } from '@/components/providers/NoteProvider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { useReposts, useRepostsByPubkey } from '@/hooks/query/useReposts'
@@ -14,7 +14,7 @@ import { RepostPopover } from '../../Repost/RepostPopover'
 import { iconProps } from './utils'
 
 export const ButtonRepost = memo(function ButtonRepost() {
-  const { event } = useNoteContext()
+  const { event } = useEventContext()
   const { dense } = useContentContext()
   const pubkey = useCurrentPubkey()
   const reposts = useReposts(event)
@@ -27,7 +27,7 @@ export const ButtonRepost = memo(function ButtonRepost() {
         <IconButton
           {...getProps()}
           ref={setRef}
-          toggle={!!reposted}
+          selected={!!reposted}
           size={dense ? 'sm' : 'md'}
           onClick={(e) => {
             open()

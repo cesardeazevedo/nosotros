@@ -30,6 +30,23 @@ export type RelayInfoStored = {
   data: string
 }
 
+export type SqliteNearestUserEmbedding = {
+  pubkey: string
+  model_id: string
+  created_at: number
+  distance: number
+  similarity: number
+  vector: number[]
+  is_anchor?: boolean
+}
+
+export type SqliteHybridUserSearchResult = UserDB & {
+  model_id: string
+  created_at: number
+  distance: number
+  similarity: number
+}
+
 export type SqliteMessageResponse<T> = { result: T } | { error: string }
 export type SqliteMessageResponseError = { error: string }
 export type SqliteUsersRelaysParams = [string[], Pick<NostrContext, 'permission' | 'ignoreRelays' | 'maxRelaysPerUser'>]
@@ -56,6 +73,13 @@ export type SqliteMessages =
   | { method: 'insertNip05'; params: Nip05DB }
   | { method: 'queryTags'; params: { tag: string; query?: string; limit?: number } }
   | { method: 'queryUsers'; params: { prefix: string; limit?: number } }
+  | { method: 'queryUsersWithEmbeddings'; params: { prefix: string; limit?: number; modelId?: string } }
+  | { method: 'queryEmbeddedPubkeys'; params: { pubkeys: string[]; modelId?: string } }
+  | {
+      method: 'queryUsersByEmbedding'
+      params: { prefix: string; vector: number[]; limit?: number; modelId?: string; candidateLimit?: number }
+    }
+  | { method: 'queryNearestUserEmbeddings'; params: { pubkey: string; limit?: number; offset?: number } }
   | { method: 'upsertUser'; params: UserDB }
   | { method: 'countEvents' }
   | { method: 'countTags' }

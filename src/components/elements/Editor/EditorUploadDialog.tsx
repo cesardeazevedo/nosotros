@@ -1,4 +1,9 @@
-import { filesAtom, selectFilesForUploadAtom, setUploadDialogConfigAtom, uploadDialogConfigAtom } from '@/atoms/upload.atoms'
+import {
+  filesAtom,
+  selectFilesForUploadAtom,
+  setUploadDialogConfigAtom,
+  uploadDialogConfigAtom,
+} from '@/atoms/upload.atoms'
 import { DialogSheet } from '@/components/elements/Layouts/Dialog'
 import { UploadServersMenuList } from '@/components/elements/Upload/UploadServersMenuList'
 import { Button } from '@/components/ui/Button/Button'
@@ -44,12 +49,7 @@ export const EditorUploadDialog = (props: Props) => {
     <DialogSheet open={open} onClose={onClose} maxWidth={pendingFiles.length > 1 ? 'lg' : 'md'}>
       <Stack horizontal={false} gap={0} sx={styles.root}>
         <Stack sx={styles.header} justify='space-between' align='center'>
-          <IconButton
-            size='md'
-            onClick={onClose}
-            icon={<IconX size={24} />}
-            aria-label='Close'
-          />
+          <IconButton size='md' onClick={onClose} icon={<IconX size={24} />} aria-label='Close' />
           <Text variant='title' size='lg'>
             Upload Media
           </Text>
@@ -61,7 +61,11 @@ export const EditorUploadDialog = (props: Props) => {
         <Stack horizontal={!isMobile} align='stretch'>
           <Stack grow sx={styles.mediaColumn}>
             <Stack sx={styles.files}>
-              <MediaListEditor files={pendingFiles} onAddMedia={() => selectFiles()} disableAddMedia={Boolean(uploading)} />
+              <MediaListEditor
+                files={pendingFiles}
+                onAddMedia={() => selectFiles()}
+                disableAddMedia={Boolean(uploading)}
+              />
             </Stack>
           </Stack>
           <Divider orientation={isMobile ? 'horizontal' : 'vertical'} />

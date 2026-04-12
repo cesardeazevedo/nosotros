@@ -4,7 +4,12 @@ import type { Filter, NostrEvent } from 'nostr-tools'
 import { isAddressableKind, isReplaceableKind } from 'nostr-tools/kinds'
 import type { Nip05DB, RelayInfoDB, RelayStatsDB, SeenDB, UserDB } from '../types'
 import { SqliteSharedService } from './sqlite.shared'
-import type { NostrEventDB, NostrEventExists } from './sqlite.types'
+import type {
+  NostrEventDB,
+  NostrEventExists,
+  SqliteHybridUserSearchResult,
+  SqliteNearestUserEmbedding,
+} from './sqlite.types'
 import { type SqliteMessages } from './sqlite.types'
 
 export class SqliteStorage {
@@ -127,6 +132,34 @@ export class SqliteStorage {
     return await this.send<UserDB[]>({
       method: 'queryUsers',
       params: { prefix, limit },
+    })
+  }
+
+  async queryUsersWithEmbeddings(prefix: string, limit = 20, modelId?: string) {
+    return await this.send<UserDB[]>({
+      method: 'queryUsersWithEmbeddings',
+      params: { prefix, limit, modelId },
+    })
+  }
+
+  async queryEmbeddedPubkeys(pubkeys: string[], modelId?: string) {
+    return await this.send<string[]>({
+      method: 'queryEmbeddedPubkeys',
+      params: { pubkeys, modelId },
+    })
+  }
+
+  async queryUsersByEmbedding(prefix: string, vector: number[], limit = 20, modelId?: string, candidateLimit?: number) {
+    return await this.send<SqliteHybridUserSearchResult[]>({
+      method: 'queryUsersByEmbedding',
+      params: { prefix, vector, limit, modelId, candidateLimit },
+    })
+  }
+
+  async queryNearestUserEmbeddings(pubkey: string, limit = 50, offset = 0) {
+    return await this.send<SqliteNearestUserEmbedding[]>({
+      method: 'queryNearestUserEmbeddings',
+      params: { pubkey, limit, offset },
     })
   }
 

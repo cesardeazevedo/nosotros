@@ -89,14 +89,24 @@ const Options = memo(function Options(props: PropsOptions) {
           label='Details'
           onClick={props.onDetailsClick}
         />
-        <MenuItem {...itemProps} leadingIcon={<IconCopy {...iconProps} />} label='Copy ID' onClick={props.onCopyIdClick} />
+        <MenuItem
+          {...itemProps}
+          leadingIcon={<IconCopy {...iconProps} />}
+          label='Copy ID'
+          onClick={props.onCopyIdClick}
+        />
         <MenuItem
           {...itemProps}
           leadingIcon={<IconCopy {...iconProps} />}
           label='Copy Author ID'
           onClick={props.onCopyAuthorIdClick}
         />
-        <MenuItem {...itemProps} leadingIcon={<IconLink {...iconProps} />} label='Copy Link' onClick={props.onCopyLinkClick} />
+        <MenuItem
+          {...itemProps}
+          leadingIcon={<IconLink {...iconProps} />}
+          label='Copy Link'
+          onClick={props.onCopyLinkClick}
+        />
         <ContentLink tooltip={false} underline={false} href={`https://njump.me/${nevent}`} sx={styles.link}>
           <MenuItem {...itemProps} leadingIcon={<IconExternalLink {...iconProps} />} label='Njump.me' />
         </ContentLink>
@@ -157,8 +167,8 @@ const PostOptionsContent = memo(function PostOptionsContent(props: {
   const { mutateAsync: requestDelete } = usePublishEventMutation<{ target: NostrEventDB }>({
     mutationFn:
       ({ signer, pubkey }) =>
-        ({ target }) =>
-          publishDeleteRequest(pubkey, target, { signer }),
+      ({ target }) =>
+        publishDeleteRequest(pubkey, target, { signer }),
   })
 
   const handleCopy = useCallback((value: string | undefined) => {
@@ -258,6 +268,7 @@ export const PostOptions = memo(function PostOptions(props: Props) {
               open()
             }}
             size={dense ? 'sm' : 'md'}
+            // size='sm'
             icon={<IconDotsVertical stroke='currentColor' strokeWidth='2.0' size={dense ? 16 : 18} opacity={0.8} />}
           />
         )}

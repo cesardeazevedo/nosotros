@@ -1,5 +1,4 @@
 import { Chip } from '@/components/ui/Chip/Chip'
-import { Divider } from '@/components/ui/Divider/Divider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { Kind } from '@/constants/kinds'
@@ -58,7 +57,6 @@ export const FeedSettings = memo(function FeedSettings(props: Props) {
 
   return (
     <html.div style={styles.root}>
-      <Divider />
       <Stack horizontal={false} sx={styles.content} gap={1}>
         <Text variant='label' size='lg' sx={styles.label}>
           Content

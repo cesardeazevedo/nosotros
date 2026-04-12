@@ -1,4 +1,4 @@
-import { useNoteContext } from '@/components/providers/NoteProvider'
+import { useEventContext } from '@/components/providers/NoteProvider'
 import { Button } from '@/components/ui/Button/Button'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
@@ -26,7 +26,7 @@ type ZapInfo = {
 }
 
 export const ZapNoteList = memo(function ZapNoteList() {
-  const { event } = useNoteContext()
+  const { event } = useEventContext()
   const zaps = useZaps(event)
   const theme = useCurrentTheme()
   const [pageSize, setPageSize] = useState(10)

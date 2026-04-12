@@ -28,8 +28,9 @@ describe('useRelativeDate', () => {
     const { result, rerender } = renderHook(
       ({ style }: { style: Intl.RelativeTimeFormatStyle }) => useRelativeDate(date, style),
       {
-      initialProps: { style: 'narrow' },
-    })
+        initialProps: { style: 'narrow' },
+      },
+    )
 
     expect(result.current).toEqual(['1 min. ', 'Feb 21, 2026, 8:09 PM'])
 

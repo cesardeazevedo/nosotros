@@ -2,9 +2,8 @@ import { useRouteUtilsContext } from '@/components/providers/RouteUtilsProvider'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import type { FeedState } from '@/hooks/state/useFeed'
 import { useAtomValue } from 'jotai'
-import type { BaseSyntheticEvent } from 'react'
 import React, { memo, useCallback, useLayoutEffect, useMemo, useRef } from 'react'
-import { css, html } from 'react-strict-dom'
+import { html } from 'react-strict-dom'
 import { FeedNewPosts } from './FeedNewPosts'
 
 type FeedListBaseItem = {
@@ -13,7 +12,6 @@ type FeedListBaseItem = {
 
 export type Props<T = NostrEventDB> = {
   feed: FeedState
-  column?: boolean
   renderNewPostsIndicator?: boolean
   onScrollEnd?: () => void
   render: (item: T) => React.ReactNode
@@ -26,93 +24,66 @@ export type Props<T = NostrEventDB> = {
 }
 
 const FeedListBase = function FeedList<T = NostrEventDB>(props: Props<T>) {
-  const { feed, render, onScrollEnd, column, renderNewPostsIndicator = true } = props
+  const { feed, render, onScrollEnd, renderNewPostsIndicator = true } = props
   const ref = useRef<HTMLDivElement>(null)
   const { hiddenRoute } = useRouteUtilsContext()
 
   const data = useAtomValue(feed.atoms.data)
-  const baseList = useMemo(
-    () => data?.pages.flat().slice(0, feed.pageSize) || [],
-    [data?.pages, feed.pageSize],
-  )
+  const baseList = useMemo(() => data?.pages.flat().slice(0, feed.pageSize) || [], [data?.pages, feed.pageSize])
   const list = props.items ?? (baseList as unknown as T[])
 
-  useLayoutEffect(() => {
-    if (!column) {
-      const abort = new AbortController()
-      document.addEventListener('scroll', handleWindowScroll, { signal: abort.signal })
-      return () => abort.abort()
-    }
-  })
-
-  const handleWindowScroll = useCallback(() => {
+  const handleScroll = useCallback(() => {
     if (hiddenRoute) {
       return
     }
-    const offset = document.scrollingElement?.scrollTop || 0
-    if (offset >= (document.scrollingElement?.scrollHeight || Infinity) - 2100) {
+    const element = ref.current?.closest('section[role="region"]') as HTMLElement | null
+    if (!element) {
+      return
+    }
+    const offset = element.scrollTop
+    if (offset >= (element.scrollHeight || Infinity) - 2500) {
       onScrollEnd?.()
     }
-  }, [onScrollEnd, hiddenRoute])
+  }, [hiddenRoute, onScrollEnd])
 
-  const handleScrollColumn = useCallback(
-    (e: BaseSyntheticEvent) => {
-      const offset = e.target.scrollTop
-      if (offset >= (e.target.scrollHeight || Infinity) - 2500) {
-        onScrollEnd?.()
-      }
-    },
-    [onScrollEnd],
-  )
+  useLayoutEffect(() => {
+    const element = ref.current?.closest('section[role="region"]') as HTMLElement | null
+    if (!element) {
+      return
+    }
+    const abort = new AbortController()
+    element.addEventListener('scroll', handleScroll, { signal: abort.signal })
+    return () => abort.abort()
+  }, [handleScroll])
 
   const content = useMemo(() => {
     return list.map((item, index) => {
-      const key =
-        props.getItemKey?.(item, index) ||
-        ((item as FeedListBaseItem)?.id ?? String(index))
+      const key = props.getItemKey?.(item, index) || ((item as FeedListBaseItem)?.id ?? String(index))
       return <React.Fragment key={key}>{render(item)}</React.Fragment>
     })
   }, [list, props.getItemKey, render])
 
-  if (column) {
-    return (
-      <html.div data-feed-scroll='1' style={styles.column} ref={ref} onScroll={handleScrollColumn}>
-        {props.header}
-        {!props.wrapper && renderNewPostsIndicator && <FeedNewPosts ref={ref} feed={feed} />}
-        {props.wrapper ? (
-          <>
-            {props.wrapper(
-              <>
-                {renderNewPostsIndicator && <FeedNewPosts ref={ref} feed={feed} />}
-                {content}
-              </>,
-            )}
-          </>
-        ) : (
-          content
-        )}
-        {props.footer}
-      </html.div>
-    )
-  }
   return (
-    <>
+    <html.div ref={ref}>
       {props.header}
-      {feed.options.live !== false && <FeedNewPosts feed={feed} />}
-      {props.wrapper ? props.wrapper(<>{content}</>) : content}
+      {!props.wrapper && renderNewPostsIndicator && feed.options.live !== false && (
+        <FeedNewPosts ref={ref} feed={feed} />
+      )}
+      {props.wrapper ? (
+        <>
+          {props.wrapper(
+            <>
+              {renderNewPostsIndicator && feed.options.live !== false && <FeedNewPosts ref={ref} feed={feed} />}
+              {content}
+            </>,
+          )}
+        </>
+      ) : (
+        content
+      )}
       {props.footer}
-    </>
+    </html.div>
   )
 }
 
-export const FeedList = memo(FeedListBase) as <T = NostrEventDB>(
-  props: Props<T>,
-) => React.JSX.Element
-
-const styles = css.create({
-  column: {
-    position: 'relative',
-    height: 'calc(100vh - 70px)',
-    overflow: 'scroll',
-  },
-})
+export const FeedList = memo(FeedListBase) as <T = NostrEventDB>(props: Props<T>) => React.JSX.Element

@@ -15,10 +15,7 @@ export const ToastDraftSaved = memo(function ToastDraftSaved() {
     <Stack horizontal={false} sx={styles.root} gap={1}>
       <Text size='lg'>Draft saved</Text>
       <Link to='/drafts' className={css.props(styles.link).className}>
-        <Button
-          fullWidth
-          variant='filledTonal'
-          onClick={() => dequeueToast()}>
+        <Button fullWidth variant='filledTonal' onClick={() => dequeueToast()}>
           See drafts
         </Button>
       </Link>

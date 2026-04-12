@@ -52,7 +52,6 @@ export const SearchContent = memo(function SearchContent(props: Props) {
   } = props
 
   const [selectedIndex, setSelectedIndex] = useState(initialSelected)
-  // const searchRef = useRef<{ users: User[] } | null>(null)
 
   const handleKeyUp = useCallback(() => {
     setSelectedIndex((prev) => (prev + limit - 1) % limit)
@@ -80,7 +79,8 @@ export const SearchContent = memo(function SearchContent(props: Props) {
           handleKeyDown()
           return true
         }
-        case 'Enter': {
+        case 'Enter':
+        case 'Tab': {
           event.preventDefault()
           const item = items[selectedIndex]
           if (item) {

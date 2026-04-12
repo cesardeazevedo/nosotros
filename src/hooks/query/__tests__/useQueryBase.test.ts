@@ -46,12 +46,8 @@ describe('createEventQueryOptions', () => {
 
     mockSubscribeStrategy
       .mockReset()
-      .mockImplementationOnce(() =>
-        of([event1]),
-      )
-      .mockImplementationOnce(() =>
-        of([event2]).pipe(delay(50)),
-      )
+      .mockImplementationOnce(() => of([event1]))
+      .mockImplementationOnce(() => of([event2]).pipe(delay(50)))
 
     const result = await renderReactQueryHook(
       createEventQueryOptions({

@@ -6,7 +6,7 @@ import { setSeenData } from '@/hooks/query/useSeen'
 import { fakeEventMeta } from '@/utils/faker'
 import { test } from '@/utils/fixtures'
 import { getEventId } from '@/utils/nip19'
-import type { NostrEvent } from 'nostr-tools'
+import { nip19, type NostrEvent } from 'nostr-tools'
 import { useReplyTags } from '../useEditor'
 
 const setSeenRelays = (event: NostrEvent, relays: string[]) => {
@@ -26,6 +26,7 @@ const setUserRelayList = (pubkey: string, relay: string) => {
 const setEventInCache = (event: ReturnType<typeof fakeEventMeta>) => {
   const queryKey = eventToQueryKey(event)
   if (queryKey) {
+    // console.log('Setting event in cache', queryKey, event)
     queryClient.setQueryData(queryKey, [event])
   }
 }
@@ -74,9 +75,7 @@ describe('useReplyTags', () => {
       ])
     })
 
-    test('assert root without author relay list.', async ({
-      renderHookWithQueryProvider,
-    }) => {
+    test('assert root without author relay list.', async ({ renderHookWithQueryProvider }) => {
       const pubkey1 = 'pubkey1'
       const e1 = 'e1'
 
@@ -144,6 +143,19 @@ describe('useReplyTags', () => {
         pubkey: pubkey1,
       })
 
+      const mentionPubkey = 'c6603b0f1ccfec625d9c08b753e4f774eaf7d1cf2769223125b5fd4da728019e'
+      const mention = nip19.nprofileEncode({ pubkey: mentionPubkey, relays: [RELAY_1] })
+      const parentEvent = fakeEventMeta({
+        kind: Kind.Text,
+        id: e2,
+        content: `nostr:${mention}`,
+        pubkey: pubkey2,
+        tags: [
+          ['p', mentionPubkey],
+          ['p', pubkey1],
+        ],
+      })
+
       const replyEvent = fakeEventMeta({
         kind: Kind.Text,
         id: e3,
@@ -152,13 +164,21 @@ describe('useReplyTags', () => {
         tags: [
           ['e', e1, '', 'root', pubkey1],
           ['e', e2, '', 'reply', pubkey2],
+          ['p', pubkey1],
+          ['p', pubkey2],
         ],
       })
 
       setSeenRelays(rootEvent, [RELAY_3])
       setSeenRelays(replyEvent, [RELAY_2])
+      // setUserRelayList(pubkey3, RELAY_1)
+      setUserRelayList(pubkey1, RELAY_1)
+      setUserRelayList(pubkey2, RELAY_1)
       setUserRelayList(pubkey3, RELAY_1)
+      setUserRelayList(mentionPubkey, RELAY_1)
       setEventInCache(rootEvent)
+      setEventInCache(parentEvent)
+      setEventInCache(replyEvent)
 
       const { result } = renderHookWithQueryProvider(() => useReplyTags(replyEvent))
 
@@ -168,6 +188,9 @@ describe('useReplyTags', () => {
         ['e', e1, RELAY_3, 'root', pubkey1],
         ['e', e3, RELAY_2, 'reply', pubkey3],
         ['p', pubkey3, RELAY_1],
+        ['p', pubkey1, RELAY_1],
+        ['p', pubkey2, RELAY_1],
+        ['p', mentionPubkey, RELAY_1],
       ])
     })
   })
@@ -183,7 +206,6 @@ describe('useReplyTags', () => {
         pubkey: pubkey1,
         tags: [['d', 'article-slug']],
       })
-
 
       setSeenRelays(article, [RELAY_1])
       setUserRelayList(pubkey1, RELAY_2)

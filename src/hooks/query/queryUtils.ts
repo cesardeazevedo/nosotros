@@ -68,6 +68,9 @@ export function setEventData(event: NostrEventDB) {
       break
     }
   }
+
+  queryClient.setQueryData(queryKeys.event(event.id), [event])
+
   const queryKey = eventToQueryKey(event)
   if (queryKey) {
     queryClient.setQueryData(queryKey, [event])
@@ -81,10 +84,7 @@ export function prependEventFeed(queryKey: QueryKey, events: Array<NostrEventDB>
     if (data) {
       return {
         ...data,
-        pages: [
-          dedupeById([...sorted, ...data.pages[0]]),
-          ...data.pages.slice(1),
-        ],
+        pages: [dedupeById([...sorted, ...data.pages[0]]), ...data.pages.slice(1)],
       }
     }
     return {

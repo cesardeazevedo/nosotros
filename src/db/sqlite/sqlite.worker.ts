@@ -1,16 +1,16 @@
 import { Kind } from '@/constants/kinds'
 import { type Database, type SAHPoolUtil } from '@sqlite.org/sqlite-wasm'
 import invariant from 'tiny-invariant'
-import { SqliteEventSearch } from './events/sqlite.events.fts'
 import { SqliteEventStore } from './events/sqlite.events'
+import { SqliteEventSearch } from './events/sqlite.events.fts'
 import { SqliteNip05 } from './nip05/sqlite.nip05'
 import { SqliteRelayInfo } from './relayInfo/sqlite.relayInfo'
 import { SqliteRelayStats } from './relayStats/sqlite.relayStats'
 import { SqliteSeen } from './seen/sqlite.seen'
-import { SqliteTags } from './tags/sqlite.tags'
 import { deleteSQLiteFile, initializeSQLite } from './sqlite.schemas'
 import { SqliteStats } from './sqlite.stats'
 import type { NostrEventDB, SqliteMessages } from './sqlite.types'
+import { SqliteTags } from './tags/sqlite.tags'
 import { SqliteUsers } from './users/sqlite.users'
 
 export class SqliteStorage {
@@ -56,6 +56,7 @@ export class SqliteStorage {
     const db = await this.db
     db.exec('DELETE FROM events')
     db.exec('DELETE FROM events_fts')
+    db.exec('DELETE FROM user_embeddings')
     db.exec('DELETE FROM tags')
     db.exec('DELETE FROM relayStats')
     db.exec('DELETE FROM relayInfo')
@@ -187,6 +188,26 @@ async function onMessage(e: MessageEvent) {
     }
     case 'queryUsers': {
       const res = store.users.query(db, msg.params)
+      postMessage(msg, res)
+      break
+    }
+    case 'queryUsersWithEmbeddings': {
+      const res = store.users.queryWithEmbeddings(db, msg.params)
+      postMessage(msg, res)
+      break
+    }
+    case 'queryEmbeddedPubkeys': {
+      const res = store.users.queryEmbeddedPubkeys(db, msg.params)
+      postMessage(msg, res)
+      break
+    }
+    case 'queryUsersByEmbedding': {
+      const res = store.users.queryByEmbedding(db, msg.params)
+      postMessage(msg, res)
+      break
+    }
+    case 'queryNearestUserEmbeddings': {
+      const res = store.event.embeddings.queryNearestToPubkey(db, msg.params.pubkey, msg.params.limit, msg.params.offset)
       postMessage(msg, res)
       break
     }

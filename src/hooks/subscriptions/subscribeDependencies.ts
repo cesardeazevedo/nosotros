@@ -25,6 +25,7 @@ const subscribeIds = (ctx: NostrContext, ids: string[], relayHints?: NostrContex
   }
   const depsCtx = {
     ...ctx,
+    queryKey: ['deps', ids],
     network: 'CACHE_FIRST_BATCH',
     subId: 'deps',
     relayHints,
@@ -55,7 +56,7 @@ const subscribeQuotes = (ctx: NostrContext, options?: QuoteOptions) => {
         const ids = dedupe(mentions)
         return subscribeIds(ctx, ids, event.metadata?.relayHints)
       }),
-      skip(1)
+      skip(1),
     )
   })
 }
@@ -103,7 +104,7 @@ export function subscribeDependencies(ctx: NostrContext, options?: Options) {
           event$.pipe(subscribeRepost(ctx), ignoreElements()),
           event$.pipe(subscribeParents(ctx), ignoreElements()),
         )
-      })
+      }),
     )
   })
 }

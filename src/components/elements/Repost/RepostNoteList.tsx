@@ -1,4 +1,4 @@
-import { useNoteContext } from '@/components/providers/NoteProvider'
+import { useEventContext } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { useReposts } from '@/hooks/query/useReposts'
@@ -10,7 +10,7 @@ import { css } from 'react-strict-dom'
 import { UserAvatar } from '../User/UserAvatar'
 
 export const RepostNoteList = memo(function RepostNoteList() {
-  const { event } = useNoteContext()
+  const { event } = useEventContext()
   const reposts = useReposts(event)
 
   const repostsList = useMemo(() => {

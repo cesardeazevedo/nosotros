@@ -14,6 +14,7 @@ import { from } from 'rxjs'
 import { test as base } from 'vitest'
 import type { MockRelayOptions } from './testHelpers'
 import { RelayServer, TestSigner } from './testHelpers'
+import { JotaiProvider } from '@/components/providers/JotaiProvider'
 
 interface Fixtures {
   pool: Pool
@@ -22,7 +23,7 @@ interface Fixtures {
   insertEvents: (events: NostrEventDB[]) => Promise<void>
   reset: () => void
   signer: TestSigner
-  renderHookWithQueryProvider: <Result>(options: (initialProps: unknown) => Result) => RenderHookResult<Result, unknown>,
+  renderHookWithQueryProvider: <Result>(options: (initialProps: unknown) => Result) => RenderHookResult<Result, unknown>
   renderReactQueryHook: (queryOptions: UseQueryOptions<NostrEventDB[]>) => Promise<UseQueryResult>
 }
 
@@ -69,7 +70,9 @@ export const test = base.extend<Fixtures>({
   renderHookWithQueryProvider: async ({ }, use) => {
     await use((options) => {
       const wrapper = ({ children }: { children: React.ReactNode }) => (
-        <QueryProvider client={queryClient}>{children}</QueryProvider>
+        <QueryProvider client={queryClient}>
+          <JotaiProvider client={queryClient}>{children}</JotaiProvider>
+        </QueryProvider>
       )
       return renderHook(options, { wrapper })
     })

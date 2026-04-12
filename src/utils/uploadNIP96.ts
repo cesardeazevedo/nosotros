@@ -18,11 +18,17 @@ export async function uploadNIP96(options: NIP96Options): Promise<UploadTask> {
   }
   const server = await readServerConfig(options.serverUrl)
   const authorization = await getToken(server.api_url, 'POST', options.sign, true)
-  const res = await uploadFile(options.file, server.api_url, authorization, {
-    alt: options.alt || '',
-    expiration: options.expiration?.toString() || '',
-    content_type: options.file.type,
-  }, options.onProgress)
+  const res = await uploadFile(
+    options.file,
+    server.api_url,
+    authorization,
+    {
+      alt: options.alt || '',
+      expiration: options.expiration?.toString() || '',
+      content_type: options.file.type,
+    },
+    options.onProgress,
+  )
   const url = res.nip94_event?.tags.find((x) => x[0] === 'url')?.[1] || ''
   const sha256 = res.nip94_event?.tags.find((x) => x[0] === 'x')?.[1] || ''
   return {

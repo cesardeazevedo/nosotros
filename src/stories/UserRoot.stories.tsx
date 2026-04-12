@@ -37,8 +37,6 @@ const meta = {
   ],
   args: {
     pubkey: 'p1',
-    border: false,
-    renderBanner: false,
   },
 } satisfies Meta<typeof UserRoot>
 
@@ -103,15 +101,15 @@ export const AllBioVariations: Story = {
   ],
   render: () => (
     <>
-      <UserRoot pubkey='p1' border />
-      <UserRoot pubkey='p2' border />
-      <UserRoot pubkey='p3' border />
-      <UserRoot pubkey='p4' border />
-      <UserRoot pubkey='p5' border />
-      <UserRoot pubkey='p6' border />
-      <UserRoot pubkey='p7' border />
-      <UserRoot pubkey='p8' border />
-      <UserRoot pubkey='p9' border />
+      <UserRoot pubkey='p1' />
+      <UserRoot pubkey='p2' />
+      <UserRoot pubkey='p3' />
+      <UserRoot pubkey='p4' />
+      <UserRoot pubkey='p5' />
+      <UserRoot pubkey='p6' />
+      <UserRoot pubkey='p7' />
+      <UserRoot pubkey='p8' />
+      <UserRoot pubkey='p9' />
     </>
   ),
 }

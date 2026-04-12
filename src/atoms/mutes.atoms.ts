@@ -7,7 +7,7 @@ import { atomWithQuery } from 'jotai-tanstack-query'
 import { atomFamily } from 'jotai/utils'
 import { selectedPubkeyAtom, signerAtom } from './auth.atoms'
 
-const userMutesQueryFamily = atomFamily(
+export const userMutesQueryFamily = atomFamily(
   (params: { pubkey: string | undefined; enabled: boolean }) => {
     const { pubkey, enabled } = params
     return atomWithQuery(() =>
@@ -31,6 +31,7 @@ const userMuteSetsQueryFamily = atomFamily(
         },
         enabled: !!pubkey && enabled,
         ctx: {
+          subId: 'mute_sets',
           network: 'STALE_WHILE_REVALIDATE',
         },
       })
@@ -96,9 +97,7 @@ const userMuteSetTagsQueryFamily = atomFamily(
     })
   },
   (a, b) =>
-    a.event?.id === b.event?.id &&
-    a.event?.created_at === b.event?.created_at &&
-    a.event?.content === b.event?.content,
+    a.event?.id === b.event?.id && a.event?.created_at === b.event?.created_at && a.event?.content === b.event?.content,
 )
 
 export const userMutedStateFamily = atomFamily(

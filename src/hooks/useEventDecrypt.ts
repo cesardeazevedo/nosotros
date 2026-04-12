@@ -10,7 +10,10 @@ export function useEventDecrypt(event: NostrEventDB | undefined): UseEventDecryp
   const signer = useCurrentSigner()
   const pubkey = useCurrentPubkey()
 
-  const decryptedEvent$ = useObservable<UseEventDecryptResult, [NostrEventDB | undefined, typeof signer, string | undefined]>(
+  const decryptedEvent$ = useObservable<
+    UseEventDecryptResult,
+    [NostrEventDB | undefined, typeof signer, string | undefined]
+  >(
     (input$) => {
       return input$.pipe(
         switchMap(([currentEvent, currentSigner, currentPubkey]) => {

@@ -247,6 +247,36 @@ describe('welshmanToProseMirror', () => {
     })
   })
 
+  test('assert dashed emoji tag parses to inline emoji node', () => {
+    const event = fakeEvent({
+      content: ':party-blob:',
+      tags: [
+        ['emoji', 'party-blob', 'https://cdn.example.com/party-blob.webp'],
+        ['client', 'TestClient'],
+      ],
+    })
+
+    const { contentSchema } = parse({ content: event.content, tags: event.tags })
+
+    expect(contentSchema).toStrictEqual({
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [
+            {
+              type: 'emoji',
+              attrs: {
+                name: 'party-blob',
+                src: 'https://cdn.example.com/party-blob.webp',
+              },
+            },
+          ],
+        },
+      ],
+    })
+  })
+
   test('assert subdomain bare link', () => {
     const event = fakeEvent({
       content: 'Docs: docs.api.nostr.com/path',
@@ -462,7 +492,6 @@ describe('welshmanToProseMirror', () => {
     })
   })
 
-
   test('assert markdown content', () => {
     const event = fakeEvent({
       kind: 30023,
@@ -477,125 +506,123 @@ describe('welshmanToProseMirror', () => {
         `,
     })
     const { contentSchema } = parse({ content: event.content, tags: event.tags, markdown: true })
-    expect(contentSchema).toStrictEqual(
-      {
-        "content": [
-          {
-            "attrs": {
-              "level": 1,
-            },
-            "content": [
-              {
-                "text": "Title",
-                "type": "text",
-              },
-            ],
-            "type": "heading",
+    expect(contentSchema).toStrictEqual({
+      content: [
+        {
+          attrs: {
+            level: 1,
           },
-          {
-            "attrs": {
-              "tight": true,
+          content: [
+            {
+              text: 'Title',
+              type: 'text',
             },
-            "content": [
-              {
-                "content": [
-                  {
-                    "content": [
-                      {
-                        "text": "list 1",
-                        "type": "text",
-                      },
-                    ],
-                    "type": "paragraph",
-                  },
-                ],
-                "type": "listItem",
-              },
-              {
-                "content": [
-                  {
-                    "content": [
-                      {
-                        "text": "list 2",
-                        "type": "text",
-                      },
-                    ],
-                    "type": "paragraph",
-                  },
-                ],
-                "type": "listItem",
-              },
-              {
-                "content": [
-                  {
-                    "content": [
-                      {
-                        "text": "list 3",
-                        "type": "text",
-                      },
-                    ],
-                    "type": "paragraph",
-                  },
-                ],
-                "type": "listItem",
-              },
-            ],
-            "type": "bulletList",
+          ],
+          type: 'heading',
+        },
+        {
+          attrs: {
+            tight: true,
           },
-          {
-            "content": [
-              {
-                "text": "text ",
-                "type": "text",
-              },
-              {
-                "marks": [
-                  {
-                    "type": "bold",
-                  },
-                ],
-                "text": "bold",
-                "type": "text",
-              },
-              {
-                "text": " ",
-                "type": "text",
-              },
-              {
-                "marks": [
-                  {
-                    "type": "italic",
-                  },
-                ],
-                "text": "italic",
-                "type": "text",
-              },
-              {
-                "text": " ",
-                "type": "text",
-              },
-              {
-                "marks": [
-                  {
-                    "attrs": {
-                      "class": null,
-                      "href": "https://nostr.com",
-                      "rel": "noopener noreferrer nofollow",
-                      "target": "_blank",
+          content: [
+            {
+              content: [
+                {
+                  content: [
+                    {
+                      text: 'list 1',
+                      type: 'text',
                     },
-                    "type": "link",
+                  ],
+                  type: 'paragraph',
+                },
+              ],
+              type: 'listItem',
+            },
+            {
+              content: [
+                {
+                  content: [
+                    {
+                      text: 'list 2',
+                      type: 'text',
+                    },
+                  ],
+                  type: 'paragraph',
+                },
+              ],
+              type: 'listItem',
+            },
+            {
+              content: [
+                {
+                  content: [
+                    {
+                      text: 'list 3',
+                      type: 'text',
+                    },
+                  ],
+                  type: 'paragraph',
+                },
+              ],
+              type: 'listItem',
+            },
+          ],
+          type: 'bulletList',
+        },
+        {
+          content: [
+            {
+              text: 'text ',
+              type: 'text',
+            },
+            {
+              marks: [
+                {
+                  type: 'bold',
+                },
+              ],
+              text: 'bold',
+              type: 'text',
+            },
+            {
+              text: ' ',
+              type: 'text',
+            },
+            {
+              marks: [
+                {
+                  type: 'italic',
+                },
+              ],
+              text: 'italic',
+              type: 'text',
+            },
+            {
+              text: ' ',
+              type: 'text',
+            },
+            {
+              marks: [
+                {
+                  attrs: {
+                    class: null,
+                    href: 'https://nostr.com',
+                    rel: 'noopener noreferrer nofollow',
+                    target: '_blank',
                   },
-                ],
-                "text": "link",
-                "type": "text",
-              },
-            ],
-            "type": "paragraph",
-          },
-        ],
-        "type": "doc",
-      }
-    )
+                  type: 'link',
+                },
+              ],
+              text: 'link',
+              type: 'text',
+            },
+          ],
+          type: 'paragraph',
+        },
+      ],
+      type: 'doc',
+    })
   })
 
   test('assert nostr links inside markdown', () => {
@@ -606,33 +633,33 @@ describe('welshmanToProseMirror', () => {
     const { contentSchema } = parse({ content: event.content, tags: event.tags, markdown: true })
     expect(contentSchema).toMatchInlineSnapshot(
       {
-        "content": [
+        content: [
           {
-            "attrs": {
-              "level": 3,
+            attrs: {
+              level: 3,
             },
-            "content": [
+            content: [
               {
-                "text": "Test ",
-                "type": "text",
+                text: 'Test ',
+                type: 'text',
               },
               {
-                "attrs": {
-                  "bech32": "nprofile1qqsvvcpmpuwvlmrztkwq3d6nunmhf6hh688jw6fzxyjmtl2d5u5qr8spz3mhxue69uhhyetvv9ujuerpd46hxtnfdufzkeuj",
-                  "pubkey": "c6603b0f1ccfec625d9c08b753e4f774eaf7d1cf2769223125b5fd4da728019e",
-                  "relays": [
-                    "wss://relay.damus.io",
-                  ],
-                  "type": "nprofile",
+                attrs: {
+                  bech32:
+                    'nprofile1qqsvvcpmpuwvlmrztkwq3d6nunmhf6hh688jw6fzxyjmtl2d5u5qr8spz3mhxue69uhhyetvv9ujuerpd46hxtnfdufzkeuj',
+                  pubkey: 'c6603b0f1ccfec625d9c08b753e4f774eaf7d1cf2769223125b5fd4da728019e',
+                  relays: ['wss://relay.damus.io'],
+                  type: 'nprofile',
                 },
-                "type": "nprofile",
+                type: 'nprofile',
               },
             ],
-            "type": "heading",
+            type: 'heading',
           },
         ],
-        "type": "doc",
-      }, `
+        type: 'doc',
+      },
+      `
       {
         "content": [
           {
@@ -661,7 +688,8 @@ describe('welshmanToProseMirror', () => {
         ],
         "type": "doc",
       }
-    `)
+    `,
+    )
   })
 
   test('assert markdown nested lists', () => {

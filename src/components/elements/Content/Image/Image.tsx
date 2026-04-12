@@ -1,5 +1,5 @@
 import { addMediaDimAtom, mediaErrorsAtom } from '@/atoms/media.atoms'
-import { useNoteContext } from '@/components/providers/NoteProvider'
+import { useEventContext } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { SxProps } from '@/components/ui/types'
 import { useNevent } from '@/hooks/useEventUtils'
@@ -26,7 +26,7 @@ type Props = {
 
 export const Image = memo(function Image(props: Props) {
   const { src, proxy = true, index = 0, cover = false, sx, ...rest } = props
-  const { event } = useNoteContext()
+  const { event } = useEventContext()
   const media = useMediaStore(src, event.metadata?.imeta, proxy)
   const addMediaDim = useSetAtom(addMediaDimAtom)
   const hasError = useAtomValue(mediaErrorsAtom).has(src)
@@ -97,7 +97,7 @@ const styles = css.create({
     height: 'auto',
   },
   loaded: {
-    // width: 'auto',
+    width: 'auto',
     height: 'auto',
   },
   cover: {

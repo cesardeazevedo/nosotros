@@ -1,14 +1,27 @@
 import { Button } from '@/components/ui/Button/Button'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import { useMuted } from '@/hooks/useMuted'
 import { spacing } from '@/themes/spacing.stylex'
+import { useState } from 'react'
 import { css } from 'react-strict-dom'
 
 type Props = {
-  onClick: () => void
+  event: NostrEventDB
+  children: React.ReactNode
 }
 
 export const PostContentHidden = (props: Props) => {
+  const { event, children } = props
+  const { isMuted } = useMuted(event)
+  const [showMutedContent, setShowMutedContent] = useState(false)
+  const hideContent = !!isMuted && !showMutedContent
+
+  if (!hideContent) {
+    return children
+  }
+
   return (
     <Stack horizontal={false} gap={2} align='center' sx={styles.root}>
       <Text variant='title' size='lg' sx={styles.label}>
@@ -19,7 +32,7 @@ export const PostContentHidden = (props: Props) => {
         onClick={(event) => {
           event.preventDefault()
           event.stopPropagation()
-          props.onClick()
+          setShowMutedContent(true)
         }}>
         See Content
       </Button>

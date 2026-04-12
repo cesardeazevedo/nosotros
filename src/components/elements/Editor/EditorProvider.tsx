@@ -16,14 +16,15 @@ const EditorProviderLazy = lazy(async () =>
 export const EditorProvider = memo(function EditorProvider(props: EditorProviderProps) {
   const pubkey = useCurrentPubkey()
   return (
-    <Suspense fallback={
-      <EditorContainer>
-        {pubkey && <UserAvatar pubkey={pubkey} />}
-        <Stack horizontal={false} align='stretch' justify={'center'} grow>
-          <EditorPlaceholder placeholder="What's on your mind?" />
-        </Stack>
-      </EditorContainer>
-    }>
+    <Suspense
+      fallback={
+        <EditorContainer>
+          {pubkey && <UserAvatar pubkey={pubkey} />}
+          <Stack horizontal={false} align='stretch' justify={'center'} grow>
+            <EditorPlaceholder placeholder="What's on your mind?" />
+          </Stack>
+        </EditorContainer>
+      }>
       <EditorProviderLazy {...props} />
     </Suspense>
   )

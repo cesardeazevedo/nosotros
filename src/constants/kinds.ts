@@ -60,6 +60,7 @@ export enum Kind {
   AppCurationSets = 30267,
   TrustedAssertionUser = 30382,
   TrustedList = 30392,
+  UserEmbeddings = 31313,
   Calendar = 31924,
   StarterPack = 39089,
   MediaStarterPack = 39092,

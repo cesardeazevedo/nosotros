@@ -24,18 +24,20 @@ const darkTheme = css.createTheme(palette, {
   errorContainer: colors.red7,
   onErrorContainer: colors.red0,
 
-  surface: '#000000',
+  surface: colors.gray12,
+  surfaceBright: colors.gray9,
   onSurface: '#fff',
   onSurfaceVariant: colors.gray6,
 
-  surfaceContainerLowest: '#000',
-  surfaceContainerLow: colors.gray11,
-  surfaceContainer: colors.gray10,
-  surfaceContainerHigh: colors.gray9,
-  surfaceContainerHighest: colors.gray8,
+  // surfaceContainerLowest: '#0d0e12',// colors.gray11,
+  surfaceContainerLowest: colors.gray11,
+  surfaceContainerLow: '#111417', // colors.gray10,
+  surfaceContainer: colors.gray9,
+  surfaceContainerHigh: colors.gray8,
+  surfaceContainerHighest: colors.gray7,
 
   inverseSurface: colors.gray0,
-  inverseOnSurface: colors.gray10,
+  inverseOnSurface: colors.gray0,
   inversePrimary: colors.gray0,
 
   outline: colors.gray8,

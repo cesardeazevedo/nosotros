@@ -16,21 +16,40 @@ import { UserAvatar } from './UserAvatar'
 type Props = {
   max?: number
   pubkeys: string[]
+  avatarSize?: 'xxs' | 'xs' | 'sm' | 'md'
   description?: ReactNode
+  renderTotal?: boolean
   renderTooltip?: boolean
   onPrimary?: boolean
   borderColor?: keyof ColorPalette
   sx?: SxProps
 }
 
+const ButtonMore = (props: { pubkeys: string[], onClick?: () => void } & Record<string, unknown>) => {
+  const { pubkeys, onClick, ...rest } = props
+  return (
+    <ButtonBase
+      {...rest}
+      onClick={(e) => {
+        e.stopPropagation()
+        onClick?.()
+      }}
+      sx={styles.more}>
+      <Text variant='body' size='sm'>
+        {props.pubkeys.length}
+      </Text>
+    </ButtonBase>
+  )
+}
+
 export const UsersAvatars = function UserAvatars(props: Props) {
-  const { pubkeys, max = 3, description, borderColor, renderTooltip = true, sx } = props
+  const { pubkeys, max = 3, description, borderColor, renderTotal = true, renderTooltip = true, sx, avatarSize = 'xxs' } = props
   const topUsers = pubkeys.slice(0, max)
   const popoverUsers = pubkeys.slice(0, 100)
   const remainingUsers = Math.max(0, pubkeys.length - popoverUsers.length)
   return (
     <Stack justify='center' gap={0.5} sx={[styles.root, sx]}>
-      {renderTooltip && (
+      {renderTooltip ? (
         <Popover
           placement='bottom-start'
           contentRenderer={() => (
@@ -49,23 +68,23 @@ export const UsersAvatars = function UserAvatars(props: Props) {
             </Paper>
           )}>
           {({ open, getProps, setRef }) => (
-            <ButtonBase {...getProps()} ref={setRef} onClick={(e) => {
-              e.stopPropagation()
-              open()
-            }} sx={styles.more}>
-              <Text variant='body' size='sm'>
-                {pubkeys.length}
-              </Text>
-            </ButtonBase>
+            <ButtonMore
+              {...getProps()}
+              ref={setRef}
+              pubkeys={pubkeys}
+              onClick={() => open()}
+            />
           )}
         </Popover>
+      ) : (
+        renderTotal && <ButtonMore pubkeys={pubkeys} />
       )}
       <ContentProvider value={{ disableLink: true, disablePopover: true }}>
         {topUsers.map((pubkey, index) => (
           <UserAvatar
             key={pubkey + index}
             sx={[styles.avatar, borderColor ? styles.avatarBorderColor(borderColor) : null]}
-            size='xs'
+            size={avatarSize}
             pubkey={pubkey}
           />
         ))}

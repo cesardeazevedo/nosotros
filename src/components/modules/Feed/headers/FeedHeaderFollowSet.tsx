@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
 import { skeletonTokens } from '@/components/ui/Skeleton/Skeleton.stylex'
 import { Stack } from '@/components/ui/Stack/Stack'
@@ -12,10 +13,11 @@ import { FeedHeaderBase } from './FeedHeaderBase'
 
 type Props = {
   feed: FeedState
+  leadingPrefix?: ReactNode
 }
 
 export const FeedHeaderFollowSet = function FeedHeaderFollowSet(props: Props) {
-  const { feed } = props
+  const { feed, leadingPrefix } = props
   // this component also supports starter pack
   const kind = feed.filter.kinds?.[0] || Kind.FollowSets
   const author = feed.filter.authors?.[0] || ''
@@ -25,6 +27,7 @@ export const FeedHeaderFollowSet = function FeedHeaderFollowSet(props: Props) {
   return (
     <FeedHeaderBase
       feed={feed}
+      leadingPrefix={leadingPrefix}
       leading={
         <Stack gap={2}>
           {event.data ? <ListChip event={event.data} /> : <Skeleton variant='rectangular' sx={styles.loading} />}

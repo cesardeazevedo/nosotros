@@ -6,11 +6,14 @@ import type { BindableValue, Database } from '@sqlite.org/sqlite-wasm'
 import type { NostrEvent } from 'nostr-tools'
 import { isAddressableKind, isReplaceableKind } from 'nostr-tools/kinds'
 import { InsertBatcher } from '../batcher'
+import { SqliteUserEmbeddings } from '../embeddings/sqlite.embeddings'
 import type { NostrEventDB, NostrEventExists, NostrEventStored } from '../sqlite.types'
+import { queryUserPubkeys } from '../users/sqlite.users'
 import { queryEventSearch } from './sqlite.events.fts'
 
 export class SqliteEventStore {
   batcher: InsertBatcher<NostrEventDB>
+  embeddings = new SqliteUserEmbeddings()
 
   constructor(private db: Promise<Database>) {
     this.batcher = new InsertBatcher(async (events) => {
@@ -131,7 +134,7 @@ export class SqliteEventStore {
       return this.getByIds(db, filter.ids)
     }
     if (filter.search) {
-      return queryEventSearch(db, filter, relays, this.buildQuery.bind(this), this.formatEvent.bind(this))
+      return this.querySearch(db, filter, relays)
     }
 
     const { conditions, params, needsTagJoin, tagName, tagValues } = this.buildQuery(filter, relays)
@@ -167,6 +170,80 @@ export class SqliteEventStore {
     }
 
     const res = db.selectObjects(query, params) || []
+    return res.map((event) => this.formatEvent(event as NostrEventStored))
+  }
+
+  private querySearch(db: Database, filter: NostrFilter, relays: string[] = []) {
+    const kinds = filter.kinds || []
+    const includesMetadata = kinds.includes(Kind.Metadata)
+    const nonMetadataKinds = kinds.filter((kind) => kind !== Kind.Metadata)
+
+    const metadataResults = includesMetadata ? this.queryMetadataSearch(db, filter, relays) : []
+    const eventResults =
+      nonMetadataKinds.length > 0 || !includesMetadata
+        ? queryEventSearch(
+            db,
+            includesMetadata ? { ...filter, kinds: nonMetadataKinds } : filter,
+            relays,
+            this.buildQuery.bind(this),
+            this.formatEvent.bind(this),
+          )
+        : []
+
+    const deduped = new Map<string, NostrEventDB>()
+    for (const event of [...metadataResults, ...eventResults]) {
+      deduped.set(event.id, event)
+    }
+
+    const results = Array.from(deduped.values()).sort((a, b) => b.created_at - a.created_at)
+    const limit = filter.limit
+    return typeof limit === 'number' ? results.slice(0, limit) : results
+  }
+
+  private queryMetadataSearch(db: Database, filter: NostrFilter, relays: string[] = []) {
+    const prefix = filter.search?.trim()
+    if (!prefix) {
+      return []
+    }
+
+    const pubkeys = queryUserPubkeys(db, {
+      prefix,
+      limit: filter.limit,
+    })
+    if (pubkeys.length === 0) {
+      return []
+    }
+
+    const metadataFilter = {
+      ...filter,
+      kinds: [Kind.Metadata],
+      authors: pubkeys,
+      search: undefined,
+    } as NostrFilter
+
+    const { conditions, params } = this.buildQuery(metadataFilter, relays, 'e')
+    const query = `
+      SELECT e.*
+      FROM events e
+      WHERE
+        ${conditions.length ? conditions.join(' AND ') : '1'}
+        AND NOT EXISTS (
+          SELECT 1
+          FROM events newer
+          WHERE newer.kind = e.kind
+            AND newer.pubkey = e.pubkey
+            AND newer.created_at > e.created_at
+        )
+      ORDER BY e.created_at DESC
+      ${filter.limit ? 'LIMIT ?' : ''}
+    `
+
+    const bind: BindableValue[] = [...params]
+    if (filter.limit) {
+      bind.push(filter.limit)
+    }
+
+    const res = db.selectObjects(query, bind) || []
     return res.map((event) => this.formatEvent(event as NostrEventStored))
   }
 
@@ -322,7 +399,6 @@ export class SqliteEventStore {
         )
       }
     }
-
   }
 
   insertEvent(db: Database, event: NostrEventDB) {
@@ -396,10 +472,12 @@ export class SqliteEventStore {
       this.applyDeletionRequest(db, event)
     }
 
+    this.embeddings.insertEvent(db, event)
     return event
   }
 
   delete(db: Database, id: string) {
     db.exec(`DELETE FROM events WHERE id = ?`, { bind: [id] })
+    this.embeddings.delete(db, id)
   }
 }

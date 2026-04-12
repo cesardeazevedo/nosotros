@@ -38,7 +38,7 @@ export const ThreadRelated = memo(function ThreadRelated(props: Props) {
   }, [event.id, rootEvent?.id])
 
   const filteredReplies = useMemo(
-    () => rootEvent ? sorted.filter((r) => r.id !== excludeId) : [],
+    () => (rootEvent ? sorted.filter((r) => r.id !== excludeId) : []),
     [sorted, excludeId, rootEvent],
   )
 
@@ -47,7 +47,9 @@ export const ThreadRelated = memo(function ThreadRelated(props: Props) {
   return (
     <html.div style={styles.root}>
       <html.div style={styles.divider}>
-        <Text variant='label' size='md' sx={styles.label}>Other threads</Text>
+        <Text variant='label' size='md' sx={styles.label}>
+          Other threads
+        </Text>
       </html.div>
       <RepliesTree replies={filteredReplies} repliesOpen={null} level={1} />
     </html.div>
@@ -55,8 +57,7 @@ export const ThreadRelated = memo(function ThreadRelated(props: Props) {
 })
 
 const styles = css.create({
-  root: {
-  },
+  root: {},
   divider: {
     paddingInline: spacing.padding2,
     paddingBottom: spacing.padding2,

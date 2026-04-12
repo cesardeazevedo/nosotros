@@ -1,6 +1,7 @@
 import { STORAGE_SETTINGS_KEY } from '@/constants/storage'
 import { atom } from 'jotai'
-import { atomWithStorage, createJSONStorage, unstable_withStorageValidator as withStorageValidator } from 'jotai/utils'
+import { atomWithStorage, createJSONStorage } from 'jotai/utils'
+import type { SyncStorage } from 'jotai/vanilla/utils/atomWithStorage'
 import { z } from 'zod'
 
 export const settingsSchema = z
@@ -14,8 +15,10 @@ export const settingsSchema = z
     defaultUploadType: z.enum(['blossom', 'nip96']),
     defaultUploadUrl: z.string().url(),
     sidebarCollapsed: z.boolean(),
+    feedsPaneCollapsed: z.boolean().default(false),
     sidebarRelaysCollapsed: z.boolean(),
     notificationsCompact: z.boolean(),
+    renderEmbeddingSimilarity: z.boolean(),
     recentsCollapsed: z.boolean(),
     maxRelaysPerUser: z.number().int().nonnegative(),
     clientTag: z.boolean(),
@@ -34,19 +37,46 @@ export const DEFAULT_SETTINGS: Settings = {
   defaultUploadType: 'nip96',
   defaultUploadUrl: 'https://nostr.build',
   sidebarCollapsed: false,
+  feedsPaneCollapsed: false,
   sidebarRelaysCollapsed: false,
   notificationsCompact: false,
+  renderEmbeddingSimilarity: false,
   recentsCollapsed: false,
   maxRelaysPerUser: 3,
   clientTag: true,
 }
 
-const isSettings = (value: unknown): value is Settings => settingsSchema.safeParse(value).success
+const normalizeSettings = (value: unknown): unknown => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return value
+  }
+
+  const normalized = { ...(value as Record<string, unknown>) }
+  if ('renderEmbeddingsRank' in normalized && !('renderEmbeddingSimilarity' in normalized)) {
+    normalized.renderEmbeddingSimilarity = normalized.renderEmbeddingsRank
+  }
+  delete normalized.renderEmbeddingsRank
+
+  return normalized
+}
+
+const settingsStorageBase = createJSONStorage<Settings>()
+
+const settingsStorage: SyncStorage<Settings> = {
+  getItem: (key: string, initialValue: Settings) => {
+    const value = settingsStorageBase.getItem(key, initialValue)
+    const parsed = settingsSchema.safeParse(normalizeSettings(value))
+    return parsed.success ? parsed.data : initialValue
+  },
+  setItem: settingsStorageBase.setItem,
+  removeItem: settingsStorageBase.removeItem,
+  subscribe: settingsStorageBase.subscribe,
+}
 
 export const settingsAtom = atomWithStorage<Settings>(
   STORAGE_SETTINGS_KEY,
   DEFAULT_SETTINGS,
-  withStorageValidator(isSettings)(createJSONStorage()),
+  settingsStorage,
   { getOnInit: true },
 )
 

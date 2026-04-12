@@ -86,38 +86,44 @@ export const Editor = memo(function Editor(props: Props) {
   return (
     <>
       <EditorContainer open={state.open} onClick={() => state?.setOpen()} renderBubble={renderBubble} sx={sx}>
-        {pubkey && !isXS && <UserAvatar size='md' pubkey={pubkey} />}
-        <Container {...ContainerProps} sx={styles.wrapper}>
-          <Stack horizontal={false} grow>
-            <Stack sx={[styles.content, dense && styles.content$dense]} gap={2} align='stretch'>
-              <Stack horizontal={false} sx={styles.wrapper}>
-                <Stack gap={1}>
-                  <EditorHeader />
-                  {state.open && headerComponent && (
-                    <Stack gap={1}>
-                      <IconChevronRight size={16} strokeWidth='3' />
-                      {headerComponent}
-                    </Stack>
+        <Stack horizontal gap={2} align='flex-start'>
+          {pubkey && !isXS && <UserAvatar size='md' pubkey={pubkey} />}
+          <Container {...ContainerProps} sx={styles.wrapper}>
+            <Stack horizontal={false} grow>
+              <Stack sx={[styles.content, dense && styles.content$dense]} gap={2} align='stretch'>
+                <Stack horizontal={false} sx={styles.wrapper}>
+                  <Stack gap={1}>
+                    <EditorHeader />
+                    {state.open && headerComponent && (
+                      <Stack gap={1}>
+                        <IconChevronRight size={16} strokeWidth='3' />
+                        {headerComponent}
+                      </Stack>
+                    )}
+                  </Stack>
+                  {state.open ? (
+                    <EditorTiptap key='editor' dense={dense} />
+                  ) : (
+                    <EditorPlaceholder placeholder={state.placeholder} />
                   )}
                 </Stack>
-                {state.open ? <EditorTiptap key='editor' dense={dense} /> : <EditorPlaceholder placeholder={state.placeholder} />}
               </Stack>
+              {state.open && (
+                <EditorActions>
+                  <EditorSubmit
+                    submitting={state.submitting}
+                    disabled={isEmpty || state.submitting || state.isUploading}
+                    renderDiscard={renderDiscard}
+                    onSubmit={() => submit(state)}
+                    onDiscard={onDiscard}
+                  />
+                </EditorActions>
+              )}
             </Stack>
-            {state.open && (
-              <EditorActions>
-                <EditorSubmit
-                  submitting={state.submitting}
-                  disabled={isEmpty || state.submitting || state.isUploading}
-                  renderDiscard={renderDiscard}
-                  onSubmit={() => submit(state)}
-                  onDiscard={onDiscard}
-                />
-              </EditorActions>
-            )}
-          </Stack>
-        </Container>
+          </Container>
+        </Stack>
+        {!floatToolbar && <EditorExpandables />}
       </EditorContainer>
-      {!floatToolbar && <EditorExpandables />}
     </>
   )
 })

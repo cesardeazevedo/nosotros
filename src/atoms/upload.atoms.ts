@@ -128,31 +128,28 @@ export const setFileDataAtom = atom(null, (get, set, args: { src: string; attrs:
   )
 })
 
-export const addFileUploadAtom = atom(
-  null,
-  (get, set, args: { file: File; src: string; pos?: number }) => {
-    const files = get(filesAtom)
-    const batchId = crypto.randomUUID()
-    if (files.some((item) => item.src === args.src)) {
-      return
-    }
-    set(filesAtom, [
-      ...files,
-      {
-        id: crypto.randomUUID(),
-        file: args.file,
-        src: args.src,
-        alt: '',
-        tags: [],
-        sha256: '',
-        uploading: false,
-        error: '',
-        pos: args.pos,
-        batchId,
-      } as UploadEditorFile,
-    ])
-  },
-)
+export const addFileUploadAtom = atom(null, (get, set, args: { file: File; src: string; pos?: number }) => {
+  const files = get(filesAtom)
+  const batchId = crypto.randomUUID()
+  if (files.some((item) => item.src === args.src)) {
+    return
+  }
+  set(filesAtom, [
+    ...files,
+    {
+      id: crypto.randomUUID(),
+      file: args.file,
+      src: args.src,
+      alt: '',
+      tags: [],
+      sha256: '',
+      uploading: false,
+      error: '',
+      pos: args.pos,
+      batchId,
+    } as UploadEditorFile,
+  ])
+})
 
 export const selectFilesForUploadAtom = atom(
   null,
@@ -218,7 +215,8 @@ export const uploadFilesAtom = atom(null, async (get, set) => {
     from(pendingFiles).pipe(
       mergeMap((file) => {
         const run = async () => {
-          const fileConfig = get(uploadConfigByFileAtom)[getUploadFileKey(file.file)] || createDefaultUploadConfig(settings)
+          const fileConfig =
+            get(uploadConfigByFileAtom)[getUploadFileKey(file.file)] || createDefaultUploadConfig(settings)
           const isVideo = file.file.type.startsWith('video/')
           let phase: 'compressing' | 'uploading' = 'compressing'
           const qualityLabel =
@@ -264,8 +262,7 @@ export const uploadFilesAtom = atom(null, async (get, set) => {
               sign: signer.sign as (event: EventTemplate) => Promise<NostrEvent>,
               onProgress: setUploadProgress,
             }
-            const uploadRequest = () =>
-              fileConfig.uploadType === 'blossom' ? uploadBlossom(data) : uploadNIP96(data)
+            const uploadRequest = () => (fileConfig.uploadType === 'blossom' ? uploadBlossom(data) : uploadNIP96(data))
 
             const response = await lastValueFrom(
               defer(uploadRequest).pipe(
@@ -348,9 +345,9 @@ export const uploadFilesAtom = atom(null, async (get, set) => {
         const imetaQueryable =
           responses.length === 1
             ? [
-              responses[0].response.result?.tags.find((x) => x[0] === 'm') || [],
-              responses[0].response.result?.tags.find((x) => x[0] === 'x') || [],
-            ]
+                responses[0].response.result?.tags.find((x) => x[0] === 'm') || [],
+                responses[0].response.result?.tags.find((x) => x[0] === 'x') || [],
+              ]
             : []
         const tags = [
           ...imetas,

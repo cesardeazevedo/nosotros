@@ -1,5 +1,5 @@
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
-import { useEventHeadImage, useNevent } from '@/hooks/useEventUtils'
+import { useEventHeadImage } from '@/hooks/useEventUtils'
 import { shape } from '@/themes/shape.stylex'
 import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
@@ -12,7 +12,6 @@ type Props = {
 export const NotificationMedia = memo(function NotificationMedia(props: Props) {
   const { event } = props
 
-  const nevent = useNevent(event)
   const headImage = useEventHeadImage(event)
 
   if (!headImage) {
@@ -20,7 +19,7 @@ export const NotificationMedia = memo(function NotificationMedia(props: Props) {
   }
 
   return (
-    <LinkNEvent nevent={nevent}>
+    <LinkNEvent event={event}>
       <html.div style={styles.root}>
         <html.img style={styles.img} src={headImage} />
       </html.div>

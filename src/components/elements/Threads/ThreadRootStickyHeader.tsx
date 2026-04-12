@@ -149,7 +149,7 @@ const styles = css.create({
   },
   root$fixed: (left: number, width: number) => ({
     position: 'fixed',
-    top: 0,
+    top: 84,
     left,
     width,
     zIndex: 120,

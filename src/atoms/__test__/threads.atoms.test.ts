@@ -120,29 +120,24 @@ const BRANCHES = [
                               fakeEventMeta({ id: 'branch4_14', created_at: 14 }),
                               [
                                 fakeEventMeta({ id: 'branch4_15', created_at: 15 }),
-                                [
-                                  fakeEventMeta({ id: 'branch4_16', created_at: 16 }),
-                                ]
-                              ]
-                            ]
-                          ]
-                        ]
-                      ]
-                    ]
-                  ]
-                ]
-              ]
-            ]
-          ]
-        ]
-      ]
+                                [fakeEventMeta({ id: 'branch4_16', created_at: 16 })],
+                              ],
+                            ],
+                          ],
+                        ],
+                      ],
+                    ],
+                  ],
+                ],
+              ],
+            ],
+          ],
+        ],
+      ],
     ],
   ],
-  [
-    fakeEventMeta({ id: 'branch3_1', created_at: 9 }),
-  ],
+  [fakeEventMeta({ id: 'branch3_1', created_at: 9 })],
 ] as NostrEventDB[][]
-
 
 describe('threads.atoms', () => {
   beforeEach(() => {
@@ -182,31 +177,33 @@ describe('threads.atoms', () => {
 
     const groups = store.get(
       threadGroupsAtomFamily({
-        pages: [[
-          // These are the notes we got from relays,
-          branch1_2,
-          branch1_4,
-          branch2_5,
-          branch2_10,
-          // thread 3
-          branch3_2,
-          branch3_4,
-          branch3_6,
-          branch3_8,
-          branch3_10,
-          branch3_12,
-          branch3_14,
-          branch3_16,
-          // thread 4
-          branch4_2,
-          branch4_4,
-          branch4_6,
-          branch4_8,
-          branch4_10,
-          branch4_12,
-          branch4_14,
-          branch4_16,
-        ]],
+        pages: [
+          [
+            // These are the notes we got from relays,
+            branch1_2,
+            branch1_4,
+            branch2_5,
+            branch2_10,
+            // thread 3
+            branch3_2,
+            branch3_4,
+            branch3_6,
+            branch3_8,
+            branch3_10,
+            branch3_12,
+            branch3_14,
+            branch3_16,
+            // thread 4
+            branch4_2,
+            branch4_4,
+            branch4_6,
+            branch4_8,
+            branch4_10,
+            branch4_12,
+            branch4_14,
+            branch4_16,
+          ],
+        ],
         pageParams: [null],
       }),
     )
@@ -254,16 +251,16 @@ describe('threads.atoms', () => {
                     'branch3_11',
                     'branch3_12',
                     'branch3_13',
-                    'branch3_14'
-                  ]
+                    'branch3_14',
+                  ],
                 },
                 { type: 'parent', eventId: 'branch3_15' },
                 {
                   type: 'reply',
                   eventId: 'branch3_16',
-                  hasChildren: false
-                }
-              ]
+                  hasChildren: false,
+                },
+              ],
             },
             {
               items: [
@@ -283,17 +280,17 @@ describe('threads.atoms', () => {
                     'branch4_11',
                     'branch4_12',
                     'branch4_13',
-                    'branch4_14'
-                  ]
+                    'branch4_14',
+                  ],
                 },
                 { type: 'parent', eventId: 'branch4_15' },
                 {
                   type: 'reply',
                   eventId: 'branch4_16',
-                  hasChildren: false
-                }
-              ]
-            }
+                  hasChildren: false,
+                },
+              ],
+            },
           ],
         },
       ],

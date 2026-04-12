@@ -1,7 +1,7 @@
+import { HeaderBase } from '@/components/elements/Layouts/HeaderBase'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { Stack } from '@/components/ui/Stack/Stack'
-import { Text } from '@/components/ui/Text/Text'
 import { useMobile } from '@/hooks/useMobile'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
@@ -18,11 +18,7 @@ export const SettingsTabs = () => {
   const isMobile = useMobile()
   return (
     <Stack horizontal={false}>
-      <Stack sx={styles.header}>
-        <Text variant='title' size='lg'>
-          Settings
-        </Text>
-      </Stack>
+      <HeaderBase leading='Settings' />
       <Divider />
       <Stack
         grow
@@ -76,17 +72,13 @@ const styles = css.create({
   root: {
     padding: spacing.padding1,
     height: '100%',
-    minWidth: 310,
-    maxWidth: 310,
+    width: '100%',
+    minWidth: 0,
   },
   root$mobile: {
     maxWidth: '100%',
     borderBottom: '1px solid',
     borderBottomColor: palette.outlineVariant,
     backgroundColor: palette.surfaceContainerLow,
-  },
-  header: {
-    paddingBlock: spacing.padding2,
-    paddingInline: spacing.padding4,
   },
 })

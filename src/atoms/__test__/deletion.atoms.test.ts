@@ -13,19 +13,16 @@ describe('assert deletion atoms', () => {
     const eventId = 'deleted-event-1'
     const address = '30023:pubkey:article'
 
-    store.set(
-      addDeletionEventsAtom,
-      [
-        fakeEventMeta({
-          id: 'delete-request-1',
-          kind: Kind.EventDeletion,
-          tags: [
-            ['e', eventId],
-            ['a', address],
-          ],
-        }),
-      ],
-    )
+    store.set(addDeletionEventsAtom, [
+      fakeEventMeta({
+        id: 'delete-request-1',
+        kind: Kind.EventDeletion,
+        tags: [
+          ['e', eventId],
+          ['a', address],
+        ],
+      }),
+    ])
 
     expect(store.get(isDeletedEventAtomFamily(eventId))).toBe(true)
     expect(store.get(isDeletedEventAtomFamily(address))).toBe(true)
@@ -35,16 +32,13 @@ describe('assert deletion atoms', () => {
     const store = createStore()
     const eventId = 'deleted-event-2'
 
-    store.set(
-      addDeletionEventsAtom,
-      [
-        fakeEventMeta({
-          id: 'note-1',
-          kind: Kind.Text,
-          tags: [['e', eventId]],
-        }),
-      ],
-    )
+    store.set(addDeletionEventsAtom, [
+      fakeEventMeta({
+        id: 'note-1',
+        kind: Kind.Text,
+        tags: [['e', eventId]],
+      }),
+    ])
 
     expect(store.get(isDeletedEventAtomFamily(eventId))).toBe(false)
   })
@@ -54,27 +48,21 @@ describe('assert deletion atoms', () => {
     const firstId = 'deleted-event-3'
     const secondId = 'deleted-event-4'
 
-    store.set(
-      addDeletionEventsAtom,
-      [
-        fakeEventMeta({
-          id: 'delete-request-2',
-          kind: Kind.EventDeletion,
-          tags: [['e', firstId]],
-        }),
-      ],
-    )
+    store.set(addDeletionEventsAtom, [
+      fakeEventMeta({
+        id: 'delete-request-2',
+        kind: Kind.EventDeletion,
+        tags: [['e', firstId]],
+      }),
+    ])
 
-    store.set(
-      addDeletionEventsAtom,
-      [
-        fakeEventMeta({
-          id: 'delete-request-3',
-          kind: Kind.EventDeletion,
-          tags: [['e', secondId]],
-        }),
-      ],
-    )
+    store.set(addDeletionEventsAtom, [
+      fakeEventMeta({
+        id: 'delete-request-3',
+        kind: Kind.EventDeletion,
+        tags: [['e', secondId]],
+      }),
+    ])
 
     expect(store.get(isDeletedEventAtomFamily(firstId))).toBe(true)
     expect(store.get(isDeletedEventAtomFamily(secondId))).toBe(true)
@@ -116,7 +104,7 @@ describe('assert deletion atoms with mocked react query', () => {
     const store = createStore()
     store.set(queryClientAtom, queryClient)
     const queryAtom = userRequestDeletesQueryFamily('pubkey')
-    const unsubscribe = store.sub(queryAtom, () => { })
+    const unsubscribe = store.sub(queryAtom, () => {})
     store.get(queryAtom)
 
     await vi.waitFor(() => {

@@ -80,7 +80,7 @@ const styles = css.create({
     overflow: 'hidden',
   },
   header: {
-    paddingInline: spacing.padding3,
+    paddingInline: spacing.padding2,
   },
   content: {
     width: '100%',

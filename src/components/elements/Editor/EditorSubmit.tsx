@@ -26,11 +26,14 @@ export const EditorSubmit = memo(function EditorSubmit(props: Props) {
 
   const isReply = useEditorSelector((editor) => !!editor.parent && editor.parent.kind !== Kind.PublicMessage)
 
-  const handleDiscard = useCallback((event: StrictClickEvent) => {
-    event.stopPropagation()
-    event.preventDefault()
-    onDiscard?.()
-  }, [onDiscard])
+  const handleDiscard = useCallback(
+    (event: StrictClickEvent) => {
+      event.stopPropagation()
+      event.preventDefault()
+      onDiscard?.()
+    },
+    [onDiscard],
+  )
 
   return (
     <Stack gap={0.5}>

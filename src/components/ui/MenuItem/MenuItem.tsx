@@ -12,9 +12,5 @@ export type Props = ListItemProps & {
 // TODO: remove this component entirely
 export const MenuItem = (props: Props) => {
   const { label, htmlFor, keepOpenOnClick, ...other } = props
-  return (
-    <ListItem {...other}>
-      {label}
-    </ListItem>
-  )
+  return <ListItem {...other}>{label}</ListItem>
 }

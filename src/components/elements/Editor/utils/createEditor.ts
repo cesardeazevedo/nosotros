@@ -1,5 +1,6 @@
 import { NEventEditor } from '@/components/elements/Content/NEvent/NEventEditor'
 import { NProfileEditor } from '@/components/elements/Content/NProfile/NProfileEditor'
+import { EmojiExtension } from '@/components/elements/Content/Emoji/EmojiExtension'
 import { SpotifyEditor } from '@/components/elements/Content/Spotify/SpotifyEditor'
 import { SpotifyExtension } from '@/components/elements/Content/Spotify/SpotifyExtension'
 import { TweetEditor } from '@/components/elements/Content/Tweet/TweetEditor'
@@ -49,6 +50,8 @@ const addVideoNodeView = (Component: React.ComponentType<NodeViewProps>) => ({
 type Options = {
   placeholder: () => string
   onFilesSelect: (files: File[], pos?: number) => void
+  resolveEmoji?: (name: string) => { name: string; src: string } | null
+  getEmojiSuggestions?: (query: string) => Array<{ name: string; src: string }>
 }
 
 export function createEditor(options: Options): UseEditorOptions {
@@ -63,6 +66,10 @@ export function createEditor(options: Options): UseEditorOptions {
       DropCursorExtension,
       GapcursorExtension,
       Placeholder.configure({ placeholder: options.placeholder }),
+      EmojiExtension.configure({
+        resolveEmoji: options.resolveEmoji || (() => null),
+        getEmojiSuggestions: options.getEmojiSuggestions || (() => []),
+      }),
       NostrExtension.configure({
         link: {
           openOnClick: false,

@@ -29,7 +29,7 @@ export const FeedSettingsSubmit = (props: Props) => {
           feed.saveFeed()
           onClose?.()
         }}>
-        Save Feed Changes
+        Save Changes
       </Button>
     </Stack>
   )

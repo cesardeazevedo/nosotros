@@ -1,13 +1,18 @@
 import { Kind } from '@/constants/kinds'
+import { EMBEDDINGS_RELAYS } from '@/constants/relays'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
-import { replaceableEventQueryOptions } from '@/hooks/query/useQueryBase'
+import {
+  replaceableEventQueryOptions,
+  trustedAssertionsQueryOptions,
+  userEmbeddingsQueryOptions,
+} from '@/hooks/query/useQueryBase'
 import { encodeSafe } from '@/utils/nip19'
 import { atom } from 'jotai'
 import { atomWithQuery } from 'jotai-tanstack-query'
 import { atomFamily } from 'jotai/utils'
 import { nip19 } from 'nostr-tools'
 import { userRequestDeletesQueryFamily } from './deletion.atoms'
-import { userMutedStateFamily } from './mutes.atoms'
+import { userMutedStateFamily, userMutesQueryFamily } from './mutes.atoms'
 import { nprofileFamily } from './nip19.atoms'
 
 const userEventQueryFamily = atomFamily((pubkey: string | undefined) => {
@@ -25,6 +30,33 @@ const userFollowsQueryFamily = atomFamily(
   },
   (a, b) => a.pubkey === b.pubkey && a.fullUserSync === b.fullUserSync,
 )
+
+export const userTrustedAssertionQueryFamily = atomFamily((pubkey: string | undefined) => {
+  return atomWithQuery(() =>
+    trustedAssertionsQueryOptions(pubkey || '', {
+      // needs to implement kind 10040 first
+      enabled: false,
+      ctx: {
+        relays: EMBEDDINGS_RELAYS,
+        outbox: false,
+        negentropy: false,
+      },
+    }),
+  )
+})
+
+export const userEmbeddingsQueryFamily = atomFamily((pubkey: string | undefined) => {
+  return atomWithQuery(() =>
+    userEmbeddingsQueryOptions(pubkey || '', {
+      enabled: !!pubkey,
+      ctx: {
+        relays: EMBEDDINGS_RELAYS,
+        outbox: false,
+        negentropy: false,
+      },
+    }),
+  )
+})
 
 export const userFamily = atomFamily(
   (params: { pubkey: string | undefined; fullUserSync: boolean }) => {
@@ -55,6 +87,10 @@ export const userFamily = atomFamily(
       const followsAtom = userFollowsQueryFamily({ pubkey, fullUserSync })
       const follows = get(followsAtom)
       const tags = follows.data?.tags || []
+      const trustedAssertion = get(userTrustedAssertionQueryFamily(pubkey))
+      const trustedAssertionEvent = trustedAssertion.data as NostrEventDB | undefined
+      const embeddings = get(userEmbeddingsQueryFamily(pubkey))
+      const mutes = get(userMutesQueryFamily({ pubkey, enabled: fullUserSync }))
 
       if (fullUserSync) {
         get(userRequestDeletesQueryFamily(pubkey))
@@ -79,10 +115,13 @@ export const userFamily = atomFamily(
         initials: displayName?.[0],
         canReceiveZap: !!metadata?.lud06 || !!metadata?.lud16,
         nprofile,
+        trustedAssertionEvent,
+        embeddings,
         totalFollowing: tags.length,
         mutedNotes,
         mutedAuthors,
         follows,
+        mutes,
         followsTag,
         followsAll,
       }

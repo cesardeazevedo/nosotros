@@ -86,7 +86,7 @@ const COLLAPSE_THRESHOLD = 4
 
 type Segment = {
   parentIds: string[] // non-feed events before this feed reply (last one = immediate parent)
-  replyId: string     // feed reply
+  replyId: string // feed reply
 }
 
 export function buildBranches(replies: { replyId: string; chainIds: string[] }[]): ThreadBranch[] {

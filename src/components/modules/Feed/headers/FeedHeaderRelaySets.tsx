@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { RelaySetsChip } from '@/components/elements/Relays/RelaySetsChip'
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
 import { skeletonTokens } from '@/components/ui/Skeleton/Skeleton.stylex'
@@ -12,16 +13,18 @@ import { FeedHeaderBase } from './FeedHeaderBase'
 
 type Props = {
   feed: FeedState
+  leadingPrefix?: ReactNode
 }
 
 export const FeedHeaderRelaySets = function FeedHeaderRelaySets(props: Props) {
-  const { feed } = props
+  const { feed, leadingPrefix } = props
   const author = feed.filter.authors?.[0] || ''
   const d = feed.filter['#d']?.[0] || ''
   const event = useEventAddress(Kind.RelaySets, author, d)
   return (
     <FeedHeaderBase
       feed={feed}
+      leadingPrefix={leadingPrefix}
       leading={
         <Stack gap={2}>
           {event.data ? <RelaySetsChip event={event.data} /> : <Skeleton variant='rectangular' sx={styles.loading} />}

@@ -44,9 +44,7 @@ export const CopyIconButton = forwardRef<CopyButtonRef, Props>((props, ref) => {
           size='sm'
           sx={styles.button}
           onClick={copy}
-          icon={
-            copied ? <IconCheck size={18} strokeWidth='2.5' /> : <IconCopy size={18} strokeWidth='1.8' />
-          }
+          icon={copied ? <IconCheck size={18} strokeWidth='2.5' /> : <IconCopy size={18} strokeWidth='1.8' />}
         />
       </Tooltip>
     </html.div>

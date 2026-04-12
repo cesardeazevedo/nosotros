@@ -19,11 +19,7 @@ type Props = Omit<SearchContentProps, 'query' | 'ref'> & {
 export const Search = (props: Props) => {
   const { sx, placeholder, trailing, onCancel, onSelect, ...rest } = props
   const [query, updateQuery] = useObservableState<string, string>((input$) => {
-    return input$.pipe(
-      debounceTime(500),
-      distinctUntilChanged(),
-      startWith(''),
-    )
+    return input$.pipe(debounceTime(500), distinctUntilChanged(), startWith(''))
   }, '')
 
   const searchRef = useRef<OnKeyDownRef>(null)

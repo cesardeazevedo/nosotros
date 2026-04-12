@@ -45,9 +45,14 @@ const MuteOptionItem = (props: MuteSetItemProps) => {
   const title = useEventTag(event, 'title')
   const dTag = useEventTag(event, 'd')
   const isPrivate = !!event?.content
-  const pCount = isPrivate ? (decryptedTags ? decryptedTags.filter((tag) => tag[0] === 'p').length : undefined) : pTags.length
-  const tags = isPrivate ? (decryptedTags || []) : (event?.tags || [])
-  const isTargetMuted = !!props.targetValue && tags.some((tag) => tag[0] === props.targetTagName && tag[1] === props.targetValue)
+  const pCount = isPrivate
+    ? decryptedTags
+      ? decryptedTags.filter((tag) => tag[0] === 'p').length
+      : undefined
+    : pTags.length
+  const tags = isPrivate ? decryptedTags || [] : event?.tags || []
+  const isTargetMuted =
+    !!props.targetValue && tags.some((tag) => tag[0] === props.targetTagName && tag[1] === props.targetValue)
   const baseLabel = label || title || dTag || '-'
   const resolvedLabel = isTargetMuted ? `Unmute from ${baseLabel}` : baseLabel
 
@@ -88,7 +93,7 @@ const ListMuteOptionsContent = (props: ContentProps) => {
   const targetTagName = targetEventId ? 'e' : 'p'
   const targetValue = targetEventId || targetPubkey
   const targetUser = useUserState(targetPubkey)
-  const targetLabel = targetEventId ? 'Note' : (targetUser.displayName || 'User')
+  const targetLabel = targetEventId ? 'Note' : targetUser.displayName || 'User'
 
   const muteListQuery = useQuery(
     replaceableEventQueryOptions(Kind.Mutelist, pubkey || '', {
@@ -132,9 +137,9 @@ const ListMuteOptionsContent = (props: ContentProps) => {
   const { mutateAsync } = usePublishEventMutation<UnsignedEvent>({
     mutationFn:
       ({ signer: localSigner }) =>
-        (newEvent) => {
-          return publish(newEvent, { signer: localSigner })
-        },
+      (newEvent) => {
+        return publish(newEvent, { signer: localSigner })
+      },
   })
 
   const invalidateMuteQueries = async () => {
@@ -207,9 +212,7 @@ const ListMuteOptionsContent = (props: ContentProps) => {
     if (isPrivate) {
       const privateTags =
         decryptedTags ||
-        (targetEvent.content
-          ? parseDecryptedTags(await signer.decrypt(pubkey, targetEvent.content))
-          : undefined)
+        (targetEvent.content ? parseDecryptedTags(await signer.decrypt(pubkey, targetEvent.content)) : undefined)
       if (!privateTags) {
         enqueueToast({ component: 'Cannot decrypt private mute set', duration: 4000 })
         return
@@ -251,11 +254,7 @@ const ListMuteOptionsContent = (props: ContentProps) => {
     await mutateAsync({
       kind: Kind.MuteSets,
       pubkey,
-      tags: [
-        ['d', dTag],
-        ['title', title],
-        ...(!isPrivate ? [[targetTagName, targetValue]] : []),
-      ],
+      tags: [['d', dTag], ['title', title], ...(!isPrivate ? [[targetTagName, targetValue]] : [])],
       content,
       created_at: Math.floor(Date.now() / 1000),
     })
@@ -342,7 +341,12 @@ export const ListMuteOptionsDialog = (props: Props) => {
   return (
     <DialogSheet open={open} onClose={onClose} maxWidth='sm'>
       {targetPubkey ? (
-        <ListMuteOptionsContent open={open} onClose={onClose} targetPubkey={targetPubkey} targetEventId={targetEventId} />
+        <ListMuteOptionsContent
+          open={open}
+          onClose={onClose}
+          targetPubkey={targetPubkey}
+          targetEventId={targetEventId}
+        />
       ) : null}
     </DialogSheet>
   )

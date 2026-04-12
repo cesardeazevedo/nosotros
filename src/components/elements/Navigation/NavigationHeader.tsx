@@ -1,3 +1,4 @@
+import { HeaderBase } from '@/components/elements/Layouts/HeaderBase'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
@@ -6,7 +7,6 @@ import { IconChevronLeft } from '@tabler/icons-react'
 import { useMatch } from '@tanstack/react-router'
 import type { DecodedResult } from 'nostr-tools/nip19'
 import { memo } from 'react'
-import { css } from 'react-strict-dom'
 import { UserAvatar } from '../User/UserAvatar'
 import { UserName } from '../User/UserName'
 
@@ -30,26 +30,25 @@ export const NavigationHeader = memo(function NavigationHeader() {
   const goBack = useGoBack()
   const pubkey = getPubkey(context?.decoded)
   return (
-    <Stack justify='flex-start' gap={1} sx={styles.root}>
-      <IconButton onClick={goBack} icon={<IconChevronLeft color='currentColor' />} />
-      {pubkey ? (
-        <Stack horizontal={false}>
-          <Stack gap={2}>
-            <UserAvatar size='sm' pubkey={pubkey} />
-            <UserName variant='title' size='lg' pubkey={pubkey} />
-          </Stack>
+    <HeaderBase
+      leading={
+        <Stack gap={1}>
+          <IconButton onClick={goBack} icon={<IconChevronLeft color='currentColor' />} />
+          {pubkey ? (
+            <Stack horizontal={false}>
+              <Stack gap={2}>
+                <UserAvatar size='sm' pubkey={pubkey} />
+                <UserName variant='title' size='lg' pubkey={pubkey} />
+              </Stack>
+            </Stack>
+          ) : (
+            <Text variant='title' size='md'>
+              Post
+            </Text>
+          )}
         </Stack>
-      ) : (
-        <Text variant='title' size='md'>
-          Post
-        </Text>
-      )}
-    </Stack>
+      }>
+      {null}
+    </HeaderBase>
   )
-})
-
-const styles = css.create({
-  root: {
-    flex: 1,
-  },
 })

@@ -9,7 +9,7 @@ import { memo, useCallback } from 'react'
 import { css, html } from 'react-strict-dom'
 import { ThreadItem } from '../elements/Threads/ThreadItem'
 import { ContentProvider } from '../providers/ContentProvider'
-import { NoteProvider } from '../providers/NoteProvider'
+import { EventProvider } from '../providers/NoteProvider'
 import { Button } from '../ui/Button/Button'
 import { Divider } from '../ui/Divider/Divider'
 import { Stack } from '../ui/Stack/Stack'
@@ -18,7 +18,7 @@ import { Text } from '../ui/Text/Text'
 const ThreadItemInternal = (props: { event: NostrEventDB; onCancel: () => void }) => {
   const note = useNoteState(props.event, { replying: true, repliesOpen: false, contentOpen: false })
   return (
-    <NoteProvider value={{ event: props.event }}>
+    <EventProvider value={{ event: props.event }}>
       <ContentProvider value={{ disableLink: false, isDialog: true }}>
         <ThreadItem
           note={note}
@@ -29,7 +29,7 @@ const ThreadItemInternal = (props: { event: NostrEventDB; onCancel: () => void }
           onEditorDiscard={props.onCancel}
         />
       </ContentProvider>
-    </NoteProvider>
+    </EventProvider>
   )
 }
 

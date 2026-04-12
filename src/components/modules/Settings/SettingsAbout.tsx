@@ -1,6 +1,7 @@
 import { Link } from '@/components/elements/Links/Link'
 import { LinkBase } from '@/components/elements/Links/LinkBase'
 import { Stats } from '@/components/elements/Footer/Stats'
+import { HeaderBase } from '@/components/elements/Layouts/HeaderBase'
 import { UserName } from '@/components/elements/User/UserName'
 import { UserRoot } from '@/components/elements/User/UserRoot'
 import { Button } from '@/components/ui/Button/Button'
@@ -24,11 +25,7 @@ export const SettingsAboutRoute = memo(function SettingsAboutRoute() {
   const router = useRouter()
   return (
     <Stack grow horizontal={false} sx={styles.container}>
-      <Stack sx={styles.header} gap={1}>
-        <Text variant='title' size='lg'>
-          About nosotros.app
-        </Text>
-      </Stack>
+      <HeaderBase leading='About nosotros.app' />
       <Divider />
       <Stack grow sx={styles.root} horizontal={false} gap={3}>
         <Stack horizontal={false} gap={2}>
@@ -50,7 +47,7 @@ export const SettingsAboutRoute = memo(function SettingsAboutRoute() {
             <UserName size='sm' pubkey={PUBKEY} sx={styles.sectionTitle} />
           </Stack>
           <Paper outlined sx={styles.userCard}>
-            <UserRoot renderBanner pubkey={PUBKEY} />
+            <UserRoot pubkey={PUBKEY} />
           </Paper>
         </Stack>
 
@@ -83,10 +80,6 @@ const styles = css.create({
     width: '100%',
     padding: spacing.padding3,
     overflowY: 'auto',
-  },
-  header: {
-    padding: spacing.padding2,
-    height: 60,
   },
   sectionTitle: {
     color: palette.onSurfaceVariant,

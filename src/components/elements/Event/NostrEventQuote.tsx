@@ -1,6 +1,8 @@
 import { ArticleFeedItem } from '@/components/modules/Articles/ArticleFeedItem'
 import { FollowEventRoot } from '@/components/modules/Follows/FollowEventRoot'
 import { ListCard } from '@/components/modules/Lists/ListCard'
+import { ListEmojiSetsRoot } from '@/components/modules/Lists/ListEmojiSetsRoot'
+import { ListQuote } from '@/components/modules/Lists/ListQuote'
 import { Paper } from '@/components/ui/Paper/Paper'
 import { Kind, isListKind } from '@/constants/kinds'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
@@ -52,9 +54,16 @@ export const NostrEventQuote = memo(function NostrEventQuote(props: Props) {
         </Paper>
       )
     }
+    case Kind.EmojiSets: {
+      return (
+        <ListQuote event={event}>
+          <ListEmojiSetsRoot event={event} />
+        </ListQuote>
+      )
+    }
     default: {
       if (isListKind(event.kind)) {
-        return <ListCard event={event} onEdit={() => { }} canEdit={false} />
+        return <ListCard event={event} onEdit={() => {}} canEdit={false} />
       }
       console.log('Unhandled item to render', event)
       return <NostrEventUnsupportedContent event={event} />

@@ -10,7 +10,7 @@ import type { ImageAttributes, VideoAttributes } from 'nostr-editor'
 import { Fragment, memo } from 'react'
 import { css } from 'react-strict-dom'
 import { ImageEditor } from '../Content/Image/ImageEditor'
-import { MediaGroup, } from '../Content/Layout/MediaGroup'
+import { MediaGroup } from '../Content/Layout/MediaGroup'
 import type { Props as MediaWrapperProps } from '../Content/Layout/MediaWrapper'
 import { VideoEditor } from '../Content/Video/VideoEditor'
 
@@ -29,7 +29,7 @@ export const MediaListEditor = memo(function MediaListEditor(props: Props) {
   const isPair = files.length == 2
   const isMultiple = files.length > 1
   const wrapperProps = {
-    mode: (files.length == 1 ? 'single_dense' : isPair ? 'pair' : 'carousel'),
+    mode: files.length == 1 ? 'single_dense' : isPair ? 'pair' : 'carousel',
     sx: [styles.wrapper, isMultiple && styles.multiple],
   } satisfies Omit<MediaWrapperProps, 'children' | 'src'>
   return (

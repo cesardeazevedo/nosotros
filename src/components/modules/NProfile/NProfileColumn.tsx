@@ -47,7 +47,6 @@ export const NProfileColumn = memo(function NProfileColumn(props: Props) {
       <NProfileMutedContent pubkey={pubkey}>
         <Feed
           key={selected}
-          column
           header={
             <>
               <UserProfileHeader pubkey={pubkey} />

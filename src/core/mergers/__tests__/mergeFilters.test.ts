@@ -63,6 +63,27 @@ describe('mergeFilters', () => {
     expect(result[1]).toStrictEqual({ kinds: [0], '#e': ['3'], until: 10 })
   })
 
+  test('Should expect #d tags to be merged', () => {
+    const result = mergeFilters([
+      { kinds: [30382], '#d': ['pubkey1'] },
+      { kinds: [30382], '#d': ['pubkey2'] },
+      { kinds: [30382], '#d': ['pubkey2'] },
+    ])
+    expect(result).toStrictEqual([{ kinds: [30382], '#d': ['pubkey1', 'pubkey2'] }])
+  })
+
+  test('Should expect #d tags to keep different pagination values separated', () => {
+    const result = mergeFilters([
+      { kinds: [30382], '#d': ['pubkey1'], until: 10 },
+      { kinds: [30382], '#d': ['pubkey2'], until: 10 },
+      { kinds: [30382], '#d': ['pubkey3'], until: 15 },
+    ])
+    expect(result).toStrictEqual([
+      { kinds: [30382], '#d': ['pubkey1', 'pubkey2'], until: 10 },
+      { kinds: [30382], '#d': ['pubkey3'], until: 15 },
+    ])
+  })
+
   test('Should expect merge authors of kind [0, 1, 6] and [0]', () => {
     const result = mergeFilters([
       { kinds: [0, 1, 6], authors: ['npub1'] },

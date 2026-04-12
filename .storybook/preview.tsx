@@ -19,7 +19,9 @@ import '../src/styles/stylex.css'
 const channel = addons.getChannel()
 
 // Initialize MSW
-initialize()
+initialize({
+  onUnhandledRequest: 'bypass',
+})
 
 // eslint-disable-next-line react-refresh/only-export-components
 const App = (props: { Story: PartialStoryFn<ReactRenderer> }) => {

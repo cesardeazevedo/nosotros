@@ -11,7 +11,7 @@ export const MediaHeader = memo(function MediaHeader(props: Props) {
   const { feed } = props
   return (
     <FeedHeaderBase
-      label='Media'
+      leading='Media'
       feed={feed}
       customSettings={({ close }) => <MediaSettings feed={feed} onClose={close} />}
     />

@@ -49,7 +49,6 @@ const meta = {
     },
   ],
   args: {
-    open: true,
   },
 } satisfies Meta<typeof NostrEventRoot>
 

@@ -1,7 +1,8 @@
 import { useContentContext } from '@/components/providers/ContentProvider'
+import type { SxProps } from '@/components/ui/types'
 import { spacing } from '@/themes/spacing.stylex'
 import type { ReactNode } from 'react'
-import { type MutableRefObject, useRef } from 'react'
+import { useRef, type MutableRefObject } from 'react'
 import { css, html } from 'react-strict-dom'
 import { useDraggable } from 'react-use-draggable-scroll'
 import { Image } from '../Image/Image'
@@ -20,14 +21,17 @@ type Props =
     length: number
   }
 
-const MediaDraggable = (props: { children: ReactNode }) => {
-  const { dense } = useContentContext()
+const MediaDraggable = (props: { sx?: SxProps, children: ReactNode }) => {
   const ref = useRef<HTMLDivElement>(null)
   const { events } = useDraggable(ref as MutableRefObject<HTMLElement>, {
     applyRubberBandEffect: true,
   })
   return (
-    <div {...css.props([styles.root, dense && styles.root$dense, styles.root$carousel])} {...events} ref={ref}>
+    <div
+      {...css.props([props.sx, styles.root$carousel])}
+      {...events}
+      ref={ref}
+    >
       {props.children}
     </div>
   )
@@ -71,23 +75,29 @@ const MediaList = (props: MediaProps) => {
 }
 
 export const MediaGroup = (props: Props) => {
-  const { dense } = useContentContext()
+  const { dense, mediaObject } = useContentContext()
 
   const length = 'children' in props ? props.length : props.media.length
   const isCarousel = length > 2
   const isPair = length == 2
+  const sx = [
+    styles.root,
+    mediaObject && styles.root$mediaObject,
+    mediaObject && isCarousel && styles.root$MediaObjectCarousel,
+    dense && styles.root$dense
+  ]
 
   if (!isCarousel) {
     return (
       <>
-        <html.div style={[styles.root, isPair && styles.root$pair, dense && styles.root$dense]}>
+        <html.div style={[sx, isPair && styles.root$pair]}>
           {'children' in props ? props.children : <MediaList {...props} />}
         </html.div>
       </>
     )
   }
 
-  return <MediaDraggable>{'children' in props ? props.children : <MediaList {...props} />}</MediaDraggable>
+  return <MediaDraggable sx={sx}>{'children' in props ? props.children : <MediaList {...props} />}</MediaDraggable>
 }
 
 const styles = css.create({
@@ -102,6 +112,7 @@ const styles = css.create({
     height: '100%',
     overflowY: 'hidden',
     overflowX: 'auto',
+    // border: '1px solid red',
     paddingInline: spacing.padding2,
     paddingBlock: 4,
     '::-webkit-scrollbar': {
@@ -118,6 +129,15 @@ const styles = css.create({
   },
   root$dense: {
     paddingInline: 0,
+  },
+  root$mediaObject: {
+    paddingInline: 0,
+  },
+  root$MediaObjectCarousel: {
+    marginTop: spacing.padding1,
+    paddingLeft: 70,
+    marginInlineStart: -72,
+    width: 'calc(100% + 88px)',
   },
   wrapper: {
     height: '100%',

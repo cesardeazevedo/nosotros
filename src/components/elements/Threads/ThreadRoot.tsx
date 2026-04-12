@@ -28,17 +28,18 @@ export const ThreadRoot = memo(function ThreadRoot(props: Props) {
         <html.div style={styles.thread} />
         <Stack horizontal={false} sx={styles.content}>
           <PostHeader event={note.event} renderOptions={false} />
-          {![Kind.Text, Kind.Comment, Kind.Article, Kind.Media, Kind.Video, Kind.ShortVideo].includes(note.event.kind) ? (
+          {![Kind.Text, Kind.Comment, Kind.Article, Kind.Media, Kind.Video, Kind.ShortVideo].includes(
+            note.event.kind,
+          ) ? (
             <NostrEventUnsupportedContent sx={styles.unsupported} event={note.event} />
           ) : (
             <>
               <Stack horizontal={false} sx={styles.rootWrapper}>
-                <LinkNEvent nevent={note.nip19}>
-                  <PostContent note={note} />
+                <LinkNEvent event={note.event}>
+                  <PostContent />
                 </LinkNEvent>
                 <ContentProvider value={{ dense: true }}>
                   <PostActions
-                    note={note}
                     statsPopover
                     renderOptions
                     onReplyClick={() => note.actions.toggleReplying()}

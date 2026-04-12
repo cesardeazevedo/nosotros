@@ -13,18 +13,16 @@ import { css } from 'react-strict-dom'
 
 type Props = {
   header?: ReactNode
-  column?: boolean
   feed: MediaFeedState
 }
 
 export const MediaFeed = memo(function MediaFeed(props: Props) {
-  const { header, feed, column } = props
+  const { header, feed } = props
   return (
     <NostrContextProvider value={feed.options.ctx}>
       <ContentProvider value={{ blured: feed.blured }}>
         <FeedList
           key={feed.layout}
-          column={column}
           feed={feed}
           header={header}
           onScrollEnd={feed.paginate}

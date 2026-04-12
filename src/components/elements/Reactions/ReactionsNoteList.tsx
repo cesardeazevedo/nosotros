@@ -1,4 +1,4 @@
-import { useNoteContext } from '@/components/providers/NoteProvider'
+import { useEventContext } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { useReactionsGrouped } from '@/hooks/query/useReactions'
@@ -9,7 +9,7 @@ import { css } from 'react-strict-dom'
 import { UserAvatar } from '../User/UserAvatar'
 
 export const ReactionsNoteList = memo(function ReactionsNoteList() {
-  const { event } = useNoteContext()
+  const { event } = useEventContext()
   const grouped = useReactionsGrouped(event)
   if (!grouped.data || grouped.data.length === 0) {
     return

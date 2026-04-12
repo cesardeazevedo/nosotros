@@ -23,12 +23,13 @@ export const vars = {
   onErrorContainer: colors.red12,
   warning: colors.yellow8,
 
-  surface: colors.gray0,
+  surface: colors.stone0,
+  surfaceBright: '#fff',
   onSurface: colors.gray11,
   onSurfaceVariant: colors.gray8,
 
-  surfaceContainerLowest: '#fff',
-  surfaceContainerLow: colors.gray0,
+  surfaceContainerLowest: '#fdfdfd',
+  surfaceContainerLow: '#fcfcfd',
   surfaceContainer: colors.gray1,
   surfaceContainerHigh: colors.gray2,
   surfaceContainerHighest: colors.gray3,
@@ -37,8 +38,8 @@ export const vars = {
   inverseOnSurface: colors.gray0,
   inversePrimary: colors.gray12,
 
-  outline: colors.gray6,
-  outlineVariant: colors.gray4,
+  outline: colors.gray3,
+  outlineVariant: colors.gray2,
 
   primaryFixed: colors.gray12,
   onPrimaryFixed: colors.gray0,

@@ -1,5 +1,6 @@
 import type { Database, SAHPoolUtil } from '@sqlite.org/sqlite-wasm'
-import sqlite3InitModule from '@sqlite.org/sqlite-wasm'
+import sqlite3InitModule from '@sqliteai/sqlite-wasm'
+import { createUserEmbeddingsSchema } from './embeddings/sqlite.embeddings'
 import { migrate } from './sqlite.migrations'
 
 export function deleteExpiredEvents(db: Database, nowSec = Math.floor(Date.now() / 1000)) {
@@ -79,6 +80,7 @@ export async function deleteSQLiteFile(filename: string, pool?: SAHPoolUtil) {
 }
 
 function build(db: Database) {
+  db.exec('PRAGMA foreign_keys = ON;')
   db.exec(`
     CREATE TABLE IF NOT EXISTS events (
       id TEXT(64) PRIMARY KEY,
@@ -148,9 +150,10 @@ function build(db: Database) {
       created_at INTEGER
     );
   `)
+  createUserEmbeddingsSchema(db)
 }
 
-export async function initializeSQLite(name: string = 'nosotrosdb.sqlite3', tracing = true) {
+export async function initializeSQLite(name: string = 'nosotrosdb.sqlite3', tracing = false) {
   try {
     console.log('Loading and initializing SQLite3 module...')
     let startupCorruptionDetected = false
@@ -243,6 +246,10 @@ export async function initializeSQLite(name: string = 'nosotrosdb.sqlite3', trac
       if (typeof sqlite3.installOpfsSAHPoolVfs === 'function') {
         const pool = (await sqlite3.installOpfsSAHPoolVfs({ initialCapacity: 24 })) as SAHPoolUtil
         const db = new pool.OpfsSAHPoolDb(filename)
+        // console.log('>>>event', db.exec(`DELETE FROM events where kind=31313`))
+        // console.log('>>>event', db.exec(`DELETE FROM user_embeddings`))
+        // console.log('>>>event', db.selectValue(`SELECT count(*) FROM events where kind=31313`))
+        // console.log('>>>user_embeddings', db.selectValue(`SELECT count(*) FROM user_embeddings`))
         if (tracing) {
           console.log(`Using VFS: opfs-sahpool -> ${filename}`)
         }

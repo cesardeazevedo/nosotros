@@ -75,7 +75,7 @@ const assignRef = <T,>(ref: React.Ref<T> | undefined, value: T | null) => {
     ref(value)
     return
   }
-  ; (ref as React.MutableRefObject<T | null>).current = value
+  ;(ref as React.MutableRefObject<T | null>).current = value
 }
 
 const getPosition = (rect: DOMRect, tipWidth: number, tipHeight: number, placement: Placement): TooltipPosition => {
@@ -84,53 +84,41 @@ const getPosition = (rect: DOMRect, tipWidth: number, tipHeight: number, placeme
     case 'top':
     case 'top-start':
     case 'top-end': {
-      const left =
-        align === 'start'
-          ? rect.left
-          : align === 'end'
-            ? rect.right - tipWidth
-            : rect.left + rect.width / 2
+      const left = align === 'start' ? rect.left : align === 'end' ? rect.right - tipWidth : rect.left + rect.width / 2
       return { top: rect.top - GAP - tipHeight, left: align === 'center' ? left - tipWidth / 2 : left }
     }
     case 'left':
     case 'left-start':
     case 'left-end': {
-      const top =
-        align === 'start'
-          ? rect.top
-          : align === 'end'
-            ? rect.bottom - tipHeight
-            : rect.top + rect.height / 2
+      const top = align === 'start' ? rect.top : align === 'end' ? rect.bottom - tipHeight : rect.top + rect.height / 2
       return { top: align === 'center' ? top - tipHeight / 2 : top, left: rect.left - GAP - tipWidth }
     }
     case 'right':
     case 'right-start':
     case 'right-end': {
-      const top =
-        align === 'start'
-          ? rect.top
-          : align === 'end'
-            ? rect.bottom - tipHeight
-            : rect.top + rect.height / 2
+      const top = align === 'start' ? rect.top : align === 'end' ? rect.bottom - tipHeight : rect.top + rect.height / 2
       return { top: align === 'center' ? top - tipHeight / 2 : top, left: rect.right + GAP }
     }
     case 'bottom':
     case 'bottom-start':
     case 'bottom-end':
     default: {
-      const left =
-        align === 'start'
-          ? rect.left
-          : align === 'end'
-            ? rect.right - tipWidth
-            : rect.left + rect.width / 2
+      const left = align === 'start' ? rect.left : align === 'end' ? rect.right - tipWidth : rect.left + rect.width / 2
       return { top: rect.bottom + GAP, left: align === 'center' ? left - tipWidth / 2 : left }
     }
   }
 }
 
 export const Tooltip = function Tooltip(props: Props) {
-  const { children, text, enterDelay = 700, keepMounted, opened: openedProp, placement = 'bottom', cursor = 'arrow' } = props
+  const {
+    children,
+    text,
+    enterDelay = 700,
+    keepMounted,
+    opened: openedProp,
+    placement = 'bottom',
+    cursor = 'arrow',
+  } = props
   const isMobile = useMobile()
   const id = useId()
   const triggerRef = useRef<HTMLSpanElement | null>(null)
@@ -174,14 +162,8 @@ export const Tooltip = function Tooltip(props: Props) {
       next = getPosition(triggerRect, tipWidth, tipHeight, finalPlacement)
     }
 
-    const clampedLeft = Math.min(
-      Math.max(next.left, VIEWPORT_PADDING),
-      window.innerWidth - tipWidth - VIEWPORT_PADDING,
-    )
-    const clampedTop = Math.min(
-      Math.max(next.top, VIEWPORT_PADDING),
-      window.innerHeight - tipHeight - VIEWPORT_PADDING,
-    )
+    const clampedLeft = Math.min(Math.max(next.left, VIEWPORT_PADDING), window.innerWidth - tipWidth - VIEWPORT_PADDING)
+    const clampedTop = Math.min(Math.max(next.top, VIEWPORT_PADDING), window.innerHeight - tipHeight - VIEWPORT_PADDING)
 
     setResolvedPlacement(finalPlacement)
     setPosition({ top: clampedTop, left: clampedLeft })
@@ -369,9 +351,7 @@ export const Tooltip = function Tooltip(props: Props) {
           onMouseLeave={handleLeave}
           style={{ ...inlineStyle }}
           {...css.props(styles.content, visible && styles.content$open, closing && styles.content$close)}>
-          {cursor === 'arrow' && (
-            <span {...css.props(styles.cursor)} style={cursorStyle} aria-hidden />
-          )}
+          {cursor === 'arrow' && <span {...css.props(styles.cursor)} style={cursorStyle} aria-hidden />}
           <span {...css.props(styles.text)}>{text}</span>
         </div>
       )}

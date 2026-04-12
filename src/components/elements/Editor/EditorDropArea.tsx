@@ -42,8 +42,8 @@ export const EditorDropArea = memo(function EditorDropArea(props: Props) {
         }
       }}
       onDrop={(event: DragEvent<HTMLDivElement>) => {
-        const files = Array.from(event.dataTransfer?.files || []).filter((file) =>
-          file.type.startsWith('image/') || file.type.startsWith('video/'),
+        const files = Array.from(event.dataTransfer?.files || []).filter(
+          (file) => file.type.startsWith('image/') || file.type.startsWith('video/'),
         )
         if (files.length) {
           event.preventDefault()
@@ -56,9 +56,7 @@ export const EditorDropArea = memo(function EditorDropArea(props: Props) {
       {children}
       {dragActive && (
         <div {...css.props(styles.overlay)}>
-          <Text size='lg'>
-            Drop media to upload
-          </Text>
+          <Text size='lg'>Drop media to upload</Text>
         </div>
       )}
     </div>

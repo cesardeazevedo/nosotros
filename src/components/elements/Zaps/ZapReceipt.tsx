@@ -10,5 +10,5 @@ type Props = {
 export const ZapReceiptRoot = (props: Props) => {
   const { event } = props
   const isProfileZap = !useEventTag(event, 'e')
-  return <>{isProfileZap ? <ZapReceiptProfile event={event} /> : <ZapReceiptEvent />}</>
+  return isProfileZap ? <ZapReceiptProfile event={event} /> : <ZapReceiptEvent event={event} />
 }

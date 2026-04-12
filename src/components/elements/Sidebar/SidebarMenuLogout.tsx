@@ -3,8 +3,6 @@ import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { useLogout } from '@/hooks/useAuth'
 import { IconLogout } from '@tabler/icons-react'
 import { useNavigate } from '@tanstack/react-router'
-import { useContext } from 'react'
-import { SidebarContext } from './SidebarContext'
 
 type Props = {
   size?: MenuItemProps['size']
@@ -14,7 +12,6 @@ type Props = {
 export const SidebarMenuLogout = (props: Props) => {
   const { size, onClick } = props
   const logout = useLogout()
-  const context = useContext(SidebarContext)
   const navigate = useNavigate()
   return (
     <MenuItem
@@ -22,7 +19,6 @@ export const SidebarMenuLogout = (props: Props) => {
       leadingIcon={<IconLogout strokeWidth='1.8' />}
       label='Log out'
       onClick={() => {
-        context.setPane(false)
         logout()
         onClick?.()
         navigate({ to: '/' })

@@ -32,14 +32,12 @@ export const EditorHeader = memo(function EditorHeader() {
   }
 
   if (parent) {
-    return (
-      <UserName pubkey={pubkey} />
-    )
+    return <UserName renderTaRank={false} renderEmbeddingSimilarity={false} pubkey={pubkey} />
   }
 
   return (
-    <Stack grow justify='space-between'>
-      <UserName pubkey={pubkey} />
+    <Stack justify='space-between'>
+      <UserName renderTaRank={false} renderEmbeddingSimilarity={false} pubkey={pubkey} />
       <Button
         variant={section === 'drafts' ? 'filledTonal' : 'text'}
         sx={styles.draftButton}
@@ -47,7 +45,6 @@ export const EditorHeader = memo(function EditorHeader() {
         Drafts
       </Button>
     </Stack>
-
   )
 })
 

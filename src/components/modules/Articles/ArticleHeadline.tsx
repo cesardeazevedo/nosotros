@@ -2,7 +2,7 @@ import { openImageDialogAtom } from '@/atoms/dialog.atoms'
 import { addMediaErrorAtom, mediaErrorsAtom } from '@/atoms/media.atoms'
 import { TextClamped } from '@/components/elements/Content/TextClamped'
 import { PostHeaderDate } from '@/components/elements/Posts/PostHeaderDate'
-import { useNoteContext } from '@/components/providers/NoteProvider'
+import { useEventContext } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { useEventTag } from '@/hooks/useEventUtils'
@@ -11,14 +11,12 @@ import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { getImgProxyUrl } from '@/utils/imgproxy'
-import { useMatch } from '@tanstack/react-router'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { memo } from 'react'
 import { css, html } from 'react-strict-dom'
 
 export const ArticleHeadline = memo(function ArticleHeadline() {
-  const { event } = useNoteContext()
-  const isDeck = !!useMatch({ from: '/deck/$id', shouldThrow: false })
+  const { event } = useEventContext()
   const isMobile = useMobile()
   const pushImage = useSetAtom(openImageDialogAtom)
   const title = useEventTag(event, 'title')
@@ -32,7 +30,7 @@ export const ArticleHeadline = memo(function ArticleHeadline() {
       {image && !hasError && (
         <html.img
           src={getImgProxyUrl('feed_img', image)}
-          style={[styles.banner, !isDeck && styles.banner$round, isMobile && styles.banner$mobile]}
+          style={[styles.banner, styles.banner$round, isMobile && styles.banner$mobile]}
           onClick={() => pushImage({ src: image })}
           onError={() => addError(image)}
         />

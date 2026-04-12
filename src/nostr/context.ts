@@ -10,6 +10,7 @@ export enum NetworkStrategy {
 }
 
 export type NostrContext = {
+  subscriptionGroupId?: string
   subId?: string
   relays?: string[]
   relaySets?: string[]

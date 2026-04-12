@@ -13,6 +13,7 @@ export function createRelayFeedModule(relay: string): FeedModule {
     type: 'relayfeed',
     queryKey: queryKeys.feed(id, filter),
     filter,
+    pageSize: filter.limit,
     includeReplies: false,
     ctx: {
       network: 'REMOTE_ONLY',

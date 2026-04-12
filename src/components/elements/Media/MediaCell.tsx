@@ -1,6 +1,6 @@
 import { addMediaErrorAtom, mediaErrorsAtom } from '@/atoms/media.atoms'
 import { ContentProvider } from '@/components/providers/ContentProvider'
-import { NoteProvider } from '@/components/providers/NoteProvider'
+import { EventProvider } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { useNoteState } from '@/hooks/state/useNote'
@@ -82,13 +82,13 @@ export const MediaCell = memo(function MediaCell(props: Props) {
   useNoteState(event)
   return (
     <>
-      <NoteProvider value={{ event }}>
+      <EventProvider value={{ event }}>
         <ContentProvider value={{ dense: true }}>
           {imetaList.slice(0, 1).map(([type, src], index) => (
             <MediaCellItem key={src} type={type} src={src} event={event} index={index} />
           ))}
         </ContentProvider>
-      </NoteProvider>
+      </EventProvider>
     </>
   )
 })

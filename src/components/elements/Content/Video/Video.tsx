@@ -1,6 +1,6 @@
 import { addMediaDimAtom, currentVideoAtom, removeCurrentVideoAtom, setCurrentVideoAtom } from '@/atoms/media.atoms'
 import { useContentContext } from '@/components/providers/ContentProvider'
-import { useNoteContext } from '@/components/providers/NoteProvider'
+import { useEventContext } from '@/components/providers/NoteProvider'
 import type { SxProps } from '@/components/ui/types'
 import { useNevent } from '@/hooks/useEventUtils'
 import { useMediaLink } from '@/hooks/useMediaLink'
@@ -27,7 +27,7 @@ type Props = {
 
 export const Video = memo(function Video(props: Props) {
   const { src, muted = false, loop = false, preload = 'metadata', index, cover, sx } = props
-  const { event } = useNoteContext()
+  const { event } = useEventContext()
   const { autoPlay: contextAutoPlay } = useContentContext()
   const nevent = useNevent(event)
   const onClickMedia = useMediaLink(nevent, index)

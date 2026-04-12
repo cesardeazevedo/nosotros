@@ -55,7 +55,7 @@ export const MediaDownload = (props: Props) => {
   }
 
   const onDownload = (event: { preventDefault: () => void; stopPropagation: () => void }) => {
-    handleDownload(event).catch(() => { })
+    handleDownload(event).catch(() => {})
   }
 
   return (

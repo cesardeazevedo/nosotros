@@ -7,7 +7,21 @@ import type { NostrContext } from '@/nostr/context'
 import { dedupeById } from '@/utils/utils'
 import type { InfiniteData, UseInfiniteQueryOptions } from '@tanstack/react-query'
 import { infiniteQueryOptions } from '@tanstack/react-query'
-import { concatMap, firstValueFrom, from, ignoreElements, map, merge, mergeMap, of, partition, shareReplay, tap, timer, toArray } from 'rxjs'
+import {
+  concatMap,
+  firstValueFrom,
+  from,
+  ignoreElements,
+  map,
+  merge,
+  mergeMap,
+  of,
+  partition,
+  shareReplay,
+  tap,
+  timer,
+  toArray,
+} from 'rxjs'
 import type { Module } from '../modules/module'
 import { subscribeDependencies } from '../subscriptions/subscribeDependencies'
 import { subscribeFeed } from '../subscriptions/subscribeFeed'
@@ -29,6 +43,7 @@ export type FeedModule = Module & {
   scope: FeedScope
   live?: boolean
   blured?: boolean
+  selectedAuthor?: string
   pageSize?: number
   includeReplies?: boolean
   includeMuted?: boolean
@@ -77,14 +92,16 @@ export function createFeedQueryOptions(
 
       const $ = subscribeFeed(ctx, options.scope, filter).pipe(
         map((res) => {
-          return res
-            // Remove annoying "future posts" spammers (we are adding a 2 second margin)
-            .filter((x) => x.created_at <= (Date.now() + 2000) / 1000)
-            .map((event) => {
-              setEventData(event)
-              return event
-            })
-            .filter((event) => event.kind !== Kind.EventDeletion)
+          return (
+            res
+              // Remove annoying "future posts" spammers (we are adding a 2 second margin)
+              .filter((x) => x.created_at <= (Date.now() + 2000) / 1000)
+              .map((event) => {
+                setEventData(event)
+                return event
+              })
+              .filter((event) => event.kind !== Kind.EventDeletion)
+          )
         }),
 
         concatMap((res) => {
@@ -95,7 +112,11 @@ export function createFeedQueryOptions(
             // Feed is empty, fetch the database again, likely new user with no cache
             return timer(4000).pipe(
               mergeMap(() =>
-                subscribeFeed({ ...options.ctx, queryKey: options.queryKey, network: 'CACHE_ONLY' }, options.scope, filter),
+                subscribeFeed(
+                  { ...options.ctx, queryKey: options.queryKey, network: 'CACHE_ONLY' },
+                  options.scope,
+                  filter,
+                ),
               ),
             )
           } else if (!feedEmpty && res.length !== 0 && isFirstPage && network !== 'CACHE_ONLY') {

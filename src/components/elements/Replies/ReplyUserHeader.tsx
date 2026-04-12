@@ -1,4 +1,4 @@
-import { useNoteContext } from '@/components/providers/NoteProvider'
+import { useEventContext } from '@/components/providers/NoteProvider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { memo } from 'react'
 import { PostHeaderDate } from '../Posts/PostHeaderDate'
@@ -6,7 +6,7 @@ import { UserName } from '../User/UserName'
 import { UserNIP05 } from '../User/UserNIP05'
 
 export const ReplyUserHeader = memo(function ReplyUserHeader() {
-  const { event } = useNoteContext()
+  const { event } = useEventContext()
   return (
     <Stack horizontal={false}>
       <Stack gap={1} align='center'>

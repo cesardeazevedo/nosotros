@@ -1,4 +1,20 @@
 /* stylex.css */
 @import './preflight.css' layer(priority1);
 
+@property --editor-border-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes editor-border-spin {
+  from {
+    --editor-border-angle: 0deg;
+  }
+
+  to {
+    --editor-border-angle: 360deg;
+  }
+}
+
 @stylex stylesheet;

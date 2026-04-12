@@ -1,4 +1,3 @@
-import { useDeckColumn } from '@/components/modules/Deck/hooks/useDeck'
 import { Divider } from '@/components/ui/Divider/Divider'
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
 import { Stack } from '@/components/ui/Stack/Stack'
@@ -12,7 +11,6 @@ type Props = {
 
 export const PostLoading = memo(function PostLoading({ rows = 2 }: Props) {
   const list = [...Array(rows).keys()]
-  const renderDivider = useDeckColumn()?.index !== undefined
 
   return list.map((key, index) => (
     <React.Fragment key={key}>
@@ -26,7 +24,7 @@ export const PostLoading = memo(function PostLoading({ rows = 2 }: Props) {
         </Stack>
         <Skeleton animation='wave' variant='rectangular' sx={styles.content} />
       </html.div>
-      {(index !== list.length - 1 || renderDivider) && <Divider />}
+      {(index !== list.length - 1) && <Divider />}
     </React.Fragment>
   ))
 })

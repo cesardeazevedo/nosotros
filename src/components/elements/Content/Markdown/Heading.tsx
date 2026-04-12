@@ -24,7 +24,7 @@ const styles = css.create({
   root: {
     marginTop: spacing.margin4,
     marginBottom: spacing.margin1,
-    paddingLeft: spacing.padding2,
+    // paddingLeft: spacing.padding2,
   },
   dense: {
     padding: 0,

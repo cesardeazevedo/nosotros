@@ -19,7 +19,6 @@ export const EditorButtonBroadcast = memo(function EditorButtonBroadcast(props: 
       <IconButton
         {...rest}
         ref={ref}
-        toggle={section === 'broadcast'}
         selected={section === 'broadcast'}
         size={dense ? 'sm' : 'md'}
         icon={<IconServerBolt size={dense ? 20 : 22} strokeWidth='1.6' />}

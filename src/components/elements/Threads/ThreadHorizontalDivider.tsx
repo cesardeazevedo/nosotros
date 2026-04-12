@@ -22,4 +22,3 @@ const styles = css.create({
     color: palette.outlineVariant,
   },
 })
-

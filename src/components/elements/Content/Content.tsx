@@ -1,5 +1,5 @@
 import { ContentProvider, useContentContext } from '@/components/providers/ContentProvider'
-import { useNoteContext } from '@/components/providers/NoteProvider'
+import { useEventContext } from '@/components/providers/NoteProvider'
 import { Kind } from '@/constants/kinds'
 import { getMimeFromExtension } from '@/hooks/parsers/parseImeta'
 import { useEventTag } from '@/hooks/useEventUtils'
@@ -40,7 +40,7 @@ const isImageNode = (kind: Kind, node: CustomNode): node is ImageCustomNode => {
 
 export const Content = memo(function Content(props: Props) {
   const { wrapper, children, renderMedia = true } = props
-  const { event } = useNoteContext()
+  const { event } = useEventContext()
   const { dense, blured } = useContentContext()
   const nsfw = useEventTag(event, 'content-warning')
   const schema = event.metadata?.contentSchema || { content: [] }

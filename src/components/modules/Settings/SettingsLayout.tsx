@@ -8,10 +8,17 @@ export const SettingsLayout = function SettingsLayout() {
   return (
     <>
       <MenuItem
-        label='Compact notifications layout'
+        label='Show embedding similarity'
         trailing={
-          <Switch checked={settings.notificationsCompact} onChange={() => toggle('notificationsCompact')} />
+          <Switch
+            checked={settings.renderEmbeddingSimilarity}
+            onChange={() => toggle('renderEmbeddingSimilarity')}
+          />
         }
+      />
+      <MenuItem
+        label='Compact notifications layout'
+        trailing={<Switch checked={settings.notificationsCompact} onChange={() => toggle('notificationsCompact')} />}
       />
     </>
   )

@@ -139,11 +139,7 @@ export const ZapRequestInvoice = (props: Props) => {
               </Stack>
             )}
             <html.div style={styles.qrcode}>
-              <QRCodeCanvas
-                onClick={() => copyButtonRef.current?.copy()}
-                size={250}
-                value={invoice.toUpperCase()}
-              />
+              <QRCodeCanvas onClick={() => copyButtonRef.current?.copy()} size={250} value={invoice.toUpperCase()} />
             </html.div>
             <Stack horizontal={false} gap={1}>
               <CopyButton fullWidth text={invoice} title='Copy Invoice' ref={copyButtonRef} />

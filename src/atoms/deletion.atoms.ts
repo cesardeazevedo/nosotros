@@ -36,25 +36,22 @@ export const userRequestDeletesQueryFamily = atomFamily(
   (a, b) => a === b,
 )
 
-export const addDeletionEventsAtom = atom(
-  null,
-  (get, set, events: NostrEventDB[]) => {
-    const nextStore = new Set(get(deletedEventsAtom))
+export const addDeletionEventsAtom = atom(null, (get, set, events: NostrEventDB[]) => {
+  const nextStore = new Set(get(deletedEventsAtom))
 
-    for (const event of events) {
-      if (event.kind !== 5) continue
-      for (const tag of event.tags) {
-        const tagName = tag[0]
-        const tagValue = tag[1]
-        if ((tagName === 'e' || tagName === 'a') && tagValue) {
-          nextStore.add(tagValue)
-        }
+  for (const event of events) {
+    if (event.kind !== 5) continue
+    for (const tag of event.tags) {
+      const tagName = tag[0]
+      const tagValue = tag[1]
+      if ((tagName === 'e' || tagName === 'a') && tagValue) {
+        nextStore.add(tagValue)
       }
     }
+  }
 
-    set(deletedEventsAtom, nextStore)
-  },
-)
+  set(deletedEventsAtom, nextStore)
+})
 
 export const isDeletedEventAtomFamily = atomFamily(
   (eventRef: string | undefined) =>

@@ -32,6 +32,7 @@ export function useFeedStateAtom(feedAtoms: FeedAtoms) {
   const [buffer = [], setBuffer] = useAtom(feedAtoms.buffer)
   const [bufferReplies = [], setBufferReplies] = useAtom(feedAtoms.bufferReplies)
   const [pageSize = 10, setPageSize] = useAtom(feedAtoms.pageSize)
+  const [selectedAuthor, setSelectedAuthor] = useAtom(feedAtoms.selectedAuthor)
 
   const isDirty = useAtomValue(feedAtoms.isDirty)
   const isModified = useAtomValue(feedAtoms.isModified)
@@ -44,7 +45,7 @@ export function useFeedStateAtom(feedAtoms: FeedAtoms) {
   // sync changes from options, these changes comes from url router
   useEffect(() => {
     syncOptions(baseOptions)
-  }, [baseOptions.filter, baseOptions.includeReplies, syncOptions])
+  }, [baseOptions.filter, baseOptions.includeReplies, baseOptions.selectedAuthor, baseOptions.live, syncOptions])
 
   const onStream = useCallback(
     (event: NostrEventDB) => {
@@ -94,7 +95,7 @@ export function useFeedStateAtom(feedAtoms: FeedAtoms) {
     const timer = setTimeout(() => {
       const count = query.data?.pages?.[0]?.length ?? 0
       setIsEmpty(count === 0)
-    }, 8000)
+    }, 16000)
     return () => clearTimeout(timer)
   }, [query.data?.pages?.[0]])
 
@@ -211,6 +212,8 @@ export function useFeedStateAtom(feedAtoms: FeedAtoms) {
     bufferTotalReplies,
     autoUpdate,
     setAutoUpdate,
+    selectedAuthor,
+    setSelectedAuthor,
     flush,
     hasKind,
     toggleKind,

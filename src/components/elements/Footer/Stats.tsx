@@ -1,6 +1,5 @@
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
-import { spacing } from '@/themes/spacing.stylex'
 import { IconBug } from '@tabler/icons-react'
 import { memo } from 'react'
 import { css } from 'react-strict-dom'
@@ -36,7 +35,6 @@ export const Stats = memo(function Stats() {
 const styles = css.create({
   root: {
     opacity: 0.6,
-    padding: spacing.padding2,
   },
   text: {
     fontWeight: 500,

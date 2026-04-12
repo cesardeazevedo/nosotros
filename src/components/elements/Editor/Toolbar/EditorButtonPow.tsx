@@ -18,7 +18,7 @@ export const EditorButtonPow = memo(function EditorButtonPow(props: Props) {
     <Tooltip cursor='arrow' text='Proof of Work (PoW)' enterDelay={200}>
       <IconButton
         {...rest}
-        toggle={section === 'pow'}
+        selected={section === 'pow'}
         size={dense ? 'sm' : 'md'}
         icon={<IconCpu size={dense ? 20 : 22} strokeWidth='1.6' />}
         onClick={() => openSection('pow')}

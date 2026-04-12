@@ -1,7 +1,7 @@
 import { enqueueToastAtom } from '@/atoms/toaster.atoms'
 import { useContentContext } from '@/components/providers/ContentProvider'
 import { useNostrContext } from '@/components/providers/NostrContextProvider'
-import { useNoteContext } from '@/components/providers/NoteProvider'
+import { useEventContext } from '@/components/providers/NoteProvider'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { usePublishEventMutation } from '@/hooks/mutations/usePublishEventMutation'
@@ -38,7 +38,7 @@ const emojiColors: Record<string, string> = {
 export const ButtonReaction = memo(function ButtonReaction() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [bounceTick, setBounceTick] = useState(0)
-  const { event } = useNoteContext()
+  const { event } = useEventContext()
   const { dense } = useContentContext()
   const ctx = useNostrContext()
   const enqueueToast = useSetAtom(enqueueToastAtom)
@@ -69,7 +69,6 @@ export const ButtonReaction = memo(function ButtonReaction() {
     <ReactionPicker mobileOpen={mobileOpen} onClick={handleReaction} onClose={() => setMobileOpen(false)}>
       <IconButton
         size={dense ? 'sm' : 'md'}
-        selected={!!myReaction}
         onClick={(e) => {
           e.stopPropagation()
           e.preventDefault()
@@ -82,27 +81,33 @@ export const ButtonReaction = memo(function ButtonReaction() {
           }
         }}
         sx={selectedColorStyle}
-        selectedIcon={
-          myReaction === '❤️' ? (
-            <IconHeartFilled
-              key={`myreaction-${bounceTick}`}
-              className={bounceClassName}
-              size={dense ? iconProps.size$dense : iconProps.size}
-              strokeWidth={iconProps.strokeWidth}
-            />
-          ) : (
-            <html.span key={`myreaction-${bounceTick}`} style={[styles.iconBounce, styles.myCustomReaction]}>
-              {myReaction && fallbackEmoji(myReaction)}
-            </html.span>
-          )
-        }
         icon={
-          <IconHeart
-            key={`reaction-${bounceTick}`}
-            className={bounceClassName}
-            size={dense ? iconProps.size$dense : iconProps.size}
-            strokeWidth={iconProps.strokeWidth}
-          />
+          <>
+            {myReaction ? (
+              <>
+                {myReaction === '❤️' ? (
+                  <IconHeartFilled
+                    key={`myreaction-${bounceTick}`}
+                    className={bounceClassName}
+                    color={color}
+                    size={dense ? iconProps.size$dense : iconProps.size}
+                    strokeWidth={iconProps.strokeWidth}
+                  />
+                ) : (
+                  <html.span key={`myreaction-${bounceTick}`} style={[styles.iconBounce, styles.myCustomReaction]}>
+                    {myReaction && fallbackEmoji(myReaction)}
+                  </html.span>
+                )}
+              </>
+            ) : (
+              <IconHeart
+                key={`reaction-${bounceTick}`}
+                className={bounceClassName}
+                size={dense ? iconProps.size$dense : iconProps.size}
+                strokeWidth={iconProps.strokeWidth}
+              />
+            )}
+          </>
         }
       />
     </ReactionPicker>

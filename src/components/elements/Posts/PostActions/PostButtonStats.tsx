@@ -45,7 +45,6 @@ const PostButtonStatsInner = (props: PropsInner) => {
     <Stack sx={styles.root}>
       <IconButton
         variant={note.state.statsOpen ? 'filledTonal' : 'standard'}
-        toggle={note.state.statsOpen}
         selected={note.state.statsOpen}
         size={dense ? 'sm' : 'md'}
         onClick={handleClick}
@@ -66,12 +65,14 @@ const PostButtonStatsInner = (props: PropsInner) => {
       cursor='arrow'
       key={isMobile.toString()}
       enterDelay={0}
-      text={seenOn && (
-        <div style={{ whiteSpace: 'pre-wrap' }}>
-          Seen on{'\n'}
-          {seenOn?.map((relay) => relay.replace('wss://', '')).join('\n')}
-        </div>
-      )}>
+      text={
+        seenOn && (
+          <div style={{ whiteSpace: 'pre-wrap' }}>
+            Seen on{'\n'}
+            {seenOn?.map((relay) => relay.replace('wss://', '')).join('\n')}
+          </div>
+        )
+      }>
       {content}
     </Tooltip>
   )
@@ -92,9 +93,7 @@ export const PostButtonStats = memo(function PostButtonStats(props: Props) {
             <PostStats note={note} />
           </Paper>
         )}>
-        {({ getProps, setRef }) => (
-          <PostButtonStatsInner {...getProps()} ref={setRef} note={note} dense={dense} />
-        )}
+        {({ getProps, setRef }) => <PostButtonStatsInner {...getProps()} ref={setRef} note={note} dense={dense} />}
       </PopoverBase>
     )
   }

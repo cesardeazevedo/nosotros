@@ -2,7 +2,7 @@ import { Image } from '@/components/elements/Content/Image/Image'
 import { CenteredContainer } from '@/components/elements/Layouts/CenteredContainer'
 import { PaperContainer } from '@/components/elements/Layouts/PaperContainer'
 import { ContentProvider } from '@/components/providers/ContentProvider'
-import { NoteProvider } from '@/components/providers/NoteProvider'
+import { EventProvider } from '@/components/providers/NoteProvider'
 import { fakeEventMeta } from '@/utils/faker'
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { createStore, Provider } from 'jotai'
@@ -30,11 +30,11 @@ const meta = {
           <CenteredContainer margin>
             <PaperContainer>
               <div style={{ padding: 24, maxWidth: 400 }}>
-                <NoteProvider value={{ event }}>
+                <EventProvider value={{ event }}>
                   <ContentProvider value={{}}>
                     <Story />
                   </ContentProvider>
-                </NoteProvider>
+                </EventProvider>
               </div>
             </PaperContainer>
           </CenteredContainer>

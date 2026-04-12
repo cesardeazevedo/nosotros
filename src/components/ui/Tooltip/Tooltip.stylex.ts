@@ -11,7 +11,7 @@ const vars = {
   trailingSpace: spacing.padding1,
 
   // container
-  containerColor: palette.inverseSurface,
+  containerColor: '#000',
   containerShape: shape.md,
   containerMaxWidth: '215px',
   containerMinHeight: '24px',
@@ -19,7 +19,7 @@ const vars = {
   // supportingText
   supportingTextColor: palette.inverseOnSurface,
   supportingTextFont: typeScale.labelFont$md,
-  supportingTextSize: typeScale.labelSize$md,
+  supportingTextSize: typeScale.labelSize$lg,
   supportingTextWeight: typeScale.labelWeight$md,
   supportingTextLineHeight: typeScale.labelLineHeight$md,
   supportingTextLetterSpacing: typeScale.labelLetterSpacing$md,

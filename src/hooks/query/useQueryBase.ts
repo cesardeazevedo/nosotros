@@ -1,6 +1,6 @@
 import { settingsAtom } from '@/atoms/settings.atoms'
 import { store } from '@/atoms/store'
-import type { Kind } from '@/constants/kinds'
+import { Kind } from '@/constants/kinds'
 import { FALLBACK_RELAYS } from '@/constants/relays'
 import { mergeRelayHints } from '@/core/mergers/mergeRelayHints'
 import type { RelayHints } from '@/core/types'
@@ -12,12 +12,14 @@ import { keepPreviousData, queryOptions, useQuery } from '@tanstack/react-query'
 import type { Filter } from 'nostr-tools'
 import { isAddressableKind, isReplaceableKind } from 'nostr-tools/kinds'
 import { defaultIfEmpty, firstValueFrom, from, mergeMap, shareReplay, tap } from 'rxjs'
-import { batcher } from '../batchers'
+import { batcher, batcherLocal } from '../batchers'
 import { subscribeMediaStats } from '../subscriptions/subscribeMediaStats'
 import { subscribeStrategy } from '../subscriptions/subscribeStrategy'
 import { queryClient } from './queryClient'
 import { eventIdToQueryKey, pointerToQueryKey, queryKeys } from './queryKeys'
 import { dedupeEvents, setEventData } from './queryUtils'
+
+const TRUSTED_ASSERTIONS_PUBKEY = 'e8c77dbd1d0ed2f5f44ae03af454bfdb0963655fd5562b5361263c3200de5ca8'
 
 export type UseQueryOptionsWithFilter<Selector = NostrEventDB[]> = UseQueryOptions<NostrEventDB[], Error, Selector> & {
   ctx?: NostrContext
@@ -94,6 +96,47 @@ export function replaceableEventQueryOptions<Selector = NostrEventDB>(
     ctx: {
       network: 'STALE_WHILE_REVALIDATE_BATCH',
       batcher,
+      ...options?.ctx,
+    },
+  })
+}
+
+export function trustedAssertionsQueryOptions<Selector = NostrEventDB>(
+  pubkey: string,
+  options?: CustomQueryOptions<Selector>,
+) {
+  return createEventQueryOptions<Selector>({
+    filter: {
+      kinds: [Kind.TrustedAssertionUser],
+      authors: [TRUSTED_ASSERTIONS_PUBKEY],
+      '#d': [pubkey],
+    },
+    queryKey: queryKeys.addressable(Kind.TrustedAssertionUser, TRUSTED_ASSERTIONS_PUBKEY, pubkey),
+    select: (events) => events[0] as Selector,
+    ...options,
+    ctx: {
+      network: 'STALE_WHILE_REVALIDATE_BATCH',
+      batcher: batcherLocal,
+      ...options?.ctx,
+    },
+  })
+}
+
+export function userEmbeddingsQueryOptions<Selector = NostrEventDB[]>(
+  pubkeys: string | string[],
+  options?: CustomQueryOptions<Selector>,
+) {
+  const values = [...new Set((Array.isArray(pubkeys) ? pubkeys : [pubkeys]).filter(Boolean))].sort()
+  return createEventQueryOptions<Selector>({
+    filter: {
+      kinds: [Kind.UserEmbeddings],
+      '#p': values,
+    },
+    queryKey: queryKeys.tag('p', values, Kind.UserEmbeddings),
+    ...options,
+    ctx: {
+      network: 'STALE_WHILE_REVALIDATE_BATCH',
+      batcher: batcherLocal,
       ...options?.ctx,
     },
   })
