@@ -1,5 +1,6 @@
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
-import { NoteState, useNoteState } from '@/hooks/state/useNote'
+import type { NoteState} from '@/hooks/state/useNote'
+import { useNoteState } from '@/hooks/state/useNote'
 import { createContext, useContext } from 'react'
 
 type EventContextValues = {

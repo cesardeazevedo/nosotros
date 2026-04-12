@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/Button/Button'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
-import { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { useMuted } from '@/hooks/useMuted'
 import { spacing } from '@/themes/spacing.stylex'
 import { useState } from 'react'

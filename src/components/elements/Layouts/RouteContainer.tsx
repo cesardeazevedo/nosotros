@@ -1,4 +1,3 @@
-import { Divider } from '@/components/ui/Divider/Divider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { palette } from '@/themes/palette.stylex'
 import React, { memo } from 'react'
@@ -10,12 +9,11 @@ type Props = CenteredContainerProps & {
   headline?: React.ReactNode
   header?: React.ReactNode
   children: React.ReactNode
-  renderDivider?: boolean
   margin?: boolean
 }
 
 export const RouteContainer = memo(function RouteContainer(props: Props) {
-  const { children, headline, header, margin = true, renderDivider = true, ...rest } = props
+  const { children, headline, header, margin = true, ...rest } = props
 
   return (
     <Stack horizontal={false} sx={styles.root}>
@@ -48,11 +46,6 @@ const styles = css.create({
     width: '100%',
     borderBottom: '1px solid',
     borderBottomColor: palette.outlineVariant,
-    // backgroundColor: palette.surfaceContainerLowest,
-    // backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    // backgroundColor: 'rgba(0, 0, 0, 0.95)',
-    // backgroundColor: palette.surfaceContainerLowest,
-    // backdropFilter: 'blur(10px)',
     zIndex: 10,
   },
   body: {

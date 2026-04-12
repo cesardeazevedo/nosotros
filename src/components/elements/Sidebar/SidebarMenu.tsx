@@ -13,13 +13,11 @@ import {
   IconBell,
   IconBellFilled,
   IconEdit,
-  IconGlobe,
   IconListDetails,
   IconSearch,
   IconSettings,
   IconSettingsFilled,
   IconSparkles,
-  IconStar,
   IconUser,
 } from '@tabler/icons-react'
 import { Link, useMatch } from '@tanstack/react-router'
@@ -81,16 +79,6 @@ export const SidebarMenu = memo(function SidebarMenu() {
             )}
           </Link>
         )}
-        <Link to='/explore'>
-          <SidebarTooltip collapsed={sidebarCollapsed} text='Explore'>
-            <MenuItem
-              interactive
-              collapsed={sidebarCollapsed}
-              leadingIcon={<IconSparkles {...iconProps} />}
-              label='Explore'
-            />
-          </SidebarTooltip>
-        </Link>
         {pubkey && (
           <Link to='/notifications'>
             <SidebarTooltip collapsed={sidebarCollapsed} text='Notifications'>
@@ -153,6 +141,20 @@ export const SidebarMenu = memo(function SidebarMenu() {
           </Link>
         )}
         <SidebarMenuRelays iconProps={iconProps} />
+        <Link to='/embeddings'>
+          {({ isActive }) => (
+
+            <SidebarTooltip collapsed={sidebarCollapsed} text='Embeddings (alpha)'>
+              <MenuItem
+                interactive
+                selected={isActive}
+                collapsed={sidebarCollapsed}
+                leadingIcon={<IconSparkles {...iconProps} />}
+                label='Embeddings (alpha)'
+              />
+            </SidebarTooltip>
+          )}
+        </Link>
         <Link to='/settings'>
           {({ isActive }) => (
             <SidebarTooltip collapsed={sidebarCollapsed} text='Settings'>

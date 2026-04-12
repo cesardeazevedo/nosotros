@@ -101,24 +101,18 @@ const FeedItem = (props: Props) => {
     )
   }
 
-  switch (event.kind) {
-    /// We handle threads in the feed completed different, the header is entirely different
-    case Kind.Text: {
-      if (!event.metadata?.isRoot) {
-        return <Threads event={event} maxLevel={2} />
-      }
-    }
-    default: {
-      return (
-        <NostrEventHeader event={event}>
-          <NostrEventContent event={event} />
-          <ContentProvider value={{ dense: true }}>
-            <PostActions />
-          </ContentProvider>
-        </NostrEventHeader>
-      )
-    }
+  if (event.kind === Kind.Text && !event.metadata?.isRoot) {
+    return <Threads event={event} maxLevel={2} />
   }
+
+  return (
+    <NostrEventHeader event={event}>
+      <NostrEventContent event={event} />
+      <ContentProvider value={{ dense: true }}>
+        <PostActions />
+      </ContentProvider>
+    </NostrEventHeader>
+  )
 }
 
 const RepostFeedItemLink = memo(function RepostFeedItemLink(props: Props) {

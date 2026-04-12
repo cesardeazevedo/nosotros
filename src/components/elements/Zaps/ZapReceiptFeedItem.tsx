@@ -1,5 +1,5 @@
 import { Paper } from '@/components/ui/Paper/Paper'
-import { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { spacing } from '@/themes/spacing.stylex'
 import { css } from 'react-strict-dom'
 import { ZapReceiptRoot } from './ZapReceipt'

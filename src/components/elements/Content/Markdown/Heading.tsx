@@ -9,7 +9,7 @@ type Props = {
 }
 
 export const Heading = (props: Props) => {
-  const { dense, mediaObject } = useContentContext()
+  const { dense } = useContentContext()
   return (
     <TextContent
       node={props.node}
@@ -25,8 +25,6 @@ const styles = css.create({
     marginTop: spacing.margin4,
     marginBottom: spacing.margin1,
     // paddingLeft: spacing.padding2,
-  },
-  mediaObject: {
   },
   dense: {
     padding: 0,

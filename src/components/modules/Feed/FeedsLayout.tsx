@@ -119,7 +119,7 @@ export const FeedsLayout = () => {
         <RouteUtilsContextProvider value={{ hiddenRoute: !!nostr }}>
           <html.div style={[styles.mainColumn, !!nostr && styles.hidden]}>{center}</html.div>
         </RouteUtilsContextProvider>
-        {!!nostr ? <NostrRouteParallel nostr={nostr} /> : null}
+        {nostr ? <NostrRouteParallel nostr={nostr} /> : null}
       </>
     )
   }

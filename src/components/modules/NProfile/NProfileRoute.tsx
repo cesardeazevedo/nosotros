@@ -14,7 +14,7 @@ export type Props = {
 export const NProfileRoute = function NProfileRoute(props: Props) {
   useResetScroll()
   return (
-    <RouteContainer header={<NavigationHeader />} renderDivider margin={false}>
+    <RouteContainer header={<NavigationHeader />} margin={false}>
       <UserProfileHeader pubkey={props.pubkey} />
       <Divider />
       <NProfileFeedTabs />

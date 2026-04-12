@@ -15,7 +15,7 @@ import { RootLayout } from './components/elements/Layouts/RootLayout'
 import { ArticlesRoute } from './components/modules/Articles/ArticlesRoute'
 import { DraftsRoute } from './components/modules/Drafts/DraftsRoute'
 import { EditorRoute } from './components/modules/Editor/EditorRoute'
-import { ExploreRoute } from './components/modules/Explore/ExploreRoute'
+import { EmbeddingsRoute } from './components/modules/Embeddings/EmbeddingsRoute'
 import { Feed } from './components/modules/Feed/Feed'
 import { FeedsLayout } from './components/modules/Feed/FeedsLayout'
 import { ListsRoute } from './components/modules/Lists/ListRoute'
@@ -87,13 +87,13 @@ const feedsLayoutRoute = createRoute({
   component: FeedsLayout,
 })
 
-const exploreRoute = createRoute({
+const embeddingsRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: '/explore',
+  path: '/embeddings',
   validateSearch: z.object({
     anchor_pubkey: z.string().optional(),
   }),
-  component: ExploreRoute,
+  component: EmbeddingsRoute,
 })
 
 const zNumberArray = z.union([z.number(), z.array(z.number())]).optional()
@@ -365,19 +365,6 @@ export const feedRoute = createRoute({
   component: () => null,
 })
 
-// export const deckRoute = createRoute({
-//   getParentRoute: () => rootRoute,
-//   path: '/deck/$id',
-//   beforeLoad: (options) => {
-//     const { id } = options.params
-//     const decks = store.get(decksAtom)
-//     if (!(id in decks)) {
-//       throw redirect({ to: '/deck/$id', params: { id: 'default' } })
-//     }
-//   },
-//   component: DeckRoute,
-// })
-
 export const notificationsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/notifications',
@@ -541,7 +528,7 @@ export const searchRoute = createRoute({
   loader: createFeedLoader({
     kind: Kind.Metadata,
     limit: 100,
-    live: true,
+    live: false,
     outbox: false,
     type: 'search',
     relays: SEARCH_RELAYS,
@@ -656,7 +643,7 @@ export const routeTree = rootRoute.addChildren([
   feedsLayoutRoute.addChildren([homeRoute, homeRepliesRoute, feedRoute]),
   nostrRoute.addChildren([nprofileIndexRoute, nprofileRepliesRoute, nprofileMediaRoute, nprofileArticlesRoute]),
   searchRoute,
-  exploreRoute,
+  embeddingsRoute,
   listsRoute.addChildren([listsDiscoverRoute]),
   notificationsRoute,
   mediaRoute,

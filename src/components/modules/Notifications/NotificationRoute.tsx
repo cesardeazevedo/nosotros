@@ -89,7 +89,6 @@ const styles = css.create({
     height: '100%',
   },
   resizeHandle: {
-    width: 12,
     height: '100%',
     cursor: 'col-resize',
     borderLeft: '1px solid',

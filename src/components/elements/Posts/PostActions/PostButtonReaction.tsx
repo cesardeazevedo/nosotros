@@ -83,7 +83,7 @@ export const ButtonReaction = memo(function ButtonReaction() {
         sx={selectedColorStyle}
         icon={
           <>
-            {!!myReaction ? (
+            {myReaction ? (
               <>
                 {myReaction === '❤️' ? (
                   <IconHeartFilled

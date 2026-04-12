@@ -1,5 +1,4 @@
 import { Chip } from '@/components/ui/Chip/Chip'
-import { Divider } from '@/components/ui/Divider/Divider'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { Kind } from '@/constants/kinds'

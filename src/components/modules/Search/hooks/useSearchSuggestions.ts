@@ -2,6 +2,7 @@ import { userEmbeddingsQueryFamily } from '@/atoms/users.atoms'
 import { Kind } from '@/constants/kinds'
 import { SEARCH_RELAYS } from '@/constants/relays'
 import { createEventQueryOptions } from '@/hooks/query/useQueryBase'
+import { useSettings } from '@/hooks/useSettings'
 import { useCurrentPubkey } from '@/hooks/useAuth'
 import { dbSqlite } from '@/nostr/db'
 import { selectLatestPublishedEmbedding } from '@/utils/embeddings'
@@ -41,15 +42,17 @@ function useSearchOnRelays(options: SearchOptions) {
 
 function useSearchLocalUsers(options: SearchOptions) {
   const { query, limit } = options
+  const settings = useSettings()
   const currentPubkey = useCurrentPubkey()
   const currentUserEmbeddings = useAtomValue(userEmbeddingsQueryFamily(currentPubkey))
   const currentEmbedding = selectLatestPublishedEmbedding(currentUserEmbeddings.data)
+  const shouldRankByEmbedding = settings.renderEmbeddingSimilarity && !!currentEmbedding
 
   return useQuery({
-    queryKey: ['search-users', query, limit, currentEmbedding?.modelId, currentEmbedding?.createdAt],
+    queryKey: ['search-users', query, limit, shouldRankByEmbedding, currentEmbedding?.modelId, currentEmbedding?.createdAt],
     enabled: !!query,
     queryFn: () =>
-      currentEmbedding
+      shouldRankByEmbedding && currentEmbedding
         ? dbSqlite.queryUsersByEmbedding(query, currentEmbedding.vector, limit, currentEmbedding.modelId)
         : dbSqlite.queryUsersWithEmbeddings(query, limit),
   })

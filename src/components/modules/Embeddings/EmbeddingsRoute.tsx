@@ -1,8 +1,8 @@
 import { RouteContainer } from '@/components/elements/Layouts/RouteContainer'
-import { UserChip } from '@/components/elements/User/UserChip'
+import { Link } from '@/components/elements/Links/Link'
 import { UserHeader } from '@/components/elements/User/UserHeader'
-import { ContentProvider } from '@/components/providers/ContentProvider'
 import { Button } from '@/components/ui/Button/Button'
+import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Paper } from '@/components/ui/Paper/Paper'
 import { Popover } from '@/components/ui/Popover/Popover'
 import { Skeleton } from '@/components/ui/Skeleton/Skeleton'
@@ -10,23 +10,27 @@ import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { userEmbeddingsQueryOptions } from '@/hooks/query/useQueryBase'
 import { useUserFollows } from '@/hooks/query/useQueryUser'
+import { useUserState } from '@/hooks/state/useUser'
 import { useCurrentPubkey } from '@/hooks/useAuth'
 import { dbSqlite } from '@/nostr/db'
 import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
+import { IconSearch, IconX } from '@tabler/icons-react'
 import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { css, html } from 'react-strict-dom'
-import { EmbeddingChart } from '../Embeddings/EmbeddingChart'
+import { EmbeddingChart } from './EmbeddingChart'
 import { FeedHeaderBase } from '../Feed/headers/FeedHeaderBase'
-import { Search } from '../Search/Search'
 import type { SearchItem } from '../Search/hooks/useSearchSuggestions'
+import { Search } from '../Search/Search'
 
-export const ExploreRoute = () => {
+export const EmbeddingsRoute = () => {
   const currentPubkey = useCurrentPubkey()
-  const navigate = useNavigate({ from: '/explore' })
-  const anchorPubkeySearch = useSearch({ from: '/explore', select: (x) => x.anchor_pubkey })
+  const navigate = useNavigate({ from: '/embeddings' })
+  const anchorPubkeySearch = useSearch({ from: '/embeddings', select: (x) => x.anchor_pubkey })
   const anchorPubkey = anchorPubkeySearch || currentPubkey
+  const anchorUser = useUserState(anchorPubkey || '')
+  const anchorLabel = anchorUser?.displayName || 'anchor'
   const follows = useUserFollows(anchorPubkey || '', { enabled: !!anchorPubkey })
   const followedPubkeys = [...new Set((follows.data?.tags || []).filter((tag) => tag[0] === 'p').map((tag) => tag[1]))]
   const followedEmbeddings = useQuery(
@@ -70,50 +74,69 @@ export const ExploreRoute = () => {
   return (
     <RouteContainer
       maxWidth='lg'
-      header={<FeedHeaderBase leading='Explore' />}
+      header={<FeedHeaderBase leading='Embeddings (alpha)' />}
       headline={currentPubkey ? <EmbeddingChart entries={entries} /> : null}>
       <Stack horizontal={false} sx={styles.root} gap={2}>
         {!!anchorPubkey && (
-          <Stack gap={2} align='center' sx={styles.headerRow}>
-            <Text variant='title' size='lg'>
-              Closest Users ({entries.length})
-            </Text>
-            <ContentProvider value={{ disableLink: true, disablePopover: true }}>
-              <Popover
-                placement='bottom-start'
-                floatingStrategy='fixed'
-                contentRenderer={({ close }) => (
-                  <Paper elevation={2} outlined surface='surfaceContainerLow' sx={styles.popover}>
-                    <Search
-                      dense
-                      placeholder='Search Users'
-                      suggestQuery={false}
-                      suggestRelays={false}
-                      onSelect={(item) => handleSelectUser(item, close)}
-                    />
-                  </Paper>
-                )}>
-                {({ getProps, setRef, open }) => (
-                  <div ref={setRef} {...getProps()} onClick={open}>
-                    <UserChip
-                      pubkey={anchorPubkey}
-                      onDelete={
-                        currentPubkey && anchorPubkey !== currentPubkey
-                          ? () =>
-                              navigate({
-                                search: (prev) => ({
-                                  ...prev,
-                                  anchor_pubkey: undefined,
-                                }),
-                              })
-                          : undefined
-                      }
-                    />
-                  </div>
-                )}
-              </Popover>
-            </ContentProvider>
-          </Stack>
+          <>
+            <Stack gap={2} align='center' sx={styles.header}>
+              <Stack gap={4} horizontal={false}>
+                <Stack horizontal={false} gap={2}>
+                  <Text variant='headline' size='lg' sx={styles.title}>
+                    Vector Embeddings
+                  </Text>
+                  <Text variant='body' size='lg' sx={styles.title}>
+                    We are experimenting with vector embeddings, a new way to find similar users based on your graph and interactions on Nostr.
+                    They are generated by a machine learning graph neural network model trained on nostr data, and can help you discovery similar
+                    accounts from a specific user perspective, filter out users too far away from your graph, recommendation systems and more.
+                    you can learn more here <Link style={styles.link} href='https://github.com/nosotros-social/nostr-gnn'>NostrGNN</Link>
+                  </Text>
+                  <Text variant='body' size='lg' sx={styles.title}>
+                    This feature still very experimental and only showing users from it's local database, so it might not be accurate, this project is part of the nosfabrica <Link style={styles.link} href='https://nosfabrica.com/wotathon/'>Wotathon</Link> project.
+                  </Text>
+                </Stack>
+              </Stack>
+            </Stack>
+            <Stack grow justify='space-between' align='center'>
+              <Stack horizontal={false} gap={1}>
+                <Text variant='title' size='lg'>
+                  <Stack horizontal={false}>
+                    Similar users to
+                  </Stack>
+                </Text>
+                <Paper surface='surfaceContainerLow' outlined sx={styles.card}>
+                  <Stack gap={2}>
+                    <UserHeader size='lg' userAvatarProps={{ size: 'sm' }} renderEmbeddingSimilarity={true} pubkey={anchorPubkey} />
+                    <IconButton onClick={() => navigate({ search: (prev) => ({ ...prev, anchor_pubkey: undefined }) })}>
+                      <IconX size={20} />
+                    </IconButton>
+                  </Stack>
+                </Paper>
+              </Stack>
+              <Stack>
+                <Popover
+                  placement='bottom-end'
+                  floatingStrategy='fixed'
+                  contentRenderer={({ close }) => (
+                    <Paper elevation={2} outlined surface='surfaceContainerLow' sx={styles.popover}>
+                      <Search
+                        dense
+                        placeholder='Search users'
+                        suggestQuery={false}
+                        suggestRelays={false}
+                        onSelect={(item) => handleSelectUser(item, close)}
+                      />
+                    </Paper>
+                  )}>
+                  {({ getProps, setRef, open }) => (
+                    <div ref={setRef} {...getProps()} onClick={open}>
+                      <IconButton icon={<IconSearch size={20} />} aria-label='Search users' />
+                    </div>
+                  )}
+                </Popover>
+              </Stack>
+            </Stack>
+          </>
         )}
 
         {!currentPubkey ? (
@@ -173,14 +196,14 @@ export const ExploreRoute = () => {
                       surface='surfaceContainerLow'
                       sx={[styles.card, styles.card$interactive]}>
                       <Stack horizontal={false} gap={2} align='flex-start'>
-                        <UserHeader pubkey={entry.pubkey} />
+                        <UserHeader pubkey={entry.pubkey} renderEmbeddingSimilarity={true} />
                         <Stack gap={2} justify='space-between' sx={styles.cardBottomRow}>
                           <Stack horizontal={false} align='flex-start' sx={styles.metrics}>
                             <Text variant='title' size='md'>
                               {similarity}
                             </Text>
                             <Text variant='body' size='sm' sx={styles.metricLabel}>
-                              similarity
+                              {`similarity score to ${anchorLabel}`}
                             </Text>
                           </Stack>
                         </Stack>
@@ -212,11 +235,15 @@ const MD = '@media (max-width: 960px)'
 const PAGE_SIZE = 200
 
 const styles = css.create({
+  title: {
+    maxWidth: 500,
+  },
   root: {
     paddingBlock: spacing.padding4,
   },
-  headerRow: {
+  header: {
     width: '100%',
+    marginBottom: spacing.padding2,
   },
   notice: {
     padding: spacing.padding3,
@@ -279,5 +306,12 @@ const styles = css.create({
   scoreSkeleton: {
     width: 48,
     height: 18,
+  },
+  link: {
+    color: palette.tertiary,
+    fontWeight: 600,
+  },
+  search: {
+    maxWidth: 250,
   },
 })

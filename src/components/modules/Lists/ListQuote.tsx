@@ -1,8 +1,8 @@
 import { LinkNAddress } from '@/components/elements/Links/LinkNAddress'
 import { ContentProvider } from '@/components/providers/ContentProvider'
 import { Paper } from '@/components/ui/Paper/Paper'
-import { NostrEventDB } from '@/db/sqlite/sqlite.types'
-import { ReactNode } from 'react'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import type { ReactNode } from 'react'
 import { css, html } from 'react-strict-dom'
 
 type Props = {

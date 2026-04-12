@@ -1,16 +1,12 @@
-import { PostActions } from '@/components/elements/Posts/PostActions/PostActions'
-import { PostContentHidden } from '@/components/elements/Posts/PostContentHidden'
-import { PostHeader } from '@/components/elements/Posts/PostHeader'
+import { Paper } from '@/components/ui/Paper/Paper'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
-import { NostrEventDB } from '@/db/sqlite/sqlite.types'
-import { useNoteState } from '@/hooks/state/useNote'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { useCurrentPubkey } from '@/hooks/useAuth'
 import { spacing } from '@/themes/spacing.stylex'
+import { useMemo } from 'react'
 import { css } from 'react-strict-dom'
 import { FollowBulkButton } from './FollowBulkButton'
-import { useMemo } from 'react'
-import { Paper } from '@/components/ui/Paper/Paper'
 
 type Props = {
   event: NostrEventDB
@@ -19,7 +15,6 @@ type Props = {
 export const FollowEventFeedItem = (props: Props) => {
   const { event } = props
   const { tags } = event
-  const note = useNoteState(event, { repliesOpen: false, forceSync: false, contentOpen: false })
   const pubkey = useCurrentPubkey()
   const values = useMemo(() => tags.map(([, pubkey]) => pubkey), [tags])
   const isOwnFollowList = event.pubkey === pubkey

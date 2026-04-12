@@ -85,9 +85,5 @@ const styles = css.create({
       default: 505,
       [MOBILE]: '100%',
     },
-    maxWidth: {
-      default: 600,
-      [MOBILE]: '100%',
-    },
   },
 })

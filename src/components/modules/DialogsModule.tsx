@@ -10,7 +10,6 @@ import { NoteStatsDialog } from '../dialogs/notestats.dialog'
 import { ReplyDialog } from '../dialogs/reply.dialog'
 import { ZapDialog } from '../dialogs/zap.dialog'
 import { ZapRequestInvoiceDialog } from '../dialogs/zapinvoice.dialog'
-import { DeckFormDialog } from './Deck/DeckFormDialog'
 import { SearchDialog } from './Search/SearchDialog'
 
 export const Dialogs = React.memo(function Dialogs() {
@@ -28,7 +27,6 @@ export const Dialogs = React.memo(function Dialogs() {
       <NoteStatsDialog />
       <ListFormDialog />
       <SearchDialog />
-      <DeckFormDialog />
     </>
   )
 })

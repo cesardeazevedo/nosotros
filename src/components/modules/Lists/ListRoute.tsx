@@ -3,7 +3,7 @@ import { Divider } from '@/components/ui/Divider/Divider'
 import { MenuItem } from '@/components/ui/MenuItem/MenuItem'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
-import { Kind, LIST_KIND_MAP } from '@/constants/kinds'
+import { LIST_KIND_MAP } from '@/constants/kinds'
 import { createListModule } from '@/hooks/modules/createListModule'
 import { useCurrentPubkey } from '@/hooks/useAuth'
 import { useMobile } from '@/hooks/useMobile'
@@ -58,7 +58,7 @@ export const ListsRoute = memo(function ListsRoute() {
   const isMobile = useMobile()
   const discoverRoute = useMatch({ from: '/lists/discover', shouldThrow: false })
   const [myKinds, setMyKinds] = useState<number[]>([])
-  const [discoverKinds, setDiscoverKinds] = useState<number[]>([Kind.StarterPack])
+  const [discoverKinds, setDiscoverKinds] = useState<number[]>([])
   const defaultKinds = useMemo(() => Object.keys(LIST_KIND_MAP).map((kind) => Number(kind)), [])
 
   const myListsModule = useMemo(

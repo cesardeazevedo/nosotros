@@ -1,5 +1,5 @@
 import { Stack } from '@/components/ui/Stack/Stack'
-import { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { useEventTag } from '@/hooks/useEventUtils'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconChevronRight } from '@tabler/icons-react'

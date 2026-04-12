@@ -1,6 +1,6 @@
 import { Kind } from '@/constants/kinds'
 import type { Database } from '@sqlite.org/sqlite-wasm'
-import type { NostrEventDB, SqliteNearestUserEmbedding } from '../sqlite.types'
+import type { NostrEventDB } from '../sqlite.types'
 
 const USER_EMBEDDING_DIMENSION = 64
 

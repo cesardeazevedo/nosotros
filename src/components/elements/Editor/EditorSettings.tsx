@@ -12,7 +12,6 @@ import { lazy, memo, Suspense, useState } from 'react'
 import { css } from 'react-strict-dom'
 import { EditorSettingsUpload } from './EditorSettingsUpload'
 import { useEditorSelector } from './hooks/useEditor'
-import { Divider } from '@/components/ui/Divider/Divider'
 
 const jsonTheme = {
   ...githubDarkTheme,

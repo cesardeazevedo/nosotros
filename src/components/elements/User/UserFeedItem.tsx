@@ -4,7 +4,6 @@ import { Stack } from "@/components/ui/Stack/Stack"
 import { spacing } from "@/themes/spacing.stylex"
 import { css } from "react-strict-dom"
 import { UserContentAbout } from "./UserContentAbout"
-import { UserHeader } from "./UserHeader"
 
 type Props = {
   pubkey: string
@@ -29,7 +28,6 @@ export const UserFeedItem = function UserFeedItem(props: Props) {
     </Paper>
   )
 }
-
 
 const styles = css.create({
   root: {

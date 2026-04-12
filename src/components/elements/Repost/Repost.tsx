@@ -1,11 +1,8 @@
-import { ArticleFeedItem } from '@/components/modules/Articles/ArticleFeedItem'
 import { EventProvider } from '@/components/providers/NoteProvider'
-import { Kind } from '@/constants/kinds'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { useRepostedEvent } from '@/hooks/query/useQueryBase'
 import { memo } from 'react'
 // import { PostFeedItem } from '../Posts/PostFeedItem'
-import { RepostHeader } from './RepostHeader'
 import { NostrEventContent } from '../Event/NostrEventFeedItem'
 
 type Props = {

@@ -1,4 +1,4 @@
-import { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { useNIP19 } from '@/hooks/useEventUtils'
 import { useIsCurrentRouteEventID } from '@/hooks/useNavigations'
 import { useNostrMaskedLinkProps, useNostrNavigationScope } from '@/hooks/useNostrMaskedLinkProps'

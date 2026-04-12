@@ -17,6 +17,8 @@ export type Props = StackProps & {
   size?: TextProps['size']
   renderAvatar?: boolean
   renderNIP05?: boolean
+  renderTaRank?: boolean
+  renderEmbeddingSimilarity?: boolean
 }
 
 export const UserHeader = memo(function UserHeader(props: Props) {
@@ -29,13 +31,19 @@ export const UserHeader = memo(function UserHeader(props: Props) {
     size,
     userAvatarProps,
     renderNIP05 = true,
+    renderTaRank,
+    renderEmbeddingSimilarity,
     ...rest
   } = props
   return (
     <Stack horizontal gap={2} align='center' {...rest} sx={[styles.root, rest.sx]}>
       {renderAvatar && <UserAvatar pubkey={pubkey} size={dense ? 'sm' : 'md'} {...userAvatarProps} />}
       <Stack horizontal={false} sx={styles.content}>
-        <UserName pubkey={pubkey} size={size}>
+        <UserName
+          pubkey={pubkey}
+          size={size}
+          renderTaRank={renderTaRank}
+          renderEmbeddingSimilarity={renderEmbeddingSimilarity}>
           {children}
         </UserName>
         {renderNIP05 && <UserNIP05 pubkey={pubkey} sx={styles.nip05} />}

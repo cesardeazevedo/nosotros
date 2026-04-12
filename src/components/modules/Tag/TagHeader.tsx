@@ -10,7 +10,7 @@ import { dedupe } from '@/core/helpers/dedupe'
 import type { FeedState } from '@/hooks/state/useFeed'
 import { spacing } from '@/themes/spacing.stylex'
 import { IconPlus } from '@tabler/icons-react'
-import { useMatch, useNavigate } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router'
 import { memo, useActionState, useMemo, useState } from 'react'
 import { css, html } from 'react-strict-dom'
 

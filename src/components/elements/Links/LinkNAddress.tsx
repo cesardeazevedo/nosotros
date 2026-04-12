@@ -1,6 +1,5 @@
 import { useContentContext } from '@/components/providers/ContentProvider'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
-import { createEventModule } from '@/hooks/modules/createEventModule'
 import { useNaddress } from '@/hooks/useEventUtils'
 import { useNostrMaskedLinkProps, useNostrNavigationScope } from '@/hooks/useNostrMaskedLinkProps'
 import { Link, useNavigate, useRouter } from '@tanstack/react-router'

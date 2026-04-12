@@ -4,7 +4,6 @@ import { createEditorInline } from '@/components/elements/Editor/utils/createEdi
 import { getEditorEmojiTags } from '@/components/elements/Editor/utils/getEditorEmojiTags'
 import { IconButton } from '@/components/ui/IconButton/IconButton'
 import { Stack } from '@/components/ui/Stack/Stack'
-import { Text } from '@/components/ui/Text/Text'
 import { Tooltip } from '@/components/ui/Tooltip/Tooltip'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'

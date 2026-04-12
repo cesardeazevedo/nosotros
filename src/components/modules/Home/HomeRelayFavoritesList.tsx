@@ -33,7 +33,7 @@ export const HomeRelayFavoritesList = (props: Props) => {
           return (
             <Expandable
               key={relay}
-              expanded={expandedRows[relay] ?? true}
+              expanded={expandedRows[relay] ?? false}
               onChange={(expanded) => setExpandedRows((current) => ({ ...current, [relay]: expanded }))}
               trigger={({ expanded, expand }) => (
                 <html.div onClick={() => expand()}>

@@ -1,6 +1,5 @@
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
-import { spacing } from '@/themes/spacing.stylex'
 import { IconBug } from '@tabler/icons-react'
 import { memo } from 'react'
 import { css } from 'react-strict-dom'

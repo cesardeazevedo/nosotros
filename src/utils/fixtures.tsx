@@ -15,7 +15,6 @@ import { test as base } from 'vitest'
 import type { MockRelayOptions } from './testHelpers'
 import { RelayServer, TestSigner } from './testHelpers'
 import { JotaiProvider } from '@/components/providers/JotaiProvider'
-import { store } from '@/atoms/store'
 
 interface Fixtures {
   pool: Pool

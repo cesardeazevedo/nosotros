@@ -18,6 +18,8 @@ import { UserRank } from './UserRank'
 export interface Props extends Omit<TextProps, 'children'> {
   pubkey: string
   children?: React.ReactNode
+  renderTaRank?: boolean
+  renderEmbeddingSimilarity?: boolean
 }
 
 const UserNameSkeletonOrPubkey = memo(function UserNameSkeletonOrPubkey(props: Omit<Props, 'children'>) {
@@ -46,7 +48,14 @@ const UserNameSkeletonOrPubkey = memo(function UserNameSkeletonOrPubkey(props: O
 })
 
 export const UserName = memo(function UserName(props: Props) {
-  const { pubkey, children, size = 'lg', ...rest } = props
+  const {
+    pubkey,
+    children,
+    size = 'lg',
+    renderTaRank = true,
+    renderEmbeddingSimilarity,
+    ...rest
+  } = props
   const { disableLink } = useContentContext()
   const user = useUserState(pubkey)
   const currentUser = useCurrentUser()
@@ -67,7 +76,11 @@ export const UserName = memo(function UserName(props: Props) {
       {!user && <UserNameSkeletonOrPubkey pubkey={pubkey} size={size} {...rest} />}
       <UserPopover pubkey={pubkey}>{textWithLink}</UserPopover>
       {(user?.trustedAssertionEvent || user?.embeddings?.data?.length) && (
-        <UserRank pubkey={pubkey} event={user?.trustedAssertionEvent} />
+        <UserRank
+          pubkey={pubkey}
+          renderTaRank={renderTaRank}
+          renderEmbeddingSimilarity={renderEmbeddingSimilarity}
+        />
       )}
       {currentUser?.followsTag(user?.pubkey) && (
         <IconUserCheck size={14} strokeWidth='2.2' {...css.props(styles.followingIndicator)} />

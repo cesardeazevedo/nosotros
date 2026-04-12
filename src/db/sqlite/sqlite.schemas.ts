@@ -152,7 +152,7 @@ function build(db: Database) {
   createUserEmbeddingsSchema(db)
 }
 
-export async function initializeSQLite(name: string = 'nosotrosdb.sqlite3', tracing = true) {
+export async function initializeSQLite(name: string = 'nosotrosdb.sqlite3', tracing = false) {
   try {
     console.log('Loading and initializing SQLite3 module...')
     let startupCorruptionDetected = false

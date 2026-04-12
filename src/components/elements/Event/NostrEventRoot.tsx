@@ -1,11 +1,9 @@
 import { FollowEventRoot } from '@/components/modules/Follows/FollowEventRoot'
 import { ListEmojiSetsRoot } from '@/components/modules/Lists/ListEmojiSetsRoot'
 import { ListEventRoot } from '@/components/modules/Lists/ListEventRoot'
-import { EventProvider, NoteProvider } from '@/components/providers/NoteProvider'
-import { Paper } from '@/components/ui/Paper/Paper'
+import { EventProvider } from '@/components/providers/NoteProvider'
 import { Kind, isListKind } from '@/constants/kinds'
 import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
-import { useNoteState } from '@/hooks/state/useNote'
 import { memo } from 'react'
 import { PostActions } from '../Posts/PostActions/PostActions'
 import { PostRoot } from '../Posts/PostRoot'
@@ -50,7 +48,6 @@ export const ContentRoot = memo(function NostrEventRoot(props: Props) {
     }
     case Kind.Media:
     case Kind.Video:
-    case Kind.Article:
     case Kind.ShortVideo:
     case Kind.PublicMessage: {
       return <PostRoot event={event} />
@@ -73,27 +70,22 @@ export const ContentRoot = memo(function NostrEventRoot(props: Props) {
 
 const Item = memo(function Item(props: Props) {
   const { event } = props
-  switch (event.kind) {
-    case Kind.Text: {
-      if (!event.metadata?.isRoot) {
-        return (
-          <>
-            <Threads event={event} renderReplies renderRepliesSummary={false} />
-            <ThreadRelated event={event} />
-          </>
-        )
-      }
-    }
-    default: {
-      return (
-        <>
-          <NostrEventHeader event={event} />
-          <ContentRoot event={event} />
-          <PostActions />
-        </>
-      )
-    }
+  if (event.kind === Kind.Text && !event.metadata?.isRoot) {
+    return (
+      <>
+        <Threads event={event} renderReplies renderRepliesSummary={false} />
+        <ThreadRelated event={event} />
+      </>
+    )
   }
+
+  return (
+    <>
+      <NostrEventHeader event={event} />
+      <ContentRoot event={event} />
+      <PostActions />
+    </>
+  )
 })
 
 export const NostrEventRoot = memo(function NostrEventRoot(props: Props) {

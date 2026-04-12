@@ -27,7 +27,7 @@ export class SqliteStorage {
   tags: SqliteTags
 
   constructor(public name: string) {
-    const init = initializeSQLite(this.name, true)
+    const init = initializeSQLite(this.name, false)
     this.db = init.then((r) => r.db)
     this.pool = init.then((r) => r.pool)
     this.event = new SqliteEventStore(this.db)
@@ -39,46 +39,6 @@ export class SqliteStorage {
     this.stats = new SqliteStats()
     this.users = new SqliteUsers(this.db)
     this.tags = new SqliteTags()
-    //
-    // void this.db.then((db) => {
-    //   const existing = (db.selectValue(`SELECT COUNT(*) FROM user_embeddings`) as number) || 0
-    //   if (existing > 0) {
-    //     return
-    //   }
-    //
-    //   const rows =
-    //     (db.selectObjects(
-    //       `
-    //         SELECT id, kind, pubkey, created_at, content, tags, sig, metadata
-    //         FROM events
-    //         WHERE kind = ?
-    //       `,
-    //       [Kind.UserEmbeddings],
-    //     ) as Array<{
-    //       id: string
-    //       kind: number
-    //       pubkey: string
-    //       created_at: number
-    //       content: string
-    //       tags: string
-    //       sig: string
-    //       metadata: string
-    //     }>) || []
-    //
-    //   if (!rows.length) {
-    //     return
-    //   }
-    //
-    //   db.transaction((tx) => {
-    //     for (const row of rows) {
-    //       this.event.embeddings.insertEvent(tx, {
-    //         ...row,
-    //         tags: JSON.parse(row.tags || '[]'),
-    //         metadata: JSON.parse(row.metadata || 'null'),
-    //       } as NostrEventDB)
-    //     }
-    //   })
-    // })
   }
 
   async deleteDB() {

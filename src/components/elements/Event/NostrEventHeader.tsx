@@ -1,5 +1,5 @@
 import { Kind } from '@/constants/kinds'
-import { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { PostHeader } from '../Posts/PostHeader'
 import { RepostHeader } from '../Repost/RepostHeader'
 import { PublicMessageHeader } from '../PublicMessage/PublicMessageHeader'

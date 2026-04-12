@@ -38,7 +38,7 @@ export const HomeSidebarColumn = (props: Props) => {
         <Stack gap={0.5} horizontal={false} sx={styles.list}>
           {isFollowingActive ? (
             <Expandable
-              expanded={expandedRows.following ?? true}
+              expanded={expandedRows.following ?? false}
               onChange={(expanded) => setExpandedRows((current) => ({ ...current, following: expanded }))}
               trigger={({ expanded, expand }) => (
                 <html.div onClick={() => expand()}>

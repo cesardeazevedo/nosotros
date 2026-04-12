@@ -6,7 +6,6 @@ import { Paper } from '@/components/ui/Paper/Paper'
 import { Stack } from '@/components/ui/Stack/Stack'
 import type { FeedState } from '@/hooks/state/useFeed'
 import { useResetScroll } from '@/hooks/useResetScroll'
-import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import React, { memo } from 'react'
 import { css, html } from 'react-strict-dom'
@@ -49,15 +48,13 @@ export const FeedRoute = memo(function FeedRoute(props: Props) {
             </>
           )}
           {bodyHeader}
-          {bodyHeader && <Divider />}
           <FeedSelectedAuthorChip feed={feed} />
-          <Divider />
           <Feed feed={feed} />
         </html.div>
         {sideRail ? (
           <html.div style={styles.rail}>
             <html.div style={styles.rail$sticky}>
-              <Paper outlined surface='surfaceContainerLow' elevation={2} sx={styles.rail$paper}>
+              <Paper elevation={2}>
                 {sideRail}
               </Paper>
             </html.div>
@@ -80,6 +77,7 @@ const styles = css.create({
   rail: {
     position: 'absolute',
     left: 'calc(100% + 12px)',
+    padding: spacing.padding1,
     top: 0,
     bottom: 0,
     width: 280,
@@ -91,10 +89,6 @@ const styles = css.create({
   rail$sticky: {
     position: 'sticky',
     top: 76,
-  },
-  rail$paper: {
-    overflow: 'hidden',
-    backgroundColor: palette.surfaceContainerLow,
   },
   editor$header: {
     marginBlock: spacing['padding0.5'],

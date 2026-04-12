@@ -23,7 +23,8 @@ const OutletParallel = () => {
   const homeRoute = useMatch({ from: '/feeds-layout/', shouldThrow: false })
   const homeRepliesRoute = useMatch({ from: '/feeds-layout/threads', shouldThrow: false })
   const feedRoute = useMatch({ from: '/feeds-layout/feed', shouldThrow: false })
-  const feedsRoute = !!homeRoute || !!homeRepliesRoute || !!feedRoute
+  const searchRoute = useMatch({ from: '/search', shouldThrow: false })
+  const feedsRoute = !!homeRoute || !!homeRepliesRoute || !!feedRoute || !!searchRoute
   const renderColumn = !!column && !notificationsRoute && !feedsRoute
 
   if (feedsRoute || notificationsRoute) {

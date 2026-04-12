@@ -2,7 +2,7 @@ import { palette } from '@/themes/palette.stylex'
 import { spacing } from '@/themes/spacing.stylex'
 import { css, html } from 'react-strict-dom'
 import { PostCountdown } from './PostCountdown'
-import { NostrEventDB } from '@/db/sqlite/sqlite.types'
+import type { NostrEventDB } from '@/db/sqlite/sqlite.types'
 import { useCurrentPubkey } from '@/hooks/useAuth'
 
 type Props = {

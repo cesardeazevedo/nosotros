@@ -1,5 +1,5 @@
 import { useContentContext } from '@/components/providers/ContentProvider'
-import { SxProps } from '@/components/ui/types'
+import type { SxProps } from '@/components/ui/types'
 import { spacing } from '@/themes/spacing.stylex'
 import type { ReactNode } from 'react'
 import { useRef, type MutableRefObject } from 'react'

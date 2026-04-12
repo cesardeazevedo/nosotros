@@ -13,7 +13,7 @@ type Props = Omit<LinkProps, 'to' | 'search'> & {
 }
 
 export const LinkRelayFeed = memo(function LinkRelayFeed(props: Props) {
-  const { url, target = '_self', sx, children, allowDeckLink = true, onClick } = props
+  const { url, target = '_self', sx, onClick } = props
   const router = useRouter()
   const module = useMemo(() => createRelayFeedModule(url), [url])
 

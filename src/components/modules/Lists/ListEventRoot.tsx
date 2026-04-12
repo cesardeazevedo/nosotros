@@ -1,5 +1,3 @@
-import { PostHeader } from '@/components/elements/Posts/PostHeader'
-import { UserRoot } from '@/components/elements/User/UserRoot'
 import { EventProvider } from '@/components/providers/NoteProvider'
 import { Button } from '@/components/ui/Button/Button'
 import { Divider } from '@/components/ui/Divider/Divider'

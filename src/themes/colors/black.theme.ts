@@ -57,5 +57,5 @@ const blackTheme = css.createTheme(palette, {
 })
 
 export const theme: Partial<Theme> = {
-  palette: darkTheme,
+  palette: blackTheme,
 }

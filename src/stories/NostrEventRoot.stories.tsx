@@ -149,7 +149,6 @@ export const Kind1TextNote: Story = {
 }
 
 export const Kind1TextThread: Story = {
-  name: 'Kind 1 Text Thread',
   args: {
     event: kind1TextThreadReply,
   },
@@ -161,7 +160,6 @@ export const Kind1TextThread: Story = {
 }
 
 export const Kind1TextThreads: Story = {
-  name: 'Kind 1 Text Threads',
   args: {
     event: kind1TextThreadsReply,
   },
@@ -260,7 +258,6 @@ export const Kind20MediaCarousel: Story = {
         ],
       ],
     }),
-    open: true,
   },
 }
 
@@ -329,7 +326,6 @@ Suspendisse sollicitudin velit sed leo. Ut pharetra augue nec augue. Nam elit ma
         ['image', 'https://placehold.co/600x300'],
       ],
     }),
-    open: true,
   },
 }
 

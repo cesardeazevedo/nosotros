@@ -1,6 +1,5 @@
 import { NostrEventRoot } from '@/components/elements/Event/NostrEventRoot'
 import { CenteredContainer } from '@/components/elements/Layouts/CenteredContainer'
-import { PaperContainer } from '@/components/elements/Layouts/PaperContainer'
 import { Paper } from '@/components/ui/Paper/Paper'
 import { setEventData } from '@/hooks/query/queryUtils'
 import { fakeEventMeta } from '@/utils/faker'

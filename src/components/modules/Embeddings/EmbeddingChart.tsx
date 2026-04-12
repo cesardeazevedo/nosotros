@@ -141,7 +141,7 @@ const styles = css.create({
     justifyContent: 'center',
   },
   chartMarker$anchor: {
-    zIndex: 2,
+    zIndex: 10,
   },
   chartAvatarFrame: {
     display: 'flex',
@@ -154,11 +154,11 @@ const styles = css.create({
   },
   chartAvatarFrame$point: {
     borderWidth: 1,
-    padding: 1,
+    padding: 0,
   },
   chartAvatarFrame$anchor: {
     borderWidth: 2,
-    padding: 1,
+    padding: 0,
   },
   chartAvatar: {
     boxShadow: 'none',
@@ -246,7 +246,7 @@ function normalizeRatio(distance: number, minDistance: number, maxDistance: numb
 function getBorderColor(ratio: number, emphasis: number) {
   const curved = Math.pow(Math.max(0, Math.min(ratio, 1)), emphasis)
   const hue = 8 + curved * 126
-  return `hsl(${hue}deg 78% 58%)`
+  return `hsl(${hue}deg 78% 50%)`
 }
 
 function createSeededRandom(seed: number) {

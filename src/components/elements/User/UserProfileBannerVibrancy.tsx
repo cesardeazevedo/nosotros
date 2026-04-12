@@ -1,6 +1,5 @@
 import { mediaErrorsAtom } from '@/atoms/media.atoms'
 import { useUserState } from '@/hooks/state/useUser'
-import { getImgProxyUrl } from '@/utils/imgproxy'
 import { useAtomValue } from 'jotai'
 // @ts-ignore
 import { Vibrant } from 'node-vibrant/browser'

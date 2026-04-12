@@ -34,7 +34,8 @@ const userFollowsQueryFamily = atomFamily(
 export const userTrustedAssertionQueryFamily = atomFamily((pubkey: string | undefined) => {
   return atomWithQuery(() =>
     trustedAssertionsQueryOptions(pubkey || '', {
-      enabled: !!pubkey,
+      // needs to implement kind 10040 first
+      enabled: false,
       ctx: {
         relays: EMBEDDINGS_RELAYS,
         outbox: false,

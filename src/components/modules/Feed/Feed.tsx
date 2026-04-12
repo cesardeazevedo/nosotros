@@ -23,10 +23,15 @@ export type Props = {
 
 export const Feed = memo(function Feed(props: Props) {
   const { feed, render, loading, ...rest } = props
-  const showLoading = feed.options.scope === 'sets_e' ? feed.query.isFetching : !feed.isEmpty
+  const items = feed.query.data?.pages.flat() || []
+  const isLoading = (feed.query.isLoading || feed.query.isPending || feed.query.isFetching) && items.length === 0
+  const isPaginatingLocal = items.length > feed.pageSize
+  const isEmpty = !isLoading && items.length === 0
   const isThreadsMode = feed.replies === true && feed.options.type !== 'inbox'
   const footer = (
-    <>{showLoading ? loading || <PostLoading rows={4} /> : feed.isEmpty ? <FeedEmpty feed={feed} /> : null}</>
+    <>
+      {isLoading || isPaginatingLocal ? loading || <PostLoading rows={4} /> : isEmpty ? <FeedEmpty feed={feed} /> : null}
+    </>
   )
 
   return (

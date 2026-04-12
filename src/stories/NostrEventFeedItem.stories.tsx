@@ -379,7 +379,6 @@ export const Kind1Text: Story = {
 }
 
 export const Kind1TextThread: Story = {
-  name: 'Kind 1 Text Thread',
   args: {
     items: kind1ThreadItems,
     preload: kind1ThreadRoots,
@@ -387,7 +386,6 @@ export const Kind1TextThread: Story = {
 }
 
 export const Kind1TextThreads: Story = {
-  name: 'Kind 1 Text Threads',
   args: {
     items: kind1ThreadsItems,
     preload: [...kind1ThreadRoots, ...kind1ThreadItems],

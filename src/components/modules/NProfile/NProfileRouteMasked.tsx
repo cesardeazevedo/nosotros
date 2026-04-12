@@ -26,7 +26,7 @@ export const NProfileRouteMasked = function NProfileRouteMasked(props: Props) {
 
   const feed = useFeedState(moduleSelected)
   return (
-    <RouteContainer header={<NavigationHeader />} renderDivider={false}>
+    <RouteContainer header={<NavigationHeader />}>
       <UserProfileHeader pubkey={pubkey} />
       <Divider />
       <NProfileFeedTabsState

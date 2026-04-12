@@ -1,6 +1,4 @@
 import { TextClamped } from '@/components/elements/Content/TextClamped'
-import { PostActions } from '@/components/elements/Posts/PostActions/PostActions'
-import { PostHeader } from '@/components/elements/Posts/PostHeader'
 import { ContentProvider, useContentContext } from '@/components/providers/ContentProvider'
 import { Paper } from '@/components/ui/Paper/Paper'
 import { Stack } from '@/components/ui/Stack/Stack'

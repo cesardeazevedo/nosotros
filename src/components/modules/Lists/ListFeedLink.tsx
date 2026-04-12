@@ -5,7 +5,7 @@ import { createListFeedModule } from '@/hooks/modules/createListFeedModule'
 import type { FeedModule } from '@/hooks/query/useQueryFeeds'
 import { Link } from '@tanstack/react-router'
 import { memo, useMemo, type ReactNode } from 'react'
-import { css, html } from 'react-strict-dom'
+import { css } from 'react-strict-dom'
 
 type ListFeedType = 'lists' | 'followset' | 'relaysets' | 'starterpack'
 type ListFeedScope = 'sets_p' | 'sets_e' | 'relay_sets'

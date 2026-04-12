@@ -35,7 +35,6 @@ import { UserFollowings } from './UserFollowings'
 import { UserMutes } from './UserMutes'
 import { UserNIP05 } from './UserNIP05'
 import { UserProfileBanner } from './UserProfileBanner'
-import { UserProfileBannerVibrancy } from './UserProfileBannerVibrancy'
 import { UserProfileForm } from './UserProfileForm'
 import { UserRelays } from './UserRelays'
 import { UserRank } from './UserRank'
@@ -85,8 +84,6 @@ export const UserProfileHeader = memo(function UserProfileHeader(props: Props) {
     }
   }, [user.metadata?.website])
 
-  console.log(user)
-
   return (
     <>
       {/* <UserProfileBannerVibrancy pubkey={pubkey} /> */}
@@ -102,7 +99,7 @@ export const UserProfileHeader = memo(function UserProfileHeader(props: Props) {
               <Stack align='center' gap={1}>
                 {user?.displayName}
                 {user && (user.trustedAssertionEvent || user.embeddings?.data?.length) && (
-                  <UserRank pubkey={pubkey} event={user.trustedAssertionEvent} />
+                  <UserRank pubkey={pubkey} renderTaRank />
                 )}
                 {user.metadata?.pronouns ? (
                   <html.span style={styles.pronouns}>({user.metadata.pronouns})</html.span>

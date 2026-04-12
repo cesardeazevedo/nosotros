@@ -1,7 +1,4 @@
-import { PostHeader } from '@/components/elements/Posts/PostHeader'
-import { UserFeedItem, UserItem } from '@/components/elements/User/UserFeedItem'
-import { UserRoot } from '@/components/elements/User/UserRoot'
-import { EventProvider } from '@/components/providers/NoteProvider'
+import { UserItem } from '@/components/elements/User/UserFeedItem'
 import { Button } from '@/components/ui/Button/Button'
 import { Chip } from '@/components/ui/Chip/Chip'
 import { Divider } from '@/components/ui/Divider/Divider'

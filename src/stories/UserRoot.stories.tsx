@@ -37,7 +37,6 @@ const meta = {
   ],
   args: {
     pubkey: 'p1',
-    renderBanner: false,
   },
 } satisfies Meta<typeof UserRoot>
 

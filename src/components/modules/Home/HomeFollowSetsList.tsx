@@ -52,7 +52,7 @@ export const HomeFollowSetsList = (props: Props) => {
       return (
         <Expandable
           key={event.id}
-          expanded={expandedRows[event.id] ?? true}
+          expanded={expandedRows[event.id] ?? false}
           onChange={(expanded) => setExpandedRows((current) => ({ ...current, [event.id]: expanded }))}
           trigger={({ expanded, expand }) => (
             <html.div onClick={() => expand()}>

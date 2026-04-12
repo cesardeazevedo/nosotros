@@ -1,7 +1,6 @@
-import { Chip } from '@/components/ui/Chip/Chip'
 import { RelayInputChip } from '@/components/elements/Relays/RelayInputChip'
 import { RelaySelectPopover } from '@/components/elements/Relays/RelaySelectPopover'
-import { Divider } from '@/components/ui/Divider/Divider'
+import { Chip } from '@/components/ui/Chip/Chip'
 import { Stack } from '@/components/ui/Stack/Stack'
 import { Text } from '@/components/ui/Text/Text'
 import { Kind } from '@/constants/kinds'
@@ -25,11 +24,11 @@ type Props = {
 }
 
 export const SearchSettings = memo(function SearchSettings(props: Props) {
-  const { feed, variant = 'popover' } = props
+  const { feed } = props
   const navigate = useNavigate()
   const search = searchRoute.useSearch()
   const selectedKinds = [search.kind ?? feed.filter.kinds ?? []].flat()
-  const network = search.network || 'STALE_WHILE_REVALIDATE'
+  const network = search.network ?? feed.options.ctx.network ?? 'REMOTE_ONLY'
 
   const updateSearch = (updater: (prev: typeof search) => typeof search) => {
     navigate({
@@ -86,7 +85,6 @@ export const SearchSettings = memo(function SearchSettings(props: Props) {
   return (
     <>
       <html.div style={styles.root}>
-        {variant === 'popover' && <Divider />}
         <Stack horizontal={false} sx={styles.content} gap={2}>
           <Stack horizontal={false} gap={0.5}>
             <Text variant='label' size='lg' sx={styles.label}>
@@ -183,7 +181,7 @@ export const SearchSettings = memo(function SearchSettings(props: Props) {
 const styles = css.create({
   root: {},
   content: {
-    padding: spacing.padding2,
+    // padding: spacing.padding2,
   },
   label: {
     marginLeft: spacing.margin1,

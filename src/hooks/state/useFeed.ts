@@ -90,14 +90,14 @@ export function useFeedStateAtom(feedAtoms: FeedAtoms) {
 
   const [isEmpty, setIsEmpty] = useState(false)
 
-  // useEffect(() => {
-  //   setIsEmpty(false)
-  //   const timer = setTimeout(() => {
-  //     const count = query.data?.pages?.[0]?.length ?? 0
-  //     setIsEmpty(count === 0)
-  //   }, 16000)
-  //   return () => clearTimeout(timer)
-  // }, [query.data?.pages?.[0]])
+  useEffect(() => {
+    setIsEmpty(false)
+    const timer = setTimeout(() => {
+      const count = query.data?.pages?.[0]?.length ?? 0
+      setIsEmpty(count === 0)
+    }, 16000)
+    return () => clearTimeout(timer)
+  }, [query.data?.pages?.[0]])
 
   const addNewEvents = useCallback(
     (events: NostrEventDB[]) => {

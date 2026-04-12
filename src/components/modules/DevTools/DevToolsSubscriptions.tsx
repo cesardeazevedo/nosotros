@@ -13,7 +13,6 @@ import { DevToolsMiniChip } from './DevToolsMiniChip'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import { IconArrowDown, IconArrowUp, IconChevronDown, IconChevronUp } from '@tabler/icons-react'
 import { memo, useEffect, useMemo, useState } from 'react'
 import { css, html } from 'react-strict-dom'
 
