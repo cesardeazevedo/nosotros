@@ -15,7 +15,7 @@ type SearchOptions = {
 export type SearchItem =
   | { type: 'user'; pubkey: string }
   | { type: 'user_relay'; pubkey: string }
-  | { type: 'user_namecoin'; pubkey: string; address: string }
+  | { type: 'user_namecoin'; pubkey: string; address: string; relays?: string[] }
   | { type: 'query'; query: string }
   | { type: 'relay'; relay: string }
 
@@ -56,7 +56,7 @@ function useSearchNamecoin(query: string) {
     queryFn: async () => {
       const result = await resolveNamecoin(query)
       if (!result) return null
-      return { pubkey: result.pubkey, address: query }
+      return { pubkey: result.pubkey, address: query, relays: result.relays }
     },
   })
 }
@@ -77,7 +77,7 @@ export function useSearchSuggestions(options: SearchOptions) {
       : undefined
 
   const namecoinSuggestion = namecoinResult.data
-    ? { type: 'user_namecoin' as const, pubkey: namecoinResult.data.pubkey, address: namecoinResult.data.address }
+    ? { type: 'user_namecoin' as const, pubkey: namecoinResult.data.pubkey, address: namecoinResult.data.address, relays: namecoinResult.data.relays }
     : undefined
 
   return [

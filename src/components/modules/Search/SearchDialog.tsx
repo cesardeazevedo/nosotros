@@ -44,6 +44,12 @@ export const SearchDialog = memo(function SearchDialog() {
               })
               break
             }
+            case 'user_namecoin': {
+              const nmcRelays = ('relays' in item && item.relays?.slice(0, 4)) || []
+              const nostrNmc = nip19.nprofileEncode({ pubkey: item.pubkey, relays: nmcRelays })
+              navigate({ to: '/$nostr', params: { nostr: nostrNmc } })
+              break
+            }
             case 'user_relay':
             case 'user': {
               const relays = getUserRelaysFromCache(item.pubkey, WRITE).map((x) => x.relay).slice(0, 4)
@@ -51,7 +57,6 @@ export const SearchDialog = memo(function SearchDialog() {
               navigate({
                 to: '/$nostr',
                 params: { nostr },
-                // params: { nostr: user?.nprofile ? user.nprofile : nip19.nprofileEncode({ pubkey: item.pubkey }) },
               })
               break
             }
