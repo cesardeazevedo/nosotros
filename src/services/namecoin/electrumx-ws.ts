@@ -204,7 +204,8 @@ interface HistoryEntry {
 
 interface RpcResponse {
   jsonrpc?: string
-  id: number
+  id?: number
+  method?: string
   result?: unknown
   error?: { code: number; message: string }
 }
@@ -212,8 +213,15 @@ interface RpcResponse {
 /**
  * Batch multiple JSON-RPC calls over a single WebSocket connection.
  * Sends requests sequentially but keeps the socket open until all are done.
+ *
+ * ElectrumX speaks bidirectional JSON-RPC: the server can initiate its own
+ * requests (server.banner, blockchain.headers.subscribe pushes, relayfee
+ * estimates, etc.) which arrive as `{ method, params, id? }` frames with no
+ * matching `id`. We match every inbound frame against the outstanding call's
+ * `id` and silently drop anything else, so server pushes can't corrupt the
+ * result array.
  */
-function wsRpcBatch(
+export function wsRpcBatch(
   url: string,
   calls: Array<{ method: string; params: unknown[] }>,
   timeoutMs = 20000,
@@ -245,22 +253,32 @@ function wsRpcBatch(
       if (settled) return
       try {
         const data = typeof ev.data === 'string' ? ev.data : String(ev.data)
-        const msg: RpcResponse = JSON.parse(data.trim())
-        if (msg.error) {
-          settled = true
-          clearTimeout(timer)
-          ws.close()
-          reject(new Error(msg.error.message || `RPC error ${msg.error.code}`))
-          return
-        }
-        results.push(msg.result)
-        callIndex++
-        if (callIndex >= calls.length) {
-          settled = true
-          clearTimeout(timer)
-          ws.close()
-          resolve(results)
-        } else {
+        // Some ElectrumX servers send multiple JSON-RPC messages back to back,
+        // separated by newlines. Handle each line independently.
+        for (const line of data.split('\n')) {
+          const trimmed = line.trim()
+          if (!trimmed || settled) continue
+          const msg = JSON.parse(trimmed) as RpcResponse
+          // Drop anything that isn't a response to our outstanding call —
+          // server-initiated pushes (no `id`, or mismatched `id`) must not
+          // advance callIndex or pollute the result array.
+          if (msg.id !== callIndex + 1) continue
+          if (msg.error) {
+            settled = true
+            clearTimeout(timer)
+            ws.close()
+            reject(new Error(msg.error.message || `RPC error ${msg.error.code}`))
+            return
+          }
+          results.push(msg.result)
+          callIndex++
+          if (callIndex >= calls.length) {
+            settled = true
+            clearTimeout(timer)
+            ws.close()
+            resolve(results)
+            return
+          }
           sendNext()
         }
       } catch (err) {
