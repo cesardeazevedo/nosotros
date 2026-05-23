@@ -11,6 +11,7 @@
 import type { ParsedNamecoinIdentifier, NamecoinNostrResult } from './types'
 import { DEFAULT_CACHE_TTL } from './constants'
 import { nameShowWithFallback } from './electrumx-ws'
+import { expandImports, type JsonObject } from './importResolver'
 
 // ── Identifier detection & parsing ──────────────────────────────────
 
@@ -123,7 +124,30 @@ async function resolveNamecoinViaWs(parsed: ParsedNamecoinIdentifier): Promise<N
     return null
   }
 
+  // ifa-0001 §"import": apex records (especially under the 520-byte
+  // per-name limit) may delegate shared blocks like `nostr.names` into a
+  // sibling name (commonly `dd/<name>`). Records without an `import` key
+  // skip this entirely and pay zero extra I/O cost.
+  if (parsedValue && typeof parsedValue === 'object' && 'import' in parsedValue) {
+    parsedValue = await expandImports(parsedValue as JsonObject, fetchImportedValue)
+  }
+
   return extractNostrData(parsedValue, parsed)
+}
+
+/**
+ * Fetcher for the import-chain expander. Returns the raw JSON value
+ * string of a Namecoin name, or `null` on miss/expiry/error. Failures
+ * are absorbed by the expander.
+ */
+async function fetchImportedValue(namecoinName: string): Promise<string | null> {
+  try {
+    const r = await nameShowWithFallback(namecoinName)
+    if (!r || r.expired) return null
+    return r.value ?? null
+  } catch {
+    return null
+  }
 }
 
 /**
