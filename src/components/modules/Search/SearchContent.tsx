@@ -10,7 +10,7 @@ import type { SxProps } from '@/components/ui/types'
 import { palette } from '@/themes/palette.stylex'
 import { shape } from '@/themes/shape.stylex'
 import { spacing } from '@/themes/spacing.stylex'
-import { IconSearch, IconServerBolt } from '@tabler/icons-react'
+import { IconSearch, IconServerBolt, IconShieldCheck } from '@tabler/icons-react'
 import type { ReactNode, Ref } from 'react'
 import React, { memo, useCallback, useImperativeHandle, useState } from 'react'
 import { css, html } from 'react-strict-dom'
@@ -162,6 +162,23 @@ export const SearchContent = memo(function SearchContent(props: Props) {
                   </ListItem>
                 </React.Fragment>
               )
+            case 'user_namecoin': {
+              return (
+                <ListItem
+                  {...listItemProps}
+                  key={item.type + item.pubkey}
+                  supportingText={
+                    <Text variant='label' size='sm' sx={styles.namecoinLabel}>
+                      <IconShieldCheck size={12} strokeWidth={2.2} {...css.props(styles.namecoinIcon)} />
+                      {item.address}
+                    </Text>
+                  }
+                  onClick={() => handleSelect(item)}
+                  leadingIcon={<UserAvatar size='sm' pubkey={item.pubkey} />}>
+                  <UserName pubkey={item.pubkey} />
+                </ListItem>
+              )
+            }
             case 'user': {
               return (
                 <React.Fragment key={item.type + item.pubkey}>
@@ -220,5 +237,14 @@ const styles = css.create({
     paddingTop: spacing.padding1,
     paddingBottom: spacing.padding1,
     paddingLeft: spacing.padding1,
+  },
+  namecoinLabel: {
+    color: '#009688',
+  },
+  namecoinIcon: {
+    display: 'inline-block',
+    verticalAlign: 'text-bottom',
+    color: '#009688',
+    marginRight: 4,
   },
 })
